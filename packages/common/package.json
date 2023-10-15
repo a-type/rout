@@ -1,0 +1,12 @@
+{
+  "name": "@long-game/common",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.2"
+  }
+}
