@@ -27,10 +27,10 @@ export const appRouter = router({
       // join GameSession->Profile to check ownership
       // before allowing access
       const gameSession = await db
-        .selectFrom('GameSessionMembership')
-        .where('GameSessionMembership.id', '=', input.id)
+        .selectFrom('GameSession')
+        .where('GameSession.id', '=', input.id)
         .innerJoin(
-          'GameSession',
+          'GameSessionMembership',
           'GameSession.id',
           'GameSessionMembership.gameSessionId',
         )
@@ -39,6 +39,7 @@ export const appRouter = router({
           'GameSession.id as gameSessionId',
           'GameSession.gameId as gameId',
           'GameSessionMembership.userId as userId',
+          'GameSessionMembership.status as status',
           'GameSession.createdAt as createdAt',
         ])
         .executeTakeFirst();
@@ -46,6 +47,13 @@ export const appRouter = router({
       if (!gameSession) {
         throw new TRPCError({
           message: 'No game session found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      if (gameSession.status !== 'accepted') {
+        throw new TRPCError({
+          message: 'Game session has not been accepted',
           code: 'NOT_FOUND',
         });
       }
@@ -72,6 +80,14 @@ export const appRouter = router({
       const session = opts.ctx.session;
       assert(!!session);
 
+      const gameDefinition = gameDefinitions[opts.input.gameId];
+      if (!gameDefinition) {
+        throw new TRPCError({
+          message: 'No game rules found',
+          code: 'NOT_FOUND',
+        });
+      }
+
       const gameSession = await db
         .insertInto('GameSession')
         .values({
@@ -79,6 +95,7 @@ export const appRouter = router({
           gameId: opts.input.gameId,
           // TODO: configurable + automatic detection?
           timezone: 'America/New_York',
+          initialState: gameDefinition.getInitialGlobalState(),
         })
         .returning(['id', 'gameId', 'createdAt'])
         .executeTakeFirstOrThrow();
@@ -110,8 +127,19 @@ export const appRouter = router({
       async (
         opts,
       ): Promise<{
+        /**
+         * The public state available to this client,
+         * with queued moves applied
+         */
         state: any;
+        /**
+         * All historical moves for all players
+         */
         moves: Move<any>[];
+        /**
+         * All moves submitted by this player for this round
+         */
+        queuedMoves: Move<any>[];
       }> => {
         const session = opts.ctx.session;
         assert(!!session);
@@ -125,7 +153,7 @@ export const appRouter = router({
           )
           .where('GameSession.id', '=', opts.input.gameSessionId)
           .where('GameSessionMembership.userId', '=', session.userId)
-          .select(['gameId'])
+          .select(['gameId', 'initialState', 'timezone'])
           .executeTakeFirst();
 
         if (!gameSession) {
@@ -135,12 +163,27 @@ export const appRouter = router({
           });
         }
 
-        const dbMoves = await db
+        const moves = await db
           .selectFrom('GameMove')
           .where('gameSessionId', '=', opts.input.gameSessionId)
-          .select(['id', 'data', 'userId'])
+          .select(['id', 'data', 'userId', 'createdAt'])
           .orderBy('createdAt', 'asc')
           .execute();
+
+        // separate out moves from the current round
+        const { roundStart } = getRoundTimerange(
+          new Date(),
+          gameSession.timezone,
+        );
+        // we only show the player queued moves for their
+        // own user
+        const movesThisRound = moves.filter(
+          (move) =>
+            move.createdAt >= roundStart && move.userId === session.userId,
+        );
+        const movesPreviousRounds = moves.filter(
+          (move) => move.createdAt < roundStart,
+        );
 
         const gameDefinition = gameDefinitions[gameSession.gameId];
 
@@ -151,17 +194,27 @@ export const appRouter = router({
           });
         }
 
-        const moves = dbMoves.map((dbMove) => ({
-          data: JSON.parse(dbMove.data),
-          id: dbMove.id,
-          userId: dbMove.userId,
-        }));
-
-        const state = gameDefinition.getState(moves);
+        const globalState = gameDefinition.getState(
+          gameSession.initialState,
+          moves,
+        );
+        const playerStateInitial = gameDefinition.getPlayerState(
+          globalState,
+          session.userId,
+        );
+        const playerState = gameDefinition.getProspectivePlayerState(
+          playerStateInitial,
+          session.userId,
+          movesThisRound,
+        );
+        const historicalMoves = movesPreviousRounds.map(
+          gameDefinition.getPublicMove,
+        );
 
         return {
-          state,
-          moves,
+          state: playerState,
+          moves: historicalMoves,
+          queuedMoves: movesThisRound,
         };
       },
     ),

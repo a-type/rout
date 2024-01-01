@@ -64,13 +64,19 @@ export async function up(db: Kysely<any>) {
     )
     .addColumn('timezone', 'text', (col) => col.notNull())
     .addColumn('gameId', 'text', (col) => col.notNull())
+    .addColumn('initialState', 'text', (col) => col.notNull())
+    .addColumn('status', 'text', (col) => col.notNull().defaultTo('pending'))
     .execute();
 
   await db.schema
     .createTable('GameMove')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('createdAt', 'datetime', (col) => col.notNull())
-    .addColumn('updatedAt', 'datetime', (col) => col.notNull())
+    .addColumn('createdAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('updatedAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
     .addColumn('gameSessionId', 'text', (col) =>
       col.notNull().references('GameSession.id').onDelete('cascade'),
     )
@@ -101,27 +107,25 @@ export async function up(db: Kysely<any>) {
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
     .addColumn('gameSessionId', 'text', (col) =>
-      col.notNull().references('Plan.id').onDelete('cascade'),
+      col.notNull().references('GameSession.id').onDelete('cascade'),
     )
     .addColumn('inviterId', 'text', (col) =>
-      col.notNull().references('Profile.id'),
+      col.notNull().references('User.id'),
     )
     .addColumn('userId', 'text', (col) =>
-      col.notNull().references('Profile.id').onDelete('cascade'),
+      col.notNull().references('User.id').onDelete('cascade'),
     )
-    .addColumn('expiresAt', 'datetime', (col) => col.notNull())
+    .addColumn('expiresAt', 'datetime')
     .addColumn('claimedAt', 'datetime')
     .addColumn('status', 'text', (col) => col.notNull())
     .execute();
 }
 
 export async function down(db: Kysely<any>) {
-  await db.schema.dropTable('ActivityLog').execute();
-  await db.schema.dropTable('PasswordReset').execute();
-  await db.schema.dropTable('EmailVerification').execute();
-  await db.schema.dropTable('PlanInvitation').execute();
-  await db.schema.dropTable('PlanMembership').execute();
-  await db.schema.dropTable('Plan').execute();
+  await db.schema.dropTable('GameSessionMembership').execute();
+  await db.schema.dropTable('GameMove').execute();
+  await db.schema.dropTable('GameSession').execute();
+  await db.schema.dropTable('VerificationToken').execute();
   await db.schema.dropTable('Account').execute();
-  await db.schema.dropTable('Profile').execute();
+  await db.schema.dropTable('User').execute();
 }

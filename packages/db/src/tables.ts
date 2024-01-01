@@ -59,7 +59,14 @@ export interface GameSessionTable {
   createdAt: ColumnType<Date, Date | undefined, never>;
   updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
   timezone: string;
-
+  initialState: any;
+  status: ColumnType<
+    'pending' | 'active' | 'completed',
+    'pending' | 'active' | 'completed' | undefined,
+    'pending' | 'active' | 'completed'
+  >;
+  // does not relate to anything in the db; game information is
+  // defined in code.
   gameId: string;
 }
 

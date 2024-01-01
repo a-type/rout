@@ -16,7 +16,9 @@ export function OAuthSignInButton({
   inviteId?: string | null;
 } & ButtonProps) {
   const url = new URL(
-    `${SECURE ? 'https' : 'http'}://${API_ORIGIN}/api/auth/${provider}/login`,
+    `${
+      SECURE ? 'https' : 'http'
+    }://${API_ORIGIN}/auth/provider/${provider}/login`,
   );
   if (returnTo) {
     url.searchParams.set('returnTo', returnTo);

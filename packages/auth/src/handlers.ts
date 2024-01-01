@@ -1,14 +1,16 @@
 import { AuthDB } from './db.js';
 import { AuthProvider } from './providers/types.js';
 import { RETURN_TO_COOKIE } from './returnTo.js';
-import { getSession } from './session.js';
+import { getOrCreateSession } from './session.js';
 
 export function createHandlers({
   providers,
   db,
+  defaultReturnTo = '/',
 }: {
   providers: Record<string, AuthProvider>;
   db: AuthDB;
+  defaultReturnTo?: string;
 }) {
   function handleOAuthLoginRequest(req: Request, opts: { provider: string }) {
     const url = new URL(req.url);
@@ -24,7 +26,7 @@ export function createHandlers({
       headers: {
         location: loginUrl,
         'set-cookie': `${RETURN_TO_COOKIE}=${
-          url.searchParams.get('returnTo') ?? '/'
+          url.searchParams.get('returnTo') ?? defaultReturnTo
         }; Path=/`,
       },
     });
@@ -67,8 +69,8 @@ export function createHandlers({
           fullName: profile.fullName,
           friendlyName: profile.friendlyName ?? null,
           email: profile.email,
-          emailVerified: null,
-          image: profile.avatarUrl ?? null,
+          emailVerifiedAt: null,
+          imageUrl: profile.avatarUrl ?? null,
         });
         userId = user.id;
       }
@@ -89,10 +91,10 @@ export function createHandlers({
     const res = new Response(null, {
       status: 302,
       headers: {
-        location: url.searchParams.get('returnTo') ?? '/',
+        location: url.searchParams.get('returnTo') ?? defaultReturnTo,
       },
     });
-    const session = await getSession(req, res);
+    const session = await getOrCreateSession(req, res);
     session.userId = userId;
     await session.save();
     return res;
@@ -100,14 +102,14 @@ export function createHandlers({
 
   async function handleLogoutRequest(req: Request) {
     const url = new URL(req.url);
-    const returnTo = url.searchParams.get('returnTo') ?? '/';
+    const returnTo = url.searchParams.get('returnTo') ?? defaultReturnTo;
     const res = new Response(null, {
       status: 302,
       headers: {
         location: returnTo,
       },
     });
-    const session = await getSession(req, res);
+    const session = await getOrCreateSession(req, res);
     session.destroy();
     return res;
   }

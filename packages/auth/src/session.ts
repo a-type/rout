@@ -11,8 +11,19 @@ export interface Session {
   userId: string;
 }
 
-export function getSession(req: Request, res: Response) {
-  return getIronSession<Session>(req, res, {
+export async function getLiveSession(
+  req: Request,
+  res: Response,
+): Promise<Session | null> {
+  const rawSession = await getOrCreateSession(req, res);
+  if (!rawSession.userId) {
+    return null;
+  }
+  return rawSession as Session;
+}
+
+export function getOrCreateSession(req: Request, res: Response) {
+  return getIronSession<Partial<Session>>(req, res, {
     cookieName: SESSION_COOKIE,
     password: SESSION_SECRET,
   });

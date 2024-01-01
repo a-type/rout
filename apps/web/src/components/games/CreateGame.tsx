@@ -10,7 +10,7 @@ export function CreateGame({}: CreateGameProps) {
 
   const create = async () => {
     const result = await mutateAsync({ gameId: 'number-guess' });
-    navigate(`/sessions/${result.id}`);
+    navigate(`/session/${result.id}`);
   };
 
   return <Button onClick={create}>New Game</Button>;

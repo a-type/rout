@@ -7,28 +7,69 @@ import {
   TRPCClientError,
   createTRPCProxyClient,
   httpBatchLink,
+  OperationLink,
+  TRPCLink,
 } from '@trpc/client';
+import { observable, tap } from '@trpc/server/observable';
 import type { AppRouter } from '@long-game/trpc';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createTRPCReact } from '@trpc/react-query';
 import superjson from 'superjson';
+import cuid2 from '@paralleldrive/cuid2';
 
-const trpc = createTRPCProxyClient<AppRouter>({
-  transformer: superjson,
-  links: [
-    httpBatchLink({
-      url: 'http://localhost:3001/trpc',
-    }),
-  ],
-});
 const trpcReact = createTRPCReact<AppRouter>();
 
-type GameStoreApi<PlayerState, MoveData extends BaseMoveData> = StoreApi<{
+const loginLink = (opts: { loginUrl: string }): TRPCLink<AppRouter> => {
+  return () => {
+    return ({ op, next }) => {
+      return observable((observer) => {
+        return next(op)
+          .pipe(
+            tap({
+              next(value) {
+                observer.next(value);
+              },
+              error(result) {
+                if (result.data?.code === 'UNAUTHORIZED') {
+                  window.location.href = opts.loginUrl;
+                }
+              },
+            }),
+          )
+          .subscribe(observer);
+      });
+    };
+  };
+};
+
+const fetchLink = (host: string) =>
+  httpBatchLink({
+    url: host + '/trpc',
+    fetch: (input, init) => {
+      return fetch(input, {
+        ...init,
+        credentials: 'include',
+      });
+    },
+  });
+
+type GameStoreApi<
+  PlayerState,
+  MoveData extends BaseMoveData,
+  PublicMoveData extends BaseMoveData = MoveData,
+> = StoreApi<{
   state: PlayerState | null;
   error: string | null;
   queuedMoves: Move<MoveData>[];
-  prospectiveState: PlayerState | null;
+  moves: Move<PublicMoveData>[];
+  getProspectiveState: () => PlayerState | null;
   refreshState: () => Promise<void>;
   addMove: (move: MoveData) => void;
   setMove: (
@@ -39,16 +80,29 @@ type GameStoreApi<PlayerState, MoveData extends BaseMoveData> = StoreApi<{
   submitMoves: () => Promise<void>;
 }>;
 
-const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
-  gameDefinition: GameDefinition<any, PlayerState, MoveData>,
-  session: Session,
-): GameStoreApi<PlayerState, MoveData> => {
-  return createStore(
+const createGameStore = <PlayerState, MoveData extends BaseMoveData>({
+  gameDefinition,
+  session,
+  host,
+  loginUrl,
+}: {
+  gameDefinition: GameDefinition<any, PlayerState, MoveData>;
+  session: Session;
+  host: string;
+  loginUrl: string;
+}): GameStoreApi<PlayerState, MoveData> => {
+  const trpc = createTRPCProxyClient<AppRouter>({
+    transformer: superjson,
+    links: [loginLink({ loginUrl }), fetchLink(host)],
+  });
+
+  const store = createStore(
     combine(
       {
         error: null as string | null,
         state: null as PlayerState | null,
         queuedMoves: new Array<Move<MoveData>>(),
+        moves: new Array<Move<MoveData>>(),
       },
       (set, get) => {
         function getProspectiveState() {
@@ -67,7 +121,8 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
             });
             set({
               state: data.state,
-              queuedMoves: data.moves as Move<MoveData>[],
+              moves: data.moves as Move<MoveData>[],
+              queuedMoves: data.queuedMoves as Move<MoveData>[],
               error: null,
             });
           } catch (err) {
@@ -113,19 +168,30 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
           move: MoveData | ((prev: MoveData | undefined) => MoveData),
         ) {
           set((current) => {
-            const prospectiveMoves = current.queuedMoves.map(
-              (queuedMove, i) => {
-                if (i === index) {
-                  return {
-                    ...queuedMove,
-                    data:
-                      typeof move === 'function' ? move(queuedMove.data) : move,
-                  };
-                } else {
-                  return queuedMove;
-                }
-              },
-            );
+            const prospectiveMoves = [...current.queuedMoves];
+
+            /**
+             * This method is only used to replace known moves or
+             * add a move to the end of the queue when the index
+             * is known - for example, if only N moves are valid.
+             */
+            if (
+              prospectiveMoves.length <= index &&
+              index !== prospectiveMoves.length
+            ) {
+              throw new Error('Invalid index');
+            }
+
+            const existingMove = prospectiveMoves[index] as
+              | Move<MoveData>
+              | undefined;
+            prospectiveMoves[index] = {
+              id: cuid2.createId(),
+              userId: session.userId,
+              data:
+                typeof move === 'function' ? move(existingMove?.data) : move,
+            };
+
             const currentState = getProspectiveState();
 
             if (!currentState) {
@@ -163,6 +229,7 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
             gameSessionId: session.gameSessionId,
             moves: get().queuedMoves,
           });
+          await refreshState();
         }
 
         return {
@@ -171,14 +238,13 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
           setMove,
           removeMove,
           submitMoves,
-
-          get prospectiveState() {
-            return getProspectiveState();
-          },
+          getProspectiveState,
         };
       },
     ),
   );
+
+  return store;
 };
 
 export function createGameClient<PlayerState, MoveData extends BaseMoveData>(
@@ -196,7 +262,17 @@ export function createGameClient<PlayerState, MoveData extends BaseMoveData>(
     session: Session;
     children: ReactNode;
   }) => {
-    const [client] = useState(() => createGameStore(gameDefinition, session));
+    const ctx = useContext(GlobalGameContext);
+    if (!ctx) {
+      throw new Error('GlobalGameContext not found');
+    }
+    const { host, loginUrl } = ctx;
+    const [client] = useState(() =>
+      createGameStore({ gameDefinition, session, loginUrl, host }),
+    );
+    useEffect(() => {
+      client.getState().refreshState();
+    }, [client]);
 
     return (
       <GameClientContext.Provider value={client}>
@@ -231,22 +307,35 @@ export const usePlayerSessions = trpcReact.gameSessions.useQuery;
 export const usePlayerSession = trpcReact.gameSession.useQuery;
 export const usePlayerMemberships = trpcReact.gameMemberships.useQuery;
 export const useCreateGameSession = trpcReact.createGameSession.useMutation;
-export const GameProvider = ({ children }: { children: ReactNode }) => {
+export const GameProvider = ({
+  children,
+  host,
+  loginUrl,
+}: {
+  children: ReactNode;
+  host: string;
+  loginUrl: string;
+}) => {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => {
     return trpcReact.createClient({
       transformer: superjson,
-      links: [
-        httpBatchLink({
-          url: 'http://localhost:3001/trpc',
-        }),
-      ],
+      links: [loginLink({ loginUrl }), fetchLink(host)],
     });
   });
 
   return (
-    <trpcReact.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </trpcReact.Provider>
+    <GlobalGameContext.Provider value={{ host, loginUrl }}>
+      <trpcReact.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </trpcReact.Provider>
+    </GlobalGameContext.Provider>
   );
 };
+
+const GlobalGameContext = createContext<{
+  host: string;
+  loginUrl: string;
+} | null>(null);

@@ -3,16 +3,9 @@ import { lazy } from 'react';
 
 export type GlobalState = {
   secretNumber: number;
-  playerGuesses: {
-    [playerId: string]: number[];
-  };
 };
 
-export type PlayerState = {
-  playerGuesses: {
-    [playerId: string]: number[];
-  };
-};
+export type PlayerState = {};
 
 export type MoveData = {
   guess: number;
@@ -21,6 +14,7 @@ export type MoveData = {
 export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
+  MoveData,
   MoveData
 > = {
   id: 'number-guess',
@@ -43,29 +37,20 @@ export const gameDefinition: GameDefinition<
     return true;
   },
 
-  getProspectivePlayerState: (playerState, playerId, prospectiveMoves) => {
-    return {
-      ...playerState,
-      playerGuesses: {
-        ...playerState.playerGuesses,
-        [playerId]: [
-          ...playerState.playerGuesses[playerId],
-          prospectiveMoves[0].data.guess,
-        ],
-      },
-    };
+  getProspectivePlayerState: (playerState) => {
+    return playerState;
   },
 
-  getPlayerState: (globalState, playerId) => {
-    return {
-      playerGuesses: globalState.playerGuesses,
-    };
+  // players see nothing; all state is secret in this game.
+  getPlayerState: () => {
+    return {};
   },
 
-  getState: (moves) => {
-    const initialState = gameDefinition.getInitialGlobalState();
+  getState: (initialState, moves) => {
     return moves.reduce(applyMoveToGlobalState, { ...initialState });
   },
+
+  getPublicMove: (move) => move,
 
   Client: lazy(() => import('./Client.js')),
 };
@@ -74,14 +59,5 @@ const applyMoveToGlobalState = (
   globalState: GlobalState,
   move: Move<MoveData>,
 ) => {
-  return {
-    ...globalState,
-    playerGuesses: {
-      ...globalState.playerGuesses,
-      [move.userId]: [
-        ...globalState.playerGuesses[move.userId],
-        move.data.guess,
-      ],
-    },
-  };
+  return globalState;
 };

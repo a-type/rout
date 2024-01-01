@@ -30,12 +30,14 @@ export type GameDefinition<
   GlobalState = any,
   PlayerState = any,
   MoveData extends BaseMoveData = any,
+  PublicMoveData extends BaseMoveData = MoveData,
 > = {
   id: string;
   getInitialGlobalState: () => GlobalState;
   isValidTurn: IsValidTurn<PlayerState, MoveData>;
   getProspectivePlayerState: GetProspectivePlayerState<PlayerState, MoveData>;
   getPlayerState: GetPlayerState<GlobalState, PlayerState>;
-  getState: (moves: Move<MoveData>[]) => GlobalState;
+  getState: (initialState: GlobalState, moves: Move<MoveData>[]) => GlobalState;
+  getPublicMove: (move: Move<MoveData>) => Move<PublicMoveData>;
   Client: ComponentType<{ session: Session }>;
 };

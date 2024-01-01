@@ -14,8 +14,10 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace*",
     "@long-game/trpc": "workspace:*",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@trpc/client": "^10.45.0",
     "@trpc/react-query": "^10.45.0",
+    "@trpc/server": "^10.45.0",
     "@tanstack/react-query": "^4.36.1"
   },
   "devDependencies": {

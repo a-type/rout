@@ -1,6 +1,6 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { getSession } from '@long-game/auth';
+import { getLiveSession } from '@long-game/auth';
 import superjson from 'superjson';
 
 type Context = {
@@ -49,7 +49,7 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 export const userProcedure = t.procedure.use(async (opts) => {
   const { ctx } = opts;
-  const session = await getSession(ctx.req, ctx.res);
+  const session = await getLiveSession(ctx.req, ctx.res);
   if (!session) {
     throw new TRPCError({
       message: 'Please log in',

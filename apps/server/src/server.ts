@@ -8,10 +8,9 @@ import { DEPLOYED_CONTEXT } from './deployedContext.js';
 
 const router = Router();
 
-const { preflight } = createCors({
-  headers: ['Authorization', 'Content-Type'],
-  methods: ['GET', 'POST', 'OPTIONS'],
+const { preflight, corsify } = createCors({
   origins: [DEPLOYED_CONTEXT.uiHost],
+  headers: { 'Access-Control-Allow-Credentials': true },
 });
 
 const logger = (req: IRequest) => {
@@ -19,17 +18,26 @@ const logger = (req: IRequest) => {
 };
 
 router
-  .all('*', preflight, logger)
+  .all('*', logger, preflight)
   .get('/', () => 'Success!')
   .all('/auth/*', authRouter.handle)
   .all('/trpc/*', trpcRouter.handle)
   .all('*', () => error(404));
 
 const ittyServer = createServerAdapter((request) =>
-  router.handle(request).catch((reason) => {
-    console.error(reason);
-    return error(reason);
-  }),
+  router
+    .handle(request)
+    .catch((reason) => {
+      console.error(reason);
+      return error(reason);
+    })
+    .then((res) => {
+      if (res instanceof Response) return res;
+      return json(res);
+    })
+    .then((res) => {
+      return corsify(res);
+    }),
 );
 
 const httpServer = createServer(ittyServer);

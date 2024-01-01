@@ -11,6 +11,7 @@
     "migrate": "env-cmd long-game-migrate"
   },
   "dependencies": {
+    "@a-type/utils": "^1.0.5",
     "@long-game/auth": "workspace:*",
     "@long-game/db": "workspace:*",
     "@long-game/trpc": "workspace:*",
