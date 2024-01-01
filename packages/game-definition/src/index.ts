@@ -1,7 +1,11 @@
+import { ComponentType } from 'react';
+import { Session } from '@long-game/common';
+
 export type BaseMoveData = object;
 
 export interface Move<MoveData extends BaseMoveData> {
   id: string;
+  userId: string | null;
   data: MoveData;
 }
 
@@ -32,4 +36,6 @@ export type GameDefinition<
   isValidTurn: IsValidTurn<PlayerState, MoveData>;
   getProspectivePlayerState: GetProspectivePlayerState<PlayerState, MoveData>;
   getPlayerState: GetPlayerState<GlobalState, PlayerState>;
+  getState: (moves: Move<MoveData>[]) => GlobalState;
+  Client: ComponentType<{ session: Session }>;
 };

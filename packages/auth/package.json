@@ -1,0 +1,19 @@
+{
+  "name": "@long-game/auth",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@long-game/common": "workspace:*",
+    "cookie": "^0.6.0",
+    "googleapis": "^129.0.0",
+    "iron-session": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/node": "^20.10.6",
+    "typescript": "^5.0.2"
+  }
+}

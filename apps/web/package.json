@@ -1,13 +1,27 @@
 {
   "name": "@long-game/web",
   "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
   "dependencies": {
-    "@a-type/ui": "^0.1.6",
+    "@a-type/ui": "^0.6.8",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@verdant-web/react-router": "^0.5.5",
+    "clsx": "^2.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
+    "@unocss/transformer-variant-group": "0.54.1",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
     "unocss": "^0.54.1",
-    "@unocss/transformer-variant-group": "0.54.1"
+    "vite": "^5.0.10",
+    "vite-plugin-pwa": "^0.17.4"
   }
 }

@@ -1,4 +1,5 @@
-import { GameDefinition } from '@long-game/game-definition';
+import { GameDefinition, Move } from '@long-game/game-definition';
+import { lazy } from 'react';
 
 export type GlobalState = {
   secretNumber: number;
@@ -60,4 +61,27 @@ export const gameDefinition: GameDefinition<
       playerGuesses: globalState.playerGuesses,
     };
   },
+
+  getState: (moves) => {
+    const initialState = gameDefinition.getInitialGlobalState();
+    return moves.reduce(applyMoveToGlobalState, { ...initialState });
+  },
+
+  Client: lazy(() => import('./Client.js')),
+};
+
+const applyMoveToGlobalState = (
+  globalState: GlobalState,
+  move: Move<MoveData>,
+) => {
+  return {
+    ...globalState,
+    playerGuesses: {
+      ...globalState.playerGuesses,
+      [move.userId]: [
+        ...globalState.playerGuesses[move.userId],
+        move.data.guess,
+      ],
+    },
+  };
 };

@@ -8,3 +8,12 @@ export type PlayerSession = {
   gameSessionId: string;
   playerId: string;
 };
+
+export type Session = {
+  userId: string;
+  gameId: string;
+  gameSessionId: string;
+  createdAt: Date;
+};
+
+export * from './rounds.js';

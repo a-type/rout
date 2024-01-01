@@ -1,8 +1,8 @@
 import { BaseMoveData, GameDefinition, Move } from '@long-game/game-definition';
 import { StoreApi, createStore } from 'zustand/vanilla';
-import { useStore, UseBoundStore } from 'zustand';
+import { useStore } from 'zustand';
 import { combine } from 'zustand/middleware';
-import { PlayerSession } from '@long-game/common';
+import { Session } from '@long-game/common';
 import {
   TRPCClientError,
   createTRPCProxyClient,
@@ -12,11 +12,13 @@ import type { AppRouter } from '@long-game/trpc';
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createTRPCReact } from '@trpc/react-query';
+import superjson from 'superjson';
 
 const trpc = createTRPCProxyClient<AppRouter>({
+  transformer: superjson,
   links: [
     httpBatchLink({
-      url: 'localhost:3000',
+      url: 'http://localhost:3001/trpc',
     }),
   ],
 });
@@ -39,7 +41,7 @@ type GameStoreApi<PlayerState, MoveData extends BaseMoveData> = StoreApi<{
 
 const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
   gameDefinition: GameDefinition<any, PlayerState, MoveData>,
-  session: PlayerSession,
+  session: Session,
 ): GameStoreApi<PlayerState, MoveData> => {
   return createStore(
     combine(
@@ -54,14 +56,14 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
           if (!state) return null;
           return gameDefinition.getProspectivePlayerState(
             state,
-            session.playerId,
+            session.userId,
             queuedMoves,
           );
         }
         async function refreshState() {
           try {
             const data = await trpc.gameState.query({
-              sessionId: session.gameSessionId,
+              gameSessionId: session.gameSessionId,
             });
             set({
               state: data.state,
@@ -84,6 +86,7 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
               {
                 id: Math.random().toString(),
                 data: move,
+                userId: session.userId,
               },
             ];
             const currentState = getProspectiveState();
@@ -157,6 +160,7 @@ const createGameStore = <PlayerState, MoveData extends BaseMoveData>(
 
         async function submitMoves() {
           await trpc.submitMoves.mutate({
+            gameSessionId: session.gameSessionId,
             moves: get().queuedMoves,
           });
         }
@@ -189,7 +193,7 @@ export function createGameClient<PlayerState, MoveData extends BaseMoveData>(
     session,
     children,
   }: {
-    session: PlayerSession;
+    session: Session;
     children: ReactNode;
   }) => {
     const [client] = useState(() => createGameStore(gameDefinition, session));
@@ -223,14 +227,18 @@ export function createGameClient<PlayerState, MoveData extends BaseMoveData>(
 
 // Global Long Game SDKs
 
-export const usePlayerSessions = trpcReact.sessions.useQuery;
+export const usePlayerSessions = trpcReact.gameSessions.useQuery;
+export const usePlayerSession = trpcReact.gameSession.useQuery;
+export const usePlayerMemberships = trpcReact.gameMemberships.useQuery;
+export const useCreateGameSession = trpcReact.createGameSession.useMutation;
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() => {
     return trpcReact.createClient({
+      transformer: superjson,
       links: [
         httpBatchLink({
-          url: 'localhost:3000',
+          url: 'http://localhost:3001/trpc',
         }),
       ],
     });

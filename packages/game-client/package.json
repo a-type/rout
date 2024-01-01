@@ -2,19 +2,20 @@
   "name": "@long-game/game-client",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "main": "src/index.tsx",
+  "module": "src/index.tsx",
   "type": "module",
   "dependencies": {
-    "zustand": "^4.4.3"
+    "zustand": "^4.4.3",
+    "superjson": "^1.12.0"
   },
   "peerDependencies": {
     "react": "^18.2.0",
     "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace*",
     "@long-game/trpc": "workspace:*",
-    "@trpc/client": "^10.40.0",
-    "@trpc/react-query": "^10.40.0",
+    "@trpc/client": "^10.45.0",
+    "@trpc/react-query": "^10.45.0",
     "@tanstack/react-query": "^4.36.1"
   },
   "devDependencies": {

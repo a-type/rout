@@ -1,15 +1,14 @@
 {
-  "name": "@long-game/game-definition",
+  "name": "@long-game/games",
   "version": "0.0.1",
   "private": true,
   "main": "src/index.ts",
   "module": "src/index.ts",
   "type": "module",
   "dependencies": {
-    "@long-game/common": "workspace:*"
+    "@long-game/game-number-guess": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.0.2",
-    "@types/react": "^18.2.46"
+    "typescript": "^5.0.2"
   }
 }

@@ -1,21 +1,23 @@
 import { createGameClient } from '@long-game/game-client';
-import { PlayerSession } from '@long-game/common';
+import { Session } from '@long-game/common';
 import { gameDefinition } from './gameDefinition.js';
 
 const { GameClientProvider, useGameClient } = createGameClient(gameDefinition);
 
 export interface ClientProps {
-  playerSession: PlayerSession;
+  session: Session;
 }
 
-export function Client({ playerSession }: ClientProps) {
+export function Client({ session }: ClientProps) {
   return (
-    <GameClientProvider session={playerSession}>
+    <GameClientProvider session={session}>
       <LocalGuess />
       <History />
     </GameClientProvider>
   );
 }
+
+export default Client;
 
 function LocalGuess() {
   const guess = useGameClient((state) => state.queuedMoves[0]?.data.guess);

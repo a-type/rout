@@ -1,4 +1,29 @@
 {
   "name": "@long-game/server",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "env-cmd tsx watch ./src/server.ts",
+    "prestart": "pnpm migrate",
+    "start": "pnpm prestart && tsx --tsconfig ./tsconfig.json ./src/server.ts",
+    "start:local": "env-cmd pnpm start",
+    "build": "tsc --build tsconfig.json",
+    "vapid": "node ./scripts/generateVapidKeys.js",
+    "migrate": "env-cmd long-game-migrate"
+  },
+  "dependencies": {
+    "@long-game/auth": "workspace:*",
+    "@long-game/db": "workspace:*",
+    "@long-game/trpc": "workspace:*",
+    "@trpc/server": "^10.45.0",
+    "@whatwg-node/server": "^0.9.22",
+    "itty-router": "^4.0.25",
+    "web-push": "^3.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "dotenv": "^16.3.1",
+    "env-cmd": "^10.1.0",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0"
+  }
 }

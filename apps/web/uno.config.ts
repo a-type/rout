@@ -1,7 +1,7 @@
 // uno.config.ts
 import { defineConfig } from 'unocss';
 import variantGroup from '@unocss/transformer-variant-group';
-import preset from '@a-type/ui/dist/esm/uno.preset';
+import preset from '@a-type/ui/uno-preset';
 
 export default defineConfig({
   presets: [preset()],
