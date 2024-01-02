@@ -1,12 +1,11 @@
 import { createGameClient } from '@long-game/game-client';
-import { Session } from '@long-game/common';
 import { gameDefinition } from './gameDefinition.js';
-import { useState } from 'react';
+import { ComponentProps } from 'react';
 
 const { GameClientProvider, useGameClient } = createGameClient(gameDefinition);
 
 export interface ClientProps {
-  session: Session;
+  session: ComponentProps<typeof GameClientProvider>['session'];
 }
 
 export function Client({ session }: ClientProps) {

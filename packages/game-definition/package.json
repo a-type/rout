@@ -6,7 +6,8 @@
   "module": "src/index.ts",
   "type": "module",
   "dependencies": {
-    "@long-game/common": "workspace:*"
+    "@long-game/common": "workspace:*",
+    "@long-game/trpc": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.2",

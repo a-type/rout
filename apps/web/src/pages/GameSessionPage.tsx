@@ -1,15 +1,21 @@
 import { GameSession } from '@/components/games/GameSession.jsx';
-import { usePlayerSession } from '@long-game/game-client';
+import { globalHooks } from '@long-game/game-client';
 import { useParams } from '@verdant-web/react-router';
 import { Spinner } from '@a-type/ui/components/spinner';
+import { GameSetup } from '@/components/games/GameSetup.jsx';
 
 export interface GameSessionPageProps {}
 
 export function GameSessionPage({}: GameSessionPageProps) {
   const { sessionId } = useParams();
-  const { data: session } = usePlayerSession({ id: sessionId });
+  const { data: session } = globalHooks.gameSessions.gameSession.useQuery({
+    id: sessionId,
+  });
   if (!session) {
     return <Spinner />;
+  }
+  if (session.status === 'pending') {
+    return <GameSetup gameSession={session} />;
   }
   return <GameSession session={session} />;
 }

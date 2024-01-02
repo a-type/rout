@@ -3,10 +3,10 @@ import { Database } from './tables.js'; // this is the Database interface we def
 import SQLite from 'better-sqlite3';
 import { Kysely, SqliteDialect } from 'kysely';
 export { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/sqlite';
-import { createId } from '@paralleldrive/cuid2';
-import * as bcrypt from 'bcrypt';
+export * from './utils.js';
+
 import { SerializePlugin } from 'kysely-plugin-serialize';
-import { UpdatedAtPlugin } from './plugins.js';
+import { TimestampsPlugin } from './plugins.js';
 
 const DATABASE_FILE = process.env.DATABASE_FILE;
 assert(DATABASE_FILE, 'DATABASE_FILE environment variable must be set');
@@ -22,21 +22,9 @@ const dialect = new SqliteDialect({
 export const db = new Kysely<Database>({
   dialect,
   plugins: [
-    new UpdatedAtPlugin<Database>({ ignoredTables: ['VerificationToken'] }),
+    new TimestampsPlugin<Database>({ ignoredTables: ['VerificationToken'] }),
     new SerializePlugin(),
   ],
 });
 
 export type DB = typeof db;
-
-export function id(prefix?: string) {
-  return `${prefix || ''}${createId()}`;
-}
-
-export function hashPassword(password: string) {
-  return bcrypt.hash(password, 10);
-}
-
-export function comparePassword(password: string, hash: string) {
-  return bcrypt.compare(password, hash);
-}

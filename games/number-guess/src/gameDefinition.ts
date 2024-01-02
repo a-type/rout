@@ -18,6 +18,7 @@ export const gameDefinition: GameDefinition<
   MoveData
 > = {
   id: 'number-guess',
+  title: 'Guess A Number',
   getInitialGlobalState: () => ({
     secretNumber: Math.floor(Math.random() * 100),
     playerGuesses: {},

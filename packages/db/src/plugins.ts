@@ -1,4 +1,13 @@
-import { QueryResult, TableNode, UnknownRow } from 'kysely';
+import {
+  InsertQueryNode,
+  PrimitiveValueListNode,
+  QueryResult,
+  TableNode,
+  UnknownRow,
+  UpdateQueryNode,
+  ValueListNode,
+  ValuesNode,
+} from 'kysely';
 import {
   ColumnNode,
   ColumnUpdateNode,
@@ -8,8 +17,11 @@ import {
   RootOperationNode,
   ValueNode,
 } from 'kysely';
+import { dateTime } from './utils.js';
 
-export class UpdatedAtPlugin<
+const ALWAYS_IGNORED = [/^kysely_/, /^sqlite_/];
+
+export class TimestampsPlugin<
   DB extends Record<string, any> = { [key: string]: any },
 > implements KyselyPlugin
 {
@@ -18,22 +30,45 @@ export class UpdatedAtPlugin<
     this.ignoredTables = ignoredTables;
   }
 
-  transformQuery(args: PluginTransformQueryArgs): RootOperationNode {
-    if (args.node.kind === 'UpdateQueryNode') {
-      const table = args.node.table;
+  private ignoreTable(table: string) {
+    if (ALWAYS_IGNORED.some((regex) => regex.test(table))) {
+      return true;
+    }
+    return this.ignoredTables.includes(table);
+  }
+
+  private ignore(node: RootOperationNode) {
+    if (InsertQueryNode.is(node)) {
+      const table = node.into;
       if (TableNode.is(table)) {
-        if (this.ignoredTables.includes(table.table.identifier.name)) {
-          return args.node;
+        if (this.ignoreTable(table.table.identifier.name)) {
+          return true;
         }
       }
+    } else if (UpdateQueryNode.is(node)) {
+      const table = node.table;
+      if (TableNode.is(table)) {
+        if (this.ignoreTable(table.table.identifier.name)) {
+          return true;
+        }
+      }
+    }
 
+    return false;
+  }
+
+  transformQuery(args: PluginTransformQueryArgs): RootOperationNode {
+    if (this.ignore(args.node)) {
+      return args.node;
+    }
+    if (UpdateQueryNode.is(args.node)) {
       const arr: ColumnUpdateNode[] = [];
 
       arr.push(...args.node.updates!);
       arr.push(
         ColumnUpdateNode.create(
           ColumnNode.create('updatedAt'),
-          ValueNode.create(new Date()),
+          ValueNode.create(dateTime()),
         ),
       );
 
@@ -41,6 +76,33 @@ export class UpdatedAtPlugin<
         ...args.node,
         updates: arr,
       };
+    } else if (InsertQueryNode.is(args.node)) {
+      if (!args.node.values) {
+        return InsertQueryNode.cloneWith(args.node, {
+          columns: [
+            ColumnNode.create('createdAt'),
+            ColumnNode.create('updatedAt'),
+          ],
+          values: ValuesNode.create([
+            PrimitiveValueListNode.create([dateTime(), dateTime()]),
+          ]),
+        });
+      } else if (ValuesNode.is(args.node.values)) {
+        return InsertQueryNode.cloneWith(args.node, {
+          columns: [
+            ColumnNode.create('createdAt'),
+            ColumnNode.create('updatedAt'),
+            ...(args.node.columns || []),
+          ],
+          values: ValuesNode.create([
+            PrimitiveValueListNode.create([
+              dateTime(),
+              dateTime(),
+              ...args.node.values.values[0].values,
+            ]),
+          ]),
+        });
+      }
     }
 
     return args.node;

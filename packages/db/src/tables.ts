@@ -1,5 +1,12 @@
 import { ColumnType, Insertable, Selectable, Updateable } from 'kysely';
 
+type CreatedAtColumn = ColumnType<string, string | undefined, never>;
+type UpdatedAtColumn = ColumnType<
+  string,
+  string | undefined,
+  string | undefined
+>;
+
 export interface Database {
   User: UserTable;
   Account: AccountTable;
@@ -7,16 +14,18 @@ export interface Database {
   GameSession: GameSessionTable;
   GameMove: GameMoveTable;
   GameSessionMembership: GameSessionMembershipTable;
+  Friendship: FriendshipTable;
+  FriendshipView: FriendshipTable;
 }
 
 export interface UserTable {
   id: string;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
   fullName: string | null;
   friendlyName: string | null;
   email: string;
-  emailVerifiedAt: Date | null;
+  emailVerifiedAt: string | null;
   imageUrl: string | null;
 }
 
@@ -26,8 +35,8 @@ export type UserUpdate = Updateable<UserTable>;
 
 export interface AccountTable {
   id: string;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
   userId: string;
   type: 'email' | 'oidc' | 'oauth';
   provider: string;
@@ -47,7 +56,7 @@ export type AccountUpdate = Updateable<AccountTable>;
 export interface VerificationTokenTable {
   id: string;
   token: string;
-  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  expiresAt: ColumnType<string, string | undefined, string | undefined>;
 }
 
 export type VerificationToken = Selectable<VerificationTokenTable>;
@@ -56,8 +65,8 @@ export type VerificationTokenUpdate = Updateable<VerificationTokenTable>;
 
 export interface GameSessionTable {
   id: string;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
   timezone: string;
   initialState: any;
   status: ColumnType<
@@ -76,8 +85,8 @@ export type GameSessionUpdate = Updateable<GameSessionTable>;
 
 export interface GameMoveTable {
   id: string;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
 
   gameSessionId: string;
   userId: string | null;
@@ -91,14 +100,14 @@ export type GameMoveUpdate = Updateable<GameMoveTable>;
 
 export interface GameSessionMembershipTable {
   id: string;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
 
   gameSessionId: string;
   inviterId: string;
   userId: string;
-  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
-  claimedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  expiresAt: ColumnType<string, string | undefined, string | undefined>;
+  claimedAt: ColumnType<string, string | undefined, string | undefined>;
   status: 'pending' | 'accepted' | 'declined' | 'expired';
 }
 
@@ -106,3 +115,19 @@ export type GameSessionMembership = Selectable<GameSessionMembershipTable>;
 export type NewGameSessionMembership = Insertable<GameSessionMembershipTable>;
 export type GameSessionMembershipUpdate =
   Updateable<GameSessionMembershipTable>;
+
+export interface FriendshipTable {
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
+
+  userId: string;
+  friendId: string;
+  status: 'pending' | 'accepted' | 'declined';
+
+  // FYI to future me - this is queried as a view.
+  // if you change this, you'll need to update the view.
+}
+
+export type Friendship = Selectable<FriendshipTable>;
+export type NewFriendship = Insertable<FriendshipTable>;
+export type FriendshipUpdate = Updateable<FriendshipTable>;

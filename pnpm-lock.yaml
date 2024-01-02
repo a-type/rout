@@ -251,6 +251,9 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
+      '@long-game/trpc':
+        specifier: workspace:*
+        version: link:../trpc
     devDependencies:
       '@types/react':
         specifier: ^18.2.46

@@ -1,9 +1,9 @@
-import { Session } from '@long-game/common';
+import { GameSessionData } from '@long-game/game-client';
 import { gameDefinitions } from '@long-game/games';
 import { Suspense } from 'react';
 
 export interface GameSessionProps {
-  session: Session;
+  session: GameSessionData;
 }
 
 export function GameSession({ session }: GameSessionProps) {

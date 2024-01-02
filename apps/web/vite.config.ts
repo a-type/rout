@@ -100,7 +100,13 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['@a-type/ui'],
-    include: ['react/jsx-runtime', 'react', 'react-dom', 'react-dom/client'],
+    include: [
+      'react/jsx-runtime',
+      'react',
+      'react-dom',
+      'react-dom/client',
+      '@a-type/ui > formik',
+    ],
   },
   resolve: {
     alias: {

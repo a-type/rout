@@ -2,8 +2,8 @@
   "name": "@long-game/game-client",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.tsx",
-  "module": "src/index.tsx",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
   "type": "module",
   "dependencies": {
     "zustand": "^4.4.3",

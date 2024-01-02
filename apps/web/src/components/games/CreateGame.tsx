@@ -1,11 +1,12 @@
 import { Button } from '@a-type/ui/components/button';
-import { useCreateGameSession } from '@long-game/game-client';
+import { globalHooks } from '@long-game/game-client';
 import { useNavigate } from '@verdant-web/react-router';
 
 export interface CreateGameProps {}
 
 export function CreateGame({}: CreateGameProps) {
-  const { mutateAsync } = useCreateGameSession();
+  const { mutateAsync } =
+    globalHooks.gameSessions.createGameSession.useMutation();
   const navigate = useNavigate();
 
   const create = async () => {
