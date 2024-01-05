@@ -12,7 +12,7 @@ import {
 import { TRPCError } from '@trpc/server';
 import { assert } from '@a-type/utils';
 import { gameDefinitions } from '@long-game/games';
-import { ClientSession, Move } from '@long-game/game-definition';
+import { ClientSession, GameStatus, Move } from '@long-game/game-definition';
 
 export const gameSessionsRouter = router({
   /**
@@ -405,6 +405,11 @@ export const gameSessionsRouter = router({
          * All moves submitted by this player for this round
          */
         queuedMoves: Move<any>[];
+        /**
+         * The status of the current game. Completed games
+         * cannot accept new moves.
+         */
+        status: GameStatus;
       }> => {
         const session = opts.ctx.session;
         assert(!!session);
@@ -418,7 +423,7 @@ export const gameSessionsRouter = router({
           )
           .where('GameSession.id', '=', opts.input.gameSessionId)
           .where('GameSessionMembership.userId', '=', session.userId)
-          .select(['gameId', 'initialState', 'timezone'])
+          .select(['gameId', 'initialState', 'timezone', 'GameSession.id'])
           .executeTakeFirst();
 
         if (!gameSession) {
@@ -428,41 +433,17 @@ export const gameSessionsRouter = router({
           });
         }
 
-        const moves = await db
-          .selectFrom('GameMove')
-          .where('gameSessionId', '=', opts.input.gameSessionId)
-          .select(['id', 'data', 'userId', 'createdAt'])
-          .orderBy('createdAt', 'asc')
-          .execute();
-
-        // separate out moves from the current round
-        const { roundStart } = getRoundTimerange(
-          new Date(),
-          gameSession.timezone,
-        );
+        const {
+          moves,
+          globalState,
+          gameDefinition,
+          movesPreviousRounds,
+          movesThisRound,
+        } = await getGameState(gameSession);
         // we only show the player queued moves for their
         // own user
-        const movesThisRound = moves.filter(
-          (move) =>
-            compareDates(move.createdAt, '>=', roundStart) &&
-            move.userId === session.userId,
-        );
-        const movesPreviousRounds = moves.filter(
-          (move) => new Date(move.createdAt) < roundStart,
-        );
-
-        const gameDefinition = gameDefinitions[gameSession.gameId];
-
-        if (!gameDefinition) {
-          throw new TRPCError({
-            message: 'No game rules found',
-            code: 'NOT_FOUND',
-          });
-        }
-
-        const globalState = gameDefinition.getState(
-          gameSession.initialState,
-          moves,
+        const myMovesThisRound = movesThisRound.filter(
+          (move) => move.userId === session.userId,
         );
         const playerStateInitial = gameDefinition.getPlayerState(
           globalState,
@@ -476,11 +457,13 @@ export const gameSessionsRouter = router({
         const historicalMoves = movesPreviousRounds.map(
           gameDefinition.getPublicMove,
         );
+        const status = gameDefinition.getStatus(globalState, moves);
 
         return {
           state: playerState,
           moves: historicalMoves,
-          queuedMoves: movesThisRound,
+          queuedMoves: myMovesThisRound,
+          status,
         };
       },
     ),
@@ -495,7 +478,7 @@ export const gameSessionsRouter = router({
         moves: zod.array(
           zod.object({
             id: zod.string(),
-            data: zod.unknown(),
+            data: zod.any(),
           }),
         ),
       }),
@@ -513,7 +496,12 @@ export const gameSessionsRouter = router({
       // at midnight in the game's timezone.
       const gameSession = await db
         .selectFrom('GameSession')
-        .select(['timezone'])
+        .select([
+          'timezone',
+          'GameSession.id',
+          'GameSession.initialState',
+          'GameSession.gameId',
+        ])
         .innerJoin(
           'GameSessionMembership',
           'GameSession.id',
@@ -537,6 +525,47 @@ export const gameSessionsRouter = router({
         now,
         gameSession.timezone,
       );
+
+      // validate the moves
+      const {
+        globalState,
+        gameDefinition,
+        movesThisRound,
+        movesPreviousRounds,
+      } = await getGameState(gameSession);
+      const playerStateInitial = gameDefinition.getPlayerState(
+        globalState,
+        session.userId,
+      );
+      const playerState = gameDefinition.getProspectivePlayerState(
+        playerStateInitial,
+        session.userId,
+        movesThisRound,
+      );
+      if (
+        !gameDefinition.isValidTurn(
+          playerState,
+          opts.input.moves.map((m) => ({
+            ...m,
+            data: m.data || null,
+            userId: session.userId,
+          })),
+        )
+      ) {
+        throw new TRPCError({
+          message: 'Invalid moves',
+          code: 'BAD_REQUEST',
+        });
+      }
+
+      // validate the game status
+      const status = gameDefinition.getStatus(globalState, movesPreviousRounds);
+      if (status.status !== 'active') {
+        throw new TRPCError({
+          message: 'Game is not active',
+          code: 'BAD_REQUEST',
+        });
+      }
 
       // in one transaction, delete existing moves from this player
       // in the timerange and insert the provided ones
@@ -566,3 +595,51 @@ export const gameSessionsRouter = router({
       });
     }),
 });
+
+async function getGameState(gameSession: {
+  id: string;
+  timezone: string;
+  initialState: any;
+  gameId: string;
+}) {
+  const moves = await db
+    .selectFrom('GameMove')
+    .where('gameSessionId', '=', gameSession.id)
+    .select(['id', 'data', 'userId', 'createdAt'])
+    .orderBy('createdAt', 'asc')
+    .execute();
+
+  // separate out moves from the current round
+  const { roundStart, roundEnd } = getRoundTimerange(
+    new Date(),
+    gameSession.timezone,
+  );
+
+  const movesPreviousRounds = moves.filter(
+    (move) => new Date(move.createdAt) < roundStart,
+  );
+  const movesThisRound = moves.filter(
+    (move) => new Date(move.createdAt) >= roundStart,
+  );
+
+  const gameDefinition = gameDefinitions[gameSession.gameId];
+
+  if (!gameDefinition) {
+    throw new TRPCError({
+      message: 'No game rules found',
+      code: 'NOT_FOUND',
+    });
+  }
+
+  const globalState = gameDefinition.getState(gameSession.initialState, moves);
+
+  return {
+    globalState,
+    moves,
+    movesPreviousRounds,
+    movesThisRound,
+    gameDefinition,
+    roundStart,
+    roundEnd,
+  };
+}

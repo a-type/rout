@@ -33,12 +33,15 @@ const LocalGuess = withGame(function LocalGuess() {
         type="number"
         value={guess}
         onChange={(e) => {
-          client.setMove(0, { guess: e.target.valueAsNumber });
+          let num = e.target.valueAsNumber;
+          if (isNaN(num)) num = 0;
+          client.setMove(0, { guess: num });
         }}
       />
       {hasUnsubmittedMoves && (
         <button onClick={client.submitMoves}>Submit</button>
       )}
+      {client.error && <div>{client.error}</div>}
     </div>
   );
 });

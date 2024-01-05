@@ -9,22 +9,14 @@ export interface Move<MoveData extends BaseMoveData> {
   createdAt?: string;
 }
 
-export type IsValidTurn<PlayerState, MoveData extends BaseMoveData> = (
-  playerState: PlayerState,
-  moves: Move<MoveData>[],
-) => boolean;
-export type GetPlayerState<GlobalState, PlayerState> = (
-  globalState: GlobalState,
-  playerId: string,
-) => PlayerState;
-export type GetProspectivePlayerState<
-  PlayerState,
-  MoveData extends BaseMoveData,
-> = (
-  playerState: PlayerState,
-  playerId: string,
-  prospectiveMoves: Move<MoveData>[],
-) => PlayerState;
+export type GameStatus =
+  | {
+      status: 'active';
+    }
+  | {
+      status: 'completed';
+      winnerIds: string[];
+    };
 
 export type GameDefinition<
   GlobalState = any,
@@ -35,11 +27,21 @@ export type GameDefinition<
   id: string;
   title: string;
   getInitialGlobalState: () => GlobalState;
-  isValidTurn: IsValidTurn<PlayerState, MoveData>;
-  getProspectivePlayerState: GetProspectivePlayerState<PlayerState, MoveData>;
-  getPlayerState: GetPlayerState<GlobalState, PlayerState>;
+  isValidTurn: (playerState: PlayerState, moves: Move<MoveData>[]) => boolean;
+  getProspectivePlayerState: (
+    playerState: PlayerState,
+    playerId: string,
+    prospectiveMoves: Move<MoveData>[],
+  ) => PlayerState;
+  getPlayerState: (globalState: GlobalState, playerId: string) => PlayerState;
   getState: (initialState: GlobalState, moves: Move<MoveData>[]) => GlobalState;
   getPublicMove: (move: Move<MoveData>) => Move<PublicMoveData>;
+  /**
+   * globalState is the computed current state. moves are provided
+   * for reference only, you do not need to recompute the current
+   * state.
+   */
+  getStatus: (globalState: GlobalState, moves: Move<MoveData>[]) => GameStatus;
   Client: ComponentType<{ session: ClientSession }>;
 };
 

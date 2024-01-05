@@ -104,6 +104,7 @@ class GameClient<
           this.state = data.state;
           this.historyMoves = data.moves as Move<PublicMoveData>[];
           this.queuedMoves = data.queuedMoves as Move<MoveData>[];
+          this.error = null;
         }),
       )
       .catch(
@@ -126,7 +127,8 @@ class GameClient<
     };
 
     if (!this.state) {
-      throw new Error('Cannot add move before state is loaded');
+      this.error = "The game hasn't loaded yet. Try again?";
+      return;
     }
 
     // validate the move based on what we know
@@ -136,10 +138,12 @@ class GameClient<
         newMove,
       ])
     ) {
-      throw new Error('Invalid move');
+      this.error = 'Invalid move';
+      return;
     }
 
     this.queuedMoves.push(newMove);
+    this.error = null;
   }
 
   @action
@@ -153,7 +157,9 @@ class GameClient<
      * is known - for example, if only N moves are valid.
      */
     if (this.queuedMoves.length <= index && index !== this.queuedMoves.length) {
-      throw new Error('Invalid index');
+      this.error =
+        'Internal error. Cannot create move. Please report this problem!';
+      throw new Error('Invalid move index: ' + index);
     }
 
     const existingMove = this.queuedMoves[index] as Move<MoveData> | undefined;
@@ -166,14 +172,17 @@ class GameClient<
     proposedMoves[index] = newMove;
 
     if (!this.state) {
-      throw new Error('Cannot add move before state is loaded');
+      this.error = "The game hasn't loaded yet. Try again?";
+      return;
     }
 
     if (!this.gameDefinition.isValidTurn(this.state, proposedMoves)) {
-      throw new Error('Invalid move');
+      this.error = 'Invalid move';
+      return;
     }
 
     this.queuedMoves[index] = newMove;
+    this.error = null;
   }
 
   submitMoves = async () => {

@@ -53,6 +53,27 @@ export const gameDefinition: GameDefinition<
 
   getPublicMove: (move) => move,
 
+  getStatus: (globalState, moves) => {
+    const movesThatGuessedRight = moves.filter(
+      (move) => move.data.guess === globalState.secretNumber,
+    );
+
+    if (movesThatGuessedRight.length > 0) {
+      return {
+        status: 'completed',
+        // exclude nulls - users which have left the game or
+        // otherwise invalid moves...
+        winnerIds: movesThatGuessedRight
+          .map((move) => move.userId)
+          .filter((id): id is string => !!id),
+      };
+    }
+
+    return {
+      status: 'active',
+    };
+  },
+
   Client: lazy(() => import('./Client.js')),
 };
 
