@@ -49,7 +49,17 @@ const History = withGame(function History() {
   return (
     <div>
       <h1>History</h1>
-      <pre>{JSON.stringify(client.historyMoves, null, 2)}</pre>
+      <ul>
+        {client.historyMovesWithUsers.map((move) => (
+          <li key={move.id}>
+            <div>
+              {move.data.guess} -{' '}
+              {move.createdAt ? new Date(move.createdAt).toDateString() : ''}
+            </div>
+            <div>By {move.user.name}</div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 });

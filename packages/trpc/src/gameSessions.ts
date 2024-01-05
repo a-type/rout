@@ -1,11 +1,18 @@
 import { router, userProcedure } from './util.js';
 import * as zod from 'zod';
 import { getRoundTimerange } from '@long-game/common';
-import { db, id, jsonArrayFrom, compareDates, dateTime } from '@long-game/db';
+import {
+  db,
+  id,
+  jsonArrayFrom,
+  compareDates,
+  dateTime,
+  sql,
+} from '@long-game/db';
 import { TRPCError } from '@trpc/server';
 import { assert } from '@a-type/utils';
 import { gameDefinitions } from '@long-game/games';
-import { Move } from '@long-game/game-definition';
+import { ClientSession, Move } from '@long-game/game-definition';
 
 export const gameSessionsRouter = router({
   /**
@@ -20,7 +27,7 @@ export const gameSessionsRouter = router({
         id: zod.string(),
       }),
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<ClientSession> => {
       const session = ctx.session;
       assert(!!session);
 
@@ -39,16 +46,25 @@ export const gameSessionsRouter = router({
           'GameSession.gameId',
           'GameSession.status',
           'GameSession.createdAt',
+          'GameSession.updatedAt',
           'GameSession.timezone',
         ])
         .select((eb) => [
           jsonArrayFrom(
             eb
               .selectFrom('GameSessionMembership')
+              .innerJoin('User', 'User.id', 'GameSessionMembership.userId')
               .select([
-                'GameSessionMembership.userId',
+                'GameSessionMembership.id as membershipId',
+                'GameSessionMembership.userId as id',
                 'GameSessionMembership.status',
+                'User.imageUrl',
               ])
+              .select(
+                sql<string>`COALESCE(User.friendlyName, User.fullName)`.as(
+                  'name',
+                ),
+              )
               .whereRef('gameSessionId', '=', 'GameSession.id'),
           ).as('members'),
         ])
@@ -62,7 +78,7 @@ export const gameSessionsRouter = router({
       }
 
       const myMembership = gameSession.members.find(
-        (member) => member.userId === session.userId,
+        (member) => member.id === session.userId,
       );
 
       if (!myMembership) {

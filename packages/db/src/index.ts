@@ -4,6 +4,7 @@ import SQLite from 'better-sqlite3';
 import { Kysely, SqliteDialect } from 'kysely';
 export { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/sqlite';
 export * from './utils.js';
+export { sql } from 'kysely';
 
 import { SerializePlugin } from 'kysely-plugin-serialize';
 import { TimestampsPlugin } from './plugins.js';

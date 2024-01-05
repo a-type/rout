@@ -1,16 +1,19 @@
 {
-	"$schema": "https://turborepo.org/schema.json",
-	"pipeline": {
-		"build": {
-			"dependsOn": ["^build"],
-			"outputs": [".next/**", "dist/**"]
-		},
-		"test": {
-			"outputs": [],
-			"inputs": ["**/*.tsx", "**/*.ts", "**/*.test.tsx", "**/*.test.ts"]
-		},
-		"dev": {
-			"cache": false
-		}
-	}
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "test": {
+      "outputs": [],
+      "inputs": ["**/*.tsx", "**/*.ts", "**/*.test.tsx", "**/*.test.ts"]
+    },
+    "dev": {
+      "cache": false
+    },
+    "setup": {
+      "cache": false
+    }
+  }
 }

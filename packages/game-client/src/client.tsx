@@ -58,6 +58,22 @@ class GameClient<
     return this.state === null;
   }
 
+  @computed
+  get historyMovesWithUsers(): (Move<PublicMoveData> & {
+    user: { id: string; name: string; imageUrl: string | null };
+  })[] {
+    return this.historyMoves.map((move) => ({
+      ...move,
+      user: this.session.members.find(
+        (player) => player.id === move.userId,
+      ) ?? {
+        id: 'unknown',
+        name: 'Unknown',
+        imageUrl: null,
+      },
+    }));
+  }
+
   constructor({
     gameDefinition,
     host,

@@ -50,6 +50,12 @@ export type ClientSession = {
   createdAt: string;
   updatedAt: string;
   timezone: string;
-  members: { id: string; status: 'pending' | 'accepted' | 'rejected' }[];
+  members: {
+    id: string;
+    membershipId: string;
+    status: 'pending' | 'accepted' | 'declined' | 'expired';
+    name: string;
+    imageUrl: string | null;
+  }[];
   localPlayer: { id: string };
 };

@@ -3,10 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "env-cmd tsx watch --clear-screen=false ./src/server.ts",
-    "prestart": "pnpm migrate",
-    "start": "pnpm prestart && tsx --tsconfig ./tsconfig.json ./src/server.ts",
+    "setup": "pnpm migrate",
+    "start": "node ./dist/server.js",
     "start:local": "env-cmd pnpm start",
-    "start:js": "env-cmd node ./dist/server.js",
     "build": "tsc --build tsconfig.json",
     "vapid": "node ./scripts/generateVapidKeys.js",
     "migrate": "env-cmd long-game-migrate"
