@@ -1,5 +1,4 @@
 import { ComponentType } from 'react';
-import { Outputs } from '@long-game/trpc';
 
 export type BaseMoveData = object;
 
@@ -7,6 +6,7 @@ export interface Move<MoveData extends BaseMoveData> {
   id: string;
   userId: string | null;
   data: MoveData;
+  createdAt?: string;
 }
 
 export type IsValidTurn<PlayerState, MoveData extends BaseMoveData> = (
@@ -40,5 +40,16 @@ export type GameDefinition<
   getPlayerState: GetPlayerState<GlobalState, PlayerState>;
   getState: (initialState: GlobalState, moves: Move<MoveData>[]) => GlobalState;
   getPublicMove: (move: Move<MoveData>) => Move<PublicMoveData>;
-  Client: ComponentType<{ session: Outputs['gameSessions']['gameSession'] }>;
+  Client: ComponentType<{ session: ClientSession }>;
+};
+
+export type ClientSession = {
+  id: string;
+  gameId: string;
+  status: 'pending' | 'active' | 'completed';
+  createdAt: string;
+  updatedAt: string;
+  timezone: string;
+  members: { id: string; status: 'pending' | 'accepted' | 'rejected' }[];
+  localPlayer: { id: string };
 };

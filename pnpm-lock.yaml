@@ -229,6 +229,12 @@ importers:
       '@trpc/server':
         specifier: ^10.45.0
         version: 10.45.0
+      mobx:
+        specifier: ^6.12.0
+        version: 6.12.0
+      mobx-react-lite:
+        specifier: ^4.0.5
+        version: 4.0.5(mobx@6.12.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -251,9 +257,6 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
-      '@long-game/trpc':
-        specifier: workspace:*
-        version: link:../trpc
     devDependencies:
       '@types/react':
         specifier: ^18.2.46
@@ -264,10 +267,19 @@ importers:
 
   packages/games:
     dependencies:
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../game-definition
       '@long-game/game-number-guess':
         specifier: workspace:*
         version: link:../../games/number-guess
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
     devDependencies:
+      '@types/react':
+        specifier: ^18.2.46
+        version: 18.2.46
       typescript:
         specifier: ^5.0.2
         version: 5.3.3
@@ -6071,6 +6083,29 @@ packages:
       pkg-types: 1.0.3
       ufo: 1.3.2
     dev: true
+
+  /mobx-react-lite@4.0.5(mobx@6.12.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-StfB2wxE8imKj1f6T8WWPf4lVMx3cYH9Iy60bbKXEs21+HQ4tvvfIBZfSmMXgQAefi8xYEwQIz4GN9s0d2h7dg==}
+    peerDependencies:
+      mobx: ^6.9.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      mobx: 6.12.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  /mobx@6.12.0:
+    resolution: {integrity: sha512-Mn6CN6meXEnMa0a5u6a5+RKrqRedHBhZGd15AWLk9O6uFY4KYHzImdt8JI8WODo1bjTSRnwXhJox+FCUZhCKCQ==}
+    dev: false
 
   /mrmime@2.0.0:
     resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}

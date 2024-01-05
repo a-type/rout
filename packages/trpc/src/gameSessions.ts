@@ -1,12 +1,11 @@
 import { router, userProcedure } from './util.js';
 import * as zod from 'zod';
 import { getRoundTimerange } from '@long-game/common';
-import { db, id, jsonArrayFrom } from '@long-game/db';
+import { db, id, jsonArrayFrom, compareDates, dateTime } from '@long-game/db';
 import { TRPCError } from '@trpc/server';
 import { assert } from '@a-type/utils';
 import { gameDefinitions } from '@long-game/games';
 import { Move } from '@long-game/game-definition';
-import { compareDates, dateTime } from '@long-game/db/src/utils.js';
 
 export const gameSessionsRouter = router({
   /**
@@ -35,12 +34,21 @@ export const gameSessionsRouter = router({
           'GameSession.id',
           'GameSessionMembership.gameSessionId',
         )
-        .selectAll('GameSession')
+        .select([
+          'GameSession.id',
+          'GameSession.gameId',
+          'GameSession.status',
+          'GameSession.createdAt',
+          'GameSession.timezone',
+        ])
         .select((eb) => [
           jsonArrayFrom(
             eb
               .selectFrom('GameSessionMembership')
-              .select(['userId', 'status'])
+              .select([
+                'GameSessionMembership.userId',
+                'GameSessionMembership.status',
+              ])
               .whereRef('gameSessionId', '=', 'GameSession.id'),
           ).as('members'),
         ])
@@ -529,7 +537,10 @@ export const gameSessionsRouter = router({
           .insertInto('GameMove')
           .values(
             opts.input.moves.map((move) => ({
-              id: move.id,
+              // provide a new ID - otherwise users could
+              // overwrite each other's moves or a move
+              // from a previous turn (if constraints change)
+              id: id(),
               gameSessionId: opts.input.gameSessionId,
               userId: session.userId,
               data: JSON.stringify(move.data),

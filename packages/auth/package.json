@@ -2,9 +2,14 @@
   "name": "@long-game/auth",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "module": "dist/esm/index.js",
+  "main": "dist/esm/index.js",
+  "typings": "dist/typings/index.d.ts",
   "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
   "dependencies": {
     "@long-game/common": "workspace:*",
     "cookie": "^0.6.0",

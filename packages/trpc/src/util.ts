@@ -1,5 +1,4 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import * as trpcExpress from '@trpc/server/adapters/express';
 import { getLiveSession } from '@long-game/auth';
 import superjson from 'superjson';
 
@@ -20,7 +19,9 @@ export const createContext = async ({
   req,
   res,
   deployedContext,
-}: trpcExpress.CreateExpressContextOptions & {
+}: {
+  res: Response;
+  req: Request;
   deployedContext: {
     apiHost: string;
     uiHost: string;

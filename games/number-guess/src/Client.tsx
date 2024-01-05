@@ -2,7 +2,8 @@ import { createGameClient } from '@long-game/game-client';
 import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps } from 'react';
 
-const { GameClientProvider, useGameClient } = createGameClient(gameDefinition);
+const { GameClientProvider, useGameClient, withGame } =
+  createGameClient(gameDefinition);
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -19,11 +20,11 @@ export function Client({ session }: ClientProps) {
 
 export default Client;
 
-function LocalGuess() {
-  const guess = useGameClient((state) => state.queuedMoves[0]?.data.guess ?? 0);
-  const updateGuess = useGameClient((state) => state.setMove.bind(null, 0));
-  const hasMoves = useGameClient((state) => state.queuedMoves.length > 0);
-  const submitMoves = useGameClient((state) => state.submitMoves);
+const LocalGuess = withGame(function LocalGuess() {
+  const client = useGameClient();
+  const guess = client.queuedMoves[0]?.data.guess ?? 0;
+  const hasUnsubmittedMoves =
+    client.queuedMoves.filter((move) => !move.createdAt).length > 0;
 
   return (
     <div>
@@ -32,21 +33,23 @@ function LocalGuess() {
         type="number"
         value={guess}
         onChange={(e) => {
-          updateGuess({ guess: e.target.valueAsNumber });
+          client.setMove(0, { guess: e.target.valueAsNumber });
         }}
       />
-      {hasMoves && <button onClick={submitMoves}>Submit</button>}
+      {hasUnsubmittedMoves && (
+        <button onClick={client.submitMoves}>Submit</button>
+      )}
     </div>
   );
-}
+});
 
-function History() {
-  const moves = useGameClient((state) => state.moves);
+const History = withGame(function History() {
+  const client = useGameClient();
 
   return (
     <div>
       <h1>History</h1>
-      <pre>{JSON.stringify(moves, null, 2)}</pre>
+      <pre>{JSON.stringify(client.historyMoves, null, 2)}</pre>
     </div>
   );
-}
+});

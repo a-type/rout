@@ -1,7 +1,7 @@
 import { Router } from 'itty-router';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '@long-game/trpc';
-import { DEPLOYED_CONTEXT } from 'src/deployedContext.js';
+import { DEPLOYED_CONTEXT } from '../deployedContext.js';
 
 export const trpcRouter = Router({
   base: '/trpc',

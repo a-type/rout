@@ -15,7 +15,7 @@ export interface AuthUser {
   fullName: string | null;
   friendlyName: string | null;
   email: string;
-  emailVerifiedAt: Date | null;
+  emailVerifiedAt: string | null;
   imageUrl: string | null;
 }
 

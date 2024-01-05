@@ -15,22 +15,7 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "downlevelIteration": true,
-    "experimentalDecorators": true,
     "isolatedModules": true
   },
-  "exclude": ["node_modules", "**/*/dist"],
-  "references": [
-    {
-      "path": "./packages/common"
-    },
-    {
-      "path": "./packages/game-client"
-    },
-    {
-      "path": "./packages/game-definition"
-    },
-    {
-      "path": "./packages/trpc"
-    }
-  ]
+  "exclude": ["node_modules", "**/*/dist"]
 }

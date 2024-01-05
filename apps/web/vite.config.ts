@@ -9,17 +9,6 @@ export default defineConfig({
   plugins: [
     UnoCSS(),
     react(),
-    // checker({
-    // 	typescript: {
-    // 		tsconfigPath: './tsconfig.json',
-    // 		buildMode: true,
-    // 	},
-    // 	overlay: {
-    // 		initialIsOpen: false,
-    // 		badgeStyle: 'display: none',
-    // 	},
-    // 	enableBuild: false,
-    // }),
     // VitePWA({
     // 	includeManifestIcons: true,
     // 	strategies: 'injectManifest',
@@ -114,7 +103,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3100,
   },
   build: {
     sourcemap: true,

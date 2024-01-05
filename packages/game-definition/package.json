@@ -2,12 +2,15 @@
   "name": "@long-game/game-definition",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "module": "dist/esm/index.js",
+  "typings": "dist/typings/index.d.ts",
   "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
   "dependencies": {
-    "@long-game/common": "workspace:*",
-    "@long-game/trpc": "workspace:*"
+    "@long-game/common": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.2",

@@ -2,7 +2,7 @@ import { Router } from 'itty-router';
 import { GoogleProvider, createHandlers } from '@long-game/auth';
 import { db, id } from '@long-game/db';
 import { assert } from '@a-type/utils';
-import { DEPLOYED_CONTEXT } from 'src/deployedContext.js';
+import { DEPLOYED_CONTEXT } from '../deployedContext.js';
 
 export const authRouter = Router({
   base: '/auth',

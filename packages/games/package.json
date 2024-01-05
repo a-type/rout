@@ -2,13 +2,21 @@
   "name": "@long-game/games",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "module": "dist/esm/index.js",
+  "main": "dist/esm/index.js",
+  "typings": "dist/typings/index.d.ts",
   "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
   "dependencies": {
-    "@long-game/game-number-guess": "workspace:*"
+    "@long-game/game-number-guess": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "react": "^18.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "@types/react": "^18.2.46"
   }
 }
