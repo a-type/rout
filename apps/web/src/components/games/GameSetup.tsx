@@ -21,8 +21,7 @@ export function GameSetup({ gameSession }: GameSetupProps) {
 
   const needToAcceptMyInvite = gameSession.members.some(
     (member) =>
-      member.userId === gameSession.localPlayer.id &&
-      member.status === 'pending',
+      member.id === gameSession.localPlayer.id && member.status === 'pending',
   );
 
   const respondToInvite =
@@ -66,6 +65,13 @@ export function GameSetup({ gameSession }: GameSetupProps) {
   );
 }
 
+type GameSetupInviteEntryData = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  status: 'accepted' | 'pending' | 'declined' | 'expired' | 'uninvited';
+};
+
 function GameSetupInviteFriends({
   sessionId,
   members,
@@ -78,37 +84,51 @@ function GameSetupInviteFriends({
   const { data: friends } = globalHooks.friendships.list.useQuery({
     statusFilter: 'accepted',
   });
+  const friendsNotInvited = (friends ?? []).filter(
+    (friend) => !members.some((member) => member.id === friend.id),
+  );
 
   const { mutateAsync } =
     globalHooks.gameSessions.createGameInvite.useMutation();
+
+  const entries: GameSetupInviteEntryData[] = [
+    ...members.map((member) => ({
+      id: member.id,
+      name: member.name,
+      imageUrl: member.imageUrl,
+      status: member.status,
+    })),
+    ...friendsNotInvited.map((friend) => ({
+      id: friend.id,
+      name: friend.name,
+      imageUrl: friend.imageUrl,
+      status: 'uninvited' as const,
+    })),
+  ];
 
   return (
     <div>
       <H2>Invite Friends</H2>
       <ul className="p-0">
-        {friends?.map((friend) => {
-          const membership = members.find(
-            (member) => member.userId === friend.id,
-          );
-
+        {entries?.map((entry) => {
           return (
-            <li className="flex flex-row gap-2 items-center" key={friend.id}>
-              <Avatar imageSrc={friend.imageUrl ?? undefined} />
-              {friend.name}
+            <li className="flex flex-row gap-2 items-center" key={entry.id}>
+              <Avatar imageSrc={entry.imageUrl ?? undefined} />
+              {entry.name}
               <div className="self-end">
-                {!membership || membership.status === 'declined' ? (
+                {entry.status === 'declined' || entry.status === 'uninvited' ? (
                   <Button
                     onClick={async () => {
                       await mutateAsync({
                         gameSessionId: sessionId,
-                        userId: friend.id,
+                        userId: entry.id,
                       });
                       onInvite();
                     }}
                   >
                     Invite
                   </Button>
-                ) : membership.status === 'pending' ? (
+                ) : entry.status === 'pending' ? (
                   <Button disabled>Uninvite (todo)</Button>
                 ) : (
                   <span>Joined</span>

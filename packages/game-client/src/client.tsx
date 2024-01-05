@@ -12,7 +12,7 @@ import SuperJSON from 'superjson';
 import { fetchLink, loginLink } from './trpc.js';
 import cuid2 from '@paralleldrive/cuid2';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { createTRPCReact } from '@trpc/react-query';
+import { CreateTRPCReact, createTRPCReact } from '@trpc/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 if (
@@ -255,7 +255,8 @@ export function createGameClient<
 }
 
 // Global Long Game SDKs
-export const globalHooks: any = createTRPCReact<AppRouter>();
+export const globalHooks: CreateTRPCReact<AppRouter, unknown, null> =
+  createTRPCReact<AppRouter>();
 export const GameProvider = ({
   children,
   host,

@@ -1,4 +1,4 @@
-import { db } from '@long-game/db';
+import { db, sql } from '@long-game/db';
 import { router, userProcedure } from './util.js';
 import { TRPCError } from '@trpc/server';
 import * as zod from 'zod';
@@ -120,10 +120,12 @@ export const friendshipsRouter = router({
         .select([
           'friendId as id',
           'status',
-          'User.friendlyName as name',
           'User.imageUrl as imageUrl',
           'User.email as email',
-        ]);
+        ])
+        .select(
+          sql<string>`COALESCE(User.friendlyName, User.fullName)`.as('name'),
+        );
 
       if (opts.input.statusFilter !== 'all') {
         friendshipsQuery = friendshipsQuery.where(
