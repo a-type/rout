@@ -14,10 +14,11 @@ export function GameSetup({ gameSession }: GameSetupProps) {
   const refetch = useCallback(() => {
     utils.gameSessions.gameSession.invalidate({ id: gameSession.id });
   }, [utils.gameSessions.gameSession, gameSession.id]);
-  const { mutateAsync } =
-    globalHooks.gameSessions.updateGameSession.useMutation({
+  const { mutateAsync: startGame } = globalHooks.gameSessions.start.useMutation(
+    {
       onSuccess: refetch,
-    });
+    },
+  );
 
   const needToAcceptMyInvite = gameSession.members.some(
     (member) =>
@@ -52,9 +53,8 @@ export function GameSetup({ gameSession }: GameSetupProps) {
       ) : (
         <Button
           onClick={async () => {
-            await mutateAsync({
+            await startGame({
               id: gameSession.id,
-              status: 'active',
             });
           }}
         >

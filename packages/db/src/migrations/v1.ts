@@ -59,7 +59,7 @@ export async function up(db: Kysely<any>) {
     .addColumn('timezone', 'text', (col) => col.notNull())
     .addColumn('gameId', 'text', (col) => col.notNull())
     .addColumn('initialState', 'text', (col) => col.notNull())
-    .addColumn('status', 'text', (col) => col.notNull().defaultTo('pending'))
+    .addColumn('startedAt', 'text')
     .execute();
 
   await db.schema

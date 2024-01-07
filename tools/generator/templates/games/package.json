@@ -1,0 +1,25 @@
+{
+  "name": "@long-game/game-{{name}}",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/esm/index.js",
+  "module": "./dist/esm/index.js",
+  "typings": "./dist/typings/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13"
+  }
+}

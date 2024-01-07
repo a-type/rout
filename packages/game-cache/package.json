@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/trpc",
+  "name": "@long-game/game-cache",
   "version": "0.0.1",
   "private": true,
   "module": "dist/esm/index.js",
@@ -11,19 +11,12 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@a-type/utils": "^1.0.5",
-    "@trpc/server": "^10.45.0",
-    "@long-game/auth": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/db": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/games": "workspace:*",
-    "@long-game/game-cache": "workspace:*",
-    "superjson": "^1.12.0",
-    "zod": "^3.19.0"
+    "@long-game/games": "workspace:*"
   },
   "devDependencies": {
-    "@types/express": "^4.17.14",
     "typescript": "^5.0.2"
   }
 }

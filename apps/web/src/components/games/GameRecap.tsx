@@ -1,5 +1,8 @@
+import { Divider } from '@a-type/ui/components/divider';
 import { H1 } from '@a-type/ui/components/typography';
-import { GameSessionData } from '@long-game/game-client';
+import { GameSessionData, globalHooks } from '@long-game/game-client';
+import { gameDefinitions } from '@long-game/games';
+import { Suspense } from 'react';
 
 export interface GameRecapProps {
   gameSession: GameSessionData;
@@ -10,7 +13,56 @@ export function GameRecap({ gameSession }: GameRecapProps) {
     <div>
       <H1>Game Recap</H1>
       <div>The game has ended!</div>
-      {/* TODO: expose winners and post-game info like correct answer, etc */}
+      <RecapDetails gameSession={gameSession} />
+    </div>
+  );
+}
+
+function RecapDetails({ gameSession }: { gameSession: GameSessionData }) {
+  const game = gameDefinitions[gameSession.gameId];
+  const { GameRecap } = game;
+
+  const { data: postGameData } = globalHooks.gameSessions.postGame.useQuery({
+    gameSessionId: gameSession.id,
+  });
+
+  if (!postGameData) {
+    return null;
+  }
+
+  return (
+    <>
+      <Winners
+        gameSession={gameSession}
+        winnerIds={postGameData?.winnerIds ?? []}
+      />
+      <Divider />
+      <Suspense>
+        <GameRecap
+          session={gameSession}
+          globalState={postGameData?.globalState}
+        />
+      </Suspense>
+    </>
+  );
+}
+
+function Winners({
+  gameSession,
+  winnerIds,
+}: {
+  gameSession: GameSessionData;
+  winnerIds: string[];
+}) {
+  const winners = gameSession.members.filter((member) =>
+    winnerIds.includes(member.id),
+  );
+  return (
+    <div>
+      <div>Winners:</div>
+      {winners.map((winner) => (
+        <div key={winner.id}>{winner.name}</div>
+      ))}
     </div>
   );
 }

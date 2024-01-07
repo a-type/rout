@@ -1,26 +1,13 @@
-import { router, userProcedure } from './util.js';
-import * as zod from 'zod';
-import { getRoundTimerange } from '@long-game/common';
-import {
-  db,
-  id,
-  jsonArrayFrom,
-  compareDates,
-  dateTime,
-  sql,
-} from '@long-game/db';
-import { TRPCError } from '@trpc/server';
 import { assert } from '@a-type/utils';
-import { gameDefinitions } from '@long-game/games';
+import { dateTime, db, id, jsonArrayFrom, sql } from '@long-game/db';
+import { getCachedGame } from '@long-game/game-cache';
 import { ClientSession, GameStatus, Move } from '@long-game/game-definition';
+import { gameDefinitions } from '@long-game/games';
+import { TRPCError } from '@trpc/server';
+import * as zod from 'zod';
+import { router, userProcedure } from './util.js';
 
 export const gameSessionsRouter = router({
-  /**
-   * List all game sessions the player is participating in
-   */
-  gameSessions: userProcedure.query(async (opts) => {
-    return [];
-  }),
   gameSession: userProcedure
     .input(
       zod.object({
@@ -44,10 +31,11 @@ export const gameSessionsRouter = router({
         .select([
           'GameSession.id',
           'GameSession.gameId',
-          'GameSession.status',
+          'GameSession.startedAt',
           'GameSession.createdAt',
           'GameSession.updatedAt',
           'GameSession.timezone',
+          'GameSession.initialState',
         ])
         .select((eb) => [
           jsonArrayFrom(
@@ -88,10 +76,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      if (
-        myMembership.status !== 'accepted' &&
-        gameSession.status !== 'pending'
-      ) {
+      if (myMembership.status !== 'accepted' && !!gameSession.startedAt) {
         throw new TRPCError({
           message:
             'Game session has not been accepted. Cannot view game in progress.',
@@ -99,8 +84,19 @@ export const gameSessionsRouter = router({
         });
       }
 
+      const game = await getCachedGame(gameSession, new Date());
+      const status =
+        game?.gameDefinition.getStatus(
+          game.globalState,
+          game.movesPreviousRounds,
+        ) ??
+        ({
+          status: 'active',
+        } as GameStatus);
+
       return {
         ...gameSession,
+        status,
         localPlayer: {
           id: session.userId,
         },
@@ -121,7 +117,7 @@ export const gameSessionsRouter = router({
       .select([
         'GameSessionMembership.id',
         'gameSessionId',
-        'GameSession.status as gameSessionStatus',
+        'GameSession.startedAt as startedAt',
         'GameSessionMembership.status as membershipStatus',
         'GameSession.gameId',
         'GameSessionMembership.createdAt',
@@ -138,14 +134,6 @@ export const gameSessionsRouter = router({
       const session = opts.ctx.session;
       assert(!!session);
 
-      const gameDefinition = gameDefinitions[opts.input.gameId];
-      if (!gameDefinition) {
-        throw new TRPCError({
-          message: 'No game rules found',
-          code: 'NOT_FOUND',
-        });
-      }
-
       const gameSession = await db
         .insertInto('GameSession')
         .values({
@@ -153,8 +141,7 @@ export const gameSessionsRouter = router({
           gameId: opts.input.gameId,
           // TODO: configurable + automatic detection?
           timezone: 'America/New_York',
-          initialState: gameDefinition.getInitialGlobalState(),
-          status: 'pending',
+          initialState: null,
         })
         .returning(['id', 'gameId', 'createdAt'])
         .executeTakeFirstOrThrow();
@@ -177,13 +164,6 @@ export const gameSessionsRouter = router({
     .input(
       zod.object({
         id: zod.string(),
-        status: zod
-          .union([
-            zod.literal('pending'),
-            zod.literal('active'),
-            zod.literal('completed'),
-          ])
-          .optional(),
         gameId: zod.string().optional(),
       }),
     )
@@ -200,7 +180,7 @@ export const gameSessionsRouter = router({
         )
         .where('GameSession.id', '=', opts.input.id)
         .where('GameSessionMembership.userId', '=', session.userId)
-        .select(['gameId', 'GameSession.status'])
+        .select(['gameId'])
         .executeTakeFirst();
 
       if (!gameSession) {
@@ -210,20 +190,9 @@ export const gameSessionsRouter = router({
         });
       }
 
-      if (
-        opts.input.gameId &&
-        opts.input.gameId !== gameSession.gameId &&
-        gameSession.status !== 'pending'
-      ) {
+      if (opts.input.gameId && opts.input.gameId !== gameSession.gameId) {
         throw new TRPCError({
           message: 'Cannot change game type',
-          code: 'BAD_REQUEST',
-        });
-      }
-
-      if (opts.input.status && opts.input.status === 'pending') {
-        throw new TRPCError({
-          message: 'Cannot set game session to pending',
           code: 'BAD_REQUEST',
         });
       }
@@ -234,13 +203,65 @@ export const gameSessionsRouter = router({
         .updateTable('GameSession')
         .set({
           gameId: opts.input.gameId,
-          status: opts.input.status,
         })
         .where('id', '=', opts.input.id)
-        .returning(['id', 'gameId', 'status'])
+        .returning(['id', 'gameId'])
         .execute();
 
       return updated;
+    }),
+  start: userProcedure
+    .input(
+      zod.object({
+        id: zod.string(),
+      }),
+    )
+    .mutation(async (opts) => {
+      const session = opts.ctx.session;
+      assert(!!session);
+
+      const gameSession = await db
+        .selectFrom('GameSession')
+        .innerJoin(
+          'GameSessionMembership',
+          'GameSession.id',
+          'GameSessionMembership.gameSessionId',
+        )
+        .where('GameSession.id', '=', opts.input.id)
+        .where('GameSessionMembership.userId', '=', session.userId)
+        .select(['gameId', 'startedAt'])
+        .executeTakeFirst();
+
+      if (!gameSession) {
+        throw new TRPCError({
+          message: 'No game session found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      if (!!gameSession.startedAt) {
+        throw new TRPCError({
+          message: 'Game session has already started',
+          code: 'BAD_REQUEST',
+        });
+      }
+
+      const gameDefinition = gameDefinitions[gameSession.gameId];
+      if (!gameDefinition) {
+        throw new TRPCError({
+          message: 'No game rules found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      await db
+        .updateTable('GameSession')
+        .set({
+          startedAt: dateTime(),
+          initialState: gameDefinition.getInitialGlobalState(),
+        })
+        .where('id', '=', opts.input.id)
+        .execute();
     }),
   createGameInvite: userProcedure
     .input(
@@ -264,7 +285,7 @@ export const gameSessionsRouter = router({
         .where('GameSessionMembership.userId', '=', session.userId)
         .select([
           'GameSessionMembership.status as membershipStatus',
-          'GameSession.status',
+          'GameSession.startedAt',
         ])
         .executeTakeFirst();
 
@@ -275,7 +296,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      if (gameSession.status !== 'pending') {
+      if (!!gameSession.startedAt) {
         throw new TRPCError({
           message: 'Game session is already in progress',
           code: 'BAD_REQUEST',
@@ -350,7 +371,10 @@ export const gameSessionsRouter = router({
           'GameSessionMembership.gameSessionId',
         )
         .where('GameSessionMembership.userId', '=', session.userId)
-        .select(['GameSessionMembership.status as membershipStatus'])
+        .select([
+          'GameSessionMembership.status as membershipStatus',
+          'GameSession.startedAt',
+        ])
         .executeTakeFirst();
 
       if (!gameSession) {
@@ -363,6 +387,13 @@ export const gameSessionsRouter = router({
       if (gameSession.membershipStatus !== 'pending') {
         throw new TRPCError({
           message: 'Invite is no longer pending',
+          code: 'BAD_REQUEST',
+        });
+      }
+
+      if (!!gameSession.startedAt) {
+        throw new TRPCError({
+          message: 'Game session is already in progress',
           code: 'BAD_REQUEST',
         });
       }
@@ -414,19 +445,21 @@ export const gameSessionsRouter = router({
         const session = opts.ctx.session;
         assert(!!session);
 
-        const gameSession = await db
-          .selectFrom('GameSession')
-          .innerJoin(
-            'GameSessionMembership',
-            'GameSession.id',
-            'GameSessionMembership.gameSessionId',
-          )
-          .where('GameSession.id', '=', opts.input.gameSessionId)
-          .where('GameSessionMembership.userId', '=', session.userId)
-          .select(['gameId', 'initialState', 'timezone', 'GameSession.id'])
-          .executeTakeFirst();
+        const gameSession = await getAuthorizedGameSession(
+          opts.input.gameSessionId,
+          session.userId,
+        );
 
         if (!gameSession) {
+          throw new TRPCError({
+            message: 'No game session found',
+            code: 'NOT_FOUND',
+          });
+        }
+
+        const game = await getCachedGame(gameSession, new Date());
+
+        if (!game) {
           throw new TRPCError({
             message: 'No game session found',
             code: 'NOT_FOUND',
@@ -439,7 +472,7 @@ export const gameSessionsRouter = router({
           gameDefinition,
           movesPreviousRounds,
           movesThisRound,
-        } = await getGameState(gameSession);
+        } = game;
         // we only show the player queued moves for their
         // own user
         const myMovesThisRound = movesThisRound.filter(
@@ -467,6 +500,59 @@ export const gameSessionsRouter = router({
         };
       },
     ),
+
+  postGame: userProcedure
+    .input(
+      zod.object({
+        gameSessionId: zod.string(),
+      }),
+    )
+    .query(async (opts) => {
+      // TODO: extract this to reusable code
+      const session = opts.ctx.session;
+      assert(!!session);
+
+      const gameSession = await getAuthorizedGameSession(
+        opts.input.gameSessionId,
+        session.userId,
+      );
+
+      if (!gameSession) {
+        throw new TRPCError({
+          message: 'No game session found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      const game = await getCachedGame(gameSession, new Date());
+
+      if (!game) {
+        throw new TRPCError({
+          message: 'No game session found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      const { globalState, gameDefinition, movesPreviousRounds } = game;
+
+      // using movesPreviousRounds here - otherwise this API could be used
+      // to see the current state of the game with current round moves before
+      // the round is settled!
+      const status = gameDefinition.getStatus(globalState, movesPreviousRounds);
+
+      if (status.status !== 'completed') {
+        throw new TRPCError({
+          message: 'Game is not completed',
+          code: 'BAD_REQUEST',
+        });
+      }
+
+      return {
+        winnerIds: status.winnerIds,
+        globalState,
+      };
+    }),
+
   /**
    * Submit new moves for this round of a game session.
    * Overwrites any previously submitted moves this round.
@@ -491,25 +577,11 @@ export const gameSessionsRouter = router({
       // userProcedure should already be doing this.
       assert(!!session);
 
-      // determine round number by bucketing to
-      // today's date - each round is 1 day, starting
-      // at midnight in the game's timezone.
-      const gameSession = await db
-        .selectFrom('GameSession')
-        .select([
-          'timezone',
-          'GameSession.id',
-          'GameSession.initialState',
-          'GameSession.gameId',
-        ])
-        .innerJoin(
-          'GameSessionMembership',
-          'GameSession.id',
-          'GameSessionMembership.gameSessionId',
-        )
-        .where('GameSession.id', '=', opts.input.gameSessionId)
-        .where('GameSessionMembership.userId', '=', session.userId)
-        .executeTakeFirst();
+      // validate the moves
+      const gameSession = await getAuthorizedGameSession(
+        opts.input.gameSessionId,
+        session.userId,
+      );
 
       if (!gameSession) {
         throw new TRPCError({
@@ -518,21 +590,24 @@ export const gameSessionsRouter = router({
         });
       }
 
-      // calculate 00:00 and 23:59 in the game's timezone
-      // for today
-      const now = new Date();
-      const { roundStart, roundEnd } = getRoundTimerange(
-        now,
-        gameSession.timezone,
-      );
+      const game = await getCachedGame(gameSession, new Date());
 
-      // validate the moves
+      if (!game) {
+        throw new TRPCError({
+          message: 'No game session found',
+          code: 'NOT_FOUND',
+        });
+      }
+
       const {
         globalState,
         gameDefinition,
         movesThisRound,
         movesPreviousRounds,
-      } = await getGameState(gameSession);
+        roundStart,
+        roundEnd,
+      } = game;
+
       const playerStateInitial = gameDefinition.getPlayerState(
         globalState,
         session.userId,
@@ -542,6 +617,7 @@ export const gameSessionsRouter = router({
         session.userId,
         movesThisRound,
       );
+
       if (
         !gameDefinition.isValidTurn(
           playerState,
@@ -596,50 +672,46 @@ export const gameSessionsRouter = router({
     }),
 });
 
-async function getGameState(gameSession: {
-  id: string;
-  timezone: string;
-  initialState: any;
-  gameId: string;
-}) {
-  const moves = await db
-    .selectFrom('GameMove')
-    .where('gameSessionId', '=', gameSession.id)
-    .select(['id', 'data', 'userId', 'createdAt'])
-    .orderBy('createdAt', 'asc')
-    .execute();
+async function getUnauthorizedGameSession(gameSessionId: string) {
+  const gameSession = await db
+    .selectFrom('GameSession')
+    .where('GameSession.id', '=', gameSessionId)
+    .select([
+      'GameSession.id',
+      'GameSession.timezone',
+      'GameSession.initialState',
+      'GameSession.gameId',
+    ])
+    .executeTakeFirst();
 
-  // separate out moves from the current round
-  const { roundStart, roundEnd } = getRoundTimerange(
-    new Date(),
-    gameSession.timezone,
-  );
-
-  const movesPreviousRounds = moves.filter(
-    (move) => new Date(move.createdAt) < roundStart,
-  );
-  const movesThisRound = moves.filter(
-    (move) => new Date(move.createdAt) >= roundStart,
-  );
-
-  const gameDefinition = gameDefinitions[gameSession.gameId];
-
-  if (!gameDefinition) {
-    throw new TRPCError({
-      message: 'No game rules found',
-      code: 'NOT_FOUND',
-    });
+  if (!gameSession) {
+    return null;
   }
 
-  const globalState = gameDefinition.getState(gameSession.initialState, moves);
+  return gameSession;
+}
 
-  return {
-    globalState,
-    moves,
-    movesPreviousRounds,
-    movesThisRound,
-    gameDefinition,
-    roundStart,
-    roundEnd,
-  };
+async function getAuthorizedGameSession(gameSessionId: string, userId: string) {
+  const gameSession = await db
+    .selectFrom('GameSession')
+    .innerJoin(
+      'GameSessionMembership',
+      'GameSession.id',
+      'GameSessionMembership.gameSessionId',
+    )
+    .where('GameSession.id', '=', gameSessionId)
+    .where('GameSessionMembership.userId', '=', userId)
+    .select([
+      'GameSession.id',
+      'GameSession.timezone',
+      'GameSession.initialState',
+      'GameSession.gameId',
+    ])
+    .executeTakeFirst();
+
+  if (!gameSession) {
+    return null;
+  }
+
+  return gameSession;
 }

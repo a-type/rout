@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "setup": "turbo run setup"
+    "setup": "turbo run setup",
+    "gen": "node ./tools/generator/generate.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@clack/prompts": "0.7.0",
+    "cp-tpl": "1.0.9",
     "turbo": "^1.11.2"
   }
 }

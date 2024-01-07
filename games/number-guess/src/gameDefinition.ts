@@ -75,6 +75,7 @@ export const gameDefinition: GameDefinition<
   },
 
   Client: lazy(() => import('./Client.js')),
+  GameRecap: lazy(() => import('./GameRecap.js')),
 };
 
 const applyMoveToGlobalState = (

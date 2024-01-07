@@ -36,6 +36,7 @@ export type GameDefinition<
   getPlayerState: (globalState: GlobalState, playerId: string) => PlayerState;
   getState: (initialState: GlobalState, moves: Move<MoveData>[]) => GlobalState;
   getPublicMove: (move: Move<MoveData>) => Move<PublicMoveData>;
+
   /**
    * globalState is the computed current state. moves are provided
    * for reference only, you do not need to recompute the current
@@ -43,12 +44,16 @@ export type GameDefinition<
    */
   getStatus: (globalState: GlobalState, moves: Move<MoveData>[]) => GameStatus;
   Client: ComponentType<{ session: ClientSession }>;
+  GameRecap: ComponentType<{
+    globalState: GlobalState;
+    session: ClientSession;
+  }>;
 };
 
 export type ClientSession = {
   id: string;
   gameId: string;
-  status: 'pending' | 'active' | 'completed';
+  startedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   timezone: string;
@@ -60,4 +65,5 @@ export type ClientSession = {
     imageUrl: string | null;
   }[];
   localPlayer: { id: string };
+  status: GameStatus;
 };

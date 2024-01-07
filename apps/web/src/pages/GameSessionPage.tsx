@@ -15,9 +15,9 @@ export function GameSessionPage({}: GameSessionPageProps) {
   if (!session) {
     return <Spinner />;
   }
-  if (session.status === 'pending') {
+  if (!session.startedAt) {
     return <GameSetup gameSession={session} />;
-  } else if (session.status === 'completed') {
+  } else if (session.status.status === 'completed') {
     return <GameRecap gameSession={session} />;
   }
   return <GameSession session={session} />;
