@@ -58,8 +58,9 @@ export async function up(db: Kysely<any>) {
     .addColumn('updatedAt', 'text', (col) => col.notNull())
     .addColumn('timezone', 'text', (col) => col.notNull())
     .addColumn('gameId', 'text', (col) => col.notNull())
-    .addColumn('initialState', 'text', (col) => col.notNull())
+    .addColumn('initialState', 'text')
     .addColumn('startedAt', 'text')
+    .addColumn('randomSeed', 'text', (col) => col.notNull().defaultTo('seed'))
     .execute();
 
   await db.schema
@@ -108,9 +109,9 @@ export async function up(db: Kysely<any>) {
 
   // each user can only be in a game session once
   await db.schema
-    .createIndex('GameSessionMembership_userId_index')
+    .createIndex('GameSessionMembership_gameSessionId_userId_index')
     .on('GameSessionMembership')
-    .column('userId')
+    .columns(['userId', 'gameSessionId'])
     .unique()
     .execute();
 

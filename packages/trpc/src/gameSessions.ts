@@ -1,7 +1,12 @@
 import { assert } from '@a-type/utils';
 import { dateTime, db, id, jsonArrayFrom, sql } from '@long-game/db';
 import { getCachedGame } from '@long-game/game-cache';
-import { ClientSession, GameStatus, Move } from '@long-game/game-definition';
+import {
+  ClientSession,
+  GameStatus,
+  Move,
+  GameRandom,
+} from '@long-game/game-definition';
 import { gameDefinitions } from '@long-game/games';
 import { TRPCError } from '@trpc/server';
 import * as zod from 'zod';
@@ -36,6 +41,7 @@ export const gameSessionsRouter = router({
           'GameSession.updatedAt',
           'GameSession.timezone',
           'GameSession.initialState',
+          'GameSession.randomSeed',
         ])
         .select((eb) => [
           jsonArrayFrom(
@@ -84,12 +90,22 @@ export const gameSessionsRouter = router({
         });
       }
 
+      if (!gameSession.startedAt) {
+        return {
+          ...gameSession,
+          status: { status: 'pending' },
+          localPlayer: {
+            id: session.userId,
+          },
+        };
+      }
+
       const game = await getCachedGame(gameSession, new Date());
       const status =
-        game?.gameDefinition.getStatus(
-          game.globalState,
-          game.movesPreviousRounds,
-        ) ??
+        game?.gameDefinition.getStatus({
+          globalState: game.globalState,
+          moves: game.movesPreviousRounds,
+        }) ??
         ({
           status: 'active',
         } as GameStatus);
@@ -141,7 +157,8 @@ export const gameSessionsRouter = router({
           gameId: opts.input.gameId,
           // TODO: configurable + automatic detection?
           timezone: 'America/New_York',
-          initialState: null,
+          initialState: {},
+          randomSeed: id(),
         })
         .returning(['id', 'gameId', 'createdAt'])
         .executeTakeFirstOrThrow();
@@ -180,7 +197,7 @@ export const gameSessionsRouter = router({
         )
         .where('GameSession.id', '=', opts.input.id)
         .where('GameSessionMembership.userId', '=', session.userId)
-        .select(['gameId'])
+        .select(['gameId', 'startedAt'])
         .executeTakeFirst();
 
       if (!gameSession) {
@@ -190,7 +207,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      if (opts.input.gameId && opts.input.gameId !== gameSession.gameId) {
+      if (opts.input.gameId && !!gameSession.startedAt) {
         throw new TRPCError({
           message: 'Cannot change game type',
           code: 'BAD_REQUEST',
@@ -222,17 +239,33 @@ export const gameSessionsRouter = router({
 
       const gameSession = await db
         .selectFrom('GameSession')
-        .innerJoin(
-          'GameSessionMembership',
-          'GameSession.id',
-          'GameSessionMembership.gameSessionId',
-        )
         .where('GameSession.id', '=', opts.input.id)
-        .where('GameSessionMembership.userId', '=', session.userId)
-        .select(['gameId', 'startedAt'])
+        .select(['gameId', 'startedAt', 'randomSeed'])
+        .select((eb) => [
+          jsonArrayFrom(
+            eb
+              .selectFrom('GameSessionMembership')
+              .innerJoin('User', 'User.id', 'GameSessionMembership.userId')
+              .select([
+                'GameSessionMembership.id as membershipId',
+                'GameSessionMembership.userId as id',
+                'GameSessionMembership.status',
+                'User.imageUrl',
+              ])
+              .select(
+                sql<string>`COALESCE(User.friendlyName, User.fullName)`.as(
+                  'name',
+                ),
+              )
+              .whereRef('gameSessionId', '=', 'GameSession.id'),
+          ).as('members'),
+        ])
         .executeTakeFirst();
 
-      if (!gameSession) {
+      if (
+        !gameSession ||
+        !gameSession.members.some((m) => m.id === session.userId)
+      ) {
         throw new TRPCError({
           message: 'No game session found',
           code: 'NOT_FOUND',
@@ -258,7 +291,12 @@ export const gameSessionsRouter = router({
         .updateTable('GameSession')
         .set({
           startedAt: dateTime(),
-          initialState: gameDefinition.getInitialGlobalState(),
+          initialState: gameDefinition.getInitialGlobalState({
+            playerIds: gameSession.members.map((m) => m.id),
+            // altering the seed here so that the first moves don't receive
+            // the same random values as the initial state.
+            random: new GameRandom(gameSession.randomSeed + 'INITIAL'),
+          }),
         })
         .where('id', '=', opts.input.id)
         .execute();
@@ -478,19 +516,21 @@ export const gameSessionsRouter = router({
         const myMovesThisRound = movesThisRound.filter(
           (move) => move.userId === session.userId,
         );
-        const playerStateInitial = gameDefinition.getPlayerState(
+        const playerStateInitial = gameDefinition.getPlayerState({
           globalState,
-          session.userId,
+          playerId: session.userId,
+        });
+        const playerState = gameDefinition.getProspectivePlayerState({
+          playerState: playerStateInitial,
+          prospectiveMoves: movesThisRound,
+        });
+        const historicalMoves = movesPreviousRounds.map((m) =>
+          gameDefinition.getPublicMove({ move: m }),
         );
-        const playerState = gameDefinition.getProspectivePlayerState(
-          playerStateInitial,
-          session.userId,
-          movesThisRound,
-        );
-        const historicalMoves = movesPreviousRounds.map(
-          gameDefinition.getPublicMove,
-        );
-        const status = gameDefinition.getStatus(globalState, moves);
+        const status = gameDefinition.getStatus({
+          globalState,
+          moves,
+        });
 
         return {
           state: playerState,
@@ -538,7 +578,10 @@ export const gameSessionsRouter = router({
       // using movesPreviousRounds here - otherwise this API could be used
       // to see the current state of the game with current round moves before
       // the round is settled!
-      const status = gameDefinition.getStatus(globalState, movesPreviousRounds);
+      const status = gameDefinition.getStatus({
+        globalState,
+        moves: movesPreviousRounds,
+      });
 
       if (status.status !== 'completed') {
         throw new TRPCError({
@@ -608,34 +651,35 @@ export const gameSessionsRouter = router({
         roundEnd,
       } = game;
 
-      const playerStateInitial = gameDefinition.getPlayerState(
+      const playerStateInitial = gameDefinition.getPlayerState({
         globalState,
-        session.userId,
-      );
-      const playerState = gameDefinition.getProspectivePlayerState(
-        playerStateInitial,
-        session.userId,
-        movesThisRound,
-      );
+        playerId: session.userId,
+      });
+      const playerState = gameDefinition.getProspectivePlayerState({
+        playerState: playerStateInitial,
+        prospectiveMoves: movesThisRound,
+      });
 
-      if (
-        !gameDefinition.isValidTurn(
-          playerState,
-          opts.input.moves.map((m) => ({
-            ...m,
-            data: m.data || null,
-            userId: session.userId,
-          })),
-        )
-      ) {
+      const validationMessage = gameDefinition.validateTurn({
+        playerState,
+        moves: opts.input.moves.map((m) => ({
+          ...m,
+          data: m.data || null,
+          userId: session.userId,
+        })),
+      });
+      if (validationMessage) {
         throw new TRPCError({
-          message: 'Invalid moves',
+          message: `Invalid moves: ${validationMessage}`,
           code: 'BAD_REQUEST',
         });
       }
 
       // validate the game status
-      const status = gameDefinition.getStatus(globalState, movesPreviousRounds);
+      const status = gameDefinition.getStatus({
+        globalState,
+        moves: movesPreviousRounds,
+      });
       if (status.status !== 'active') {
         throw new TRPCError({
           message: 'Game is not active',
@@ -672,25 +716,6 @@ export const gameSessionsRouter = router({
     }),
 });
 
-async function getUnauthorizedGameSession(gameSessionId: string) {
-  const gameSession = await db
-    .selectFrom('GameSession')
-    .where('GameSession.id', '=', gameSessionId)
-    .select([
-      'GameSession.id',
-      'GameSession.timezone',
-      'GameSession.initialState',
-      'GameSession.gameId',
-    ])
-    .executeTakeFirst();
-
-  if (!gameSession) {
-    return null;
-  }
-
-  return gameSession;
-}
-
 async function getAuthorizedGameSession(gameSessionId: string, userId: string) {
   const gameSession = await db
     .selectFrom('GameSession')
@@ -706,6 +731,7 @@ async function getAuthorizedGameSession(gameSessionId: string, userId: string) {
       'GameSession.timezone',
       'GameSession.initialState',
       'GameSession.gameId',
+      'GameSession.randomSeed',
     ])
     .executeTakeFirst();
 

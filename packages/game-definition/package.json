@@ -2,6 +2,7 @@
   "name": "@long-game/game-definition",
   "version": "0.0.1",
   "private": true,
+  "main": "dist/esm/index.js",
   "module": "dist/esm/index.js",
   "typings": "dist/typings/index.d.ts",
   "type": "module",
@@ -10,10 +11,12 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@long-game/common": "workspace:*"
+    "@long-game/common": "workspace:*",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
-    "typescript": "^5.0.2",
-    "@types/react": "^18.2.46"
+    "@types/react": "^18.2.46",
+    "@types/seedrandom": "^3.0.8",
+    "typescript": "^5.0.2"
   }
 }

@@ -46,11 +46,10 @@ class GameClient<
   @computed
   get prospectiveState(): PlayerState | null {
     if (!this.state) return null;
-    return this.gameDefinition.getProspectivePlayerState(
-      this.state,
-      this.session.localPlayer.id,
-      this.queuedMoves,
-    );
+    return this.gameDefinition.getProspectivePlayerState({
+      playerState: this.state,
+      prospectiveMoves: this.queuedMoves,
+    });
   }
 
   @computed
@@ -132,13 +131,12 @@ class GameClient<
     }
 
     // validate the move based on what we know
-    if (
-      !this.gameDefinition.isValidTurn(this.state, [
-        ...this.queuedMoves,
-        newMove,
-      ])
-    ) {
-      this.error = 'Invalid move';
+    const validationMessage = this.gameDefinition.validateTurn({
+      playerState: this.state,
+      moves: [...this.queuedMoves, newMove],
+    });
+    if (validationMessage) {
+      this.error = validationMessage;
       return;
     }
 
@@ -176,8 +174,12 @@ class GameClient<
       return;
     }
 
-    if (!this.gameDefinition.isValidTurn(this.state, proposedMoves)) {
-      this.error = 'Invalid move';
+    const validationMessage = this.gameDefinition.validateTurn({
+      playerState: this.state,
+      moves: proposedMoves,
+    });
+    if (validationMessage) {
+      this.error = validationMessage;
       return;
     }
 

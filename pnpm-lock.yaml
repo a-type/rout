@@ -113,6 +113,34 @@ importers:
         specifier: ^0.17.4
         version: 0.17.4(vite@5.0.10)(workbox-build@7.0.0)(workbox-window@7.0.0)
 
+  games/neuron:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@long-game/game-client':
+        specifier: workspace:*
+        version: link:../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../packages/game-definition
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.28
+        version: 18.2.46
+      '@types/react-dom':
+        specifier: ^18.2.13
+        version: 18.2.18
+      typescript:
+        specifier: ^5.0.2
+        version: 5.3.3
+
   games/number-guess:
     dependencies:
       '@long-game/common':
@@ -282,10 +310,16 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
+      seedrandom:
+        specifier: ^3.0.5
+        version: 3.0.5
     devDependencies:
       '@types/react':
         specifier: ^18.2.46
         version: 18.2.46
+      '@types/seedrandom':
+        specifier: ^3.0.8
+        version: 3.0.8
       typescript:
         specifier: ^5.0.2
         version: 5.0.2
@@ -295,6 +329,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-neuron':
+        specifier: workspace:*
+        version: link:../../games/neuron
       '@long-game/game-number-guess':
         specifier: workspace:*
         version: link:../../games/number-guess
@@ -4103,6 +4140,10 @@ packages:
   /@types/scheduler@0.16.4:
     resolution: {integrity: sha512-2L9ifAGl7wmXwP4v3pN4p2FLhD0O1qsJpvKmNin5VA8+UvNVb447UDaAEV6UdrkA+m/Xs58U1RFps44x6TFsVQ==}
 
+  /@types/seedrandom@3.0.8:
+    resolution: {integrity: sha512-TY1eezMU2zH2ozQoAFAQFOPpvP15g+ZgSfTZt31AUUH/Rxtnz3H+A/Sv1Snw2/amp//omibc+AEkTaA8KUeOLQ==}
+    dev: true
+
   /@types/send@0.17.2:
     resolution: {integrity: sha512-aAG6yRf6r0wQ29bkS+x97BIs64ZLxeE/ARwyS6wrldMm3C1MdKwCcnnEwMC1slI8wuxJOpiUH9MioC0A0i+GJw==}
     dependencies:
@@ -6949,6 +6990,10 @@ packages:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
     dependencies:
       loose-envify: 1.4.0
+    dev: false
+
+  /seedrandom@3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
     dev: false
 
   /semver@6.3.1:

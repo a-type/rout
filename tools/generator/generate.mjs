@@ -92,6 +92,11 @@ await cpTpl(
   copyConfig,
 );
 
+if (template === 'games') {
+  // TODO: add to packages/games as a dependency and
+  // to the game map.
+}
+
 copySpinner.stop('Copying complete');
 
 const installSpinner = spinner();

@@ -70,6 +70,7 @@ export interface GameSessionTable {
   timezone: string;
   initialState: any;
   startedAt: ColumnType<string, string | undefined, string | undefined>;
+  randomSeed: ColumnType<string, string | undefined, string | undefined>;
   // does not relate to anything in the db; game information is
   // defined in code.
   gameId: string;

@@ -1,11 +1,11 @@
 import { getRoundTimerange } from '@long-game/common';
 import { GameSession, db } from '@long-game/db';
-import { GameDefinition, Move } from '@long-game/game-definition';
+import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { gameDefinitions } from '@long-game/games';
 
 export type RequiredGameSession = Pick<
   GameSession,
-  'id' | 'gameId' | 'initialState' | 'timezone'
+  'id' | 'gameId' | 'initialState' | 'timezone' | 'randomSeed'
 >;
 
 async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
@@ -28,7 +28,11 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
     throw new Error('No game rules found');
   }
 
-  const globalState = gameDefinition.getState(gameSession.initialState, moves);
+  const globalState = gameDefinition.getState({
+    initialState: gameSession.initialState,
+    moves,
+    random: new GameRandom(gameSession.randomSeed),
+  });
 
   return {
     globalState,

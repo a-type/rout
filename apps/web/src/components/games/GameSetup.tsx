@@ -4,6 +4,7 @@ import { Divider } from '@a-type/ui/components/divider';
 import { H1, H2 } from '@a-type/ui/components/typography';
 import { GameSessionData, globalHooks } from '@long-game/game-client';
 import { useCallback } from 'react';
+import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
   gameSession: GameSessionData;
@@ -19,6 +20,10 @@ export function GameSetup({ gameSession }: GameSetupProps) {
       onSuccess: refetch,
     },
   );
+  const { mutateAsync: updateSession } =
+    globalHooks.gameSessions.updateGameSession.useMutation({
+      onSuccess: refetch,
+    });
 
   const needToAcceptMyInvite = gameSession.members.some(
     (member) =>
@@ -31,6 +36,17 @@ export function GameSetup({ gameSession }: GameSetupProps) {
   return (
     <div>
       <H1>Game Setup</H1>
+      <label htmlFor="game-picker">Game</label>
+      <GamePicker
+        id="game-picker"
+        value={gameSession.gameId}
+        onChange={async (gameId) => {
+          await updateSession({
+            id: gameSession.id,
+            gameId,
+          });
+        }}
+      />
       <Divider />
       <GameSetupInviteFriends
         sessionId={gameSession.id}

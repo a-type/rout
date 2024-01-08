@@ -24,8 +24,8 @@ export const gameDefinition: GameDefinition<
 
   // run on both client and server
 
-  isValidTurn: (playerState, moves) => {
-    // TODO:
+  validateTurn: (playerState, moves) => {
+    // TODO: return error string if the moves are invalid
   },
 
   Client: lazy(() => import('./Client.js')),
@@ -40,12 +40,16 @@ export const gameDefinition: GameDefinition<
 
   // run on server
 
-  getPlayerState: (globalState) => {
+  getInitialGlobalState: (playerIds: string[]) => {
+    // TODO: return the initial global state. possibly randomizing initial conditions.
+  },
+
+  getPlayerState: (globalState, playerId) => {
     // TODO: compute the player state from the global state
   },
 
   getState: (initialState, moves) => {
-    return moves.reduce(gameDefinition.applyMoveToGlobalState, {
+    return moves.reduce(applyMoveToGlobalState, {
       ...initialState,
     });
   },
@@ -59,11 +63,10 @@ export const gameDefinition: GameDefinition<
   getStatus: (globalState, moves) => {
     // TODO: when is the game over? who won?
   },
-
-  // helper methods
-
-  applyMoveToGlobalState: (
-    globalState: GlobalState,
-    move: Move<MoveData>,
-  ) => {},
 };
+
+// helper methods
+const applyMoveToGlobalState = (
+  globalState: GlobalState,
+  move: Move<MoveData>,
+) => {};

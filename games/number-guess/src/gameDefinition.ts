@@ -19,26 +19,24 @@ export const gameDefinition: GameDefinition<
 > = {
   id: 'number-guess',
   title: 'Guess A Number',
-  getInitialGlobalState: () => ({
-    secretNumber: Math.floor(Math.random() * 100),
+  getInitialGlobalState: ({ random }) => ({
+    secretNumber: random.int(0, 100),
     playerGuesses: {},
   }),
 
-  isValidTurn: (playerState, moves) => {
+  validateTurn: ({ moves }) => {
     if (moves.length !== 1) {
-      return false;
+      return 'You must make exactly one guess.';
     }
 
     const move = moves[0];
 
     if (move.data.guess < 0 || move.data.guess > 100) {
-      return false;
+      return 'Your guess must be between 0 and 100';
     }
-
-    return true;
   },
 
-  getProspectivePlayerState: (playerState) => {
+  getProspectivePlayerState: ({ playerState }) => {
     return playerState;
   },
 
@@ -47,13 +45,13 @@ export const gameDefinition: GameDefinition<
     return {};
   },
 
-  getState: (initialState, moves) => {
-    return moves.reduce(applyMoveToGlobalState, { ...initialState });
+  getState: ({ initialState }) => {
+    return initialState;
   },
 
-  getPublicMove: (move) => move,
+  getPublicMove: ({ move }) => move,
 
-  getStatus: (globalState, moves) => {
+  getStatus: ({ globalState, moves }) => {
     const movesThatGuessedRight = moves.filter(
       (move) => move.data.guess === globalState.secretNumber,
     );
@@ -76,11 +74,4 @@ export const gameDefinition: GameDefinition<
 
   Client: lazy(() => import('./Client.js')),
   GameRecap: lazy(() => import('./GameRecap.js')),
-};
-
-const applyMoveToGlobalState = (
-  globalState: GlobalState,
-  move: Move<MoveData>,
-) => {
-  return globalState;
 };
