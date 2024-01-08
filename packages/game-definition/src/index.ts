@@ -46,6 +46,7 @@ export type GameDefinition<
   getProspectivePlayerState: (data: {
     playerState: PlayerState;
     prospectiveMoves: Move<MoveData>[];
+    playerId: string;
   }) => PlayerState;
 
   // SERVER ONLY

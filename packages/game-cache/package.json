@@ -2,12 +2,10 @@
   "name": "@long-game/game-cache",
   "version": "0.0.1",
   "private": true,
-  "module": "dist/esm/index.js",
-  "main": "dist/esm/index.js",
-  "typings": "dist/typings/index.d.ts",
+  "main": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "tsc -w",
+    "//dev": "tsc -w",
     "build": "tsc"
   },
   "dependencies": {

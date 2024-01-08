@@ -523,6 +523,7 @@ export const gameSessionsRouter = router({
         const playerState = gameDefinition.getProspectivePlayerState({
           playerState: playerStateInitial,
           prospectiveMoves: movesThisRound,
+          playerId: session.userId,
         });
         const historicalMoves = movesPreviousRounds.map((m) =>
           gameDefinition.getPublicMove({ move: m }),
@@ -658,6 +659,7 @@ export const gameSessionsRouter = router({
       const playerState = gameDefinition.getProspectivePlayerState({
         playerState: playerStateInitial,
         prospectiveMoves: movesThisRound,
+        playerId: session.userId,
       });
 
       const validationMessage = gameDefinition.validateTurn({

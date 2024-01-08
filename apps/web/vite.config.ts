@@ -88,7 +88,7 @@ export default defineConfig({
     // }),
   ],
   optimizeDeps: {
-    exclude: ['@a-type/ui'],
+    exclude: ['@a-type/ui', '@long-game/game-client'],
     include: [
       'react/jsx-runtime',
       'react',

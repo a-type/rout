@@ -72,10 +72,17 @@ export const gameDefinition: GameDefinition<
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveMoves: moves }) => {
-    const playerId = moves[0].userId;
+  getProspectivePlayerState: ({
+    playerState,
+    prospectiveMoves: moves,
+    playerId,
+  }) => {
     // add tile to the board and remove from hand
     const move = moves[0];
+    if (!move) {
+      return playerState;
+    }
+
     const grid = addTile(
       playerState.grid,
       move.data.coordinate,

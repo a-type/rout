@@ -6,7 +6,7 @@ import {
 } from '@long-game/game-definition';
 import { AppRouter } from '@long-game/trpc';
 import { TRPCClientError, createTRPCProxyClient } from '@trpc/client';
-import { observable, computed, action } from 'mobx';
+import { observable, computed, action, makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SuperJSON from 'superjson';
 import { fetchLink, loginLink } from './trpc.js';
@@ -28,10 +28,10 @@ class GameClient<
   MoveData extends BaseMoveData,
   PublicMoveData extends BaseMoveData = MoveData,
 > {
-  @observable accessor state: PlayerState | null = null;
-  @observable accessor queuedMoves: Move<MoveData>[] = [];
-  @observable accessor historyMoves: Move<PublicMoveData>[] = [];
-  @observable accessor error: string | null = null;
+  state: PlayerState | null = null;
+  queuedMoves: Move<MoveData>[] = [];
+  historyMoves: Move<PublicMoveData>[] = [];
+  error: string | null = null;
 
   readonly session;
   readonly gameDefinition: GameDefinition<
@@ -43,21 +43,19 @@ class GameClient<
 
   private trpc;
 
-  @computed
   get prospectiveState(): PlayerState | null {
     if (!this.state) return null;
     return this.gameDefinition.getProspectivePlayerState({
       playerState: this.state,
       prospectiveMoves: this.queuedMoves,
+      playerId: this.session.localPlayer.id,
     });
   }
 
-  @computed
   get loading(): boolean {
     return this.state === null;
   }
 
-  @computed
   get historyMovesWithUsers(): (Move<PublicMoveData> & {
     user: { id: string; name: string; imageUrl: string | null };
   })[] {
@@ -91,6 +89,7 @@ class GameClient<
       links: [loginLink({ loginUrl }), fetchLink(host)],
     });
     this.refreshState();
+    makeAutoObservable(this);
   }
 
   private refreshState = () => {
@@ -117,7 +116,6 @@ class GameClient<
       );
   };
 
-  @action
   addMove(move: MoveData) {
     const newMove = {
       id: cuid2.createId(),
@@ -144,7 +142,6 @@ class GameClient<
     this.error = null;
   }
 
-  @action
   setMove(
     index: number,
     move: MoveData | ((prev: MoveData | undefined) => MoveData),
