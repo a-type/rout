@@ -2,6 +2,17 @@
 
 An app for playing games with friends over a couple weeks.
 
+## Get started
+
+You need a `.env` with google client credentials, ask @a-type.
+
+```
+pnpm i
+pnpm build
+pnpm run setup
+pnpm dev
+```
+
 ## Structure
 
 - `apps/`: The main things. The ones that get run as processes somewhere.
