@@ -93,8 +93,9 @@ await cpTpl(
 );
 
 if (template === 'games') {
-  // TODO: add to packages/games as a dependency and
+  // add to packages/games as a dependency and
   // to the game map.
+  await addGameToGamesPackage(name);
 }
 
 copySpinner.stop('Copying complete');
@@ -112,3 +113,37 @@ await new Promise((resolve) => {
 installSpinner.stop('Dependencies installed');
 
 outro('Done!');
+
+
+// helpers
+
+async function addGameToGamesPackage(gameName: string) {
+  const gamesPackage = path.resolve(__dirname, '../../packages/games');
+  const gamesPackageJson = path.resolve(gamesPackage, 'package.json');
+
+  const gamesPackageJsonContent = await fs.readFile(gamesPackageJson, 'utf-8');
+  const gamesPackageJsonParsed = JSON.parse(gamesPackageJsonContent);
+
+  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`]: 'workspace:*';
+
+  await fs.writeFile(
+    gamesPackageJson,
+    JSON.stringify(gamesPackageJsonParsed, null, 2),
+  );
+
+  // find the `// GENERATED - DO NOT REMOVE THIS LINE` line
+  // in games/src/index.ts and add the new game above it.
+  const gamesIndex = path.resolve(gamesPackage, 'src/index.ts');
+  const gamesIndexContent = await fs.readFile(gamesIndex, 'utf-8');
+  const gamesIndexLines = gamesIndexContent.split('\n');
+
+  const generatedLine = gamesIndexLines.findIndex((line) =>
+    line.includes('// GENERATED - DO NOT REMOVE THIS LINE'),
+  );
+  gamesIndexLines.splice(generatedLine, 0, `  [${gameName}.id]: gameName,`);
+
+  // add the import to the top
+  gameIndexLines.unshift(`import ${gameName} from '@long-game/game-${gameName}';`);
+
+  await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));
+}
