@@ -1,11 +1,11 @@
-import { getRoundTimerange } from '@long-game/common';
+import { GameRound, getRoundTimerange, movesToRounds } from '@long-game/common';
 import { GameSession, db } from '@long-game/db';
 import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
-import { gameDefinitions } from '@long-game/games';
+import games from '@long-game/games';
 
 export type RequiredGameSession = Pick<
   GameSession,
-  'id' | 'gameId' | 'initialState' | 'timezone' | 'randomSeed'
+  'id' | 'gameId' | 'initialState' | 'timezone' | 'randomSeed' | 'gameVersion'
 >;
 
 async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
@@ -16,30 +16,45 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
     .orderBy('createdAt', 'asc')
     .execute();
 
+  const rounds = movesToRounds(moves, gameSession.timezone);
+
   // separate out moves from the current round
-  const { roundStart, roundEnd } = getRoundTimerange(
-    new Date(fromDay),
-    gameSession.timezone,
+  const { roundStart: currentRoundStart, roundEnd: currentRoundEnd } =
+    getRoundTimerange(new Date(fromDay), gameSession.timezone);
+
+  const game = games[gameSession.gameId];
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const gameDefinition = game.versions.find(
+    (g) => g.version === gameSession.gameVersion,
   );
 
-  const gameDefinition = gameDefinitions[gameSession.gameId];
-
   if (!gameDefinition) {
-    throw new Error('No game rules found');
+    throw new Error(
+      `No game rules found for version ${gameSession.gameVersion} of game ${gameSession.gameId}`,
+    );
   }
+
+  // only apply previous round moves! current round hasn't
+  // yet been settled
+  const previousRounds = rounds.filter(
+    (round) => new Date(round.roundStart) < currentRoundStart,
+  );
 
   const globalState = gameDefinition.getState({
     initialState: gameSession.initialState,
-    moves,
+    rounds: previousRounds,
     random: new GameRandom(gameSession.randomSeed),
   });
 
   return {
     globalState,
-    moves,
+    rounds,
     gameDefinition,
-    roundStart,
-    roundEnd,
+    roundStart: currentRoundStart,
+    roundEnd: currentRoundEnd,
   };
 }
 
@@ -54,9 +69,9 @@ export async function getCachedGame(
   fromDay: Date,
 ): Promise<null | {
   globalState: any;
-  moves: Move<any>[];
-  movesPreviousRounds: Move<any>[];
-  movesThisRound: Move<any>[];
+  rounds: GameRound<Move<any>>[];
+  previousRounds: GameRound<Move<any>>[];
+  currentRound: GameRound<Move<any>>;
   gameDefinition: GameDefinition;
   roundStart: Date;
   roundEnd: Date;
@@ -72,17 +87,26 @@ export async function getCachedGame(
 
   if (!cachedData) return null;
 
-  const movesPreviousRounds = cachedData.moves.filter(
-    (move) => new Date(move.createdAt) < cachedData.roundStart,
+  const previousRounds = cachedData.rounds.filter(
+    (round) => round.roundStart < cachedData.roundStart,
   );
-  const movesThisRound = cachedData.moves.filter(
-    (move) => new Date(move.createdAt) >= cachedData.roundStart,
+  const currentRound = cachedData.rounds.filter(
+    (round) => round.roundStart >= cachedData.roundStart,
   );
+
+  if (currentRound.length > 1) {
+    throw new Error('Expected at most one current round');
+  }
 
   return {
     ...cachedData,
-    movesPreviousRounds,
-    movesThisRound,
+    previousRounds,
+    currentRound: currentRound[0] ?? {
+      moves: [],
+      roundNumber: previousRounds.length,
+      roundStart: cachedData.roundStart,
+      roundEnd: cachedData.roundEnd,
+    },
   };
 }
 
@@ -95,4 +119,9 @@ export function cleanCache(olderThan: Date) {
     (key) => key < cutoff,
   );
   keysToDelete.forEach((key) => gameCache.delete(key));
+}
+
+export function evictSession(gameSessionId: string, fromDay: Date) {
+  const cacheKey = computeCacheKey(gameSessionId, fromDay);
+  gameCache.delete(cacheKey);
 }

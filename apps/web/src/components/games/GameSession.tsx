@@ -1,26 +1,31 @@
 import { GameSessionData } from '@long-game/game-client';
-import { gameDefinitions } from '@long-game/games';
+import games from '@long-game/games';
 import { Suspense } from 'react';
+import { NoGameFound } from './NoGameFound.jsx';
 
 export interface GameSessionProps {
   session: GameSessionData;
 }
 
 export function GameSession({ session }: GameSessionProps) {
-  const game = gameDefinitions[session.gameId];
+  const game = games[session.gameId];
 
   if (!game) {
     return <NoGameFound />;
   }
 
-  const { Client } = game;
+  const gameDefinition = game.versions.find(
+    (g) => g.version === session.gameVersion,
+  );
+
+  if (!gameDefinition) {
+    return <NoGameFound />;
+  }
+
+  const { Client } = gameDefinition;
   return (
     <Suspense>
       <Client session={session} />
     </Suspense>
   );
-}
-
-function NoGameFound() {
-  return <div>No game found for this session. Try reloading.</div>;
 }

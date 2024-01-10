@@ -1,5 +1,6 @@
 import { ComponentType } from 'react';
 import { GameRandom } from './random.js';
+import { GameRound } from '@long-game/common';
 
 export { GameRandom } from './random.js';
 
@@ -30,9 +31,7 @@ export type GameDefinition<
   MoveData extends BaseMoveData = any,
   PublicMoveData extends BaseMoveData = MoveData,
 > = {
-  id: string;
-  title: string;
-
+  version: `v${number}.${number}`;
   // SHARED
 
   /**
@@ -67,10 +66,13 @@ export type GameDefinition<
   }) => PlayerState;
   getState: (data: {
     initialState: GlobalState;
-    moves: Move<MoveData>[];
+    rounds: GameRound<Move<MoveData>>[];
     random: GameRandom;
   }) => GlobalState;
-  getPublicMove: (data: { move: Move<MoveData> }) => Move<PublicMoveData>;
+  getPublicMove: (data: {
+    move: Move<MoveData>;
+    globalState: GlobalState;
+  }) => Move<PublicMoveData>;
   /**
    * globalState is the computed current state. moves are provided
    * for reference only, you do not need to recompute the current
@@ -78,7 +80,7 @@ export type GameDefinition<
    */
   getStatus: (data: {
     globalState: GlobalState;
-    moves: Move<MoveData>[];
+    rounds: GameRound<Move<MoveData>>[];
   }) => GameStatus;
 
   // CLIENT ONLY
@@ -93,6 +95,7 @@ export type GameDefinition<
 export type ClientSession = {
   id: string;
   gameId: string;
+  gameVersion: string;
   startedAt?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -107,3 +110,13 @@ export type ClientSession = {
   localPlayer: { id: string };
   status: GameStatus;
 };
+
+export interface GameModule {
+  versions: GameDefinition[];
+  id: string;
+  title: string;
+}
+
+export function getLatestVersion(game: GameModule): GameDefinition {
+  return game.versions[game.versions.length - 1];
+}

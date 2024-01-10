@@ -6,7 +6,7 @@ import {
 } from '@long-game/game-definition';
 import { AppRouter } from '@long-game/trpc';
 import { TRPCClientError, createTRPCProxyClient } from '@trpc/client';
-import { observable, computed, action, makeAutoObservable } from 'mobx';
+import { action, computed, makeAutoObservable, makeObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SuperJSON from 'superjson';
 import { fetchLink, loginLink } from './trpc.js';
@@ -14,6 +14,14 @@ import cuid2 from '@paralleldrive/cuid2';
 import { ReactNode, createContext, useContext, useState } from 'react';
 import { CreateTRPCReact, createTRPCReact } from '@trpc/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GameRound } from '@long-game/common';
+
+// makes TS/PNPM happy when using withGame - basically
+// it gets worried whenever you re-export a tool which
+// relies on something that's not also exported from the
+// library which provided the tool... idk, it's weird.
+// the error is "likely not portable" etc, if you see one.
+export { observer } from 'mobx-react-lite';
 
 if (
   !new (class {
@@ -23,14 +31,14 @@ if (
 )
   throw new Error('Transpiler is not configured correctly');
 
-class GameClient<
+export class GameClient<
   PlayerState,
   MoveData extends BaseMoveData,
   PublicMoveData extends BaseMoveData = MoveData,
 > {
   state: PlayerState | null = null;
   queuedMoves: Move<MoveData>[] = [];
-  historyMoves: Move<PublicMoveData>[] = [];
+  previousRounds: GameRound<Move<PublicMoveData>>[] = [];
   error: string | null = null;
 
   readonly session;
@@ -56,18 +64,23 @@ class GameClient<
     return this.state === null;
   }
 
-  get historyMovesWithUsers(): (Move<PublicMoveData> & {
-    user: { id: string; name: string; imageUrl: string | null };
-  })[] {
-    return this.historyMoves.map((move) => ({
-      ...move,
-      user: this.session.members.find(
-        (player) => player.id === move.userId,
-      ) ?? {
-        id: 'unknown',
-        name: 'Unknown',
-        imageUrl: null,
-      },
+  get previousRoundsWithUsers(): GameRound<
+    Move<PublicMoveData> & {
+      user: { id: string; name: string; imageUrl: string | null };
+    }
+  >[] {
+    return this.previousRounds.map((round) => ({
+      ...round,
+      moves: round.moves.map((move) => ({
+        ...move,
+        user: this.session.members.find(
+          (player) => player.id === move.userId,
+        ) ?? {
+          id: 'unknown',
+          name: 'Unknown',
+          imageUrl: null,
+        },
+      })),
     }));
   }
 
@@ -88,8 +101,12 @@ class GameClient<
       transformer: SuperJSON,
       links: [loginLink({ loginUrl }), fetchLink(host)],
     });
+    makeAutoObservable(this, {
+      // IDK why mobx doesn't include this in typings?
+      // @ts-expect-error
+      trpc: false,
+    });
     this.refreshState();
-    makeAutoObservable(this);
   }
 
   private refreshState = () => {
@@ -100,7 +117,9 @@ class GameClient<
       .then(
         action('refreshState', (data) => {
           this.state = data.state;
-          this.historyMoves = data.moves as Move<PublicMoveData>[];
+          this.previousRounds = data.rounds as GameRound<
+            Move<PublicMoveData>
+          >[];
           this.queuedMoves = data.queuedMoves as Move<MoveData>[];
           this.error = null;
         }),
@@ -183,6 +202,8 @@ class GameClient<
     this.queuedMoves[index] = newMove;
     this.error = null;
   }
+
+  // TODO: cache local moves in storage
 
   submitMoves = async () => {
     await this.trpc.gameSessions.submitMoves.mutate({

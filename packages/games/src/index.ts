@@ -1,8 +1,10 @@
-import { gameDefinition as numberGuess } from '@long-game/game-number-guess';
-import { gameDefinition as neuron } from '@long-game/game-neuron';
-import { GameDefinition } from '@long-game/game-definition';
+import numberGuess from '@long-game/game-number-guess';
+import neuron from '@long-game/game-neuron';
+import { GameModule } from '@long-game/game-definition';
 
-export const gameDefinitions: Record<string, GameDefinition> = {
+const games: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
   [neuron.id]: neuron,
 };
+
+export default games;

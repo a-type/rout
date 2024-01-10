@@ -17,8 +17,8 @@ export const gameDefinition: GameDefinition<
   MoveData,
   MoveData
 > = {
-  id: 'number-guess',
-  title: 'Guess A Number',
+  version: 'v1.0',
+
   getInitialGlobalState: ({ random }) => ({
     secretNumber: random.int(0, 100),
     playerGuesses: {},
@@ -51,10 +51,11 @@ export const gameDefinition: GameDefinition<
 
   getPublicMove: ({ move }) => move,
 
-  getStatus: ({ globalState, moves }) => {
-    const movesThatGuessedRight = moves.filter(
-      (move) => move.data.guess === globalState.secretNumber,
-    );
+  getStatus: ({ globalState, rounds }) => {
+    const movesThatGuessedRight = rounds
+      .map((r) => r.moves)
+      .flat()
+      .filter((move) => move.data.guess === globalState.secretNumber);
 
     if (movesThatGuessedRight.length > 0) {
       return {

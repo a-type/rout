@@ -1,8 +1,9 @@
 import { Divider } from '@a-type/ui/components/divider';
 import { H1 } from '@a-type/ui/components/typography';
 import { GameSessionData, globalHooks } from '@long-game/game-client';
-import { gameDefinitions } from '@long-game/games';
+import games from '@long-game/games';
 import { Suspense } from 'react';
+import { NoGameFound } from './NoGameFound.jsx';
 
 export interface GameRecapProps {
   gameSession: GameSessionData;
@@ -19,8 +20,20 @@ export function GameRecap({ gameSession }: GameRecapProps) {
 }
 
 function RecapDetails({ gameSession }: { gameSession: GameSessionData }) {
-  const game = gameDefinitions[gameSession.gameId];
-  const { GameRecap } = game;
+  const game = games[gameSession.gameId];
+
+  if (!game) {
+    return <NoGameFound />;
+  }
+
+  const gameDefinition = game.versions.find(
+    (g) => g.version === gameSession.gameVersion,
+  );
+
+  if (!gameDefinition) {
+    return <NoGameFound />;
+  }
+  const { GameRecap } = gameDefinition;
 
   const { data: postGameData } = globalHooks.gameSessions.postGame.useQuery({
     gameSessionId: gameSession.id,

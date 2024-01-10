@@ -1,5 +1,5 @@
 import { GameSessionMembershipData, globalHooks } from '@long-game/game-client';
-import { gameDefinitions } from '@long-game/games';
+import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
 
 export interface MembershipsListProps {}
@@ -9,7 +9,7 @@ export function MembershipsList({}: MembershipsListProps) {
     globalHooks.gameSessions.gameMemberships.useQuery();
 
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       <h1>Memberships</h1>
       {memberships?.map((m) => (
         <MembershipItem key={m.id} membership={m} />
@@ -23,7 +23,7 @@ function MembershipItem({
 }: {
   membership: GameSessionMembershipData;
 }) {
-  const game = gameDefinitions[membership.gameId];
+  const game = games[membership.gameId];
   return (
     <Link to={`/session/${membership.gameSessionId}`}>
       {game.title} | Invite: {membership.membershipStatus}

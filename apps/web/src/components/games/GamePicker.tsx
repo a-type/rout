@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@a-type/ui/components/select';
-import { gameDefinitions } from '@long-game/games';
+import games from '@long-game/games';
 
 export interface GamePickerProps {
   value: string;
@@ -23,9 +23,9 @@ export function GamePicker({ value, onChange, ...rest }: GamePickerProps) {
         <SelectIcon />
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(gameDefinitions).map(([gameId, gameDefinition]) => (
+        {Object.entries(games).map(([gameId, game]) => (
           <SelectItem key={gameId} value={gameId}>
-            {gameDefinition.title}
+            {game.title}
           </SelectItem>
         ))}
       </SelectContent>

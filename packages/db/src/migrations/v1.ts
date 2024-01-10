@@ -61,6 +61,7 @@ export async function up(db: Kysely<any>) {
     .addColumn('initialState', 'text')
     .addColumn('startedAt', 'text')
     .addColumn('randomSeed', 'text', (col) => col.notNull().defaultTo('seed'))
+    .addColumn('gameVersion', 'text')
     .execute();
 
   await db.schema

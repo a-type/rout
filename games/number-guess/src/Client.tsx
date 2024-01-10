@@ -53,13 +53,20 @@ const History = withGame(function History() {
     <div>
       <h1>History</h1>
       <ul>
-        {client.historyMovesWithUsers.map((move) => (
-          <li key={move.id}>
-            <div>
-              {move.data.guess} -{' '}
-              {move.createdAt ? new Date(move.createdAt).toDateString() : ''}
-            </div>
-            <div>By {move.user.name}</div>
+        {client.previousRoundsWithUsers.map((round) => (
+          <li key={round.roundStart.toISOString()}>
+            <div>Round {round.roundNumber}</div>
+            <ul>
+              {round.moves.map((move) => (
+                <li key={move.id}>
+                  {move.data.guess} -{' '}
+                  {move.createdAt
+                    ? new Date(move.createdAt).toDateString()
+                    : ''}{' '}
+                  by {move.user.name}
+                </li>
+              ))}
+            </ul>
           </li>
         ))}
       </ul>

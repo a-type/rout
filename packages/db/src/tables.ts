@@ -74,6 +74,7 @@ export interface GameSessionTable {
   // does not relate to anything in the db; game information is
   // defined in code.
   gameId: string;
+  gameVersion: string;
 }
 
 export type GameSession = Selectable<GameSessionTable>;

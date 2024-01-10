@@ -1,0 +1,1 @@
+./apps/web/uno.config.ts
