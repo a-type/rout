@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "typings": "dist/typings/index.d.ts",
   "bin": {
-    "long-game-migrate": "./dist/migrate.js"
+    "long-game-migrate": "./bin/migrate.js"
   },
   "publishConfig": {
     "access": "public",
