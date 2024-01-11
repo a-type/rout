@@ -60,6 +60,9 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, moves }) => {
+    if (moves.length === 0) {
+      return 'You must make a move.';
+    }
     if (moves.length > 1) {
       return 'You can only make one move per turn.';
     }

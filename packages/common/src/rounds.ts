@@ -51,7 +51,15 @@ export function movesToRounds<Move extends { createdAt: string }>(
   const days = Object.keys(movesByDay).sort();
   const rounds = days.map((day, roundNumber) => {
     const moves = movesByDay[day];
-    const { roundStart, roundEnd } = getRoundTimerange(new Date(day), timezone);
+    // ok this is a little convoluted. converting the date key (which
+    // is just a date, like 2024-01-10, no TZ) back to UTC (because it's implied
+    // to be in game session timezone) then back to the game session timezone
+    // within getRoundTimerange
+    // TODO: simplify this?
+    const { roundStart, roundEnd } = getRoundTimerange(
+      convertTimezone(day, 'UTC'),
+      timezone,
+    );
     return {
       moves,
       roundNumber,
