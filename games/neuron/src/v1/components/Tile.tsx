@@ -9,7 +9,7 @@ export interface TileProps {
 export function Tile({ cells }: TileProps) {
   const shape = mergeTiles(cells.map((c) => c.tile));
   return (
-    <div className="w-[32px] h-[32px] bg-primary-light flex items-center justify-center text-lg select-none">
+    <div className="w-[32px] h-[32px] bg-primary-light flex items-center justify-center text-[30px] select-none">
       {shape}
     </div>
   );
@@ -17,6 +17,11 @@ export function Tile({ cells }: TileProps) {
 
 export function DraggableTile({ cells, id }: TileProps & { id: string }) {
   const shape = mergeTiles(cells.map((c) => c.tile));
+
+  if (!shape) {
+    return <EmptyTile />;
+  }
+
   return (
     <Draggable id={id} data={{ tile: shape }}>
       <Tile cells={cells} />
@@ -26,7 +31,7 @@ export function DraggableTile({ cells, id }: TileProps & { id: string }) {
 
 export function EmptyTile() {
   return (
-    <div className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-lg select-none">
+    <div className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none">
       &nbsp;
     </div>
   );

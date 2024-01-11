@@ -87,6 +87,7 @@ export const gameDefinition: GameDefinition<
       }
       const adjacentTile = mergeTiles(adjacentTiles.map((t) => t.tile));
       if (
+        adjacentTile &&
         !areTilesCompatible(
           move.data.tile,
           move.data.coordinate,
@@ -298,6 +299,10 @@ const applyRoundToGlobalState = (
       gridWithAllTilesApplied,
     );
     const invalid = adjacents.some(([adjacentCoord, adjacentTile]) => {
+      // empty adjacent cell is always valid
+      if (!adjacentTile) {
+        return false;
+      }
       return !areTilesCompatible(
         move.data.tile,
         move.data.coordinate,
@@ -313,6 +318,7 @@ const applyRoundToGlobalState = (
     // if they were already removed.
 
     if (invalid) {
+      console.log('INVALID MOVE', move, JSON.stringify(adjacents));
       // remove the invalid tile from the board
       finalGrid[coordinateKey] = finalGrid[coordinateKey]?.filter(
         (c) => c.id !== move.data.handId,
@@ -339,6 +345,13 @@ const applyRoundToGlobalState = (
           }),
         };
       }
+    }
+  }
+
+  // remove any empty grid cells
+  for (const [key, cells] of Object.entries(finalGrid)) {
+    if (!cells.length) {
+      delete finalGrid[key as CoordinateKey];
     }
   }
 
@@ -390,7 +403,7 @@ function scoreTile(grid: Grid, coordinate: Coordinate, tile: TileShape) {
 
   const tileConnections = CONNECTIONS[tile];
   const adjacentCoords = getAdjacents(coordinate);
-  const adjacentTiles: { tile: TileShape; coordinate: Coordinate }[] =
+  const adjacentTiles: { tile: TileShape | null; coordinate: Coordinate }[] =
     adjacentCoords.map((c) => ({
       tile: mergeTiles(
         grid[toCoordinateKey(c.x, c.y)]?.map((c) => c.tile) ?? [],
@@ -402,7 +415,10 @@ function scoreTile(grid: Grid, coordinate: Coordinate, tile: TileShape) {
     tile: adjacentTile,
     coordinate: adjacentCoordinate,
   } of adjacentTiles) {
-    if (!areTilesCompatible(tile, coordinate, adjacentTile, coordinate)) {
+    if (
+      !adjacentTile ||
+      !areTilesCompatible(tile, coordinate, adjacentTile, coordinate)
+    ) {
       continue;
     }
     const direction = getAdjacencyDirection(coordinate, adjacentCoordinate);

@@ -294,6 +294,9 @@ export function isCoordinateKey(key: string): key is CoordinateKey {
 }
 
 export function mergeTiles(tiles: TileShape[]) {
+  if (!tiles.length) {
+    return null;
+  }
   return tiles.reduce((merged, tile) => {
     const [a, b] = [merged, tile].sort();
     return MERGES[a][b];
