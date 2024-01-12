@@ -27,5 +27,18 @@ export default Client;
 const ExampleGameUI = withGame(function ExampleGameUI() {
   const client = useGameClient();
 
-  return <div>{/* Your game UI goes here */}</div>;
+  return ( 
+  <div>
+    <h1>NOMAD</h1>
+    {client.error && <div>{client.error}</div>}
+    <div>
+      Players: {client.session.members.map((member) => (
+        <span key={member.id}>
+          {member.name}
+        </span>
+      ))}
+    </div>
+    Position: {client.state?.position}
+  </div>
+  );
 });

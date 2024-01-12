@@ -1,6 +1,6 @@
-import type { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
+import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
-import type { GameRound } from '@long-game/common';
+import { GameRound } from '@long-game/common';
 
 type CoordinateKey = `${number},${number}`;
 type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean';
