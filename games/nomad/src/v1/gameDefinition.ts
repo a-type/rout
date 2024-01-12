@@ -25,6 +25,8 @@ export type PlayerState = {
   position: CoordinateKey;
   terrainGrid: Record<CoordinateKey, Terrain>;
   flippedBlessings: Array<Blessing>;
+  acquiredBlessings: Record<string, Array<Blessing>>
+  remainingBlessingCount: number;
 };
 
 export type MoveData = {
@@ -97,6 +99,8 @@ export const gameDefinition: GameDefinition<
       position: globalState.playerPositions[playerId],
       terrainGrid: globalState.terrainGrid,
       flippedBlessings: globalState.flippedBlessings,
+      acquiredBlessings: globalState.acquiredBlessings,
+      remainingBlessingCount: globalState.blessingDeck.length,
     };
   },
 

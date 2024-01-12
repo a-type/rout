@@ -1,20 +1,20 @@
 import { CoordinateKey, Terrain, TerrainType } from "../gameDefinition.js";
 
-const colorLookup: Record<TerrainType, string> = {
+export const colorLookup: Record<TerrainType, string> = {
     'desert': 'yellow',
     'forest': 'green',
     'mountain': 'gray',
     'ocean': 'blue',
 }
 
-function TerrainTile({ item, hasPlayer }: {item: Terrain, hasPlayer: boolean}) {
+function TerrainTile({ item, hasPlayer, onClick }: {item: Terrain, hasPlayer: boolean; onClick: () => void}) {
     const color = colorLookup[item.type];
-    return <div style={{backgroundColor: color, width: 40, height: 40}}>
+    return <div style={{backgroundColor: color, width: 40, height: 40}} onClick={onClick}>
         {hasPlayer && <div style={{backgroundColor: 'red', width: 20, height: 20}}>P</div>}
     </div>
 }
 
-function TerrainGrid({ items, playerLocation }: {items: Record<CoordinateKey, Terrain>, playerLocation: CoordinateKey}) {
+function TerrainGrid({ items, playerLocation, onClick }: {items: Record<CoordinateKey, Terrain>, playerLocation: CoordinateKey, onClick: (x: number, y: number) => void}) {
     const itemsToGrid = Object.entries(items).reduce((acc, [key, item]) => {
         const [x, y] = key.split(',');
         return {
@@ -36,7 +36,8 @@ function TerrainGrid({ items, playerLocation }: {items: Record<CoordinateKey, Te
                             <div key={y}>
                                 <TerrainTile 
                                     item={item}
-                                    hasPlayer={x === playerX && y === playerY} 
+                                    hasPlayer={x === playerX && y === playerY}
+                                    onClick={() => onClick(parseInt(x), parseInt(y))}
                                 />
                             </div>
                         ))
