@@ -117,14 +117,14 @@ outro('Done!');
 
 // helpers
 
-async function addGameToGamesPackage(gameName: string) {
+async function addGameToGamesPackage(gameName) {
   const gamesPackage = path.resolve(__dirname, '../../packages/games');
   const gamesPackageJson = path.resolve(gamesPackage, 'package.json');
 
   const gamesPackageJsonContent = await fs.readFile(gamesPackageJson, 'utf-8');
   const gamesPackageJsonParsed = JSON.parse(gamesPackageJsonContent);
 
-  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`]: 'workspace:*';
+  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`] = 'workspace:*';
 
   await fs.writeFile(
     gamesPackageJson,
@@ -143,7 +143,7 @@ async function addGameToGamesPackage(gameName: string) {
   gamesIndexLines.splice(generatedLine, 0, `  [${gameName}.id]: gameName,`);
 
   // add the import to the top
-  gameIndexLines.unshift(`import ${gameName} from '@long-game/game-${gameName}';`);
+  gamesIndexLines.unshift(`import ${gameName} from '@long-game/game-${gameName}';`);
 
   await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));
 }
