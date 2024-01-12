@@ -68,6 +68,7 @@ export function movesToRounds<Move extends { createdAt: string }>(
     );
     return {
       moves,
+      // TODO: Handle the case where no users submit moves in a round.
       roundNumber,
       roundStart,
       roundEnd,
