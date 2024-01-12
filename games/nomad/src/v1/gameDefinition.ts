@@ -3,16 +3,23 @@ import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
 
 export type CoordinateKey = `${number},${number}`;
-export type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean' | 'grassland' | 'swamp' | 'tundra';
+export type TerrainType =
+  | 'desert'
+  | 'forest'
+  | 'mountain'
+  | 'ocean'
+  | 'grassland'
+  | 'swamp'
+  | 'tundra';
 
 export type Terrain = {
   type: TerrainType;
-}
+};
 
 export type Blessing = {
   location: TerrainType;
   points: number;
-}
+};
 
 export type GlobalState = {
   terrainGrid: Record<CoordinateKey, Terrain>;
@@ -26,7 +33,7 @@ export type PlayerState = {
   position: CoordinateKey;
   terrainGrid: Record<CoordinateKey, Terrain>;
   flippedBlessings: Array<Blessing>;
-  acquiredBlessings: Record<string, Array<Blessing>>
+  acquiredBlessings: Record<string, Array<Blessing>>;
   remainingBlessingCount: number;
 };
 
@@ -44,7 +51,7 @@ export const gameDefinition: GameDefinition<
 
   // run on both client and server
 
-  validateTurn: ({playerState, moves}) => {
+  validateTurn: ({ playerState, moves }) => {
     if (moves.length > 1) {
       return 'You can only make one move per turn.';
     }
@@ -56,47 +63,73 @@ export const gameDefinition: GameDefinition<
 
   // run on client
 
-  getProspectivePlayerState: ({playerState, prospectiveMoves, playerId}) => {
-    const finalMove = prospectiveMoves.length > 0 ? prospectiveMoves[prospectiveMoves.length - 1] : null;
+  getProspectivePlayerState: ({ playerState, prospectiveMoves, playerId }) => {
+    const finalMove =
+      prospectiveMoves.length > 0
+        ? prospectiveMoves[prospectiveMoves.length - 1]
+        : null;
     return {
       ...playerState,
       position: finalMove ? finalMove.data.position : playerState.position,
-    }
+    };
   },
 
   // run on server
 
-  getInitialGlobalState: ({playerIds, random}) => {
+  getInitialGlobalState: ({ playerIds, random }) => {
     const width = 7;
     const height = 5;
     const blessingCount = 10;
     return {
       playerPositions: playerIds.reduce((acc, playerId) => {
-        acc[playerId] = `${random.int(0, width - 1)},${random.int(0, height - 1)}`;
+        acc[playerId] = `${random.int(0, width - 1)},${random.int(
+          0,
+          height - 1,
+        )}`;
         return acc;
       }, {} as Record<string, CoordinateKey>),
-      terrainGrid: (Array.from({length: width * height}).fill(null) as any[]).reduce((acc, _, i) => {
+      terrainGrid: (
+        Array.from({ length: width * height }).fill(null) as any[]
+      ).reduce((acc, _, i) => {
         const x = i % width;
         const y = Math.floor(i / width);
         const key = `${x},${y}`;
         acc[key] = {
-          type: random.item(['desert', 'forest', 'mountain', 'ocean', 'grassland', 'swamp', 'tundra']),
+          type: random.item([
+            'desert',
+            'forest',
+            'mountain',
+            'ocean',
+            'grassland',
+            'swamp',
+            'tundra',
+          ]),
         };
         return acc;
       }, {} as Record<CoordinateKey, Terrain>),
       flippedBlessings: [],
-      blessingDeck: (Array.from({length: blessingCount}).fill(null) as any[]).map(() => ({
-        location: random.item(['desert', 'forest', 'mountain', 'ocean', 'grassland', 'swamp', 'tundra']),
+      blessingDeck: (
+        Array.from({ length: blessingCount }).fill(null) as any[]
+      ).map(() => ({
+        location: random.item([
+          'desert',
+          'forest',
+          'mountain',
+          'ocean',
+          'grassland',
+          'swamp',
+          'tundra',
+        ]),
         points: random.int(1, 3) * random.int(1, 3),
       })),
       acquiredBlessings: playerIds.reduce((acc, playerId) => {
         acc[playerId] = [];
         return acc;
       }, {} as Record<string, Array<Blessing>>),
-    }
+    };
   },
 
-  getPlayerState: ({globalState, playerId}) => {
+  getPlayerState: ({ globalState, playerId }) => {
     return {
       position: globalState.playerPositions[playerId],
       terrainGrid: globalState.terrainGrid,
@@ -106,32 +139,34 @@ export const gameDefinition: GameDefinition<
     };
   },
 
-  getState: ({initialState, rounds, random}) => {
+  getState: ({ initialState, rounds, random }) => {
     return rounds.reduce(
       (cur, round) => applyRoundToGlobalState(cur, round, random),
       initialState,
     );
   },
 
-  getPublicMove: ({move}) => {
+  getPublicMove: ({ move }) => {
     return move;
   },
 
-  getStatus: ({globalState, rounds}) => {
-    if (globalState.blessingDeck.length === 0)
-    { 
-      const winningPlayers = Object.keys(globalState.acquiredBlessings).reduce((acc, playerId) => {
-        const blessings = globalState.acquiredBlessings[playerId];
-        if (blessings.length > acc.length) {
-          return [playerId];
-        } else if (blessings.length === acc.length) {
-          acc.push(playerId);
-        }
-        return acc;
-      }, [] as string[]);
-      return {status: "completed", winnerIds: winningPlayers};
+  getStatus: ({ globalState, rounds }) => {
+    if (globalState.blessingDeck.length === 0) {
+      const winningPlayers = Object.keys(globalState.acquiredBlessings).reduce(
+        (acc, playerId) => {
+          const blessings = globalState.acquiredBlessings[playerId];
+          if (blessings.length > acc.length) {
+            return [playerId];
+          } else if (blessings.length === acc.length) {
+            acc.push(playerId);
+          }
+          return acc;
+        },
+        [] as string[],
+      );
+      return { status: 'completed', winnerIds: winningPlayers };
     }
-    return {status: "active"};
+    return { status: 'active' };
   },
 };
 
@@ -140,13 +175,13 @@ const applyRoundToGlobalState = (
   globalState: GlobalState,
   round: GameRound<Move<MoveData>>,
   random: GameRandom,
-): GlobalState =>{
+): GlobalState => {
   const { moves } = round;
   const { blessingDeck, flippedBlessings, acquiredBlessings } = globalState;
   const newBlessingDeck = [...blessingDeck];
   let newFlippedBlessings = [...flippedBlessings];
   const nextBlessing = newBlessingDeck.shift();
-  const newAcquiredBlessings = {...acquiredBlessings};
+  const newAcquiredBlessings = { ...acquiredBlessings };
 
   const playersThatDidntMove = moves.reduce((acc, move) => {
     if (!move.userId) {
@@ -165,14 +200,14 @@ const applyRoundToGlobalState = (
     const claimantPlayers = playersThatDidntMove.filter((playerId) => {
       const playerPosition = globalState.playerPositions[playerId];
       return globalState.terrainGrid[playerPosition].type === blessing.location;
-    })
+    });
     claimantPlayers.forEach((playerId) => {
       newAcquiredBlessings[playerId].push(blessing);
-    })
-    return claimantPlayers.length === 0; 
+    });
+    return claimantPlayers.length === 0;
   });
 
-  // Add a new blessing to the revealed blessings and remove 
+  // Add a new blessing to the revealed blessings and remove
   // the oldest blessing if there are too many
   if (nextBlessing) {
     newFlippedBlessings.push(nextBlessing);
@@ -187,11 +222,11 @@ const applyRoundToGlobalState = (
     flippedBlessings: newFlippedBlessings,
     acquiredBlessings: newAcquiredBlessings,
     playerPositions: moves.reduce((acc, move) => {
-    if (!move.userId) {
+      if (!move.userId) {
+        return acc;
+      }
+      acc[move.userId] = move.data.position;
       return acc;
-    }
-    acc[move.userId] = move.data.position;
-    return acc;
-   }, {} as Record<string, CoordinateKey>)
+    }, {} as Record<string, CoordinateKey>),
   };
-}
+};

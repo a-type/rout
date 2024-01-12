@@ -29,49 +29,61 @@ export default Client;
 const ExampleGameUI = withGame(function ExampleGameUI() {
   const client = useGameClient();
   const hasUnsubmittedMoves =
-  client.queuedMoves.filter((move) => !move.createdAt).length > 0;
+    client.queuedMoves.filter((move) => !move.createdAt).length > 0;
   useEffect(() => {
     const interval = setInterval(() => {
       location.reload();
     }, 60 * 1000);
     return () => {
       clearInterval(interval);
-    }
-  })
+    };
+  });
 
-  return ( 
-  <div>
-    <h1>Nomad</h1>
-    {client.error && <div>{client.error}</div>}
+  return (
     <div>
-      Players: {client.session.members.map((member) => (
-        <span key={member.id}>
-          {member.name}
-        </span>
+      <h1>Nomad</h1>
+      {client.error && <div>{client.error}</div>}
+      <div>
+        Players:{' '}
+        {client.session.members.map((member) => (
+          <span key={member.id}>{member.name}</span>
+        ))}
+      </div>
+      {client.state && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-row gap-3">
+            <Blessings items={client.state.flippedBlessings} />
+            Remaining: {client.state.remainingBlessingCount}
+          </div>
+          <TerrainGrid
+            items={client.state.terrainGrid}
+            playerLocation={client.state.position}
+            targetLocation={
+              client.queuedMoves.length > 0
+                ? client.queuedMoves[0].data.position
+                : undefined
+            }
+            onClick={(x, y) => {
+              client.setMove(0, { position: `${x},${y}` });
+            }}
+          />
+        </div>
+      )}
+      {client.queuedMoves.map((move, idx) => (
+        <div key={idx}>{move.data.position}</div>
       ))}
-    </div>
-    {client.state && <div className="flex flex-col gap-4">
-      <div className="flex flex-row gap-3">
-        <Blessings items={client.state.flippedBlessings} />
-        Remaining: {client.state.remainingBlessingCount}
-      </div>
-      <TerrainGrid 
-        items={client.state.terrainGrid} 
-        playerLocation={client.state.position}
-        targetLocation={client.queuedMoves.length > 0 ? client.queuedMoves[0].data.position : undefined}
-        onClick={(x, y) => {
-          client.setMove(0, {position: `${x},${y}`})
-        }}
+      <button
+        onClick={() => client.submitMoves()}
+        disabled={!hasUnsubmittedMoves}
+      >
+        Submit
+      </button>
+      <h3>Acquired blessings</h3>
+      <Blessings
+        items={
+          client.state?.acquiredBlessings[client.session.localPlayer.id] || []
+        }
       />
-    </div>}
-    {client.queuedMoves.map((move, idx) => (
-      <div key={idx}>
-        {move.data.position}
-      </div>
-    ))}
-    <button onClick={() => client.submitMoves()} disabled={!hasUnsubmittedMoves}>Submit</button>
-    <h3>Acquired blessings</h3>
-    <Blessings items={client.state?.acquiredBlessings[client.session.localPlayer.id] || []} />
-  </div>
+    </div>
   );
 });
