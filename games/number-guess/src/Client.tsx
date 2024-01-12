@@ -61,7 +61,7 @@ const History = withGame(function History() {
                 <li key={move.id}>
                   {move.data.guess} -{' '}
                   {move.createdAt
-                    ? new Date(move.createdAt).toDateString()
+                    ? new Date(move.createdAt).toString()
                     : ''}{' '}
                   by {move.user.name}
                 </li>

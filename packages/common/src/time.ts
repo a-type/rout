@@ -1,7 +1,7 @@
 export function convertTimezone(utcDate: string, timezone: string): Date {
   const date = new Date(utcDate);
   return new Date(
-    date.toLocaleDateString('en-US', {
+    date.toLocaleString('en-US', {
       timeZone: timezone,
     }),
   );

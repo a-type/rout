@@ -59,7 +59,7 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
 }
 
 function computeCacheKey(gameSessionId: string, fromDay: Date) {
-  return `${fromDay.getFullYear()}-${fromDay.getMonth()}-${fromDay.getDate()}:${gameSessionId}`;
+  return `${fromDay.getFullYear()}-${fromDay.getMonth()}-${fromDay.getDate()}-${fromDay.getHours()}-${fromDay.getMinutes()}:${gameSessionId}`;
 }
 
 const gameCache = new Map<string, ReturnType<typeof loadGameState>>();
