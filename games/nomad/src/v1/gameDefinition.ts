@@ -3,7 +3,7 @@ import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
 
 export type CoordinateKey = `${number},${number}`;
-export type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean';
+export type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean' | 'grassland' | 'swamp' | 'tundra';
 
 export type Terrain = {
   type: TerrainType;
@@ -80,13 +80,13 @@ export const gameDefinition: GameDefinition<
         const y = Math.floor(i / width);
         const key = `${x},${y}`;
         acc[key] = {
-          type: random.item(['desert', 'forest', 'mountain', 'ocean']),
+          type: random.item(['desert', 'forest', 'mountain', 'ocean', 'grassland', 'swamp', 'tundra']),
         };
         return acc;
       }, {} as Record<CoordinateKey, Terrain>),
       flippedBlessings: [],
       blessingDeck: (Array.from({length: blessingCount}).fill(null) as any[]).map(() => ({
-        location: random.item(['desert', 'forest', 'mountain', 'ocean']),
+        location: random.item(['desert', 'forest', 'mountain', 'ocean', 'grassland', 'swamp', 'tundra']),
         points: random.int(1, 3) * random.int(1, 3),
       })),
       acquiredBlessings: playerIds.reduce((acc, playerId) => {

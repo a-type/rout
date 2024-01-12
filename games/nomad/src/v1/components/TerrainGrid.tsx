@@ -1,13 +1,26 @@
 import { CoordinateKey, Terrain, TerrainType } from "../gameDefinition.js";
 
 export const colorLookup: Record<TerrainType, string> = {
-    'desert': 'orange',
-    'forest': 'green',
-    'mountain': 'gray',
-    'ocean': 'blue',
+    'desert': '#F6AE2D',
+    'forest': '#5B7553',
+    'mountain': '#2B303A',
+    'ocean': '#166088',
+    'grassland': '#82C09A',
+    'swamp': '#94778B',
+    'tundra': '#92DCE5',
 }
 
-function TerrainTile({ item, hasPlayer, onClick, isTarget }: {item: Terrain, hasPlayer: boolean; onClick: () => void, isTarget: boolean}) {
+function TerrainTile({ 
+    item, 
+    hasPlayer, 
+    onClick, 
+    isTarget
+}: {
+    item: Terrain, 
+    hasPlayer: boolean; 
+    onClick: () => void, 
+    isTarget: boolean
+}) {
     const color = colorLookup[item.type];
     return (
     <div 
@@ -46,7 +59,7 @@ function TerrainGrid({
     }, {} as Record<string, Record<string, Terrain>>)
     const [playerX, playerY] = playerLocation.split(',');
 
-    return <div className="flex flex-row gap-1">
+    return <div>
         {
             Object.entries(itemsToGrid).map(([x, row]) => (
                 <div key={x} className="flex flex-col gap-1">
@@ -65,7 +78,7 @@ function TerrainGrid({
                 </div>
             ))
         }
-    </div>
+        </div>
 }
 
 export default TerrainGrid;
