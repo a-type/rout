@@ -58,6 +58,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           <TerrainGrid
             items={client.state.terrainGrid}
             playerLocation={client.state.position}
+            playerColor={client.state.color}
             targetLocation={
               client.queuedMoves.length > 0
                 ? client.queuedMoves[0].data.position
@@ -79,11 +80,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         Submit
       </button>
       <h3>Acquired blessings</h3>
-      <Blessings
-        items={
-          client.state?.acquiredBlessings[client.session.localPlayer.id] || []
-        }
-      />
+      <Blessings items={client.state?.acquiredBlessings || []} />
     </div>
   );
 });

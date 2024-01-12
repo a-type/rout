@@ -1,6 +1,7 @@
 import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
+import { cloneDeep } from './utils.js';
 
 export type CoordinateKey = `${number},${number}`;
 export type TerrainType =
@@ -25,17 +26,20 @@ export type GlobalState = {
   terrainGrid: Record<CoordinateKey, Terrain>;
   flippedBlessings: Array<Blessing>;
   blessingDeck: Array<Blessing>;
-  acquiredBlessings: Record<string, Array<Blessing>>;
-  playerPositions: Record<string, CoordinateKey>;
+  playerData: Record<string, PlayerData>;
+};
+
+export type PlayerData = {
+  position: CoordinateKey;
+  color: string;
+  acquiredBlessings: Array<Blessing>;
 };
 
 export type PlayerState = {
-  position: CoordinateKey;
   terrainGrid: Record<CoordinateKey, Terrain>;
   flippedBlessings: Array<Blessing>;
-  acquiredBlessings: Record<string, Array<Blessing>>;
   remainingBlessingCount: number;
-};
+} & PlayerData;
 
 export type MoveData = {
   position: CoordinateKey;
@@ -122,19 +126,30 @@ export const gameDefinition: GameDefinition<
         ]),
         points: random.int(1, 3) * random.int(1, 3),
       })),
-      acquiredBlessings: playerIds.reduce((acc, playerId) => {
-        acc[playerId] = [];
+      playerData: playerIds.reduce((acc, playerId) => {
+        acc[playerId] = {
+          position: `${random.int(0, width - 1)},${random.int(0, height - 1)}`,
+          color: random.item([
+            '#FF0000',
+            '#00FF00',
+            '#0000FF',
+            '#FFFF00',
+            '#00FFFF',
+            '#FF00FF',
+          ]),
+          acquiredBlessings: [],
+        };
         return acc;
-      }, {} as Record<string, Array<Blessing>>),
+      }, {} as Record<string, PlayerData>),
     };
   },
 
   getPlayerState: ({ globalState, playerId }) => {
+    const playerData = globalState.playerData[playerId];
     return {
-      position: globalState.playerPositions[playerId],
+      ...playerData,
       terrainGrid: globalState.terrainGrid,
       flippedBlessings: globalState.flippedBlessings,
-      acquiredBlessings: globalState.acquiredBlessings,
       remainingBlessingCount: globalState.blessingDeck.length,
     };
   },
@@ -152,9 +167,9 @@ export const gameDefinition: GameDefinition<
 
   getStatus: ({ globalState, rounds }) => {
     if (globalState.blessingDeck.length === 0) {
-      const winningPlayers = Object.keys(globalState.acquiredBlessings).reduce(
+      const winningPlayers = Object.keys(globalState.playerData).reduce(
         (acc, playerId) => {
-          const blessings = globalState.acquiredBlessings[playerId];
+          const blessings = globalState.playerData[playerId].acquiredBlessings;
           if (blessings.length > acc.length) {
             return [playerId];
           } else if (blessings.length === acc.length) {
@@ -177,18 +192,19 @@ const applyRoundToGlobalState = (
   random: GameRandom,
 ): GlobalState => {
   const { moves } = round;
-  const { blessingDeck, flippedBlessings, acquiredBlessings } = globalState;
+  const { blessingDeck, flippedBlessings, playerData } = globalState;
   const newBlessingDeck = [...blessingDeck];
   let newFlippedBlessings = [...flippedBlessings];
   const nextBlessing = newBlessingDeck.shift();
-  const newAcquiredBlessings = { ...acquiredBlessings };
+  const newPlayerData = cloneDeep(playerData);
 
+  // Figure out which players didn't move
   const playersThatDidntMove = moves.reduce((acc, move) => {
     if (!move.userId) {
       return acc;
     }
     const { position } = move.data;
-    const prevPosition = globalState.playerPositions[move.userId];
+    const prevPosition = globalState.playerData[move.userId].position;
     if (position === prevPosition) {
       acc.push(move.userId);
     }
@@ -198,11 +214,11 @@ const applyRoundToGlobalState = (
   // Claim blessings
   newFlippedBlessings = newFlippedBlessings.filter((blessing) => {
     const claimantPlayers = playersThatDidntMove.filter((playerId) => {
-      const playerPosition = globalState.playerPositions[playerId];
+      const playerPosition = globalState.playerData[playerId].position;
       return globalState.terrainGrid[playerPosition].type === blessing.location;
     });
     claimantPlayers.forEach((playerId) => {
-      newAcquiredBlessings[playerId].push(blessing);
+      newPlayerData[playerId].acquiredBlessings.push(blessing);
     });
     return claimantPlayers.length === 0;
   });
@@ -216,17 +232,19 @@ const applyRoundToGlobalState = (
     // TODO: Move to a discard where players can view them.
     newFlippedBlessings.shift();
   }
+
+  // Move players
+  moves.forEach((move) => {
+    if (!move.userId) {
+      return;
+    }
+    const { position } = move.data;
+    newPlayerData[move.userId].position = position;
+  });
   return {
     ...globalState,
     blessingDeck: newBlessingDeck,
     flippedBlessings: newFlippedBlessings,
-    acquiredBlessings: newAcquiredBlessings,
-    playerPositions: moves.reduce((acc, move) => {
-      if (!move.userId) {
-        return acc;
-      }
-      acc[move.userId] = move.data.position;
-      return acc;
-    }, {} as Record<string, CoordinateKey>),
+    playerData: newPlayerData,
   };
 };

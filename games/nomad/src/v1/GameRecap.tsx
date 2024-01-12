@@ -14,11 +14,16 @@ export function GameRecap({ session, globalState }: GameRecapProps) {
         <span key={member.id}>
           <h4>{member.name}</h4>
           Score:{' '}
-          {globalState.acquiredBlessings[member.id].reduce((acc, blessing) => {
-            acc += blessing.points;
-            return acc;
-          }, 0)}
-          <Blessings items={globalState.acquiredBlessings[member.id]} />
+          {globalState.playerData[member.id].acquiredBlessings.reduce(
+            (acc, blessing) => {
+              acc += blessing.points;
+              return acc;
+            },
+            0,
+          )}
+          <Blessings
+            items={globalState.playerData[member.id].acquiredBlessings}
+          />
         </span>
       ))}
     </div>

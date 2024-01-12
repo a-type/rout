@@ -13,11 +13,13 @@ export const colorLookup: Record<TerrainType, string> = {
 function TerrainTile({
   item,
   hasPlayer,
+  playerColor,
   onClick,
   isTarget,
 }: {
   item: Terrain;
   hasPlayer: boolean;
+  playerColor: string;
   onClick: () => void;
   isTarget: boolean;
 }) {
@@ -33,7 +35,9 @@ function TerrainTile({
       onClick={onClick}
     >
       {hasPlayer && (
-        <div style={{ backgroundColor: 'red', width: 20, height: 20 }}>P</div>
+        <div style={{ backgroundColor: playerColor, width: 20, height: 20 }}>
+          P
+        </div>
       )}
     </div>
   );
@@ -42,12 +46,14 @@ function TerrainTile({
 function TerrainGrid({
   items,
   playerLocation,
+  playerColor,
   targetLocation,
   onClick,
 }: {
   items: Record<CoordinateKey, Terrain>;
   playerLocation: CoordinateKey;
   targetLocation?: CoordinateKey;
+  playerColor: string;
   onClick: (x: number, y: number) => void;
 }) {
   const itemsToGrid = Object.entries(items).reduce((acc, [key, item]) => {
@@ -63,7 +69,7 @@ function TerrainGrid({
   const [playerX, playerY] = playerLocation.split(',');
 
   return (
-    <div>
+    <div className="flex flex-row gap-1">
       {Object.entries(itemsToGrid).map(([x, row]) => (
         <div key={x} className="flex flex-col gap-1">
           {Object.entries(row).map(([y, item]) => (
@@ -71,6 +77,7 @@ function TerrainGrid({
               <TerrainTile
                 item={item}
                 hasPlayer={x === playerX && y === playerY}
+                playerColor={playerColor}
                 isTarget={targetLocation === `${x},${y}`}
                 onClick={() => onClick(parseInt(x), parseInt(y))}
               />
