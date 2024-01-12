@@ -1,6 +1,8 @@
 import { createGameClient } from '@long-game/game-client';
 import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps } from 'react';
+import Blessings from './components/Blessings.js';
+import TerrainGrid from './components/TerrainGrid.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -29,7 +31,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
 
   return ( 
   <div>
-    <h1>NOMAD</h1>
+    <h1>Nomad</h1>
     {client.error && <div>{client.error}</div>}
     <div>
       Players: {client.session.members.map((member) => (
@@ -38,7 +40,10 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         </span>
       ))}
     </div>
-    Position: {client.state?.position}
+    {client.state && <>
+      <Blessings items={client.state.flippedBlessings} />
+      <TerrainGrid items={client.state.terrainGrid} playerLocation={client.state.position} />
+    </>}
   </div>
   );
 });

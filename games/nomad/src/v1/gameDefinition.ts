@@ -2,14 +2,14 @@ import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
 
-type CoordinateKey = `${number},${number}`;
-type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean';
+export type CoordinateKey = `${number},${number}`;
+export type TerrainType = 'desert' | 'forest' | 'mountain' | 'ocean';
 
-type Terrain = {
+export type Terrain = {
   type: TerrainType;
 }
 
-type Blessing = {
+export type Blessing = {
   location: TerrainType;
 }
 
