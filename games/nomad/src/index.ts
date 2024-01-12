@@ -3,6 +3,6 @@ import { gameDefinition as v1 } from './v1/gameDefinition.js';
 
 export default {
   id: 'nomad',
-  title: 'nomad',
+  title: 'Nomad',
   versions: [v1],
 } satisfies GameModule;

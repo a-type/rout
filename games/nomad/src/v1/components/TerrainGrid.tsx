@@ -1,20 +1,39 @@
 import { CoordinateKey, Terrain, TerrainType } from "../gameDefinition.js";
 
 export const colorLookup: Record<TerrainType, string> = {
-    'desert': 'yellow',
+    'desert': 'orange',
     'forest': 'green',
     'mountain': 'gray',
     'ocean': 'blue',
 }
 
-function TerrainTile({ item, hasPlayer, onClick }: {item: Terrain, hasPlayer: boolean; onClick: () => void}) {
+function TerrainTile({ item, hasPlayer, onClick, isTarget }: {item: Terrain, hasPlayer: boolean; onClick: () => void, isTarget: boolean}) {
     const color = colorLookup[item.type];
-    return <div style={{backgroundColor: color, width: 40, height: 40}} onClick={onClick}>
+    return (
+    <div 
+        style={{
+            backgroundColor: color, 
+            width: 40, 
+            height: 40, 
+            border: isTarget ? '2px red dashed' : ''
+        }} 
+        onClick={onClick}
+    >
         {hasPlayer && <div style={{backgroundColor: 'red', width: 20, height: 20}}>P</div>}
-    </div>
+    </div>);
 }
 
-function TerrainGrid({ items, playerLocation, onClick }: {items: Record<CoordinateKey, Terrain>, playerLocation: CoordinateKey, onClick: (x: number, y: number) => void}) {
+function TerrainGrid({ 
+    items, 
+    playerLocation, 
+    targetLocation, 
+    onClick
+}: {
+    items: Record<CoordinateKey, Terrain>, 
+    playerLocation: CoordinateKey, 
+    targetLocation?: CoordinateKey,
+    onClick: (x: number, y: number) => void
+}) {
     const itemsToGrid = Object.entries(items).reduce((acc, [key, item]) => {
         const [x, y] = key.split(',');
         return {
@@ -37,6 +56,7 @@ function TerrainGrid({ items, playerLocation, onClick }: {items: Record<Coordina
                                 <TerrainTile 
                                     item={item}
                                     hasPlayer={x === playerX && y === playerY}
+                                    isTarget={targetLocation === `${x},${y}`}
                                     onClick={() => onClick(parseInt(x), parseInt(y))}
                                 />
                             </div>

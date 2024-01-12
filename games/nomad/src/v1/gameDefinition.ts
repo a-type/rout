@@ -11,6 +11,7 @@ export type Terrain = {
 
 export type Blessing = {
   location: TerrainType;
+  points: number;
 }
 
 export type GlobalState = {
@@ -86,6 +87,7 @@ export const gameDefinition: GameDefinition<
       flippedBlessings: [],
       blessingDeck: (Array.from({length: blessingCount}).fill(null) as any[]).map(() => ({
         location: random.item(['desert', 'forest', 'mountain', 'ocean']),
+        points: random.int(1, 3) * random.int(1, 3),
       })),
       acquiredBlessings: playerIds.reduce((acc, playerId) => {
         acc[playerId] = [];

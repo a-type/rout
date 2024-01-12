@@ -57,7 +57,8 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       </div>
       <TerrainGrid 
         items={client.state.terrainGrid} 
-        playerLocation={client.state.position} 
+        playerLocation={client.state.position}
+        targetLocation={client.queuedMoves.length > 0 ? client.queuedMoves[0].data.position : undefined}
         onClick={(x, y) => {
           client.setMove(0, {position: `${x},${y}`})
         }}
