@@ -6,7 +6,7 @@ import { GameModule } from '@long-game/game-definition';
 const games: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
   [neuron.id]: neuron,
-  [nomad.id]: gameName,
+  [nomad.id]: nomad,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 

@@ -1,5 +1,5 @@
 import type { GameModule } from '@long-game/game-definition';
-import { gameDefinition as v1 } from './v1/gameDefinition';
+import { gameDefinition as v1 } from './v1/gameDefinition.js';
 
 export default {
   id: 'nomad',
