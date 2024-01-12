@@ -22,6 +22,8 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
   const { roundStart: currentRoundStart, roundEnd: currentRoundEnd } =
     getRoundTimerange(new Date(fromDay), gameSession.timezone);
 
+    console.log("current", currentRoundStart, currentRoundEnd)
+
   const game = games[gameSession.gameId];
   if (!game) {
     throw new Error('Game not found');
@@ -49,6 +51,8 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
     random: new GameRandom(gameSession.randomSeed),
   });
 
+  console.log("globalState", globalState)
+
   return {
     globalState,
     rounds,
@@ -59,7 +63,7 @@ async function loadGameState(gameSession: RequiredGameSession, fromDay: Date) {
 }
 
 function computeCacheKey(gameSessionId: string, fromDay: Date) {
-  return `${fromDay.getFullYear()}-${fromDay.getMonth()}-${fromDay.getDate()}:${gameSessionId}`;
+  return `${fromDay.getFullYear()}-${fromDay.getMonth()}-${fromDay.getDate()}-${fromDay.getHours()}-${fromDay.getMinutes()}:${gameSessionId}`;
 }
 
 const gameCache = new Map<string, ReturnType<typeof loadGameState>>();
@@ -93,6 +97,8 @@ export async function getCachedGame(
   const currentRound = cachedData.rounds.filter(
     (round) => round.roundStart >= cachedData.roundStart,
   );
+
+  console.log("cachedData", cachedData)
 
   if (currentRound.length > 1) {
     throw new Error('Expected at most one current round');
