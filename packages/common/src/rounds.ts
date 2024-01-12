@@ -5,20 +5,22 @@ import { convertTimezone, toDayKeyString } from './time.js';
  * Start is inclusive, end is exclusive.
  */
 export function getRoundTimerange(day: Date, timezone: string) {
-  const today = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+  const today = new Date(day.getFullYear(), day.getMonth(), day.getDate(), day.getHours(), day.getMinutes());
   const tomorrow = new Date(
     day.getFullYear(),
     day.getMonth(),
-    day.getDate() + 1,
+    day.getDate() ,
+    day.getHours(),
+    day.getMinutes() + 1,
   );
 
   const roundStart = new Date(
-    today.toLocaleDateString('en-US', {
+    today.toLocaleString('en-US', {
       timeZone: timezone,
     }),
   );
   const roundEnd = new Date(
-    tomorrow.toLocaleDateString('en-US', {
+    tomorrow.toLocaleString('en-US', {
       timeZone: timezone,
     }),
   );
@@ -36,13 +38,17 @@ export type GameRound<Move> = {
   roundEnd: Date;
 };
 
+function computeCacheKey(fromDay: Date, timeZone: string) {
+  return new Date(fromDay.getFullYear(), fromDay.getMonth(), fromDay.getDate(), fromDay.getHours(), fromDay.getMinutes()).toISOString();
+}
+
 export function movesToRounds<Move extends { createdAt: string }>(
   moves: Move[],
   timezone: string,
 ): GameRound<Move>[] {
   // split moves by day, according to timezone
   const movesByDay = moves.reduce((acc, move) => {
-    const day = toDayKeyString(convertTimezone(move.createdAt, timezone));
+    const day = computeCacheKey(new Date(move.createdAt), timezone);
     acc[day] = acc[day] || [];
     acc[day].push(move);
     return acc;
@@ -57,11 +63,12 @@ export function movesToRounds<Move extends { createdAt: string }>(
     // within getRoundTimerange
     // TODO: simplify this?
     const { roundStart, roundEnd } = getRoundTimerange(
-      convertTimezone(day, 'UTC'),
+      new Date(day),
       timezone,
     );
     return {
       moves,
+      // TODO: Handle the case where no users submit moves in a round.
       roundNumber,
       roundStart,
       roundEnd,
