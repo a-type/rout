@@ -7,8 +7,7 @@ import {
 } from '../tiles.js';
 import { useDroppable } from '@dnd-kit/core';
 import { DraggableTile, Tile } from './Tile.js';
-import { withGame } from '../gameClient.js';
-import { useMove } from '../hooks.js';
+import { useGameClient, withGame } from '../gameClient.js';
 
 export interface GridProps {
   data: GridData;
@@ -67,8 +66,9 @@ const GridCellTile = withGame(function GridCellTile({
 }: {
   cells: GridData[CoordinateKey];
 }) {
-  const move = useMove();
-  const movedTileId = move?.id;
+  const client = useGameClient();
+  const move = client.currentTurn;
+  const movedTileId = move?.data.handId;
 
   const isMoveToThisCell =
     movedTileId && cells.some((c) => c.id === movedTileId);

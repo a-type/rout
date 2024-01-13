@@ -70,7 +70,7 @@ const ActiveGame = withGame(function ActiveGame({
           if (!data.current) return;
 
           const { x, y } = fromCoordinateKey(ev.over.id);
-          client.setMove(0, {
+          client.prepareTurn({
             coordinate: { x, y },
             handId,
             tile: data.current.tile,

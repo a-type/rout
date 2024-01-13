@@ -1,4 +1,9 @@
-import { GameDefinition, GameRandom, Move } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  GameRandom,
+  Turn,
+  roundFormat,
+} from '@long-game/game-definition';
 import { lazy } from 'react';
 import {
   CONNECTIONS,
@@ -58,30 +63,21 @@ export const gameDefinition: GameDefinition<
 > = {
   version: `v1.0`,
   // run on both client and server
-
-  validateTurn: ({ playerState, moves }) => {
-    if (moves.length === 0) {
-      return 'You must make a move.';
-    }
-    if (moves.length > 1) {
-      return 'You can only make one move per turn.';
-    }
-
+  validateTurn: ({ playerState, turn }) => {
     // verify all tiles used are in player's hand
-    const move = moves[0];
-    const isInHand = getTileInHand(playerState.hand, move.data.handId);
+    const isInHand = getTileInHand(playerState.hand, turn.data.handId);
     if (!isInHand) {
       return `You don't have that tile in your hand.`;
     }
 
     // cannot move where tiles already are
-    const key = toCoordinateKey(move.data.coordinate.x, move.data.coordinate.y);
+    const key = toCoordinateKey(turn.data.coordinate.x, turn.data.coordinate.y);
     if (!!playerState.grid[key]?.length) {
       return 'There is already a tile there.';
     }
 
     // cannot move to positions with incompatible adjacents
-    const adjacents = getAdjacents(move.data.coordinate);
+    const adjacents = getAdjacents(turn.data.coordinate);
     for (const adjacent of adjacents) {
       const adjacentKey = toCoordinateKey(adjacent.x, adjacent.y);
       const adjacentTiles = playerState.grid[adjacentKey];
@@ -92,8 +88,8 @@ export const gameDefinition: GameDefinition<
       if (
         adjacentTile &&
         !areTilesCompatible(
-          move.data.tile,
-          move.data.coordinate,
+          turn.data.tile,
+          turn.data.coordinate,
           adjacentTile,
           adjacent,
         )
@@ -107,19 +103,13 @@ export const gameDefinition: GameDefinition<
   GameRecap: lazy(() => import('./GameRecap.js')),
 
   // run on client
-
   getProspectivePlayerState: ({
     playerState,
-    prospectiveMoves: moves,
+    prospectiveTurn: turn,
     playerId,
   }) => {
     // add tile to the board and remove from hand
-    const move = moves[0];
-    if (!move) {
-      return playerState;
-    }
-
-    const cell = getTileInHand(playerState.hand, move.data.handId);
+    const cell = getTileInHand(playerState.hand, turn.data.handId);
 
     if (!cell) {
       return playerState;
@@ -127,7 +117,7 @@ export const gameDefinition: GameDefinition<
 
     const grid = addTile(
       playerState.grid,
-      move.data.coordinate,
+      turn.data.coordinate,
       cell,
       playerId,
     );
@@ -146,7 +136,6 @@ export const gameDefinition: GameDefinition<
   },
 
   // run on server
-
   getInitialGlobalState: ({ playerIds, random }) => {
     return {
       grid: {},
@@ -178,8 +167,8 @@ export const gameDefinition: GameDefinition<
     );
   },
 
-  getPublicMove: ({ move, globalState }) => {
-    return move;
+  getPublicTurn: ({ turn, globalState }) => {
+    return turn;
   },
 
   getStatus: ({ globalState }) => {
@@ -228,12 +217,14 @@ export const gameDefinition: GameDefinition<
       winnerIds,
     };
   },
+
+  getRoundIndex: roundFormat.sync(),
 };
 
 // helper methods
 const applyRoundToGlobalState = (
   globalState: GlobalState,
-  round: GameRound<Move<MoveData>>,
+  round: GameRound<Turn<MoveData>>,
   random: GameRandom,
 ) => {
   // what we already validated in the moves:
@@ -246,22 +237,22 @@ const applyRoundToGlobalState = (
   // which tile placements are valid when all player placements
   // have been resolved.
 
-  const moves = round.moves;
+  const turns = round.turns;
   // make copies of global state which we will update with
-  // the moves from this round, validate, then apply
+  // the turns from this round, validate, then apply
   let gridWithAllTilesApplied = { ...globalState.grid };
 
-  for (const move of moves) {
+  for (const turn of turns) {
     let cell: GridCell | null;
-    if (move.userId) {
+    if (turn.userId) {
       cell =
-        getTileInHand(globalState.playerHands[move.userId], move.data.handId) ??
+        getTileInHand(globalState.playerHands[turn.userId], turn.data.handId) ??
         null;
     } else {
       cell = {
-        tile: move.data.tile,
+        tile: turn.data.tile,
         owner: null,
-        id: move.data.handId,
+        id: turn.data.handId,
       };
     }
 
@@ -272,15 +263,15 @@ const applyRoundToGlobalState = (
 
     gridWithAllTilesApplied = addTile(
       gridWithAllTilesApplied,
-      move.data.coordinate,
+      turn.data.coordinate,
       cell,
-      move.userId,
+      turn.userId,
     );
 
     // no user for this move - the only possible way this happens
     // right now is if a player is deleted from the whole system.
     // don't check their hand...
-    if (!move.userId) {
+    if (!turn.userId) {
       continue;
     }
   }
@@ -291,14 +282,14 @@ const applyRoundToGlobalState = (
   // a random one.
   const finalGrid = { ...gridWithAllTilesApplied };
   const playerHandsWithNewTiles = { ...globalState.playerHands };
-  for (const move of moves) {
+  for (const turn of turns) {
     const coordinateKey = toCoordinateKey(
-      move.data.coordinate.x,
-      move.data.coordinate.y,
+      turn.data.coordinate.x,
+      turn.data.coordinate.y,
     );
 
     const adjacents = getAdjacentTiles(
-      move.data.coordinate,
+      turn.data.coordinate,
       gridWithAllTilesApplied,
     );
     const invalid = adjacents.some(([adjacentCoord, adjacentTile]) => {
@@ -307,8 +298,8 @@ const applyRoundToGlobalState = (
         return false;
       }
       return !areTilesCompatible(
-        move.data.tile,
-        move.data.coordinate,
+        turn.data.tile,
+        turn.data.coordinate,
         adjacentTile,
         adjacentCoord,
       );
@@ -321,27 +312,27 @@ const applyRoundToGlobalState = (
     // if they were already removed.
 
     if (invalid) {
-      console.log('INVALID MOVE', move, JSON.stringify(adjacents));
+      console.log('INVALID MOVE', turn, JSON.stringify(adjacents));
       // remove the invalid tile from the board
       finalGrid[coordinateKey] = finalGrid[coordinateKey]?.filter(
-        (c) => c.id !== move.data.handId,
+        (c) => c.id !== turn.data.handId,
       );
     } else {
-      if (!move.userId) {
+      if (!turn.userId) {
         // no user for this move - the only possible way this happens
         // right now is if a player is deleted from the whole system.
         // don't check their hand...
         continue;
       } else {
-        const playerHand = playerHandsWithNewTiles[move.userId];
-        playerHandsWithNewTiles[move.userId] = {
+        const playerHand = playerHandsWithNewTiles[turn.userId];
+        playerHandsWithNewTiles[turn.userId] = {
           ...playerHand,
           tiles: playerHand.tiles.map((t) => {
-            if (t?.id === move.data.handId) {
+            if (t?.id === turn.data.handId) {
               return {
                 tile: random.item(SORTED_TILES),
                 id: random.id(),
-                owner: move.userId,
+                owner: turn.userId,
               };
             }
             return t;

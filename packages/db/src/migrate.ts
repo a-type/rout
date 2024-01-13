@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { promises as fs } from 'fs';
 import { db } from './index.js';
 import { Migrator, MigrationProvider, Migration } from 'kysely';
 import url from 'url';

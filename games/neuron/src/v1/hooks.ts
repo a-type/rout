@@ -15,8 +15,3 @@ export function getTile(client: NeuronClient, id: string) {
     .find((tile) => tile?.id === id);
   if (inGrid) return inGrid;
 }
-
-export function useMove() {
-  const client = useGameClient();
-  return client.queuedMoves[0] ?? null;
-}
