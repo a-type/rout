@@ -12,6 +12,12 @@ export function sum(arr: Array<number>): number {
   return arr.reduce((acc, n) => acc + n, 0);
 }
 
+export function removeFirst<T>(arr: Array<T>, predicate: (t: T) => boolean) {
+  const index = arr.findIndex(predicate);
+  if (index === -1) return arr;
+  return [...arr.slice(0, index), ...arr.slice(index + 1)];
+}
+
 export function generateAxialGrid(q: number, r: number): Array<CoordinateKey> {
   const grid: Array<CoordinateKey> = [];
   for (let x = -q; x <= q; x++) {

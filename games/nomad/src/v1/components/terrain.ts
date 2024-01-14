@@ -13,7 +13,7 @@ export const colorLookup: Record<TerrainType, string> = {
 export const movementCosts: Record<TerrainType, number> = {
   desert: 1,
   forest: 2,
-  mountain: 2,
+  mountain: 3,
   ocean: 3,
   grassland: 1,
   swamp: 2,

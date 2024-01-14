@@ -6,6 +6,7 @@ import TerrainGrid from './components/TerrainGrid.js';
 import { axialDistance, last, offsetToAxial, sum } from './utils.js';
 import { movementCosts } from './components/terrain.js';
 import TileInfo from './components/TileInfo.js';
+import Inventory from './components/Inventory.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -149,8 +150,16 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           Submit
         </button>
       </div>
-      <h3>Acquired blessings</h3>
-      <Blessings items={client.state.acquiredBlessings || []} />
+      <div className="flex flex-row gap-8">
+        <div>
+          <h3>Inventory</h3>
+          <Inventory items={client.state.inventory || []} />
+        </div>
+        <div>
+          <h3>Acquired blessings</h3>
+          <Blessings items={client.state.acquiredBlessings || []} />
+        </div>
+      </div>
     </div>
   );
 });

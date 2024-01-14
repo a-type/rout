@@ -1,7 +1,13 @@
 import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
-import { axialDistance, cloneDeep, generateAxialGrid, last } from './utils.js';
+import {
+  axialDistance,
+  cloneDeep,
+  generateAxialGrid,
+  last,
+  removeFirst,
+} from './utils.js';
 import { movementCosts } from './components/terrain.js';
 
 export type CoordinateKey = `${number},${number}`;
@@ -33,10 +39,20 @@ export type GlobalState = {
   playerData: Record<string, PlayerData>;
 };
 
+type ItemTag = 'food';
+
+export type Item = {
+  name: string;
+  description: string;
+  tags: Array<ItemTag>;
+};
+
 export type PlayerData = {
   position: CoordinateKey;
   color: string;
   acquiredBlessings: Array<Blessing>;
+  inventory: Array<Item>;
+  inventoryLimit: number;
 };
 
 export type PlayerState = {
@@ -49,6 +65,8 @@ export type PlayerState = {
 export type MoveData = {
   positions: Array<CoordinateKey>;
 };
+
+const STARTING_INVENTORY_LIMIT = 5;
 
 export const gameDefinition: GameDefinition<
   GlobalState,
@@ -147,6 +165,19 @@ export const gameDefinition: GameDefinition<
             '#DD77DD',
           ]),
           acquiredBlessings: [],
+          inventory: [
+            ...Array.from({ length: 5 })
+              .fill(null)
+              .map(
+                () =>
+                  ({
+                    name: 'Food',
+                    description: 'Food',
+                    tags: ['food'],
+                  } as Item),
+              ),
+          ],
+          inventoryLimit: 5,
         };
         return acc;
       }, {} as Record<string, PlayerData>),
@@ -221,6 +252,14 @@ const applyRoundToGlobalState = (
     return acc;
   }, [] as string[]);
 
+  // Pay sustenance
+  Object.keys(newPlayerData).forEach((playerId) => {
+    newPlayerData[playerId].inventory = removeFirst(
+      newPlayerData[playerId].inventory,
+      (item) => item.tags.includes('food'),
+    );
+  });
+
   // Claim blessings
   newFlippedBlessings = newFlippedBlessings.filter((blessing) => {
     const claimantPlayers = playersThatDidntMove.filter((playerId) => {
@@ -251,6 +290,21 @@ const applyRoundToGlobalState = (
     const position = last(move.data.positions);
     if (position) {
       newPlayerData[move.userId].position = position;
+    }
+  });
+
+  // Check for getting food
+  Object.keys(newPlayerData).forEach((playerId) => {
+    const player = newPlayerData[playerId];
+    const terrain = globalState.terrainGrid[player.position];
+    if (terrain.features.includes('city')) {
+      while (player.inventory.length < player.inventoryLimit) {
+        player.inventory.push({
+          name: 'Food',
+          description: 'Food',
+          tags: ['food'],
+        } as Item);
+      }
     }
   });
   return {
