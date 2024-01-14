@@ -203,6 +203,11 @@ export class GameClient<
     this.error = null;
   }
 
+  clearMoves() {
+    this.queuedMoves = [];
+    this.error = null;
+  }
+
   // TODO: cache local moves in storage
 
   submitMoves = async () => {

@@ -6,12 +6,12 @@ function TerrainGrid({
   items,
   playerLocation,
   playerColor,
-  targetLocation,
+  movePath,
   onClick,
 }: {
   items: Record<CoordinateKey, Terrain>;
   playerLocation: CoordinateKey;
-  targetLocation?: CoordinateKey;
+  movePath?: Array<CoordinateKey>;
   playerColor: string;
   onClick: (x: number, y: number) => void;
 }) {
@@ -50,7 +50,7 @@ function TerrainGrid({
                     item={item}
                     hasPlayer={coordinates === playerLocation}
                     playerColor={playerColor}
-                    isTarget={targetLocation === coordinates}
+                    isTarget={!!movePath?.includes(coordinates)}
                     onClick={() => onClick(parseInt(x), parseInt(y))}
                   />
                 </div>

@@ -4,6 +4,10 @@ export function cloneDeep<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+export function last<T>(arr: Array<T>): T | undefined {
+  return arr ? arr[arr.length - 1] : undefined;
+}
+
 export function generateAxialGrid(q: number, r: number): Array<CoordinateKey> {
   const grid: Array<CoordinateKey> = [];
   for (let x = -q; x <= q; x++) {

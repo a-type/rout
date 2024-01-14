@@ -1,7 +1,7 @@
 import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
-import { axialDistance, cloneDeep, generateAxialGrid } from './utils.js';
+import { axialDistance, cloneDeep, generateAxialGrid, last } from './utils.js';
 
 export type CoordinateKey = `${number},${number}`;
 export type TerrainType =
@@ -42,10 +42,21 @@ export type PlayerState = {
   terrainGrid: Record<CoordinateKey, Terrain>;
   flippedBlessings: Array<Blessing>;
   remainingBlessingCount: number;
+  movement: number;
 } & PlayerData;
 
 export type MoveData = {
-  position: CoordinateKey;
+  positions: Array<CoordinateKey>;
+};
+
+const movementCosts: Record<TerrainType, number> = {
+  desert: 1,
+  forest: 2,
+  mountain: 2,
+  ocean: 3,
+  grassland: 1,
+  swamp: 2,
+  tundra: 1,
 };
 
 export const gameDefinition: GameDefinition<
@@ -59,12 +70,19 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, moves }) => {
-    if (moves.length > 1) {
-      return 'You can only make one move per turn.';
-    }
+    let playerPosition = playerState.position;
+    let remainingMovement = playerState.movement;
     for (const move of moves) {
-      if (axialDistance(move.data.position, playerState.position) > 1) {
-        return 'You must move at most once hex.';
+      for (const movePosition of move.data.positions) {
+        if (remainingMovement <= 0) {
+          return 'You have no remaining movement.';
+        }
+        if (axialDistance(movePosition, playerPosition) > 1) {
+          return 'You must move at most once hex per move.';
+        }
+        playerPosition = movePosition;
+        remainingMovement -=
+          movementCosts[playerState.terrainGrid[playerPosition].type];
       }
     }
     return;
@@ -82,25 +100,19 @@ export const gameDefinition: GameDefinition<
         : null;
     return {
       ...playerState,
-      position: finalMove ? finalMove.data.position : playerState.position,
+      position:
+        finalMove && finalMove.data.positions.length > 0
+          ? finalMove.data.positions[finalMove.data.positions.length - 1]
+          : playerState.position,
     };
   },
 
   // run on server
 
   getInitialGlobalState: ({ playerIds, random }) => {
-    const width = 7;
-    const height = 5;
     const blessingCount = 10;
-    const gridCoordinates = generateAxialGrid(4, 4);
+    const gridCoordinates = generateAxialGrid(5, 5);
     return {
-      playerPositions: playerIds.reduce((acc, playerId) => {
-        acc[playerId] = `${random.int(0, width - 1)},${random.int(
-          0,
-          height - 1,
-        )}`;
-        return acc;
-      }, {} as Record<string, CoordinateKey>),
       terrainGrid: gridCoordinates.reduce((acc, key, i) => {
         acc[key] = {
           type: random.item([
@@ -136,12 +148,12 @@ export const gameDefinition: GameDefinition<
         acc[playerId] = {
           position: random.item(gridCoordinates),
           color: random.item([
-            '#FF0000',
-            '#00FF00',
-            '#0000FF',
-            '#FFFF00',
-            '#00FFFF',
-            '#FF00FF',
+            '#DD7777',
+            '#77DD77',
+            '#7777DD',
+            '#DDDD77',
+            '#77DDDD',
+            '#DD77DD',
           ]),
           acquiredBlessings: [],
         };
@@ -157,6 +169,7 @@ export const gameDefinition: GameDefinition<
       terrainGrid: globalState.terrainGrid,
       flippedBlessings: globalState.flippedBlessings,
       remainingBlessingCount: globalState.blessingDeck.length,
+      movement: 3,
     };
   },
 
@@ -209,9 +222,9 @@ const applyRoundToGlobalState = (
     if (!move.userId) {
       return acc;
     }
-    const { position } = move.data;
+    const position = last(move.data.positions);
     const prevPosition = globalState.playerData[move.userId].position;
-    if (position === prevPosition) {
+    if (!position || position === prevPosition) {
       acc.push(move.userId);
     }
     return acc;
@@ -244,8 +257,10 @@ const applyRoundToGlobalState = (
     if (!move.userId) {
       return;
     }
-    const { position } = move.data;
-    newPlayerData[move.userId].position = position;
+    const position = last(move.data.positions);
+    if (position) {
+      newPlayerData[move.userId].position = position;
+    }
   });
   return {
     ...globalState,

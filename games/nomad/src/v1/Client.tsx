@@ -3,7 +3,7 @@ import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps, useEffect } from 'react';
 import Blessings from './components/Blessings.js';
 import TerrainGrid from './components/TerrainGrid.js';
-import { axialDistance, offsetToAxial } from './utils.js';
+import { axialDistance, last, offsetToAxial } from './utils.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -39,7 +39,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       clearInterval(interval);
     };
   });
-  console.log(client.state?.terrainGrid);
+  const lastMovePosition = last(client.queuedMoves?.[0]?.data.positions);
 
   return (
     <div>
@@ -63,18 +63,24 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
             items={client.state.terrainGrid}
             playerLocation={client.state.position}
             playerColor={client.state.color}
-            targetLocation={
-              client.queuedMoves.length > 0
-                ? client.queuedMoves[0].data.position
-                : undefined
-            }
+            movePath={client.queuedMoves.flatMap((move) => move.data.positions)}
             onClick={(x, y) => {
               if (!client.state) {
                 return;
               }
               const [q, r] = offsetToAxial([x, y]);
-              if (axialDistance(client.state.position, `${q},${r}`) <= 1) {
-                client.setMove(0, { position: `${q},${r}` });
+              if (
+                axialDistance(
+                  lastMovePosition ?? client.state.position,
+                  `${q},${r}`,
+                ) === 1
+              ) {
+                client.setMove(0, {
+                  positions: [
+                    ...(client.queuedMoves?.[0]?.data?.positions ?? []),
+                    `${q},${r}`,
+                  ],
+                });
               }
             }}
           />
@@ -82,18 +88,31 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       )}
       <hr />
       {client.state &&
-        client.queuedMoves.map((move, idx) => (
+        client.queuedMoves?.[0]?.data.positions.map((position, idx) => (
           <div className="flex flex-row gap-2" key={idx}>
-            <span>{move.data.position}</span>
-            <span>{client.state!.terrainGrid[move.data.position].type}</span>
+            <span>{position}</span>
+            <span>{client.state!.terrainGrid[position].type}</span>
+            {client.state!.terrainGrid[position].features.map(
+              (feature, idx) => (
+                <span key={idx}>{feature}</span>
+              ),
+            )}
           </div>
         ))}
-      <button
-        onClick={() => client.submitMoves()}
-        disabled={!hasUnsubmittedMoves}
-      >
-        Submit
-      </button>
+      <div className="flex flex-row gap-2">
+        <button
+          onClick={() => client.clearMoves()}
+          disabled={client.queuedMoves.length === 0}
+        >
+          Clear
+        </button>
+        <button
+          onClick={() => client.submitMoves()}
+          disabled={!hasUnsubmittedMoves}
+        >
+          Submit
+        </button>
+      </div>
       <h3>Acquired blessings</h3>
       <Blessings items={client.state?.acquiredBlessings || []} />
     </div>

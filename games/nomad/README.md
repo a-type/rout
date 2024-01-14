@@ -12,16 +12,17 @@ On your turn, you may move your caravan to an adjacent location, or you may stay
 
 ## Blessing track
 
-* Each turn, a new blessing is revealed on the blessing track. Anyone who is present in the location of the blessing may take it by spending a turn there. If at any time, three or more blessings are revealed, the oldest one vanishes.
+- Each turn, a new blessing is revealed on the blessing track. Anyone who is present in the location of the blessing may take it by spending a turn there. If at any time, three or more blessings are revealed, the oldest one vanishes.
 
 ## Prophecy
+
 At the start of the game, you are given a prophecy, which will tell of a sequence of blessings that will happen during the game.
 
 # Technical specs
 
 ## Game state
 
-The game state is stored as a 2d array of terrain tiles, each of which has a terrain type and may have a special feature.
+The game state is stored as a record of axial coordinates to terrain tiles, each of which has a terrain type and may have special features.
 
 The list of blessings is stored as a queue.
 
