@@ -1,10 +1,10 @@
 import { assert } from '@a-type/utils';
 import { dateTime, db, id, jsonArrayFrom, sql } from '@long-game/db';
-import { evictSession, getCachedGame } from '@long-game/game-cache';
+import { getGameState } from '@long-game/game-state';
 import {
   ClientSession,
   GameStatus,
-  Move,
+  Turn,
   GameRandom,
   getLatestVersion,
 } from '@long-game/game-definition';
@@ -103,7 +103,7 @@ export const gameSessionsRouter = router({
         };
       }
 
-      const game = await getCachedGame(gameSession, new Date());
+      const game = await getGameState(gameSession, new Date());
       const status =
         game?.gameDefinition.getStatus({
           globalState: game.globalState,
@@ -484,11 +484,12 @@ export const gameSessionsRouter = router({
         /**
          * All historical moves for all players
          */
-        rounds: GameRound<Move<any>>[];
+        rounds: GameRound<Turn<any>>[];
         /**
-         * All moves submitted by this player for this round
+         * The turn submitted by this player for this round.
+         * Undefined if player has not yet submitted a turn.
          */
-        queuedMoves: Move<any>[];
+        currentTurn: Turn<any> | undefined;
         /**
          * The status of the current game. Completed games
          * cannot accept new moves.
@@ -510,7 +511,7 @@ export const gameSessionsRouter = router({
           });
         }
 
-        const game = await getCachedGame(gameSession, new Date());
+        const game = await getGameState(gameSession, new Date());
 
         if (!game) {
           throw new TRPCError({
@@ -521,10 +522,11 @@ export const gameSessionsRouter = router({
 
         const { globalState, gameDefinition, previousRounds, currentRound } =
           game;
-        // we only show the player queued moves for their
+        // we only show the player queued turn for their
         // own user
-        const myMovesThisRound = currentRound.moves.filter(
-          (move) => move.userId === session.userId,
+        // players should only have 1 turn per round.
+        const myTurnThisRound = currentRound.turns.find(
+          (turn) => turn.userId === session.userId,
         );
         const playerState = gameDefinition.getPlayerState({
           globalState,
@@ -532,8 +534,8 @@ export const gameSessionsRouter = router({
         });
         const publicHistoricalRounds = previousRounds.map((r) => ({
           ...r,
-          moves: r.moves.map((m) =>
-            gameDefinition.getPublicMove({ move: m, globalState }),
+          turns: r.turns.map((m) =>
+            gameDefinition.getPublicTurn({ turn: m, globalState }),
           ),
         }));
         const status = gameDefinition.getStatus({
@@ -544,7 +546,7 @@ export const gameSessionsRouter = router({
         return {
           state: playerState,
           rounds: publicHistoricalRounds,
-          queuedMoves: myMovesThisRound,
+          currentTurn: myTurnThisRound,
           status,
         };
       },
@@ -573,7 +575,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      const game = await getCachedGame(gameSession, new Date());
+      const game = await getGameState(gameSession, new Date());
 
       if (!game) {
         throw new TRPCError({
@@ -609,16 +611,13 @@ export const gameSessionsRouter = router({
    * Submit new moves for this round of a game session.
    * Overwrites any previously submitted moves this round.
    */
-  submitMoves: userProcedure
+  submitTurn: userProcedure
     .input(
       zod.object({
         gameSessionId: zod.string(),
-        moves: zod.array(
-          zod.object({
-            id: zod.string(),
-            data: zod.any(),
-          }),
-        ),
+        turn: zod.object({
+          data: zod.any(),
+        }),
       }),
     )
     .mutation(async (opts) => {
@@ -642,7 +641,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      const game = await getCachedGame(gameSession, new Date());
+      const game = await getGameState(gameSession, new Date());
 
       if (!game) {
         throw new TRPCError({
@@ -651,14 +650,8 @@ export const gameSessionsRouter = router({
         });
       }
 
-      const {
-        globalState,
-        gameDefinition,
-        currentRound,
-        previousRounds,
-        roundStart,
-        roundEnd,
-      } = game;
+      const { globalState, gameDefinition, currentRound, previousRounds } =
+        game;
 
       // validate the game status - cannot make moves on an ended game
       const status = gameDefinition.getStatus({
@@ -682,11 +675,11 @@ export const gameSessionsRouter = router({
       // then apply these moves to that state and see if they're valid
       const validationMessage = gameDefinition.validateTurn({
         playerState,
-        moves: opts.input.moves.map((m) => ({
-          ...m,
-          data: m.data || null,
+        turn: {
+          data: null,
+          ...opts.input.turn,
           userId: session.userId,
-        })),
+        },
       });
       if (validationMessage) {
         throw new TRPCError({
@@ -699,31 +692,27 @@ export const gameSessionsRouter = router({
       // in the timerange and insert the provided ones
       await db.transaction().execute(async (trx) => {
         await trx
-          .deleteFrom('GameMove')
-          .where('gameSessionId', '=', opts.input.gameSessionId)
-          .where('userId', '=', session.userId)
-          .where('createdAt', '>=', dateTime(roundStart))
-          .where('createdAt', '<', dateTime(roundEnd))
-          .execute();
-
-        await trx
-          .insertInto('GameMove')
-          .values(
-            opts.input.moves.map((move) => ({
-              // provide a new ID - otherwise users could
-              // overwrite each other's moves or a move
-              // from a previous turn (if constraints change)
-              id: id(),
-              gameSessionId: opts.input.gameSessionId,
-              userId: session.userId,
-              data: JSON.stringify(move.data),
-            })),
-          )
+          .insertInto('GameTurn')
+          .values({
+            // provide a new ID - otherwise users could
+            // overwrite each other's moves or a move
+            // from a previous turn (if constraints change)
+            gameSessionId: opts.input.gameSessionId,
+            userId: session.userId,
+            data: opts.input.turn.data,
+            roundIndex: currentRound.roundIndex,
+          })
+          .onConflict((bld) => {
+            // resolve conflicts on composite primary key by updating
+            // turn data to the newly supplied turn
+            return bld
+              .columns(['gameSessionId', 'userId', 'roundIndex'])
+              .doUpdateSet({
+                data: opts.input.turn.data,
+              });
+          })
           .execute();
       });
-
-      // evict the cached game state
-      evictSession(opts.input.gameSessionId, new Date());
     }),
 });
 
@@ -744,6 +733,7 @@ async function getAuthorizedGameSession(gameSessionId: string, userId: string) {
       'GameSession.gameId',
       'GameSession.randomSeed',
       'GameSession.gameVersion',
+      'GameSession.startedAt',
     ])
     .executeTakeFirst();
 

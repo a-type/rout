@@ -26,7 +26,7 @@ export class GameRandom {
     // counting up is unique. since games run
     // deterministically, we don't need anything
     // fancier.
-    return `${this.idCounter++}`;
+    return `${this.seed}-${this.idCounter++}`;
   }
 
   __advance = (count = 1) => {

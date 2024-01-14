@@ -22,9 +22,7 @@ export default Client;
 
 const LocalGuess = withGame(function LocalGuess() {
   const client = useGameClient();
-  const guess = client.queuedMoves[0]?.data.guess ?? 0;
-  const hasUnsubmittedMoves =
-    client.queuedMoves.filter((move) => !move.createdAt).length > 0;
+  const guess = client.currentTurn?.data.guess ?? 0;
 
   return (
     <div>
@@ -35,12 +33,10 @@ const LocalGuess = withGame(function LocalGuess() {
         onChange={(e) => {
           let num = e.target.valueAsNumber;
           if (isNaN(num)) num = 0;
-          client.setMove(0, { guess: num });
+          client.prepareTurn({ guess: num });
         }}
       />
-      {hasUnsubmittedMoves && (
-        <button onClick={client.submitMoves}>Submit</button>
-      )}
+      {client.dirty && <button onClick={client.submitMoves}>Submit</button>}
       {client.error && <div>{client.error}</div>}
     </div>
   );
@@ -54,16 +50,14 @@ const History = withGame(function History() {
       <h1>History</h1>
       <ul>
         {client.previousRoundsWithUsers.map((round) => (
-          <li key={round.roundStart.toISOString()}>
-            <div>Round {round.roundNumber}</div>
+          <li key={round.roundIndex}>
+            <div>Round {round.roundIndex + 1}</div>
             <ul>
-              {round.moves.map((move) => (
-                <li key={move.id}>
-                  {move.data.guess} -{' '}
-                  {move.createdAt
-                    ? new Date(move.createdAt).toString()
-                    : ''}{' '}
-                  by {move.user.name}
+              {round.turns.map((turn) => (
+                <li key={turn.userId}>
+                  {turn.data.guess} -{' '}
+                  {turn.createdAt ? new Date(turn.createdAt).toString() : ''} by{' '}
+                  {turn.user.name}
                 </li>
               ))}
             </ul>

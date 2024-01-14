@@ -1,4 +1,4 @@
-import { GameDefinition, Move } from '@long-game/game-definition';
+import { roundFormat, GameDefinition } from '@long-game/game-definition';
 import { lazy } from 'react';
 
 export type GlobalState = {
@@ -24,14 +24,8 @@ export const gameDefinition: GameDefinition<
     playerGuesses: {},
   }),
 
-  validateTurn: ({ moves }) => {
-    if (moves.length !== 1) {
-      return 'You must make exactly one guess.';
-    }
-
-    const move = moves[0];
-
-    if (move.data.guess < 0 || move.data.guess > 100) {
+  validateTurn: ({ turn }) => {
+    if (turn.data.guess < 0 || turn.data.guess > 100) {
       return 'Your guess must be between 0 and 100';
     }
   },
@@ -49,20 +43,20 @@ export const gameDefinition: GameDefinition<
     return initialState;
   },
 
-  getPublicMove: ({ move }) => move,
+  getPublicTurn: ({ turn }) => turn,
 
   getStatus: ({ globalState, rounds }) => {
-    const movesThatGuessedRight = rounds
-      .map((r) => r.moves)
+    const turnsThatGuessedRight = rounds
+      .map((r) => r.turns)
       .flat()
       .filter((move) => move.data.guess === globalState.secretNumber);
 
-    if (movesThatGuessedRight.length > 0) {
+    if (turnsThatGuessedRight.length > 0) {
       return {
         status: 'completed',
         // exclude nulls - users which have left the game or
         // otherwise invalid moves...
-        winnerIds: movesThatGuessedRight
+        winnerIds: turnsThatGuessedRight
           .map((move) => move.userId)
           .filter((id): id is string => !!id),
       };
@@ -72,6 +66,8 @@ export const gameDefinition: GameDefinition<
       status: 'active',
     };
   },
+
+  getRoundIndex: roundFormat.sync(),
 
   Client: lazy(() => import('./Client.js')),
   GameRecap: lazy(() => import('./GameRecap.js')),

@@ -1,4 +1,10 @@
-import { ColumnType, Insertable, Selectable, Updateable } from 'kysely';
+import {
+  ColumnType,
+  Generated,
+  Insertable,
+  Selectable,
+  Updateable,
+} from 'kysely';
 
 type CreatedAtColumn = ColumnType<string, string | undefined, never>;
 type UpdatedAtColumn = ColumnType<
@@ -12,7 +18,7 @@ export interface Database {
   Account: AccountTable;
   VerificationToken: VerificationTokenTable;
   GameSession: GameSessionTable;
-  GameMove: GameMoveTable;
+  GameTurn: GameTurnTable;
   GameSessionMembership: GameSessionMembershipTable;
   Friendship: FriendshipTable;
   FriendshipView: FriendshipTable;
@@ -81,20 +87,21 @@ export type GameSession = Selectable<GameSessionTable>;
 export type NewGameSession = Insertable<GameSessionTable>;
 export type GameSessionUpdate = Updateable<GameSessionTable>;
 
-export interface GameMoveTable {
-  id: string;
+export interface GameTurnTable {
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
+  // primary key is composite of these 3 columns
   gameSessionId: string;
   userId: string | null;
-  // TODO: define this format? the main contents will be game dependent
+  roundIndex: number;
+  // the main contents will be game dependent, see game-definition
   data: any;
 }
 
-export type GameMove = Selectable<GameMoveTable>;
-export type NewGameMove = Insertable<GameMoveTable>;
-export type GameMoveUpdate = Updateable<GameMoveTable>;
+export type GameTurn = Selectable<GameTurnTable>;
+export type NewGameTurn = Insertable<GameTurnTable>;
+export type GameTurnUpdate = Updateable<GameTurnTable>;
 
 export interface GameSessionMembershipTable {
   id: string;

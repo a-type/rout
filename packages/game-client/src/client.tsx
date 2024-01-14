@@ -1,8 +1,9 @@
 import {
-  BaseMoveData,
+  BaseTurnData,
   GameDefinition,
-  Move,
+  Turn,
   ClientSession,
+  LocalTurn,
 } from '@long-game/game-definition';
 import { AppRouter } from '@long-game/trpc';
 import { TRPCClientError, createTRPCProxyClient } from '@trpc/client';
@@ -33,29 +34,33 @@ if (
 
 export class GameClient<
   PlayerState,
-  MoveData extends BaseMoveData,
-  PublicMoveData extends BaseMoveData = MoveData,
+  TurnData extends BaseTurnData,
+  PublicTurnData extends BaseTurnData = TurnData,
 > {
   state: PlayerState | null = null;
-  queuedMoves: Move<MoveData>[] = [];
-  previousRounds: GameRound<Move<PublicMoveData>>[] = [];
+  currentTurn: LocalTurn<TurnData> | undefined;
+  /** Whether there are local changes not yet submitted to server */
+  dirty = false;
+  previousRounds: GameRound<Turn<PublicTurnData>>[] = [];
   error: string | null = null;
 
   readonly session;
   readonly gameDefinition: GameDefinition<
     any,
     PlayerState,
-    MoveData,
-    PublicMoveData
+    TurnData,
+    PublicTurnData
   >;
 
   private trpc;
+  private _disposes: (() => void)[] = [];
 
   get prospectiveState(): PlayerState | null {
     if (!this.state) return null;
+    if (!this.currentTurn) return this.state;
     return this.gameDefinition.getProspectivePlayerState({
       playerState: this.state,
-      prospectiveMoves: this.queuedMoves,
+      prospectiveTurn: this.currentTurn,
       playerId: this.session.localPlayer.id,
     });
   }
@@ -64,14 +69,16 @@ export class GameClient<
     return this.state === null;
   }
 
+  // assigns rich user data to each turn, making it easier
+  // to display in the UI
   get previousRoundsWithUsers(): GameRound<
-    Move<PublicMoveData> & {
+    Turn<PublicTurnData> & {
       user: { id: string; name: string; imageUrl: string | null };
     }
   >[] {
     return this.previousRounds.map((round) => ({
       ...round,
-      moves: round.moves.map((move) => ({
+      turns: round.turns.map((move) => ({
         ...move,
         user: this.session.members.find(
           (player) => player.id === move.userId,
@@ -107,6 +114,26 @@ export class GameClient<
       trpc: false,
     });
     this.refreshState();
+    // listen for window visibility and refresh state when it becomes visible
+    // again
+    const onVisiblilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        this.refreshState();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisiblilityChange);
+    window.addEventListener('focus', onVisiblilityChange);
+    this._disposes.push(() => {
+      document.removeEventListener('visibilitychange', onVisiblilityChange);
+      window.removeEventListener('focus', onVisiblilityChange);
+    });
+    // also refresh once a minute
+    const interval = setInterval(() => {
+      this.refreshState();
+    }, 60 * 1000);
+    this._disposes.push(() => {
+      clearInterval(interval);
+    });
   }
 
   private refreshState = () => {
@@ -118,9 +145,10 @@ export class GameClient<
         action('refreshState', (data) => {
           this.state = data.state;
           this.previousRounds = data.rounds as GameRound<
-            Move<PublicMoveData>
+            Turn<PublicTurnData>
           >[];
-          this.queuedMoves = data.queuedMoves as Move<MoveData>[];
+          this.currentTurn = data.currentTurn;
+          this.dirty = false;
           this.error = null;
         }),
       )
@@ -135,55 +163,11 @@ export class GameClient<
       );
   };
 
-  addMove(move: MoveData) {
-    const newMove = {
-      id: cuid2.createId(),
-      data: move,
+  prepareTurn(turn: TurnData | ((prev: TurnData | undefined) => TurnData)) {
+    const newTurn: LocalTurn<TurnData> = {
       userId: this.session.localPlayer.id,
+      data: typeof turn === 'function' ? turn(this.currentTurn?.data) : turn,
     };
-
-    if (!this.state) {
-      this.error = "The game hasn't loaded yet. Try again?";
-      return;
-    }
-
-    // validate the move based on what we know
-    const validationMessage = this.gameDefinition.validateTurn({
-      playerState: this.state,
-      moves: [...this.queuedMoves, newMove],
-    });
-    if (validationMessage) {
-      this.error = validationMessage;
-      return;
-    }
-
-    this.queuedMoves.push(newMove);
-    this.error = null;
-  }
-
-  setMove(
-    index: number,
-    move: MoveData | ((prev: MoveData | undefined) => MoveData),
-  ) {
-    /**
-     * This method is only used to replace known moves or
-     * add a move to the end of the queue when the index
-     * is known - for example, if only N moves are valid.
-     */
-    if (this.queuedMoves.length <= index && index !== this.queuedMoves.length) {
-      this.error =
-        'Internal error. Cannot create move. Please report this problem!';
-      throw new Error('Invalid move index: ' + index);
-    }
-
-    const existingMove = this.queuedMoves[index] as Move<MoveData> | undefined;
-    const newMove = {
-      id: cuid2.createId(),
-      userId: this.session.localPlayer.id,
-      data: typeof move === 'function' ? move(existingMove?.data) : move,
-    };
-    const proposedMoves = [...this.queuedMoves];
-    proposedMoves[index] = newMove;
 
     if (!this.state) {
       this.error = "The game hasn't loaded yet. Try again?";
@@ -192,23 +176,25 @@ export class GameClient<
 
     const validationMessage = this.gameDefinition.validateTurn({
       playerState: this.state,
-      moves: proposedMoves,
+      turn: newTurn,
     });
     if (validationMessage) {
       this.error = validationMessage;
       return;
     }
 
-    this.queuedMoves[index] = newMove;
+    this.currentTurn = newTurn;
     this.error = null;
+    this.dirty = true;
   }
 
-  // TODO: cache local moves in storage
+  // TODO: cache prepared turn in storage
 
   submitMoves = async () => {
-    await this.trpc.gameSessions.submitMoves.mutate({
+    if (!this.currentTurn) return;
+    await this.trpc.gameSessions.submitTurn.mutate({
       gameSessionId: this.session.id,
-      moves: this.queuedMoves,
+      turn: this.currentTurn,
     });
     await this.refreshState();
   };
@@ -216,8 +202,8 @@ export class GameClient<
 
 export function createGameClient<
   PlayerState,
-  MoveData extends BaseMoveData,
-  PublicMoveData extends BaseMoveData = MoveData,
+  MoveData extends BaseTurnData,
+  PublicMoveData extends BaseTurnData = MoveData,
 >(gameDefinition: GameDefinition<any, PlayerState, MoveData, PublicMoveData>) {
   const GameClientContext = createContext<GameClient<
     PlayerState,
