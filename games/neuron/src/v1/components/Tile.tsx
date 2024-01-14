@@ -6,9 +6,10 @@ import { hashToIndex } from '@long-game/common';
 
 export interface TileProps {
   cells: GridTile[];
+  className?: string;
 }
 
-export function Tile({ cells }: TileProps) {
+export function Tile({ cells, className }: TileProps) {
   const [lineCanvas] = useState(() => new LineCanvas());
   useEffect(() => {
     lineCanvas.setCells(cells);
@@ -17,30 +18,42 @@ export function Tile({ cells }: TileProps) {
   return (
     <div
       title={shape ?? 'blank'}
-      className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[30px] select-none"
+      className={
+        'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[30px] select-none ' +
+          className ?? ''
+      }
     >
       <canvas ref={lineCanvas.ref} width={32} height={32} />
     </div>
   );
 }
 
-export function DraggableTile({ cells, id }: TileProps & { id: string }) {
+export function DraggableTile({
+  cells,
+  id,
+  className,
+}: TileProps & { id: string; className?: string }) {
   const shape = mergeTiles(cells.map((c) => c.shape));
 
   if (!shape) {
-    return <EmptyTile />;
+    return <EmptyTile className={className} />;
   }
 
   return (
     <Draggable id={id} data={{ tile: shape }}>
-      <Tile cells={cells} />
+      <Tile cells={cells} className={className} />
     </Draggable>
   );
 }
 
-export function EmptyTile() {
+export function EmptyTile({ className }: { className?: string }) {
   return (
-    <div className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none">
+    <div
+      className={
+        'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none ' +
+          className ?? ''
+      }
+    >
       &nbsp;
     </div>
   );
