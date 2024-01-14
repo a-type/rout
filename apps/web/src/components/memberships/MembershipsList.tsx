@@ -24,9 +24,11 @@ function MembershipItem({
   membership: GameSessionMembershipData;
 }) {
   const game = games[membership.gameId];
+  console.log({ membership });
   return (
     <Link to={`/session/${membership.gameSessionId}`}>
-      {game.title} | Invite: {membership.membershipStatus}
+      {game.title} | Invite: {membership.membershipStatus} | Created:{' '}
+      {new Date(membership.createdAt).toLocaleString()}
     </Link>
   );
 }

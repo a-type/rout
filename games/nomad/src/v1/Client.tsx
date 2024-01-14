@@ -3,6 +3,7 @@ import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps, useEffect } from 'react';
 import Blessings from './components/Blessings.js';
 import TerrainGrid from './components/TerrainGrid.js';
+import { axialDistance } from './utils.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -64,8 +65,13 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
                 ? client.queuedMoves[0].data.position
                 : undefined
             }
-            onClick={(x, y) => {
-              client.setMove(0, { position: `${x},${y}` });
+            onClick={(q, r) => {
+              if (!client.state) {
+                return;
+              }
+              if (axialDistance(client.state.position, `${q},${r}`) <= 1) {
+                client.setMove(0, { position: `${q},${r}` });
+              }
             }}
           />
         </div>

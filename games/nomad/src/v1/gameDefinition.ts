@@ -1,7 +1,7 @@
 import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
-import { cloneDeep } from './utils.js';
+import { axialDistance, cloneDeep, generateAxialGrid } from './utils.js';
 
 export type CoordinateKey = `${number},${number}`;
 export type TerrainType =
@@ -59,6 +59,11 @@ export const gameDefinition: GameDefinition<
     if (moves.length > 1) {
       return 'You can only make one move per turn.';
     }
+    for (const move of moves) {
+      if (axialDistance(move.data.position, playerState.position) > 1) {
+        return 'You must move at most once hex.';
+      }
+    }
     return;
   },
 
@@ -84,6 +89,7 @@ export const gameDefinition: GameDefinition<
     const width = 7;
     const height = 5;
     const blessingCount = 10;
+    const gridCoordinates = generateAxialGrid(4, 4);
     return {
       playerPositions: playerIds.reduce((acc, playerId) => {
         acc[playerId] = `${random.int(0, width - 1)},${random.int(
@@ -92,12 +98,7 @@ export const gameDefinition: GameDefinition<
         )}`;
         return acc;
       }, {} as Record<string, CoordinateKey>),
-      terrainGrid: (
-        Array.from({ length: width * height }).fill(null) as any[]
-      ).reduce((acc, _, i) => {
-        const x = i % width;
-        const y = Math.floor(i / width);
-        const key = `${x},${y}`;
+      terrainGrid: gridCoordinates.reduce((acc, key, i) => {
         acc[key] = {
           type: random.item([
             'desert',
@@ -124,11 +125,11 @@ export const gameDefinition: GameDefinition<
           'swamp',
           'tundra',
         ]),
-        points: random.int(1, 3) * random.int(1, 3),
+        points: random.int(1, 6) + random.int(1, 6),
       })),
       playerData: playerIds.reduce((acc, playerId) => {
         acc[playerId] = {
-          position: `${random.int(0, width - 1)},${random.int(0, height - 1)}`,
+          position: random.item(gridCoordinates),
           color: random.item([
             '#FF0000',
             '#00FF00',
