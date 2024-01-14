@@ -15,6 +15,7 @@
     "@long-game/auth": "workspace:*",
     "@long-game/db": "workspace:*",
     "@long-game/trpc": "workspace:*",
+    "@long-game/server-events": "workspace:*",
     "@trpc/server": "^10.45.0",
     "@whatwg-node/server": "^0.9.22",
     "itty-router": "^4.0.25",

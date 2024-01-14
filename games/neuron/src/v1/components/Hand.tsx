@@ -21,7 +21,7 @@ const HandTile = withGame(function HandTile({ tile }: { tile: GridTile }) {
   const client = useGameClient();
   const grid = client.state?.grid;
   const canBePlayed = canTileBePlayed(tile.shape, grid ?? {});
-  console.log('canBePlayed', canBePlayed, tile.shape);
+
   return (
     <DraggableTile
       id={tile.id}

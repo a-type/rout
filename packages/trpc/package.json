@@ -17,6 +17,7 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/games": "workspace:*",
     "@long-game/game-state": "workspace:*",
+    "@long-game/server-events": "workspace:*",
     "superjson": "^1.12.0",
     "zod": "^3.19.0"
   },

@@ -7,15 +7,15 @@ import {
 } from '@long-game/game-definition';
 import { AppRouter } from '@long-game/trpc';
 import { TRPCClientError, createTRPCProxyClient } from '@trpc/client';
-import { action, computed, makeAutoObservable, makeObservable } from 'mobx';
+import { action, makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SuperJSON from 'superjson';
 import { fetchLink, loginLink } from './trpc.js';
-import cuid2 from '@paralleldrive/cuid2';
 import { ReactNode, createContext, useContext, useState } from 'react';
 import { CreateTRPCReact, createTRPCReact } from '@trpc/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GameRound } from '@long-game/common';
+import { ServerEvents, createEvents } from './events.js';
 
 // makes TS/PNPM happy when using withGame - basically
 // it gets worried whenever you re-export a tool which
@@ -52,7 +52,8 @@ export class GameClient<
     PublicTurnData
   >;
 
-  private trpc;
+  private _trpc;
+  private _events: ServerEvents;
   private _disposes: (() => void)[] = [];
 
   get prospectiveState(): PlayerState | null {
@@ -104,40 +105,23 @@ export class GameClient<
   }) {
     this.gameDefinition = gameDefinition;
     this.session = session;
-    this.trpc = createTRPCProxyClient<AppRouter>({
+    this._trpc = createTRPCProxyClient<AppRouter>({
       transformer: SuperJSON,
       links: [loginLink({ loginUrl }), fetchLink(host)],
     });
+    this._events = createEvents(host, session.id);
     makeAutoObservable(this, {
       // IDK why mobx doesn't include this in typings?
       // @ts-expect-error
-      trpc: false,
+      _trpc: false,
+      _events: false,
     });
     this.refreshState();
-    // listen for window visibility and refresh state when it becomes visible
-    // again
-    const onVisiblilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        this.refreshState();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisiblilityChange);
-    window.addEventListener('focus', onVisiblilityChange);
-    this._disposes.push(() => {
-      document.removeEventListener('visibilitychange', onVisiblilityChange);
-      window.removeEventListener('focus', onVisiblilityChange);
-    });
-    // also refresh once a minute
-    const interval = setInterval(() => {
-      this.refreshState();
-    }, 60 * 1000);
-    this._disposes.push(() => {
-      clearInterval(interval);
-    });
+    this.subscribeToRefreshEvents();
   }
 
   private refreshState = () => {
-    return this.trpc.gameSessions.gameState
+    return this._trpc.gameSessions.gameState
       .query({
         gameSessionId: this.session.id,
       })
@@ -161,6 +145,34 @@ export class GameClient<
           }
         }),
       );
+  };
+
+  private subscribeToRefreshEvents = () => {
+    // listen for window visibility and refresh state when it becomes visible
+    // again
+    // const onVisiblilityChange = () => {
+    //   if (document.visibilityState === 'visible') {
+    //     this.refreshState();
+    //   }
+    // };
+    // document.addEventListener('visibilitychange', onVisiblilityChange);
+    // window.addEventListener('focus', onVisiblilityChange);
+    // this._disposes.push(() => {
+    //   document.removeEventListener('visibilitychange', onVisiblilityChange);
+    //   window.removeEventListener('focus', onVisiblilityChange);
+    // });
+    // // also refresh once a minute
+    // const interval = setInterval(() => {
+    //   this.refreshState();
+    // }, 60 * 1000);
+    // this._disposes.push(() => {
+    //   clearInterval(interval);
+    // });
+
+    // subscribe to server event telling us to refresh game state
+    this._disposes.push(
+      this._events.subscribe('game-state-update', this.refreshState),
+    );
   };
 
   prepareTurn(turn: TurnData | ((prev: TurnData | undefined) => TurnData)) {
@@ -192,11 +204,12 @@ export class GameClient<
 
   submitMoves = async () => {
     if (!this.currentTurn) return;
-    await this.trpc.gameSessions.submitTurn.mutate({
+    await this._trpc.gameSessions.submitTurn.mutate({
       gameSessionId: this.session.id,
       turn: this.currentTurn,
     });
-    await this.refreshState();
+    // server event should do this for us
+    // await this.refreshState();
   };
 }
 

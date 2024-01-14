@@ -713,6 +713,8 @@ export const gameSessionsRouter = router({
           })
           .execute();
       });
+
+      opts.ctx.events.sendGameStateUpdate(opts.input.gameSessionId);
     }),
 });
 

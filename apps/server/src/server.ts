@@ -5,6 +5,7 @@ import { error, json, Router, createCors, IRequest } from 'itty-router';
 import { authRouter } from './routers/auth.js';
 import { trpcRouter } from './routers/trpc.js';
 import { DEPLOYED_CONTEXT } from './deployedContext.js';
+import { eventsRouter } from './routers/events.js';
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router
   .get('/', () => 'Success!')
   .all('/auth/*', authRouter.handle)
   .all('/trpc/*', trpcRouter.handle)
+  .all('/events/*', eventsRouter.handle)
   .all('*', () => error(404));
 
 const ittyServer = createServerAdapter((request) =>
