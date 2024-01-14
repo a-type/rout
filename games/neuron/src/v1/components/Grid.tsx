@@ -1,10 +1,5 @@
 import { GRID_SIZE, Grid as GridData } from '../gameDefinition.js';
-import {
-  CoordinateKey,
-  MERGES,
-  mergeTiles,
-  toCoordinateKey,
-} from '../tiles.js';
+import { CoordinateKey, toCoordinateKey } from '../tiles.js';
 import { useDroppable } from '@dnd-kit/core';
 import { DraggableTile, Tile } from './Tile.js';
 import { useGameClient, withGame } from '../gameClient.js';
@@ -25,8 +20,8 @@ export function Grid({ data }: GridProps) {
               <GridCell
                 x={x}
                 y={y}
-                key={toCoordinateKey(x, y)}
-                data={data[toCoordinateKey(x, y)]}
+                key={toCoordinateKey({ x, y })}
+                data={data[toCoordinateKey({ x, y })]}
               />
             )),
         )}
@@ -45,7 +40,7 @@ function GridCell({
 }) {
   const hasTile = !!data?.length;
   const { isOver, setNodeRef } = useDroppable({
-    id: toCoordinateKey(x, y),
+    id: toCoordinateKey({ x, y }),
     // cannot move where tiles already are
     disabled: hasTile,
   });
@@ -68,7 +63,7 @@ const GridCellTile = withGame(function GridCellTile({
 }) {
   const client = useGameClient();
   const move = client.currentTurn;
-  const movedTileId = move?.data.handId;
+  const movedTileId = move?.data.tileId;
 
   const isMoveToThisCell =
     movedTileId && cells.some((c) => c.id === movedTileId);

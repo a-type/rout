@@ -53,6 +53,7 @@ export class GameClient<
   >;
 
   private trpc;
+  private _disposes: (() => void)[] = [];
 
   get prospectiveState(): PlayerState | null {
     if (!this.state) return null;
@@ -113,6 +114,26 @@ export class GameClient<
       trpc: false,
     });
     this.refreshState();
+    // listen for window visibility and refresh state when it becomes visible
+    // again
+    const onVisiblilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        this.refreshState();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisiblilityChange);
+    window.addEventListener('focus', onVisiblilityChange);
+    this._disposes.push(() => {
+      document.removeEventListener('visibilitychange', onVisiblilityChange);
+      window.removeEventListener('focus', onVisiblilityChange);
+    });
+    // also refresh once a minute
+    const interval = setInterval(() => {
+      this.refreshState();
+    }, 60 * 1000);
+    this._disposes.push(() => {
+      clearInterval(interval);
+    });
   }
 
   private refreshState = () => {
