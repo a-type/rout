@@ -24,22 +24,58 @@ function TerrainTile({
   isTarget: boolean;
 }) {
   const color = colorLookup[item.type];
+  const width = 50;
+  const margin = 2;
   return (
-    <div
-      style={{
-        backgroundColor: color,
-        width: 40,
-        height: 40,
-        border: isTarget ? '2px red dashed' : '',
-      }}
-      onClick={onClick}
-    >
-      {hasPlayer && (
-        <div style={{ backgroundColor: playerColor, width: 20, height: 20 }}>
-          P
-        </div>
-      )}
-    </div>
+    <>
+      <div
+        style={{
+          position: 'relative',
+          backgroundColor: isTarget ? 'red' : color,
+          clipPath:
+            'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+          margin,
+          width,
+          height: width * 1.1547,
+          display: 'inline-block',
+          marginBottom: margin - width * 0.2668,
+        }}
+        onClick={onClick}
+      >
+        {isTarget && (
+          <div
+            style={{
+              position: 'absolute',
+              backgroundColor: color,
+              clipPath:
+                'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+              margin: 4,
+              top: 0,
+              left: 0,
+              width: width - 8,
+              height: (width - 8) * 1.1547,
+              display: 'inline-block',
+            }}
+            onClick={onClick}
+          />
+        )}
+        {hasPlayer && (
+          <div
+            className="position-relative"
+            style={{
+              backgroundColor: playerColor,
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 20,
+              height: 20,
+            }}
+          >
+            P
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -69,9 +105,16 @@ function TerrainGrid({
   const [playerX, playerY] = playerLocation.split(',');
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex flex-col">
       {Object.entries(itemsToGrid).map(([x, row]) => (
-        <div key={x} className="flex flex-col gap-1">
+        <div
+          key={x}
+          className="flex flex-row"
+          style={{
+            marginLeft: parseInt(x, 10) % 2 === 0 ? 0 : 26,
+            marginTop: -4,
+          }}
+        >
           {Object.entries(row).map(([y, item]) => (
             <div key={y}>
               <TerrainTile
