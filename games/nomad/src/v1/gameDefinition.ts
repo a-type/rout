@@ -1,4 +1,9 @@
-import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  Turn,
+  GameRandom,
+  roundFormat,
+} from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
 import {
@@ -62,7 +67,7 @@ export type PlayerState = {
   movement: number;
 } & PlayerData;
 
-export type MoveData = {
+export type TurnData = {
   positions: Array<CoordinateKey>;
 };
 
@@ -71,28 +76,28 @@ const STARTING_INVENTORY_LIMIT = 5;
 export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
-  MoveData,
-  MoveData
+  TurnData,
+  TurnData
 > = {
   version: `v0.0`,
 
+  getRoundIndex: roundFormat.sync(),
+
   // run on both client and server
 
-  validateTurn: ({ playerState, moves }) => {
+  validateTurn: ({ playerState, turn }) => {
     let playerPosition = playerState.position;
     let remainingMovement = playerState.movement;
-    for (const move of moves) {
-      for (const movePosition of move.data.positions) {
-        if (remainingMovement <= 0) {
-          return 'You have no remaining movement.';
-        }
-        if (axialDistance(movePosition, playerPosition) > 1) {
-          return 'You must move at most once hex per move.';
-        }
-        playerPosition = movePosition;
-        remainingMovement -=
-          movementCosts[playerState.terrainGrid[playerPosition].type];
+    for (const movePosition of turn.data.positions) {
+      if (remainingMovement <= 0) {
+        return 'You have no remaining movement.';
       }
+      if (axialDistance(movePosition, playerPosition) > 1) {
+        return 'You must move at most once hex per move.';
+      }
+      playerPosition = movePosition;
+      remainingMovement -=
+        movementCosts[playerState.terrainGrid[playerPosition].type];
     }
     return;
   },
@@ -102,17 +107,10 @@ export const gameDefinition: GameDefinition<
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveMoves, playerId }) => {
-    const finalMove =
-      prospectiveMoves.length > 0
-        ? prospectiveMoves[prospectiveMoves.length - 1]
-        : null;
+  getProspectivePlayerState: ({ playerState, prospectiveTurn, playerId }) => {
     return {
       ...playerState,
-      position:
-        finalMove && finalMove.data.positions.length > 0
-          ? finalMove.data.positions[finalMove.data.positions.length - 1]
-          : playerState.position,
+      position: last(prospectiveTurn.data.positions) ?? playerState.position,
     };
   },
 
@@ -202,8 +200,8 @@ export const gameDefinition: GameDefinition<
     );
   },
 
-  getPublicMove: ({ move }) => {
-    return move;
+  getPublicTurn: ({ turn }) => {
+    return turn;
   },
 
   getStatus: ({ globalState, rounds }) => {
@@ -229,15 +227,20 @@ export const gameDefinition: GameDefinition<
 // helper methods
 const applyRoundToGlobalState = (
   globalState: GlobalState,
-  round: GameRound<Move<MoveData>>,
+  round: GameRound<Turn<TurnData>>,
   random: GameRandom,
 ): GlobalState => {
-  const { moves } = round;
+  const { turns } = round;
   const { blessingDeck, flippedBlessings, playerData } = globalState;
   const newBlessingDeck = [...blessingDeck];
   let newFlippedBlessings = [...flippedBlessings];
   const nextBlessing = newBlessingDeck.shift();
   const newPlayerData = cloneDeep(playerData);
+
+  const moves = turns.map((turn) => ({
+    userId: turn.userId,
+    data: turn.data,
+  }));
 
   // Figure out which players didn't move
   const playersThatDidntMove = moves.reduce((acc, move) => {

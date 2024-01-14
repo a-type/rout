@@ -167,6 +167,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../packages/game-definition
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../../packages/game-ui
       react:
         specifier: ^18.2.0
         version: 18.2.0
