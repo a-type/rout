@@ -1,0 +1,23 @@
+{
+  "name": "@long-game/game-ui",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "@a-type/ui": "^0.6.10",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/game-definition": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "@types/react": "^18.2.28"
+  }
+}

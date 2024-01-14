@@ -2,6 +2,7 @@ import { Router } from 'itty-router';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '@long-game/trpc';
 import { DEPLOYED_CONTEXT } from '../deployedContext.js';
+import { events } from '../services/events.js';
 
 export const trpcRouter = Router({
   base: '/trpc',
@@ -20,6 +21,7 @@ trpcRouter.all('*', (req) => {
       req,
       deployedContext: DEPLOYED_CONTEXT,
       res,
+      events,
     }),
   });
 });

@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/{{name}}",
+  "name": "@long-game/server-events",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -8,8 +8,11 @@
     "dev": "tsc -w",
     "build": "tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@long-game/db": "workspace:*"
+  },
   "devDependencies": {
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "@types/node": "20.11.0"
   }
 }

@@ -1,45 +1,59 @@
 import { RefObject, createRef, useEffect, useState } from 'react';
-import { GridCell } from '../gameDefinition.js';
+import { GridTile } from '../gameDefinition.js';
 import { CONNECTIONS, Direction, mergeTiles } from '../tiles.js';
 import { Draggable } from './Draggable.js';
+import { hashToIndex } from '@long-game/common';
 
 export interface TileProps {
-  cells: GridCell[];
+  cells: GridTile[];
+  className?: string;
 }
 
-export function Tile({ cells }: TileProps) {
+export function Tile({ cells, className }: TileProps) {
   const [lineCanvas] = useState(() => new LineCanvas());
   useEffect(() => {
     lineCanvas.setCells(cells);
   }, [cells, lineCanvas]);
-  const shape = mergeTiles(cells.map((c) => c.tile));
+  const shape = mergeTiles(cells.map((c) => c.shape));
   return (
     <div
       title={shape ?? 'blank'}
-      className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[30px] select-none"
+      className={
+        'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[30px] select-none ' +
+          className ?? ''
+      }
     >
       <canvas ref={lineCanvas.ref} width={32} height={32} />
     </div>
   );
 }
 
-export function DraggableTile({ cells, id }: TileProps & { id: string }) {
-  const shape = mergeTiles(cells.map((c) => c.tile));
+export function DraggableTile({
+  cells,
+  id,
+  className,
+}: TileProps & { id: string; className?: string }) {
+  const shape = mergeTiles(cells.map((c) => c.shape));
 
   if (!shape) {
-    return <EmptyTile />;
+    return <EmptyTile className={className} />;
   }
 
   return (
     <Draggable id={id} data={{ tile: shape }}>
-      <Tile cells={cells} />
+      <Tile cells={cells} className={className} />
     </Draggable>
   );
 }
 
-export function EmptyTile() {
+export function EmptyTile({ className }: { className?: string }) {
   return (
-    <div className="w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none">
+    <div
+      className={
+        'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none ' +
+          className ?? ''
+      }
+    >
       &nbsp;
     </div>
   );
@@ -50,7 +64,7 @@ const COLORS = [
   '#f00',
   '#0f0',
   '#00f',
-  '#ff0',
+  '#dd0',
   '#f0f',
   '#0ff',
   '#f80',
@@ -64,9 +78,9 @@ const COLORS = [
 class LineCanvas {
   ref: RefObject<HTMLCanvasElement> = createRef();
 
-  private cells: GridCell[] = [];
+  private cells: GridTile[] = [];
 
-  setCells = (cells: GridCell[]) => {
+  setCells = (cells: GridTile[]) => {
     this.cells = cells;
     requestAnimationFrame(this.draw);
   };
@@ -80,7 +94,7 @@ class LineCanvas {
     if (!ctx) return;
 
     // when many cells overlap a line we draw the line with alternating dash pattern
-    const overlapCounts = new Map<Direction, number>();
+    const overlappingUsers = new Map<Direction, string[]>();
 
     for (const cell of this.cells) {
       for (const direction of [
@@ -89,11 +103,14 @@ class LineCanvas {
         Direction.LEFT,
         Direction.RIGHT,
       ]) {
-        if (CONNECTIONS[cell.tile][direction]) {
-          if (!overlapCounts.has(direction)) {
-            overlapCounts.set(direction, 0);
+        if (CONNECTIONS[cell.shape][direction]) {
+          if (!overlappingUsers.has(direction)) {
+            overlappingUsers.set(direction, []);
           }
-          overlapCounts.set(direction, overlapCounts.get(direction)! + 1);
+          overlappingUsers.set(direction, [
+            ...(overlappingUsers.get(direction) ?? []),
+            cell.owner,
+          ]);
         }
       }
     }
@@ -102,50 +119,57 @@ class LineCanvas {
 
     for (let i = 0; i < this.cells.length; i++) {
       const cell = this.cells[i];
-      if (cell.tile === '·') {
+      if (cell.shape === '·') {
         // draw a dot
-        ctx.fillStyle = COLORS[i % COLORS.length];
+        ctx.fillStyle = COLORS[hashToIndex(cell.owner ?? '', COLORS.length)];
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
         ctx.fill();
         continue;
       }
-      for (const direction of overlapCounts.keys()) {
-        if (CONNECTIONS[cell.tile][direction]) {
+      for (const direction of [
+        Direction.UP,
+        Direction.DOWN,
+        Direction.LEFT,
+        Direction.RIGHT,
+      ]) {
+        if (CONNECTIONS[cell.shape][direction]) {
           const length = canvas.width / 2;
 
-          const overlaps = overlapCounts.get(direction) ?? 0;
-          const lineLength = length / overlaps;
-          const lineOffset = i * lineLength;
-          ctx.strokeStyle = COLORS[i % COLORS.length];
+          const overlaps = overlappingUsers.get(direction) ?? [];
+          const lineLength = length / overlaps.length;
+          const lineOffset = lineLength * overlaps.indexOf(cell.owner);
+          ctx.strokeStyle =
+            COLORS[hashToIndex(cell.owner ?? '', COLORS.length)];
+          ctx.lineWidth = 4;
           // ok this is lazy but I don't care... there's only 4.
           ctx.beginPath();
           switch (direction) {
             case Direction.UP:
-              ctx.moveTo(canvas.width / 2, canvas.height / 2 + lineOffset);
-              ctx.lineTo(
-                canvas.width / 2,
-                canvas.height / 2 + lineOffset + lineLength,
-              );
-              break;
-            case Direction.DOWN:
               ctx.moveTo(canvas.width / 2, canvas.height / 2 - lineOffset);
               ctx.lineTo(
                 canvas.width / 2,
                 canvas.height / 2 - lineOffset - lineLength,
               );
               break;
-            case Direction.LEFT:
-              ctx.moveTo(canvas.width / 2 + lineOffset, canvas.height / 2);
+            case Direction.DOWN:
+              ctx.moveTo(canvas.width / 2, canvas.height / 2 + lineOffset);
               ctx.lineTo(
-                canvas.width / 2 + lineOffset + lineLength,
+                canvas.width / 2,
+                canvas.height / 2 + lineOffset + lineLength,
+              );
+              break;
+            case Direction.LEFT:
+              ctx.moveTo(canvas.width / 2 - lineOffset, canvas.height / 2);
+              ctx.lineTo(
+                canvas.width / 2 - lineOffset - lineLength,
                 canvas.height / 2,
               );
               break;
             case Direction.RIGHT:
-              ctx.moveTo(canvas.width / 2 - lineOffset, canvas.height / 2);
+              ctx.moveTo(canvas.width / 2 + lineOffset, canvas.height / 2);
               ctx.lineTo(
-                canvas.width / 2 - lineOffset - lineLength,
+                canvas.width / 2 + lineOffset + lineLength,
                 canvas.height / 2,
               );
               break;

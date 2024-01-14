@@ -25,3 +25,5 @@ When these older games complete, the old version's code can be removed.
 - Changes to use of randomness. Since random values are deterministically produced in sequence, any change to calls to `random` will result in a breaking change.
 - Changes to required move information which can't be defaulted or inferred.
 - Any general change to logic which would change the meaning of a move when replayed.
+- Changes to turn properties. Even a rename.
+- Changes to game state properties, even a rename.

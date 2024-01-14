@@ -1,5 +1,6 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import { getLiveSession } from '@long-game/auth';
+import { ServerEvents } from '@long-game/server-events';
 import superjson from 'superjson';
 
 type Context = {
@@ -13,6 +14,7 @@ type Context = {
     id: string;
     profileId: string;
   };
+  events: ServerEvents;
 };
 
 export const createContext = async ({

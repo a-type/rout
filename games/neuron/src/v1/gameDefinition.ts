@@ -1,10 +1,15 @@
-import { GameDefinition, GameRandom, Move } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  GameRandom,
+  LocalTurn,
+  Turn,
+  roundFormat,
+} from '@long-game/game-definition';
 import { lazy } from 'react';
 import {
   CONNECTIONS,
   Coordinate,
   CoordinateKey,
-  MERGES,
   SORTED_TILES,
   TileShape,
   areTilesCompatible,
@@ -18,16 +23,16 @@ import { GameRound } from '@long-game/common';
 export const GRID_SIZE = 9;
 const HAND_SIZE = 5;
 
-export type GridCell = {
-  tile: TileShape;
-  owner: string | null;
+export type GridTile = {
+  shape: TileShape;
+  owner: string;
   id: string;
 };
 
-export type Grid = Record<CoordinateKey, GridCell[]>;
+export type Grid = Record<CoordinateKey, GridTile[]>;
 
 export type PlayerHand = {
-  tiles: (GridCell | null)[];
+  tiles: (GridTile | null)[];
 };
 
 export type GlobalState = {
@@ -42,13 +47,19 @@ export type PlayerState = {
 
 // players position their letters on the board, one
 // per cell.
-export type MoveData = {
-  tile: TileShape;
-  // which tile id from your hand
-  handId: string;
-  // where it goes
-  coordinate: Coordinate;
-};
+export type MoveData =
+  | {
+      tile: TileShape;
+      // which tile id from your hand
+      tileId: string;
+      // where it goes
+      coordinate: Coordinate;
+    }
+  | { skip: true };
+
+export function isSkip(move: MoveData): move is { skip: true } {
+  return 'skip' in move;
+}
 
 export const gameDefinition: GameDefinition<
   GlobalState,
@@ -58,42 +69,34 @@ export const gameDefinition: GameDefinition<
 > = {
   version: `v1.0`,
   // run on both client and server
-
-  validateTurn: ({ playerState, moves }) => {
-    if (moves.length === 0) {
-      return 'You must make a move.';
-    }
-    if (moves.length > 1) {
-      return 'You can only make one move per turn.';
-    }
-
+  validateTurn: ({ playerState, turn }) => {
+    if (isSkip(turn.data)) return;
     // verify all tiles used are in player's hand
-    const move = moves[0];
-    const isInHand = getTileInHand(playerState.hand, move.data.handId);
+    const isInHand = getTileInHand(playerState.hand, turn.data.tileId);
     if (!isInHand) {
       return `You don't have that tile in your hand.`;
     }
 
     // cannot move where tiles already are
-    const key = toCoordinateKey(move.data.coordinate.x, move.data.coordinate.y);
+    const key = toCoordinateKey(turn.data.coordinate);
     if (!!playerState.grid[key]?.length) {
       return 'There is already a tile there.';
     }
 
     // cannot move to positions with incompatible adjacents
-    const adjacents = getAdjacents(move.data.coordinate);
+    const adjacents = getAdjacents(turn.data.coordinate);
     for (const adjacent of adjacents) {
-      const adjacentKey = toCoordinateKey(adjacent.x, adjacent.y);
+      const adjacentKey = toCoordinateKey(adjacent);
       const adjacentTiles = playerState.grid[adjacentKey];
       if (!adjacentTiles) {
         continue;
       }
-      const adjacentTile = mergeTiles(adjacentTiles.map((t) => t.tile));
+      const adjacentTile = mergeTiles(adjacentTiles.map((t) => t.shape));
       if (
         adjacentTile &&
         !areTilesCompatible(
-          move.data.tile,
-          move.data.coordinate,
+          turn.data.tile,
+          turn.data.coordinate,
           adjacentTile,
           adjacent,
         )
@@ -107,19 +110,17 @@ export const gameDefinition: GameDefinition<
   GameRecap: lazy(() => import('./GameRecap.js')),
 
   // run on client
-
   getProspectivePlayerState: ({
     playerState,
-    prospectiveMoves: moves,
+    prospectiveTurn: turn,
     playerId,
   }) => {
-    // add tile to the board and remove from hand
-    const move = moves[0];
-    if (!move) {
+    if (isSkip(turn.data)) {
       return playerState;
     }
 
-    const cell = getTileInHand(playerState.hand, move.data.handId);
+    // add tile to the board and remove from hand
+    const cell = getTileInHand(playerState.hand, turn.data.tileId);
 
     if (!cell) {
       return playerState;
@@ -127,7 +128,7 @@ export const gameDefinition: GameDefinition<
 
     const grid = addTile(
       playerState.grid,
-      move.data.coordinate,
+      turn.data.coordinate,
       cell,
       playerId,
     );
@@ -146,14 +147,13 @@ export const gameDefinition: GameDefinition<
   },
 
   // run on server
-
   getInitialGlobalState: ({ playerIds, random }) => {
     return {
       grid: {},
       playerHands: playerIds.reduce((hands, playerId) => {
         hands[playerId] = {
           tiles: new Array(HAND_SIZE).fill(null).map(() => ({
-            tile: random.item(SORTED_TILES),
+            shape: random.item(SORTED_TILES),
             id: random.id(),
             owner: playerId,
           })),
@@ -178,36 +178,36 @@ export const gameDefinition: GameDefinition<
     );
   },
 
-  getPublicMove: ({ move, globalState }) => {
-    return move;
+  getPublicTurn: ({ turn, globalState }) => {
+    return turn;
   },
 
   getStatus: ({ globalState }) => {
-    const isGameOver =
+    const isBoardComplete =
       Object.keys(globalState.grid).length === GRID_SIZE * GRID_SIZE;
 
-    if (!isGameOver) {
-      return {
-        status: 'active',
-      };
+    if (!isBoardComplete) {
+      // if there are no tiles left in any player's hand which
+      // can be played, the game is over.
+      const playerIds = Object.keys(globalState.playerHands);
+      const playerHands = playerIds.map((id) => globalState.playerHands[id]);
+      const tilesInHands = playerHands
+        .map((hand) => hand.tiles)
+        .flat()
+        .filter((t) => !!t) as GridTile[];
+      const tilesInHandsThatCanBePlayed = tilesInHands.filter((tile) =>
+        canTileBePlayed(tile.shape, globalState.grid),
+      );
+
+      if (tilesInHandsThatCanBePlayed.length > 0) {
+        return {
+          status: 'active',
+        };
+      }
     }
 
     // winner has the most connections to other tiles
-    const playerIds = Object.keys(globalState.playerHands);
-    const playerScores = playerIds.reduce((scores, playerId) => {
-      scores[playerId] = 0;
-      return scores;
-    }, {} as Record<string, number>);
-    for (const [coordinateKey, cells] of Object.entries(globalState.grid)) {
-      const coordinate = fromCoordinateKey(coordinateKey as CoordinateKey);
-      for (const { tile, owner } of cells) {
-        if (!owner) {
-          continue;
-        }
-        const score = scoreTile(globalState.grid, coordinate, tile);
-        playerScores[owner] += score;
-      }
-    }
+    const playerScores = getPlayerScores(globalState);
     const playersSortedByScore = Object.entries(playerScores).sort(
       (a, b) => b[1] - a[1],
     );
@@ -228,12 +228,14 @@ export const gameDefinition: GameDefinition<
       winnerIds,
     };
   },
+
+  getRoundIndex: roundFormat.sync(),
 };
 
 // helper methods
 const applyRoundToGlobalState = (
   globalState: GlobalState,
-  round: GameRound<Move<MoveData>>,
+  round: GameRound<Turn<MoveData>>,
   random: GameRandom,
 ) => {
   // what we already validated in the moves:
@@ -246,22 +248,26 @@ const applyRoundToGlobalState = (
   // which tile placements are valid when all player placements
   // have been resolved.
 
-  const moves = round.moves;
+  const turns = round.turns;
   // make copies of global state which we will update with
-  // the moves from this round, validate, then apply
+  // the turns from this round, validate, then apply
   let gridWithAllTilesApplied = { ...globalState.grid };
 
-  for (const move of moves) {
-    let cell: GridCell | null;
-    if (move.userId) {
+  for (const turn of turns) {
+    if (isSkip(turn.data)) {
+      continue;
+    }
+
+    let cell: GridTile | null;
+    if (turn.userId) {
       cell =
-        getTileInHand(globalState.playerHands[move.userId], move.data.handId) ??
+        getTileInHand(globalState.playerHands[turn.userId], turn.data.tileId) ??
         null;
     } else {
       cell = {
-        tile: move.data.tile,
-        owner: null,
-        id: move.data.handId,
+        shape: turn.data.tile,
+        owner: 'system',
+        id: turn.data.tileId,
       };
     }
 
@@ -272,15 +278,15 @@ const applyRoundToGlobalState = (
 
     gridWithAllTilesApplied = addTile(
       gridWithAllTilesApplied,
-      move.data.coordinate,
+      turn.data.coordinate,
       cell,
-      move.userId,
+      turn.userId,
     );
 
     // no user for this move - the only possible way this happens
     // right now is if a player is deleted from the whole system.
     // don't check their hand...
-    if (!move.userId) {
+    if (!turn.userId) {
       continue;
     }
   }
@@ -291,14 +297,16 @@ const applyRoundToGlobalState = (
   // a random one.
   const finalGrid = { ...gridWithAllTilesApplied };
   const playerHandsWithNewTiles = { ...globalState.playerHands };
-  for (const move of moves) {
-    const coordinateKey = toCoordinateKey(
-      move.data.coordinate.x,
-      move.data.coordinate.y,
-    );
+  for (const turn of turns) {
+    const turnData = turn.data;
+    if (isSkip(turnData)) {
+      continue;
+    }
+
+    const coordinateKey = toCoordinateKey(turnData.coordinate);
 
     const adjacents = getAdjacentTiles(
-      move.data.coordinate,
+      turnData.coordinate,
       gridWithAllTilesApplied,
     );
     const invalid = adjacents.some(([adjacentCoord, adjacentTile]) => {
@@ -307,8 +315,8 @@ const applyRoundToGlobalState = (
         return false;
       }
       return !areTilesCompatible(
-        move.data.tile,
-        move.data.coordinate,
+        turnData.tile,
+        turnData.coordinate,
         adjacentTile,
         adjacentCoord,
       );
@@ -319,29 +327,29 @@ const applyRoundToGlobalState = (
     // makes our tile valid? after reach removed invalid tile, we should
     // re-check all adjacent tiles to see if they are now valid and should be restored
     // if they were already removed.
-
     if (invalid) {
-      console.log('INVALID MOVE', move, JSON.stringify(adjacents));
+      console.log('INVALID MOVE', turn, JSON.stringify(adjacents));
       // remove the invalid tile from the board
       finalGrid[coordinateKey] = finalGrid[coordinateKey]?.filter(
-        (c) => c.id !== move.data.handId,
+        (c) => c.id !== turnData.tileId,
       );
     } else {
-      if (!move.userId) {
+      if (!turn.userId) {
         // no user for this move - the only possible way this happens
         // right now is if a player is deleted from the whole system.
-        // don't check their hand...
+        // FIXME: this actually breaks deterministic randomness!
+        // this whole deletion thing might not work.
         continue;
       } else {
-        const playerHand = playerHandsWithNewTiles[move.userId];
-        playerHandsWithNewTiles[move.userId] = {
+        const playerHand = playerHandsWithNewTiles[turn.userId];
+        playerHandsWithNewTiles[turn.userId] = {
           ...playerHand,
           tiles: playerHand.tiles.map((t) => {
-            if (t?.id === move.data.handId) {
+            if (t?.id === turnData.tileId) {
               return {
-                tile: random.item(SORTED_TILES),
+                shape: random.item(SORTED_TILES),
                 id: random.id(),
-                owner: move.userId,
+                owner: turn.userId || 'system',
               };
             }
             return t;
@@ -368,10 +376,10 @@ const applyRoundToGlobalState = (
 function addTile(
   grid: Grid,
   coordinate: Coordinate,
-  tile: GridCell,
+  tile: GridTile,
   owner: string | null,
 ) {
-  const key = toCoordinateKey(coordinate.x, coordinate.y);
+  const key = toCoordinateKey(coordinate);
   grid[key] = grid[key] || [];
   grid[key].push(tile);
   return grid;
@@ -405,22 +413,12 @@ function scoreTile(grid: Grid, coordinate: Coordinate, tile: TileShape) {
   }
 
   const tileConnections = CONNECTIONS[tile];
-  const adjacentCoords = getAdjacents(coordinate);
-  const adjacentTiles: { tile: TileShape | null; coordinate: Coordinate }[] =
-    adjacentCoords.map((c) => ({
-      tile: mergeTiles(
-        grid[toCoordinateKey(c.x, c.y)]?.map((c) => c.tile) ?? [],
-      ),
-      coordinate: c,
-    }));
+  const adjacents = getAdjacentTiles(coordinate, grid);
   let score = 0;
-  for (const {
-    tile: adjacentTile,
-    coordinate: adjacentCoordinate,
-  } of adjacentTiles) {
+  for (const [adjacentCoordinate, adjacentTile] of adjacents) {
     if (
       !adjacentTile ||
-      !areTilesCompatible(tile, coordinate, adjacentTile, coordinate)
+      !areTilesCompatible(tile, coordinate, adjacentTile, adjacentCoordinate)
     ) {
       continue;
     }
@@ -437,7 +435,58 @@ function scoreTile(grid: Grid, coordinate: Coordinate, tile: TileShape) {
 function getAdjacentTiles(coordinate: Coordinate, grid: Grid) {
   const adjacents = getAdjacents(coordinate);
   return adjacents.map((c) => {
-    const key = toCoordinateKey(c.x, c.y);
-    return [c, mergeTiles(grid[key]?.map((c) => c.tile) ?? [])] as const;
+    const key = toCoordinateKey(c);
+    return [c, mergeTiles(grid[key]?.map((c) => c.shape) ?? [])] as const;
   });
+}
+
+/**
+ * Determines if a tile shape can be played in any
+ * remaining empty position on the board.
+ */
+export function canTileBePlayed(tile: TileShape, grid: Grid) {
+  for (let x = 0; x < GRID_SIZE; x++) {
+    for (let y = 0; y < GRID_SIZE; y++) {
+      const coordinate = { x, y };
+      const key = toCoordinateKey(coordinate);
+      if (grid[key]?.length) {
+        continue;
+      }
+      const adjacents = getAdjacentTiles(coordinate, grid);
+      if (
+        adjacents.every(
+          ([adjacentCoordinate, adjacentTile]) =>
+            !adjacentTile ||
+            areTilesCompatible(
+              tile,
+              coordinate,
+              adjacentTile,
+              adjacentCoordinate,
+            ),
+        )
+      ) {
+        return coordinate;
+      }
+    }
+  }
+  return false;
+}
+
+export function getPlayerScores(globalState: GlobalState) {
+  const playerIds = Object.keys(globalState.playerHands);
+  const playerScores = playerIds.reduce((scores, playerId) => {
+    scores[playerId] = 0;
+    return scores;
+  }, {} as Record<string, number>);
+  for (const [coordinateKey, cells] of Object.entries(globalState.grid)) {
+    const coordinate = fromCoordinateKey(coordinateKey as CoordinateKey);
+    for (const { shape: tile, owner } of cells) {
+      if (!owner) {
+        continue;
+      }
+      const score = scoreTile(globalState.grid, coordinate, tile);
+      playerScores[owner] += score;
+    }
+  }
+  return playerScores;
 }

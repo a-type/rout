@@ -6,10 +6,15 @@
   "type": "module",
   "scripts": {
     "//dev": "tsc -w",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@long-game/db": "workspace:*",
+    "date-fns-tz": "2.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "vitest": "1.2.0"
   }
 }

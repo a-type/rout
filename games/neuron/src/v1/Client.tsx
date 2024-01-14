@@ -5,9 +5,11 @@ import { Hand } from './components/Hand.js';
 import { Spinner } from '@a-type/ui/components/spinner';
 import { DataRef, DndContext, DragOverlay } from '@dnd-kit/core';
 import { PlayerState } from './gameDefinition.js';
-import { useTile } from './hooks.js';
+import { useTile } from './utils.js';
 import { Tile } from './components/Tile.js';
 import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
+import { Button } from '@a-type/ui/components/button';
+import { BasicGameLog } from '@long-game/game-ui';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -70,9 +72,9 @@ const ActiveGame = withGame(function ActiveGame({
           if (!data.current) return;
 
           const { x, y } = fromCoordinateKey(ev.over.id);
-          client.setMove(0, {
+          client.prepareTurn({
             coordinate: { x, y },
-            handId,
+            tileId: handId,
             tile: data.current.tile,
           });
           client.submitMoves();
@@ -80,10 +82,21 @@ const ActiveGame = withGame(function ActiveGame({
       >
         <Grid data={state.grid} />
         <Hand data={state.hand} />
+        <Button
+          onClick={() => {
+            client.prepareTurn({
+              skip: true,
+            });
+            client.submitMoves();
+          }}
+        >
+          Skip
+        </Button>
         <DragOverlay>
           {draggingId && <DraggingTile id={draggingId} />}
         </DragOverlay>
       </DndContext>
+      <BasicGameLog className="max-h-[400px]" />
     </div>
   );
 });
