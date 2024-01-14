@@ -13,8 +13,11 @@ export type TerrainType =
   | 'swamp'
   | 'tundra';
 
+export type TerrainFeature = 'city' | 'ruins' | 'temple';
+
 export type Terrain = {
   type: TerrainType;
+  features: Array<TerrainFeature>;
 };
 
 export type Blessing = {
@@ -109,6 +112,8 @@ export const gameDefinition: GameDefinition<
             'swamp',
             'tundra',
           ]),
+          features:
+            random.float(0, 1) <= 0.1 ? [random.item(['temple', 'city'])] : [],
         };
         return acc;
       }, {} as Record<CoordinateKey, Terrain>),

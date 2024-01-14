@@ -56,6 +56,14 @@ function TerrainTile({
           className="position-absolute transform -translate-x-1/2 -translate-y-1/2"
           style={{ top: '50%', left: '50%', width: 30 }}
         />
+        {item.features.map((feature, idx) => (
+          <TileIcon
+            type={feature}
+            key={idx}
+            className="position-absolute transform -translate-x-1/2 -translate-y-1/2"
+            style={{ top: '50%', left: '50%', width: 30 }}
+          />
+        ))}
         {hasPlayer && (
           <Meeple
             className="position-relative transform -translate-x-1/2 -translate-y-1/2"

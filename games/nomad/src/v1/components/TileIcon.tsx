@@ -1,11 +1,15 @@
-import { TerrainType } from '../gameDefinition.js';
+import { TerrainFeature, TerrainType } from '../gameDefinition.js';
+import City from './icons/City.js';
 import Mountains from './icons/Mountains.js';
 import Swamp from './icons/Swamp.js';
+import Temple from './icons/Temple.js';
 
 function TileIcon({
   type,
   ...props
-}: { type: TerrainType } & React.ComponentProps<typeof Mountains>) {
+}: { type: TerrainType | TerrainFeature } & React.ComponentProps<
+  typeof Mountains
+>) {
   const Component = (
     {
       mountain: null,
@@ -15,7 +19,9 @@ function TileIcon({
       grassland: null,
       ocean: null,
       tundra: null,
-    } as Record<TerrainType, typeof Mountains | null>
+      city: City,
+      temple: Temple,
+    } as Record<TerrainType | TerrainFeature, typeof Mountains | null>
   )[type];
   if (!Component) {
     return null;

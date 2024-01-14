@@ -81,9 +81,13 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         </div>
       )}
       <hr />
-      {client.queuedMoves.map((move, idx) => (
-        <div key={idx}>{move.data.position}</div>
-      ))}
+      {client.state &&
+        client.queuedMoves.map((move, idx) => (
+          <div className="flex flex-row gap-2" key={idx}>
+            <span>{move.data.position}</span>
+            <span>{client.state!.terrainGrid[move.data.position].type}</span>
+          </div>
+        ))}
       <button
         onClick={() => client.submitMoves()}
         disabled={!hasUnsubmittedMoves}
