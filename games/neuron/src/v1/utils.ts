@@ -1,4 +1,5 @@
 import { NeuronClient, useGameClient } from './gameClient.js';
+import { isSkip } from './gameDefinition.js';
 import { toCoordinateKey } from './tiles.js';
 
 export function useTile(id: string) {
@@ -30,6 +31,8 @@ export function useLastTurnWasRejected() {
   );
 
   if (!myTurn) return false;
+
+  if (isSkip(myTurn.data)) return false;
 
   // is the tile we played in the position we played it?
   const { coordinate, tileId } = myTurn.data;

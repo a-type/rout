@@ -1,4 +1,4 @@
-import { GRID_SIZE, Grid as GridData } from '../gameDefinition.js';
+import { GRID_SIZE, Grid as GridData, isSkip } from '../gameDefinition.js';
 import { CoordinateKey, toCoordinateKey } from '../tiles.js';
 import { useDroppable } from '@dnd-kit/core';
 import { DraggableTile, Tile } from './Tile.js';
@@ -63,7 +63,8 @@ const GridCellTile = withGame(function GridCellTile({
 }) {
   const client = useGameClient();
   const move = client.currentTurn;
-  const movedTileId = move?.data.tileId;
+  const movedTileId =
+    !move || isSkip(move.data) ? undefined : move?.data.tileId;
 
   const isMoveToThisCell =
     movedTileId && cells.some((c) => c.id === movedTileId);
