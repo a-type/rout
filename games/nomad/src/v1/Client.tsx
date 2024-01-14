@@ -1,9 +1,11 @@
 import { createGameClient } from '@long-game/game-client';
-import { gameDefinition } from './gameDefinition.js';
-import { ComponentProps, useEffect } from 'react';
+import { CoordinateKey, gameDefinition } from './gameDefinition.js';
+import { ComponentProps, useEffect, useState } from 'react';
 import Blessings from './components/Blessings.js';
 import TerrainGrid from './components/TerrainGrid.js';
-import { axialDistance, last, offsetToAxial } from './utils.js';
+import { axialDistance, last, offsetToAxial, sum } from './utils.js';
+import { movementCosts } from './components/terrain.js';
+import TileInfo from './components/TileInfo.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -29,8 +31,8 @@ export default Client;
 // be reactive.
 const ExampleGameUI = withGame(function ExampleGameUI() {
   const client = useGameClient();
-  const hasUnsubmittedMoves =
-    client.queuedMoves.filter((move) => !move.createdAt).length > 0;
+  const [hoveredCoordinate, setHoveredCoordinate] =
+    useState<CoordinateKey | null>(null);
   useEffect(() => {
     const interval = setInterval(() => {
       location.reload();
@@ -39,7 +41,24 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       clearInterval(interval);
     };
   });
+
+  const hasUnsubmittedMoves =
+    client.queuedMoves.filter((move) => !move.createdAt).length > 0;
   const lastMovePosition = last(client.queuedMoves?.[0]?.data.positions);
+
+  if (!client.state) {
+    return <div>Loading...</div>;
+  }
+
+  const remainingMovement = Math.max(
+    0,
+    client.state.movement -
+      sum(
+        (client.queuedMoves[0]?.data.positions ?? [])
+          .map((position) => client.state?.terrainGrid[position].type)
+          .map((terrainType) => movementCosts[terrainType!]),
+      ),
+  );
 
   return (
     <div>
@@ -52,18 +71,25 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         ))}
       </div>
       <hr />
-      {client.state && (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row gap-3">
-            <Blessings items={client.state.flippedBlessings} />
-            Remaining: {client.state.remainingBlessingCount}
-          </div>
-          <hr style={{ width: '100%' }} />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-row gap-3">
+          <Blessings items={client.state.flippedBlessings} />
+          Remaining: {client.state.remainingBlessingCount}
+        </div>
+        <hr style={{ width: '100%' }} />
+        <div className="flex flex-row gap-6">
           <TerrainGrid
             items={client.state.terrainGrid}
             playerLocation={client.state.position}
             playerColor={client.state.color}
             movePath={client.queuedMoves.flatMap((move) => move.data.positions)}
+            onTerrainHover={(x, y) => {
+              if (!client.state) {
+                return;
+              }
+              const [q, r] = offsetToAxial([x, y]);
+              setHoveredCoordinate(`${q},${r}`);
+            }}
             onClick={(x, y) => {
               if (!client.state) {
                 return;
@@ -73,7 +99,8 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
                 axialDistance(
                   lastMovePosition ?? client.state.position,
                   `${q},${r}`,
-                ) === 1
+                ) === 1 &&
+                remainingMovement > 0
               ) {
                 client.setMove(0, {
                   positions: [
@@ -84,21 +111,27 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
               }
             }}
           />
+          {hoveredCoordinate && (
+            <div
+              className="border-l border-l-solid px-4"
+              style={{ borderColor: 'white' }}
+            >
+              <TileInfo item={client.state.terrainGrid[hoveredCoordinate]} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
       <hr />
-      {client.state &&
-        client.queuedMoves?.[0]?.data.positions.map((position, idx) => (
-          <div className="flex flex-row gap-2" key={idx}>
-            <span>{position}</span>
-            <span>{client.state!.terrainGrid[position].type}</span>
-            {client.state!.terrainGrid[position].features.map(
-              (feature, idx) => (
-                <span key={idx}>{feature}</span>
-              ),
-            )}
-          </div>
-        ))}
+      <div>Remaining movement: {remainingMovement}</div>
+      {client.queuedMoves?.[0]?.data.positions.map((position, idx) => (
+        <div className="flex flex-row gap-2" key={idx}>
+          <span>{position}</span>
+          <span>{client.state!.terrainGrid[position].type}</span>
+          {client.state!.terrainGrid[position].features.map((feature, idx) => (
+            <span key={idx}>{feature}</span>
+          ))}
+        </div>
+      ))}
       <div className="flex flex-row gap-2">
         <button
           onClick={() => client.clearMoves()}
@@ -107,14 +140,17 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           Clear
         </button>
         <button
-          onClick={() => client.submitMoves()}
+          onClick={() => {
+            // TODO: handle error (typically when the move has been processed but the client hasn't reloaded.
+            client.submitMoves();
+          }}
           disabled={!hasUnsubmittedMoves}
         >
           Submit
         </button>
       </div>
       <h3>Acquired blessings</h3>
-      <Blessings items={client.state?.acquiredBlessings || []} />
+      <Blessings items={client.state.acquiredBlessings || []} />
     </div>
   );
 });

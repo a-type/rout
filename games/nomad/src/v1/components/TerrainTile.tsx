@@ -1,5 +1,5 @@
 import { CoordinateKey, Terrain } from '../gameDefinition.js';
-import colorLookup from './terrainColors.js';
+import { colorLookup } from './terrain.js';
 import Mountains from './icons/Mountains.js';
 import Swamp from './icons/Swamp.js';
 import TileIcon from './TileIcon.js';
@@ -10,12 +10,14 @@ function TerrainTile({
   hasPlayer,
   playerColor,
   onClick,
+  onHover,
   isTarget,
 }: {
   item: Terrain;
   hasPlayer: boolean;
   playerColor: string;
   onClick: () => void;
+  onHover: () => void;
   isTarget: boolean;
 }) {
   const color = colorLookup[item.type];
@@ -35,6 +37,7 @@ function TerrainTile({
           marginBottom: margin - width * 0.2668,
         }}
         onClick={onClick}
+        onMouseOver={onHover}
       >
         {isTarget && (
           <div

@@ -1,5 +1,5 @@
 import type { Blessing } from '../gameDefinition.js';
-import colorLookup from './terrainColors.js';
+import { colorLookup } from './terrain.js';
 
 // https://24ways.org/2010/calculating-color-contrast
 function getContrastYIQ(hexcolor: string) {

@@ -8,6 +8,10 @@ export function last<T>(arr: Array<T>): T | undefined {
   return arr ? arr[arr.length - 1] : undefined;
 }
 
+export function sum(arr: Array<number>): number {
+  return arr.reduce((acc, n) => acc + n, 0);
+}
+
 export function generateAxialGrid(q: number, r: number): Array<CoordinateKey> {
   const grid: Array<CoordinateKey> = [];
   for (let x = -q; x <= q; x++) {

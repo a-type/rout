@@ -8,12 +8,14 @@ function TerrainGrid({
   playerColor,
   movePath,
   onClick,
+  onTerrainHover,
 }: {
   items: Record<CoordinateKey, Terrain>;
   playerLocation: CoordinateKey;
   movePath?: Array<CoordinateKey>;
   playerColor: string;
   onClick: (x: number, y: number) => void;
+  onTerrainHover: (x: number, y: number) => void;
 }) {
   const itemsToGrid = Object.entries(items).reduce((acc, [key, item]) => {
     const [x, y] = axialToOffset(coordinateKeyToTuple(key as CoordinateKey));
@@ -26,8 +28,6 @@ function TerrainGrid({
       },
     };
   }, {} as Record<number, Record<number, { item: Terrain; coordinates: CoordinateKey }>>);
-
-  const [playerX, playerY] = coordinateKeyToTuple(playerLocation);
 
   return (
     <div className="flex flex-col mb2">
@@ -52,6 +52,7 @@ function TerrainGrid({
                     playerColor={playerColor}
                     isTarget={!!movePath?.includes(coordinates)}
                     onClick={() => onClick(parseInt(x), parseInt(y))}
+                    onHover={() => onTerrainHover(parseInt(x), parseInt(y))}
                   />
                 </div>
               ))}

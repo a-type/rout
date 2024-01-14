@@ -2,6 +2,7 @@ import { GameDefinition, Move, GameRandom } from '@long-game/game-definition';
 import { lazy } from 'react';
 import { GameRound } from '@long-game/common';
 import { axialDistance, cloneDeep, generateAxialGrid, last } from './utils.js';
+import { movementCosts } from './components/terrain.js';
 
 export type CoordinateKey = `${number},${number}`;
 export type TerrainType =
@@ -47,16 +48,6 @@ export type PlayerState = {
 
 export type MoveData = {
   positions: Array<CoordinateKey>;
-};
-
-const movementCosts: Record<TerrainType, number> = {
-  desert: 1,
-  forest: 2,
-  mountain: 2,
-  ocean: 3,
-  grassland: 1,
-  swamp: 2,
-  tundra: 1,
 };
 
 export const gameDefinition: GameDefinition<
