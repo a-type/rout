@@ -9,6 +9,7 @@ import { useTile } from './utils.js';
 import { Tile } from './components/Tile.js';
 import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
 import { Button } from '@a-type/ui/components/button';
+import { BasicGameLog } from '@long-game/game-ui';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -95,6 +96,7 @@ const ActiveGame = withGame(function ActiveGame({
           {draggingId && <DraggingTile id={draggingId} />}
         </DragOverlay>
       </DndContext>
+      <BasicGameLog className="max-h-[400px]" />
     </div>
   );
 });

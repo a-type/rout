@@ -22,6 +22,7 @@ export interface Database {
   GameSessionMembership: GameSessionMembershipTable;
   Friendship: FriendshipTable;
   FriendshipView: FriendshipTable;
+  ChatMessage: ChatMessageTable;
 }
 
 export interface UserTable {
@@ -136,3 +137,17 @@ export interface FriendshipTable {
 export type Friendship = Selectable<FriendshipTable>;
 export type NewFriendship = Insertable<FriendshipTable>;
 export type FriendshipUpdate = Updateable<FriendshipTable>;
+
+export interface ChatMessageTable {
+  id: string;
+  createdAt: CreatedAtColumn;
+  updatedAt: UpdatedAtColumn;
+
+  userId: string;
+  gameSessionId: string;
+  message: string;
+}
+
+export type ChatMessage = Selectable<ChatMessageTable>;
+export type NewChatMessage = Insertable<ChatMessageTable>;
+export type ChatMessageUpdate = Updateable<ChatMessageTable>;

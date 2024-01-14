@@ -8,7 +8,9 @@
     "dev": "tsc -w",
     "build": "tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@long-game/db": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.0.2",
     "@types/node": "20.11.0"

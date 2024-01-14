@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import type { ChatMessage } from '@long-game/db';
 
 /**
  * Centralized eventing for server-sent events.
@@ -9,26 +10,40 @@ export class ServerEvents {
   private _emitters: Record<string, EventEmitter> = {};
   constructor() {}
 
-  sendGameStateUpdate = (gameSessionId: string) => {
+  private send = (gameSessionId: string, event: string, data: any) => {
     const emitter = this._emitters[gameSessionId];
     if (!emitter) {
       // no one's listening.
       return;
     }
-    emitter.emit(`game-state-update`, {});
-    console.debug(`Sent game state update for ${gameSessionId}`);
+    emitter.emit('event', {
+      type: event,
+      data,
+    });
+    console.debug(`Sent ${event} for ${gameSessionId}`);
   };
 
-  subscribe = (gameSessionId: string, callback: () => void) => {
+  sendGameStateUpdate = (gameSessionId: string) => {
+    this.send(gameSessionId, 'game-state-update', {});
+  };
+
+  sendChat = (gameSessionId: string, chatMessage: ChatMessage) => {
+    this.send(gameSessionId, 'chat-message', chatMessage);
+  };
+
+  subscribe = (
+    gameSessionId: string,
+    callback: (event: { type: string; data: any }) => void,
+  ) => {
     let emitter = this._emitters[gameSessionId];
     if (!emitter) {
       emitter = new EventEmitter();
       this._emitters[gameSessionId] = emitter;
     }
-    emitter.on(`game-state-update`, callback);
+    emitter.on('event', callback);
 
     return () => {
-      emitter?.removeListener(`game-state-update`, callback);
+      emitter?.removeListener('event', callback);
       // remove emitter when no one's listening
       if (emitter?.eventNames().length === 0) {
         console.debug(`No more listeners for ${gameSessionId}, cleaning up`);

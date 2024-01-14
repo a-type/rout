@@ -1,8 +1,11 @@
+import { RawChatMessage } from './types.js';
+
 type ServerEventMap = {
   'game-state-update': {
     // clients should refetch from API here.
     // TODO: include data in event?
   };
+  'chat-message': RawChatMessage;
 };
 
 export class EventSubscriber<Events extends Record<string, any>> {

@@ -16,13 +16,14 @@ import { CreateTRPCReact, createTRPCReact } from '@trpc/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GameRound } from '@long-game/common';
 import { ServerEvents, createEvents } from './events.js';
+import { ChatMessage, GameLogItem, RawChatMessage } from './types.js';
 
 // makes TS/PNPM happy when using withGame - basically
 // it gets worried whenever you re-export a tool which
 // relies on something that's not also exported from the
 // library which provided the tool... idk, it's weird.
 // the error is "likely not portable" etc, if you see one.
-export { observer } from 'mobx-react-lite';
+export { observer as withGame } from 'mobx-react-lite';
 
 if (
   !new (class {
@@ -43,6 +44,7 @@ export class GameClient<
   dirty = false;
   previousRounds: GameRound<Turn<PublicTurnData>>[] = [];
   error: string | null = null;
+  chatLog: RawChatMessage[] = [];
 
   readonly session;
   readonly gameDefinition: GameDefinition<
@@ -92,6 +94,41 @@ export class GameClient<
     }));
   }
 
+  // assigns user data to each chat message, making it easier
+  // to display in the UI
+  get chat(): ChatMessage[] {
+    return this.chatLog.map((msg) => ({
+      ...msg,
+      user: this.session.members.find((player) => player.id === msg.userId) ?? {
+        id: msg.userId,
+        name: 'Unknown',
+        imageUrl: null,
+      },
+    }));
+  }
+
+  /**
+   * Combines chat and round logs into one feed, with
+   * user info attached.
+   */
+  get combinedGameLog(): GameLogItem<PublicTurnData>[] {
+    return [
+      ...this.chat.map((msg) => ({
+        type: 'chat' as const,
+        chatMessage: msg,
+        timestamp: msg.createdAt,
+      })),
+      ...this.previousRoundsWithUsers.map((round) => ({
+        type: 'round' as const,
+        round,
+        timestamp: round.turns[round.turns.length - 1].createdAt,
+      })),
+    ].sort((a, b) => {
+      // making dates here just to sort out weird stuff
+      return new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1;
+    });
+  }
+
   constructor({
     gameDefinition,
     host,
@@ -118,6 +155,7 @@ export class GameClient<
     });
     this.refreshState();
     this.subscribeToRefreshEvents();
+    this.setupChat();
   }
 
   private refreshState = () => {
@@ -148,30 +186,26 @@ export class GameClient<
   };
 
   private subscribeToRefreshEvents = () => {
-    // listen for window visibility and refresh state when it becomes visible
-    // again
-    // const onVisiblilityChange = () => {
-    //   if (document.visibilityState === 'visible') {
-    //     this.refreshState();
-    //   }
-    // };
-    // document.addEventListener('visibilitychange', onVisiblilityChange);
-    // window.addEventListener('focus', onVisiblilityChange);
-    // this._disposes.push(() => {
-    //   document.removeEventListener('visibilitychange', onVisiblilityChange);
-    //   window.removeEventListener('focus', onVisiblilityChange);
-    // });
-    // // also refresh once a minute
-    // const interval = setInterval(() => {
-    //   this.refreshState();
-    // }, 60 * 1000);
-    // this._disposes.push(() => {
-    //   clearInterval(interval);
-    // });
-
     // subscribe to server event telling us to refresh game state
     this._disposes.push(
       this._events.subscribe('game-state-update', this.refreshState),
+    );
+  };
+
+  private setupChat = async () => {
+    const chats = await this._trpc.chat.getPage.query({
+      gameSessionId: this.session.id,
+    });
+    action('setChatLog', (messages: RawChatMessage[]) => {
+      this.chatLog = messages;
+    })(chats.messages);
+    this._disposes.push(
+      this._events.subscribe(
+        'chat-message',
+        action('appendChat', (msg) => {
+          this.chatLog.push(msg);
+        }),
+      ),
     );
   };
 
@@ -211,6 +245,27 @@ export class GameClient<
     // server event should do this for us
     // await this.refreshState();
   };
+
+  sendChatMessage = async (message: string) => {
+    await this._trpc.chat.send.mutate({
+      gameSessionId: this.session.id,
+      message,
+    });
+  };
+}
+
+const GameClientContext = createContext<GameClient<any, any, any> | null>(null);
+
+/**
+ * An untyped version of the useGameClient you get from
+ * createGameClient. Used for generic stuff.
+ */
+export function useGameClient() {
+  const client = useContext(GameClientContext);
+  if (!client) {
+    throw new Error('GameClientContext not found');
+  }
+  return client;
 }
 
 export function createGameClient<
@@ -218,12 +273,6 @@ export function createGameClient<
   MoveData extends BaseTurnData,
   PublicMoveData extends BaseTurnData = MoveData,
 >(gameDefinition: GameDefinition<any, PlayerState, MoveData, PublicMoveData>) {
-  const GameClientContext = createContext<GameClient<
-    PlayerState,
-    MoveData,
-    PublicMoveData
-  > | null>(null);
-
   const Provider = observer(function GameClientProviderWithLoading({
     client,
     children,
@@ -264,20 +313,18 @@ export function createGameClient<
         }),
     );
 
+    (window as any).client = client;
+
     return <Provider client={client}>{children}</Provider>;
   };
 
-  function useGameClient() {
-    const client = useContext(GameClientContext);
-    if (!client) {
-      throw new Error('GameClientContext not found');
-    }
-    return client;
-  }
-
   return {
     GameClientProvider,
-    useGameClient,
+    useGameClient: useGameClient as () => GameClient<
+      PlayerState,
+      MoveData,
+      PublicMoveData
+    >,
     withGame: observer,
   };
 }

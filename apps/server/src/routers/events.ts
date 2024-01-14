@@ -46,8 +46,10 @@ eventsRouter.get('/:gameSessionId', async (req) => {
   const stream = new ReadableStream({
     start(controller) {
       console.debug('Subscribing to', req.params.gameSessionId);
-      unsubscribe = events.subscribe(req.params.gameSessionId, () => {
-        controller.enqueue(`event: game-state-update\ndata: {}\n\n`);
+      unsubscribe = events.subscribe(req.params.gameSessionId, (event) => {
+        controller.enqueue(
+          `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
+        );
       });
     },
     cancel() {
