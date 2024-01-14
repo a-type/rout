@@ -22,15 +22,15 @@ function TerrainGrid({
       ...acc,
       [x]: {
         ...acc[x],
-        [y]: item,
+        [y]: { item, coordinates: key as CoordinateKey },
       },
     };
-  }, {} as Record<number, Record<number, Terrain>>);
+  }, {} as Record<number, Record<number, { item: Terrain; coordinates: CoordinateKey }>>);
 
-  const [playerX, playerY] = playerLocation.split(',');
+  const [playerX, playerY] = coordinateKeyToTuple(playerLocation);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mb2">
       {Object.entries(itemsToGrid)
         .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10))
         .map(([x, row]) => (
@@ -42,17 +42,19 @@ function TerrainGrid({
               marginTop: -4,
             }}
           >
-            {Object.entries(row).map(([y, item]) => (
-              <div key={y}>
-                <TerrainTile
-                  item={item}
-                  hasPlayer={x === playerX && y === playerY}
-                  playerColor={playerColor}
-                  isTarget={targetLocation === `${x},${y}`}
-                  onClick={() => onClick(parseInt(x), parseInt(y))}
-                />
-              </div>
-            ))}
+            {Object.entries(row)
+              .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10))
+              .map(([y, { item, coordinates }]) => (
+                <div key={y}>
+                  <TerrainTile
+                    item={item}
+                    hasPlayer={coordinates === playerLocation}
+                    playerColor={playerColor}
+                    isTarget={targetLocation === coordinates}
+                    onClick={() => onClick(parseInt(x), parseInt(y))}
+                  />
+                </div>
+              ))}
           </div>
         ))}
     </div>

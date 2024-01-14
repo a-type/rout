@@ -14,7 +14,7 @@ function BlessingCard({ item }: { item: Blessing }) {
   const backgroundColor = colorLookup[item.location];
   return (
     <div
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-3 items-center justify-center"
       style={{
         // light if background color is dark, otherwise dark
         color: getContrastYIQ(backgroundColor),
@@ -23,8 +23,8 @@ function BlessingCard({ item }: { item: Blessing }) {
         height: 100,
       }}
     >
-      <span>{item.location}</span>
-      <span>{item.points}</span>
+      <span className="capitalize">{item.location}</span>
+      <span className="font-bold text-xl">{item.points}</span>
     </div>
   );
 }

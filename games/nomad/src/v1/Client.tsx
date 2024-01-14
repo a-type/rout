@@ -3,7 +3,7 @@ import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps, useEffect } from 'react';
 import Blessings from './components/Blessings.js';
 import TerrainGrid from './components/TerrainGrid.js';
-import { axialDistance } from './utils.js';
+import { axialDistance, offsetToAxial } from './utils.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -39,6 +39,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       clearInterval(interval);
     };
   });
+  console.log(client.state?.terrainGrid);
 
   return (
     <div>
@@ -50,12 +51,14 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           <span key={member.id}>{member.name}</span>
         ))}
       </div>
+      <hr />
       {client.state && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-row gap-3">
             <Blessings items={client.state.flippedBlessings} />
             Remaining: {client.state.remainingBlessingCount}
           </div>
+          <hr style={{ width: '100%' }} />
           <TerrainGrid
             items={client.state.terrainGrid}
             playerLocation={client.state.position}
@@ -65,10 +68,11 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
                 ? client.queuedMoves[0].data.position
                 : undefined
             }
-            onClick={(q, r) => {
+            onClick={(x, y) => {
               if (!client.state) {
                 return;
               }
+              const [q, r] = offsetToAxial([x, y]);
               if (axialDistance(client.state.position, `${q},${r}`) <= 1) {
                 client.setMove(0, { position: `${q},${r}` });
               }
@@ -76,6 +80,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           />
         </div>
       )}
+      <hr />
       {client.queuedMoves.map((move, idx) => (
         <div key={idx}>{move.data.position}</div>
       ))}

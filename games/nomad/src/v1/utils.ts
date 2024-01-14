@@ -33,7 +33,7 @@ export function axialToOffset([ax, ay]: [number, number]): [number, number] {
   return [ax, ay + Math.floor(ax / 2)];
 }
 
-export function offsetToAxial(a: [number, number]): CoordinateKey {
+export function offsetToAxial(a: [number, number]): [number, number] {
   const [x, y] = a;
-  return `${x - y / 2},${y}`;
+  return [x, y - Math.floor(x / 2)];
 }
