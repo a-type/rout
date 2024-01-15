@@ -14,6 +14,7 @@ import {
   removeFirst,
 } from './utils.js';
 import { movementCosts } from './components/terrain.js';
+import { baseMap } from './map.js';
 
 export type CoordinateKey = `${number},${number}`;
 export type TerrainType =
@@ -120,22 +121,7 @@ export const gameDefinition: GameDefinition<
     const blessingCount = 10;
     const gridCoordinates = generateAxialGrid(5, 5);
     return {
-      terrainGrid: gridCoordinates.reduce((acc, key, i) => {
-        acc[key] = {
-          type: random.item([
-            'desert',
-            'forest',
-            'mountain',
-            'ocean',
-            'grassland',
-            'swamp',
-            'tundra',
-          ]),
-          features:
-            random.float(0, 1) <= 0.1 ? [random.item(['temple', 'city'])] : [],
-        };
-        return acc;
-      }, {} as Record<CoordinateKey, Terrain>),
+      terrainGrid: baseMap(),
       flippedBlessings: [],
       blessingDeck: (
         Array.from({ length: blessingCount }).fill(null) as any[]

@@ -62,6 +62,8 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       ),
   );
 
+  console.log({ map: client.state.terrainGrid });
+
   return (
     <div className="flex flex-row gap-1">
       <div className="flex-grow-1">
@@ -137,12 +139,6 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
           </div>
         ))}
         <div className="flex flex-row gap-2">
-          {/* <button
-          onClick={() => client.clearMoves()}
-          disabled={client.queuedMoves.length === 0}
-        >
-          Clear
-        </button> */}
           <button
             onClick={() => {
               // TODO: handle error (typically when the move has been processed but the client hasn't reloaded.
