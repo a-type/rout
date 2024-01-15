@@ -15,8 +15,17 @@ import {
 } from './utils.js';
 import { movementCosts } from './components/terrain.js';
 import { baseMap } from './map.js';
+import { EventId, eventDefinitions } from './events.js';
+import { ItemId, itemDefinitions } from './items.js';
 
 export type CoordinateKey = `${number},${number}`;
+export type CardDefinition = {
+  name: string;
+  description: string;
+  color?: string;
+  tags?: Array<string>;
+};
+
 export type TerrainType =
   | 'desert'
   | 'forest'
@@ -40,30 +49,22 @@ export type Blessing = {
 
 export type GlobalState = {
   terrainGrid: Record<CoordinateKey, Terrain>;
-  flippedBlessings: Array<Blessing>;
-  blessingDeck: Array<Blessing>;
+  activeEvents: Array<EventId>;
+  futureDeck: Array<EventId>;
   playerData: Record<string, PlayerData>;
-};
-
-type ItemTag = 'food';
-
-export type Item = {
-  name: string;
-  description: string;
-  tags: Array<ItemTag>;
 };
 
 export type PlayerData = {
   position: CoordinateKey;
   color: string;
   acquiredBlessings: Array<Blessing>;
-  inventory: Array<Item>;
+  inventory: Array<ItemId>;
   inventoryLimit: number;
 };
 
 export type PlayerState = {
   terrainGrid: Record<CoordinateKey, Terrain>;
-  flippedBlessings: Array<Blessing>;
+  activeEvents: Array<EventId>;
   remainingBlessingCount: number;
   movement: number;
 } & PlayerData;
@@ -71,8 +72,6 @@ export type PlayerState = {
 export type TurnData = {
   positions: Array<CoordinateKey>;
 };
-
-const STARTING_INVENTORY_LIMIT = 5;
 
 export const gameDefinition: GameDefinition<
   GlobalState,
@@ -118,25 +117,19 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ playerIds, random }) => {
-    const blessingCount = 10;
     const gridCoordinates = generateAxialGrid(5, 5);
     return {
       terrainGrid: baseMap(),
-      flippedBlessings: [],
-      blessingDeck: (
-        Array.from({ length: blessingCount }).fill(null) as any[]
-      ).map(() => ({
-        location: random.item([
-          'desert',
-          'forest',
-          'mountain',
-          'ocean',
-          'grassland',
-          'swamp',
-          'tundra',
-        ]),
-        points: random.int(1, 6) + random.int(1, 6),
-      })),
+      activeEvents: [],
+      futureDeck: [
+        'empty',
+        'empty',
+        'fireRelic',
+        'empty',
+        'empty',
+        'empty',
+        'empty',
+      ],
       playerData: playerIds.reduce((acc, playerId) => {
         acc[playerId] = {
           position: random.item(gridCoordinates),
@@ -152,14 +145,7 @@ export const gameDefinition: GameDefinition<
           inventory: [
             ...Array.from({ length: 5 })
               .fill(null)
-              .map(
-                () =>
-                  ({
-                    name: 'Food',
-                    description: 'Food',
-                    tags: ['food'],
-                  } as Item),
-              ),
+              .map(() => 'food' as ItemId),
           ],
           inventoryLimit: 5,
         };
@@ -173,17 +159,17 @@ export const gameDefinition: GameDefinition<
     return {
       ...playerData,
       terrainGrid: globalState.terrainGrid,
-      flippedBlessings: globalState.flippedBlessings,
-      remainingBlessingCount: globalState.blessingDeck.length,
+      activeEvents: globalState.activeEvents,
+      remainingBlessingCount: globalState.futureDeck.length,
       movement: 3,
     };
   },
 
   getState: ({ initialState, rounds, random }) => {
-    return rounds.reduce(
-      (cur, round) => applyRoundToGlobalState(cur, round, random),
-      initialState,
-    );
+    return rounds.reduce((cur, round) => {
+      let nextState = applyRoundToGlobalState(cur, round, random);
+      return applyEventsToGlobalState(nextState, random);
+    }, initialState);
   },
 
   getPublicTurn: ({ turn }) => {
@@ -191,7 +177,7 @@ export const gameDefinition: GameDefinition<
   },
 
   getStatus: ({ globalState, rounds }) => {
-    if (globalState.blessingDeck.length === 0) {
+    if (globalState.futureDeck.length === 0) {
       const winningPlayers = Object.keys(globalState.playerData).reduce(
         (acc, playerId) => {
           const blessings = globalState.playerData[playerId].acquiredBlessings;
@@ -217,59 +203,20 @@ const applyRoundToGlobalState = (
   random: GameRandom,
 ): GlobalState => {
   const { turns } = round;
-  const { blessingDeck, flippedBlessings, playerData } = globalState;
-  const newBlessingDeck = [...blessingDeck];
-  let newFlippedBlessings = [...flippedBlessings];
-  const nextBlessing = newBlessingDeck.shift();
-  const newPlayerData = cloneDeep(playerData);
+  const nextGlobalState = cloneDeep(globalState);
 
   const moves = turns.map((turn) => ({
     userId: turn.userId,
     data: turn.data,
   }));
 
-  // Figure out which players didn't move
-  const playersThatDidntMove = moves.reduce((acc, move) => {
-    if (!move.userId) {
-      return acc;
-    }
-    const position = last(move.data.positions);
-    const prevPosition = globalState.playerData[move.userId].position;
-    if (!position || position === prevPosition) {
-      acc.push(move.userId);
-    }
-    return acc;
-  }, [] as string[]);
-
   // Pay sustenance
-  Object.keys(newPlayerData).forEach((playerId) => {
-    newPlayerData[playerId].inventory = removeFirst(
-      newPlayerData[playerId].inventory,
-      (item) => item.tags.includes('food'),
+  Object.keys(nextGlobalState.playerData).forEach((playerId) => {
+    nextGlobalState.playerData[playerId].inventory = removeFirst(
+      nextGlobalState.playerData[playerId].inventory,
+      (item) => !!itemDefinitions[item]?.tags?.includes('food'),
     );
   });
-
-  // Claim blessings
-  newFlippedBlessings = newFlippedBlessings.filter((blessing) => {
-    const claimantPlayers = playersThatDidntMove.filter((playerId) => {
-      const playerPosition = globalState.playerData[playerId].position;
-      return globalState.terrainGrid[playerPosition].type === blessing.location;
-    });
-    claimantPlayers.forEach((playerId) => {
-      newPlayerData[playerId].acquiredBlessings.push(blessing);
-    });
-    return claimantPlayers.length === 0;
-  });
-
-  // Add a new blessing to the revealed blessings and remove
-  // the oldest blessing if there are too many
-  if (nextBlessing) {
-    newFlippedBlessings.push(nextBlessing);
-  }
-  while (newFlippedBlessings.length > 3) {
-    // TODO: Move to a discard where players can view them.
-    newFlippedBlessings.shift();
-  }
 
   // Move players
   moves.forEach((move) => {
@@ -278,28 +225,36 @@ const applyRoundToGlobalState = (
     }
     const position = last(move.data.positions);
     if (position) {
-      newPlayerData[move.userId].position = position;
+      nextGlobalState.playerData[move.userId].position = position;
     }
   });
 
   // Check for getting food
-  Object.keys(newPlayerData).forEach((playerId) => {
-    const player = newPlayerData[playerId];
+  Object.keys(nextGlobalState.playerData).forEach((playerId) => {
+    const player = nextGlobalState.playerData[playerId];
     const terrain = globalState.terrainGrid[player.position];
     if (terrain.features.includes('city')) {
       while (player.inventory.length < player.inventoryLimit) {
-        player.inventory.push({
-          name: 'Food',
-          description: 'Food',
-          tags: ['food'],
-        } as Item);
+        player.inventory.push('food');
       }
     }
   });
-  return {
-    ...globalState,
-    blessingDeck: newBlessingDeck,
-    flippedBlessings: newFlippedBlessings,
-    playerData: newPlayerData,
-  };
+  return nextGlobalState;
+};
+
+const applyEventsToGlobalState = (
+  globalState: GlobalState,
+  random: GameRandom,
+): GlobalState => {
+  let nextGlobalState = cloneDeep(globalState);
+  const nextEvent = nextGlobalState.futureDeck.shift();
+  if (nextEvent) {
+    eventDefinitions[nextEvent].reveal?.(nextGlobalState, random);
+    nextGlobalState.activeEvents.push(nextEvent);
+  }
+  nextGlobalState.activeEvents = nextGlobalState.activeEvents.filter(
+    (eventId) =>
+      !eventDefinitions[eventId].roundEffect?.(nextGlobalState, random),
+  );
+  return nextGlobalState;
 };

@@ -1,13 +1,14 @@
 import { createGameClient } from '@long-game/game-client';
 import { CoordinateKey, gameDefinition } from './gameDefinition.js';
 import { ComponentProps, useEffect, useState } from 'react';
-import Blessings from './components/Blessings.js';
+import ActiveEvents from './components/ActiveEvents.js';
 import TerrainGrid from './components/TerrainGrid.js';
 import { axialDistance, last, offsetToAxial, sum } from './utils.js';
 import { movementCosts } from './components/terrain.js';
 import TileInfo from './components/TileInfo.js';
 import Inventory from './components/Inventory.js';
 import { BasicGameLog } from '@long-game/game-ui';
+import Card from './components/Card.js';
 
 const { GameClientProvider, useGameClient, withGame } =
   createGameClient(gameDefinition);
@@ -62,8 +63,6 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
       ),
   );
 
-  console.log({ map: client.state.terrainGrid });
-
   return (
     <div className="flex flex-row gap-1">
       <div className="flex-grow-1">
@@ -77,7 +76,7 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         <hr />
         <div className="flex flex-col gap-4">
           <div className="flex flex-row gap-3">
-            <Blessings items={client.state.flippedBlessings} />
+            <ActiveEvents eventIds={client.state.activeEvents} />
             Remaining: {client.state.remainingBlessingCount}
           </div>
           <hr style={{ width: '100%' }} />
@@ -141,6 +140,14 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         <div className="flex flex-row gap-2">
           <button
             onClick={() => {
+              client.prepareTurn({ positions: [] });
+            }}
+            disabled={!client.dirty}
+          >
+            Clear
+          </button>{' '}
+          <button
+            onClick={() => {
               // TODO: handle error (typically when the move has been processed but the client hasn't reloaded.
               client.submitMoves();
             }}
@@ -152,11 +159,19 @@ const ExampleGameUI = withGame(function ExampleGameUI() {
         <div className="flex flex-row gap-8">
           <div>
             <h3>Inventory</h3>
-            <Inventory items={client.state.inventory || []} />
+            <Inventory itemIds={client.state.inventory || []} />
           </div>
           <div>
             <h3>Acquired blessings</h3>
-            <Blessings items={client.state.acquiredBlessings || []} />
+            <div className="flex flex-row gap-2">
+              {client.state.acquiredBlessings.map((blessing, idx) => (
+                <Card
+                  key={idx}
+                  name={blessing.location}
+                  description={`${blessing.points}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

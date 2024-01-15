@@ -5,7 +5,7 @@ export const baseMap = (): Record<CoordinateKey, Terrain> => ({
   '-5,1': { type: 'tundra', features: [] },
   '-5,2': { type: 'tundra', features: [] },
   '-5,3': { type: 'forest', features: [] },
-  '-5,4': { type: 'mountain', features: ['temple'] },
+  '-5,4': { type: 'tundra', features: ['temple'] },
   '-5,5': { type: 'swamp', features: [] },
   '-4,-1': { type: 'tundra', features: [] },
   '-4,0': { type: 'mountain', features: ['temple'] },

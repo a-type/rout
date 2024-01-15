@@ -1,6 +1,7 @@
 import { ClientSession } from '@long-game/game-definition';
 import { GlobalState } from './gameDefinition.js';
-import Blessings from './components/Blessings.js';
+import ActiveEvents from './components/ActiveEvents.js';
+import Card from './components/Card.js';
 
 export interface GameRecapProps {
   session: ClientSession;
@@ -21,9 +22,17 @@ export function GameRecap({ session, globalState }: GameRecapProps) {
             },
             0,
           )}
-          <Blessings
-            items={globalState.playerData[member.id].acquiredBlessings}
-          />
+          <div className="flex flex-row gap-2">
+            {globalState.playerData[member.id].acquiredBlessings.map(
+              (blessing, idx) => (
+                <Card
+                  key={idx}
+                  name={blessing.location}
+                  description={`${blessing.points}`}
+                />
+              ),
+            )}
+          </div>
         </span>
       ))}
     </div>
