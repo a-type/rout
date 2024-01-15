@@ -54,11 +54,11 @@ const ActiveGame = withGame(function ActiveGame({
   return (
     <div
       className={clsx(
-        'flex flex-col items-center justify-center gap-3 h-full max-h-screen overflow-hidden',
+        'flex flex-col items-center justify-stretch gap-3 h-full max-h-screen overflow-hidden',
         'md:flex-row',
       )}
     >
-      <div className="flex flex-col items-center justify-center gap-3 md:flex-1 md:p-4">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 max-h-50% w-full max-w-40vh md:p-4 md:max-w-75vw">
         <DndContext
           onDragStart={(ev) => {
             setDraggingId(ev.active.id);
@@ -106,7 +106,7 @@ const ActiveGame = withGame(function ActiveGame({
         </DndContext>
       </div>
       <Divider className="md:hidden" />
-      <BasicGameLog className="flex-1 min-h-80px w-full p-4 md:w-auto md:[flex:0_0_30%] md:overflow-y-auto md:h-full" />
+      <BasicGameLog className="min-h-40px w-full p-4 md:w-auto md:[flex:0_0_30%] md:overflow-y-auto md:h-full" />
     </div>
   );
 });
