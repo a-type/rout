@@ -9,7 +9,7 @@ export interface HandProps {
 export const Hand = withGame(function Hand({ data }: HandProps) {
   const { tiles } = data;
   return (
-    <div className="flex flex-row gap-2 justify-around w-[288px]">
+    <div className="flex flex-row gap-2 justify-around w-full mx-4">
       {tiles.map((t, idx) => (
         <div
           key={t?.id ?? idx}
