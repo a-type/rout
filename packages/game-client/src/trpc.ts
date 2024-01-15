@@ -14,7 +14,13 @@ export const loginLink = (opts: { loginUrl: string }): TRPCLink<AppRouter> => {
               },
               error(result) {
                 if (result.data?.code === 'UNAUTHORIZED') {
-                  window.location.href = opts.loginUrl;
+                  // avoid loop
+                  if (
+                    window.location.href !== opts.loginUrl &&
+                    window.location.pathname !== opts.loginUrl
+                  ) {
+                    window.location.href = opts.loginUrl;
+                  }
                 }
               },
             }),
