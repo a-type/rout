@@ -3,6 +3,7 @@ import { GlobalState, PlayerState, TurnData } from './gameDefinition.js';
 import {
   getPlayerTerrain,
   getPlayersByCondition,
+  getTerrainCoordinatesByCondition,
   giveItemToPlayer,
 } from './gameStateHelpers.js';
 
@@ -20,15 +21,15 @@ export type EventId = keyof typeof definitions;
 
 const definitions = {
   empty: {
-    name: 'Nothing',
+    name: 'Time passes',
     description: 'Nothing happens.',
-    color: '#000',
+    color: '#000000',
   },
   fireRelic: {
     name: 'Fire relic',
     description:
       'The fire relic will be discovered at the temple in the mountains.',
-    color: '#F72',
+    color: '#FF7722',
     roundEffect: (globalState: GlobalState, random: GameRandom) => {
       const validPlayers = getPlayersByCondition(
         globalState,
@@ -48,7 +49,7 @@ const definitions = {
     name: 'Water relic',
     description:
       'The water relic will be discovered at the temple in the lake.',
-    color: '#26F',
+    color: '#2266FF',
     roundEffect: (globalState: GlobalState, random: GameRandom) => {
       const validPlayers = getPlayersByCondition(
         globalState,
@@ -68,7 +69,7 @@ const definitions = {
     name: 'Wind relic',
     description:
       'The wind relic will be discovered at the temple in the tundra.',
-    color: '#9E7',
+    color: '#99EE77',
     roundEffect: (globalState: GlobalState, random: GameRandom) => {
       const validPlayers = getPlayersByCondition(
         globalState,
@@ -88,7 +89,7 @@ const definitions = {
     name: 'Lightning relic',
     description:
       'The lightning relic will be discovered at the temple in the desert.',
-    color: '#FF0',
+    color: '#FFFF00',
     roundEffect: (globalState: GlobalState, random: GameRandom) => {
       const validPlayers = getPlayersByCondition(
         globalState,
@@ -101,6 +102,52 @@ const definitions = {
       }
       const chosenPlayer = random.item(validPlayers);
       giveItemToPlayer(globalState, chosenPlayer, 'lightningRelicItem');
+      return true;
+    },
+  },
+  relicQuest: {
+    name: 'Relic quest',
+    description: 'The one that brings the relics together will be blessed',
+    color: '#FFFFFF',
+    roundEffect: (globalState: GlobalState, random: GameRandom) => {
+      const relicItems = [
+        'fireRelicItem',
+        'waterRelicItem',
+        'windRelicItem',
+        'lightningRelicItem',
+      ];
+      const relicPlayers = getPlayersByCondition(
+        globalState,
+        ({ playerState: { inventory } }) =>
+          inventory.filter((item) => relicItems.includes(item)).length >= 3,
+      );
+      if (relicPlayers.length === 0) {
+        return false;
+      }
+      const chosenPlayer = random.item(relicPlayers);
+      globalState.playerData[chosenPlayer].acquiredBlessings.push({
+        location: 'forest',
+        points: 20,
+      });
+      return true;
+    },
+  },
+  crumblingCity: {
+    name: 'Crumbling city',
+    description: 'A city will crumble to ruins',
+    color: '#000000',
+    roundEffect: (globalState: GlobalState, random: GameRandom) => {
+      const terrainCoords = getTerrainCoordinatesByCondition(
+        globalState,
+        ({ features }) => features.includes('city'),
+      );
+      if (terrainCoords.length === 0) {
+        return false;
+      }
+      const chosenTerrain = random.item(terrainCoords);
+      globalState.terrainGrid[chosenTerrain].features = globalState.terrainGrid[
+        chosenTerrain
+      ].features.filter((feature) => feature !== 'city');
       return true;
     },
   },

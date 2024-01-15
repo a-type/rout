@@ -122,9 +122,21 @@ export const gameDefinition: GameDefinition<
       terrainGrid: baseMap(),
       activeEvents: [],
       futureDeck: [
-        'empty',
+        'crumblingCity',
         'empty',
         'fireRelic',
+        'empty',
+        'waterRelic',
+        'empty',
+        'lightningRelic',
+        'empty',
+        'windRelic',
+        'empty',
+        'empty',
+        'relicQuest',
+        'empty',
+        'empty',
+        'empty',
         'empty',
         'empty',
         'empty',
@@ -250,11 +262,16 @@ const applyEventsToGlobalState = (
   const nextEvent = nextGlobalState.futureDeck.shift();
   if (nextEvent) {
     eventDefinitions[nextEvent].reveal?.(nextGlobalState, random);
-    nextGlobalState.activeEvents.push(nextEvent);
   }
   nextGlobalState.activeEvents = nextGlobalState.activeEvents.filter(
     (eventId) =>
       !eventDefinitions[eventId].roundEffect?.(nextGlobalState, random),
   );
+  if (nextEvent) {
+    nextGlobalState.activeEvents.push(nextEvent);
+  }
+  while (nextGlobalState.activeEvents.length > 5) {
+    nextGlobalState.activeEvents.shift();
+  }
   return nextGlobalState;
 };

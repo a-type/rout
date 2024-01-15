@@ -9,7 +9,7 @@ function getContrastYIQ(hexcolor: string) {
   return yiq >= 128 ? 'black' : 'white';
 }
 
-function Card({ name, description, color = '#444', tags }: CardDefinition) {
+function Card({ name, description, color = '#444444', tags }: CardDefinition) {
   return (
     <div
       className="flex flex-col gap-3 items-center justify-center border border-solid border-white rounded-md p-1"

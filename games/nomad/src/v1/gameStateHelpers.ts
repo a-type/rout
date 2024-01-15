@@ -1,4 +1,9 @@
-import { GlobalState, PlayerData, Terrain } from './gameDefinition.js';
+import {
+  CoordinateKey,
+  GlobalState,
+  PlayerData,
+  Terrain,
+} from './gameDefinition.js';
 import { ItemId } from './items.js';
 
 export function getPlayerIds(gameState: GlobalState): string[] {
@@ -20,6 +25,16 @@ export function getPlayersByCondition(
       terrain: getPlayerTerrain(globalState, id),
     }),
   );
+}
+
+export function getTerrainCoordinatesByCondition(
+  globalState: GlobalState,
+  condition: (terrain: Terrain) => boolean,
+): CoordinateKey[] {
+  return Object.keys(globalState.terrainGrid).filter((position) => {
+    const terrain = globalState.terrainGrid[position as CoordinateKey];
+    return condition(terrain);
+  }) as CoordinateKey[];
 }
 
 export function getPlayerTerrain(

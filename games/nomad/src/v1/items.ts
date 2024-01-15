@@ -14,25 +14,25 @@ const definitions = {
   fireRelicItem: {
     name: 'Fire relic',
     description: 'A relic that can be used to light a fire.',
-    color: '#F72',
+    color: '#FF7722',
     tags: ['relic', 'fire'],
   },
   waterRelicItem: {
     name: 'Water relic',
     description: 'A relic that can be used to purify water.',
-    color: '#26F',
+    color: '#2266FF',
     tags: ['relic', 'water'],
   },
   windRelicItem: {
     name: 'Wind relic',
     description: 'A relic that can be used to summon the wind.',
-    color: '#9E7',
+    color: '#99EE77',
     tags: ['relic', 'wind'],
   },
   lightningRelicItem: {
     name: 'Lightning relic',
     description: 'A relic that can be used to summon lightning.',
-    color: '#FF0',
+    color: '#FFFF00',
     tags: ['relic', 'lightning'],
   },
 } satisfies Record<string, ItemDefinition>;
