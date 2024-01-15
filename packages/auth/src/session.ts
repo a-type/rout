@@ -28,3 +28,11 @@ export function getOrCreateSession(req: Request, res: Response) {
     password: SESSION_SECRET,
   });
 }
+
+export async function refreshSession(req: Request, res: Response) {
+  const session = await getOrCreateSession(req, res);
+  if (!session.userId) {
+    return;
+  }
+  await session.save();
+}

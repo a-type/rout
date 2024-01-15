@@ -2,15 +2,19 @@ import { RefObject, createRef, useEffect, useState } from 'react';
 import { GridTile } from '../gameDefinition.js';
 import { CONNECTIONS, Direction, mergeTiles } from '../tiles.js';
 import { Draggable } from './Draggable.js';
-import { hashToIndex } from '@long-game/common';
+import { colors } from '@long-game/common';
+import { useGameClient } from '@long-game/game-client';
+import { NeuronClient, withGame } from '../gameClient.js';
+import clsx from 'clsx';
 
 export interface TileProps {
   cells: GridTile[];
   className?: string;
 }
 
-export function Tile({ cells, className }: TileProps) {
-  const [lineCanvas] = useState(() => new LineCanvas());
+export const Tile = withGame(function Tile({ cells, className }: TileProps) {
+  const client = useGameClient();
+  const [lineCanvas] = useState(() => new LineCanvas(client));
   useEffect(() => {
     lineCanvas.setCells(cells);
   }, [cells, lineCanvas]);
@@ -19,14 +23,19 @@ export function Tile({ cells, className }: TileProps) {
     <div
       title={shape ?? 'blank'}
       className={
-        'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[30px] select-none ' +
+        'w-full h-full bg-white flex items-center justify-center text-[30px] select-none ' +
           className ?? ''
       }
     >
-      <canvas ref={lineCanvas.ref} width={32} height={32} />
+      <canvas
+        ref={lineCanvas.ref}
+        width={32}
+        height={32}
+        className="w-full h-full"
+      />
     </div>
   );
-}
+});
 
 export function DraggableTile({
   cells,
@@ -41,7 +50,7 @@ export function DraggableTile({
 
   return (
     <Draggable id={id} data={{ tile: shape }}>
-      <Tile cells={cells} className={className} />
+      <Tile cells={cells} className={clsx('cursor-grab', className)} />
     </Draggable>
   );
 }
@@ -59,24 +68,10 @@ export function EmptyTile({ className }: { className?: string }) {
   );
 }
 
-// TODO: actual player colors in the server
-const COLORS = [
-  '#f00',
-  '#0f0',
-  '#00f',
-  '#dd0',
-  '#f0f',
-  '#0ff',
-  '#f80',
-  '#08f',
-  '#80f',
-  '#8f0',
-  '#f08',
-  '#0f8',
-];
-
 class LineCanvas {
   ref: RefObject<HTMLCanvasElement> = createRef();
+
+  constructor(private client: NeuronClient) {}
 
   private cells: GridTile[] = [];
 
@@ -119,9 +114,10 @@ class LineCanvas {
 
     for (let i = 0; i < this.cells.length; i++) {
       const cell = this.cells[i];
+      const owner = this.client.getMember(cell.owner);
       if (cell.shape === '·') {
         // draw a dot
-        ctx.fillStyle = COLORS[hashToIndex(cell.owner ?? '', COLORS.length)];
+        ctx.fillStyle = colors[owner.color].default;
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
         ctx.fill();
@@ -139,8 +135,7 @@ class LineCanvas {
           const overlaps = overlappingUsers.get(direction) ?? [];
           const lineLength = length / overlaps.length;
           const lineOffset = lineLength * overlaps.indexOf(cell.owner);
-          ctx.strokeStyle =
-            COLORS[hashToIndex(cell.owner ?? '', COLORS.length)];
+          ctx.strokeStyle = colors[owner.color].default;
           ctx.lineWidth = 4;
           // ok this is lazy but I don't care... there's only 4.
           ctx.beginPath();

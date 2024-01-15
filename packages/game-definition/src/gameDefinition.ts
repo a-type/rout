@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { GameRandom } from './random.js';
-import { GameRound } from '@long-game/common';
+import { GameRound, PlayerColorName } from '@long-game/common';
 
 export type BaseTurnData = object;
 
@@ -129,6 +129,7 @@ export type ClientSession = {
     status: 'pending' | 'accepted' | 'declined' | 'expired';
     name: string;
     imageUrl: string | null;
+    color: PlayerColorName;
   }[];
   localPlayer: { id: string };
   status: GameStatus;

@@ -10,7 +10,7 @@ export interface GridProps {
 
 export function Grid({ data }: GridProps) {
   return (
-    <div className="grid grid-cols-9 grid-rows-9 w-[288px] h-[288px]">
+    <div className="grid grid-cols-9 grid-rows-9 w-full aspect-square">
       {new Array(GRID_SIZE)
         .fill(null)
         .map((_, y) =>

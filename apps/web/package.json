@@ -5,7 +5,7 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@a-type/ui": "^0.6.8",
+    "@a-type/ui": "^0.6.12",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/games": "workspace:*",

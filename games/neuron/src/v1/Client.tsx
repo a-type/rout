@@ -10,6 +10,7 @@ import { Tile } from './components/Tile.js';
 import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
 import { Button } from '@a-type/ui/components/button';
 import { BasicGameLog } from '@long-game/game-ui';
+import { Divider } from '@a-type/ui/components/divider';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -50,7 +51,7 @@ const ActiveGame = withGame(function ActiveGame({
   const [draggingId, setDraggingId] = useState<string | number | null>(null);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3">
+    <div className="flex flex-col items-center justify-center gap-3 h-full max-h-screen overflow-hidden">
       <DndContext
         onDragStart={(ev) => {
           setDraggingId(ev.active.id);
@@ -96,7 +97,8 @@ const ActiveGame = withGame(function ActiveGame({
           {draggingId && <DraggingTile id={draggingId} />}
         </DragOverlay>
       </DndContext>
-      <BasicGameLog className="max-h-[400px]" />
+      <Divider />
+      <BasicGameLog className="flex-1 min-h-80px w-full p-4" />
     </div>
   );
 });

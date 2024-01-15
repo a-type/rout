@@ -34,6 +34,7 @@ export interface UserTable {
   email: string;
   emailVerifiedAt: string | null;
   imageUrl: string | null;
+  color: string | null;
 }
 
 export type User = Selectable<UserTable>;

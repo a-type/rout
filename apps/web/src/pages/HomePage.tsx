@@ -3,6 +3,7 @@ import { FriendsList } from '@/components/friendships/FriendsList.jsx';
 import { SendInvite } from '@/components/friendships/SendInvite.jsx';
 import { CreateGame } from '@/components/games/CreateGame.jsx';
 import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
+import { EditProfileButton } from '@/components/users/EditProfile.jsx';
 import {
   PageContent,
   PageNowPlaying,
@@ -15,6 +16,9 @@ export function HomePage({}: HomePageProps) {
   return (
     <PageRoot>
       <PageContent>
+        <div className="flex flex-row">
+          <EditProfileButton />
+        </div>
         <SendInvite />
         <FriendInvites />
         <FriendsList />

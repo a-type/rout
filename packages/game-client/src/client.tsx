@@ -252,6 +252,17 @@ export class GameClient<
       message,
     });
   };
+
+  getMember = (id: string) => {
+    return (
+      this.session.members.find((player) => player.id === id) ?? {
+        id,
+        name: 'Unknown',
+        imageUrl: null,
+        color: 'gray',
+      }
+    );
+  };
 }
 
 const GameClientContext = createContext<GameClient<any, any, any> | null>(null);

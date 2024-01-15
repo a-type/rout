@@ -1,5 +1,6 @@
 import { createId } from '@paralleldrive/cuid2';
 import * as bcrypt from 'bcrypt';
+import { sql } from 'kysely';
 
 export function id(prefix?: string) {
   return `${prefix || ''}${createId()}`;
@@ -41,3 +42,7 @@ export function compareDates(
     throw new Error(`Invalid operator: ${operator}`);
   }
 }
+
+/** Selects the user name - prefers friendlyName, falls back to fullName */
+export const userNameSelector =
+  sql<string>`COALESCE(User.friendlyName, User.fullName)`.as('name');

@@ -1,5 +1,12 @@
 import { assert } from '@a-type/utils';
-import { dateTime, db, id, jsonArrayFrom, sql } from '@long-game/db';
+import {
+  dateTime,
+  db,
+  id,
+  jsonArrayFrom,
+  sql,
+  userNameSelector,
+} from '@long-game/db';
 import { getGameState } from '@long-game/game-state';
 import {
   ClientSession,
@@ -12,7 +19,7 @@ import games from '@long-game/games';
 import { TRPCError } from '@trpc/server';
 import * as zod from 'zod';
 import { router, userProcedure } from './util.js';
-import { GameRound } from '@long-game/common';
+import { GameRound, PlayerColorName } from '@long-game/common';
 
 export const gameSessionsRouter = router({
   gameSession: userProcedure
@@ -56,12 +63,9 @@ export const gameSessionsRouter = router({
                 'GameSessionMembership.userId as id',
                 'GameSessionMembership.status',
                 'User.imageUrl',
+                'User.color',
               ])
-              .select(
-                sql<string>`COALESCE(User.friendlyName, User.fullName)`.as(
-                  'name',
-                ),
-              )
+              .select(userNameSelector)
               .whereRef('gameSessionId', '=', 'GameSession.id'),
           ).as('members'),
         ])
@@ -93,9 +97,16 @@ export const gameSessionsRouter = router({
         });
       }
 
+      const members = gameSession.members.map((member) => ({
+        ...member,
+        name: member.name ?? 'Unknown',
+        color: member.color ? (member.color as PlayerColorName) : 'gray',
+      }));
+
       if (!gameSession.startedAt) {
         return {
           ...gameSession,
+          members,
           status: { status: 'pending' },
           localPlayer: {
             id: session.userId,
@@ -115,6 +126,7 @@ export const gameSessionsRouter = router({
 
       return {
         ...gameSession,
+        members,
         status,
         localPlayer: {
           id: session.userId,
@@ -265,11 +277,7 @@ export const gameSessionsRouter = router({
                 'GameSessionMembership.status',
                 'User.imageUrl',
               ])
-              .select(
-                sql<string>`COALESCE(User.friendlyName, User.fullName)`.as(
-                  'name',
-                ),
-              )
+              .select(userNameSelector)
               .whereRef('gameSessionId', '=', 'GameSession.id'),
           ).as('members'),
         ])

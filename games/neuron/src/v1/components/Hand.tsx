@@ -10,9 +10,14 @@ export const Hand = withGame(function Hand({ data }: HandProps) {
   const { tiles } = data;
   return (
     <div className="flex flex-row gap-2 justify-around w-[288px]">
-      {tiles.map((t, idx) =>
-        t ? <HandTile tile={t} key={t.id} /> : <EmptyTile key={idx} />,
-      )}
+      {tiles.map((t, idx) => (
+        <div
+          key={t?.id ?? idx}
+          className="aspect-square border-1 border-solid border-black"
+        >
+          {t ? <HandTile tile={t} /> : <EmptyTile />}
+        </div>
+      ))}
     </div>
   );
 });
