@@ -11,6 +11,7 @@ import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
 import { Button } from '@a-type/ui/components/button';
 import { BasicGameLog } from '@long-game/game-ui';
 import { Divider } from '@a-type/ui/components/divider';
+import clsx from 'clsx';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -51,54 +52,61 @@ const ActiveGame = withGame(function ActiveGame({
   const [draggingId, setDraggingId] = useState<string | number | null>(null);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 h-full max-h-screen overflow-hidden">
-      <DndContext
-        onDragStart={(ev) => {
-          setDraggingId(ev.active.id);
-        }}
-        onDragEnd={(ev) => {
-          setDraggingId(null);
-          if (!ev.over) return;
+    <div
+      className={clsx(
+        'flex flex-col items-center justify-center gap-3 h-full max-h-screen overflow-hidden',
+        'md:flex-row',
+      )}
+    >
+      <div className="flex flex-col items-center justify-center gap-3 md:flex-1 md:p-4">
+        <DndContext
+          onDragStart={(ev) => {
+            setDraggingId(ev.active.id);
+          }}
+          onDragEnd={(ev) => {
+            setDraggingId(null);
+            if (!ev.over) return;
 
-          console.log(
-            `Dropped on ${ev.over.id}: ${ev.active.id} ${JSON.stringify(
-              ev.active.data,
-            )}`,
-          );
-          if (typeof ev.over.id !== 'string') return;
-          if (!isCoordinateKey(ev.over.id)) return;
-          const handId = ev.active.id;
-          if (typeof handId !== 'string') return;
-          const data = ev.active.data as DataRef<{ tile: TileShape }>;
-          if (!data.current) return;
+            console.log(
+              `Dropped on ${ev.over.id}: ${ev.active.id} ${JSON.stringify(
+                ev.active.data,
+              )}`,
+            );
+            if (typeof ev.over.id !== 'string') return;
+            if (!isCoordinateKey(ev.over.id)) return;
+            const handId = ev.active.id;
+            if (typeof handId !== 'string') return;
+            const data = ev.active.data as DataRef<{ tile: TileShape }>;
+            if (!data.current) return;
 
-          const { x, y } = fromCoordinateKey(ev.over.id);
-          client.prepareTurn({
-            coordinate: { x, y },
-            tileId: handId,
-            tile: data.current.tile,
-          });
-          client.submitMoves();
-        }}
-      >
-        <Grid data={state.grid} />
-        <Hand data={state.hand} />
-        <Button
-          onClick={() => {
+            const { x, y } = fromCoordinateKey(ev.over.id);
             client.prepareTurn({
-              skip: true,
+              coordinate: { x, y },
+              tileId: handId,
+              tile: data.current.tile,
             });
             client.submitMoves();
           }}
         >
-          Skip
-        </Button>
-        <DragOverlay>
-          {draggingId && <DraggingTile id={draggingId} />}
-        </DragOverlay>
-      </DndContext>
-      <Divider />
-      <BasicGameLog className="flex-1 min-h-80px w-full p-4" />
+          <Grid data={state.grid} />
+          <Hand data={state.hand} />
+          <Button
+            onClick={() => {
+              client.prepareTurn({
+                skip: true,
+              });
+              client.submitMoves();
+            }}
+          >
+            Skip
+          </Button>
+          <DragOverlay>
+            {draggingId && <DraggingTile id={draggingId} />}
+          </DragOverlay>
+        </DndContext>
+      </div>
+      <Divider className="md:hidden" />
+      <BasicGameLog className="flex-1 min-h-80px w-full p-4 md:w-auto md:[flex:0_0_30%] md:overflow-y-auto md:h-full" />
     </div>
   );
 });
