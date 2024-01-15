@@ -3,6 +3,7 @@ import { FriendsList } from '@/components/friendships/FriendsList.jsx';
 import { SendInvite } from '@/components/friendships/SendInvite.jsx';
 import { CreateGame } from '@/components/games/CreateGame.jsx';
 import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
+import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
 import { EditProfileButton } from '@/components/users/EditProfile.jsx';
 import {
   PageContent,
@@ -26,6 +27,7 @@ export function HomePage({}: HomePageProps) {
         <PageNowPlaying unstyled>
           <CreateGame />
         </PageNowPlaying>
+        <CompleteProfileDialog />
       </PageContent>
     </PageRoot>
   );
