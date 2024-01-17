@@ -31,3 +31,4 @@ export const db = new Kysely<Database>({
 export type DB = typeof db;
 
 export type * from './tables.js';
+export { migrateToLatest } from './migrate.js';

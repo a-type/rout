@@ -4,8 +4,7 @@
     "outDir": "./dist/esm",
     "declaration": true,
     "declarationDir": "./dist/typings",
-    "declarationMap": true,
-    "baseUrl": "."
+    "declarationMap": true
   },
   "include": ["src"]
 }

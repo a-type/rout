@@ -1,10 +1,6 @@
-import * as path from 'path';
+import { Migration, MigrationProvider, Migrator } from 'kysely';
 import { db } from './index.js';
-import { Migrator, MigrationProvider, Migration } from 'kysely';
-import url from 'url';
 import migrations from './migrations/index.js';
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 export class FileMigrationProvider implements MigrationProvider {
   constructor() {}
@@ -14,8 +10,7 @@ export class FileMigrationProvider implements MigrationProvider {
   }
 }
 
-async function migrateToLatest() {
-  console.log(__dirname);
+export async function migrateToLatest() {
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider(),
@@ -39,5 +34,3 @@ async function migrateToLatest() {
 
   await db.destroy();
 }
-
-migrateToLatest();

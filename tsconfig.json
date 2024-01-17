@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "downlevelIteration": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "customConditions": ["dev"]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

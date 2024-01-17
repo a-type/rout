@@ -2,7 +2,8 @@
   "name": "@long-game/web",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build"
   },
   "dependencies": {
     "@a-type/ui": "^0.6.12",

@@ -6,6 +6,7 @@ import { authRouter } from './routers/auth.js';
 import { trpcRouter } from './routers/trpc.js';
 import { DEPLOYED_CONTEXT } from './deployedContext.js';
 import { eventsRouter } from './routers/events.js';
+import { migrateToLatest } from '@long-game/db';
 
 const router = Router();
 
@@ -41,6 +42,8 @@ const ittyServer = createServerAdapter((request) =>
       return corsify(res);
     }),
 );
+
+await migrateToLatest();
 
 const httpServer = createServer(ittyServer);
 const port = DEPLOYED_CONTEXT.apiHost.split(':')[2];

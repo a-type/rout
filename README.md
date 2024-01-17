@@ -9,7 +9,6 @@ You need a `.env` with google client credentials, ask @a-type.
 ```
 pnpm i
 pnpm build
-pnpm run setup
 pnpm dev
 ```
 

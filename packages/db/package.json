@@ -2,17 +2,16 @@
   "name": "@long-game/db",
   "private": true,
   "version": "0.0.1",
-  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "node": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
   "bin": {
     "long-game-migrate": "./bin/migrate.js"
-  },
-  "publishConfig": {
-    "access": "public",
-    "exports": {
-      ".": {
-        "import": "./dist/index.js"
-      }
-    }
   },
   "scripts": {
     "build": "tsc",

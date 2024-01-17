@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-import '../dist/esm/migrate.js';
+import { migrateToLatest } '../dist/esm/migrate.js';
+migrateToLatest();

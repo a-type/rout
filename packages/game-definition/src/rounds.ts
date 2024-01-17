@@ -2,9 +2,9 @@
  * Helpers for common round formats
  */
 
-import { withTimezone } from '@long-game/common/src/time.js';
+import { withTimezone } from '@long-game/common';
 import { RoundIndexDecider } from './gameDefinition.js';
-import add from 'date-fns/add';
+import add from 'date-fns/add/index.js';
 
 export type PeriodType = 'days' | 'hours' | 'minutes';
 

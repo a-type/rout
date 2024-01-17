@@ -2,11 +2,18 @@
   "name": "@long-game/game-definition",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "dev": "./src/index.ts",
+      "import": "./dist/esm/index.js",
+      "node": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
   "type": "module",
   "scripts": {
     "//dev": "tsc -w",
-    "//build": "tsc",
+    "build": "tsc",
     "test": "vitest"
   },
   "dependencies": {
