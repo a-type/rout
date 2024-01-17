@@ -46,7 +46,7 @@ const ittyServer = createServerAdapter((request) =>
 await migrateToLatest();
 
 const httpServer = createServer(ittyServer);
-const port = DEPLOYED_CONTEXT.apiHost.split(':')[2];
+const port = process.env.PORT || DEPLOYED_CONTEXT.apiHost.split(':')[2];
 httpServer.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

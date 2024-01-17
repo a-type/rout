@@ -7,15 +7,16 @@ app = "long-game"
 primary_region = "iad"
 
 [env]
-DATABASE_FILE = "file:/data/database.sqlite"
+DATABASE_FILE = "/data/database.sqlite"
 HOST = "https://api.long-game.gfor.rest"
+PORT = "3100"
 UI_HOST = "https://long-game.gfor.rest"
 
 [build]
 dockerfile = "Dockerfile"
 
 [http_service]
-internal_port = 3000
+internal_port = 3100
 force_https = true
 auto_stop_machines = true
 auto_start_machines = true

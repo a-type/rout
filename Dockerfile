@@ -23,10 +23,9 @@ COPY . .
 
 RUN pnpm install --filter . --frozen-lockfile
 RUN pnpm install --filter "@long-game/server..." --frozen-lockfile --unsafe-perm
-RUN pnpm --filter "@long-game/server" run build
-RUN pnpm --filter "@long-game/db": run build
+RUN pnpm --filter "@long-game/server..." run build
 
 WORKDIR /root/monorepo/apps/server
-EXPOSE 3001
+EXPOSE 3100
 ENV NODE_ENV=production
 ENTRYPOINT ["pnpm", "start"]
