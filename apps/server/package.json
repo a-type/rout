@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "env-cmd tsx watch --clear-screen=false ./src/server.ts",
     "setup": "pnpm migrate",
-    "start": "node ./dist/server.js",
+    "start": "node --conditions=prod ./dist/server.js",
     "start:local": "env-cmd pnpm start",
     "build": "tsc --build tsconfig.json",
     "vapid": "node ./scripts/generateVapidKeys.js",

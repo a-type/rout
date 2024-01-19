@@ -4657,7 +4657,7 @@ packages:
       '@whatwg-node/events': 0.1.1
       busboy: 1.6.0
       fast-querystring: 1.1.2
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /@whatwg-node/server@0.9.22:
@@ -4665,7 +4665,7 @@ packages:
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.14
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /abbrev@1.1.1:
@@ -7114,7 +7114,7 @@ packages:
       '@types/react': 18.2.46
       react: 18.2.0
       react-style-singleton: 2.2.1(@types/react@18.2.46)(react@18.2.0)
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /react-remove-scroll@2.5.4(@types/react@18.2.46)(react@18.2.0):
@@ -7169,7 +7169,7 @@ packages:
       get-nonce: 1.0.1
       invariant: 2.2.4
       react: 18.2.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /react@18.2.0:
@@ -7754,6 +7754,10 @@ packages:
     resolution: {integrity: sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig==}
     dev: false
 
+  /tslib@2.6.2:
+    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: false
+
   /tsx@4.7.0:
     resolution: {integrity: sha512-I+t79RYPlEYlHn9a+KzwrvEwhJg35h/1zHsLC2JXvhC2mdynMv6Zxzvhv5EMV6VF5qJlLlkSnMVvdZV3PSIGcg==}
     engines: {node: '>=18.0.0'}
@@ -8060,7 +8064,7 @@ packages:
     dependencies:
       '@types/react': 18.2.46
       react: 18.2.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /use-isomorphic-layout-effect@1.1.2(@types/react@18.2.46)(react@18.2.0):
@@ -8089,7 +8093,7 @@ packages:
       '@types/react': 18.2.46
       detect-node-es: 1.1.0
       react: 18.2.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: false
 
   /use-sync-external-store@1.2.0(react@18.2.0):

@@ -4,9 +4,8 @@
   "version": "0.0.1",
   "exports": {
     ".": {
-      "dev": "./src/index.ts",
-      "import": "./dist/esm/index.js",
-      "node": "./dist/esm/index.js",
+      "prod": "./dist/esm/index.js",
+      "import": "./src/index.ts",
       "default": "./dist/esm/index.js"
     }
   },
