@@ -9,24 +9,27 @@ export { sql } from 'kysely';
 import { SerializePlugin } from 'kysely-plugin-serialize';
 import { TimestampsPlugin } from './plugins.js';
 
-const DATABASE_FILE = process.env.DATABASE_FILE;
-assert(DATABASE_FILE, 'DATABASE_FILE environment variable must be set');
+export function createDb() {
+  const DATABASE_FILE = process.env.DATABASE_FILE;
+  assert(DATABASE_FILE, 'DATABASE_FILE environment variable must be set');
+  const dialect = new SqliteDialect({
+    database: new SQLite(DATABASE_FILE),
+  });
 
-const dialect = new SqliteDialect({
-  database: new SQLite(DATABASE_FILE),
-});
+  // Database interface is passed to Kysely's constructor, and from now on, Kysely
+  // knows your database structure.
+  // Dialect is passed to Kysely's constructor, and from now on, Kysely knows how
+  // to communicate with your database.
+  return new Kysely<Database>({
+    dialect,
+    plugins: [
+      new TimestampsPlugin<Database>({ ignoredTables: ['VerificationToken'] }),
+      new SerializePlugin(),
+    ],
+  });
+}
 
-// Database interface is passed to Kysely's constructor, and from now on, Kysely
-// knows your database structure.
-// Dialect is passed to Kysely's constructor, and from now on, Kysely knows how
-// to communicate with your database.
-export const db = new Kysely<Database>({
-  dialect,
-  plugins: [
-    new TimestampsPlugin<Database>({ ignoredTables: ['VerificationToken'] }),
-    new SerializePlugin(),
-  ],
-});
+export const db = createDb();
 
 export type DB = typeof db;
 

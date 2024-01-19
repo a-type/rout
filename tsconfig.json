@@ -16,7 +16,7 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "isolatedModules": true,
-    "customConditions": ["dev"]
+    "customConditions": ["development"]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

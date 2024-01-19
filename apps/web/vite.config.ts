@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import UnoCSS from 'unocss/vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     UnoCSS(),
     react(),
@@ -101,6 +101,10 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+    conditions:
+      mode === 'production'
+        ? ['production', 'import', 'module', 'browser', 'default']
+        : ['development', 'import', 'module', 'browser', 'default'],
   },
   server: {
     port: 3100,
@@ -108,4 +112,4 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
-});
+}));
