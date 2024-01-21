@@ -23,6 +23,7 @@ export async function getGameState(
   previousRounds: GameRound<Turn<any>>[];
   currentRound: GameRound<Turn<any>>;
   gameDefinition: GameDefinition;
+  members: { id: string }[];
 }> {
   const turns = await db
     .selectFrom('GameTurn')
@@ -86,6 +87,7 @@ export async function getGameState(
     initialState: gameSession.initialState,
     rounds: previousRounds,
     random: new GameRandom(gameSession.randomSeed),
+    members,
   });
 
   const currentRound: GameRound<Turn<any>> = rounds[currentRoundIndex] || {
@@ -99,5 +101,6 @@ export async function getGameState(
     rounds,
     globalState,
     gameDefinition,
+    members,
   };
 }

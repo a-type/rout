@@ -119,6 +119,7 @@ export const gameSessionsRouter = router({
         game?.gameDefinition.getStatus({
           globalState: game.globalState,
           rounds: game.previousRounds,
+          members,
         }) ??
         ({
           status: 'active',
@@ -314,10 +315,10 @@ export const gameSessionsRouter = router({
         .set({
           startedAt: dateTime(),
           initialState: gameDefinition.getInitialGlobalState({
-            playerIds: gameSession.members.map((m) => m.id),
             // altering the seed here so that the first moves don't receive
             // the same random values as the initial state.
             random: new GameRandom(gameSession.randomSeed + 'INITIAL'),
+            members: gameSession.members,
           }),
           gameVersion: gameDefinition.version,
         })
@@ -528,8 +529,13 @@ export const gameSessionsRouter = router({
           });
         }
 
-        const { globalState, gameDefinition, previousRounds, currentRound } =
-          game;
+        const {
+          globalState,
+          gameDefinition,
+          previousRounds,
+          currentRound,
+          members,
+        } = game;
         // we only show the player queued turn for their
         // own user
         // players should only have 1 turn per round.
@@ -539,6 +545,8 @@ export const gameSessionsRouter = router({
         const playerState = gameDefinition.getPlayerState({
           globalState,
           playerId: session.userId,
+          roundIndex: currentRound.roundIndex,
+          members,
         });
         const publicHistoricalRounds = previousRounds.map((r) => ({
           ...r,
@@ -549,6 +557,7 @@ export const gameSessionsRouter = router({
         const status = gameDefinition.getStatus({
           globalState,
           rounds: previousRounds,
+          members,
         });
 
         return {
@@ -592,7 +601,7 @@ export const gameSessionsRouter = router({
         });
       }
 
-      const { globalState, gameDefinition, previousRounds } = game;
+      const { globalState, gameDefinition, previousRounds, members } = game;
 
       // using previousRounds here - otherwise this API could be used
       // to see the current state of the game with current round moves before
@@ -600,6 +609,7 @@ export const gameSessionsRouter = router({
       const status = gameDefinition.getStatus({
         globalState,
         rounds: previousRounds,
+        members,
       });
 
       if (status.status !== 'completed') {
@@ -658,13 +668,19 @@ export const gameSessionsRouter = router({
         });
       }
 
-      const { globalState, gameDefinition, currentRound, previousRounds } =
-        game;
+      const {
+        globalState,
+        gameDefinition,
+        currentRound,
+        previousRounds,
+        members,
+      } = game;
 
       // validate the game status - cannot make moves on an ended game
       const status = gameDefinition.getStatus({
         globalState,
         rounds: previousRounds,
+        members,
       });
       if (status.status !== 'active') {
         throw new TRPCError({
@@ -678,6 +694,8 @@ export const gameSessionsRouter = router({
       const playerState = gameDefinition.getPlayerState({
         globalState,
         playerId: session.userId,
+        roundIndex: currentRound.roundIndex,
+        members,
       });
 
       // then apply these moves to that state and see if they're valid
@@ -688,6 +706,8 @@ export const gameSessionsRouter = router({
           ...opts.input.turn,
           userId: session.userId,
         },
+        members,
+        roundIndex: currentRound.roundIndex,
       });
       if (validationMessage) {
         throw new TRPCError({

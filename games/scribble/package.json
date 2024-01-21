@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/game-{{name}}",
+  "name": "@long-game/game-scribble",
   "version": "0.0.1",
   "private": true,
   "exports": {

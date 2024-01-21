@@ -1,0 +1,18 @@
+{
+  "React Game Component": {
+    "scope": "typescriptreact",
+    "prefix": "rgc",
+    "body": [
+      "import { withGame, useGameClient } from '${1:../gameClient.js}';",
+      "",
+      "export interface ${2:${TM_FILENAME/(.*)\\..+$/$1/}}Props {",
+      "  $3",
+      "}",
+      "",
+      "export const $2 = withGame(function $2({ $4 }: $2Props) {",
+      "  const client = useGameClient();",
+      "  return <div>TODO</div>;",
+      "});"
+    ]
+  }
+}

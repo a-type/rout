@@ -1,9 +1,6 @@
-import { createGameClient } from '@long-game/game-client';
+import { GameClientProvider, withGame, useGameClient } from './gameClient.js';
 import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps } from 'react';
-
-const { GameClientProvider, useGameClient, withGame } =
-  createGameClient(gameDefinition);
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];

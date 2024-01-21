@@ -80,22 +80,20 @@ const ActiveGame = withGame(function ActiveGame({
             if (!data.current) return;
 
             const { x, y } = fromCoordinateKey(ev.over.id);
-            client.prepareTurn({
+            client.submitTurn({
               coordinate: { x, y },
               tileId: handId,
               tile: data.current.tile,
             });
-            client.submitMoves();
           }}
         >
           <Grid data={state.grid} />
           <Hand data={state.hand} />
           <Button
             onClick={() => {
-              client.prepareTurn({
+              client.submitTurn({
                 skip: true,
               });
-              client.submitMoves();
             }}
           >
             Skip

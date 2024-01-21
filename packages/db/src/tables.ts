@@ -95,7 +95,7 @@ export interface GameTurnTable {
 
   // primary key is composite of these 3 columns
   gameSessionId: string;
-  userId: string | null;
+  userId: string;
   roundIndex: number;
   // the main contents will be game dependent, see game-definition
   data: any;

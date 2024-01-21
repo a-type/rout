@@ -36,7 +36,9 @@ const LocalGuess = withGame(function LocalGuess() {
           client.prepareTurn({ guess: num });
         }}
       />
-      {client.dirty && <button onClick={client.submitMoves}>Submit</button>}
+      {client.dirty && (
+        <button onClick={() => client.submitTurn()}>Submit</button>
+      )}
       {client.error && <div>{client.error}</div>}
     </div>
   );

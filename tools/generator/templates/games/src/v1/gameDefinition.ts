@@ -1,4 +1,5 @@
-import { GameDefinition, Move } from '@long-game/game-definition';
+import { GameDefinition, Turn, roundFormat } from '@long-game/game-definition';
+import { GameRound } from '@long-game/common';
 import { lazy } from 'react';
 
 export type GlobalState = {
@@ -9,22 +10,21 @@ export type PlayerState = {
   // TODO: public state available for players
 };
 
-export type MoveData = {
+export type TurnData = {
   // TODO: what data can players submit in their moves?
 };
 
 export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
-  MoveData,
-  MoveData
+  TurnData,
+  TurnData
 > = {
-  id: '{{name}}',
-  title: '{{name}}',
-
+  version: 'v1.0',
+  getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
-  validateTurn: (playerState, moves) => {
+  validateTurn: ({ playerState, turn }) => {
     // TODO: return error string if the moves are invalid
   },
 
@@ -33,34 +33,34 @@ export const gameDefinition: GameDefinition<
 
   // run on client
 
-  getProspectivePlayerState: (playerState, moves) => {
+  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
   },
 
   // run on server
 
-  getInitialGlobalState: (playerIds: string[]) => {
+  getInitialGlobalState: ({ playerIds }) => {
     // TODO: return the initial global state. possibly randomizing initial conditions.
   },
 
-  getPlayerState: (globalState, playerId) => {
+  getPlayerState: ({ globalState, playerId }) => {
     // TODO: compute the player state from the global state
   },
 
-  getState: (initialState, moves) => {
-    return moves.reduce(applyMoveToGlobalState, {
+  getState: ({ initialState, random, rounds }) => {
+    return rounds.reduce(applyMoveToGlobalState, {
       ...initialState,
     });
   },
 
-  getPublicMove: (move) => {
-    // TODO: process full move data into what players can see
-    // (i.e. what should you know about other players' moves?)
-    return move;
+  getPublicTurn: ({ turn }) => {
+    // TODO: process full turn data into what players can see
+    // (i.e. what should you know about other players' turns?)
+    return turn;
   },
 
-  getStatus: (globalState, moves) => {
+  getStatus: ({ globalState, rounds }) => {
     // TODO: when is the game over? who won?
   },
 };
@@ -68,5 +68,5 @@ export const gameDefinition: GameDefinition<
 // helper methods
 const applyMoveToGlobalState = (
   globalState: GlobalState,
-  move: Move<MoveData>,
+  move: GameRound<Turn<TurnData>>,
 ) => {};

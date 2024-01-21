@@ -18,7 +18,8 @@
     "@long-game/game-number-guess": "workspace:*",
     "@long-game/game-neuron": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "@long-game/game-scribble": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.2",

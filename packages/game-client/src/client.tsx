@@ -39,7 +39,8 @@ export class GameClient<
   PublicTurnData extends BaseTurnData = TurnData,
 > {
   state: PlayerState | null = null;
-  currentTurn: LocalTurn<TurnData> | undefined;
+  private currentServerTurn: LocalTurn<TurnData> | undefined;
+  private currentLocalTurn: LocalTurn<TurnData> | undefined;
   /** Whether there are local changes not yet submitted to server */
   dirty = false;
   previousRounds: GameRound<Turn<PublicTurnData>>[] = [];
@@ -57,6 +58,10 @@ export class GameClient<
   private _trpc;
   private _events: ServerEvents;
   private _disposes: (() => void)[] = [];
+
+  get currentTurn() {
+    return this.currentLocalTurn ?? this.currentServerTurn;
+  }
 
   get prospectiveState(): PlayerState | null {
     if (!this.state) return null;
@@ -129,6 +134,15 @@ export class GameClient<
     });
   }
 
+  get roundIndex(): number {
+    return this.previousRounds.length;
+  }
+
+  get localPlayer() {
+    const id = this.session.localPlayer.id;
+    return this.getMember(id)!;
+  }
+
   constructor({
     gameDefinition,
     host,
@@ -169,7 +183,7 @@ export class GameClient<
           this.previousRounds = data.rounds as GameRound<
             Turn<PublicTurnData>
           >[];
-          this.currentTurn = data.currentTurn;
+          this.currentServerTurn = data.currentTurn;
           this.dirty = false;
           this.error = null;
         }),
@@ -220,27 +234,48 @@ export class GameClient<
       return;
     }
 
+    this.currentLocalTurn = newTurn;
+    this.error = null;
+    this.dirty = true;
+  }
+
+  validateCurrentTurn() {
+    if (!this.state) {
+      this.error = "The game hasn't loaded yet. Try again?";
+      return;
+    }
+    if (!this.currentTurn) {
+      this.error = "You haven't made a move yet.";
+      return;
+    }
+
     const validationMessage = this.gameDefinition.validateTurn({
       playerState: this.state,
-      turn: newTurn,
+      turn: this.currentTurn,
+      roundIndex: this.roundIndex,
+      members: this.session.members,
     });
     if (validationMessage) {
       this.error = validationMessage;
       return;
     }
-
-    this.currentTurn = newTurn;
-    this.error = null;
-    this.dirty = true;
   }
 
   // TODO: cache prepared turn in storage
 
-  submitMoves = async () => {
-    if (!this.currentTurn) return;
+  submitTurn = async (
+    turn?: TurnData | ((prev: TurnData | undefined) => TurnData),
+  ) => {
+    if (turn) this.prepareTurn(turn);
+    if (!this.currentLocalTurn) return;
+
+    // validate locally before submitting
+    this.validateCurrentTurn();
+    if (this.error) return;
+
     await this._trpc.gameSessions.submitTurn.mutate({
       gameSessionId: this.session.id,
-      turn: this.currentTurn,
+      turn: this.currentLocalTurn,
     });
     // server event should do this for us
     // await this.refreshState();

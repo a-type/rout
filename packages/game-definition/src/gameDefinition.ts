@@ -5,7 +5,7 @@ import { GameRound, PlayerColorName } from '@long-game/common';
 export type BaseTurnData = object;
 
 export interface LocalTurn<TurnData extends BaseTurnData> {
-  userId: string | null;
+  userId: string;
   data: TurnData;
 }
 
@@ -43,6 +43,8 @@ export type GameDefinition<
   validateTurn: (data: {
     playerState: PlayerState;
     turn: LocalTurn<TurnData>;
+    roundIndex: number;
+    members: { id: string }[];
   }) => string | void;
   getProspectivePlayerState: (data: {
     playerState: PlayerState;
@@ -59,17 +61,20 @@ export type GameDefinition<
   // compute holistic information - initial state and global state from initial.
 
   getInitialGlobalState: (data: {
-    playerIds: string[];
     random: GameRandom;
+    members: { id: string }[];
   }) => GlobalState;
   getPlayerState: (data: {
     globalState: GlobalState;
     playerId: string;
+    roundIndex: number;
+    members: { id: string }[];
   }) => PlayerState;
   getState: (data: {
     initialState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
     random: GameRandom;
+    members: { id: string }[];
   }) => GlobalState;
   getPublicTurn: (data: {
     turn: Turn<TurnData>;
@@ -83,6 +88,7 @@ export type GameDefinition<
   getStatus: (data: {
     globalState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
+    members: { id: string }[];
   }) => GameStatus;
   /**
    * Games can determine how rounds are advanced. There are a few approaches...

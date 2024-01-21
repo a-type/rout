@@ -147,15 +147,15 @@ export const gameDefinition: GameDefinition<
   },
 
   // run on server
-  getInitialGlobalState: ({ playerIds, random }) => {
+  getInitialGlobalState: ({ members, random }) => {
     return {
       grid: {},
-      playerHands: playerIds.reduce((hands, playerId) => {
-        hands[playerId] = {
+      playerHands: members.reduce((hands, member) => {
+        hands[member.id] = {
           tiles: new Array(HAND_SIZE).fill(null).map(() => ({
             shape: random.item(SORTED_TILES),
             id: random.id(),
-            owner: playerId,
+            owner: member.id,
           })),
         };
         return hands;

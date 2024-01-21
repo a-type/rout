@@ -6,7 +6,7 @@ import {
   indigo,
   blue,
   teal,
-  green,
+  lime,
   bronze,
   orange,
   yellow,
@@ -147,22 +147,22 @@ export const colors = {
     default: teal.teal9,
     defaultText: 'white',
   },
-  green: {
+  lime: {
     range: [
-      green.green1,
-      green.green2,
-      green.green3,
-      green.green4,
-      green.green5,
-      green.green6,
-      green.green7,
-      green.green8,
-      green.green9,
-      green.green10,
-      green.green11,
-      green.green12,
+      lime.lime1,
+      lime.lime2,
+      lime.lime3,
+      lime.lime4,
+      lime.lime5,
+      lime.lime6,
+      lime.lime7,
+      lime.lime8,
+      lime.lime9,
+      lime.lime10,
+      lime.lime11,
+      lime.lime12,
     ],
-    default: green.green9,
+    default: lime.lime9,
     defaultText: 'white',
   },
   bronze: {
@@ -258,3 +258,4 @@ export const colors = {
 };
 
 export type PlayerColorName = keyof typeof colors;
+export type PlayerColorPalette = (typeof colors)[PlayerColorName];

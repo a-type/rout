@@ -114,7 +114,6 @@ installSpinner.stop('Dependencies installed');
 
 outro('Done!');
 
-
 // helpers
 
 async function addGameToGamesPackage(gameName) {
@@ -124,7 +123,8 @@ async function addGameToGamesPackage(gameName) {
   const gamesPackageJsonContent = await fs.readFile(gamesPackageJson, 'utf-8');
   const gamesPackageJsonParsed = JSON.parse(gamesPackageJsonContent);
 
-  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`] = 'workspace:*';
+  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`] =
+    'workspace:*';
 
   await fs.writeFile(
     gamesPackageJson,
@@ -140,10 +140,12 @@ async function addGameToGamesPackage(gameName) {
   const generatedLine = gamesIndexLines.findIndex((line) =>
     line.includes('// GENERATED - DO NOT REMOVE THIS LINE'),
   );
-  gamesIndexLines.splice(generatedLine, 0, `  [${gameName}.id]: gameName,`);
+  gamesIndexLines.splice(generatedLine, 0, `  [${gameName}.id]: ${gameName},`);
 
   // add the import to the top
-  gamesIndexLines.unshift(`import ${gameName} from '@long-game/game-${gameName}';`);
+  gamesIndexLines.unshift(
+    `import ${gameName} from '@long-game/game-${gameName}';`,
+  );
 
   await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));
 }
