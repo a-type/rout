@@ -64,17 +64,18 @@ export type PlayerState = {
   imageSize: number;
 };
 
-type TurnOneData = {
-  descriptions: string[];
+type PromptResponse =
+  | {
+      type: 'description';
+      value: string;
+    }
+  | {
+      type: 'illustration';
+      value: string;
+    };
+export type TurnData = {
+  promptResponses: PromptResponse[];
 };
-type TurnTwoData = {
-  illustrations: string[];
-};
-type OtherTurnData = {
-  description: string;
-  illustration: string;
-};
-export type TurnData = TurnOneData | TurnTwoData | OtherTurnData;
 
 export type PublicTurnData = {};
 
@@ -89,27 +90,46 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ turn, roundIndex, members }) => {
-    const sequenceCount = getSequenceCount(members.length);
-    const requiredInitialEntries = Math.floor(sequenceCount / members.length);
     if (roundIndex === 0) {
-      if (!isTurnOneData(turn.data)) {
-        return 'You must provide descriptions for the first round.';
-      }
-      if (turn.data.descriptions.length !== requiredInitialEntries) {
-        return `You must provide ${requiredInitialEntries} descriptions for the first round.`;
+      if (
+        turn.data.promptResponses.length !== 1 ||
+        turn.data.promptResponses[0].type !== 'description'
+      ) {
+        return `You must provide 1 prompt for the first round.`;
       }
     }
     if (roundIndex === 1) {
-      if (!isTurnTwoData(turn.data)) {
-        return 'You must provide illustrations for the second round.';
+      if (turn.data.promptResponses.length !== 2) {
+        return `You must provide 1 prompt and 1 illustration for the second round.`;
       }
-      if (turn.data.illustrations.length !== requiredInitialEntries) {
-        return `You must provide ${requiredInitialEntries} illustrations for the second round.`;
+      if (
+        turn.data.promptResponses.filter((r) => r.type === 'illustration')
+          .length !== 1
+      ) {
+        return `You must provide 1 illustration for the second round.`;
+      }
+      if (
+        turn.data.promptResponses.filter((r) => r.type === 'description')
+          .length !== 1
+      ) {
+        return `You must provide 1 prompt for the second round.`;
       }
     }
     if (roundIndex > 1) {
-      if (!isOtherTurnData(turn.data)) {
-        return 'You must provide a description and illustration for each turn.';
+      if (turn.data.promptResponses.length !== 2) {
+        return `You must provide 1 prompt and 1 illustration for the second round.`;
+      }
+      if (
+        turn.data.promptResponses.filter((r) => r.type === 'illustration')
+          .length !== 1
+      ) {
+        return `You must provide 1 illustration for the second round.`;
+      }
+      if (
+        turn.data.promptResponses.filter((r) => r.type === 'description')
+          .length !== 1
+      ) {
+        return `You must provide 1 description for the second round.`;
       }
     }
   },
@@ -145,44 +165,41 @@ export const gameDefinition: GameDefinition<
     const sequenceCount = globalState.sequences.length;
     const prompts: Prompt[] = [];
     if (roundIndex === 0) {
-      // nothing to fetch... just send empty prompts
-      for (let i = 0; i < Math.floor(sequenceCount / members.length); i++) {
-        prompts.push({
-          type: 'prompt',
-        });
-      }
-    } else if (roundIndex === 1) {
+      // nothing to fetch... just send empty prompt
+      prompts.push({
+        type: 'prompt',
+      });
+      // for initial rounds we add more prompts to empty sequences
+      // and illustrate ones added by other players until we fill
+      // all sequences
+    } else if (roundIndex < Math.floor(sequenceCount / members.length)) {
+      prompts.push({
+        type: 'prompt',
+      });
       // start at illustrationIndex and add until count is reached
-      for (let i = 0; i < Math.floor(sequenceCount / members.length); i++) {
-        const seq =
-          globalState.sequences[
-            (indexes.illustrationIndex + i) % sequenceCount
-          ];
-        const item = getLatest(seq) ?? {
-          description:
-            "(Whoops, something went wrong and there's no prompt! Draw anything?)",
-          describerId: '',
-          illustration: '',
-          illustratorId: '',
-        };
-        prompts.push({
-          type: 'draw',
-          description: item.description,
-          userId: item.describerId,
-        });
-      }
+      const seq = globalState.sequences[indexes.toDrawIndex];
+      const item = getLatest(seq) ?? {
+        description:
+          "(Whoops, something went wrong and there's no prompt! Draw anything?)",
+        describerId: '',
+        illustration: '',
+        illustratorId: '',
+      };
+      prompts.push({
+        type: 'draw',
+        description: item.description,
+        userId: item.describerId,
+      });
     } else {
-      const descriptionSequence =
-        globalState.sequences[indexes.descriptionIndex];
-      const illustrationSequence =
-        globalState.sequences[indexes.illustrationIndex];
-      const illustration = getLatest(illustrationSequence);
+      const toDrawSequence = globalState.sequences[indexes.toDrawIndex];
+      const toDescribeSequence = globalState.sequences[indexes.toDescribeIndex];
+      const illustration = getLatest(toDescribeSequence);
       prompts.push({
         type: 'describe',
         illustration: illustration?.illustration ?? '',
         userId: illustration?.illustratorId ?? '',
       });
-      const description = getLatest(descriptionSequence);
+      const description = getLatest(toDrawSequence);
       prompts.push({
         type: 'draw',
         description:
@@ -239,7 +256,7 @@ const applyMoveToGlobalState = (
   members: { id: string }[],
 ): GlobalState => {
   for (const turn of round.turns) {
-    const { descriptionIndex, illustrationIndex } = getPromptSequenceIndexes({
+    const { toDrawIndex, toDescribeIndex } = getPromptSequenceIndexes({
       members,
       playerId: turn.userId,
       roundIndex,
@@ -248,59 +265,34 @@ const applyMoveToGlobalState = (
     // when applying a turn, we write the illustration to the
     // description sequence's last item, and the description to the
     // illustration sequence as a new item.
-    const descriptionSequence = globalState.sequences[descriptionIndex];
-    const illustrationSequence = globalState.sequences[illustrationIndex];
+    const sequenceWeDrew = globalState.sequences[toDrawIndex];
+    const sequenceWeDescribed = globalState.sequences[toDescribeIndex];
 
-    // this branch isn't used on the first round, where we only
-    // have a description
     const turnData = turn.data;
-    if (isTurnOneData(turnData)) {
-      for (let i = 0; i < turnData.descriptions.length; i++) {
-        // starting at player default index and moving to next
-        // sequence until entries are exhausted
-        const defaultIndex = getPlayerDefaultIndex({
-          members,
-          playerId: turn.userId,
-          sequenceCount: globalState.sequences.length,
-        });
-        const description = turnData.descriptions[i];
-        const seq = globalState.sequences[defaultIndex + i];
-        seq.push({
-          description,
+    for (const promptResponse of turnData.promptResponses) {
+      if (promptResponse.type === 'description') {
+        sequenceWeDescribed.push({
+          description: promptResponse.value,
           describerId: turn.userId,
           illustration: '',
           illustratorId: '',
         });
-      }
-    } else if (isTurnTwoData(turnData)) {
-      for (let i = 0; i < turnData.illustrations.length; i++) {
-        const illustration = turnData.illustrations[i];
-        const seq = globalState.sequences[illustrationIndex + i];
-        // should apply to the first and only item in the sequence
-        seq[0].illustration = illustration;
-        seq[0].illustratorId = turn.userId;
-      }
-    } else {
-      const itemWeIllustrated = getLatest(descriptionSequence);
-      if (!itemWeIllustrated) {
-        // idk what happened!
-        descriptionSequence.push({
-          description: '(Something went wrong here... we lost the description)',
-          describerId: '',
-          illustration: turnData.illustration ?? '',
-          illustratorId: turn.userId,
-        });
       } else {
-        itemWeIllustrated.illustration = turnData.illustration ?? '';
-        itemWeIllustrated.illustratorId = turn.userId;
+        const itemWeDrew = getLatest(sequenceWeDrew);
+        if (!itemWeDrew) {
+          // idk what happened!
+          sequenceWeDrew.push({
+            description:
+              '(Something went wrong here... we lost the description)',
+            describerId: '',
+            illustration: promptResponse.value ?? '',
+            illustratorId: turn.userId,
+          });
+        } else {
+          itemWeDrew.illustration = promptResponse.value ?? '';
+          itemWeDrew.illustratorId = turn.userId;
+        }
       }
-
-      illustrationSequence.push({
-        description: turnData.description,
-        describerId: turn.userId,
-        illustration: '',
-        illustratorId: '',
-      });
     }
   }
   return globalState;
@@ -358,49 +350,41 @@ export const getPromptSequenceIndexes = ({
     playerId,
     sequenceCount,
   });
-  // rounds 0 and 1 are special. in round 0, we use the default
+  // rounds 0 is special. in round 0, we use the default
   // index for description, and we don't do illustrations.
-  // in round 1, we do illustrations, starting at the default
-  // index of the next player, and we don't do descriptions.
   if (roundIndex === 0) {
     return {
-      descriptionIndex: playerDefaultIndex,
-      illustrationIndex: playerDefaultIndex,
+      toDescribeIndex: playerDefaultIndex,
+      toDrawIndex: playerDefaultIndex,
     };
-  } else if (roundIndex === 1) {
-    const illustrationIndex =
-      (playerDefaultIndex + Math.floor(sequenceCount / members.length)) %
-      sequenceCount;
-    return { descriptionIndex: illustrationIndex, illustrationIndex };
   }
 
-  const otherRoundsIndex = roundIndex - 2;
-
-  // for other rounds we begin the illustration index at the start of N + 2 player's sequences
-  const illustrationIndex =
+  // with 2 players, we need to jump back once more after the
+  // initial prompting rounds are complete so that we are
+  // describing the drawings of the other player on our own
+  // prompts, not describing our own drawings on their prompts.
+  const special2PlayerCase =
+    members.length === 2 &&
+    roundIndex >= Math.floor(sequenceCount / members.length);
+  const specialDescribeOffset = special2PlayerCase
+    ? Math.floor(sequenceCount / members.length)
+    : 0;
+  // describe along the normal track of your own sequence region
+  const toDescribeIndex =
+    (playerDefaultIndex + roundIndex + specialDescribeOffset) % sequenceCount;
+  // start drawing in N+1 player's sequence region
+  const toDrawIndex =
     (playerDefaultIndex +
-      Math.floor(sequenceCount / members.length) * 2 +
-      otherRoundsIndex) %
+      Math.floor(sequenceCount / members.length) +
+      roundIndex -
+      1) %
     sequenceCount;
-  const descriptionIndex = (illustrationIndex + 1) % sequenceCount;
-  return { descriptionIndex, illustrationIndex };
+  return { toDrawIndex, toDescribeIndex };
 };
 
 const getLatest = <T>(arr: T[]): T | undefined => {
   return arr[arr.length - 1];
 };
-
-function isTurnOneData(data: TurnData): data is TurnOneData {
-  return (data as TurnOneData).descriptions !== undefined;
-}
-
-function isTurnTwoData(data: TurnData): data is TurnTwoData {
-  return (data as TurnTwoData).illustrations !== undefined;
-}
-
-function isOtherTurnData(data: TurnData): data is OtherTurnData {
-  return (data as OtherTurnData).description !== undefined;
-}
 
 function getSequenceCount(memberCount: number) {
   if (memberCount < 3) {

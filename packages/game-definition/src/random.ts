@@ -29,6 +29,18 @@ export class GameRandom {
     return `${this.seed}-${this.idCounter++}`;
   }
 
+  /**
+   * Shuffles an array. Uses a sattolo cycle, so each
+   * item is guaranteed to be in a new position.
+   */
+  shuffle<T>(items: T[]) {
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = this.int(0, i + 1);
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+  }
+
   __advance = (count = 1) => {
     for (let i = 0; i < count; i++) {
       this.random();

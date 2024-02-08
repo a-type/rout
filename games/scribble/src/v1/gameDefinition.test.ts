@@ -11,7 +11,7 @@ describe('scribble game logic helpers', () => {
   describe('prompt sequence indexes', () => {
     it('alternates indexes for 2 players', () => {
       const members = [{ id: '1' }, { id: '2' }];
-      const sequenceCount = 4;
+      const sequenceCount = 6;
       // first round and second round have the same sequence
       // indexes, then they begin alternating.
       expect(
@@ -22,8 +22,8 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 0,
-        illustrationIndex: 0,
+        toDrawIndex: 0,
+        toDescribeIndex: 0,
       });
       expect(
         getPromptSequenceIndexes({
@@ -33,8 +33,8 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 2,
-        illustrationIndex: 2,
+        toDrawIndex: 3,
+        toDescribeIndex: 3,
       });
       expect(
         getPromptSequenceIndexes({
@@ -44,8 +44,8 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 2,
-        illustrationIndex: 2,
+        toDrawIndex: 3,
+        toDescribeIndex: 1,
       });
       expect(
         getPromptSequenceIndexes({
@@ -55,8 +55,8 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 0,
-        illustrationIndex: 0,
+        toDrawIndex: 0,
+        toDescribeIndex: 4,
       });
       expect(
         getPromptSequenceIndexes({
@@ -66,9 +66,12 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 1,
-        illustrationIndex: 0,
+        toDrawIndex: 4,
+        toDescribeIndex: 2,
       });
+
+      // it jumps back to 0 for describe so we're describing
+      // the other player's drawing
       expect(
         getPromptSequenceIndexes({
           members,
@@ -77,8 +80,8 @@ describe('scribble game logic helpers', () => {
           sequenceCount,
         }),
       ).toEqual({
-        descriptionIndex: 2,
-        illustrationIndex: 1,
+        toDrawIndex: 5,
+        toDescribeIndex: 0,
       });
     });
   });
@@ -134,12 +137,6 @@ describe('scribble game definition', () => {
           {
             "type": "prompt",
           },
-          {
-            "type": "prompt",
-          },
-          {
-            "type": "prompt",
-          },
         ],
       }
     `);
@@ -147,12 +144,6 @@ describe('scribble game definition', () => {
       {
         "imageSize": 256,
         "prompts": [
-          {
-            "type": "prompt",
-          },
-          {
-            "type": "prompt",
-          },
           {
             "type": "prompt",
           },
@@ -166,7 +157,12 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            descriptions: ['a cat', 'a phone', 'a car'],
+            promptResponses: [
+              {
+                type: 'description',
+                value: 'a cat',
+              },
+            ],
           },
           roundIndex,
           userId: '1',
@@ -174,7 +170,12 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            descriptions: ['a dog', 'a book', 'a house'],
+            promptResponses: [
+              {
+                type: 'description',
+                value: 'a dog',
+              },
+            ],
           },
           roundIndex,
           userId: '2',
@@ -205,61 +206,31 @@ describe('scribble game definition', () => {
       members,
       random,
     });
-    expect(globalState).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "sequences": [
-          [
-            {
-              "describerId": "1",
-              "description": "a cat",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
-          [
-            {
-              "describerId": "1",
-              "description": "a phone",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
-          [
-            {
-              "describerId": "1",
-              "description": "a car",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a dog",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a book",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a house",
-              "illustration": "",
-              "illustratorId": "",
-            },
-          ],
+    expect(globalState).toEqual({
+      imageSize: 256,
+      sequences: [
+        [
+          {
+            describerId: '1',
+            description: 'a cat',
+            illustration: '',
+            illustratorId: '',
+          },
         ],
-      }
-    `);
+        [],
+        [],
+        [
+          {
+            describerId: '2',
+            description: 'a dog',
+            illustration: '',
+            illustratorId: '',
+          },
+        ],
+        [],
+        [],
+      ],
+    });
 
     // second round: drawings
     roundIndex = 1;
@@ -277,50 +248,32 @@ describe('scribble game definition', () => {
       roundIndex,
     });
 
-    expect(player1State).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "prompts": [
-          {
-            "description": "a dog",
-            "type": "draw",
-            "userId": "2",
-          },
-          {
-            "description": "a book",
-            "type": "draw",
-            "userId": "2",
-          },
-          {
-            "description": "a house",
-            "type": "draw",
-            "userId": "2",
-          },
-        ],
-      }
-    `);
-    expect(player2State).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "prompts": [
-          {
-            "description": "a cat",
-            "type": "draw",
-            "userId": "1",
-          },
-          {
-            "description": "a phone",
-            "type": "draw",
-            "userId": "1",
-          },
-          {
-            "description": "a car",
-            "type": "draw",
-            "userId": "1",
-          },
-        ],
-      }
-    `);
+    expect(player1State).toEqual({
+      imageSize: 256,
+      prompts: [
+        {
+          type: 'prompt',
+        },
+        {
+          description: 'a dog',
+          type: 'draw',
+          userId: '2',
+        },
+      ],
+    });
+    expect(player2State).toEqual({
+      imageSize: 256,
+      prompts: [
+        {
+          type: 'prompt',
+        },
+        {
+          description: 'a cat',
+          type: 'draw',
+          userId: '1',
+        },
+      ],
+    });
 
     rounds.push({
       roundIndex,
@@ -328,10 +281,15 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            illustrations: [
-              'a drawing of a dog',
-              'a drawing of a book',
-              'a drawing of a house',
+            promptResponses: [
+              {
+                type: 'illustration',
+                value: 'a drawing of a dog',
+              },
+              {
+                type: 'description',
+                value: 'a phone',
+              },
             ],
           },
           roundIndex,
@@ -340,10 +298,15 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            illustrations: [
-              'a drawing of a cat',
-              'a drawing of a phone',
-              'a drawing of a car',
+            promptResponses: [
+              {
+                type: 'illustration',
+                value: 'a drawing of a cat',
+              },
+              {
+                type: 'description',
+                value: 'a book',
+              },
             ],
           },
           roundIndex,
@@ -375,61 +338,45 @@ describe('scribble game definition', () => {
       members,
       random,
     });
-    expect(globalState).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "sequences": [
-          [
-            {
-              "describerId": "1",
-              "description": "a cat",
-              "illustration": "a drawing of a cat",
-              "illustratorId": "2",
-            },
-          ],
-          [
-            {
-              "describerId": "1",
-              "description": "a phone",
-              "illustration": "a drawing of a phone",
-              "illustratorId": "2",
-            },
-          ],
-          [
-            {
-              "describerId": "1",
-              "description": "a car",
-              "illustration": "a drawing of a car",
-              "illustratorId": "2",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a dog",
-              "illustration": "a drawing of a dog",
-              "illustratorId": "1",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a book",
-              "illustration": "a drawing of a book",
-              "illustratorId": "1",
-            },
-          ],
-          [
-            {
-              "describerId": "2",
-              "description": "a house",
-              "illustration": "a drawing of a house",
-              "illustratorId": "1",
-            },
-          ],
+    expect(globalState).toEqual({
+      imageSize: 256,
+      sequences: [
+        [
+          {
+            describerId: '1',
+            description: 'a cat',
+            illustration: 'a drawing of a cat',
+            illustratorId: '2',
+          },
         ],
-      }
-    `);
+        [
+          {
+            describerId: '1',
+            description: 'a phone',
+            illustration: '',
+            illustratorId: '',
+          },
+        ],
+        [],
+        [
+          {
+            describerId: '2',
+            description: 'a dog',
+            illustration: 'a drawing of a dog',
+            illustratorId: '1',
+          },
+        ],
+        [
+          {
+            describerId: '2',
+            description: 'a book',
+            illustration: '',
+            illustratorId: '',
+          },
+        ],
+        [],
+      ],
+    });
 
     // third round: guess and draw
     roundIndex = 2;
@@ -447,36 +394,30 @@ describe('scribble game definition', () => {
       roundIndex,
     });
 
-    expect(player1State).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "prompts": [
-          {
-            "illustration": "a drawing of a cat",
-            "type": "describe",
-            "userId": "2",
-          },
-          {
-            "description": "a phone",
-            "type": "draw",
-            "userId": "1",
-          },
-        ],
-      }
-    `);
+    expect(player1State).toEqual({
+      imageSize: 256,
+      prompts: [
+        {
+          type: 'prompt',
+        },
+        {
+          description: 'a book',
+          type: 'draw',
+          userId: '2',
+        },
+      ],
+    });
     expect(player2State).toMatchInlineSnapshot(`
       {
         "imageSize": 256,
         "prompts": [
           {
-            "illustration": "a drawing of a dog",
-            "type": "describe",
-            "userId": "1",
+            "type": "prompt",
           },
           {
-            "description": "a book",
+            "description": "a phone",
             "type": "draw",
-            "userId": "2",
+            "userId": "1",
           },
         ],
       }
@@ -488,8 +429,16 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            description: 'a lion',
-            illustration: 'a drawing of a candy bar',
+            promptResponses: [
+              {
+                type: 'description',
+                value: 'a car',
+              },
+              {
+                type: 'illustration',
+                value: 'a drawing of a laptop',
+              },
+            ],
           },
           roundIndex,
           userId: '1',
@@ -497,8 +446,16 @@ describe('scribble game definition', () => {
         {
           createdAt: new Date().toISOString(),
           data: {
-            description: 'a dingo',
-            illustration: 'a drawing of a laptop',
+            promptResponses: [
+              {
+                type: 'description',
+                value: 'a house',
+              },
+              {
+                type: 'illustration',
+                value: 'a drawing of a candy bar',
+              },
+            ],
           },
           roundIndex,
           userId: '2',
@@ -540,27 +497,21 @@ describe('scribble game definition', () => {
               "illustration": "a drawing of a cat",
               "illustratorId": "2",
             },
-            {
-              "describerId": "1",
-              "description": "a lion",
-              "illustration": "",
-              "illustratorId": "",
-            },
           ],
           [
             {
               "describerId": "1",
               "description": "a phone",
               "illustration": "a drawing of a candy bar",
-              "illustratorId": "1",
+              "illustratorId": "2",
             },
           ],
           [
             {
               "describerId": "1",
               "description": "a car",
-              "illustration": "a drawing of a car",
-              "illustratorId": "2",
+              "illustration": "",
+              "illustratorId": "",
             },
           ],
           [
@@ -570,27 +521,21 @@ describe('scribble game definition', () => {
               "illustration": "a drawing of a dog",
               "illustratorId": "1",
             },
-            {
-              "describerId": "2",
-              "description": "a dingo",
-              "illustration": "",
-              "illustratorId": "",
-            },
           ],
           [
             {
               "describerId": "2",
               "description": "a book",
               "illustration": "a drawing of a laptop",
-              "illustratorId": "2",
+              "illustratorId": "1",
             },
           ],
           [
             {
               "describerId": "2",
               "description": "a house",
-              "illustration": "a drawing of a house",
-              "illustratorId": "1",
+              "illustration": "",
+              "illustratorId": "",
             },
           ],
         ],
@@ -613,40 +558,38 @@ describe('scribble game definition', () => {
       roundIndex,
     });
 
-    expect(player1State).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "prompts": [
-          {
-            "illustration": "a drawing of a candy bar",
-            "type": "describe",
-            "userId": "1",
-          },
-          {
-            "description": "a car",
-            "type": "draw",
-            "userId": "1",
-          },
-        ],
-      }
-    `);
+    expect(player1State).toEqual({
+      imageSize: 256,
+      prompts: [
+        {
+          illustration: 'a drawing of a cat',
+          type: 'describe',
+          userId: '2',
+        },
+        {
+          description: 'a house',
+          type: 'draw',
+          userId: '2',
+        },
+      ],
+    });
 
-    expect(player2State).toMatchInlineSnapshot(`
-      {
-        "imageSize": 256,
-        "prompts": [
-          {
-            "illustration": "a drawing of a laptop",
-            "type": "describe",
-            "userId": "2",
-          },
-          {
-            "description": "a house",
-            "type": "draw",
-            "userId": "2",
-          },
-        ],
-      }
-    `);
+    expect(player2State).toEqual({
+      imageSize: 256,
+      prompts: [
+        {
+          illustration: 'a drawing of a dog',
+          type: 'describe',
+          userId: '1',
+        },
+        {
+          description: 'a car',
+          type: 'draw',
+          userId: '1',
+        },
+      ],
+    });
   });
+
+  it('plays 3 players', () => {});
 });
