@@ -7,14 +7,14 @@
 
 import { GameRandom } from '@long-game/game-definition';
 
-export type SequenceItemAction = 'draw' | 'describe' | 'skip';
-export type SequenceItem = {
-  action: SequenceItemAction;
+export type OrderingItemAction = 'draw' | 'describe' | 'skip';
+export type OrderingItem = {
+  action: OrderingItemAction;
   playerId: string;
 };
 
 // ignore above stuff, this is the real algo
-export function getSequences({
+export function getOrderings({
   random,
   members,
 }: {
@@ -76,7 +76,7 @@ export function getSequences({
   return random.shuffle([...orderingsA, ...orderingsB]);
 }
 
-function sequenceToActions(seq: string[]): SequenceItem[] {
+function sequenceToActions(seq: string[]): OrderingItem[] {
   return seq.map((id, i) => {
     const action = i % 2 === 0 ? 'describe' : 'draw';
     return { action, playerId: id };

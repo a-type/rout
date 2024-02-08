@@ -2,6 +2,7 @@ import { GameRound } from '@long-game/common';
 import { GameDefinition, Turn, roundFormat } from '@long-game/game-definition';
 import { de } from 'date-fns/locale';
 import { lazy } from 'react';
+import { OrderingItem, getOrderings } from './orderings.js';
 
 /*
 
@@ -40,6 +41,9 @@ type SequenceItem = {
 };
 
 export type GlobalState = {
+  // pre-determined game ordering
+  orderings: OrderingItem[][];
+  // actual items created by players
   sequences: SequenceItem[][];
   imageSize: number;
 };
@@ -145,8 +149,9 @@ export const gameDefinition: GameDefinition<
 
   // run on server
 
-  getInitialGlobalState: ({ members }) => {
+  getInitialGlobalState: ({ members, random }) => {
     return {
+      orderings: getOrderings({ random, members }),
       // seed the sequences
       sequences: new Array(getSequenceCount(members.length))
         .fill(null)
@@ -156,57 +161,54 @@ export const gameDefinition: GameDefinition<
   },
 
   getPlayerState: ({ globalState, playerId, roundIndex, members }) => {
-    const indexes = getPromptSequenceIndexes({
-      members,
-      playerId,
-      roundIndex,
-      sequenceCount: globalState.sequences.length,
-    });
-    const sequenceCount = globalState.sequences.length;
+    // get the orderings for this round and find this player's actions
+    const orderings = globalState.orderings;
+    const thisRoundsOrderings = orderings.map((o, i) => ({
+      sequenceIndex: i,
+      ...o[roundIndex],
+    }));
+    const thisPlayersOrderings = thisRoundsOrderings.filter(
+      (o) => o.playerId === playerId,
+    );
+
     const prompts: Prompt[] = [];
-    if (roundIndex === 0) {
-      // nothing to fetch... just send empty prompt
-      prompts.push({
-        type: 'prompt',
-      });
-      // for initial rounds we add more prompts to empty sequences
-      // and illustrate ones added by other players until we fill
-      // all sequences
-    } else if (roundIndex < Math.floor(sequenceCount / members.length)) {
-      prompts.push({
-        type: 'prompt',
-      });
-      // start at illustrationIndex and add until count is reached
-      const seq = globalState.sequences[indexes.toDrawIndex];
-      const item = getLatest(seq) ?? {
-        description:
-          "(Whoops, something went wrong and there's no prompt! Draw anything?)",
-        describerId: '',
-        illustration: '',
-        illustratorId: '',
-      };
-      prompts.push({
-        type: 'draw',
-        description: item.description,
-        userId: item.describerId,
-      });
-    } else {
-      const toDrawSequence = globalState.sequences[indexes.toDrawIndex];
-      const toDescribeSequence = globalState.sequences[indexes.toDescribeIndex];
-      const illustration = getLatest(toDescribeSequence);
-      prompts.push({
-        type: 'describe',
-        illustration: illustration?.illustration ?? '',
-        userId: illustration?.illustratorId ?? '',
-      });
-      const description = getLatest(toDrawSequence);
-      prompts.push({
-        type: 'draw',
-        description:
-          description?.description ??
-          "(Whoops, something went wrong and there's no prompt! Draw anything?)",
-        userId: description?.describerId ?? '',
-      });
+
+    for (const o of thisPlayersOrderings) {
+      switch (o.action) {
+        case 'describe':
+          // if there's no illustration, this is a 'prompt'
+          const illustration =
+            globalState.sequences[o.sequenceIndex][roundIndex - 1]
+              ?.illustration;
+          if (illustration) {
+            prompts.push({
+              type: 'describe',
+              illustration,
+              userId: playerId,
+            });
+          } else {
+            prompts.push({
+              type: 'prompt',
+            });
+          }
+          break;
+        case 'draw':
+          // if there's no description, something went wrong.
+          const description =
+            globalState.sequences[o.sequenceIndex][roundIndex - 1]?.description;
+          if (description) {
+            prompts.push({
+              type: 'draw',
+              description:
+                globalState.sequences[o.sequenceIndex][roundIndex - 1]
+                  .description,
+              userId: playerId,
+            });
+          }
+          break;
+        case 'skip':
+          break;
+      }
     }
 
     return {
@@ -235,7 +237,11 @@ export const gameDefinition: GameDefinition<
   },
 
   getStatus: ({ globalState, rounds, members }) => {
-    if (rounds.length >= 10) {
+    const maxOrdering = Math.max(...globalState.orderings.map((o) => o.length));
+    const maxSequenceLength = Math.max(
+      ...globalState.sequences.map((s) => s.length),
+    );
+    if (maxSequenceLength >= maxOrdering) {
       return {
         status: 'completed',
         // everybody wins

@@ -1,6 +1,6 @@
 import { GameRandom } from '@long-game/game-definition';
 import { describe, expect, it } from 'vitest';
-import { getSequences } from './sequences.js';
+import { getOrderings } from './orderings.js';
 
 describe('sequence generation', () => {
   it('should generate prompt/draw sequences and describe sequences that follow the rules', () => {
@@ -20,7 +20,7 @@ describe('sequence generation', () => {
       { id: 'd' },
     ];
 
-    const sequences = getSequences({
+    const sequences = getOrderings({
       random,
       members,
     });
