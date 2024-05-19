@@ -68,6 +68,8 @@ export const gameDefinition: GameDefinition<
   MoveData
 > = {
   version: `v1.0`,
+  minimumPlayers: 2,
+  maximumPlayers: 6,
   // run on both client and server
   validateTurn: ({ playerState, turn }) => {
     if (isSkip(turn.data)) return;

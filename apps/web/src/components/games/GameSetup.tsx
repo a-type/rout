@@ -5,6 +5,7 @@ import { H1, H2 } from '@a-type/ui/components/typography';
 import { GameSessionData, globalHooks } from '@long-game/game-client';
 import { useCallback } from 'react';
 import { GamePicker } from './GamePicker.jsx';
+import games from '@long-game/games';
 
 export interface GameSetupProps {
   gameSession: GameSessionData;
@@ -32,6 +33,11 @@ export function GameSetup({ gameSession }: GameSetupProps) {
 
   const respondToInvite =
     globalHooks.gameSessions.respondToGameInvite.useMutation();
+
+  const game = games[gameSession.gameId];
+  const insufficientPlayers =
+    gameSession.members.length <
+    (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
   return (
     <div>
@@ -73,8 +79,9 @@ export function GameSetup({ gameSession }: GameSetupProps) {
               id: gameSession.id,
             });
           }}
+          disabled={insufficientPlayers}
         >
-          Start Game
+          {insufficientPlayers ? 'Need more players' : 'Start Game'}
         </Button>
       )}
     </div>

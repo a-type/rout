@@ -34,6 +34,8 @@ export type GameDefinition<
   PublicTurnData extends BaseTurnData = TurnData,
 > = {
   version: `v${number}.${number}`;
+  minimumPlayers: number;
+  maximumPlayers: number;
   // SHARED
 
   /**

@@ -18,6 +18,8 @@ export const gameDefinition: GameDefinition<
   MoveData
 > = {
   version: 'v1.0',
+  minimumPlayers: 1,
+  maximumPlayers: 100,
 
   getInitialGlobalState: ({ random }) => ({
     secretNumber: random.int(0, 100),

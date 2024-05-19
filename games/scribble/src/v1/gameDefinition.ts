@@ -90,6 +90,8 @@ export const gameDefinition: GameDefinition<
   PublicTurnData
 > = {
   version: 'v1.0',
+  minimumPlayers: 3,
+  maximumPlayers: 9,
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
@@ -102,38 +104,21 @@ export const gameDefinition: GameDefinition<
         return `You must provide 1 prompt for the first round.`;
       }
     }
-    if (roundIndex === 1) {
+    if (roundIndex >= 1) {
       if (turn.data.promptResponses.length !== 2) {
-        return `You must provide 1 prompt and 1 illustration for the second round.`;
+        return `You must provide 1 prompt and 1 illustration for this round.`;
       }
       if (
         turn.data.promptResponses.filter((r) => r.type === 'illustration')
           .length !== 1
       ) {
-        return `You must provide 1 illustration for the second round.`;
+        return `You must provide 1 illustration for this round.`;
       }
       if (
         turn.data.promptResponses.filter((r) => r.type === 'description')
           .length !== 1
       ) {
-        return `You must provide 1 prompt for the second round.`;
-      }
-    }
-    if (roundIndex > 1) {
-      if (turn.data.promptResponses.length !== 2) {
-        return `You must provide 1 prompt and 1 illustration for the second round.`;
-      }
-      if (
-        turn.data.promptResponses.filter((r) => r.type === 'illustration')
-          .length !== 1
-      ) {
-        return `You must provide 1 illustration for the second round.`;
-      }
-      if (
-        turn.data.promptResponses.filter((r) => r.type === 'description')
-          .length !== 1
-      ) {
-        return `You must provide 1 description for the second round.`;
+        return `You must provide 1 description for this round.`;
       }
     }
   },
