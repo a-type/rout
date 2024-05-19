@@ -16,7 +16,7 @@ type UpdatedAtColumn = ColumnType<
 export interface Database {
   User: UserTable;
   Account: AccountTable;
-  VerificationToken: VerificationTokenTable;
+  VerificationCode: VerificationCodeTable;
   GameSession: GameSessionTable;
   GameTurn: GameTurnTable;
   GameSessionMembership: GameSessionMembershipTable;
@@ -35,6 +35,10 @@ export interface UserTable {
   emailVerifiedAt: string | null;
   imageUrl: string | null;
   color: string | null;
+  password: string | null;
+  stripeCustomerId: string | null;
+  acceptedTosAt: ColumnType<Date, Date | undefined, Date | undefined> | null;
+  sendEmailUpdates: ColumnType<boolean, boolean | undefined, boolean>;
 }
 
 export type User = Selectable<UserTable>;
@@ -45,31 +49,37 @@ export interface AccountTable {
   id: string;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
-  userId: string;
-  type: 'email' | 'oidc' | 'oauth';
+
+  type: string;
   provider: string;
   providerAccountId: string;
-  refreshToken: string | undefined;
-  accessToken: string | undefined;
-  expiresAt: number | undefined;
-  tokenType: string | undefined;
-  scope: string | undefined;
-  idToken: string | undefined;
+  refreshToken: string | null;
+  accessToken: string | null;
+  tokenType: string | null;
+  accessTokenExpiresAt: ColumnType<Date, Date | undefined, Date> | null;
+  scope: string | null;
+  idToken: string | null;
+  userId: string;
 }
 
 export type Account = Selectable<AccountTable>;
 export type NewAccount = Insertable<AccountTable>;
 export type AccountUpdate = Updateable<AccountTable>;
 
-export interface VerificationTokenTable {
+export interface VerificationCodeTable {
   id: string;
-  token: string;
-  expiresAt: ColumnType<string, string | undefined, string | undefined>;
+  createdAt: ColumnType<Date, Date | undefined, never>;
+  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+
+  code: string;
+  email: string;
+  name: string;
+  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
 }
 
-export type VerificationToken = Selectable<VerificationTokenTable>;
-export type NewVerificationToken = Insertable<VerificationTokenTable>;
-export type VerificationTokenUpdate = Updateable<VerificationTokenTable>;
+export type VerificationCode = Selectable<VerificationCodeTable>;
+export type NewVerificationCode = Insertable<VerificationCodeTable>;
+export type VerificationCodeUpdate = Updateable<VerificationCodeTable>;
 
 export interface GameSessionTable {
   id: string;

@@ -6,8 +6,13 @@ export { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/sqlite';
 export * from './utils.js';
 export { sql } from 'kysely';
 
+import migrations from './migrations/index.js';
+
 import { SerializePlugin } from 'kysely-plugin-serialize';
-import { TimestampsPlugin } from './plugins.js';
+import {
+  TimestampsPlugin,
+  migrateToLatest as migrateInternal,
+} from '@a-type/kysely';
 
 export function createDb() {
   const DATABASE_FILE = process.env.DATABASE_FILE;
@@ -22,10 +27,7 @@ export function createDb() {
   // to communicate with your database.
   return new Kysely<Database>({
     dialect,
-    plugins: [
-      new TimestampsPlugin<Database>({ ignoredTables: ['VerificationToken'] }),
-      new SerializePlugin(),
-    ],
+    plugins: [new TimestampsPlugin<Database>(), new SerializePlugin()],
   });
 }
 
@@ -34,4 +36,14 @@ export const db = createDb();
 export type DB = typeof db;
 
 export type * from './tables.js';
-export { migrateToLatest } from './migrate.js';
+
+export function migrateToLatest() {
+  return migrateInternal(db, migrations);
+}
+export {
+  id,
+  hashPassword,
+  comparePassword,
+  dateTime,
+  compareDates,
+} from '@a-type/kysely';

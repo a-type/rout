@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@a-type/utils": "^1.0.5",
-    "@long-game/auth": "workspace:*",
+    "@a-type/auth": "0.5.4",
+    "@long-game/common": "workspace:*",
     "@long-game/db": "workspace:*",
     "@long-game/trpc": "workspace:*",
     "@long-game/server-events": "workspace:*",
