@@ -14,6 +14,14 @@ const routes = makeRoutes([
     component: lazy(() => import('./LoginPage.jsx')),
   },
   {
+    path: '/verify',
+    component: lazy(() => import('./CompleteSignupPage.jsx')),
+  },
+  {
+    path: '/reset-password',
+    component: lazy(() => import('./ResetPasswordPage.jsx')),
+  },
+  {
     path: '/session/:sessionId',
     component: GameSessionPage,
   },

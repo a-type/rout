@@ -10,7 +10,14 @@ export const RoundOne = withGame(function RoundOne({}: RoundOneProps) {
       onSubmit={(ev) => {
         ev.preventDefault();
         const prompt = (ev.target as any).prompt.value;
-        client.submitTurn({ description: prompt });
+        client.submitTurn({
+          promptResponses: [
+            {
+              type: 'description',
+              value: prompt,
+            },
+          ],
+        });
       }}
     >
       <label>

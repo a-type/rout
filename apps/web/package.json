@@ -6,21 +6,22 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@a-type/ui": "^0.6.12",
+    "@a-type/ui": "0.8.19",
+    "@a-type/auth-client": "^1.0.6",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/games": "workspace:*",
-    "@verdant-web/react-router": "^0.5.5",
+    "@verdant-web/react-router": "^0.6.2",
     "clsx": "^2.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@unocss/transformer-variant-group": "0.54.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "@types/react": "^18.2.46",
-    "@types/react-dom": "^18.2.18",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
     "unocss": "^0.58.2",
     "vite": "^5.0.10",
     "vite-plugin-pwa": "^0.17.4"
