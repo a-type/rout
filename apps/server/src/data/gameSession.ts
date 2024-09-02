@@ -1,3 +1,5 @@
+import { Session } from '@a-type/auth';
+import { LongGameError } from '@long-game/common';
 import { db } from '@long-game/db';
 
 export async function getAuthorizedGameSession(
@@ -29,4 +31,28 @@ export async function getAuthorizedGameSession(
   }
 
   return gameSession;
+}
+
+export async function validateAccessToGameSession(
+  gameSessionId: string,
+  session: Session | null,
+) {
+  if (!session) {
+    throw new LongGameError(
+      LongGameError.Code.Unauthorized,
+      'You must be logged in to access game sessions',
+    );
+  }
+  await db
+    .selectFrom('GameSessionMembership')
+    .where('gameSessionId', '=', gameSessionId)
+    .where('userId', '=', session.userId)
+    .select(['id'])
+    .executeTakeFirstOrThrow(
+      () =>
+        new LongGameError(
+          LongGameError.Code.NotFound,
+          'Could not find that game session. Are you logged in?',
+        ),
+    );
 }

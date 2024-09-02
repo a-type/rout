@@ -1,13 +1,5 @@
 import { GameRound } from '@long-game/common';
 import { BaseTurnData, Turn } from '@long-game/game-definition';
-import { Outputs } from '@long-game/trpc';
-
-export type Responses = Outputs;
-
-export type GameSessionData = Outputs['gameSessions']['gameSession'];
-export type GameSessionMembershipData =
-  Outputs['gameSessions']['gameMemberships'][0];
-export type Me = Outputs['users']['me'];
 
 export type RawChatMessage = {
   userId: string;

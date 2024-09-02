@@ -20,7 +20,6 @@
     "cp-tpl": "1.0.9",
     "turbo": "^1.11.2",
     "typescript": "5.5.4",
-    "gql.tada": "1.8.6",
-    "graphql": "16.9.0"
+    "gql.tada": "1.8.6"
   }
 }

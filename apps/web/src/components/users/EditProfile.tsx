@@ -12,31 +12,47 @@ import {
   useField,
   useValues,
 } from '@a-type/ui/components/forms';
-import { Me, globalHooks } from '@long-game/game-client';
 import { colors, randomItem } from '@long-game/common';
 import { Button } from '@a-type/ui/components/button/Button';
 import { Icon } from '@a-type/ui/components/icon';
 import { useState } from 'react';
+import {
+  graphql,
+  useMutation,
+  useQuery,
+  useSuspenseQuery,
+} from '@long-game/game-client';
+import { meQuery } from './queries.js';
 
 export interface EditProfileProps {
   onSave?: () => void;
 }
 
+const updateMe = graphql(`
+  mutation UpdateMe($input: UpdateUserInfoInput!) {
+    updateUserInfo(input: $input) {
+      id
+      name
+      color
+    }
+  }
+`);
+
 const randomColor = randomItem(Object.keys(colors));
 
 export function EditProfileForm({ onSave }: EditProfileProps) {
-  const { data: me, refetch } = globalHooks.users.me.useQuery();
-  const { mutateAsync } = globalHooks.users.update.useMutation();
+  const { data } = useSuspenseQuery(meQuery);
+  const initial = data.me;
+  const [save] = useMutation(updateMe);
 
   return (
     <FormikForm
       initialValues={{
-        name: me?.name ?? '',
-        color: me?.color ?? randomColor,
+        name: initial?.name ?? '',
+        color: initial?.color ?? randomColor,
       }}
       onSubmit={async (values) => {
-        await mutateAsync(values);
-        await refetch();
+        await save({ variables: { input: values } });
         onSave?.();
       }}
     >

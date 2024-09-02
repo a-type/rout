@@ -16,7 +16,7 @@ export function createResults<T>(ids: readonly string[], defaultValue?: T) {
   );
 }
 
-export function createDataLoaders(ctx: Omit<GQLContext, 'dataLoaders'>) {
+export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
   const gameSessionLoader = new DataLoader(async (ids: readonly string[]) => {
     if (!ctx.session) {
       // can't view sessions without logging in

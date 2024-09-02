@@ -125,7 +125,7 @@ export interface GameSessionMembershipTable {
   userId: string;
   expiresAt: ColumnType<string, string | undefined, string | undefined>;
   claimedAt: ColumnType<string, string | undefined, string | undefined>;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
 }
 
 export type GameSessionMembership = Selectable<GameSessionMembershipTable>;

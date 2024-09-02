@@ -1,8 +1,8 @@
 type ChatMessage implements Node {
   createdAt: DateTime!
   id: ID!
-  message: String
-  userId: String
+  message: String!
+  userId: String!
 }
 
 scalar Date
@@ -10,7 +10,7 @@ scalar Date
 scalar DateTime
 
 type Friendship implements Node {
-  friend: User
+  friend: User!
   id: ID!
   status: FriendshipStatus
 }
@@ -20,7 +20,7 @@ input FriendshipFilterInput {
 }
 
 input FriendshipInviteResponseInput {
-  friendshipId: String!
+  friendshipId: ID!
   response: FriendshipStatus!
 }
 
@@ -30,14 +30,28 @@ enum FriendshipStatus {
   pending
 }
 
+enum GameInviteResponse {
+  accepted
+  declined
+  expired
+  pending
+  uninvited
+}
+
 """An instance of a game being played by a group of users."""
 type GameSession implements Node {
-  chat(after: String, before: String, first: Int, last: Int): GameSessionChatConnection
+  chat(after: String, before: String, first: Int, last: Int): GameSessionChatConnection!
+  createdAt: DateTime!
+  gameId: ID!
+  gameVersion: String!
   id: ID!
-  members: [GameSessionMembership!]
+  members: [GameSessionMembership!]!
   postGame: GameSessionPostGame
-  state: GameSessionState
-  status: GameSessionStatus
+  startedAt: DateTime
+  state: GameSessionState!
+  status: GameSessionStatus!
+  timezone: String!
+  updatedAt: DateTime!
 }
 
 type GameSessionChatConnection {
@@ -47,15 +61,15 @@ type GameSessionChatConnection {
 
 type GameSessionChatConnectionEdge {
   cursor: String!
-  node: ChatMessage
+  node: ChatMessage!
 }
 
 """A user who is a member of a game session."""
 type GameSessionMembership implements Node {
-  gameSession: GameSession
+  gameSession: GameSession!
   id: ID!
-  status: String
-  user: User
+  status: String!
+  user: User!
 }
 
 type GameSessionPostGame {
@@ -94,7 +108,9 @@ type Mutation {
   acceptTermsOfService: User
   prepareGameSession(input: PrepareGameSessionInput!): GameSession
   respondToFriendshipInvite(input: FriendshipInviteResponseInput!): Friendship
+  respondToGameInvite(input: RespondToGameInviteInput!): GameSessionMembership
   sendFriendshipInvite(input: SendFriendshipInviteInput!): Friendship
+  sendGameInvite(input: SendGameInviteInput!): GameSessionMembership
   sendMessage(input: SendChatMessageInput!): ChatMessage
   setSendEmailUpdates(value: Boolean!): User
   startGameSession(gameSessionId: ID!): GameSession
@@ -120,12 +136,17 @@ input PrepareGameSessionInput {
 }
 
 type Query {
-  friendships(input: FriendshipFilterInput): [Friendship!]
+  friendships(input: FriendshipFilterInput): [Friendship!]!
   gameSession(id: ID!): GameSession
   me: User!
   memberships: [GameSessionMembership!]
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
+}
+
+input RespondToGameInviteInput {
+  inviteId: ID!
+  response: GameInviteResponse!
 }
 
 type Round {
@@ -142,6 +163,11 @@ input SendFriendshipInviteInput {
   email: String!
 }
 
+input SendGameInviteInput {
+  gameSessionId: ID!
+  userId: ID!
+}
+
 input SubmitTurnInput {
   gameSessionId: String!
   turn: GameTurnInput!
@@ -151,9 +177,14 @@ type SubmitTurnResult {
   gameSession: GameSession
 }
 
+type Subscription {
+  chatMessageSent(gameSessionId: ID!): ChatMessage
+  gameSessionStateChanged(gameSessionId: ID!): GameSessionState
+}
+
 type Turn {
-  data: JSON
-  userId: String
+  data: JSON!
+  userId: String!
 }
 
 input UpdateGameSessionInput {
@@ -170,9 +201,10 @@ input UpdateUserInfoInput {
 
 """A user of Long Game"""
 type User implements Node {
-  color: String
-  email: String
+  color: String!
+  email: String!
   id: ID!
   imageUrl: String
-  name: String
+  isViewer: Boolean!
+  name: String!
 }

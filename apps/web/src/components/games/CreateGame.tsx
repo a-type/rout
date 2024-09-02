@@ -1,17 +1,31 @@
 import { Button } from '@a-type/ui/components/button';
-import { globalHooks } from '@long-game/game-client';
+import { LongGameError } from '@long-game/common';
+import { graphql, useMutation } from '@long-game/game-client';
 import { useNavigate } from '@verdant-web/react-router';
 
-export interface CreateGameProps {}
+const createGameMutation = graphql(`
+  mutation CreateGameSession($gameId: ID!) {
+    prepareGameSession(input: { gameId: $gameId }) {
+      id
+    }
+  }
+`);
 
-export function CreateGame({}: CreateGameProps) {
-  const { mutateAsync } =
-    globalHooks.gameSessions.createGameSession.useMutation();
+export function CreateGame() {
+  const [mutate] = useMutation(createGameMutation);
+
   const navigate = useNavigate();
 
   const create = async () => {
-    const result = await mutateAsync({ gameId: 'number-guess' });
-    navigate(`/session/${result.id}`);
+    const result = await mutate({ variables: { gameId: 'number-guess' } });
+    const gameSessionId = result.data?.prepareGameSession?.id;
+    if (!gameSessionId) {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Failed to create game session',
+      );
+    }
+    navigate(`/session/${gameSessionId}`);
   };
 
   return <Button onClick={create}>New Game</Button>;

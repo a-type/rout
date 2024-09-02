@@ -123,10 +123,24 @@ User.implement({
   fields: (t) => ({
     name: t.string({
       resolve: (user) => user.friendlyName || user.fullName || 'Anonymous',
+      nullable: false,
     }),
-    email: t.exposeString('email'),
+    email: t.exposeString('email', {
+      nullable: false,
+    }),
     imageUrl: t.exposeString('imageUrl'),
-    color: t.exposeString('color'),
+    color: t.field({
+      type: 'String',
+      resolve: (user) => user.color || 'gray',
+      nullable: false,
+    }),
+    isViewer: t.field({
+      type: 'Boolean',
+      nullable: false,
+      resolve: (user, _, ctx) => {
+        return ctx.session?.userId === user.id;
+      },
+    }),
   }),
 });
 

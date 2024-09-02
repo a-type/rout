@@ -1,5 +1,27 @@
+import { validateAccessToGameSession } from '../../data/gameSession.js';
+import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
+
+builder.subscriptionFields((t) => ({
+  gameSessionStateChanged: t.field({
+    type: 'GameSessionState',
+    args: {
+      gameSessionId: t.arg.id({ required: true }),
+    },
+    authScopes: { user: true },
+    subscribe: async (_, { gameSessionId }, ctx) => {
+      // validate access to game session
+      await validateAccessToGameSession(gameSessionId, ctx.session);
+      return ctx.pubsub.asyncIterator(
+        EVENT_LABELS.gameStateChanged(gameSessionId),
+      ) as any;
+    },
+    resolve: (payload: GameStateChangedEvent) => {
+      return assignTypeName('GameSessionState')(payload.gameSessionState);
+    },
+  }),
+}));
 
 export const GameSessionState = builder.loadableNodeRef('GameSessionState', {
   load: async (ids, ctx) => {

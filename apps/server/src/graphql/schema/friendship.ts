@@ -10,6 +10,7 @@ import { User } from './user.js';
 builder.queryFields((t) => ({
   friendships: t.field({
     type: [Friendship],
+    nullable: false,
     authScopes: {
       user: true,
     },
@@ -223,6 +224,7 @@ Friendship.implement({
     friend: t.field({
       type: User,
       resolve: (friendship) => friendship.friendId,
+      nullable: false,
     }),
   }),
 });
@@ -258,7 +260,7 @@ builder.inputType('SendFriendshipInviteInput', {
 
 builder.inputType('FriendshipInviteResponseInput', {
   fields: (t) => ({
-    friendshipId: t.string({
+    friendshipId: t.id({
       required: true,
     }),
     response: t.field({

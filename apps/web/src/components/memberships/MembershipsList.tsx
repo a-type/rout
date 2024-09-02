@@ -1,12 +1,38 @@
-import { GameSessionMembershipData, globalHooks } from '@long-game/game-client';
+import {
+  FragmentOf,
+  graphql,
+  readFragment,
+  useSuspenseQuery,
+} from '@long-game/game-client';
 import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
 
-export interface MembershipsListProps {}
+const membershipFragment = graphql(`
+  fragment MembershipFragment on GameSessionMembership {
+    id
+    status
+    gameSession {
+      id
+      gameId
+    }
+  }
+`);
 
-export function MembershipsList({}: MembershipsListProps) {
-  const { data: memberships } =
-    globalHooks.gameSessions.gameMemberships.useQuery();
+const membershipsQuery = graphql(
+  `
+    query GameMemberships {
+      memberships {
+        id
+        ...MembershipFragment
+      }
+    }
+  `,
+  [membershipFragment],
+);
+
+export function MembershipsList() {
+  const { data } = useSuspenseQuery(membershipsQuery);
+  const memberships = data?.memberships;
 
   return (
     <div className="flex flex-col gap-3">
@@ -19,14 +45,15 @@ export function MembershipsList({}: MembershipsListProps) {
 }
 
 function MembershipItem({
-  membership,
+  membership: frag,
 }: {
-  membership: GameSessionMembershipData;
+  membership: FragmentOf<typeof membershipFragment>;
 }) {
-  const game = games[membership.gameId];
+  const membership = readFragment(membershipFragment, frag);
+  const game = games[membership.gameSession.gameId];
   return (
-    <Link to={`/session/${membership.gameSessionId}`}>
-      {game.title} | Invite: {membership.membershipStatus}
+    <Link to={`/session/${membership.gameSession.id}`}>
+      {game.title} | Invite: {membership.status}
     </Link>
   );
 }

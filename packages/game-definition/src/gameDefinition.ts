@@ -1,6 +1,8 @@
 import { ComponentType } from 'react';
 import { GameRandom } from './random.js';
 import { GameRound, PlayerColorName } from '@long-game/common';
+import { FragmentOf } from '@long-game/graphql';
+import { clientSessionFragment } from './fragments.js';
 
 export type BaseTurnData = object;
 
@@ -101,10 +103,10 @@ export type GameDefinition<
 
   // CLIENT ONLY
 
-  Client: ComponentType<{ session: ClientSession }>;
+  Client: ComponentType<{ session: FragmentOf<typeof clientSessionFragment> }>;
   GameRecap: ComponentType<{
     globalState: GlobalState;
-    session: ClientSession;
+    session: FragmentOf<typeof clientSessionFragment>;
   }>;
 };
 
@@ -122,26 +124,6 @@ export type RoundIndexDecider<
   currentTime: Date;
   gameTimeZone: string;
 }) => number;
-
-export type ClientSession = {
-  id: string;
-  gameId: string;
-  gameVersion: string;
-  startedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  timezone: string;
-  members: {
-    id: string;
-    membershipId: string;
-    status: 'pending' | 'accepted' | 'declined' | 'expired';
-    name: string;
-    imageUrl: string | null;
-    color: PlayerColorName;
-  }[];
-  localPlayer: { id: string };
-  status: GameStatus;
-};
 
 export interface GameModule {
   versions: GameDefinition[];

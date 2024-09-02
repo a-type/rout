@@ -1,27 +1,20 @@
-import { builder } from '../builder.js';
-import { createResults, keyIndexes } from '../dataloaders.js';
-import {
-  dateTime,
-  GameSession as DBGameSession,
-  id,
-  jsonArrayFrom,
-} from '@long-game/db';
-import { assignTypeName, hasTypeName } from '../relay.js';
-import { GameSessionMembership } from './gameSessionMembership.js';
-import { z } from 'zod';
 import { assert } from '@a-type/utils';
-import games from '@long-game/games';
+import { LongGameError } from '@long-game/common';
+import { dateTime, id, jsonArrayFrom } from '@long-game/db';
 import { GameRandom, getLatestVersion } from '@long-game/game-definition';
-import { getGameState } from '@long-game/game-state';
-import {
-  encodeGameSessionStateId,
-  GameSessionState,
-} from './gameSessionState.js';
+import games from '@long-game/games';
 import {
   resolveCursorConnection,
   ResolveCursorConnectionArgs,
 } from '@pothos/plugin-relay';
-import { LongGameError } from '@long-game/common';
+import { z } from 'zod';
+import { builder } from '../builder.js';
+import { assignTypeName, hasTypeName } from '../relay.js';
+import { GameSessionMembership } from './gameSessionMembership.js';
+import {
+  encodeGameSessionStateId,
+  GameSessionState,
+} from './gameSessionState.js';
 
 builder.queryFields((t) => ({
   gameSession: t.field({
@@ -241,8 +234,11 @@ GameSession.implement({
   description: 'An instance of a game being played by a group of users.',
   isTypeOf: hasTypeName('GameSession'),
   fields: (t) => ({
+    gameId: t.exposeID('gameId', { nullable: false }),
+    gameVersion: t.exposeString('gameVersion', { nullable: false }),
     members: t.field({
       type: [GameSessionMembership],
+      nullable: false,
       resolve: async (gameSession, _, ctx) => {
         const memberships = await ctx.db
           .selectFrom('GameSessionMembership')
@@ -255,12 +251,14 @@ GameSession.implement({
     }),
     state: t.field({
       type: GameSessionState,
+      nullable: false,
       resolve: async (gameSession, _, ctx) => {
         return encodeGameSessionStateId(gameSession.id);
       },
     }),
     status: t.field({
       type: 'GameSessionStatus',
+      nullable: false,
       resolve: async (gameSession, _, ctx) => {
         const state = await ctx.dataLoaders.gameSessionState.load(
           gameSession.id,
@@ -274,6 +272,7 @@ GameSession.implement({
     }),
     chat: t.connection({
       type: 'ChatMessage',
+      nullable: false,
       resolve: (gameSession, args, ctx) =>
         resolveCursorConnection(
           {
@@ -308,6 +307,7 @@ GameSession.implement({
     }),
     postGame: t.field({
       type: 'GameSessionPostGame',
+      nullable: true,
       resolve: async (gameSession, _, ctx) => {
         const state = await ctx.dataLoaders.gameSessionState.load(
           gameSession.id,
@@ -326,6 +326,23 @@ GameSession.implement({
         };
       },
     }),
+    createdAt: t.field({
+      type: 'DateTime',
+      nullable: false,
+      resolve: (gameSession) => new Date(gameSession.createdAt),
+    }),
+    updatedAt: t.field({
+      type: 'DateTime',
+      nullable: false,
+      resolve: (gameSession) => new Date(gameSession.updatedAt),
+    }),
+    startedAt: t.field({
+      type: 'DateTime',
+      nullable: true,
+      resolve: (gameSession) =>
+        gameSession.startedAt ? new Date(gameSession.startedAt) : null,
+    }),
+    timezone: t.exposeString('timezone', { nullable: false }),
   }),
 });
 

@@ -3,15 +3,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@a-type/ui/components/dialog';
-import { Me, globalHooks } from '@long-game/game-client';
 import { EditProfileForm } from './EditProfile.jsx';
+import { useSuspenseQuery } from '@long-game/game-client';
+import { meQuery } from './queries.js';
 
-export interface CompleteProfileDialogProps {}
+export function CompleteProfileDialog() {
+  const { data } = useSuspenseQuery(meQuery);
 
-export function CompleteProfileDialog({}: CompleteProfileDialogProps) {
-  const { data: me } = globalHooks.users.me.useQuery();
-
-  const open = !!me && incompleteProfile(me);
+  const open = !!data.me && incompleteProfile(data.me);
 
   return (
     <Dialog open={open}>
@@ -25,6 +24,6 @@ export function CompleteProfileDialog({}: CompleteProfileDialogProps) {
   );
 }
 
-function incompleteProfile(me: Me) {
+function incompleteProfile(me: { name: string; color: string | null }) {
   return !me.name || !me.color;
 }

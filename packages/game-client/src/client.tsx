@@ -2,15 +2,17 @@ import {
   BaseTurnData,
   GameDefinition,
   Turn,
-  ClientSession,
   LocalTurn,
+  clientSessionFragment,
 } from '@long-game/game-definition';
+import { ResultOf, FragmentOf } from '@long-game/graphql';
 import { action, makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { ReactNode, createContext, useContext, useState } from 'react';
-import { GameRound, LongGameError, LongGameErrorCode } from '@long-game/common';
-import { ServerEvents, createEvents } from './events.js';
+import { FC, ReactNode, createContext, useContext, useState } from 'react';
+import { GameRound } from '@long-game/common';
 import { ChatMessage, GameLogItem, RawChatMessage } from './types.js';
+import { graphqlClient } from './apollo.js';
+import { graphql, readFragment } from '../../graphql/src/graphql.js';
 
 // makes TS/PNPM happy when using withGame - basically
 // it gets worried whenever you re-export a tool which
@@ -49,8 +51,6 @@ export class GameClient<
     PublicTurnData
   >;
 
-  private _hono;
-  private _events: ServerEvents;
   private _disposes: (() => void)[] = [];
 
   get currentTurn() {
@@ -63,7 +63,7 @@ export class GameClient<
     return this.gameDefinition.getProspectivePlayerState({
       playerState: this.state,
       prospectiveTurn: this.currentTurn,
-      playerId: this.session.localPlayer.id,
+      playerId: this.localPlayer.id,
     });
   }
 
@@ -83,8 +83,8 @@ export class GameClient<
       turns: round.turns.map((move) => ({
         ...move,
         user: this.session.members.find(
-          (player) => player.id === move.userId,
-        ) ?? {
+          (player) => player.user.id === move.userId,
+        )?.user ?? {
           id: 'unknown',
           name: 'Unknown',
           imageUrl: null,
@@ -98,7 +98,7 @@ export class GameClient<
   get chat(): ChatMessage[] {
     return this.chatLog.map((msg) => ({
       ...msg,
-      user: this.session.members.find((player) => player.id === msg.userId) ?? {
+      user: this.getMember(msg.userId) ?? {
         id: msg.userId,
         name: 'Unknown',
         imageUrl: null,
@@ -133,93 +133,114 @@ export class GameClient<
   }
 
   get localPlayer() {
-    const id = this.session.localPlayer.id;
-    return this.getMember(id)!;
+    return (
+      this.session.members.find((m) => m.user.isViewer)?.user ?? {
+        id: 'unknown',
+        name: 'Unknown',
+        imageUrl: null,
+      }
+    );
   }
 
   constructor({
     gameDefinition,
     session,
-    sdk,
   }: {
     gameDefinition: GameDefinition;
-    session: ClientSession;
-    sdk: LongGameSDK;
+    session: ResultOf<typeof clientSessionFragment>;
   }) {
     this.gameDefinition = gameDefinition;
     this.session = session;
 
-    this._events = createEvents(sdk.host, session.id);
-    makeAutoObservable(this, {
-      // IDK why mobx doesn't include this in typings?
-      // @ts-expect-error
-      _trpc: false,
-      _events: false,
-    });
-    this.refreshState();
-    this.subscribeToRefreshEvents();
-    this.setupChat();
+    makeAutoObservable(this);
+    this.subscribeToState();
+    this.subscribeToChat();
   }
 
-  private refreshState = () => {
-    return this._hono.gameSessions[':gameSessionId'].state
-      .$get({
-        param: {
-          gameSessionId: this.session.id,
-        },
-      })
-      .then((r) => r.json())
-      .then(
-        action('refreshState', (data) => {
-          this.state = data.state;
-          this.previousRounds = data.rounds as GameRound<
-            Turn<PublicTurnData>
-          >[];
-          this.currentServerTurn = data.currentTurn;
-          this.dirty = false;
-          this.error = null;
-        }),
-      )
-      .catch(
-        action('handleError', (err) => {
-          if (LongGameError.isInstance(err)) {
-            this.error = err.message;
-          } else {
-            this.error = 'Unknown error';
+  private subscribeToState = async () => {
+    const result = graphqlClient.subscribe({
+      query: graphql(`
+        subscription ClientGameStateSub($gameSessionId: ID!) {
+          gameSessionStateChanged(gameSessionId: $gameSessionId) {
+            playerState
+            currentTurn {
+              userId
+              data
+            }
+            rounds {
+              roundIndex
+              turns {
+                userId
+                data
+              }
+            }
           }
-        }),
-      );
-  };
-
-  private subscribeToRefreshEvents = () => {
-    // subscribe to server event telling us to refresh game state
-    this._disposes.push(
-      this._events.subscribe('game-state-update', this.refreshState),
-    );
-  };
-
-  private setupChat = async () => {
-    const res = await this._hono.gameSessions[':gameSessionId'].chat.$get({
-      param: { gameSessionId: this.session.id },
-      query: { before: undefined },
+        }
+      `),
     });
-    const chats = await res.json();
+
+    const sub = result.subscribe({
+      next: (data) => {
+        const state = data.data?.gameSessionStateChanged;
+        if (!state) return;
+        this.state = state.playerState;
+        this.previousRounds = state.rounds as GameRound<Turn<PublicTurnData>>[];
+        this.currentServerTurn = state.currentTurn ?? undefined;
+      },
+    });
+    this._disposes.push(() => sub.unsubscribe());
+  };
+
+  private subscribeToChat = async () => {
+    const res = await graphqlClient.query({
+      query: graphql(`
+        query ClientGameChat($gameSessionId: ID!) {
+          gameSession(id: $gameSessionId) {
+            chat {
+              edges {
+                node {
+                  id
+                  createdAt
+                  userId
+                  message
+                }
+              }
+            }
+          }
+        }
+      `),
+    });
+    const chats = res.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
     action('setChatLog', (messages: RawChatMessage[]) => {
       this.chatLog = messages;
-    })(chats.messages);
-    this._disposes.push(
-      this._events.subscribe(
-        'chat-message',
-        action('appendChat', (msg) => {
-          this.chatLog.push(msg);
-        }),
-      ),
-    );
+    })(chats);
+
+    const observer = graphqlClient.subscribe({
+      query: graphql(`
+        subscription ClientGameChatSub($gameSessionId: ID!) {
+          chatMessageSent(gameSessionId: $gameSessionId) {
+            id
+            createdAt
+            userId
+            message
+          }
+        }
+      `),
+    });
+
+    const sub = observer.subscribe({
+      next: (data) => {
+        const message = data.data?.chatMessageSent;
+        if (!message) return;
+        this.chatLog.push(message);
+      },
+    });
+    this._disposes.push(() => sub.unsubscribe());
   };
 
   prepareTurn(turn: TurnData | ((prev: TurnData | undefined) => TurnData)) {
     const newTurn: LocalTurn<TurnData> = {
-      userId: this.session.localPlayer.id,
+      userId: this.localPlayer.id,
       data: typeof turn === 'function' ? turn(this.currentTurn?.data) : turn,
     };
 
@@ -267,28 +288,45 @@ export class GameClient<
     this.validateCurrentTurn();
     if (this.error) return;
 
-    await this._hono.gameSessions[':gameSessionId'].submitTurn.$post({
-      param: { gameSessionId: this.session.id },
-      json: { turn: this.currentLocalTurn },
+    await graphqlClient.mutate({
+      mutation: graphql(`
+        mutation ClientSubmitTurn($input: SubmitTurnInput!) {
+          submitTurn(input: $input) {
+            __typename
+          }
+        }
+      `),
+      variables: {
+        input: {
+          gameSessionId: this.session.id,
+          turn: this.currentLocalTurn,
+        },
+      },
     });
-    // server event should do this for us
-    // await this.refreshState();
+    this.dirty = false;
   };
 
   sendChatMessage = async (message: string) => {
-    await this._hono.gameSessions[':gameSessionId'].chat.$post({
-      param: {
-        gameSessionId: this.session.id,
-      },
-      json: {
-        message,
+    await graphqlClient.mutate({
+      mutation: graphql(`
+        mutation ClientSendChat($input: SendChatMessageInput!) {
+          sendMessage(input: $input) {
+            id
+          }
+        }
+      `),
+      variables: {
+        input: {
+          gameSessionId: this.session.id,
+          message,
+        },
       },
     });
   };
 
   getMember = (id: string) => {
     return (
-      this.session.members.find((player) => player.id === id) ?? {
+      this.session.members.find((player) => player.id === id)?.user ?? {
         id,
         name: 'Unknown',
         imageUrl: null,
@@ -335,24 +373,16 @@ export function createGameClient<
     );
   });
 
-  const GameClientProvider = ({
-    session,
-    children,
-  }: {
-    session: ClientSession;
+  const GameClientProvider: FC<{
+    session: FragmentOf<typeof clientSessionFragment>;
     children: ReactNode;
-  }) => {
-    const ctx = useContext(GlobalGameContext);
-    if (!ctx) {
-      throw new Error('GlobalGameContext not found');
-    }
-    const { sdk } = ctx;
+  }> = ({ session: sessionFrag, children }) => {
+    const session = readFragment(clientSessionFragment, sessionFrag);
     const [client] = useState(
       () =>
         new GameClient<PlayerState, MoveData, PublicMoveData>({
           gameDefinition,
           session,
-          sdk,
         }),
     );
 
@@ -371,126 +401,3 @@ export function createGameClient<
     withGame: observer,
   };
 }
-
-// Global Long Game SDK
-
-export class LongGameSDK {
-  readonly queryClient;
-  readonly fetch;
-  readonly hono;
-
-  constructor(
-    private options: { host: string; onError?: (err: LongGameError) => void },
-  ) {
-    this.queryClient = new QueryClient({});
-    this.fetch = createFetch({
-      isSessionExpired: (res) =>
-        LongGameError.fromResponse(res).code ===
-        LongGameError.Code.SessionExpired,
-      refreshSessionEndpoint: `${options.host}/auth/refresh`,
-    });
-    this.hono = hc<AppType>(options.host, {
-      fetch: this.fetch,
-    });
-  }
-  get host() {
-    return this.options.host;
-  }
-
-  wrap = <T, Args extends unknown[]>(
-    name: string,
-    method: (...args: Args) => Promise<T | ClientResponse<T>>,
-  ) => {
-    const wrapped = async (...args: Args) => {
-      try {
-        // bailing out of types here to make this wrapper more versatile.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res = (await method(...args)) as any;
-        if (!res || !(typeof res === 'object')) {
-          return res as T;
-        }
-        if ('json' in res) {
-          return res.json() as Promise<T>;
-        } else {
-          return res as T;
-        }
-      } catch (err) {
-        if (LongGameError.isInstance(err)) {
-          this.options.onError?.(err);
-          throw err;
-        } else {
-          this.options.onError?.(
-            new LongGameError(LongGameErrorCode.Unknown, 'Unknown error', err),
-          );
-          throw new LongGameError(
-            LongGameErrorCode.Unknown,
-            'Unknown error',
-            err,
-          );
-        }
-      }
-    };
-
-    wrapped.query = (...args: Args) => ({
-      queryFn: () => wrapped(...args),
-      queryKey: ['api', name, ...args],
-      retry: (failureCount: number, error: unknown) => {
-        if (LongGameError.isInstance(error)) {
-          if (
-            error.code > LongGameError.Code.Unknown &&
-            error.code < LongGameError.Code.InternalServerError
-          ) {
-            // don't retry 4xx style errors.
-            return false;
-          }
-        }
-        return failureCount < 2;
-      },
-    });
-
-    return wrapped;
-  };
-}
-
-class LongGameSubSDK {
-  constructor(protected sdk: LongGameSDK) {}
-}
-
-class LongGameFriendshipsSDK extends LongGameSubSDK {
-  list = this.sdk.wrap(
-    'friendships',
-    (options: { statusFilter?: 'accepted' | 'declined' | 'pending' | 'all' }) =>
-      this.sdk.hono.friendships.$get({
-        query: options,
-      }),
-  );
-  respondToInvite = this.sdk.wrap(
-    'friendships/respond',
-    (options: { id: string; response: 'accepted' | 'declined' }) =>
-      this.sdk.hono.friendships[':id/respond'].$post({
-        param: options,
-      }),
-  );
-}
-
-export { useQuery } from '@tanstack/react-query';
-
-export const GameProvider = ({
-  children,
-  sdk,
-}: {
-  children: ReactNode;
-  sdk: LongGameSDK;
-}) => {
-  return (
-    <GlobalGameContext.Provider value={{ sdk }}>
-      <QueryClientProvider client={sdk.queryClient}>
-        {children}
-      </QueryClientProvider>
-    </GlobalGameContext.Provider>
-  );
-};
-
-const GlobalGameContext = createContext<{
-  sdk: LongGameSDK;
-} | null>(null);

@@ -5,10 +5,9 @@ import { createFetch } from '@a-type/auth-client';
 export { refreshSession } from '@a-type/auth-client';
 
 export const fetch = createFetch({
-  readBody: true,
   refreshSessionEndpoint: `${API_ORIGIN}/auth/refresh`,
-  isSessionExpired: (res, body) => {
-    const biscuitsError = LongGameError.readResponseBody(body);
+  isSessionExpired: (res) => {
+    const biscuitsError = LongGameError.fromResponse(res);
     if (biscuitsError) {
       console.error('Long Game Error', biscuitsError);
       return biscuitsError.code === LongGameError.Code.SessionExpired;

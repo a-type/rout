@@ -52,6 +52,15 @@ export const builder = new SchemaBuilder<{
     PrepareGameSessionInput: { gameId: string };
     UpdateGameSessionInput: { gameSessionId: string; gameId: string };
 
+    SendGameInviteInput: {
+      gameSessionId: string;
+      userId: string;
+    };
+    RespondToGameInviteInput: {
+      inviteId: string;
+      response: 'accepted' | 'declined' | 'pending' | 'expired' | 'uninvited';
+    };
+
     SubmitTurnInput: {
       gameSessionId: string;
       turn: { data: any };
@@ -103,6 +112,9 @@ export const builder = new SchemaBuilder<{
   plugins: [RelayPlugin, DataloaderPlugin, AuthPlugin, ZodPlugin],
   relay: {
     edgesFieldOptions: {
+      nullable: false,
+    },
+    nodeFieldOptions: {
       nullable: false,
     },
   },

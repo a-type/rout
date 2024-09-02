@@ -1,12 +1,43 @@
 import { Divider } from '@a-type/ui/components/divider';
 import { H1 } from '@a-type/ui/components/typography';
-import { GameSessionData, globalHooks } from '@long-game/game-client';
 import games from '@long-game/games';
 import { Suspense } from 'react';
 import { NoGameFound } from './NoGameFound.jsx';
+import {
+  FragmentOf,
+  graphql,
+  readFragment,
+  useSuspenseQuery,
+} from '@long-game/game-client';
+import { clientSessionFragment } from '../../../../../packages/game-definition/src/fragments.js';
+
+export const postGameSessionFragment = graphql(
+  `
+    fragment PostGameSessionFragment on GameSession {
+      id
+      gameId
+      gameVersion
+      members {
+        id
+        user {
+          id
+          name
+          imageUrl
+          color
+        }
+      }
+      postGame {
+        globalState
+        winnerIds
+      }
+      ...GameDefinitionClientSession
+    }
+  `,
+  [clientSessionFragment],
+);
 
 export interface GameRecapProps {
-  gameSession: GameSessionData;
+  gameSession: FragmentOf<typeof postGameSessionFragment>;
 }
 
 export function GameRecap({ gameSession }: GameRecapProps) {
@@ -19,25 +50,28 @@ export function GameRecap({ gameSession }: GameRecapProps) {
   );
 }
 
-function RecapDetails({ gameSession }: { gameSession: GameSessionData }) {
-  const game = games[gameSession.gameId];
+function RecapDetails({
+  gameSession,
+}: {
+  gameSession: FragmentOf<typeof postGameSessionFragment>;
+}) {
+  const postGameData = readFragment(postGameSessionFragment, gameSession);
+
+  const gameId = postGameData.gameId;
+  const gameVersion = postGameData.gameVersion;
+
+  const game = games[gameId];
 
   if (!game) {
     return <NoGameFound />;
   }
 
-  const gameDefinition = game.versions.find(
-    (g) => g.version === gameSession.gameVersion,
-  );
+  const gameDefinition = game.versions.find((g) => g.version === gameVersion);
 
   if (!gameDefinition) {
     return <NoGameFound />;
   }
   const { GameRecap } = gameDefinition;
-
-  const { data: postGameData } = globalHooks.gameSessions.postGame.useQuery({
-    gameSessionId: gameSession.id,
-  });
 
   if (!postGameData) {
     return null;
@@ -47,13 +81,13 @@ function RecapDetails({ gameSession }: { gameSession: GameSessionData }) {
     <>
       <Winners
         gameSession={gameSession}
-        winnerIds={postGameData?.winnerIds ?? []}
+        winnerIds={postGameData.postGame?.winnerIds ?? []}
       />
       <Divider />
       <Suspense>
         <GameRecap
-          session={gameSession}
-          globalState={postGameData?.globalState}
+          session={postGameData}
+          globalState={postGameData.postGame?.globalState}
         />
       </Suspense>
     </>
@@ -64,17 +98,18 @@ function Winners({
   gameSession,
   winnerIds,
 }: {
-  gameSession: GameSessionData;
+  gameSession: FragmentOf<typeof postGameSessionFragment>;
   winnerIds: string[];
 }) {
-  const winners = gameSession.members.filter((member) =>
+  const data = readFragment(postGameSessionFragment, gameSession);
+  const winners = data.members.filter((member) =>
     winnerIds.includes(member.id),
   );
   return (
     <div>
       <div>Winners:</div>
       {winners.map((winner) => (
-        <div key={winner.id}>{winner.name}</div>
+        <div key={winner.id}>{winner.user.name}</div>
       ))}
     </div>
   );

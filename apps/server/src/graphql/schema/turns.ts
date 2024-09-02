@@ -117,10 +117,11 @@ builder.mutationFields((t) => ({
 
 builder.objectType('Turn', {
   fields: (t) => ({
-    userId: t.exposeString('userId'),
+    userId: t.exposeString('userId', { nullable: false }),
     data: t.field({
       type: 'JSON',
       resolve: (obj) => obj.data,
+      nullable: false,
     }),
   }),
 });

@@ -2,37 +2,117 @@ import { Avatar } from '@a-type/ui/components/avatar';
 import { Button } from '@a-type/ui/components/button';
 import { Divider } from '@a-type/ui/components/divider';
 import { H1, H2 } from '@a-type/ui/components/typography';
-import { GameSessionData, globalHooks } from '@long-game/game-client';
-import { useCallback } from 'react';
 import { GamePicker } from './GamePicker.jsx';
 import games from '@long-game/games';
+import {
+  FragmentOf,
+  graphql,
+  readFragment,
+  useMutation,
+  useSuspenseQuery,
+} from '@long-game/game-client';
+import { friendsListQuery } from '../friendships/FriendsList.jsx';
+
+const membersFragment = graphql(`
+  fragment GameSetupMembersFragment on GameSessionMembership {
+    id
+    status
+    user {
+      id
+      isViewer
+      name
+      imageUrl
+      color
+    }
+  }
+`);
+
+export const gameSetupSessionFragment = graphql(
+  `
+    fragment GameSetupSessionFragment on GameSession {
+      id
+      gameId
+      members {
+        id
+        status
+        user {
+          id
+          isViewer
+          name
+        }
+        ...GameSetupMembersFragment
+      }
+    }
+  `,
+  [membersFragment],
+);
+
+const startGameMutation = graphql(
+  `
+    mutation StartGame($id: ID!) {
+      startGameSession(gameSessionId: $id) {
+        id
+        status {
+          status
+        }
+        members {
+          id
+          user {
+            id
+            isViewer
+          }
+          ...GameSetupMembersFragment
+        }
+      }
+    }
+  `,
+  [membersFragment],
+);
+
+const updateGameMutation = graphql(`
+  mutation UpdateGame($id: ID!, $gameId: ID!) {
+    updateGameSession(input: { gameSessionId: $id, gameId: $gameId }) {
+      id
+      gameId
+    }
+  }
+`);
+
+const respondToInviteMutation = graphql(`
+  mutation RespondToInvite($id: ID!, $response: GameInviteResponse!) {
+    respondToGameInvite(input: { inviteId: $id, response: $response }) {
+      id
+      status
+      user {
+        id
+        isViewer
+      }
+    }
+  }
+`);
 
 export interface GameSetupProps {
-  gameSession: GameSessionData;
+  gameSession: FragmentOf<typeof gameSetupSessionFragment>;
+  onRefetch: () => void;
 }
 
-export function GameSetup({ gameSession }: GameSetupProps) {
-  const utils = globalHooks.useUtils();
-  const refetch = useCallback(() => {
-    utils.gameSessions.gameSession.invalidate({ id: gameSession.id });
-  }, [utils.gameSessions.gameSession, gameSession.id]);
-  const { mutateAsync: startGame } = globalHooks.gameSessions.start.useMutation(
-    {
-      onSuccess: refetch,
-    },
-  );
-  const { mutateAsync: updateSession } =
-    globalHooks.gameSessions.updateGameSession.useMutation({
-      onSuccess: refetch,
-    });
+export function GameSetup({ gameSession: frag, onRefetch }: GameSetupProps) {
+  const gameSession = readFragment(gameSetupSessionFragment, frag);
+  const [startGame] = useMutation(startGameMutation, {
+    variables: { id: gameSession.id },
+    onCompleted: onRefetch,
+  });
+  const [updateSession] = useMutation(updateGameMutation, {
+    onCompleted: onRefetch,
+  });
 
   const needToAcceptMyInvite = gameSession.members.some(
-    (member) =>
-      member.id === gameSession.localPlayer.id && member.status === 'pending',
+    (member) => member.user.isViewer && member.status === 'pending',
   );
 
-  const respondToInvite =
-    globalHooks.gameSessions.respondToGameInvite.useMutation();
+  const [respondToInvite] = useMutation(respondToInviteMutation, {
+    onCompleted: onRefetch,
+  });
 
   const game = games[gameSession.gameId];
   const insufficientPlayers =
@@ -48,8 +128,10 @@ export function GameSetup({ gameSession }: GameSetupProps) {
         value={gameSession.gameId}
         onChange={async (gameId) => {
           await updateSession({
-            id: gameSession.id,
-            gameId,
+            variables: {
+              id: gameSession.id,
+              gameId,
+            },
           });
         }}
       />
@@ -57,17 +139,18 @@ export function GameSetup({ gameSession }: GameSetupProps) {
       <GameSetupInviteFriends
         sessionId={gameSession.id}
         members={gameSession.members}
-        onInvite={refetch}
+        onInvite={onRefetch}
       />
       <Divider />
       {needToAcceptMyInvite ? (
         <Button
           onClick={async () => {
-            await respondToInvite.mutateAsync({
-              id: gameSession.id,
-              response: 'accepted',
+            await respondToInvite({
+              variables: {
+                id: gameSession.id,
+                response: 'accepted',
+              },
             });
-            refetch();
           }}
         >
           Accept Invite
@@ -76,7 +159,9 @@ export function GameSetup({ gameSession }: GameSetupProps) {
         <Button
           onClick={async () => {
             await startGame({
-              id: gameSession.id,
+              variables: {
+                id: gameSession.id,
+              },
             });
           }}
           disabled={insufficientPlayers}
@@ -95,36 +180,49 @@ type GameSetupInviteEntryData = {
   status: 'accepted' | 'pending' | 'declined' | 'expired' | 'uninvited';
 };
 
+const inviteMutation = graphql(`
+  mutation InviteToGame($gameSessionId: ID!, $userId: ID!) {
+    sendGameInvite(input: { gameSessionId: $gameSessionId, userId: $userId }) {
+      id
+      status
+      user {
+        id
+        isViewer
+      }
+    }
+  }
+`);
+
 function GameSetupInviteFriends({
   sessionId,
-  members,
+  members: membersFrag,
   onInvite,
 }: {
   sessionId: string;
-  members: GameSessionData['members'];
+  members: FragmentOf<typeof membersFragment>[];
   onInvite: () => void;
 }) {
-  const { data: friends } = globalHooks.friendships.list.useQuery({
-    statusFilter: 'accepted',
-  });
-  const friendsNotInvited = (friends ?? []).filter(
-    (friend) => !members.some((member) => member.id === friend.id),
+  const { data } = useSuspenseQuery(friendsListQuery);
+  const members = membersFrag.map((member) =>
+    readFragment(membersFragment, member),
+  );
+  const friendsNotInvited = (data.friendships ?? []).filter(
+    (friend) => !members.some((member) => member.id === friend.friend.id),
   );
 
-  const { mutateAsync } =
-    globalHooks.gameSessions.createGameInvite.useMutation();
+  const [invite] = useMutation(inviteMutation);
 
   const entries: GameSetupInviteEntryData[] = [
     ...members.map((member) => ({
       id: member.id,
-      name: member.name,
-      imageUrl: member.imageUrl,
-      status: member.status,
+      name: member.user.name,
+      imageUrl: member.user.imageUrl,
+      status: member.status as any,
     })),
     ...friendsNotInvited.map((friend) => ({
       id: friend.id,
-      name: friend.name,
-      imageUrl: friend.imageUrl,
+      name: friend.friend.name,
+      imageUrl: friend.friend.imageUrl,
       status: 'uninvited' as const,
     })),
   ];
@@ -142,9 +240,11 @@ function GameSetupInviteFriends({
                 {entry.status === 'declined' || entry.status === 'uninvited' ? (
                   <Button
                     onClick={async () => {
-                      await mutateAsync({
-                        gameSessionId: sessionId,
-                        userId: entry.id,
+                      await invite({
+                        variables: {
+                          gameSessionId: sessionId,
+                          userId: entry.id,
+                        },
                       });
                       onInvite();
                     }}

@@ -1,0 +1,24 @@
+{
+  "name": "@long-game/graphql",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/esm/index.js",
+      "development": "./src/index.ts",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "//dev": "tsc -w",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "gql.tada": "1.8.6",
+    "graphql": "16.9.0"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4"
+  }
+}

@@ -4,18 +4,23 @@ import {
   SubmitButton,
   TextField,
 } from '@a-type/ui/components/forms';
-import { globalHooks } from '@long-game/game-client';
+import { graphql, useMutation } from '@long-game/game-client';
 
-export interface SendInviteProps {}
+const sendFriendInviteMutation = graphql(`
+  mutation SendFriendInvite($input: SendFriendshipInviteInput!) {
+    sendFriendshipInvite(input: $input) {
+      id
+    }
+  }
+`);
 
-export function SendInvite({}: SendInviteProps) {
-  const { mutateAsync } =
-    globalHooks.friendships.createFriendshipInvite.useMutation();
+export function SendInvite() {
+  const [send] = useMutation(sendFriendInviteMutation);
   return (
     <FormikForm
       initialValues={{ email: '' }}
       onSubmit={async (values) => {
-        await mutateAsync({ email: values.email });
+        await send({ variables: { input: { email: values.email } } });
       }}
     >
       <TextField name="email" label="Email" type="email" />

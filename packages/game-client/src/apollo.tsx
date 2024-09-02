@@ -1,13 +1,16 @@
-import { ApolloClient, InMemoryCache, from } from '@apollo/client';
+import {
+  ApolloClient,
+  ApolloProvider,
+  InMemoryCache,
+  from,
+} from '@apollo/client';
 import { ErrorHandler, onError } from '@apollo/client/link/error';
 import { HttpLink } from '@apollo/client/link/http';
 import { RetryLink } from '@apollo/client/link/retry';
 import { LongGameError } from '@long-game/common';
 import * as CONFIG from './config.js';
 import { fetch, refreshSession } from './fetch.js';
-
-export { maskFragments, readFragment } from 'gql.tada';
-export type { FragmentOf, ResultOf, VariablesOf } from 'gql.tada';
+import { FC, ReactNode } from 'react';
 
 let hasNetworkError = false;
 
@@ -179,3 +182,7 @@ export {
   ApolloProvider,
 } from '@apollo/client';
 export type * from '@apollo/client';
+
+export const GameProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  return <ApolloProvider client={graphqlClient}>{children}</ApolloProvider>;
+};
