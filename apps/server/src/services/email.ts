@@ -1,5 +1,5 @@
 import { Email } from '@a-type/auth';
-import { DEPLOYED_CONTEXT } from '../deployedContext.js';
+import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
 import { assert } from '@a-type/utils';
 
 const EMAIL_USER = process.env.EMAIL_USER;

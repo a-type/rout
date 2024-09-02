@@ -8,7 +8,9 @@
     "build": "turbo run build",
     "setup": "turbo run setup",
     "test": "turbo run test",
-    "gen": "node ./tools/generator/generate.mjs"
+    "gen": "node ./tools/generator/generate.mjs",
+    "gql:doctor": "gql.tada doctor",
+    "gql:gen": "gql.tada generate-output"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +18,9 @@
   "dependencies": {
     "@clack/prompts": "0.7.0",
     "cp-tpl": "1.0.9",
-    "turbo": "^1.11.2"
+    "turbo": "^1.11.2",
+    "typescript": "5.5.4",
+    "gql.tada": "1.8.6",
+    "graphql": "16.9.0"
   }
 }

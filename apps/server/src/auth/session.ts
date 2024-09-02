@@ -2,7 +2,7 @@ import { SessionManager } from '@a-type/auth';
 import { db, userNameSelector } from '@long-game/db';
 import { LongGameError } from '@long-game/common';
 import { SESSION_SECRET } from '../secrets.js';
-import { DEPLOYED_CONTEXT } from '../deployedContext.js';
+import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
 
 declare module '@a-type/auth' {
   interface Session {
@@ -27,6 +27,7 @@ export const sessions = new SessionManager({
 
     if (!user) {
       throw new LongGameError(
+        LongGameError.Code.BadRequest,
         `Invalid session. User with ID ${userId} not found.`,
       );
     }

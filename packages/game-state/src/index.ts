@@ -1,4 +1,4 @@
-import { GameRound, getRoundTimerange } from '@long-game/common';
+import { GameRound } from '@long-game/common';
 import { GameSession, db } from '@long-game/db';
 import { GameDefinition, Turn, GameRandom } from '@long-game/game-definition';
 import games from '@long-game/games';
@@ -14,17 +14,19 @@ export type RequiredGameSession = Pick<
   | 'startedAt'
 >;
 
-export async function getGameState(
-  gameSession: RequiredGameSession,
-  currentTime: Date,
-): Promise<null | {
+export interface GameSessionState {
   globalState: any;
   rounds: GameRound<Turn<any>>[];
   previousRounds: GameRound<Turn<any>>[];
   currentRound: GameRound<Turn<any>>;
   gameDefinition: GameDefinition;
   members: { id: string }[];
-}> {
+}
+
+export async function getGameState(
+  gameSession: RequiredGameSession,
+  currentTime: Date,
+): Promise<null | GameSessionState> {
   const turns = await db
     .selectFrom('GameTurn')
     .where('gameSessionId', '=', gameSession.id)

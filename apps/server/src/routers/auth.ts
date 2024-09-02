@@ -1,57 +1,57 @@
-import { Router } from 'itty-router';
 import { authHandlers } from '../auth/handlers.js';
 import { AuthError } from '@a-type/auth';
-import { DEPLOYED_CONTEXT } from '../deployedContext.js';
+import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
+import { Hono } from 'hono';
 
-export const authRouter = Router({
-  base: '/auth',
-});
-
-authRouter
-  .post('/provider/:provider/login', (req) => {
-    const provider = req.params.provider;
+export const authRouter = new Hono()
+  .post('/provider/:provider/login', (ctx) => {
+    const provider = ctx.req.param('provider');
     try {
-      return authHandlers.handleOAuthLoginRequest(req, { provider });
+      return authHandlers.handleOAuthLoginRequest(ctx.req.raw, { provider });
     } catch (err) {
       return routeAuthErrorsToUi('/login')(err as Error);
     }
   })
-  .get('/provider/:provider/callback', (req) => {
-    const provider = req.params.provider;
+  .get('/provider/:provider/callback', (ctx) => {
+    const provider = ctx.req.param('provider');
     return authHandlers
-      .handleOAuthCallbackRequest(req, { provider })
+      .handleOAuthCallbackRequest(ctx.req.raw, { provider })
       .catch(routeAuthErrorsToUi('/login'));
   })
-  .all('/logout', (req) =>
-    authHandlers.handleLogoutRequest(req).catch(routeAuthErrorsToUi('/')),
-  )
-  .post('/begin-email-signup', (req) =>
+  .all('/logout', (ctx) =>
     authHandlers
-      .handleSendEmailVerificationRequest(req)
+      .handleLogoutRequest(ctx.req.raw)
+      .catch(routeAuthErrorsToUi('/')),
+  )
+  .post('/begin-email-signup', (ctx) =>
+    authHandlers
+      .handleSendEmailVerificationRequest(ctx.req.raw)
       .catch(routeAuthErrorsToUi('/login')),
   )
-  .post('/complete-email-signup', (req) =>
+  .post('/complete-email-signup', (ctx) =>
     authHandlers
-      .handleVerifyEmailRequest(req)
+      .handleVerifyEmailRequest(ctx.req.raw)
       .catch(routeAuthErrorsToUi('/login')),
   )
-  .post('/email-login', (req) =>
+  .post('/email-login', (ctx) =>
     authHandlers
-      .handleEmailLoginRequest(req)
+      .handleEmailLoginRequest(ctx.req.raw)
       .catch(routeAuthErrorsToUi('/login')),
   )
-  .post('/begin-reset-password', (req) =>
+  .post('/begin-reset-password', (ctx) =>
     authHandlers
-      .handleResetPasswordRequest(req)
+      .handleResetPasswordRequest(ctx.req.raw)
       .catch(routeAuthErrorsToUi('/login')),
   )
-  .post('/complete-reset-password', (req) =>
+  .post('/complete-reset-password', (ctx) =>
     authHandlers
-      .handleVerifyPasswordResetRequest(req)
+      .handleVerifyPasswordResetRequest(ctx.req.raw)
       .catch(routeAuthErrorsToUi('/login')),
   )
-  .post('/refresh', authHandlers.handleRefreshSessionRequest)
-  .get('/session', authHandlers.handleSessionRequest);
+  .post('/refresh', (ctx) =>
+    authHandlers.handleRefreshSessionRequest(ctx.req.raw),
+  )
+  .get('/session', (ctx) => authHandlers.handleSessionRequest(ctx.req.raw));
 
 function routeAuthErrorsToUi(path: string) {
   return function (err: Error) {

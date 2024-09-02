@@ -24,7 +24,7 @@ export const Tile = withGame(function Tile({ cells, className }: TileProps) {
       title={shape ?? 'blank'}
       className={
         'w-full h-full bg-white flex items-center justify-center text-[30px] select-none ' +
-          className ?? ''
+        (className ?? '')
       }
     >
       <canvas
@@ -60,7 +60,7 @@ export function EmptyTile({ className }: { className?: string }) {
     <div
       className={
         'w-[32px] h-[32px] bg-gray-2 flex items-center justify-center text-[32px] select-none ' +
-          className ?? ''
+        (className ?? '')
       }
     >
       &nbsp;

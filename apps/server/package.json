@@ -1,6 +1,14 @@
 {
   "name": "@long-game/server",
   "type": "module",
+  "exports": {
+    "./app": {
+      "development": "./src/app.ts",
+      "production": "./dist/app.js",
+      "import": "./dist/app.js",
+      "types": "./dist/app.d.ts"
+    }
+  },
   "scripts": {
     "dev": "env-cmd tsx watch --conditions=development --clear-screen=false ./src/server.ts",
     "setup": "pnpm migrate",
@@ -8,25 +16,38 @@
     "start:local": "env-cmd pnpm start",
     "build": "tsc --build tsconfig.json",
     "vapid": "node ./scripts/generateVapidKeys.js",
-    "migrate": "env-cmd long-game-migrate"
+    "migrate": "env-cmd long-game-migrate",
+    "write-schema": "env-cmd tsx watch --conditions=development ./scripts/writeSchema.ts"
   },
   "dependencies": {
-    "@a-type/utils": "^1.1.3",
     "@a-type/auth": "0.6.6",
+    "@a-type/utils": "^1.1.3",
+    "@hono/node-server": "1.12.2",
+    "@hono/zod-validator": "^0.2.2",
     "@long-game/common": "workspace:*",
     "@long-game/db": "workspace:*",
-    "@long-game/trpc": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/game-state": "workspace:*",
+    "@long-game/games": "workspace:*",
     "@long-game/server-events": "workspace:*",
-    "@trpc/server": "^10.45.0",
-    "@whatwg-node/server": "^0.9.22",
-    "itty-router": "^4.0.25",
-    "web-push": "^3.6.6"
+    "@pothos/core": "4.2.0",
+    "@pothos/plugin-dataloader": "4.1.0",
+    "@pothos/plugin-relay": "4.1.0",
+    "@pothos/plugin-scope-auth": "4.1.0",
+    "@pothos/plugin-zod": "^4.1.0",
+    "dataloader": "^2.2.2",
+    "graphql": "^16.9.0",
+    "graphql-scalars": "1.23.0",
+    "graphql-yoga": "5.7.0",
+    "hono": "4.5.10",
+    "web-push": "^3.6.6",
+    "zod": "^3.19.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
     "dotenv": "^16.3.1",
     "env-cmd": "^10.1.0",
-    "typescript": "^5.3.3",
-    "tsx": "^4.7.0"
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   }
 }

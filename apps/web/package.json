@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@a-type/ui": "0.8.19",
-    "@a-type/auth-client": "^1.0.6",
+    "@a-type/auth-client": "^1.0.10",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/games": "workspace:*",

@@ -5,16 +5,10 @@ import {
   ClientSession,
   LocalTurn,
 } from '@long-game/game-definition';
-import { AppRouter } from '@long-game/trpc';
-import { TRPCClientError, createTRPCProxyClient } from '@trpc/client';
 import { action, makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import SuperJSON from 'superjson';
-import { fetchLink, loginLink } from './trpc.js';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { CreateTRPCReact, createTRPCReact } from '@trpc/react-query';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { GameRound } from '@long-game/common';
+import { GameRound, LongGameError, LongGameErrorCode } from '@long-game/common';
 import { ServerEvents, createEvents } from './events.js';
 import { ChatMessage, GameLogItem, RawChatMessage } from './types.js';
 
@@ -55,7 +49,7 @@ export class GameClient<
     PublicTurnData
   >;
 
-  private _trpc;
+  private _hono;
   private _events: ServerEvents;
   private _disposes: (() => void)[] = [];
 
@@ -145,22 +139,17 @@ export class GameClient<
 
   constructor({
     gameDefinition,
-    host,
-    loginUrl,
     session,
+    sdk,
   }: {
     gameDefinition: GameDefinition;
-    host: string;
-    loginUrl: string;
     session: ClientSession;
+    sdk: LongGameSDK;
   }) {
     this.gameDefinition = gameDefinition;
     this.session = session;
-    this._trpc = createTRPCProxyClient<AppRouter>({
-      transformer: SuperJSON,
-      links: [loginLink({ loginUrl }), fetchLink(host)],
-    });
-    this._events = createEvents(host, session.id);
+
+    this._events = createEvents(sdk.host, session.id);
     makeAutoObservable(this, {
       // IDK why mobx doesn't include this in typings?
       // @ts-expect-error
@@ -173,10 +162,13 @@ export class GameClient<
   }
 
   private refreshState = () => {
-    return this._trpc.gameSessions.gameState
-      .query({
-        gameSessionId: this.session.id,
+    return this._hono.gameSessions[':gameSessionId'].state
+      .$get({
+        param: {
+          gameSessionId: this.session.id,
+        },
       })
+      .then((r) => r.json())
       .then(
         action('refreshState', (data) => {
           this.state = data.state;
@@ -190,7 +182,7 @@ export class GameClient<
       )
       .catch(
         action('handleError', (err) => {
-          if (err instanceof TRPCClientError) {
+          if (LongGameError.isInstance(err)) {
             this.error = err.message;
           } else {
             this.error = 'Unknown error';
@@ -207,9 +199,11 @@ export class GameClient<
   };
 
   private setupChat = async () => {
-    const chats = await this._trpc.chat.getPage.query({
-      gameSessionId: this.session.id,
+    const res = await this._hono.gameSessions[':gameSessionId'].chat.$get({
+      param: { gameSessionId: this.session.id },
+      query: { before: undefined },
     });
+    const chats = await res.json();
     action('setChatLog', (messages: RawChatMessage[]) => {
       this.chatLog = messages;
     })(chats.messages);
@@ -273,18 +267,22 @@ export class GameClient<
     this.validateCurrentTurn();
     if (this.error) return;
 
-    await this._trpc.gameSessions.submitTurn.mutate({
-      gameSessionId: this.session.id,
-      turn: this.currentLocalTurn,
+    await this._hono.gameSessions[':gameSessionId'].submitTurn.$post({
+      param: { gameSessionId: this.session.id },
+      json: { turn: this.currentLocalTurn },
     });
     // server event should do this for us
     // await this.refreshState();
   };
 
   sendChatMessage = async (message: string) => {
-    await this._trpc.chat.send.mutate({
-      gameSessionId: this.session.id,
-      message,
+    await this._hono.gameSessions[':gameSessionId'].chat.$post({
+      param: {
+        gameSessionId: this.session.id,
+      },
+      json: {
+        message,
+      },
     });
   };
 
@@ -348,14 +346,13 @@ export function createGameClient<
     if (!ctx) {
       throw new Error('GlobalGameContext not found');
     }
-    const { host, loginUrl } = ctx;
+    const { sdk } = ctx;
     const [client] = useState(
       () =>
         new GameClient<PlayerState, MoveData, PublicMoveData>({
           gameDefinition,
-          host,
-          loginUrl,
           session,
+          sdk,
         }),
     );
 
@@ -375,38 +372,125 @@ export function createGameClient<
   };
 }
 
-// Global Long Game SDKs
-export const globalHooks: CreateTRPCReact<AppRouter, unknown, null> =
-  createTRPCReact<AppRouter>();
+// Global Long Game SDK
+
+export class LongGameSDK {
+  readonly queryClient;
+  readonly fetch;
+  readonly hono;
+
+  constructor(
+    private options: { host: string; onError?: (err: LongGameError) => void },
+  ) {
+    this.queryClient = new QueryClient({});
+    this.fetch = createFetch({
+      isSessionExpired: (res) =>
+        LongGameError.fromResponse(res).code ===
+        LongGameError.Code.SessionExpired,
+      refreshSessionEndpoint: `${options.host}/auth/refresh`,
+    });
+    this.hono = hc<AppType>(options.host, {
+      fetch: this.fetch,
+    });
+  }
+  get host() {
+    return this.options.host;
+  }
+
+  wrap = <T, Args extends unknown[]>(
+    name: string,
+    method: (...args: Args) => Promise<T | ClientResponse<T>>,
+  ) => {
+    const wrapped = async (...args: Args) => {
+      try {
+        // bailing out of types here to make this wrapper more versatile.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res = (await method(...args)) as any;
+        if (!res || !(typeof res === 'object')) {
+          return res as T;
+        }
+        if ('json' in res) {
+          return res.json() as Promise<T>;
+        } else {
+          return res as T;
+        }
+      } catch (err) {
+        if (LongGameError.isInstance(err)) {
+          this.options.onError?.(err);
+          throw err;
+        } else {
+          this.options.onError?.(
+            new LongGameError(LongGameErrorCode.Unknown, 'Unknown error', err),
+          );
+          throw new LongGameError(
+            LongGameErrorCode.Unknown,
+            'Unknown error',
+            err,
+          );
+        }
+      }
+    };
+
+    wrapped.query = (...args: Args) => ({
+      queryFn: () => wrapped(...args),
+      queryKey: ['api', name, ...args],
+      retry: (failureCount: number, error: unknown) => {
+        if (LongGameError.isInstance(error)) {
+          if (
+            error.code > LongGameError.Code.Unknown &&
+            error.code < LongGameError.Code.InternalServerError
+          ) {
+            // don't retry 4xx style errors.
+            return false;
+          }
+        }
+        return failureCount < 2;
+      },
+    });
+
+    return wrapped;
+  };
+}
+
+class LongGameSubSDK {
+  constructor(protected sdk: LongGameSDK) {}
+}
+
+class LongGameFriendshipsSDK extends LongGameSubSDK {
+  list = this.sdk.wrap(
+    'friendships',
+    (options: { statusFilter?: 'accepted' | 'declined' | 'pending' | 'all' }) =>
+      this.sdk.hono.friendships.$get({
+        query: options,
+      }),
+  );
+  respondToInvite = this.sdk.wrap(
+    'friendships/respond',
+    (options: { id: string; response: 'accepted' | 'declined' }) =>
+      this.sdk.hono.friendships[':id/respond'].$post({
+        param: options,
+      }),
+  );
+}
+
+export { useQuery } from '@tanstack/react-query';
+
 export const GameProvider = ({
   children,
-  host,
-  loginUrl,
+  sdk,
 }: {
   children: ReactNode;
-  host: string;
-  loginUrl: string;
+  sdk: LongGameSDK;
 }) => {
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() => {
-    return globalHooks.createClient({
-      transformer: SuperJSON,
-      links: [loginLink({ loginUrl }), fetchLink(host)],
-    });
-  });
-
   return (
-    <GlobalGameContext.Provider value={{ host, loginUrl }}>
-      <globalHooks.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </globalHooks.Provider>
+    <GlobalGameContext.Provider value={{ sdk }}>
+      <QueryClientProvider client={sdk.queryClient}>
+        {children}
+      </QueryClientProvider>
     </GlobalGameContext.Provider>
   );
 };
 
 const GlobalGameContext = createContext<{
-  host: string;
-  loginUrl: string;
+  sdk: LongGameSDK;
 } | null>(null);

@@ -16,7 +16,14 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "isolatedModules": true,
-    "customConditions": ["development"]
+    "customConditions": ["development"],
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "./apps/server/schema.graphql",
+        "tadaOutputLocation": "./packages/game-client/src/graphql-env.d.ts"
+      }
+    ]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

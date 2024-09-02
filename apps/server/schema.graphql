@@ -1,0 +1,178 @@
+type ChatMessage implements Node {
+  createdAt: DateTime!
+  id: ID!
+  message: String
+  userId: String
+}
+
+scalar Date
+
+scalar DateTime
+
+type Friendship implements Node {
+  friend: User
+  id: ID!
+  status: FriendshipStatus
+}
+
+input FriendshipFilterInput {
+  status: FriendshipStatus
+}
+
+input FriendshipInviteResponseInput {
+  friendshipId: String!
+  response: FriendshipStatus!
+}
+
+enum FriendshipStatus {
+  accepted
+  declined
+  pending
+}
+
+"""An instance of a game being played by a group of users."""
+type GameSession implements Node {
+  chat(after: String, before: String, first: Int, last: Int): GameSessionChatConnection
+  id: ID!
+  members: [GameSessionMembership!]
+  postGame: GameSessionPostGame
+  state: GameSessionState
+  status: GameSessionStatus
+}
+
+type GameSessionChatConnection {
+  edges: [GameSessionChatConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GameSessionChatConnectionEdge {
+  cursor: String!
+  node: ChatMessage
+}
+
+"""A user who is a member of a game session."""
+type GameSessionMembership implements Node {
+  gameSession: GameSession
+  id: ID!
+  status: String
+  user: User
+}
+
+type GameSessionPostGame {
+  globalState: JSON
+  winnerIds: [ID!]
+}
+
+type GameSessionState implements Node {
+  currentTurn: Turn
+  id: ID!
+  playerState: JSON
+  rounds: [Round!]
+}
+
+type GameSessionStatus {
+  status: GameSessionStatusValue
+  winnerIds: [String!]
+}
+
+enum GameSessionStatusValue {
+  active
+  completed
+  pending
+}
+
+input GameTurnInput {
+  data: JSON!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Mutation {
+  acceptTermsOfService: User
+  prepareGameSession(input: PrepareGameSessionInput!): GameSession
+  respondToFriendshipInvite(input: FriendshipInviteResponseInput!): Friendship
+  sendFriendshipInvite(input: SendFriendshipInviteInput!): Friendship
+  sendMessage(input: SendChatMessageInput!): ChatMessage
+  setSendEmailUpdates(value: Boolean!): User
+  startGameSession(gameSessionId: ID!): GameSession
+  submitTurn(input: SubmitTurnInput!): SubmitTurnResult
+  updateGameSession(input: UpdateGameSessionInput!): GameSession
+  updateUserInfo(input: UpdateUserInfoInput!): User
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+input PrepareGameSessionInput {
+  """The ID of the game to play."""
+  gameId: ID!
+}
+
+type Query {
+  friendships(input: FriendshipFilterInput): [Friendship!]
+  gameSession(id: ID!): GameSession
+  me: User!
+  memberships: [GameSessionMembership!]
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+}
+
+type Round {
+  roundIndex: Int
+  turns: [Turn!]
+}
+
+input SendChatMessageInput {
+  gameSessionId: String!
+  message: String!
+}
+
+input SendFriendshipInviteInput {
+  email: String!
+}
+
+input SubmitTurnInput {
+  gameSessionId: String!
+  turn: GameTurnInput!
+}
+
+type SubmitTurnResult {
+  gameSession: GameSession
+}
+
+type Turn {
+  data: JSON
+  userId: String
+}
+
+input UpdateGameSessionInput {
+  """The ID of the game to play."""
+  gameId: ID!
+
+  """The ID of the game session to update."""
+  gameSessionId: ID!
+}
+
+input UpdateUserInfoInput {
+  name: String!
+}
+
+"""A user of Long Game"""
+type User implements Node {
+  color: String
+  email: String
+  id: ID!
+  imageUrl: String
+  name: String
+}

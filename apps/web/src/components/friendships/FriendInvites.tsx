@@ -1,10 +1,10 @@
 import { Button } from '@a-type/ui/components/button';
-import { globalHooks } from '@long-game/game-client';
+import { useQuery } from '@long-game/game-client';
 
 export interface FriendInvitesProps {}
 
 export function FriendInvites({}: FriendInvitesProps) {
-  const { data: invites, refetch } = globalHooks.friendships.list.useQuery({
+  const { data: invites, refetch } = useQuery(sdk.friendships.list.useQuery({
     statusFilter: 'pending',
   });
 
