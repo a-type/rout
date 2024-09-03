@@ -20,9 +20,12 @@ export class LongGameError extends Error {
       'name' in err &&
       err.name === 'LongGameError');
 
-  static fromResponse = (res: Response): LongGameError => {
-    const code = Number(res.headers.get('X-LongGame-Error')) || 0;
-    const message = res.headers.get('X-LongGame-Message') || 'Unknown error';
+  static fromResponse = (res: Response): LongGameError | null => {
+    if (res.ok) {
+      return null;
+    }
+    const code = Number(res.headers.get('X-Long-Game-Error')) || 0;
+    const message = res.headers.get('X-Long-Game-Message') || 'Unknown error';
     return new LongGameError(code, message);
   };
 
@@ -44,8 +47,8 @@ export class LongGameError extends Error {
 
   get headers() {
     return {
-      'X-LongGame-Error': this.code.toString(),
-      'X-LongGame-Message': this.message,
+      'X-Long-Game-Error': this.code.toString(),
+      'X-Long-Game-Message': this.message,
     };
   }
 }

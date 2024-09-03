@@ -1,10 +1,10 @@
 import { assert } from '@a-type/utils';
-import { builder } from '../builder.js';
-import { getGameState } from '@long-game/game-state';
 import { LongGameError } from '@long-game/common';
-import { events } from '../../services/events.js';
-import { GameSession } from './gameSession.js';
+import { getGameState } from '@long-game/game-state';
+import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
+import { GameSession } from './gameSession.js';
+import { decodeGlobalID } from '@pothos/plugin-relay';
 
 builder.mutationFields((t) => ({
   submitTurn: t.field({
@@ -18,7 +18,8 @@ builder.mutationFields((t) => ({
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
       const { userId } = ctx.session;
-      const { gameSessionId, turn } = input;
+      const { turn } = input;
+      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
 
       const gameSession = await ctx.dataLoaders.gameSession.load(gameSessionId);
 
@@ -106,7 +107,9 @@ builder.mutationFields((t) => ({
           .execute();
       });
 
-      events.sendGameStateUpdate(gameSessionId);
+      // ctx.pubsub.publish(EVENT_LABELS.gameStateChanged(gameSessionId), {
+      //   //TODO: this.
+      // })
 
       return {
         gameSessionId,

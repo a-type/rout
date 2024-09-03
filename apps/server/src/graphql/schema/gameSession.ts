@@ -4,6 +4,7 @@ import { dateTime, id, jsonArrayFrom } from '@long-game/db';
 import { GameRandom, getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import {
+  decodeGlobalID,
   resolveCursorConnection,
   ResolveCursorConnectionArgs,
 } from '@pothos/plugin-relay';
@@ -20,10 +21,10 @@ builder.queryFields((t) => ({
   gameSession: t.field({
     type: GameSession,
     args: {
-      id: t.arg({ type: 'ID', required: true }),
+      id: t.arg.globalID({ required: true }),
     },
     resolve: async (_, { id }, ctx) => {
-      return id;
+      return id.id;
     },
   }),
 }));
@@ -101,7 +102,8 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
-      const { gameSessionId, gameId } = input;
+      const { gameSessionId: gameSessionIdEncoded, gameId } = input;
+      const gameSessionId = decodeGlobalID(gameSessionIdEncoded).id;
 
       const gameSession = await ctx.db
         .selectFrom('GameSession')
@@ -133,7 +135,7 @@ builder.mutationFields((t) => ({
         .set({
           gameId,
         })
-        .where('id', '=', gameSessionId)
+        .where('GameSession.id', '=', gameSessionId)
         .returningAll()
         .executeTakeFirstOrThrow(
           () => new LongGameError(LongGameError.Code.NotFound),
@@ -149,7 +151,7 @@ builder.mutationFields((t) => ({
       user: true,
     },
     args: {
-      gameSessionId: t.arg({ type: 'ID', required: true }),
+      gameSessionId: t.arg.globalID({ required: true }),
     },
     resolve: async (_, { gameSessionId }, ctx) => {
       assert(ctx.session);
@@ -161,9 +163,14 @@ builder.mutationFields((t) => ({
           'GameSession.id',
           'GameSessionMembership.gameSessionId',
         )
-        .where('GameSession.id', '=', gameSessionId)
+        .where('GameSession.id', '=', gameSessionId.id)
         .where('GameSessionMembership.userId', '=', ctx.session.userId)
-        .select(['id', 'startedAt', 'gameId', 'randomSeed'])
+        .select([
+          'GameSession.id',
+          'GameSession.startedAt',
+          'GameSession.gameId',
+          'GameSession.randomSeed',
+        ])
         .select((eb) => [
           jsonArrayFrom(
             eb
@@ -211,7 +218,7 @@ builder.mutationFields((t) => ({
           }),
           gameVersion: gameDefinition.version,
         })
-        .where('id', '=', gameSessionId)
+        .where('GameSession.id', '=', gameSessionId.id)
         .returningAll()
         .executeTakeFirstOrThrow(
           () => new LongGameError(LongGameError.Code.NotFound),
@@ -375,8 +382,7 @@ builder.inputType('PrepareGameSessionInput', {
 
 builder.inputType('UpdateGameSessionInput', {
   fields: (t) => ({
-    gameSessionId: t.field({
-      type: 'ID',
+    gameSessionId: t.id({
       description: 'The ID of the game session to update.',
       required: true,
     }),

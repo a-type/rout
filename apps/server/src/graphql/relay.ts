@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export function assignTypeName<Typename extends string>(typename: Typename) {
   return function <Obj extends {}>(obj: Obj): Obj & { __typename: Typename } {
     if (!obj) return obj as any;

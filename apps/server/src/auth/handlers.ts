@@ -1,23 +1,20 @@
 import { GoogleProvider, createHandlers } from '@a-type/auth';
-import { assert } from '@a-type/utils';
 import { comparePassword, db, hashPassword, id } from '@long-game/db';
 import { sessions } from '../auth/session.js';
 import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
 import { email } from '../services/email.js';
-
-assert(!!process.env.GOOGLE_AUTH_CLIENT_ID, 'GOOGLE_CLIENT_ID must be set');
-assert(
-  !!process.env.GOOGLE_AUTH_CLIENT_SECRET,
-  'GOOGLE_CLIENT_SECRET must be set',
-);
+import {
+  GOOGLE_AUTH_CLIENT_ID,
+  GOOGLE_AUTH_CLIENT_SECRET,
+} from '../config/secrets.js';
 
 export const authHandlers = createHandlers({
   sessions,
   returnToOrigin: DEPLOYED_CONTEXT.uiHost,
   providers: {
     google: new GoogleProvider({
-      clientId: process.env.GOOGLE_AUTH_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET!,
+      clientId: GOOGLE_AUTH_CLIENT_ID,
+      clientSecret: GOOGLE_AUTH_CLIENT_SECRET,
       redirectUri: DEPLOYED_CONTEXT.apiHost + '/auth/provider/google/callback',
     }),
   },

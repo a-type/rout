@@ -1,8 +1,11 @@
-import { useSuspenseQuery } from '@apollo/client';
-import { graphql } from '@long-game/graphql';
+import {
+  graphql,
+  useSuspenseQuery,
+  clientSessionFragment,
+} from '@long-game/game-client';
 import { FC, ReactNode } from 'react';
 import games from '@long-game/games';
-import { clientSessionFragment } from '@long-game/game-definition';
+import { NoGameFound } from './NoGameFound.js';
 
 const gameSessionQuery = graphql(
   `
@@ -20,13 +23,9 @@ const gameSessionQuery = graphql(
 
 export interface GameSessionProps {
   gameSessionId: string;
-  notFound: ReactNode;
 }
 
-export const GameSession: FC<GameSessionProps> = ({
-  gameSessionId,
-  notFound,
-}) => {
+export const GameSession: FC<GameSessionProps> = ({ gameSessionId }) => {
   const { data } = useSuspenseQuery(gameSessionQuery, {
     variables: {
       gameSessionId,
@@ -34,7 +33,7 @@ export const GameSession: FC<GameSessionProps> = ({
   });
 
   if (!data?.gameSession) {
-    return notFound;
+    return <NoGameFound />;
   }
   const session = data.gameSession;
 
@@ -44,7 +43,7 @@ export const GameSession: FC<GameSessionProps> = ({
   );
 
   if (!game || !gameDefinition) {
-    return notFound;
+    return <NoGameFound />;
   }
 
   const { Client } = gameDefinition;

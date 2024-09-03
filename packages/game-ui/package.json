@@ -15,15 +15,16 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "react": "18.3.1",
+    "@a-type/ui": "^1.1.16"
   },
   "dependencies": {
-    "@a-type/ui": "^0.6.10",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.0.2",
+    "@a-type/ui": "1.1.16",
+    "typescript": "5.5.4",
     "@types/react": "^18.2.28"
   }
 }

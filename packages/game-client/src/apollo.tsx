@@ -3,6 +3,7 @@ import {
   ApolloProvider,
   InMemoryCache,
   from,
+  split,
 } from '@apollo/client';
 import { ErrorHandler, onError } from '@apollo/client/link/error';
 import { HttpLink } from '@apollo/client/link/http';
@@ -10,7 +11,9 @@ import { RetryLink } from '@apollo/client/link/retry';
 import { LongGameError } from '@long-game/common';
 import * as CONFIG from './config.js';
 import { fetch, refreshSession } from './fetch.js';
+import { createSse } from './apollo/sseLink.js';
 import { FC, ReactNode } from 'react';
+import { getMainDefinition } from '@apollo/client/utilities';
 
 let hasNetworkError = false;
 
@@ -24,21 +27,25 @@ function createErrorHandler(
     if (graphQLErrors) {
       for (const err of graphQLErrors) {
         console.error('Error during op', operation.operationName, err);
-        if (err.extensions?.biscuitsCode) {
-          const code = err.extensions.biscuitsCode as number;
+        if (err.extensions?.longGameCode) {
+          const code = err.extensions.longGameCode as number;
           if (
-            code >= 4010 &&
-            code < 4020 &&
-            code !== LongGameError.Code.SessionExpired
+            code === LongGameError.Code.SessionExpired ||
+            code === LongGameError.Code.Unauthorized
           ) {
             errorMessage = undefined;
             operation.setContext(async () => {
               // attempt to refresh the session
               console.log('Attempting to refresh session');
-              const success = await refreshSession(CONFIG.API_ORIGIN);
-              console.log('Refresh session succeeded:', success);
+              const success = await refreshSession(
+                CONFIG.API_ORIGIN + '/auth/refresh',
+              );
               if (success) {
                 // retry the original request
+                console.log(
+                  'Session refreshed. Retrying original request',
+                  operation.operationName,
+                );
                 return forward(operation);
               } else {
                 console.error('Failed to refresh session');
@@ -59,9 +66,14 @@ function createErrorHandler(
         operation.setContext(async () => {
           // attempt to refresh the session
           console.log('Attempting to refresh session');
-          const success = await refreshSession(CONFIG.API_ORIGIN);
-          console.log('Refresh session succeeded:', success);
+          const success = await refreshSession(
+            CONFIG.API_ORIGIN + '/auth/refresh',
+          );
           if (success) {
+            console.log(
+              'Session refreshed. Retrying original request',
+              operation.operationName,
+            );
             // retry the original request
             return forward(operation);
           } else {
@@ -131,13 +143,25 @@ export function createGraphQLClient({
   onLoggedOut?: () => void;
 } = {}) {
   const http = createHttp(origin);
+  const sse = createSse(origin);
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      );
+    },
+    sse,
+    http,
+  );
   return new ApolloClient({
     uri: `${origin}/graphql`,
     cache: new InMemoryCache({}),
     link: from([
       onError(createErrorHandler(deduplicateErrors(errorHandler), onLoggedOut)),
       retry,
-      http,
+      splitLink,
     ]),
   });
 }
@@ -145,6 +169,9 @@ export function createGraphQLClient({
 export const defaultErrorHandlerRef = {
   onError: (error: string) => {
     console.error(error);
+  },
+  onLoggedOut: () => {
+    window.location.href = CONFIG.HOME_ORIGIN + '/login';
   },
 };
 

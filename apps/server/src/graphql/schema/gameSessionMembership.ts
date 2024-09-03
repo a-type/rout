@@ -201,10 +201,10 @@ const GameInviteResponse = builder.enumType('GameInviteResponse', {
 
 builder.inputType('SendGameInviteInput', {
   fields: (t) => ({
-    gameSessionId: t.id({
+    gameSessionId: t.string({
       required: true,
     }),
-    userId: t.id({
+    userId: t.string({
       required: true,
     }),
   }),
@@ -212,7 +212,7 @@ builder.inputType('SendGameInviteInput', {
 
 builder.inputType('RespondToGameInviteInput', {
   fields: (t) => ({
-    inviteId: t.id({
+    inviteId: t.string({
       required: true,
     }),
     response: t.field({

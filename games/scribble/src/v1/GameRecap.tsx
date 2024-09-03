@@ -1,8 +1,8 @@
-import { ClientSession } from '@long-game/game-definition';
 import { GlobalState } from './gameDefinition.js';
+import { FragmentOf, clientSessionFragment } from '@long-game/game-client';
 
 export interface GameRecapProps {
-  session: ClientSession;
+  session: FragmentOf<typeof clientSessionFragment>;
   globalState: GlobalState;
 }
 

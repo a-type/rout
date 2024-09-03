@@ -29,7 +29,7 @@ builder.queryFields((t) => ({
         return [];
       }
 
-      let friendshipsQueryBuilder = await ctx.db
+      let friendshipsQueryBuilder = ctx.db
         .selectFrom('FriendshipView')
         .where('userId', '=', ctx.session.userId)
         .selectAll();

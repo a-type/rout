@@ -29,6 +29,24 @@ if (
 )
   throw new Error('Transpiler is not configured correctly');
 
+const refreshSessionFragment = graphql(`
+  fragment ClientRefreshSession on GameSessionState {
+    id
+    playerState
+    currentTurn {
+      userId
+      data
+    }
+    rounds {
+      roundIndex
+      turns {
+        userId
+        data
+      }
+    }
+  }
+`);
+
 export class GameClient<
   PlayerState,
   TurnData extends BaseTurnData,
@@ -157,35 +175,63 @@ export class GameClient<
     this.subscribeToChat();
   }
 
+  private loadFromState = (
+    state: FragmentOf<typeof refreshSessionFragment>,
+  ) => {
+    const { playerState, rounds, currentTurn } = readFragment(
+      refreshSessionFragment,
+      state,
+    );
+    this.state = playerState;
+    this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
+    this.currentServerTurn = currentTurn ?? undefined;
+  };
   private subscribeToState = async () => {
-    const result = graphqlClient.subscribe({
-      query: graphql(`
-        subscription ClientGameStateSub($gameSessionId: ID!) {
-          gameSessionStateChanged(gameSessionId: $gameSessionId) {
-            playerState
-            currentTurn {
-              userId
-              data
-            }
-            rounds {
-              roundIndex
-              turns {
-                userId
-                data
+    const res = await graphqlClient.query({
+      query: graphql(
+        `
+          query ClientGameState($gameSessionId: ID!) {
+            gameSession(id: $gameSessionId) {
+              id
+              state {
+                ...ClientRefreshSession
               }
             }
           }
-        }
-      `),
+        `,
+        [refreshSessionFragment],
+      ),
+      variables: {
+        gameSessionId: this.session.id,
+      },
+    });
+
+    if (res.data.gameSession?.state) {
+      this.loadFromState(res.data.gameSession.state);
+    }
+
+    const result = graphqlClient.subscribe({
+      query: graphql(
+        `
+          subscription ClientGameStateSub($gameSessionId: ID!) {
+            gameSessionStateChanged(gameSessionId: $gameSessionId) {
+              id
+              ...ClientRefreshSession
+            }
+          }
+        `,
+        [refreshSessionFragment],
+      ),
+      variables: {
+        gameSessionId: this.session.id,
+      },
     });
 
     const sub = result.subscribe({
       next: (data) => {
         const state = data.data?.gameSessionStateChanged;
         if (!state) return;
-        this.state = state.playerState;
-        this.previousRounds = state.rounds as GameRound<Turn<PublicTurnData>>[];
-        this.currentServerTurn = state.currentTurn ?? undefined;
+        this.loadFromState(state);
       },
     });
     this._disposes.push(() => sub.unsubscribe());
@@ -196,6 +242,7 @@ export class GameClient<
       query: graphql(`
         query ClientGameChat($gameSessionId: ID!) {
           gameSession(id: $gameSessionId) {
+            id
             chat {
               edges {
                 node {
@@ -209,6 +256,9 @@ export class GameClient<
           }
         }
       `),
+      variables: {
+        gameSessionId: this.session.id,
+      },
     });
     const chats = res.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
     action('setChatLog', (messages: RawChatMessage[]) => {
@@ -226,6 +276,9 @@ export class GameClient<
           }
         }
       `),
+      variables: {
+        gameSessionId: this.session.id,
+      },
     });
 
     const sub = observer.subscribe({
@@ -299,7 +352,9 @@ export class GameClient<
       variables: {
         input: {
           gameSessionId: this.session.id,
-          turn: this.currentLocalTurn,
+          turn: {
+            data: this.currentLocalTurn.data,
+          },
         },
       },
     });

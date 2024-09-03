@@ -5,6 +5,7 @@ import { GameSession as DBGameSession } from '@long-game/db';
 import { decodeGameSessionStateId } from './schema/gameSessionState.js';
 import { getGameState } from '@long-game/game-state';
 import { GameSessionState } from '@long-game/game-state';
+import { assignTypeName } from './relay.js';
 
 export function keyIndexes(ids: readonly string[]) {
   return Object.fromEntries(ids.map((id, index) => [id, index]));
@@ -33,7 +34,7 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
         'GameSessionMembership.gameSessionId',
       )
       .where('GameSessionMembership.userId', '=', ctx.session.userId)
-      .selectAll()
+      .selectAll('GameSession')
       .execute();
 
     const indexes = keyIndexes(ids);
@@ -42,10 +43,8 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
       DBGameSession & { __typename: 'GameSession' }
     >(ids);
     for (const gameSession of gameSessions) {
-      results[indexes[gameSession.id]] = {
-        ...gameSession,
-        __typename: 'GameSession',
-      };
+      results[indexes[gameSession.id]] =
+        assignTypeName('GameSession')(gameSession);
     }
 
     return results;

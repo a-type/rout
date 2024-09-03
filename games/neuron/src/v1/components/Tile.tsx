@@ -5,7 +5,7 @@ import { Draggable } from './Draggable.js';
 import { colors } from '@long-game/common';
 import { useGameClient } from '@long-game/game-client';
 import { NeuronClient, withGame } from '../gameClient.js';
-import clsx from 'clsx';
+import { clsx } from '@a-type/ui';
 
 export interface TileProps {
   cells: GridTile[];

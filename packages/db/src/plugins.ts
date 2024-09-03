@@ -40,14 +40,14 @@ export class TimestampsPlugin<
   private ignore(node: RootOperationNode) {
     if (InsertQueryNode.is(node)) {
       const table = node.into;
-      if (TableNode.is(table)) {
+      if (table && TableNode.is(table)) {
         if (this.ignoreTable(table.table.identifier.name)) {
           return true;
         }
       }
     } else if (UpdateQueryNode.is(node)) {
       const table = node.table;
-      if (TableNode.is(table)) {
+      if (table && TableNode.is(table)) {
         if (this.ignoreTable(table.table.identifier.name)) {
           return true;
         }

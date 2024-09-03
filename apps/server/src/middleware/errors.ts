@@ -10,8 +10,7 @@ export function handleError(reason: unknown): Response {
       status: reason.statusCode,
       headers: {
         'Content-Type': 'application/json',
-        'x-volu-error': reason.code.toString(),
-        'x-volu-message': reason.message,
+        ...reason.headers,
       },
     });
   }
@@ -21,7 +20,7 @@ export function handleError(reason: unknown): Response {
       status: 400,
       headers: {
         'Content-Type': 'application/json',
-        'x-volu-error': LongGameError.Code.BadRequest.toString(),
+        'x-long-game-error': LongGameError.Code.BadRequest.toString(),
       },
     });
   }
@@ -31,7 +30,7 @@ export function handleError(reason: unknown): Response {
     status: 500,
     headers: {
       'Content-Type': 'text/plain',
-      'x-volu-error': LongGameError.Code.InternalServerError.toString(),
+      'x-long-game-error': LongGameError.Code.InternalServerError.toString(),
     },
   });
 }

@@ -4,19 +4,24 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('User')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('createdAt', 'text', (col) => col.notNull())
-    .addColumn('updatedAt', 'text', (col) => col.notNull())
+    .addColumn('createdAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('updatedAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
     .addColumn('fullName', 'text')
     .addColumn('friendlyName', 'text')
     .addColumn('email', 'text', (col) => col.unique().notNull())
-    .addColumn('emailVerifiedAt', 'text')
+    .addColumn('emailVerifiedAt', 'datetime')
     .addColumn('imageUrl', 'text')
-    .execute();
-
-  await db.schema
-    .createIndex('User_email_index')
-    .on('User')
-    .column('email')
+    .addColumn('color', 'text')
+    .addColumn('password', 'text')
+    .addColumn('stripeCustomerId', 'text')
+    .addColumn('acceptedTosAt', 'datetime')
+    .addColumn('sendEmailUpdates', 'boolean', (col) =>
+      col.notNull().defaultTo(false),
+    )
     .execute();
 
   await db.schema
@@ -32,17 +37,10 @@ export async function up(db: Kysely<any>) {
     .addColumn('providerAccountId', 'text', (col) => col.notNull())
     .addColumn('refreshToken', 'text')
     .addColumn('accessToken', 'text')
-    .addColumn('expiresAt', 'text')
+    .addColumn('accessTokenExpiresAt', 'text')
     .addColumn('tokenType', 'text')
     .addColumn('scope', 'text')
     .addColumn('idToken', 'text')
-    .execute();
-
-  await db.schema
-    .createTable('VerificationToken')
-    .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('token', 'text', (col) => col.notNull().unique())
-    .addColumn('expiresAt', 'text', (col) => col.notNull())
     .execute();
 
   await db.schema
@@ -52,23 +50,49 @@ export async function up(db: Kysely<any>) {
     .execute();
 
   await db.schema
+    .createTable('VerificationCode')
+    .addColumn('id', 'text', (col) => col.primaryKey())
+    .addColumn('createdAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('updatedAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('code', 'text', (col) => col.notNull())
+    .addColumn('email', 'text', (col) => col.notNull())
+    .addColumn('name', 'text', (col) => col.notNull())
+    .addColumn('expiresAt', 'datetime', (col) => col.notNull())
+    .execute();
+
+  await db.schema
+    .createIndex('VerificationCode_code_index')
+    .on('VerificationCode')
+    .column('code')
+    .execute();
+
+  await db.schema
+    .createIndex('VerificationCode_email_index')
+    .on('VerificationCode')
+    .column('email')
+    .execute();
+
+  await db.schema
     .createTable('GameSession')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('createdAt', 'text', (col) => col.notNull())
-    .addColumn('updatedAt', 'text', (col) => col.notNull())
+    .addColumn('createdAt', 'datetime', (col) => col.notNull())
+    .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('timezone', 'text', (col) => col.notNull())
     .addColumn('gameId', 'text', (col) => col.notNull())
     .addColumn('initialState', 'text')
-    .addColumn('startedAt', 'text')
+    .addColumn('startedAt', 'datetime')
     .addColumn('randomSeed', 'text', (col) => col.notNull().defaultTo('seed'))
     .addColumn('gameVersion', 'text')
     .execute();
 
   await db.schema
-    .createTable('GameMove')
-    .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('createdAt', 'text', (col) => col.notNull())
-    .addColumn('updatedAt', 'text', (col) => col.notNull())
+    .createTable('GameTurn')
+    .addColumn('createdAt', 'datetime', (col) => col.notNull())
+    .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('gameSessionId', 'text', (col) =>
       col.notNull().references('GameSession.id').onDelete('cascade'),
     )
@@ -76,24 +100,31 @@ export async function up(db: Kysely<any>) {
       col.references('User.id').onDelete('set null'),
     )
     .addColumn('data', 'text', (col) => col.notNull())
+    .addColumn('roundIndex', 'integer', (col) => col.notNull())
+    .addPrimaryKeyConstraint('GameTurn_pk', [
+      'gameSessionId',
+      'userId',
+      'roundIndex',
+    ])
     .execute();
 
   await db.schema
-    .createIndex('GameMove_gameSessionId_index')
-    .on('GameMove')
+    .createIndex('GameTurn_gameSessionId_index')
+    .on('GameTurn')
     .column('gameSessionId')
     .execute();
+
   await db.schema
-    .createIndex('GameMove_userId_index')
-    .on('GameMove')
+    .createIndex('GameTurn_userId_index')
+    .on('GameTurn')
     .column('userId')
     .execute();
 
   await db.schema
     .createTable('GameSessionMembership')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('createdAt', 'text', (col) => col.notNull())
-    .addColumn('updatedAt', 'text', (col) => col.notNull())
+    .addColumn('createdAt', 'datetime', (col) => col.notNull())
+    .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('gameSessionId', 'text', (col) =>
       col.notNull().references('GameSession.id').onDelete('cascade'),
     )
@@ -103,8 +134,8 @@ export async function up(db: Kysely<any>) {
     .addColumn('userId', 'text', (col) =>
       col.notNull().references('User.id').onDelete('cascade'),
     )
-    .addColumn('expiresAt', 'text')
-    .addColumn('claimedAt', 'text')
+    .addColumn('expiresAt', 'datetime')
+    .addColumn('claimedAt', 'datetime')
     .addColumn('status', 'text', (col) => col.notNull())
     .execute();
 
@@ -167,13 +198,40 @@ export async function up(db: Kysely<any>) {
     `,
     )
     .execute();
+
+  await db.schema
+    .createTable('ChatMessage')
+    .addColumn('id', 'text', (col) => col.primaryKey())
+    .addColumn('createdAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('updatedAt', 'datetime', (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn('gameSessionId', 'text', (col) =>
+      col.notNull().references('GameSession.id').onDelete('cascade'),
+    )
+    .addColumn('userId', 'text', (col) =>
+      col.references('User.id').onDelete('set null'),
+    )
+    .addColumn('message', 'text', (col) => col.notNull())
+    .execute();
+
+  await db.schema
+    .createIndex('ChatMessage_gameSessionId_index')
+    .on('ChatMessage')
+    .column('gameSessionId')
+    .execute();
 }
 
 export async function down(db: Kysely<any>) {
   await db.schema.dropTable('GameSessionMembership').execute();
-  await db.schema.dropTable('GameMove').execute();
+  await db.schema.dropTable('GameTurn').execute();
   await db.schema.dropTable('GameSession').execute();
   await db.schema.dropTable('VerificationToken').execute();
   await db.schema.dropTable('Account').execute();
   await db.schema.dropTable('User').execute();
+  await db.schema.dropTable('Friendship').execute();
+  await db.schema.dropTable('FriendshipView').execute();
+  await db.schema.dropTable('ChatMessage').execute();
 }

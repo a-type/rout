@@ -145,7 +145,7 @@ type Query {
 }
 
 input RespondToGameInviteInput {
-  inviteId: ID!
+  inviteId: String!
   response: GameInviteResponse!
 }
 
@@ -164,8 +164,8 @@ input SendFriendshipInviteInput {
 }
 
 input SendGameInviteInput {
-  gameSessionId: ID!
-  userId: ID!
+  gameSessionId: String!
+  userId: String!
 }
 
 input SubmitTurnInput {

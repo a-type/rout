@@ -1,15 +1,15 @@
-import { GameSession, graphql, useSuspenseQuery } from '@long-game/game-client';
+import { graphql, useSuspenseQuery } from '@long-game/game-client';
 import { useParams } from '@verdant-web/react-router';
 import { Spinner } from '@a-type/ui/components/spinner';
 import {
   GameSetup,
   gameSetupSessionFragment,
-} from '@/components/games/GameSetup.jsx';
+} from '@/components/games/GameSetup.js';
 import {
   GameRecap,
   postGameSessionFragment,
-} from '@/components/games/GameRecap.jsx';
-import { NoGameFound } from '@/components/games/NoGameFound.jsx';
+} from '@/components/games/GameRecap.js';
+import { GameSession } from '@/components/games/GameSession.js';
 
 const gameSessionPageQuery = graphql(
   `
@@ -42,7 +42,7 @@ export function GameSessionPage() {
   } else if (session.status.status === 'completed') {
     return <GameRecap gameSession={session} />;
   }
-  return <GameSession gameSessionId={sessionId} notFound={<NoGameFound />} />;
+  return <GameSession gameSessionId={sessionId} />;
 }
 
 export default GameSessionPage;

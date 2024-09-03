@@ -7,14 +7,14 @@ builder.subscriptionFields((t) => ({
   gameSessionStateChanged: t.field({
     type: 'GameSessionState',
     args: {
-      gameSessionId: t.arg.id({ required: true }),
+      gameSessionId: t.arg.globalID({ required: true }),
     },
     authScopes: { user: true },
     subscribe: async (_, { gameSessionId }, ctx) => {
       // validate access to game session
-      await validateAccessToGameSession(gameSessionId, ctx.session);
+      await validateAccessToGameSession(gameSessionId.id, ctx.session);
       return ctx.pubsub.asyncIterator(
-        EVENT_LABELS.gameStateChanged(gameSessionId),
+        EVENT_LABELS.gameStateChanged(gameSessionId.id),
       ) as any;
     },
     resolve: (payload: GameStateChangedEvent) => {

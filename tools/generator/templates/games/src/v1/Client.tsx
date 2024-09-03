@@ -1,5 +1,4 @@
 import { GameClientProvider, withGame, useGameClient } from './gameClient.js';
-import { gameDefinition } from './gameDefinition.js';
 import { ComponentProps } from 'react';
 
 export interface ClientProps {

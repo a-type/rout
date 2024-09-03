@@ -12,12 +12,20 @@ export const app = new Hono()
     cors({
       origin: corsOrigins,
       credentials: true,
-      allowHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+      allowHeaders: [
+        'Authorization',
+        'Content-Type',
+        'X-Request-Id',
+        'X-Csrf-Token',
+      ],
       exposeHeaders: [
         'Content-Type',
         'Content-Length',
         'X-Request-Id',
         'Set-Cookie',
+        'X-Long-Game-Error',
+        'X-Long-Game-Message',
+        'X-Csrf-Token',
       ],
     }),
   )

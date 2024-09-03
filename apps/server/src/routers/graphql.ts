@@ -1,4 +1,4 @@
-import { AuthError, Session } from '@a-type/auth';
+import { AuthError, ErrorMessages, Session } from '@a-type/auth';
 import { useCSRFPrevention } from '@graphql-yoga/plugin-csrf-prevention';
 import { LongGameError } from '@long-game/common';
 import { db } from '@long-game/db';
@@ -102,7 +102,8 @@ export const graphqlRouter = new Hono<Env>().all('/', async (honoCtx) => {
   } catch (e) {
     // if session expired, we need to tell the client to refresh it
     if (e instanceof AuthError) {
-      if (e.message === 'Session expired') {
+      if (e.message === ErrorMessages.SessionExpired) {
+        console.error('Session expired');
         throw new LongGameError(
           LongGameError.Code.SessionExpired,
           'Session expired',

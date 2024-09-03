@@ -1,9 +1,9 @@
 export const SECURE =
   typeof window !== 'undefined' && window.location.protocol === 'https:';
 export const API_ORIGIN =
-  import.meta.env.VITE_API_ORIGIN || 'http://localhost:6124';
+  import.meta.env.VITE_API_ORIGIN || 'http://localhost:3101';
 export const HOME_ORIGIN =
-  import.meta.env.VITE_HOME_ORIGIN || 'http://localhost:6123';
+  import.meta.env.VITE_HOME_ORIGIN || 'http://localhost:3100';
 
 declare global {
   interface ImportMetaEnv {

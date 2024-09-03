@@ -11,7 +11,7 @@ import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
 import { Button } from '@a-type/ui/components/button';
 import { BasicGameLog } from '@long-game/game-ui';
 import { Divider } from '@a-type/ui/components/divider';
-import clsx from 'clsx';
+import { clsx } from '@a-type/ui';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];

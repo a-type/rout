@@ -1,16 +1,15 @@
 import { assert } from '@a-type/utils';
-import { builder } from '../builder.js';
-import { z } from 'zod';
 import { id } from '@long-game/db';
-import { assignTypeName } from '../relay.js';
-import { LongGameError } from '@long-game/common';
-import { GQLContext } from '../context.js';
+import { decodeGlobalID } from '@pothos/plugin-relay';
+import { z } from 'zod';
+import { validateAccessToGameSession } from '../../data/gameSession.js';
 import {
   ChatMessageSentEvent,
   EVENT_LABELS,
   pubsub,
 } from '../../services/pubsub.js';
-import { withFilter } from 'graphql-subscriptions';
+import { builder } from '../builder.js';
+import { assignTypeName } from '../relay.js';
 
 builder.mutationFields((t) => ({
   sendMessage: t.field({
@@ -32,27 +31,15 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
+      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
 
-      // validate game session access
-      const membership = await ctx.db
-        .selectFrom('GameSessionMembership')
-        .where('gameSessionId', '=', input.gameSessionId)
-        .where('userId', '=', ctx.session.userId)
-        .select(['id'])
-        .executeTakeFirst();
-
-      if (!membership) {
-        throw new LongGameError(
-          LongGameError.Code.NotFound,
-          'Could not find that game session. Are you logged in?',
-        );
-      }
+      await validateAccessToGameSession(gameSessionId, ctx.session);
 
       const chatMessage = await ctx.db
         .insertInto('ChatMessage')
         .values({
           id: id(),
-          gameSessionId: input.gameSessionId,
+          gameSessionId: gameSessionId,
           message: input.message,
           userId: ctx.session.userId,
         })
@@ -71,25 +58,16 @@ builder.subscriptionFields((t) => ({
       user: true,
     },
     args: {
-      gameSessionId: t.arg({
-        type: 'ID',
+      gameSessionId: t.arg.globalID({
         required: true,
       }),
     },
     subscribe: async (_, args, ctx) => {
       assert(ctx.session);
-      // authorize game session access first
-      await ctx.db
-        .selectFrom('GameSessionMembership')
-        .where('gameSessionId', '=', args.gameSessionId)
-        .where('userId', '=', ctx.session.userId)
-        .select(['id'])
-        .executeTakeFirstOrThrow(
-          () => new LongGameError(LongGameError.Code.Forbidden),
-        );
+      await validateAccessToGameSession(args.gameSessionId.id, ctx.session);
 
       const iterator = pubsub.asyncIterator(
-        EVENT_LABELS.chatMessageSent(args.gameSessionId),
+        EVENT_LABELS.chatMessageSent(args.gameSessionId.id),
       );
 
       return iterator as any;

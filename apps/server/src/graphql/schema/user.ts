@@ -1,11 +1,10 @@
-import { LongGameError } from '@long-game/common';
-import { builder } from '../builder.js';
-import { userNameSelector } from '@long-game/db';
-import { assignTypeName, hasTypeName } from '../relay.js';
-import { createResults, keyIndexes } from '../dataloaders.js';
-import type { User as DBUser } from '@long-game/db';
 import { assert } from '@a-type/utils';
+import { LongGameError } from '@long-game/common';
+import type { User as DBUser } from '@long-game/db';
 import { z } from 'zod';
+import { builder } from '../builder.js';
+import { createResults, keyIndexes } from '../dataloaders.js';
+import { assignTypeName, hasTypeName } from '../relay.js';
 
 builder.queryField('me', (t) =>
   t.field({
