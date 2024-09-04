@@ -50,6 +50,13 @@ export type GameDefinition<
     roundIndex: number;
     members: { id: string }[];
   }) => string | void;
+  /**
+   * Returns the player state as it would be if the player made the move.
+   * This may not be the same as the final computed player state, since
+   * we may not want to reveal information about the global state. But,
+   * for example, if the player moves a game piece, we may want to show
+   * the player the new position of the piece.
+   */
   getProspectivePlayerState: (data: {
     playerState: PlayerState;
     prospectiveTurn: LocalTurn<TurnData>;
@@ -64,25 +71,44 @@ export type GameDefinition<
   // randomness needs to be stable, so we supply random to methods that
   // compute holistic information - initial state and global state from initial.
 
+  /**
+   * This is the initial state of the game. It should be deterministic.
+   */
   getInitialGlobalState: (data: {
     random: GameRandom;
     members: { id: string }[];
   }) => GlobalState;
+  /**
+   * This is the player's view of the game state. It should be deterministically
+   * computed from global state.
+   */
   getPlayerState: (data: {
     globalState: GlobalState;
     playerId: string;
     roundIndex: number;
     members: { id: string }[];
+    rounds: GameRound<Turn<TurnData>>[];
   }) => PlayerState;
+  /**
+   * This is the computed current state of the game. It should be deterministic.
+   * It's computed from the initial state and all moves.
+   */
   getState: (data: {
     initialState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
     random: GameRandom;
     members: { id: string }[];
   }) => GlobalState;
+  /**
+   * This is the public view of a turn, visible to all players
+   * after the turn has been played. The public info can also
+   * be customized based on the viewer's id, for example to show
+   * a player their own move in a different way from others'.
+   */
   getPublicTurn: (data: {
     turn: Turn<TurnData>;
     globalState: GlobalState;
+    viewerId: string;
   }) => Turn<PublicTurnData>;
   /**
    * globalState is the computed current state. moves are provided

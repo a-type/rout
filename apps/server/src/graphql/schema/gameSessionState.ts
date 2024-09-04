@@ -1,3 +1,4 @@
+import { assert } from '@a-type/utils';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
@@ -43,6 +44,7 @@ GameSessionState.implement({
           playerId: userId,
           roundIndex: state.currentRound.roundIndex,
           members: state.members,
+          rounds: state.rounds,
         });
       },
     }),
@@ -51,11 +53,18 @@ GameSessionState.implement({
       nullable: true,
       authScopes: { user: true },
       resolve: async (state, _, ctx) => {
+        assert(ctx.session);
         const turn = state.currentRound.turns.find(
           (turn) => turn.userId === ctx.session!.userId,
         );
         if (turn) {
-          return assignTypeName('Turn')(turn);
+          return assignTypeName('Turn')(
+            state.gameDefinition.getPublicTurn({
+              turn,
+              globalState: state.globalState,
+              viewerId: ctx.session.userId,
+            }),
+          );
         }
         return null;
       },
@@ -63,7 +72,24 @@ GameSessionState.implement({
     rounds: t.field({
       type: ['Round'],
       authScopes: { user: true },
-      resolve: (state) => state.rounds,
+      resolve: (state, _, ctx) => {
+        assert(ctx.session);
+        const userId = ctx.session.userId;
+        return state.rounds.map((round) =>
+          assignTypeName('Round')({
+            ...round,
+            turns: round.turns.map((turn) =>
+              assignTypeName('Turn')(
+                state.gameDefinition.getPublicTurn({
+                  turn,
+                  globalState: state.globalState,
+                  viewerId: userId,
+                }),
+              ),
+            ),
+          }),
+        );
+      },
     }),
   }),
 });

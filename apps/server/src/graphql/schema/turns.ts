@@ -4,7 +4,7 @@ import { getGameState } from '@long-game/game-state';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
 import { GameSession } from './gameSession.js';
-import { decodeGlobalID } from '@pothos/plugin-relay';
+import { decodeGlobalID, encodeGlobalID } from '@pothos/plugin-relay';
 
 builder.mutationFields((t) => ({
   submitTurn: t.field({
@@ -38,6 +38,7 @@ builder.mutationFields((t) => ({
         currentRound,
         previousRounds,
         members,
+        rounds,
       } = state;
 
       // validate the game status - cannot make moves on an ended game
@@ -60,6 +61,7 @@ builder.mutationFields((t) => ({
         playerId: userId,
         roundIndex: currentRound.roundIndex,
         members,
+        rounds,
       });
 
       // then apply these moves to that state and see if they're valid
@@ -120,7 +122,11 @@ builder.mutationFields((t) => ({
 
 builder.objectType('Turn', {
   fields: (t) => ({
-    userId: t.exposeString('userId', { nullable: false }),
+    userId: t.field({
+      type: 'ID',
+      resolve: (obj) => encodeGlobalID('User', obj.userId),
+      nullable: false,
+    }),
     data: t.field({
       type: 'JSON',
       resolve: (obj) => obj.data,
@@ -150,7 +156,7 @@ builder.objectType('SubmitTurnResult', {
 
 builder.inputType('SubmitTurnInput', {
   fields: (t) => ({
-    gameSessionId: t.string({ required: true }),
+    gameSessionId: t.id({ required: true }),
     turn: t.field({
       type: 'GameTurnInput',
       required: true,

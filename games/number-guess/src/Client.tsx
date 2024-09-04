@@ -60,6 +60,7 @@ const History = withGame(function History() {
                   {turn.data.guess} -{' '}
                   {turn.createdAt ? new Date(turn.createdAt).toString() : ''} by{' '}
                   {turn.user.name}
+                  {turn.data.result && ` - ${turn.data.result}`}
                 </li>
               ))}
             </ul>

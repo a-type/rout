@@ -5,17 +5,24 @@ export type GlobalState = {
   secretNumber: number;
 };
 
-export type PlayerState = {};
+export type PlayerState = {
+  lastGuessResult?: 'tooLow' | 'tooHigh' | 'correct';
+};
 
 export type MoveData = {
   guess: number;
+};
+
+export type PublicMoveData = {
+  guess: number;
+  result?: 'tooLow' | 'tooHigh' | 'correct';
 };
 
 export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
   MoveData,
-  MoveData
+  PublicMoveData
 > = {
   version: 'v1.0',
   minimumPlayers: 1,
@@ -37,15 +44,50 @@ export const gameDefinition: GameDefinition<
   },
 
   // players see nothing; all state is secret in this game.
-  getPlayerState: () => {
-    return {};
+  getPlayerState: ({ globalState, playerId, roundIndex, rounds }) => {
+    const previousRound = rounds[roundIndex - 1];
+    if (!previousRound) {
+      return {};
+    } else {
+      const lastGuess = previousRound.turns.find(
+        (turn) => turn.userId === playerId,
+      );
+      if (!lastGuess) {
+        return {};
+      }
+      return {
+        lastGuessResult:
+          lastGuess.data.guess === globalState.secretNumber
+            ? 'correct'
+            : lastGuess.data.guess < globalState.secretNumber
+            ? 'tooLow'
+            : 'tooHigh',
+      };
+    }
   },
 
   getState: ({ initialState }) => {
     return initialState;
   },
 
-  getPublicTurn: ({ turn }) => turn,
+  getPublicTurn: ({ turn, globalState, viewerId }) => {
+    if (viewerId !== turn.userId) {
+      return turn;
+    }
+
+    return {
+      ...turn,
+      data: {
+        guess: turn.data.guess,
+        result:
+          turn.data.guess === globalState.secretNumber
+            ? 'correct'
+            : turn.data.guess < globalState.secretNumber
+            ? 'tooLow'
+            : 'tooHigh',
+      },
+    };
+  },
 
   getStatus: ({ globalState, rounds }) => {
     const turnsThatGuessedRight = rounds

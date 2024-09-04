@@ -169,7 +169,7 @@ input SendGameInviteInput {
 }
 
 input SubmitTurnInput {
-  gameSessionId: String!
+  gameSessionId: ID!
   turn: GameTurnInput!
 }
 
@@ -184,7 +184,7 @@ type Subscription {
 
 type Turn {
   data: JSON!
-  userId: String!
+  userId: ID!
 }
 
 input UpdateGameSessionInput {

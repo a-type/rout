@@ -171,8 +171,7 @@ export class GameClient<
     this.session = session;
 
     makeAutoObservable(this);
-    this.subscribeToState();
-    this.subscribeToChat();
+    this.initialize();
   }
 
   private loadFromState = (
@@ -186,8 +185,8 @@ export class GameClient<
     this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
     this.currentServerTurn = currentTurn ?? undefined;
   };
-  private subscribeToState = async () => {
-    const res = await graphqlClient.query({
+  private initialize = async () => {
+    const initialRes = await graphqlClient.query({
       query: graphql(
         `
           query ClientGameState($gameSessionId: ID!) {
@@ -195,6 +194,16 @@ export class GameClient<
               id
               state {
                 ...ClientRefreshSession
+              }
+              chat {
+                edges {
+                  node {
+                    id
+                    createdAt
+                    userId
+                    message
+                  }
+                }
               }
             }
           }
@@ -206,9 +215,14 @@ export class GameClient<
       },
     });
 
-    if (res.data.gameSession?.state) {
-      this.loadFromState(res.data.gameSession.state);
+    if (initialRes.data.gameSession?.state) {
+      this.loadFromState(initialRes.data.gameSession.state);
     }
+    const chats =
+      initialRes.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
+    action('setChatLog', (messages: RawChatMessage[]) => {
+      this.chatLog = messages;
+    })(chats);
 
     const result = graphqlClient.subscribe({
       query: graphql(
@@ -227,43 +241,14 @@ export class GameClient<
       },
     });
 
-    const sub = result.subscribe({
+    const stateSub = result.subscribe({
       next: (data) => {
         const state = data.data?.gameSessionStateChanged;
         if (!state) return;
         this.loadFromState(state);
       },
     });
-    this._disposes.push(() => sub.unsubscribe());
-  };
-
-  private subscribeToChat = async () => {
-    const res = await graphqlClient.query({
-      query: graphql(`
-        query ClientGameChat($gameSessionId: ID!) {
-          gameSession(id: $gameSessionId) {
-            id
-            chat {
-              edges {
-                node {
-                  id
-                  createdAt
-                  userId
-                  message
-                }
-              }
-            }
-          }
-        }
-      `),
-      variables: {
-        gameSessionId: this.session.id,
-      },
-    });
-    const chats = res.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
-    action('setChatLog', (messages: RawChatMessage[]) => {
-      this.chatLog = messages;
-    })(chats);
+    this._disposes.push(() => stateSub.unsubscribe());
 
     const observer = graphqlClient.subscribe({
       query: graphql(`
@@ -281,14 +266,14 @@ export class GameClient<
       },
     });
 
-    const sub = observer.subscribe({
+    const chatSub = observer.subscribe({
       next: (data) => {
         const message = data.data?.chatMessageSent;
         if (!message) return;
         this.chatLog.push(message);
       },
     });
-    this._disposes.push(() => sub.unsubscribe());
+    this._disposes.push(() => chatSub.unsubscribe());
   };
 
   prepareTurn(turn: TurnData | ((prev: TurnData | undefined) => TurnData)) {
