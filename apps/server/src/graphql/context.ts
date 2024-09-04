@@ -3,7 +3,7 @@ import { DB } from '@long-game/db';
 import { Context } from 'hono';
 import { Env } from '../config/ctx.js';
 import type { createDataLoaders } from './dataloaders.js';
-import { PubSub } from 'graphql-subscriptions';
+import type { pubsub } from '../services/pubsub.js';
 
 export type GQLContext = {
   session: Session | null;
@@ -14,5 +14,5 @@ export type GQLContext = {
     applyHeaders: Headers;
     setLoginSession: (session: Session) => Promise<void>;
   };
-  pubsub: PubSub;
+  pubsub: typeof pubsub;
 };

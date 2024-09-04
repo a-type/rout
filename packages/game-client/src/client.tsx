@@ -47,6 +47,15 @@ const refreshSessionFragment = graphql(`
   }
 `);
 
+const chatFragment = graphql(`
+  fragment ClientChat on ChatMessage {
+    id
+    createdAt
+    userId
+    message
+  }
+`);
+
 export class GameClient<
   PlayerState,
   TurnData extends BaseTurnData,
@@ -174,17 +183,28 @@ export class GameClient<
     this.initialize();
   }
 
-  private loadFromState = (
-    state: FragmentOf<typeof refreshSessionFragment>,
-  ) => {
-    const { playerState, rounds, currentTurn } = readFragment(
-      refreshSessionFragment,
-      state,
-    );
-    this.state = playerState;
-    this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
-    this.currentServerTurn = currentTurn ?? undefined;
-  };
+  private loadFromState = action(
+    'loadFromState',
+    (state: FragmentOf<typeof refreshSessionFragment>) => {
+      const { playerState, rounds, currentTurn } = readFragment(
+        refreshSessionFragment,
+        state,
+      );
+      this.state = playerState;
+      this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
+      this.currentServerTurn = currentTurn ?? undefined;
+    },
+  );
+
+  private addChats = action(
+    'addChats',
+    (messages: FragmentOf<typeof chatFragment>[]) => {
+      this.chatLog.push(
+        ...messages.map((msg) => readFragment(chatFragment, msg)),
+      );
+    },
+  );
+
   private initialize = async () => {
     const initialRes = await graphqlClient.query({
       query: graphql(
@@ -199,16 +219,14 @@ export class GameClient<
                 edges {
                   node {
                     id
-                    createdAt
-                    userId
-                    message
+                    ...ClientChat
                   }
                 }
               }
             }
           }
         `,
-        [refreshSessionFragment],
+        [refreshSessionFragment, chatFragment],
       ),
       variables: {
         gameSessionId: this.session.id,
@@ -220,9 +238,7 @@ export class GameClient<
     }
     const chats =
       initialRes.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
-    action('setChatLog', (messages: RawChatMessage[]) => {
-      this.chatLog = messages;
-    })(chats);
+    this.addChats(chats);
 
     const result = graphqlClient.subscribe({
       query: graphql(
@@ -245,22 +261,24 @@ export class GameClient<
       next: (data) => {
         const state = data.data?.gameSessionStateChanged;
         if (!state) return;
+        console.log('got new live state', state);
         this.loadFromState(state);
       },
     });
     this._disposes.push(() => stateSub.unsubscribe());
 
     const observer = graphqlClient.subscribe({
-      query: graphql(`
-        subscription ClientGameChatSub($gameSessionId: ID!) {
-          chatMessageSent(gameSessionId: $gameSessionId) {
-            id
-            createdAt
-            userId
-            message
+      query: graphql(
+        `
+          subscription ClientGameChatSub($gameSessionId: ID!) {
+            chatMessageSent(gameSessionId: $gameSessionId) {
+              id
+              ...ClientChat
+            }
           }
-        }
-      `),
+        `,
+        [chatFragment],
+      ),
       variables: {
         gameSessionId: this.session.id,
       },
@@ -270,7 +288,7 @@ export class GameClient<
       next: (data) => {
         const message = data.data?.chatMessageSent;
         if (!message) return;
-        this.chatLog.push(message);
+        this.addChats([message]);
       },
     });
     this._disposes.push(() => chatSub.unsubscribe());
@@ -326,14 +344,24 @@ export class GameClient<
     this.validateCurrentTurn();
     if (this.error) return;
 
-    await graphqlClient.mutate({
-      mutation: graphql(`
-        mutation ClientSubmitTurn($input: SubmitTurnInput!) {
-          submitTurn(input: $input) {
-            __typename
+    const result = await graphqlClient.mutate({
+      mutation: graphql(
+        `
+          mutation ClientSubmitTurn($input: SubmitTurnInput!) {
+            submitTurn(input: $input) {
+              __typename
+              gameSession {
+                id
+                state {
+                  id
+                  ...ClientRefreshSession
+                }
+              }
+            }
           }
-        }
-      `),
+        `,
+        [refreshSessionFragment],
+      ),
       variables: {
         input: {
           gameSessionId: this.session.id,
@@ -343,18 +371,25 @@ export class GameClient<
         },
       },
     });
+    if (result.data?.submitTurn?.gameSession?.state) {
+      this.loadFromState(result.data.submitTurn.gameSession.state);
+    }
     this.dirty = false;
   };
 
   sendChatMessage = async (message: string) => {
     await graphqlClient.mutate({
-      mutation: graphql(`
-        mutation ClientSendChat($input: SendChatMessageInput!) {
-          sendMessage(input: $input) {
-            id
+      mutation: graphql(
+        `
+          mutation ClientSendChat($input: SendChatMessageInput!) {
+            sendMessage(input: $input) {
+              id
+              ...ClientChat
+            }
           }
-        }
-      `),
+        `,
+        [chatFragment],
+      ),
       variables: {
         input: {
           gameSessionId: this.session.id,

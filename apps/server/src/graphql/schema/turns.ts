@@ -109,9 +109,9 @@ builder.mutationFields((t) => ({
           .execute();
       });
 
-      // ctx.pubsub.publish(EVENT_LABELS.gameStateChanged(gameSessionId), {
-      //   //TODO: this.
-      // })
+      ctx.pubsub.publishGameStateChanged({
+        gameSessionState: { ...state, id: gameSessionId },
+      });
 
       return {
         gameSessionId,

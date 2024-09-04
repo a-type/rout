@@ -14,7 +14,7 @@ builder.subscriptionFields((t) => ({
     subscribe: async (_, { gameSessionId }, ctx) => {
       // validate access to game session
       await validateAccessToGameSession(gameSessionId.id, ctx.session);
-      return ctx.pubsub.asyncIterator(
+      return ctx.pubsub.events.asyncIterator(
         EVENT_LABELS.gameStateChanged(gameSessionId.id),
       ) as any;
     },
@@ -75,7 +75,7 @@ GameSessionState.implement({
       resolve: (state, _, ctx) => {
         assert(ctx.session);
         const userId = ctx.session.userId;
-        return state.rounds.map((round) =>
+        return state.previousRounds.map((round) =>
           assignTypeName('Round')({
             ...round,
             turns: round.turns.map((turn) =>

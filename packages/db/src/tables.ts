@@ -21,7 +21,6 @@ export interface Database {
   GameTurn: GameTurnTable;
   GameSessionMembership: GameSessionMembershipTable;
   Friendship: FriendshipTable;
-  FriendshipView: FriendshipTable;
   ChatMessage: ChatMessageTable;
 }
 
@@ -134,15 +133,13 @@ export type GameSessionMembershipUpdate =
   Updateable<GameSessionMembershipTable>;
 
 export interface FriendshipTable {
+  id: string;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
   userId: string;
   friendId: string;
   status: 'pending' | 'accepted' | 'declined';
-
-  // FYI to future me - this is queried as a view.
-  // if you change this, you'll need to update the view.
 }
 
 export type Friendship = Selectable<FriendshipTable>;

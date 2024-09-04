@@ -106,7 +106,7 @@ export function GameSetup({ gameSession: frag, onRefetch }: GameSetupProps) {
     onCompleted: onRefetch,
   });
 
-  const needToAcceptMyInvite = gameSession.members.some(
+  const pendingInviteForMe = gameSession.members.find(
     (member) => member.user.isViewer && member.status === 'pending',
   );
 
@@ -142,12 +142,12 @@ export function GameSetup({ gameSession: frag, onRefetch }: GameSetupProps) {
         onInvite={onRefetch}
       />
       <Divider />
-      {needToAcceptMyInvite ? (
+      {pendingInviteForMe ? (
         <Button
           onClick={async () => {
             await respondToInvite({
               variables: {
-                id: gameSession.id,
+                id: pendingInviteForMe.id,
                 response: 'accepted',
               },
             });
@@ -207,22 +207,22 @@ function GameSetupInviteFriends({
     readFragment(membersFragment, member),
   );
   const friendsNotInvited = (data.friendships ?? []).filter(
-    (friend) => !members.some((member) => member.id === friend.friend.id),
+    (friend) => !members.some((member) => member.user.id === friend.friend.id),
   );
 
   const [invite] = useMutation(inviteMutation);
 
   const entries: GameSetupInviteEntryData[] = [
     ...members.map((member) => ({
-      id: member.id,
+      id: member.user.id,
       name: member.user.name,
       imageUrl: member.user.imageUrl,
       status: member.status as any,
     })),
-    ...friendsNotInvited.map((friend) => ({
-      id: friend.id,
-      name: friend.friend.name,
-      imageUrl: friend.friend.imageUrl,
+    ...friendsNotInvited.map((friendship) => ({
+      id: friendship.friend.id,
+      name: friendship.friend.name,
+      imageUrl: friendship.friend.imageUrl,
       status: 'uninvited' as const,
     })),
   ];

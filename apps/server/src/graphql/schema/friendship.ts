@@ -1,11 +1,12 @@
 import { builder } from '../builder.js';
 import { createResults, keyIndexes } from '../dataloaders.js';
-import { Friendship as DBFriendship } from '@long-game/db';
+import { Friendship as DBFriendship, id } from '@long-game/db';
 import { assignTypeName } from '../relay.js';
 import { z } from 'zod';
 import { assert } from '@a-type/utils';
 import { LongGameError } from '@long-game/common';
 import { User } from './user.js';
+import { decodeGlobalID } from '@pothos/plugin-relay';
 
 builder.queryFields((t) => ({
   friendships: t.field({
@@ -28,10 +29,13 @@ builder.queryFields((t) => ({
       if (!ctx.session) {
         return [];
       }
+      const userId = ctx.session.userId;
 
       let friendshipsQueryBuilder = ctx.db
-        .selectFrom('FriendshipView')
-        .where('userId', '=', ctx.session.userId)
+        .selectFrom('Friendship')
+        .where((eb) =>
+          eb.or([eb('userId', '=', userId), eb('friendId', '=', userId)]),
+        )
         .selectAll();
 
       if (input?.status) {
@@ -83,11 +87,13 @@ builder.mutationFields((t) => ({
         );
       }
 
+      const [userId, friendId] = [ctx.session.userId, user.id].sort();
+
       const existing = await ctx.db
-        .selectFrom('FriendshipView')
-        .where('userId', '=', ctx.session.userId)
-        .where('friendId', '=', user.id)
-        .select(['status'])
+        .selectFrom('Friendship')
+        .where('userId', '=', userId)
+        .where('friendId', '=', friendId)
+        .select(['status', 'id'])
         .executeTakeFirst();
 
       if (existing) {
@@ -100,8 +106,9 @@ builder.mutationFields((t) => ({
       const friendship = await ctx.db
         .insertInto('Friendship')
         .values({
-          userId: ctx.session.userId,
-          friendId: user.id,
+          id: id(),
+          userId,
+          friendId,
           status: 'pending',
         })
         .returningAll()
@@ -129,19 +136,29 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
-      const { friendshipId: id, response } = input;
+      const { friendshipId, response } = input;
+      const id = decodeGlobalID(friendshipId).id;
 
       const friendship = await ctx.db
-        .selectFrom('FriendshipView')
-        .where('friendId', '=', id)
-        .where('userId', '=', ctx.session.userId)
-        .select(['status'])
+        .selectFrom('Friendship')
+        .where('id', '=', id)
+        .select(['status', 'userId', 'friendId'])
         .executeTakeFirst();
 
       if (!friendship) {
         throw new LongGameError(
           LongGameError.Code.NotFound,
           'No friendship found with that id',
+        );
+      }
+
+      if (
+        friendship.friendId !== ctx.session.userId &&
+        friendship.userId !== ctx.session.userId
+      ) {
+        throw new LongGameError(
+          LongGameError.Code.Forbidden,
+          'You are not a part of this friendship',
         );
       }
 
@@ -153,12 +170,11 @@ builder.mutationFields((t) => ({
       }
 
       const result = await ctx.db
-        .updateTable('FriendshipView')
+        .updateTable('Friendship')
         .set({
           status: response,
         })
-        .where('userId', '=', id)
-        .where('friendId', '=', ctx.session.userId)
+        .where('id', '=', id)
         .returningAll()
         .executeTakeFirstOrThrow();
 
@@ -178,19 +194,16 @@ export const Friendship = builder.loadableNodeRef('Friendship', {
     // and query db for each ID that isn't the
     // user's own ID
     const { userId } = ctx.session;
-    const friendIds = ids
-      .map(decodeFriendshipId)
-      .filter(
-        (decoded) => decoded.userId === userId || decoded.friendId === userId,
-      )
-      .map(({ userId, friendId }) => [userId, friendId])
-      .flat()
-      .filter((id) => id !== userId);
 
     const friendships = await ctx.db
-      .selectFrom('FriendshipView')
-      .where('FriendshipView.friendId', 'in', friendIds)
-      .where('FriendshipView.userId', '=', userId)
+      .selectFrom('Friendship')
+      .where('Friendship.id', 'in', ids)
+      .where((eb) =>
+        eb.or([
+          eb('Friendship.userId', '=', userId),
+          eb('Friendship.friendId', '=', userId),
+        ]),
+      )
       .selectAll()
       .execute();
 
@@ -201,9 +214,7 @@ export const Friendship = builder.loadableNodeRef('Friendship', {
     );
 
     for (const friendship of friendships) {
-      results[
-        indexes[encodeFriendshipId(friendship.userId, friendship.friendId)]
-      ] = {
+      results[indexes[friendship.id]] = {
         ...friendship,
         __typename: 'Friendship',
       };
@@ -212,7 +223,7 @@ export const Friendship = builder.loadableNodeRef('Friendship', {
     return results;
   },
   id: {
-    resolve: (obj) => encodeFriendshipId(obj.userId, obj.friendId),
+    resolve: (obj) => obj.id,
   },
 });
 Friendship.implement({
@@ -223,20 +234,17 @@ Friendship.implement({
     }),
     friend: t.field({
       type: User,
-      resolve: (friendship) => friendship.friendId,
+      resolve: (friendship, _, ctx) => {
+        if (friendship.friendId === ctx.session?.userId) {
+          return friendship.userId;
+        } else {
+          return friendship.friendId;
+        }
+      },
       nullable: false,
     }),
   }),
 });
-
-function encodeFriendshipId(userId: string, friendId: string) {
-  return [userId, friendId].sort().join(':');
-}
-
-function decodeFriendshipId(id: string) {
-  const [userId, friendId] = id.split(':');
-  return { userId, friendId };
-}
 
 const FriendshipStatus = builder.enumType('FriendshipStatus', {
   values: ['pending', 'accepted', 'declined'],

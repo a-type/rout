@@ -11,6 +11,7 @@ import { User } from './user.js';
 import { z } from 'zod';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { LongGameError } from '@long-game/common';
+import { decodeGlobalID } from '@pothos/plugin-relay';
 
 builder.queryFields((t) => ({
   memberships: t.field({
@@ -52,14 +53,18 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
-      await validateAccessToGameSession(input.gameSessionId, ctx.session);
+      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
+      const userId = decodeGlobalID(input.userId).id;
+      await validateAccessToGameSession(gameSessionId, ctx.session);
+
+      console.log(gameSessionId, userId);
 
       const membership = await ctx.db
         .insertInto('GameSessionMembership')
         .values({
           id: id(),
-          gameSessionId: input.gameSessionId,
-          userId: input.userId,
+          gameSessionId: gameSessionId,
+          userId,
           status: 'pending',
           inviterId: ctx.session.userId,
         })
@@ -82,7 +87,7 @@ builder.mutationFields((t) => ({
         validate: {
           schema: z.object({
             inviteId: z.string(),
-            response: z.enum(['accepted', 'declined', 'pending']),
+            response: z.enum(['accepted', 'declined']),
           }),
         },
       }),
@@ -92,7 +97,7 @@ builder.mutationFields((t) => ({
 
       const membership = await ctx.db
         .selectFrom('GameSessionMembership')
-        .where('id', '=', input.inviteId)
+        .where('id', '=', decodeGlobalID(input.inviteId).id)
         .selectAll()
         .executeTakeFirstOrThrow();
 
@@ -112,20 +117,13 @@ builder.mutationFields((t) => ({
         );
       }
 
-      if (input.response === 'accepted') {
-        await ctx.db
-          .updateTable('GameSessionMembership')
-          .set({
-            status: 'accepted',
-          })
-          .where('id', '=', input.inviteId)
-          .executeTakeFirstOrThrow();
-      } else {
-        await ctx.db
-          .deleteFrom('GameSessionMembership')
-          .where('id', '=', input.inviteId)
-          .executeTakeFirstOrThrow();
-      }
+      await ctx.db
+        .updateTable('GameSessionMembership')
+        .set({
+          status: 'accepted',
+        })
+        .where('id', '=', membership.id)
+        .executeTakeFirstOrThrow();
 
       return assignTypeName('GameSessionMembership')({
         ...membership,
@@ -201,10 +199,10 @@ const GameInviteResponse = builder.enumType('GameInviteResponse', {
 
 builder.inputType('SendGameInviteInput', {
   fields: (t) => ({
-    gameSessionId: t.string({
+    gameSessionId: t.id({
       required: true,
     }),
-    userId: t.string({
+    userId: t.id({
       required: true,
     }),
   }),
@@ -212,7 +210,7 @@ builder.inputType('SendGameInviteInput', {
 
 builder.inputType('RespondToGameInviteInput', {
   fields: (t) => ({
-    inviteId: t.string({
+    inviteId: t.id({
       required: true,
     }),
     response: t.field({

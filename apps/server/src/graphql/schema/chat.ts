@@ -46,6 +46,10 @@ builder.mutationFields((t) => ({
         .returningAll()
         .executeTakeFirstOrThrow();
 
+      pubsub.publishChatMessageSent({
+        message: chatMessage,
+      });
+
       return assignTypeName('ChatMessage')(chatMessage);
     },
   }),
@@ -66,7 +70,7 @@ builder.subscriptionFields((t) => ({
       assert(ctx.session);
       await validateAccessToGameSession(args.gameSessionId.id, ctx.session);
 
-      const iterator = pubsub.asyncIterator(
+      const iterator = pubsub.events.asyncIterator(
         EVENT_LABELS.chatMessageSent(args.gameSessionId.id),
       );
 

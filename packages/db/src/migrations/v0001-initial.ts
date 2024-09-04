@@ -149,6 +149,7 @@ export async function up(db: Kysely<any>) {
 
   await db.schema
     .createTable('Friendship')
+    .addColumn('id', 'text', (col) => col.primaryKey())
     .addColumn('createdAt', 'text', (col) => col.notNull())
     .addColumn('updatedAt', 'text', (col) => col.notNull())
     .addColumn('userId', 'text', (col) =>
@@ -158,44 +159,18 @@ export async function up(db: Kysely<any>) {
       col.notNull().references('User.id').onDelete('cascade'),
     )
     .addColumn('status', 'text', (col) => col.notNull())
-    .addPrimaryKeyConstraint('Friendship_userId_friendId_pk', [
+    .addUniqueConstraint('Friendship_userId_friendId_unique', [
       'userId',
       'friendId',
     ])
-    .execute();
-
-  // the primary key of a friendship is userId + friendId
-  await db.schema
-    .createIndex('Friendship_userId_friendId_index')
-    .on('Friendship')
-    .column('userId')
-    .column('friendId')
-    .unique()
-    .execute();
-
-  // this view is used to get the list of friends for a user
-  // regardless of friendship relation direction by using a union
-  // of two queries.
-  await db.schema
-    .createView('FriendshipView')
-    .as(
-      sql`
-      SELECT
-        "Friendship"."userId" AS "userId",
-        "Friendship"."friendId" AS "friendId",
-        "Friendship"."status" AS "status",
-        "Friendship"."createdAt" AS "createdAt",
-        "Friendship"."updatedAt" AS "updatedAt"
-      FROM "Friendship"
-      UNION
-      SELECT
-        "Friendship"."friendId" AS "userId",
-        "Friendship"."userId" AS "friendId",
-        "Friendship"."status" AS "status",
-        "Friendship"."createdAt" AS "createdAt",
-        "Friendship"."updatedAt" AS "updatedAt"
-      FROM "Friendship"
-    `,
+    .addCheckConstraint(
+      'Friendship_userId_not_equal_friendId',
+      sql`userId <> friendId`,
+    )
+    // ids should be lexographically ordered
+    .addCheckConstraint(
+      'Friendship_userId_less_than_friendId',
+      sql`userId < friendId`,
     )
     .execute();
 
