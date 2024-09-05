@@ -47,7 +47,7 @@ export const builder = new SchemaBuilder<{
     };
   };
   Inputs: {
-    UpdateUserInfoInput: { name?: string | null };
+    UpdateUserInfoInput: { name?: string | null; color?: string | null };
 
     PrepareGameSessionInput: { gameId: string };
     UpdateGameSessionInput: { gameSessionId: string; gameId: string };

@@ -214,7 +214,7 @@ builder.mutationFields((t) => ({
             // the same random values as the initial state.
             random: new GameRandom(gameSession.randomSeed + 'INITIAL'),
             members: gameSession.members.map(({ id }) => ({
-              id: id || 'anonymous',
+              id: id ? encodeGlobalID('User', id) : 'anonymous',
             })),
           }),
           gameVersion: gameDefinition.version,

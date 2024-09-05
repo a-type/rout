@@ -53,6 +53,7 @@ const startGameMutation = graphql(
       startGameSession(gameSessionId: $id) {
         id
         state {
+          id
           status
         }
         members {

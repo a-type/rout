@@ -1,7 +1,11 @@
 import { GameRound } from '@long-game/common';
-import { GameSession, db } from '@long-game/db';
-import { GameDefinition, Turn, GameRandom } from '@long-game/game-definition';
-import games from '@long-game/games';
+import { GameSession } from '@long-game/db';
+import {
+  GameDefinition,
+  Turn,
+  GameRandom,
+  GameStatus,
+} from '@long-game/game-definition';
 
 export type RequiredGameSession = Pick<
   GameSession,
@@ -13,39 +17,6 @@ export type RequiredGameSession = Pick<
   | 'gameVersion'
   | 'startedAt'
 >;
-
-export async function getGameState(
-  gameSession: RequiredGameSession,
-): Promise<null | GameSessionState> {
-  const turns = await db
-    .selectFrom('GameTurn')
-    .where('gameSessionId', '=', gameSession.id)
-    .select(['data', 'userId', 'createdAt', 'roundIndex'])
-    .orderBy('createdAt', 'asc')
-    .execute();
-  const members = await db
-    .selectFrom('GameSessionMembership')
-    .where('gameSessionId', '=', gameSession.id)
-    .select(['userId as id'])
-    .execute();
-
-  const game = games[gameSession.gameId];
-  if (!game) {
-    throw new Error('Game not found');
-  }
-
-  const gameDefinition = game.versions.find(
-    (g) => g.version === gameSession.gameVersion,
-  );
-
-  if (!gameDefinition) {
-    throw new Error(
-      `No game rules found for version ${gameSession.gameVersion} of game ${gameSession.gameId}`,
-    );
-  }
-
-  return new GameSessionState(gameSession, gameDefinition, turns, members);
-}
 
 export class GameSessionState {
   constructor(
@@ -65,6 +36,12 @@ export class GameSessionState {
   }
 
   get globalState(): any {
+    if (!this.gameSession.startedAt)
+      return this.gameDefinition.getInitialGlobalState({
+        random: new GameRandom(this.gameSession.randomSeed),
+        members: this.members,
+      });
+
     // only apply previous round moves! current round hasn't
     // yet been settled
     return this.gameDefinition.getState({
@@ -76,6 +53,8 @@ export class GameSessionState {
   }
 
   get rounds(): GameRound<Turn<any>>[] {
+    if (!this.gameSession.startedAt) return [];
+
     return this.turns.reduce<GameRound<Turn<any>>[]>((acc, turn) => {
       const round: GameRound<Turn<any>> = acc[turn.roundIndex] ?? {
         roundIndex: turn.roundIndex,
@@ -94,6 +73,8 @@ export class GameSessionState {
   }
 
   get currentRoundIndex(): number {
+    if (!this.gameSession.startedAt) return 0;
+
     return this.gameDefinition.getRoundIndex({
       currentTime: new Date(),
       gameTimeZone: this.gameSession.timezone,
@@ -118,7 +99,12 @@ export class GameSessionState {
     );
   }
 
-  get status() {
+  get status(): GameStatus {
+    if (!this.gameSession.startedAt)
+      return {
+        status: 'pending',
+      };
+
     return this.gameDefinition.getStatus({
       globalState: this.globalState,
       members: this.members,

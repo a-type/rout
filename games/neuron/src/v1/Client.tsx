@@ -11,7 +11,8 @@ import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
 import { Button } from '@a-type/ui/components/button';
 import { BasicGameLog } from '@long-game/game-ui';
 import { Divider } from '@a-type/ui/components/divider';
-import { clsx } from '@a-type/ui';
+import { clsx, toast } from '@a-type/ui';
+import { LongGameError, LongGameErrorCode } from '@long-game/common';
 
 export interface ClientProps {
   session: ComponentProps<typeof GameClientProvider>['session'];
@@ -63,7 +64,7 @@ const ActiveGame = withGame(function ActiveGame({
           onDragStart={(ev) => {
             setDraggingId(ev.active.id);
           }}
-          onDragEnd={(ev) => {
+          onDragEnd={async (ev) => {
             setDraggingId(null);
             if (!ev.over) return;
 
@@ -80,11 +81,23 @@ const ActiveGame = withGame(function ActiveGame({
             if (!data.current) return;
 
             const { x, y } = fromCoordinateKey(ev.over.id);
-            client.submitTurn({
-              coordinate: { x, y },
-              tileId: handId,
-              tile: data.current.tile,
-            });
+            try {
+              await client.submitTurn({
+                coordinate: { x, y },
+                tileId: handId,
+                tile: data.current.tile,
+              });
+            } catch (e) {
+              console.error(e);
+              if (
+                LongGameError.isInstance(e) &&
+                e.code === LongGameError.Code.BadRequest
+              ) {
+                // invalid turn
+                client.resetCurrentTurn();
+                toast.error(e.message);
+              }
+            }
           }}
         >
           <Grid data={state.grid} />

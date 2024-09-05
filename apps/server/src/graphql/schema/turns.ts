@@ -1,6 +1,5 @@
 import { assert } from '@a-type/utils';
 import { LongGameError } from '@long-game/common';
-import { getGameState } from '@long-game/game-state';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
 import { GameSession } from './gameSession.js';
@@ -20,10 +19,7 @@ builder.mutationFields((t) => ({
       const { userId } = ctx.session;
       const { turn } = input;
       const gameSessionId = decodeGlobalID(input.gameSessionId).id;
-
-      const gameSession = await ctx.dataLoaders.gameSession.load(gameSessionId);
-
-      const state = await getGameState(gameSession);
+      const state = await ctx.dataLoaders.gameSessionState.load(gameSessionId);
 
       if (!state) {
         throw new LongGameError(
@@ -58,7 +54,7 @@ builder.mutationFields((t) => ({
       // compute the player's view of the state
       const playerState = gameDefinition.getPlayerState({
         globalState,
-        playerId: userId,
+        playerId: encodeGlobalID('User', userId),
         roundIndex: currentRound.roundIndex,
         members,
         rounds,
@@ -104,7 +100,10 @@ builder.mutationFields((t) => ({
         .executeTakeFirstOrThrow();
 
       // apply the turn to the game state before propagating
-      state.addTurn(createdTurn);
+      state.addTurn({
+        ...createdTurn,
+        userId: encodeGlobalID('User', createdTurn.userId),
+      });
 
       ctx.pubsub.publishGameStateChanged({
         gameSessionState: state,
@@ -121,12 +120,17 @@ builder.objectType('Turn', {
   fields: (t) => ({
     userId: t.field({
       type: 'ID',
-      resolve: (obj) => encodeGlobalID('User', obj.userId),
+      resolve: (obj) => obj.userId,
       nullable: false,
     }),
     data: t.field({
       type: 'JSON',
       resolve: (obj) => obj.data,
+      nullable: false,
+    }),
+    createdAt: t.field({
+      type: 'DateTime',
+      resolve: (obj) => new Date(obj.createdAt),
       nullable: false,
     }),
   }),

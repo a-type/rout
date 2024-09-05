@@ -86,7 +86,7 @@ export interface GameSessionTable {
   updatedAt: UpdatedAtColumn;
   timezone: string;
   initialState: any;
-  startedAt: ColumnType<string, string | undefined, string | undefined>;
+  startedAt: ColumnType<string | null, string | undefined, string | undefined>;
   randomSeed: ColumnType<string, string | undefined, string | undefined>;
   // does not relate to anything in the db; game information is
   // defined in code.

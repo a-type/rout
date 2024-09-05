@@ -42,7 +42,7 @@ GameSessionState.implement({
         const { userId } = ctx.session!;
         return state.gameDefinition.getPlayerState({
           globalState: state.globalState,
-          playerId: userId,
+          playerId: encodeGlobalID('User', userId),
           roundIndex: state.currentRound.roundIndex,
           members: state.members,
           rounds: state.rounds,
@@ -55,8 +55,9 @@ GameSessionState.implement({
       authScopes: { user: true },
       resolve: async (state, _, ctx) => {
         assert(ctx.session);
+        const viewerId = encodeGlobalID('User', ctx.session.userId);
         const turn = state.currentRound.turns.find(
-          (turn) => turn.userId === ctx.session!.userId,
+          (turn) => turn.userId === viewerId,
         );
         if (turn) {
           return assignTypeName('Turn')(
@@ -95,7 +96,9 @@ GameSessionState.implement({
     status: t.field({
       type: GameSessionStatusValue,
       authScopes: { user: true },
-      resolve: (state) => state.status.status,
+      resolve: (state) => {
+        return state.status.status;
+      },
     }),
     winnerIds: t.field({
       type: ['ID'],

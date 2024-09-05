@@ -1,5 +1,5 @@
 import { assert } from '@a-type/utils';
-import { LongGameError } from '@long-game/common';
+import { colorNames, LongGameError, PlayerColorName } from '@long-game/common';
 import type { User as DBUser } from '@long-game/db';
 import { z } from 'zod';
 import { builder } from '../builder.js';
@@ -75,6 +75,7 @@ builder.mutationFields((t) => ({
         validate: {
           schema: z.object({
             name: z.string().max(255).nullable().optional(),
+            color: z.enum(colorNames),
           }),
         },
       }),
@@ -86,6 +87,7 @@ builder.mutationFields((t) => ({
         .updateTable('User')
         .set({
           friendlyName: input.name || undefined,
+          color: input.color || undefined,
         })
         .where('id', '=', userId)
         .executeTakeFirstOrThrow();
@@ -129,8 +131,8 @@ User.implement({
     }),
     imageUrl: t.exposeString('imageUrl'),
     color: t.field({
-      type: 'String',
-      resolve: (user) => user.color || 'gray',
+      type: UserColor,
+      resolve: (user) => (user.color as PlayerColorName) || 'gray',
       nullable: false,
     }),
     isViewer: t.field({
@@ -146,5 +148,10 @@ User.implement({
 builder.inputType('UpdateUserInfoInput', {
   fields: (t) => ({
     name: t.string({ required: true }),
+    color: t.field({ type: UserColor, required: true }),
   }),
+});
+
+const UserColor = builder.enumType('UserColor', {
+  values: colorNames,
 });

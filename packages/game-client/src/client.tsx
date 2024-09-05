@@ -9,7 +9,7 @@ import { ResultOf, FragmentOf } from '@long-game/graphql';
 import { action, makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, ReactNode, createContext, useContext, useState } from 'react';
-import { GameRound } from '@long-game/common';
+import { GameRound, LongGameError } from '@long-game/common';
 import { ChatMessage, GameLogItem, RawChatMessage } from './types.js';
 import { graphqlClient } from './apollo.js';
 import { graphql, readFragment } from '../../graphql/src/graphql.js';
@@ -42,6 +42,7 @@ const refreshSessionFragment = graphql(`
       turns {
         userId
         data
+        createdAt
       }
     }
   }
@@ -183,27 +184,23 @@ export class GameClient<
     this.initialize();
   }
 
-  private loadFromState = action(
-    'loadFromState',
-    (state: FragmentOf<typeof refreshSessionFragment>) => {
-      const { playerState, rounds, currentTurn } = readFragment(
-        refreshSessionFragment,
-        state,
-      );
-      this.state = playerState;
-      this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
-      this.currentServerTurn = currentTurn ?? undefined;
-    },
-  );
+  private loadFromState = (
+    state: FragmentOf<typeof refreshSessionFragment>,
+  ) => {
+    const { playerState, rounds, currentTurn } = readFragment(
+      refreshSessionFragment,
+      state,
+    );
+    this.state = playerState;
+    this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
+    this.currentServerTurn = currentTurn ?? undefined;
+  };
 
-  private addChats = action(
-    'addChats',
-    (messages: FragmentOf<typeof chatFragment>[]) => {
-      this.chatLog.push(
-        ...messages.map((msg) => readFragment(chatFragment, msg)),
-      );
-    },
-  );
+  private addChats = (messages: FragmentOf<typeof chatFragment>[]) => {
+    this.chatLog.push(
+      ...messages.map((msg) => readFragment(chatFragment, msg)),
+    );
+  };
 
   private initialize = async () => {
     const initialRes = await graphqlClient.query({
@@ -332,6 +329,12 @@ export class GameClient<
     }
   }
 
+  resetCurrentTurn = () => {
+    this.currentLocalTurn = undefined;
+    this.error = null;
+    this.dirty = false;
+  };
+
   // TODO: cache prepared turn in storage
 
   submitTurn = async (
@@ -342,7 +345,9 @@ export class GameClient<
 
     // validate locally before submitting
     this.validateCurrentTurn();
-    if (this.error) return;
+    if (this.error) {
+      throw new LongGameError(LongGameError.Code.BadRequest, this.error);
+    }
 
     const result = await graphqlClient.mutate({
       mutation: graphql(
@@ -373,6 +378,7 @@ export class GameClient<
     });
     if (result.data?.submitTurn?.gameSession?.state) {
       this.loadFromState(result.data.submitTurn.gameSession.state);
+      this.resetCurrentTurn();
     }
     this.dirty = false;
   };
@@ -401,11 +407,12 @@ export class GameClient<
 
   getMember = (id: string) => {
     return (
-      this.session.members.find((player) => player.id === id)?.user ?? {
+      this.session.members.find((membership) => membership.user.id === id)
+        ?.user ?? {
         id,
         name: 'Unknown',
         imageUrl: null,
-        color: 'gray',
+        color: 'gray' as const,
       }
     );
   };

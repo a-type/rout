@@ -16,7 +16,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@long-game/db": "workspace:*",
     "date-fns-tz": "2.0.0",
     "@radix-ui/colors": "^3.0.0"
   },

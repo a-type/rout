@@ -381,10 +381,11 @@ function addTile(
   tile: GridTile,
   owner: string | null,
 ) {
+  const gridCopy = { ...grid };
   const key = toCoordinateKey(coordinate);
-  grid[key] = grid[key] || [];
-  grid[key].push(tile);
-  return grid;
+  gridCopy[key] = gridCopy[key] || [];
+  gridCopy[key].push(tile);
+  return gridCopy;
 }
 
 function getTileInHand(hand: PlayerHand, tileId: string) {

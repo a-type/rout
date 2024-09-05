@@ -259,3 +259,7 @@ export const colors = {
 
 export type PlayerColorName = keyof typeof colors;
 export type PlayerColorPalette = (typeof colors)[PlayerColorName];
+export const colorNames = Object.keys(colors) as [
+  PlayerColorName,
+  ...PlayerColorName[],
+];

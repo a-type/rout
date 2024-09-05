@@ -2,7 +2,8 @@ type ChatMessage implements Node {
   createdAt: DateTime!
   id: ID!
   message: String!
-  userId: String!
+  user: User
+  userId: ID!
 }
 
 scalar Date
@@ -151,7 +152,7 @@ type Round {
 }
 
 input SendChatMessageInput {
-  gameSessionId: String!
+  gameSessionId: ID!
   message: String!
 }
 
@@ -179,6 +180,7 @@ type Subscription {
 }
 
 type Turn {
+  createdAt: DateTime!
   data: JSON!
   userId: ID!
 }
@@ -192,15 +194,32 @@ input UpdateGameSessionInput {
 }
 
 input UpdateUserInfoInput {
+  color: UserColor!
   name: String!
 }
 
 """A user of Long Game"""
 type User implements Node {
-  color: String!
+  color: UserColor!
   email: String!
   id: ID!
   imageUrl: String
   isViewer: Boolean!
   name: String!
+}
+
+enum UserColor {
+  blue
+  bronze
+  crimson
+  gray
+  indigo
+  lime
+  mint
+  orange
+  plum
+  red
+  teal
+  violet
+  yellow
 }

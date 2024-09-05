@@ -1,6 +1,6 @@
 import { assert } from '@a-type/utils';
 import { id } from '@long-game/db';
-import { decodeGlobalID } from '@pothos/plugin-relay';
+import { decodeGlobalID, encodeGlobalID } from '@pothos/plugin-relay';
 import { z } from 'zod';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
+import { User } from './user.js';
 
 builder.mutationFields((t) => ({
   sendMessage: t.field({
@@ -87,8 +88,13 @@ export const ChatMessage = builder.node('ChatMessage', {
     message: t.exposeString('message', {
       nullable: false,
     }),
-    userId: t.exposeString('userId', {
+    userId: t.id({
+      resolve: (obj) => encodeGlobalID('User', obj.userId),
       nullable: false,
+    }),
+    user: t.field({
+      type: User,
+      resolve: (obj) => obj.userId,
     }),
     createdAt: t.field({
       type: 'DateTime',
@@ -103,7 +109,7 @@ export const ChatMessage = builder.node('ChatMessage', {
 
 builder.inputType('SendChatMessageInput', {
   fields: (t) => ({
-    gameSessionId: t.string({
+    gameSessionId: t.id({
       required: true,
     }),
     message: t.string({
