@@ -14,18 +14,8 @@ export type RequiredGameSession = Pick<
   | 'startedAt'
 >;
 
-export interface GameSessionState {
-  globalState: any;
-  rounds: GameRound<Turn<any>>[];
-  previousRounds: GameRound<Turn<any>>[];
-  currentRound: GameRound<Turn<any>>;
-  gameDefinition: GameDefinition;
-  members: { id: string }[];
-}
-
 export async function getGameState(
   gameSession: RequiredGameSession,
-  currentTime: Date,
 ): Promise<null | GameSessionState> {
   const turns = await db
     .selectFrom('GameTurn')
@@ -54,55 +44,89 @@ export async function getGameState(
     );
   }
 
-  // group by roundIndex
-  const rounds = turns.reduce<GameRound<Turn<any>>[]>((acc, turn) => {
-    const round: GameRound<Turn<any>> = acc[turn.roundIndex] ?? {
-      roundIndex: turn.roundIndex,
-      turns: [],
-    };
+  return new GameSessionState(gameSession, gameDefinition, turns, members);
+}
 
-    round.turns.push({
-      ...turn,
-      data: turn.data,
+export class GameSessionState {
+  constructor(
+    private gameSession: RequiredGameSession,
+    public readonly gameDefinition: GameDefinition,
+    public turns: {
+      createdAt: string;
+      data: any;
+      userId: string;
+      roundIndex: number;
+    }[],
+    readonly members: { id: string }[],
+  ) {}
+
+  get id(): string {
+    return this.gameSession.id;
+  }
+
+  get globalState(): any {
+    // only apply previous round moves! current round hasn't
+    // yet been settled
+    return this.gameDefinition.getState({
+      initialState: this.gameSession.initialState,
+      rounds: this.previousRounds,
+      random: new GameRandom(this.gameSession.randomSeed),
+      members: this.members,
     });
+  }
 
-    acc[turn.roundIndex] = round;
+  get rounds(): GameRound<Turn<any>>[] {
+    return this.turns.reduce<GameRound<Turn<any>>[]>((acc, turn) => {
+      const round: GameRound<Turn<any>> = acc[turn.roundIndex] ?? {
+        roundIndex: turn.roundIndex,
+        turns: [],
+      };
 
-    return acc;
-  }, []);
+      round.turns.push({
+        ...turn,
+        data: turn.data,
+      });
 
-  const currentRoundIndex = gameDefinition.getRoundIndex({
-    currentTime,
-    gameTimeZone: gameSession.timezone,
-    members,
-    startedAt: new Date(gameSession.startedAt),
-    turns,
-  });
+      acc[turn.roundIndex] = round;
 
-  const previousRounds = rounds.filter(
-    (round) => round.roundIndex < currentRoundIndex,
-  );
+      return acc;
+    }, []);
+  }
 
-  // only apply previous round moves! current round hasn't
-  // yet been settled
-  const globalState = gameDefinition.getState({
-    initialState: gameSession.initialState,
-    rounds: previousRounds,
-    random: new GameRandom(gameSession.randomSeed),
-    members,
-  });
+  get currentRoundIndex(): number {
+    return this.gameDefinition.getRoundIndex({
+      currentTime: new Date(),
+      gameTimeZone: this.gameSession.timezone,
+      members: this.members,
+      startedAt: new Date(this.gameSession.startedAt),
+      turns: this.turns,
+    });
+  }
 
-  const currentRound: GameRound<Turn<any>> = rounds[currentRoundIndex] || {
-    turns: [],
-    roundIndex: currentRoundIndex,
-  };
+  get previousRounds(): GameRound<Turn<any>>[] {
+    return this.rounds.filter(
+      (round) => round.roundIndex < this.currentRoundIndex,
+    );
+  }
 
-  return {
-    previousRounds,
-    currentRound,
-    rounds,
-    globalState,
-    gameDefinition,
-    members,
-  };
+  get currentRound(): GameRound<Turn<any>> {
+    return (
+      this.rounds[this.currentRoundIndex] || {
+        turns: [],
+        roundIndex: this.currentRoundIndex,
+      }
+    );
+  }
+
+  get status() {
+    return this.gameDefinition.getStatus({
+      globalState: this.globalState,
+      members: this.members,
+      rounds: this.previousRounds,
+    });
+  }
+
+  addTurn(turn: Turn<any>) {
+    this.turns.push(turn);
+  }
 }

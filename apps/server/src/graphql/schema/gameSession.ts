@@ -5,6 +5,7 @@ import { GameRandom, getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import {
   decodeGlobalID,
+  encodeGlobalID,
   resolveCursorConnection,
   ResolveCursorConnectionArgs,
 } from '@pothos/plugin-relay';
@@ -263,20 +264,6 @@ GameSession.implement({
         return encodeGameSessionStateId(gameSession.id);
       },
     }),
-    status: t.field({
-      type: 'GameSessionStatus',
-      nullable: false,
-      resolve: async (gameSession, _, ctx) => {
-        const state = await ctx.dataLoaders.gameSessionState.load(
-          gameSession.id,
-        );
-        const game = games[gameSession.gameId];
-        if (!game) {
-          return { status: 'active' as const };
-        }
-        return state.gameDefinition.getStatus(state);
-      },
-    }),
     chat: t.connection({
       type: 'ChatMessage',
       nullable: false,
@@ -323,13 +310,13 @@ GameSession.implement({
         if (!game) {
           return null;
         }
-        const status = state.gameDefinition.getStatus(state);
+        const status = state.status;
         if (status.status !== 'completed') {
           return null;
         }
         return {
           globalState: state.globalState,
-          winnerIds: status.winnerIds,
+          winnerIds: status.winnerIds.map((id) => encodeGlobalID('User', id)),
         };
       },
     }),

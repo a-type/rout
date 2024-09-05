@@ -49,7 +49,6 @@ type GameSession implements Node {
   postGame: GameSessionPostGame
   startedAt: DateTime
   state: GameSessionState!
-  status: GameSessionStatus!
   timezone: String!
   updatedAt: DateTime!
 }
@@ -82,11 +81,8 @@ type GameSessionState implements Node {
   id: ID!
   playerState: JSON
   rounds: [Round!]
-}
-
-type GameSessionStatus {
   status: GameSessionStatusValue
-  winnerIds: [String!]
+  winnerIds: [ID!]
 }
 
 enum GameSessionStatusValue {

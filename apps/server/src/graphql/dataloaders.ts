@@ -57,13 +57,12 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
     const gameSessions = await gameSessionLoader.loadMany(
       ids.map(decodeGameSessionStateId),
     );
-    const currentTime = new Date();
     const computed = await Promise.allSettled(
       gameSessions.map((session) => {
         if (session instanceof Error) {
           throw session;
         }
-        return getGameState(session, currentTime);
+        return getGameState(session);
       }),
     );
 
@@ -76,9 +75,7 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
             LongGameError.Code.NotFound,
           );
         } else {
-          results[indexes[ids[index]]] = Object.assign(result.value, {
-            id: ids[index],
-          });
+          results[indexes[ids[index]]] = result.value;
         }
       } else {
         results[indexes[ids[index]]] = result.reason;

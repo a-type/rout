@@ -23,7 +23,7 @@ builder.mutationFields((t) => ({
 
       const gameSession = await ctx.dataLoaders.gameSession.load(gameSessionId);
 
-      const state = await getGameState(gameSession, new Date());
+      const state = await getGameState(gameSession);
 
       if (!state) {
         throw new LongGameError(
@@ -83,34 +83,31 @@ builder.mutationFields((t) => ({
         );
       }
 
-      // in one transaction, delete existing moves from this player
-      // in the timerange and insert the provided ones
-      await ctx.db.transaction().execute(async (trx) => {
-        await trx
-          .insertInto('GameTurn')
-          .values({
-            // provide a new ID - otherwise users could
-            // overwrite each other's moves or a move
-            // from a previous turn (if constraints change)
-            gameSessionId,
-            userId,
-            data: turn.data,
-            roundIndex: currentRound.roundIndex,
-          })
-          .onConflict((bld) => {
-            // resolve conflicts on composite primary key by updating
-            // turn data to the newly supplied turn
-            return bld
-              .columns(['gameSessionId', 'userId', 'roundIndex'])
-              .doUpdateSet({
-                data: turn.data,
-              });
-          })
-          .execute();
-      });
+      const createdTurn = await ctx.db
+        .insertInto('GameTurn')
+        .values({
+          gameSessionId,
+          userId,
+          data: turn.data,
+          roundIndex: currentRound.roundIndex,
+        })
+        .onConflict((bld) => {
+          // resolve conflicts on composite primary key by updating
+          // turn data to the newly supplied turn
+          return bld
+            .columns(['gameSessionId', 'userId', 'roundIndex'])
+            .doUpdateSet({
+              data: turn.data,
+            });
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
+      // apply the turn to the game state before propagating
+      state.addTurn(createdTurn);
 
       ctx.pubsub.publishGameStateChanged({
-        gameSessionState: { ...state, id: gameSessionId },
+        gameSessionState: state,
       });
 
       return {

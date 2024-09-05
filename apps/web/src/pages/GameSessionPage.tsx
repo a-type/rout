@@ -17,7 +17,7 @@ const gameSessionPageQuery = graphql(
       gameSession(id: $id) {
         id
         startedAt
-        status {
+        state {
           status
         }
         ...PostGameSessionFragment
@@ -39,7 +39,7 @@ export function GameSessionPage() {
   }
   if (!session.startedAt) {
     return <GameSetup gameSession={session} onRefetch={refetch} />;
-  } else if (session.status.status === 'completed') {
+  } else if (session.state.status === 'completed') {
     return <GameRecap gameSession={session} />;
   }
   return <GameSession gameSessionId={sessionId} />;

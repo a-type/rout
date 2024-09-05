@@ -3,6 +3,7 @@ import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
+import { encodeGlobalID } from '@pothos/plugin-relay';
 
 builder.subscriptionFields((t) => ({
   gameSessionStateChanged: t.field({
@@ -91,6 +92,22 @@ GameSessionState.implement({
         );
       },
     }),
+    status: t.field({
+      type: GameSessionStatusValue,
+      authScopes: { user: true },
+      resolve: (state) => state.status.status,
+    }),
+    winnerIds: t.field({
+      type: ['ID'],
+      authScopes: { user: true },
+      resolve: (state) => {
+        const status = state.status;
+        if (status.status === 'completed') {
+          return status.winnerIds.map((id) => encodeGlobalID('User', id));
+        }
+        return [];
+      },
+    }),
   }),
 });
 
@@ -101,3 +118,10 @@ export function encodeGameSessionStateId(gameSessionId: string) {
 export function decodeGameSessionStateId(id: string) {
   return id;
 }
+
+export const GameSessionStatusValue = builder.enumType(
+  'GameSessionStatusValue',
+  {
+    values: ['pending', 'active', 'completed'],
+  },
+);

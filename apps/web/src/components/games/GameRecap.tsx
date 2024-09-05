@@ -103,8 +103,9 @@ function Winners({
 }) {
   const data = readFragment(postGameSessionFragment, gameSession);
   const winners = data.members.filter((member) =>
-    winnerIds.includes(member.id),
+    winnerIds.includes(member.user.id),
   );
+  console.log(winners, winnerIds, data.members);
   return (
     <div>
       <div>Winners:</div>

@@ -9,7 +9,7 @@ export const clientSessionFragment = graphql(`
     createdAt
     updatedAt
     timezone
-    status {
+    state {
       status
       winnerIds
     }

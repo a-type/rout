@@ -16,7 +16,7 @@ export interface ChatMessageSentEvent {
 }
 
 export interface GameStateChangedEvent {
-  gameSessionState: GameSessionState & { id: string };
+  gameSessionState: GameSessionState;
 }
 
 function publishChatMessageSent(event: ChatMessageSentEvent) {
