@@ -105,7 +105,6 @@ function Winners({
   const winners = data.members.filter((member) =>
     winnerIds.includes(member.user.id),
   );
-  console.log(winners, winnerIds, data.members);
   return (
     <div>
       <div>Winners:</div>
