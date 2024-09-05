@@ -10,6 +10,8 @@ import {
   useSuspenseQuery,
 } from '@long-game/game-client';
 import { clientSessionFragment } from '../../../../../packages/game-definition/src/fragments.js';
+import { Avatar } from '@a-type/ui/components/avatar';
+import { colors } from '@long-game/common';
 
 export const postGameSessionFragment = graphql(
   `
@@ -109,7 +111,23 @@ function Winners({
     <div>
       <div>Winners:</div>
       {winners.map((winner) => (
-        <div key={winner.id}>{winner.user.name}</div>
+        <div className="row p-2" key={winner.id}>
+          <Avatar
+            imageSrc={winner.user.imageUrl}
+            style={{
+              backgroundColor: winner.user.color,
+            }}
+          />
+          <span
+            className="font-bold"
+            style={{
+              color:
+                colors[winner.user.color as any as keyof typeof colors].default,
+            }}
+          >
+            {winner.user.name}
+          </span>
+        </div>
       ))}
     </div>
   );
