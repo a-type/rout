@@ -1,6 +1,5 @@
 import { assert } from '@a-type/utils';
-import { id } from '@long-game/db';
-import { decodeGlobalID, encodeGlobalID } from '@pothos/plugin-relay';
+import { id, isPrefixedId, PrefixedId } from '@long-game/db';
 import { z } from 'zod';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import {
@@ -24,7 +23,9 @@ builder.mutationFields((t) => ({
         required: true,
         validate: {
           schema: z.object({
-            gameSessionId: z.string(),
+            gameSessionId: z.custom<PrefixedId<'gs'>>((v) =>
+              isPrefixedId(v, 'gs'),
+            ),
             message: z.string(),
           }),
         },
@@ -32,14 +33,14 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
-      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
+      const gameSessionId = input.gameSessionId;
 
       await validateAccessToGameSession(gameSessionId, ctx.session);
 
       const chatMessage = await ctx.db
         .insertInto('ChatMessage')
         .values({
-          id: id(),
+          id: id('cm'),
           gameSessionId: gameSessionId,
           message: input.message,
           userId: ctx.session.userId,
@@ -63,16 +64,17 @@ builder.subscriptionFields((t) => ({
       user: true,
     },
     args: {
-      gameSessionId: t.arg.globalID({
+      gameSessionId: t.arg.prefixedId({
         required: true,
+        prefix: 'gs',
       }),
     },
     subscribe: async (_, args, ctx) => {
       assert(ctx.session);
-      await validateAccessToGameSession(args.gameSessionId.id, ctx.session);
+      await validateAccessToGameSession(args.gameSessionId, ctx.session);
 
       const iterator = pubsub.events.asyncIterator(
-        EVENT_LABELS.chatMessageSent(args.gameSessionId.id),
+        EVENT_LABELS.chatMessageSent(args.gameSessionId),
       );
 
       return iterator as any;
@@ -89,7 +91,7 @@ export const ChatMessage = builder.node('ChatMessage', {
       nullable: false,
     }),
     userId: t.id({
-      resolve: (obj) => encodeGlobalID('User', obj.userId),
+      resolve: (obj) => obj.userId,
       nullable: false,
     }),
     user: t.field({
@@ -109,7 +111,7 @@ export const ChatMessage = builder.node('ChatMessage', {
 
 builder.inputType('SendChatMessageInput', {
   fields: (t) => ({
-    gameSessionId: t.id({
+    gameSessionId: t.prefixedId({
       required: true,
     }),
     message: t.string({

@@ -1,23 +1,20 @@
-import {
-  InsertQueryNode,
-  PrimitiveValueListNode,
-  QueryResult,
-  TableNode,
-  UnknownRow,
-  UpdateQueryNode,
-  ValueListNode,
-  ValuesNode,
-} from 'kysely';
+import { dateTime } from '@a-type/kysely';
 import {
   ColumnNode,
   ColumnUpdateNode,
+  InsertQueryNode,
   KyselyPlugin,
   PluginTransformQueryArgs,
   PluginTransformResultArgs,
+  PrimitiveValueListNode,
+  QueryResult,
   RootOperationNode,
+  TableNode,
+  UnknownRow,
+  UpdateQueryNode,
   ValueNode,
+  ValuesNode,
 } from 'kysely';
-import { dateTime } from './utils.js';
 
 const ALWAYS_IGNORED = [/^kysely_/, /^sqlite_/];
 

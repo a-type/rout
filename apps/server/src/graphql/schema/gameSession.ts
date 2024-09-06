@@ -1,11 +1,16 @@
 import { assert } from '@a-type/utils';
 import { LongGameError } from '@long-game/common';
-import { dateTime, id, jsonArrayFrom } from '@long-game/db';
+import {
+  dateTime,
+  genericId,
+  id,
+  isPrefixedId,
+  jsonArrayFrom,
+  PrefixedId,
+} from '@long-game/db';
 import { GameRandom, getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import {
-  decodeGlobalID,
-  encodeGlobalID,
   resolveCursorConnection,
   ResolveCursorConnectionArgs,
 } from '@pothos/plugin-relay';
@@ -22,10 +27,10 @@ builder.queryFields((t) => ({
   gameSession: t.field({
     type: GameSession,
     args: {
-      id: t.arg.globalID({ required: true }),
+      id: t.arg.prefixedId({ required: true, prefix: 'gs' }),
     },
-    resolve: async (_, { id }, ctx) => {
-      return id.id;
+    resolve: async (_, { id }) => {
+      return id;
     },
   }),
 }));
@@ -55,13 +60,13 @@ builder.mutationFields((t) => ({
         const gameSession = await db
           .insertInto('GameSession')
           .values({
-            id: id(),
+            id: id('gs'),
             gameId: game.id,
             gameVersion: getLatestVersion(game).version,
             // TODO: configurable + automatic detection?
             timezone: 'America/New_York',
             initialState: {},
-            randomSeed: id(),
+            randomSeed: genericId(),
           })
           .returningAll()
           .executeTakeFirstOrThrow();
@@ -70,7 +75,7 @@ builder.mutationFields((t) => ({
         await db
           .insertInto('GameSessionMembership')
           .values({
-            id: id(),
+            id: id('gsm'),
             gameSessionId: gameSession.id,
             userId: session.userId,
             inviterId: session.userId,
@@ -95,7 +100,9 @@ builder.mutationFields((t) => ({
         required: true,
         validate: {
           schema: z.object({
-            gameSessionId: z.string(),
+            gameSessionId: z.custom<PrefixedId<'gs'>>((v) =>
+              isPrefixedId(v, 'gs'),
+            ),
             gameId: z.string(),
           }),
         },
@@ -103,8 +110,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
-      const { gameSessionId: gameSessionIdEncoded, gameId } = input;
-      const gameSessionId = decodeGlobalID(gameSessionIdEncoded).id;
+      const { gameSessionId, gameId } = input;
 
       const gameSession = await ctx.db
         .selectFrom('GameSession')
@@ -152,7 +158,7 @@ builder.mutationFields((t) => ({
       user: true,
     },
     args: {
-      gameSessionId: t.arg.globalID({ required: true }),
+      gameSessionId: t.arg.prefixedId({ prefix: 'gs', required: true }),
     },
     resolve: async (_, { gameSessionId }, ctx) => {
       assert(ctx.session);
@@ -164,7 +170,7 @@ builder.mutationFields((t) => ({
           'GameSession.id',
           'GameSessionMembership.gameSessionId',
         )
-        .where('GameSession.id', '=', gameSessionId.id)
+        .where('GameSession.id', '=', gameSessionId)
         .where('GameSessionMembership.userId', '=', ctx.session.userId)
         .select([
           'GameSession.id',
@@ -214,12 +220,12 @@ builder.mutationFields((t) => ({
             // the same random values as the initial state.
             random: new GameRandom(gameSession.randomSeed + 'INITIAL'),
             members: gameSession.members.map(({ id }) => ({
-              id: id ? encodeGlobalID('User', id) : 'anonymous',
+              id: id ?? 'u-anonymous',
             })),
           }),
           gameVersion: gameDefinition.version,
         })
-        .where('GameSession.id', '=', gameSessionId.id)
+        .where('GameSession.id', '=', gameSessionId)
         .returningAll()
         .executeTakeFirstOrThrow(
           () => new LongGameError(LongGameError.Code.NotFound),
@@ -316,7 +322,7 @@ GameSession.implement({
         }
         return {
           globalState: state.globalState,
-          winnerIds: status.winnerIds.map((id) => encodeGlobalID('User', id)),
+          winnerIds: status.winnerIds as any,
         };
       },
     }),
@@ -369,7 +375,8 @@ builder.inputType('PrepareGameSessionInput', {
 
 builder.inputType('UpdateGameSessionInput', {
   fields: (t) => ({
-    gameSessionId: t.id({
+    gameSessionId: t.prefixedId({
+      prefix: 'gs',
       description: 'The ID of the game session to update.',
       required: true,
     }),

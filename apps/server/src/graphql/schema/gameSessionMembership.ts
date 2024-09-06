@@ -3,6 +3,8 @@ import { builder } from '../builder.js';
 import { createResults, keyIndexes } from '../dataloaders.js';
 import {
   id,
+  isPrefixedId,
+  PrefixedId,
   type GameSessionMembership as DBGameSessionMembership,
 } from '@long-game/db';
 import { assignTypeName, hasTypeName } from '../relay.js';
@@ -11,7 +13,6 @@ import { User } from './user.js';
 import { z } from 'zod';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { LongGameError } from '@long-game/common';
-import { decodeGlobalID } from '@pothos/plugin-relay';
 
 builder.queryFields((t) => ({
   memberships: t.field({
@@ -45,16 +46,16 @@ builder.mutationFields((t) => ({
         required: true,
         validate: {
           schema: z.object({
-            gameSessionId: z.string(),
-            userId: z.string(),
+            gameSessionId: z.custom<PrefixedId<'gs'>>((v) =>
+              isPrefixedId(v, 'gs'),
+            ),
+            userId: z.custom<PrefixedId<'u'>>((v) => isPrefixedId(v, 'u')),
           }),
         },
       }),
     },
-    resolve: async (_, { input }, ctx) => {
+    resolve: async (_, { input: { gameSessionId, userId } }, ctx) => {
       assert(ctx.session);
-      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
-      const userId = decodeGlobalID(input.userId).id;
       await validateAccessToGameSession(gameSessionId, ctx.session);
 
       console.log(gameSessionId, userId);
@@ -62,7 +63,7 @@ builder.mutationFields((t) => ({
       const membership = await ctx.db
         .insertInto('GameSessionMembership')
         .values({
-          id: id(),
+          id: id('gsm'),
           gameSessionId: gameSessionId,
           userId,
           status: 'pending',
@@ -86,7 +87,9 @@ builder.mutationFields((t) => ({
         required: true,
         validate: {
           schema: z.object({
-            inviteId: z.string(),
+            inviteId: z.custom<PrefixedId<'gsm'>>((v) =>
+              isPrefixedId(v, 'gsm'),
+            ),
             response: z.enum(['accepted', 'declined']),
           }),
         },
@@ -97,7 +100,7 @@ builder.mutationFields((t) => ({
 
       const membership = await ctx.db
         .selectFrom('GameSessionMembership')
-        .where('id', '=', decodeGlobalID(input.inviteId).id)
+        .where('id', '=', input.inviteId)
         .selectAll()
         .executeTakeFirstOrThrow();
 
@@ -144,7 +147,11 @@ export const GameSessionMembership = builder.loadableNodeRef(
 
       const memberships = await ctx.db
         .selectFrom('GameSessionMembership')
-        .where('GameSessionMembership.id', 'in', ids)
+        .where(
+          'GameSessionMembership.id',
+          'in',
+          ids.filter((id) => isPrefixedId(id, 'gsm')),
+        )
         .where('GameSessionMembership.userId', '=', ctx.session.userId)
         .selectAll()
         .execute();
@@ -199,10 +206,12 @@ const GameInviteResponse = builder.enumType('GameInviteResponse', {
 
 builder.inputType('SendGameInviteInput', {
   fields: (t) => ({
-    gameSessionId: t.id({
+    gameSessionId: t.prefixedId({
+      prefix: 'gs',
       required: true,
     }),
-    userId: t.id({
+    userId: t.prefixedId({
+      prefix: 'u',
       required: true,
     }),
   }),
@@ -210,7 +219,8 @@ builder.inputType('SendGameInviteInput', {
 
 builder.inputType('RespondToGameInviteInput', {
   fields: (t) => ({
-    inviteId: t.id({
+    inviteId: t.prefixedId({
+      prefix: 'gsm',
       required: true,
     }),
     response: t.field({

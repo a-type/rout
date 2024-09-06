@@ -1,12 +1,16 @@
 import { LongGameError } from '@long-game/common';
 import { GQLContext } from './context.js';
 import DataLoader from 'dataloader';
-import { GameSession as DBGameSession } from '@long-game/db';
+import {
+  GameSession as DBGameSession,
+  GameSession,
+  isPrefixedId,
+  PrefixedId,
+} from '@long-game/db';
 import { decodeGameSessionStateId } from './schema/gameSessionState.js';
 import { GameSessionState } from '@long-game/game-state';
 import { assignTypeName } from './relay.js';
 import games from '@long-game/games';
-import { encodeGlobalID } from '@pothos/plugin-relay';
 
 export function keyIndexes(ids: readonly string[]) {
   return Object.fromEntries(ids.map((id, index) => [id, index]));
@@ -19,7 +23,7 @@ export function createResults<T>(ids: readonly string[], defaultValue?: T) {
 }
 
 export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
-  const gameSessionLoader = new DataLoader(async (ids: readonly string[]) => {
+  const gameSessionLoader = new DataLoader<string, GameSession>(async (ids) => {
     if (!ctx.session) {
       // can't view sessions without logging in
       return createResults(ids);
@@ -28,7 +32,11 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
     // before allowing access
     const gameSessions = await ctx.db
       .selectFrom('GameSession')
-      .where('GameSession.id', 'in', ids)
+      .where(
+        'GameSession.id',
+        'in',
+        ids.filter((v) => isPrefixedId(v, 'gs')),
+      )
       .innerJoin(
         'GameSessionMembership',
         'GameSession.id',
@@ -51,40 +59,39 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
     return results;
   });
 
-  const gameSessionStateLoader = new DataLoader<
-    string,
-    GameSessionState & { id: string }
-  >(async (ids) => {
-    const gameSessions = await gameSessionLoader.loadMany(
-      ids.map(decodeGameSessionStateId),
-    );
-    const computed = await Promise.allSettled(
-      gameSessions.map((session) => {
-        if (session instanceof Error) {
-          throw session;
-        }
-        return getGameState(session, ctx);
-      }),
-    );
+  const gameSessionStateLoader = new DataLoader<string, GameSessionState>(
+    async (ids) => {
+      const gameSessions = await gameSessionLoader.loadMany(
+        ids.map((v) => v.replace('gss-', 'gs-')),
+      );
+      const computed = await Promise.allSettled(
+        gameSessions.map((session) => {
+          if (session instanceof Error) {
+            throw session;
+          }
+          return getGameState(session, ctx);
+        }),
+      );
 
-    const indexes = keyIndexes(ids);
-    const results = createResults<GameSessionState & { id: string }>(ids);
-    for (const [index, result] of computed.entries()) {
-      if (result.status === 'fulfilled') {
-        if (!result.value) {
-          results[indexes[ids[index]]] = new LongGameError(
-            LongGameError.Code.NotFound,
-          );
+      const indexes = keyIndexes(ids);
+      const results = createResults<GameSessionState>(ids);
+      for (const [index, result] of computed.entries()) {
+        if (result.status === 'fulfilled') {
+          if (!result.value) {
+            results[indexes[ids[index]]] = new LongGameError(
+              LongGameError.Code.NotFound,
+            );
+          } else {
+            results[indexes[ids[index]]] = result.value;
+          }
         } else {
-          results[indexes[ids[index]]] = result.value;
+          results[indexes[ids[index]]] = result.reason;
         }
-      } else {
-        results[indexes[ids[index]]] = result.reason;
       }
-    }
 
-    return results;
-  });
+      return results;
+    },
+  );
 
   return {
     gameSession: gameSessionLoader,
@@ -123,16 +130,5 @@ async function getGameState(
     );
   }
 
-  return new GameSessionState(
-    gameSession,
-    gameDefinition,
-    turns.map(({ userId, ...rest }) => ({
-      ...rest,
-      userId: encodeGlobalID('User', userId),
-    })),
-    members.map(({ id, ...rest }) => ({
-      id: encodeGlobalID('User', id),
-      ...rest,
-    })),
-  );
+  return new GameSessionState(gameSession, gameDefinition, turns, members);
 }

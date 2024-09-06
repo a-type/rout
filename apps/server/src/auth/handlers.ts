@@ -1,5 +1,11 @@
 import { GoogleProvider, createHandlers } from '@a-type/auth';
-import { comparePassword, db, hashPassword, id } from '@long-game/db';
+import {
+  comparePassword,
+  db,
+  hashPassword,
+  id,
+  PrefixedId,
+} from '@long-game/db';
 import { sessions } from '../auth/session.js';
 import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
 import { email } from '../services/email.js';
@@ -46,12 +52,13 @@ export const authHandlers = createHandlers({
         .selectAll()
         .executeTakeFirst();
     },
-    insertAccount: async ({ expiresAt, ...account }) => {
+    insertAccount: async ({ expiresAt, userId, ...account }) => {
       return db
         .insertInto('Account')
         .values({
-          id: id(),
+          id: id('a'),
           accessTokenExpiresAt: expiresAt ? new Date(expiresAt) : undefined,
+          userId: userId as PrefixedId<'u'>,
           ...account,
         })
         .returning('id')
@@ -70,7 +77,7 @@ export const authHandlers = createHandlers({
         const userResult = await tx
           .insertInto('User')
           .values({
-            id: id(),
+            id: id('u'),
             password,
             fullName: fullName || 'Anonymous',
             friendlyName: friendlyName || 'Anonymous',
@@ -87,7 +94,7 @@ export const authHandlers = createHandlers({
       await db
         .insertInto('VerificationCode')
         .values({
-          id: id(),
+          id: id('vc'),
           expiresAt: new Date(expiresAt),
           ...verificationCode,
         })
@@ -112,7 +119,10 @@ export const authHandlers = createHandlers({
       };
     },
     consumeVerificationCode: async (id) => {
-      await db.deleteFrom('VerificationCode').where('id', '=', id).execute();
+      await db
+        .deleteFrom('VerificationCode')
+        .where('id', '=', id as PrefixedId<'vc'>)
+        .execute();
     },
     getUserByEmailAndPassword: async (email, plaintextPassword) => {
       const user = await db
@@ -137,7 +147,7 @@ export const authHandlers = createHandlers({
         : undefined;
       await db
         .updateTable('User')
-        .where('id', '=', id)
+        .where('id', '=', id as PrefixedId<'u'>)
         .set({
           fullName: user.fullName ?? undefined,
           emailVerifiedAt: user.emailVerifiedAt ?? undefined,

@@ -41,7 +41,6 @@ export function migrateToLatest() {
   return migrateInternal(db, migrations);
 }
 export {
-  id,
   hashPassword,
   comparePassword,
   dateTime,

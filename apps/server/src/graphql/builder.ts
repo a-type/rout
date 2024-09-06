@@ -10,10 +10,13 @@ import {
   Friendship,
   GameSession,
   GameSessionMembership,
+  idToType,
+  PrefixedId,
   User,
 } from '@long-game/db';
 import { GameSessionState } from '@long-game/game-state';
 import { Turn } from '@long-game/game-definition';
+import PrefixedIdPlugin from './plugins/prefixedId/prefixedIdPlugin.js';
 
 export const builder = new SchemaBuilder<{
   Context: GQLContext;
@@ -25,16 +28,16 @@ export const builder = new SchemaBuilder<{
       __typename: 'GameSessionMembership';
     };
     GameSessionState: GameSessionState & {
-      id: string;
+      id: PrefixedId<'gss'>;
       __typename: 'GameSessionState';
     };
     GameSessionStatus: {
       status: 'pending' | 'active' | 'completed';
-      winnerIds?: string[];
+      winnerIds?: PrefixedId<'u'>[];
     };
     GameSessionPostGame: {
       globalState: any;
-      winnerIds: string[];
+      winnerIds: PrefixedId<'u'>[];
     };
     ChatMessage: ChatMessage & { __typename: 'ChatMessage' };
     Turn: Turn<any> & { __typename: 'Turn' };
@@ -43,26 +46,26 @@ export const builder = new SchemaBuilder<{
       roundIndex: number;
     };
     SubmitTurnResult: {
-      gameSessionId: string;
+      gameSessionId: PrefixedId<'gs'>;
     };
   };
   Inputs: {
     UpdateUserInfoInput: { name?: string | null; color?: string | null };
 
     PrepareGameSessionInput: { gameId: string };
-    UpdateGameSessionInput: { gameSessionId: string; gameId: string };
+    UpdateGameSessionInput: { gameSessionId: PrefixedId<'gs'>; gameId: string };
 
     SendGameInviteInput: {
-      gameSessionId: string;
-      userId: string;
+      gameSessionId: PrefixedId<'gs'>;
+      userId: PrefixedId<'u'>;
     };
     RespondToGameInviteInput: {
-      inviteId: string;
+      inviteId: PrefixedId<'gsm'>;
       response: 'accepted' | 'declined' | 'pending' | 'expired' | 'uninvited';
     };
 
     SubmitTurnInput: {
-      gameSessionId: string;
+      gameSessionId: PrefixedId<'gs'>;
       turn: { data: any };
     };
     GameTurnInput: {
@@ -76,12 +79,12 @@ export const builder = new SchemaBuilder<{
       email: string;
     };
     FriendshipInviteResponseInput: {
-      friendshipId: string;
+      friendshipId: PrefixedId<'f'>;
       response: 'accepted' | 'declined' | 'pending';
     };
 
     SendChatMessageInput: {
-      gameSessionId: string;
+      gameSessionId: PrefixedId<'gs'>;
       message: string;
     };
   };
@@ -109,13 +112,30 @@ export const builder = new SchemaBuilder<{
   };
   DefaultEdgesNullability: false;
 }>({
-  plugins: [RelayPlugin, DataloaderPlugin, AuthPlugin, ZodPlugin],
+  plugins: [
+    RelayPlugin,
+    DataloaderPlugin,
+    AuthPlugin,
+    ZodPlugin,
+    PrefixedIdPlugin,
+  ],
   relay: {
     edgesFieldOptions: {
       nullable: false,
     },
     nodeFieldOptions: {
       nullable: false,
+    },
+    decodeGlobalID: (id) => {
+      const typename = idToType(id);
+      return {
+        id,
+        typename,
+      };
+    },
+    // type name is encoded as a prefix in ids already
+    encodeGlobalID: (_typename, id) => {
+      return id.toString();
     },
   },
   scopeAuth: {

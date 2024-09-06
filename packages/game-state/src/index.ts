@@ -31,8 +31,8 @@ export class GameSessionState {
     readonly members: { id: string }[],
   ) {}
 
-  get id(): string {
-    return this.gameSession.id;
+  get id(): `gss-${string}` {
+    return this.gameSession.id.replace('gs-', 'gss-') as any;
   }
 
   get globalState(): any {

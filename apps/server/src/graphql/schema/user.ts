@@ -1,6 +1,6 @@
 import { assert } from '@a-type/utils';
 import { colorNames, LongGameError, PlayerColorName } from '@long-game/common';
-import type { User as DBUser } from '@long-game/db';
+import { isPrefixedId, type User as DBUser } from '@long-game/db';
 import { z } from 'zod';
 import { builder } from '../builder.js';
 import { createResults, keyIndexes } from '../dataloaders.js';
@@ -100,7 +100,11 @@ export const User = builder.loadableNodeRef('User', {
   load: async (ids, ctx) => {
     const users = await ctx.db
       .selectFrom('User')
-      .where('id', 'in', ids)
+      .where(
+        'id',
+        'in',
+        ids.filter((id) => isPrefixedId(id, 'u')),
+      )
       .selectAll()
       .execute();
 

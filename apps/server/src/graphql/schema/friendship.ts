@@ -1,12 +1,16 @@
 import { builder } from '../builder.js';
 import { createResults, keyIndexes } from '../dataloaders.js';
-import { Friendship as DBFriendship, id } from '@long-game/db';
+import {
+  Friendship as DBFriendship,
+  id,
+  isPrefixedId,
+  PrefixedId,
+} from '@long-game/db';
 import { assignTypeName } from '../relay.js';
 import { z } from 'zod';
 import { assert } from '@a-type/utils';
 import { LongGameError } from '@long-game/common';
 import { User } from './user.js';
-import { decodeGlobalID } from '@pothos/plugin-relay';
 
 builder.queryFields((t) => ({
   friendships: t.field({
@@ -106,7 +110,7 @@ builder.mutationFields((t) => ({
       const friendship = await ctx.db
         .insertInto('Friendship')
         .values({
-          id: id(),
+          id: id('f'),
           userId,
           friendId,
           status: 'pending',
@@ -128,7 +132,9 @@ builder.mutationFields((t) => ({
         required: true,
         validate: {
           schema: z.object({
-            friendshipId: z.string(),
+            friendshipId: z.custom<PrefixedId<'f'>>((v) =>
+              isPrefixedId(v, 'f'),
+            ),
             response: z.enum(['accepted', 'declined']),
           }),
         },
@@ -137,7 +143,7 @@ builder.mutationFields((t) => ({
     resolve: async (_, { input }, ctx) => {
       assert(ctx.session);
       const { friendshipId, response } = input;
-      const id = decodeGlobalID(friendshipId).id;
+      const id = friendshipId;
 
       const friendship = await ctx.db
         .selectFrom('Friendship')
@@ -197,7 +203,11 @@ export const Friendship = builder.loadableNodeRef('Friendship', {
 
     const friendships = await ctx.db
       .selectFrom('Friendship')
-      .where('Friendship.id', 'in', ids)
+      .where(
+        'Friendship.id',
+        'in',
+        ids.filter((id) => isPrefixedId(id, 'f')),
+      )
       .where((eb) =>
         eb.or([
           eb('Friendship.userId', '=', userId),
@@ -268,7 +278,7 @@ builder.inputType('SendFriendshipInviteInput', {
 
 builder.inputType('FriendshipInviteResponseInput', {
   fields: (t) => ({
-    friendshipId: t.id({
+    friendshipId: t.prefixedId({
       required: true,
     }),
     response: t.field({

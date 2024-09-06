@@ -5,6 +5,7 @@ import {
   Selectable,
   Updateable,
 } from 'kysely';
+import { PrefixedId } from './utils.js';
 
 type CreatedAtColumn = ColumnType<string, string | undefined, never>;
 type UpdatedAtColumn = ColumnType<
@@ -25,7 +26,7 @@ export interface Database {
 }
 
 export interface UserTable {
-  id: string;
+  id: PrefixedId<'u'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
   fullName: string | null;
@@ -45,7 +46,7 @@ export type NewUser = Insertable<UserTable>;
 export type UserUpdate = Updateable<UserTable>;
 
 export interface AccountTable {
-  id: string;
+  id: PrefixedId<'a'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
@@ -58,7 +59,7 @@ export interface AccountTable {
   accessTokenExpiresAt: ColumnType<Date, Date | undefined, Date> | null;
   scope: string | null;
   idToken: string | null;
-  userId: string;
+  userId: PrefixedId<'u'>;
 }
 
 export type Account = Selectable<AccountTable>;
@@ -66,7 +67,7 @@ export type NewAccount = Insertable<AccountTable>;
 export type AccountUpdate = Updateable<AccountTable>;
 
 export interface VerificationCodeTable {
-  id: string;
+  id: PrefixedId<'vc'>;
   createdAt: ColumnType<Date, Date | undefined, never>;
   updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
 
@@ -81,7 +82,7 @@ export type NewVerificationCode = Insertable<VerificationCodeTable>;
 export type VerificationCodeUpdate = Updateable<VerificationCodeTable>;
 
 export interface GameSessionTable {
-  id: string;
+  id: PrefixedId<'gs'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
   timezone: string;
@@ -103,8 +104,8 @@ export interface GameTurnTable {
   updatedAt: UpdatedAtColumn;
 
   // primary key is composite of these 3 columns
-  gameSessionId: string;
-  userId: string;
+  gameSessionId: PrefixedId<'gs'>;
+  userId: PrefixedId<'u'>;
   roundIndex: number;
   // the main contents will be game dependent, see game-definition
   data: any;
@@ -115,13 +116,13 @@ export type NewGameTurn = Insertable<GameTurnTable>;
 export type GameTurnUpdate = Updateable<GameTurnTable>;
 
 export interface GameSessionMembershipTable {
-  id: string;
+  id: PrefixedId<'gsm'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
-  gameSessionId: string;
-  inviterId: string;
-  userId: string;
+  gameSessionId: PrefixedId<'gs'>;
+  inviterId: PrefixedId<'u'>;
+  userId: PrefixedId<'u'>;
   expiresAt: ColumnType<string, string | undefined, string | undefined>;
   claimedAt: ColumnType<string, string | undefined, string | undefined>;
   status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
@@ -133,12 +134,12 @@ export type GameSessionMembershipUpdate =
   Updateable<GameSessionMembershipTable>;
 
 export interface FriendshipTable {
-  id: string;
+  id: PrefixedId<'f'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
-  userId: string;
-  friendId: string;
+  userId: PrefixedId<'u'>;
+  friendId: PrefixedId<'u'>;
   status: 'pending' | 'accepted' | 'declined';
 }
 
@@ -147,12 +148,12 @@ export type NewFriendship = Insertable<FriendshipTable>;
 export type FriendshipUpdate = Updateable<FriendshipTable>;
 
 export interface ChatMessageTable {
-  id: string;
+  id: PrefixedId<'cm'>;
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
 
-  userId: string;
-  gameSessionId: string;
+  userId: PrefixedId<'u'>;
+  gameSessionId: PrefixedId<'gs'>;
   message: string;
 }
 

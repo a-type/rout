@@ -3,20 +3,20 @@ import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
-import { encodeGlobalID } from '@pothos/plugin-relay';
+import { PrefixedId } from '@long-game/db';
 
 builder.subscriptionFields((t) => ({
   gameSessionStateChanged: t.field({
     type: 'GameSessionState',
     args: {
-      gameSessionId: t.arg.globalID({ required: true }),
+      gameSessionId: t.arg.prefixedId({ prefix: 'gs', required: true }),
     },
     authScopes: { user: true },
     subscribe: async (_, { gameSessionId }, ctx) => {
       // validate access to game session
-      await validateAccessToGameSession(gameSessionId.id, ctx.session);
+      await validateAccessToGameSession(gameSessionId, ctx.session);
       return ctx.pubsub.events.asyncIterator(
-        EVENT_LABELS.gameStateChanged(gameSessionId.id),
+        EVENT_LABELS.gameStateChanged(gameSessionId),
       ) as any;
     },
     resolve: (payload: GameStateChangedEvent) => {
@@ -30,7 +30,7 @@ export const GameSessionState = builder.loadableNodeRef('GameSessionState', {
     return ctx.dataLoaders.gameSessionState.loadMany(ids);
   },
   id: {
-    resolve: (obj) => encodeGameSessionStateId(obj.id),
+    resolve: (obj) => obj.id,
   },
 });
 GameSessionState.implement({
@@ -42,7 +42,7 @@ GameSessionState.implement({
         const { userId } = ctx.session!;
         return state.gameDefinition.getPlayerState({
           globalState: state.globalState,
-          playerId: encodeGlobalID('User', userId),
+          playerId: userId,
           roundIndex: state.currentRound.roundIndex,
           members: state.members,
           rounds: state.rounds,
@@ -55,7 +55,7 @@ GameSessionState.implement({
       authScopes: { user: true },
       resolve: async (state, _, ctx) => {
         assert(ctx.session);
-        const viewerId = encodeGlobalID('User', ctx.session.userId);
+        const viewerId = ctx.session.userId;
         const turn = state.currentRound.turns.find(
           (turn) => turn.userId === viewerId,
         );
@@ -106,7 +106,7 @@ GameSessionState.implement({
       resolve: (state) => {
         const status = state.status;
         if (status.status === 'completed') {
-          return status.winnerIds.map((id) => encodeGlobalID('User', id));
+          return status.winnerIds;
         }
         return [];
       },
@@ -114,12 +114,16 @@ GameSessionState.implement({
   }),
 });
 
-export function encodeGameSessionStateId(gameSessionId: string) {
-  return gameSessionId;
+export function encodeGameSessionStateId(
+  gameSessionId: PrefixedId<'gs'>,
+): PrefixedId<'gss'> {
+  return gameSessionId.replace('gs-', 'gss-') as any;
 }
 
-export function decodeGameSessionStateId(id: string) {
-  return id;
+export function decodeGameSessionStateId(
+  id: PrefixedId<'gss'>,
+): PrefixedId<'gs'> {
+  return id.replace('gss-', 'gs-') as any;
 }
 
 export const GameSessionStatusValue = builder.enumType(

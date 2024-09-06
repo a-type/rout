@@ -1,5 +1,5 @@
 import { SessionManager } from '@a-type/auth';
-import { db, userNameSelector } from '@long-game/db';
+import { db, PrefixedId, userNameSelector } from '@long-game/db';
 import { LongGameError } from '@long-game/common';
 import { SESSION_SECRET } from '../secrets.js';
 import { DEPLOYED_CONTEXT } from '../config/deployedContext.js';
@@ -20,7 +20,7 @@ export const sessions = new SessionManager({
   async createSession(userId) {
     const user = await db
       .selectFrom('User')
-      .where('id', '=', userId)
+      .where('id', '=', userId as PrefixedId<'u'>)
       .select(['id'])
       .select(userNameSelector)
       .executeTakeFirst();

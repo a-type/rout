@@ -4,6 +4,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('User')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'u-%'`)
     .addColumn('createdAt', 'datetime', (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
@@ -27,6 +28,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('Account')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'a-%'`)
     .addColumn('createdAt', 'text', (col) => col.notNull())
     .addColumn('updatedAt', 'text', (col) => col.notNull())
     .addColumn('userId', 'uuid', (col) =>
@@ -52,6 +54,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('VerificationCode')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'vc%-'`)
     .addColumn('createdAt', 'datetime', (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
@@ -79,6 +82,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('GameSession')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'gs%-'`)
     .addColumn('createdAt', 'datetime', (col) => col.notNull())
     .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('timezone', 'text', (col) => col.notNull())
@@ -123,6 +127,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('GameSessionMembership')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'gs%m-'`)
     .addColumn('createdAt', 'datetime', (col) => col.notNull())
     .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('gameSessionId', 'text', (col) =>
@@ -150,6 +155,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('Friendship')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'f-%'`)
     .addColumn('createdAt', 'text', (col) => col.notNull())
     .addColumn('updatedAt', 'text', (col) => col.notNull())
     .addColumn('userId', 'text', (col) =>
@@ -177,6 +183,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('ChatMessage')
     .addColumn('id', 'text', (col) => col.primaryKey())
+    .addCheckConstraint('id', sql`id LIKE 'cm%-'`)
     .addColumn('createdAt', 'datetime', (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )

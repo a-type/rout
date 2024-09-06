@@ -3,7 +3,7 @@ import { LongGameError } from '@long-game/common';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
 import { GameSession } from './gameSession.js';
-import { decodeGlobalID, encodeGlobalID } from '@pothos/plugin-relay';
+import { encodeGameSessionStateId } from './gameSessionState.js';
 
 builder.mutationFields((t) => ({
   submitTurn: t.field({
@@ -18,8 +18,10 @@ builder.mutationFields((t) => ({
       assert(ctx.session);
       const { userId } = ctx.session;
       const { turn } = input;
-      const gameSessionId = decodeGlobalID(input.gameSessionId).id;
-      const state = await ctx.dataLoaders.gameSessionState.load(gameSessionId);
+      const gameSessionId = input.gameSessionId;
+      const state = await ctx.dataLoaders.gameSessionState.load(
+        encodeGameSessionStateId(gameSessionId),
+      );
 
       if (!state) {
         throw new LongGameError(
@@ -54,7 +56,7 @@ builder.mutationFields((t) => ({
       // compute the player's view of the state
       const playerState = gameDefinition.getPlayerState({
         globalState,
-        playerId: encodeGlobalID('User', userId),
+        playerId: userId,
         roundIndex: currentRound.roundIndex,
         members,
         rounds,
@@ -100,10 +102,7 @@ builder.mutationFields((t) => ({
         .executeTakeFirstOrThrow();
 
       // apply the turn to the game state before propagating
-      state.addTurn({
-        ...createdTurn,
-        userId: encodeGlobalID('User', createdTurn.userId),
-      });
+      state.addTurn(createdTurn);
 
       ctx.pubsub.publishGameStateChanged({
         gameSessionState: state,
@@ -157,7 +156,10 @@ builder.objectType('SubmitTurnResult', {
 
 builder.inputType('SubmitTurnInput', {
   fields: (t) => ({
-    gameSessionId: t.id({ required: true }),
+    gameSessionId: t.prefixedId({
+      required: true,
+      prefix: 'gs',
+    }),
     turn: t.field({
       type: 'GameTurnInput',
       required: true,
