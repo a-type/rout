@@ -1,9 +1,7 @@
 import { assert } from '@a-type/utils';
 import { colorNames, LongGameError, PlayerColorName } from '@long-game/common';
-import { isPrefixedId, type User as DBUser } from '@long-game/db';
 import { z } from 'zod';
 import { builder } from '../builder.js';
-import { createResults, keyIndexes } from '../dataloaders.js';
 import { assignTypeName, hasTypeName } from '../relay.js';
 
 builder.queryField('me', (t) =>
@@ -18,7 +16,26 @@ builder.queryField('me', (t) =>
         );
       }
 
-      return ctx.session.userId;
+      try {
+        return assignTypeName('User')(
+          await ctx.dataLoaders.user.load(ctx.session.userId),
+        );
+      } catch (err) {
+        console.error(err);
+        if (
+          LongGameError.isInstance(err) &&
+          err.code === LongGameError.Code.NotFound
+        ) {
+          // the user no longer exists in the db for this session. reset the session.
+          await ctx.auth.setLoginSession(null);
+          throw new LongGameError(
+            LongGameError.Code.SessionInvalid,
+            'You must be logged in to access this functionality.',
+          );
+        }
+
+        throw err;
+      }
     },
   }),
 );
@@ -98,24 +115,7 @@ builder.mutationFields((t) => ({
 
 export const User = builder.loadableNodeRef('User', {
   load: async (ids, ctx) => {
-    const users = await ctx.db
-      .selectFrom('User')
-      .where(
-        'id',
-        'in',
-        ids.filter((id) => isPrefixedId(id, 'u')),
-      )
-      .selectAll()
-      .execute();
-
-    const indexes = keyIndexes(ids);
-
-    const results = createResults<DBUser & { __typename: 'User' }>(ids);
-    for (const result of users) {
-      results[indexes[result.id]] = assignTypeName('User')(result);
-    }
-
-    return results;
+    return ctx.dataLoaders.user.loadMany(ids);
   },
   id: {
     resolve: (user) => user.id,

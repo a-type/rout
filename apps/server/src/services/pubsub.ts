@@ -1,13 +1,13 @@
-import { ChatMessage } from '@long-game/db';
+import { ChatMessage, PrefixedId } from '@long-game/db';
 import { GameSessionState } from '@long-game/game-state';
 import { PubSub } from 'graphql-subscriptions';
 
 const events = new PubSub();
 
 export const EVENT_LABELS = {
-  chatMessageSent: (gameSessionId: string) =>
+  chatMessageSent: (gameSessionId: PrefixedId<'gs'>) =>
     `${gameSessionId}:chatMessageSent`,
-  gameStateChanged: (gameSessionId: string) =>
+  gameStateChanged: (gameSessionId: PrefixedId<'gss'>) =>
     `${gameSessionId}:gameStateChanged`,
 };
 

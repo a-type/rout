@@ -16,7 +16,7 @@ builder.subscriptionFields((t) => ({
       // validate access to game session
       await validateAccessToGameSession(gameSessionId, ctx.session);
       return ctx.pubsub.events.asyncIterator(
-        EVENT_LABELS.gameStateChanged(gameSessionId),
+        EVENT_LABELS.gameStateChanged(encodeGameSessionStateId(gameSessionId)),
       ) as any;
     },
     resolve: (payload: GameStateChangedEvent) => {

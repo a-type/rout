@@ -54,7 +54,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('VerificationCode')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addCheckConstraint('id', sql`id LIKE 'vc%-'`)
+    .addCheckConstraint('id', sql`id LIKE 'vc-%'`)
     .addColumn('createdAt', 'datetime', (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
@@ -82,7 +82,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('GameSession')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addCheckConstraint('id', sql`id LIKE 'gs%-'`)
+    .addCheckConstraint('id', sql`id LIKE 'gs-%'`)
     .addColumn('createdAt', 'datetime', (col) => col.notNull())
     .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('timezone', 'text', (col) => col.notNull())
@@ -127,7 +127,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('GameSessionMembership')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addCheckConstraint('id', sql`id LIKE 'gs%m-'`)
+    .addCheckConstraint('id', sql`id LIKE 'gsm-%'`)
     .addColumn('createdAt', 'datetime', (col) => col.notNull())
     .addColumn('updatedAt', 'datetime', (col) => col.notNull())
     .addColumn('gameSessionId', 'text', (col) =>
@@ -183,7 +183,7 @@ export async function up(db: Kysely<any>) {
   await db.schema
     .createTable('ChatMessage')
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addCheckConstraint('id', sql`id LIKE 'cm%-'`)
+    .addCheckConstraint('id', sql`id LIKE 'cm-%'`)
     .addColumn('createdAt', 'datetime', (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )

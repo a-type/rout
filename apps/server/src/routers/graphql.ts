@@ -1,7 +1,7 @@
 import { AuthError, ErrorMessages, Session } from '@a-type/auth';
 import { useCSRFPrevention } from '@graphql-yoga/plugin-csrf-prevention';
 import { LongGameError } from '@long-game/common';
-import { db } from '@long-game/db';
+import { db, PrefixedId } from '@long-game/db';
 import { GraphQLError } from 'graphql';
 import { Plugin, createYoga, maskError } from 'graphql-yoga';
 import { Hono } from 'hono';
@@ -91,14 +91,15 @@ export const graphqlRouter = new Hono<Env>().all('/', async (honoCtx) => {
       }
       // also update immediately in the context, so that
       // resolvers on return values can see the new session
-      ctx.session = ses;
+      ctx.session = ses as any;
     },
   };
 
   // Getting user session
-  let session: Session | null = null;
+  let session: (Omit<Session, 'userId'> & { userId: PrefixedId<'u'> }) | null =
+    null;
   try {
-    session = await sessions.getSession(honoCtx.req.raw);
+    session = (await sessions.getSession(honoCtx.req.raw)) as any;
   } catch (e) {
     // if session expired, we need to tell the client to refresh it
     if (e instanceof AuthError) {

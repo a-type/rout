@@ -51,6 +51,7 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
         name: initial?.name ?? '',
         color: initial?.color ?? randomColor,
       }}
+      enableReinitialize
       onSubmit={async (values) => {
         await save({ variables: { input: values } });
         onSave?.();

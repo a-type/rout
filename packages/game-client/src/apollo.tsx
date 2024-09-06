@@ -34,7 +34,7 @@ function createErrorHandler(
             code === LongGameError.Code.Unauthorized
           ) {
             errorMessage = undefined;
-            operation.setContext(async () => {
+            return operation.setContext(async () => {
               // attempt to refresh the session
               console.log('Attempting to refresh session');
               const success = await refreshSession(
@@ -54,6 +54,12 @@ function createErrorHandler(
                 onLoggedOut?.();
                 return;
               }
+            });
+          } else if (code === LongGameError.Code.SessionInvalid) {
+            // the session cookie should be removed now, so retry
+            onLoggedOut?.();
+            return operation.setContext(async () => {
+              return forward(operation);
             });
           } else {
             errorMessage = err.message;

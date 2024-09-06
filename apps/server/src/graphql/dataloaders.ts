@@ -1,12 +1,7 @@
 import { LongGameError } from '@long-game/common';
 import { GQLContext } from './context.js';
 import DataLoader from 'dataloader';
-import {
-  GameSession as DBGameSession,
-  GameSession,
-  isPrefixedId,
-  PrefixedId,
-} from '@long-game/db';
+import { GameSession, User, isPrefixedId, PrefixedId } from '@long-game/db';
 import { decodeGameSessionStateId } from './schema/gameSessionState.js';
 import { GameSessionState } from '@long-game/game-state';
 import { assignTypeName } from './relay.js';
@@ -23,6 +18,27 @@ export function createResults<T>(ids: readonly string[], defaultValue?: T) {
 }
 
 export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
+  const userLoader = new DataLoader<string, User>(async (ids) => {
+    const users = await ctx.db
+      .selectFrom('User')
+      .where(
+        'User.id',
+        'in',
+        ids.filter((v) => isPrefixedId(v, 'u')),
+      )
+      .selectAll()
+      .execute();
+
+    const indexes = keyIndexes(ids);
+
+    const results = createResults<User>(ids);
+    for (const user of users) {
+      results[indexes[user.id]] = assignTypeName('User')(user);
+    }
+
+    return results;
+  });
+
   const gameSessionLoader = new DataLoader<string, GameSession>(async (ids) => {
     if (!ctx.session) {
       // can't view sessions without logging in
@@ -48,9 +64,9 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
 
     const indexes = keyIndexes(ids);
 
-    const results = createResults<
-      DBGameSession & { __typename: 'GameSession' }
-    >(ids);
+    const results = createResults<GameSession & { __typename: 'GameSession' }>(
+      ids,
+    );
     for (const gameSession of gameSessions) {
       results[indexes[gameSession.id]] =
         assignTypeName('GameSession')(gameSession);
@@ -96,11 +112,12 @@ export function createDataLoaders(ctx: Pick<GQLContext, 'db' | 'session'>) {
   return {
     gameSession: gameSessionLoader,
     gameSessionState: gameSessionStateLoader,
+    user: userLoader,
   };
 }
 
 async function getGameState(
-  gameSession: DBGameSession,
+  gameSession: GameSession,
   ctx: Pick<GQLContext, 'db'>,
 ) {
   const turns = await ctx.db

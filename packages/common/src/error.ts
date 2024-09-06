@@ -2,6 +2,7 @@ export enum LongGameErrorCode {
   BadRequest = 40000,
   Unauthorized = 40100,
   SessionExpired = 40101,
+  SessionInvalid = 40102,
   Forbidden = 40300,
   NotFound = 40400,
   Conflict = 40900,

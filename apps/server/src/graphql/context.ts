@@ -12,7 +12,7 @@ export type GQLContext = {
   dataLoaders: ReturnType<typeof createDataLoaders>;
   auth: {
     applyHeaders: Headers;
-    setLoginSession: (session: Session) => Promise<void>;
+    setLoginSession: (session: Session | null) => Promise<void>;
   };
   pubsub: typeof pubsub;
 };

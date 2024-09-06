@@ -1,3 +1,4 @@
+import { Avatar } from '@a-type/ui/components/avatar';
 import { Button } from '@a-type/ui/components/button';
 import {
   FragmentOf,
@@ -71,8 +72,8 @@ function FriendInvite({
   const data = readFragment(friendInviteFragment, invite);
   const [respond] = useMutation(respondMutation);
   return (
-    <li>
-      <img src={data.friend.imageUrl ?? ''} />
+    <li className="row">
+      <Avatar imageSrc={data.friend.imageUrl ?? ''} name={data.friend.name} />
       {data.friend.name} invited you to be friends
       <Button
         onClick={async () => {
