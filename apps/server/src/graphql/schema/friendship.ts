@@ -11,10 +11,13 @@ import { z } from 'zod';
 import { assert } from '@a-type/utils';
 import { LongGameError } from '@long-game/common';
 import { User } from './user.js';
+import { GQLContext } from '../context.js';
+import { encodeBase64 } from '@pothos/core';
+import { resolveOffsetConnection } from '@pothos/plugin-relay';
 
 builder.queryFields((t) => ({
   friendships: t.field({
-    type: [Friendship],
+    type: 'Friendships',
     nullable: false,
     authScopes: {
       user: true,
@@ -30,36 +33,16 @@ builder.queryFields((t) => ({
       }),
     },
     resolve: async (_, { input }, ctx) => {
-      if (!ctx.session) {
-        return [];
-      }
-      const userId = ctx.session.userId;
-
-      let friendshipsQueryBuilder = ctx.db
-        .selectFrom('Friendship')
-        .where((eb) =>
-          eb.or([eb('userId', '=', userId), eb('friendId', '=', userId)]),
-        )
-        .selectAll();
-
-      if (input?.status) {
-        friendshipsQueryBuilder = friendshipsQueryBuilder.where(
-          'status',
-          '=',
-          input.status,
-        );
-      }
-
-      const friendships = await friendshipsQueryBuilder.execute();
-
-      return friendships.map(assignTypeName('Friendship'));
+      return {
+        filter: input || {},
+      };
     },
   }),
 }));
 
 builder.mutationFields((t) => ({
   sendFriendshipInvite: t.field({
-    type: 'Friendship',
+    type: 'SendFriendshipInviteResult',
     authScopes: {
       user: true,
     },
@@ -118,11 +101,14 @@ builder.mutationFields((t) => ({
         .returningAll()
         .executeTakeFirstOrThrow();
 
-      return assignTypeName('Friendship')(friendship);
+      return {
+        friendship: assignTypeName('Friendship')(friendship),
+      };
     },
   }),
   respondToFriendshipInvite: t.field({
-    type: 'Friendship',
+    type: 'FriendshipResponseResult',
+    nullable: false,
     authScopes: {
       user: true,
     },
@@ -184,11 +170,14 @@ builder.mutationFields((t) => ({
         .returningAll()
         .executeTakeFirstOrThrow();
 
-      return assignTypeName('Friendship')(result);
+      return {
+        friendship: assignTypeName('Friendship')(result),
+      };
     },
   }),
 }));
 
+// OUTPUT TYPES
 export const Friendship = builder.loadableNodeRef('Friendship', {
   load: async (ids, ctx) => {
     if (!ctx.session) {
@@ -219,15 +208,10 @@ export const Friendship = builder.loadableNodeRef('Friendship', {
 
     const indexes = keyIndexes(ids);
 
-    const results = createResults<DBFriendship & { __typename: 'Friendship' }>(
-      ids,
-    );
+    const results = createResults<DBFriendship>(ids);
 
     for (const friendship of friendships) {
-      results[indexes[friendship.id]] = {
-        ...friendship,
-        __typename: 'Friendship',
-      };
+      results[indexes[friendship.id]] = friendship;
     }
 
     return results;
@@ -260,6 +244,71 @@ const FriendshipStatus = builder.enumType('FriendshipStatus', {
   values: ['pending', 'accepted', 'declined'],
 });
 
+builder.node('Friendships', {
+  id: {
+    resolve: (obj) => encodeBase64(obj.filter.status || 'all'),
+  },
+  fields: (t) => ({
+    connection: t.connection({
+      type: Friendship,
+      resolve: async (obj, args, ctx) => {
+        return resolveOffsetConnection({ args }, ({ limit, offset }) => {
+          return getFriendships(ctx, obj.filter, { limit, offset });
+        });
+      },
+    }),
+  }),
+});
+
+builder.objectType('SendFriendshipInviteResult', {
+  fields: (t) => ({
+    friendship: t.field({
+      type: Friendship,
+      nullable: false,
+      resolve: (obj) => obj.friendship,
+    }),
+    friendships: t.field({
+      type: 'Friendships',
+      nullable: false,
+      args: {
+        input: t.arg({
+          type: 'FriendshipFilterInput',
+        }),
+      },
+      resolve: async (obj, { input }, ctx) => {
+        return {
+          filter: input || {},
+        };
+      },
+    }),
+  }),
+});
+
+builder.objectType('FriendshipResponseResult', {
+  fields: (t) => ({
+    Friendship: t.field({
+      type: Friendship,
+      nullable: false,
+      resolve: (obj) => obj.friendship,
+    }),
+    friendships: t.field({
+      type: 'Friendships',
+      nullable: false,
+      args: {
+        input: t.arg({
+          type: 'FriendshipFilterInput',
+        }),
+      },
+      resolve: async (obj, { input }, ctx) => {
+        return {
+          filter: input || {},
+        };
+      },
+    }),
+  }),
+});
+
+// INPUT TYPES
 builder.inputType('FriendshipFilterInput', {
   fields: (t) => ({
     status: t.field({
@@ -287,3 +336,34 @@ builder.inputType('FriendshipInviteResponseInput', {
     }),
   }),
 });
+
+// DATA
+async function getFriendships(
+  ctx: GQLContext,
+  input?: { status?: 'pending' | 'accepted' | 'declined' | null } | null,
+  { limit = 10, offset = 0 } = {},
+) {
+  if (!ctx.session) {
+    return [];
+  }
+  const userId = ctx.session.userId;
+
+  let friendshipsQueryBuilder = ctx.db
+    .selectFrom('Friendship')
+    .where((eb) =>
+      eb.or([eb('userId', '=', userId), eb('friendId', '=', userId)]),
+    )
+    .limit(limit)
+    .offset(offset)
+    .selectAll();
+
+  if (input?.status) {
+    friendshipsQueryBuilder = friendshipsQueryBuilder.where(
+      'status',
+      '=',
+      input?.status,
+    );
+  }
+
+  return friendshipsQueryBuilder.execute();
+}

@@ -110,6 +110,7 @@ builder.mutationFields((t) => ({
 
       return {
         gameSessionId,
+        gameSessionState: state,
       };
     },
   }),
@@ -150,6 +151,10 @@ builder.objectType('SubmitTurnResult', {
     gameSession: t.field({
       type: GameSession,
       resolve: (obj) => obj.gameSessionId,
+    }),
+    gameSessionState: t.field({
+      type: 'GameSessionState',
+      resolve: (obj) => obj.gameSessionState,
     }),
   }),
 });

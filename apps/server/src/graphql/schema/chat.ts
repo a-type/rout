@@ -8,12 +8,16 @@ import {
   pubsub,
 } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
-import { assignTypeName } from '../relay.js';
 import { User } from './user.js';
+import { encodeBase64 } from '@pothos/core';
+import {
+  resolveCursorConnection,
+  ResolveCursorConnectionArgs,
+} from '@pothos/plugin-relay';
 
 builder.mutationFields((t) => ({
   sendMessage: t.field({
-    type: 'ChatMessage',
+    type: 'SendChatMessageResult',
     authScopes: {
       user: true,
     },
@@ -52,7 +56,9 @@ builder.mutationFields((t) => ({
         message: chatMessage,
       });
 
-      return assignTypeName('ChatMessage')(chatMessage);
+      return {
+        message: chatMessage,
+      };
     },
   }),
 }));
@@ -80,7 +86,7 @@ builder.subscriptionFields((t) => ({
       return iterator as any;
     },
     resolve: async (root: ChatMessageSentEvent) => {
-      return assignTypeName('ChatMessage')(root.message);
+      return root.message;
     },
   }),
 }));
@@ -107,6 +113,63 @@ export const ChatMessage = builder.node('ChatMessage', {
   id: {
     resolve: (obj) => obj.id,
   },
+});
+
+builder.node('GameChat', {
+  id: {
+    resolve: (obj) => `gc-${encodeBase64(obj.gameSessionId)}`,
+  },
+  fields: (t) => ({
+    messages: t.connection({
+      type: ChatMessage,
+      nullable: false,
+      resolve: (root, args, ctx) =>
+        resolveCursorConnection(
+          {
+            args,
+            toCursor: (message) => message.createdAt,
+          },
+          async ({
+            before,
+            after,
+            limit,
+            inverted,
+          }: ResolveCursorConnectionArgs) => {
+            let messagesBuilder = ctx.db
+              .selectFrom('ChatMessage')
+              .where('gameSessionId', '=', root.gameSessionId);
+
+            if (before) {
+              messagesBuilder = messagesBuilder.where('createdAt', '<', before);
+            } else if (after) {
+              messagesBuilder = messagesBuilder.where('createdAt', '>', after);
+            }
+
+            const messages = await messagesBuilder
+              .selectAll()
+              .limit(limit)
+              .orderBy('createdAt', inverted ? 'desc' : 'asc')
+              .execute();
+
+            return messages;
+          },
+        ),
+    }),
+  }),
+});
+
+builder.objectType('SendChatMessageResult', {
+  fields: (t) => ({
+    message: t.field({
+      type: ChatMessage,
+      nullable: false,
+      resolve: (obj) => obj.message,
+    }),
+    gameChat: t.field({
+      type: 'GameChat',
+      resolve: (obj) => ({ gameSessionId: obj.message.gameSessionId }),
+    }),
+  }),
 });
 
 builder.inputType('SendChatMessageInput', {

@@ -213,10 +213,12 @@ export class GameClient<
                 ...ClientRefreshSession
               }
               chat {
-                edges {
-                  node {
-                    id
-                    ...ClientChat
+                messages {
+                  edges {
+                    node {
+                      id
+                      ...ClientChat
+                    }
                   }
                 }
               }
@@ -234,7 +236,8 @@ export class GameClient<
       this.loadFromState(initialRes.data.gameSession.state);
     }
     const chats =
-      initialRes.data.gameSession?.chat?.edges.map((e) => e.node) ?? [];
+      initialRes.data.gameSession?.chat?.messages.edges.map((e) => e.node) ??
+      [];
     this.addChats(chats);
 
     const result = graphqlClient.subscribe({
@@ -389,8 +392,10 @@ export class GameClient<
         `
           mutation ClientSendChat($input: SendChatMessageInput!) {
             sendMessage(input: $input) {
-              id
-              ...ClientChat
+              message {
+                id
+                ...ClientChat
+              }
             }
           }
         `,

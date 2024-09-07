@@ -9,7 +9,21 @@ import { graphql, useMutation } from '@long-game/game-client';
 const sendFriendInviteMutation = graphql(`
   mutation SendFriendInvite($input: SendFriendshipInviteInput!) {
     sendFriendshipInvite(input: $input) {
-      id
+      friendships(input: { status: pending }) {
+        id
+        connection {
+          edges {
+            node {
+              id
+              friend {
+                id
+                name
+                imageUrl
+              }
+            }
+          }
+        }
+      }
     }
   }
 `);

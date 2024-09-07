@@ -20,9 +20,10 @@ export interface GameStateChangedEvent {
 }
 
 function publishChatMessageSent(event: ChatMessageSentEvent) {
-  events.publish(EVENT_LABELS.chatMessageSent(event.message.gameSessionId), {
-    chatMessageSent: event,
-  });
+  events.publish(
+    EVENT_LABELS.chatMessageSent(event.message.gameSessionId),
+    event,
+  );
 }
 
 function publishGameStateChanged(event: GameStateChangedEvent) {

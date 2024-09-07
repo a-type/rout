@@ -21,16 +21,27 @@ import PrefixedIdPlugin from './plugins/prefixedId/prefixedIdPlugin.js';
 export const builder = new SchemaBuilder<{
   Context: GQLContext;
   Objects: {
-    User: User & { __typename: 'User' };
-    Friendship: Friendship & { __typename: 'Friendship' };
-    GameSession: GameSession & { __typename: 'GameSession' };
-    GameSessionMembership: GameSessionMembership & {
-      __typename: 'GameSessionMembership';
+    User: User;
+
+    Friendship: Friendship;
+    FriendshipResponseResult: {
+      friendship: Friendship;
     };
-    GameSessionState: GameSessionState & {
-      id: PrefixedId<'gss'>;
-      __typename: 'GameSessionState';
+    SendFriendshipInviteResult: {
+      friendship: Friendship;
     };
+    Friendships: {
+      filter: { status?: 'pending' | 'accepted' | 'declined' | null };
+    };
+
+    GameSession: GameSession;
+    UpdateGameSessionResult: {
+      gameSession: GameSession;
+    };
+
+    GameSessionMembership: GameSessionMembership;
+
+    GameSessionState: GameSessionState;
     GameSessionStatus: {
       status: 'pending' | 'active' | 'completed';
       winnerIds?: PrefixedId<'u'>[];
@@ -39,14 +50,23 @@ export const builder = new SchemaBuilder<{
       globalState: any;
       winnerIds: PrefixedId<'u'>[];
     };
-    ChatMessage: ChatMessage & { __typename: 'ChatMessage' };
-    Turn: Turn<any> & { __typename: 'Turn' };
+
+    ChatMessage: ChatMessage;
+    GameChat: {
+      gameSessionId: PrefixedId<'gs'>;
+    };
+    SendChatMessageResult: {
+      message: ChatMessage;
+    };
+
+    Turn: Turn<any>;
     Round: {
       turns: Turn<any>[];
       roundIndex: number;
     };
     SubmitTurnResult: {
       gameSessionId: PrefixedId<'gs'>;
+      gameSessionState: GameSessionState;
     };
   };
   Inputs: {

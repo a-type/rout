@@ -90,7 +90,7 @@ builder.mutationFields((t) => ({
   }),
 
   updateGameSession: t.field({
-    type: GameSession,
+    type: 'UpdateGameSessionResult',
     authScopes: {
       user: true,
     },
@@ -148,7 +148,9 @@ builder.mutationFields((t) => ({
           () => new LongGameError(LongGameError.Code.NotFound),
         );
 
-      return assignTypeName('GameSession')(updated);
+      return {
+        gameSession: assignTypeName('GameSession')(updated),
+      };
     },
   }),
 
@@ -236,6 +238,7 @@ builder.mutationFields((t) => ({
   }),
 }));
 
+// OUTPUT TYPES
 export const GameSession = builder.loadableNodeRef('GameSession', {
   load: async (ids, ctx) => {
     return ctx.dataLoaders.gameSession.loadMany(ids);
@@ -270,40 +273,10 @@ GameSession.implement({
         return encodeGameSessionStateId(gameSession.id);
       },
     }),
-    chat: t.connection({
-      type: 'ChatMessage',
+    chat: t.field({
+      type: 'GameChat',
       nullable: false,
-      resolve: (gameSession, args, ctx) =>
-        resolveCursorConnection(
-          {
-            args,
-            toCursor: (message) => message.createdAt,
-          },
-          async ({
-            before,
-            after,
-            limit,
-            inverted,
-          }: ResolveCursorConnectionArgs) => {
-            let messagesBuilder = ctx.db
-              .selectFrom('ChatMessage')
-              .where('gameSessionId', '=', gameSession.id);
-
-            if (before) {
-              messagesBuilder = messagesBuilder.where('createdAt', '<', before);
-            } else if (after) {
-              messagesBuilder = messagesBuilder.where('createdAt', '>', after);
-            }
-
-            const messages = await messagesBuilder
-              .selectAll()
-              .limit(limit)
-              .orderBy('createdAt', inverted ? 'desc' : 'asc')
-              .execute();
-
-            return messages.map(assignTypeName('ChatMessage'));
-          },
-        ),
+      resolve: (gameSession, args, ctx) => ({ gameSessionId: gameSession.id }),
     }),
     postGame: t.field({
       type: 'GameSessionPostGame',
@@ -363,6 +336,17 @@ builder.objectType('GameSessionPostGame', {
   }),
 });
 
+builder.objectType('UpdateGameSessionResult', {
+  fields: (t) => ({
+    gameSession: t.field({
+      type: GameSession,
+      nullable: false,
+      resolve: (obj) => obj.gameSession,
+    }),
+  }),
+});
+
+// INPUT TYPES
 builder.inputType('PrepareGameSessionInput', {
   fields: (t) => ({
     gameId: t.field({

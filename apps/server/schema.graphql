@@ -25,10 +25,45 @@ input FriendshipInviteResponseInput {
   response: FriendshipStatus!
 }
 
+type FriendshipResponseResult {
+  Friendship: Friendship!
+  friendships(input: FriendshipFilterInput): Friendships!
+}
+
 enum FriendshipStatus {
   accepted
   declined
   pending
+}
+
+type Friendships implements Node {
+  connection(after: String, before: String, first: Int, last: Int): FriendshipsConnection
+  id: ID!
+}
+
+type FriendshipsConnection {
+  edges: [FriendshipsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type FriendshipsConnectionEdge {
+  cursor: String!
+  node: Friendship!
+}
+
+type GameChat implements Node {
+  id: ID!
+  messages(after: String, before: String, first: Int, last: Int): GameChatMessagesConnection!
+}
+
+type GameChatMessagesConnection {
+  edges: [GameChatMessagesConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GameChatMessagesConnectionEdge {
+  cursor: String!
+  node: ChatMessage!
 }
 
 enum GameInviteResponse {
@@ -41,7 +76,7 @@ enum GameInviteResponse {
 
 """An instance of a game being played by a group of users."""
 type GameSession implements Node {
-  chat(after: String, before: String, first: Int, last: Int): GameSessionChatConnection!
+  chat: GameChat!
   createdAt: DateTime!
   gameId: ID!
   gameVersion: String!
@@ -52,16 +87,6 @@ type GameSession implements Node {
   state: GameSessionState!
   timezone: String!
   updatedAt: DateTime!
-}
-
-type GameSessionChatConnection {
-  edges: [GameSessionChatConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type GameSessionChatConnectionEdge {
-  cursor: String!
-  node: ChatMessage!
 }
 
 """A user who is a member of a game session."""
@@ -104,15 +129,15 @@ scalar JSON
 type Mutation {
   acceptTermsOfService: User
   prepareGameSession(input: PrepareGameSessionInput!): GameSession
-  respondToFriendshipInvite(input: FriendshipInviteResponseInput!): Friendship
+  respondToFriendshipInvite(input: FriendshipInviteResponseInput!): FriendshipResponseResult!
   respondToGameInvite(input: RespondToGameInviteInput!): GameSessionMembership
-  sendFriendshipInvite(input: SendFriendshipInviteInput!): Friendship
+  sendFriendshipInvite(input: SendFriendshipInviteInput!): SendFriendshipInviteResult
   sendGameInvite(input: SendGameInviteInput!): GameSessionMembership
-  sendMessage(input: SendChatMessageInput!): ChatMessage
+  sendMessage(input: SendChatMessageInput!): SendChatMessageResult
   setSendEmailUpdates(value: Boolean!): User
   startGameSession(gameSessionId: ID!): GameSession
   submitTurn(input: SubmitTurnInput!): SubmitTurnResult
-  updateGameSession(input: UpdateGameSessionInput!): GameSession
+  updateGameSession(input: UpdateGameSessionInput!): UpdateGameSessionResult
   updateUserInfo(input: UpdateUserInfoInput!): User
 }
 
@@ -133,7 +158,7 @@ input PrepareGameSessionInput {
 }
 
 type Query {
-  friendships(input: FriendshipFilterInput): [Friendship!]!
+  friendships(input: FriendshipFilterInput): Friendships!
   gameSession(id: ID!): GameSession
   me: User!
   memberships: [GameSessionMembership!]
@@ -156,8 +181,18 @@ input SendChatMessageInput {
   message: String!
 }
 
+type SendChatMessageResult {
+  gameChat: GameChat
+  message: ChatMessage!
+}
+
 input SendFriendshipInviteInput {
   email: String!
+}
+
+type SendFriendshipInviteResult {
+  friendship: Friendship!
+  friendships(input: FriendshipFilterInput): Friendships!
 }
 
 input SendGameInviteInput {
@@ -172,6 +207,7 @@ input SubmitTurnInput {
 
 type SubmitTurnResult {
   gameSession: GameSession
+  gameSessionState: GameSessionState
 }
 
 type Subscription {
@@ -191,6 +227,10 @@ input UpdateGameSessionInput {
 
   """The ID of the game session to update."""
   gameSessionId: ID!
+}
+
+type UpdateGameSessionResult {
+  gameSession: GameSession!
 }
 
 input UpdateUserInfoInput {

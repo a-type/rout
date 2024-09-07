@@ -24,7 +24,13 @@ const friendInvitesQuery = graphql(
     query FriendInvites {
       friendships(input: { status: pending }) {
         id
-        ...FriendInvite
+        connection {
+          edges {
+            node {
+              ...FriendInvite
+            }
+          }
+        }
       }
     }
   `,
@@ -33,7 +39,7 @@ const friendInvitesQuery = graphql(
 
 export function FriendInvites() {
   const { data, refetch } = useSuspenseQuery(friendInvitesQuery);
-  const invites = data?.friendships;
+  const invites = data?.friendships?.connection.edges.map((edge) => edge.node);
 
   if (!invites) {
     return null;
@@ -56,8 +62,21 @@ const respondMutation = graphql(`
     respondToFriendshipInvite(
       input: { friendshipId: $id, response: $response }
     ) {
-      id
-      status
+      friendships(input: { status: accepted }) {
+        id
+        connection {
+          edges {
+            node {
+              status
+              friend {
+                id
+                name
+                imageUrl
+              }
+            }
+          }
+        }
+      }
     }
   }
 `);
