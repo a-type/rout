@@ -1,9 +1,10 @@
 import {
   graphql,
   useSuspenseQuery,
-  clientSessionFragment,
+  initialSessionFragment,
+  GameSessionRenderer,
 } from '@long-game/game-client';
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import games from '@long-game/games';
 import { NoGameFound } from './NoGameFound.js';
 
@@ -14,11 +15,11 @@ const gameSessionQuery = graphql(
         id
         gameId
         gameVersion
-        ...GameDefinitionClientSession
+        ...ClientInitialSession
       }
     }
   `,
-  [clientSessionFragment],
+  [initialSessionFragment],
 );
 
 export interface GameSessionProps {
@@ -46,6 +47,7 @@ export const GameSession: FC<GameSessionProps> = ({ gameSessionId }) => {
     return <NoGameFound />;
   }
 
-  const { Client } = gameDefinition;
-  return <Client session={session} />;
+  return (
+    <GameSessionRenderer gameDefinition={gameDefinition} session={session} />
+  );
 };

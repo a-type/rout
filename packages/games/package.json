@@ -18,7 +18,8 @@
     "@long-game/game-number-guess": "workspace:*",
     "@long-game/game-neuron": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/game-scribble": "workspace:*"
+    "@long-game/game-scribble": "workspace:*",
+    "@long-game/game-hyperchess": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.5.4",

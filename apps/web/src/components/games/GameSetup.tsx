@@ -73,8 +73,10 @@ const startGameMutation = graphql(
 const updateGameMutation = graphql(`
   mutation UpdateGame($id: ID!, $gameId: ID!) {
     updateGameSession(input: { gameSessionId: $id, gameId: $gameId }) {
-      id
-      gameId
+      gameSession {
+        id
+        gameId
+      }
     }
   }
 `);
@@ -117,7 +119,7 @@ export function GameSetup({ gameSession: frag, onRefetch }: GameSetupProps) {
 
   const game = games[gameSession.gameId];
   const insufficientPlayers =
-    gameSession.members.length <
+    gameSession.members.filter((m) => m.status === 'accepted').length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
   return (
@@ -207,9 +209,12 @@ function GameSetupInviteFriends({
   const members = membersFrag.map((member) =>
     readFragment(membersFragment, member),
   );
-  const friendsNotInvited = (data.friendships ?? []).filter(
-    (friend) => !members.some((member) => member.user.id === friend.friend.id),
-  );
+  const friendsNotInvited = (data.friendships.connection?.edges ?? [])
+    .map((edge) => edge.node)
+    .filter(
+      (friendship) =>
+        !members.some((member) => member.user.id === friendship.friend.id),
+    );
 
   const [invite] = useMutation(inviteMutation);
 

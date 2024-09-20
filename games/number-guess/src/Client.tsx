@@ -1,20 +1,14 @@
 import { createGameClient } from '@long-game/game-client';
 import { gameDefinition } from './gameDefinition.js';
-import { ComponentProps } from 'react';
 
-const { GameClientProvider, useGameClient, withGame } =
-  createGameClient(gameDefinition);
+const { useGameClient, withGame } = createGameClient(gameDefinition);
 
-export interface ClientProps {
-  session: ComponentProps<typeof GameClientProvider>['session'];
-}
-
-export function Client({ session }: ClientProps) {
+export function Client() {
   return (
-    <GameClientProvider session={session}>
+    <>
       <LocalGuess />
       <History />
-    </GameClientProvider>
+    </>
   );
 }
 

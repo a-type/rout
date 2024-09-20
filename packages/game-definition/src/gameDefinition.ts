@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { GameRandom } from './random.js';
-import { GameRound, PlayerColorName } from '@long-game/common';
+import { GameRound } from '@long-game/common';
 import { FragmentOf } from '@long-game/graphql';
 import { clientSessionFragment } from './fragments.js';
 
@@ -129,7 +129,7 @@ export type GameDefinition<
 
   // CLIENT ONLY
 
-  Client: ComponentType<{ session: FragmentOf<typeof clientSessionFragment> }>;
+  Client: ComponentType;
   GameRecap: ComponentType<{
     globalState: GlobalState;
     session: FragmentOf<typeof clientSessionFragment>;

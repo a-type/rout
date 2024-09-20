@@ -1,4 +1,4 @@
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 /**
  * Converts an abstract idea of "day, time" into
@@ -19,7 +19,7 @@ export function withTimezone(
   },
   timezone: string,
 ): Date {
-  return zonedTimeToUtc(
+  return fromZonedTime(
     new Date(
       data.year,
       data.month,

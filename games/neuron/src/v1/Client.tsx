@@ -1,5 +1,5 @@
-import { ComponentProps, useState } from 'react';
-import { GameClientProvider, useGameClient, withGame } from './gameClient.js';
+import { useState } from 'react';
+import { useGameClient, withGame } from './gameClient.js';
 import { Grid } from './components/Grid.js';
 import { Hand } from './components/Hand.js';
 import { Spinner } from '@a-type/ui/components/spinner';
@@ -12,18 +12,12 @@ import { Button } from '@a-type/ui/components/button';
 import { BasicGameLog } from '@long-game/game-ui';
 import { Divider } from '@a-type/ui/components/divider';
 import { clsx, toast } from '@a-type/ui';
-import { LongGameError, LongGameErrorCode } from '@long-game/common';
+import { LongGameError } from '@long-game/common';
 
-export interface ClientProps {
-  session: ComponentProps<typeof GameClientProvider>['session'];
-}
+export interface ClientProps {}
 
-export function Client({ session }: ClientProps) {
-  return (
-    <GameClientProvider session={session}>
-      <GameUI />
-    </GameClientProvider>
-  );
+export function Client() {
+  return <GameUI />;
 }
 
 export default Client;

@@ -21,6 +21,8 @@ export const gameDefinition: GameDefinition<
   TurnData
 > = {
   version: 'v1.0',
+  minimumPlayers: 2,
+  maximumPlayers: 10,
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
@@ -40,7 +42,7 @@ export const gameDefinition: GameDefinition<
 
   // run on server
 
-  getInitialGlobalState: ({ playerIds }) => {
+  getInitialGlobalState: ({ members }) => {
     // TODO: return the initial global state. possibly randomizing initial conditions.
   },
 
@@ -49,7 +51,7 @@ export const gameDefinition: GameDefinition<
   },
 
   getState: ({ initialState, random, rounds }) => {
-    return rounds.reduce(applyMoveToGlobalState, {
+    return rounds.reduce(applyRoundToGlobalState, {
       ...initialState,
     });
   },
@@ -66,7 +68,7 @@ export const gameDefinition: GameDefinition<
 };
 
 // helper methods
-const applyMoveToGlobalState = (
+const applyRoundToGlobalState = (
   globalState: GlobalState,
-  move: GameRound<Turn<TurnData>>,
+  round: GameRound<Turn<TurnData>>,
 ) => {};

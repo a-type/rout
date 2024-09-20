@@ -133,14 +133,22 @@ builder.objectType('Turn', {
       resolve: (obj) => new Date(obj.createdAt),
       nullable: false,
     }),
+    roundIndex: t.field({
+      type: 'Int',
+      resolve: (obj) => obj.roundIndex,
+      nullable: false,
+    }),
   }),
 });
 
 builder.objectType('Round', {
   fields: (t) => ({
-    roundIndex: t.exposeInt('roundIndex'),
+    roundIndex: t.exposeInt('roundIndex', {
+      nullable: false,
+    }),
     turns: t.field({
       type: ['Turn'],
+      nullable: false,
       resolve: (obj) => obj.turns.map(assignTypeName('Turn')),
     }),
   }),
@@ -150,10 +158,12 @@ builder.objectType('SubmitTurnResult', {
   fields: (t) => ({
     gameSession: t.field({
       type: GameSession,
+      nullable: false,
       resolve: (obj) => obj.gameSessionId,
     }),
     gameSessionState: t.field({
       type: 'GameSessionState',
+      nullable: false,
       resolve: (obj) => obj.gameSessionState,
     }),
   }),

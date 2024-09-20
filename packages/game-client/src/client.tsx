@@ -6,11 +6,11 @@ import {
   clientSessionFragment,
 } from '@long-game/game-definition';
 import { ResultOf, FragmentOf } from '@long-game/graphql';
-import { action, makeAutoObservable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { FC, ReactNode, createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { GameRound, LongGameError } from '@long-game/common';
-import { ChatMessage, GameLogItem, RawChatMessage } from './types.js';
+import { ChatMessage, GameLogItem } from './types.js';
 import { graphqlClient } from './apollo.js';
 import { graphql, readFragment } from '../../graphql/src/graphql.js';
 
@@ -43,6 +43,7 @@ const refreshSessionFragment = graphql(`
         userId
         data
         createdAt
+        roundIndex
       }
     }
   }
@@ -57,19 +58,38 @@ const chatFragment = graphql(`
   }
 `);
 
+export const initialSessionFragment = graphql(
+  `
+    fragment ClientInitialSession on GameSession {
+      id
+      state {
+        ...ClientRefreshSession
+      }
+      chat {
+        messages {
+          edges {
+            node {
+              id
+              ...ClientChat
+            }
+          }
+        }
+      }
+      ...GameDefinitionClientSession
+    }
+  `,
+  [clientSessionFragment, refreshSessionFragment, chatFragment],
+);
+
 export class GameClient<
   PlayerState,
   TurnData extends BaseTurnData,
   PublicTurnData extends BaseTurnData = TurnData,
 > {
-  state: PlayerState | null = null;
-  private currentServerTurn: LocalTurn<TurnData> | undefined;
   private currentLocalTurn: LocalTurn<TurnData> | undefined;
   /** Whether there are local changes not yet submitted to server */
   dirty = false;
-  previousRounds: GameRound<Turn<PublicTurnData>>[] = [];
   error: string | null = null;
-  chatLog: RawChatMessage[] = [];
 
   readonly session;
   readonly gameDefinition: GameDefinition<
@@ -81,22 +101,39 @@ export class GameClient<
 
   private _disposes: (() => void)[] = [];
 
+  get currentServerTurn() {
+    return readFragment(refreshSessionFragment, this.session.state).currentTurn;
+  }
+
   get currentTurn() {
     return this.currentLocalTurn ?? this.currentServerTurn;
   }
 
-  get prospectiveState(): PlayerState | null {
-    if (!this.state) return null;
+  get state(): PlayerState {
+    return readFragment(refreshSessionFragment, this.session.state).playerState;
+  }
+
+  get players() {
+    return readFragment(clientSessionFragment, this.session).members;
+  }
+
+  get previousRounds() {
+    return readFragment(refreshSessionFragment, this.session.state).rounds;
+  }
+
+  get chatLog() {
+    return this.session.chat.messages.edges.map((e) =>
+      readFragment(chatFragment, e.node),
+    );
+  }
+
+  get prospectiveState(): PlayerState {
     if (!this.currentTurn) return this.state;
     return this.gameDefinition.getProspectivePlayerState({
       playerState: this.state,
       prospectiveTurn: this.currentTurn,
       playerId: this.localPlayer.id,
     });
-  }
-
-  get loading(): boolean {
-    return this.state === null;
   }
 
   // assigns rich user data to each turn, making it easier
@@ -108,11 +145,10 @@ export class GameClient<
   >[] {
     return this.previousRounds.map((round) => ({
       ...round,
-      turns: round.turns.map((move) => ({
-        ...move,
-        user: this.session.members.find(
-          (player) => player.user.id === move.userId,
-        )?.user ?? {
+      turns: round.turns.map((turn) => ({
+        ...turn,
+        user: this.players.find((player) => player.user.id === turn.userId)
+          ?.user ?? {
           id: 'unknown',
           name: 'Unknown',
           imageUrl: null,
@@ -162,7 +198,7 @@ export class GameClient<
 
   get localPlayer() {
     return (
-      this.session.members.find((m) => m.user.isViewer)?.user ?? {
+      this.players.find((m) => m.user.isViewer)?.user ?? {
         id: 'unknown',
         name: 'Unknown',
         imageUrl: null,
@@ -175,7 +211,7 @@ export class GameClient<
     session,
   }: {
     gameDefinition: GameDefinition;
-    session: ResultOf<typeof clientSessionFragment>;
+    session: ResultOf<typeof initialSessionFragment>;
   }) {
     this.gameDefinition = gameDefinition;
     this.session = session;
@@ -187,13 +223,7 @@ export class GameClient<
   private loadFromState = (
     state: FragmentOf<typeof refreshSessionFragment>,
   ) => {
-    const { playerState, rounds, currentTurn } = readFragment(
-      refreshSessionFragment,
-      state,
-    );
-    this.state = playerState;
-    this.previousRounds = rounds as GameRound<Turn<PublicTurnData>>[];
-    this.currentServerTurn = currentTurn ?? undefined;
+    this.session.state = state;
   };
 
   private addChats = (messages: FragmentOf<typeof chatFragment>[]) => {
@@ -203,43 +233,6 @@ export class GameClient<
   };
 
   private initialize = async () => {
-    const initialRes = await graphqlClient.query({
-      query: graphql(
-        `
-          query ClientGameState($gameSessionId: ID!) {
-            gameSession(id: $gameSessionId) {
-              id
-              state {
-                ...ClientRefreshSession
-              }
-              chat {
-                messages {
-                  edges {
-                    node {
-                      id
-                      ...ClientChat
-                    }
-                  }
-                }
-              }
-            }
-          }
-        `,
-        [refreshSessionFragment, chatFragment],
-      ),
-      variables: {
-        gameSessionId: this.session.id,
-      },
-    });
-
-    if (initialRes.data.gameSession?.state) {
-      this.loadFromState(initialRes.data.gameSession.state);
-    }
-    const chats =
-      initialRes.data.gameSession?.chat?.messages.edges.map((e) => e.node) ??
-      [];
-    this.addChats(chats);
-
     const result = graphqlClient.subscribe({
       query: graphql(
         `
@@ -324,7 +317,7 @@ export class GameClient<
       playerState: this.state,
       turn: this.currentTurn,
       roundIndex: this.roundIndex,
-      members: this.session.members,
+      members: this.players,
     });
     if (validationMessage) {
       this.error = validationMessage;
@@ -412,8 +405,7 @@ export class GameClient<
 
   getMember = (id: string) => {
     return (
-      this.session.members.find((membership) => membership.user.id === id)
-        ?.user ?? {
+      this.players.find((membership) => membership.user.id === id)?.user ?? {
         id,
         name: 'Unknown',
         imageUrl: null,
@@ -442,44 +434,7 @@ export function createGameClient<
   MoveData extends BaseTurnData,
   PublicMoveData extends BaseTurnData = MoveData,
 >(gameDefinition: GameDefinition<any, PlayerState, MoveData, PublicMoveData>) {
-  const Provider = observer(function GameClientProviderWithLoading({
-    client,
-    children,
-  }: {
-    client: GameClient<PlayerState, MoveData, PublicMoveData>;
-    children: ReactNode;
-  }) {
-    if (client.loading) {
-      return <div>Loading...</div>;
-    }
-
-    return (
-      <GameClientContext.Provider value={client}>
-        {children}
-      </GameClientContext.Provider>
-    );
-  });
-
-  const GameClientProvider: FC<{
-    session: FragmentOf<typeof clientSessionFragment>;
-    children: ReactNode;
-  }> = ({ session: sessionFrag, children }) => {
-    const session = readFragment(clientSessionFragment, sessionFrag);
-    const [client] = useState(
-      () =>
-        new GameClient<PlayerState, MoveData, PublicMoveData>({
-          gameDefinition,
-          session,
-        }),
-    );
-
-    (window as any).client = client;
-
-    return <Provider client={client}>{children}</Provider>;
-  };
-
   return {
-    GameClientProvider,
     useGameClient: useGameClient as () => GameClient<
       PlayerState,
       MoveData,
@@ -487,4 +442,28 @@ export function createGameClient<
     >,
     withGame: observer,
   };
+}
+
+export function GameSessionRenderer({
+  gameDefinition,
+  session,
+}: {
+  gameDefinition: GameDefinition;
+  session: FragmentOf<typeof initialSessionFragment>;
+}) {
+  const [client] = useState(
+    () =>
+      new GameClient({
+        gameDefinition,
+        session: readFragment(initialSessionFragment, session),
+      }),
+  );
+
+  (window as any).client = client;
+
+  return (
+    <GameClientContext.Provider value={client}>
+      <gameDefinition.Client />
+    </GameClientContext.Provider>
+  );
 }

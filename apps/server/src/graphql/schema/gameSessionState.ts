@@ -73,6 +73,7 @@ GameSessionState.implement({
     }),
     rounds: t.field({
       type: ['Round'],
+      nullable: false,
       authScopes: { user: true },
       resolve: (state, _, ctx) => {
         assert(ctx.session);

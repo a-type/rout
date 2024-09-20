@@ -16,6 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@a-type/ui": "1.1.16",
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",

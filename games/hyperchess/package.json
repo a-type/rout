@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/game-ui",
+  "name": "@long-game/game-hyperchess",
   "version": "0.0.1",
   "private": true,
   "exports": {
@@ -12,21 +12,22 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -w",
-    "build": "tsc"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "@a-type/ui": "^1.1.16"
+    "build": "tsc",
+    "test": "vitest"
   },
   "dependencies": {
-    "@long-game/common": "workspace:*",
-    "@long-game/game-client": "workspace:*",
+    "@a-type/ui": "1.1.16",
     "@long-game/game-definition": "workspace:*",
-    "@a-type/react-space": "0.2.6"
+    "@long-game/game-client": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-ui": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@a-type/ui": "1.1.16",
     "typescript": "5.5.4",
-    "@types/react": "^18.2.28"
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13",
+    "vitest": "^1.2.1"
   }
 }

@@ -4,3 +4,4 @@ export * from './time.js';
 export * from './colors.js';
 export * from './objects.js';
 export * from './error.js';
+export * from './board.js';
