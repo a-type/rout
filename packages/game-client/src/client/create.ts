@@ -6,6 +6,7 @@ import {
   usePriorRounds as useBasePriorRounds,
   useChat,
 } from './useLogs.js';
+import { usePlayer, usePlayerId, usePlayers } from './usePlayers.js';
 
 export function create<
   GlobalState,
@@ -41,5 +42,8 @@ export function create<
     useCombinedLog,
     usePriorRounds,
     useChat,
+    usePlayers,
+    usePlayer,
+    usePlayerId,
   };
 }

@@ -1,5 +1,4 @@
-import { createGameClient } from '@long-game/game-client';
 import { gameDefinition } from './gameDefinition.js';
+import { create } from '@long-game/game-client/client';
 
-export const { GameClientProvider, useGameClient, withGame } =
-  createGameClient(gameDefinition);
+export const hooks = create(gameDefinition);

@@ -1,31 +1,25 @@
-import { withGame, useGameClient } from '../gameClient.js';
+import { hooks } from '../gameClient.js';
 import { DrawCanvas } from './DrawCanvas.js';
 
 export interface DrawProps {
   description: string;
   describerId: string;
+  onImage: (image: any) => void;
 }
 
-export const Draw = withGame(function Draw({
+export const Draw = function Draw({
   describerId,
   description,
+  onImage,
 }: DrawProps) {
-  const client = useGameClient();
-  const prompts = client.state?.prompts;
+  const playerId = hooks.usePlayerId();
 
   return (
     <DrawCanvas
       description={description}
       describerId={describerId}
-      userId={client.localPlayer.id}
-      onChange={(image) =>
-        client.submitTurn((prev) => ({
-          promptResponses: [],
-          description: '',
-          ...prev,
-          illustration: image,
-        }))
-      }
+      playerId={playerId}
+      onChange={onImage}
     />
   );
-});
+};

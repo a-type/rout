@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { useGameClient, withGame } from './gameClient.js';
+import { hooks } from './gameClient.js';
 import { Grid } from './components/Grid.js';
 import { Hand } from './components/Hand.js';
-import { Spinner } from '@a-type/ui/components/spinner';
 import { DataRef, DndContext, DragOverlay } from '@dnd-kit/core';
-import { PlayerState } from './gameDefinition.js';
 import { useTile } from './utils.js';
 import { Tile } from './components/Tile.js';
 import { TileShape, fromCoordinateKey, isCoordinateKey } from './tiles.js';
@@ -27,24 +25,14 @@ export default Client;
 // You can utilize useGameClient() to get the client,
 // then access the client's state properties, which will
 // be reactive.
-const GameUI = withGame(function GameUI() {
-  const client = useGameClient();
+const GameUI = function GameUI() {
+  return <ActiveGame />;
+};
 
-  // TODO: suspend useGameClient.
-  if (!client.prospectiveState) {
-    return <Spinner />;
-  }
-
-  return <ActiveGame state={client.prospectiveState} />;
-});
-
-const ActiveGame = withGame(function ActiveGame({
-  state,
-}: {
-  state: PlayerState;
-}) {
-  const client = useGameClient();
+const ActiveGame = function ActiveGame() {
   const [draggingId, setDraggingId] = useState<string | number | null>(null);
+  const state = hooks.usePlayerState();
+  const { submitTurn, resetTurn } = hooks.useCurrentTurn();
 
   return (
     <div
@@ -76,7 +64,7 @@ const ActiveGame = withGame(function ActiveGame({
 
             const { x, y } = fromCoordinateKey(ev.over.id);
             try {
-              await client.submitTurn({
+              await submitTurn({
                 coordinate: { x, y },
                 tileId: handId,
                 tile: data.current.tile,
@@ -88,7 +76,7 @@ const ActiveGame = withGame(function ActiveGame({
                 e.code === LongGameError.Code.BadRequest
               ) {
                 // invalid turn
-                client.resetCurrentTurn();
+                resetTurn();
                 toast.error(e.message);
               }
             }
@@ -98,7 +86,7 @@ const ActiveGame = withGame(function ActiveGame({
           <Hand data={state.hand} />
           <Button
             onClick={() => {
-              client.submitTurn({
+              submitTurn({
                 skip: true,
               });
             }}
@@ -114,16 +102,12 @@ const ActiveGame = withGame(function ActiveGame({
       <BasicGameLog className="min-h-40px w-full p-4 md:w-auto md:[flex:0_0_30%] md:overflow-y-auto md:h-full" />
     </div>
   );
-});
+};
 
-const DraggingTile = withGame(function DraggingTile({
-  id,
-}: {
-  id: string | number;
-}) {
+const DraggingTile = function DraggingTile({ id }: { id: string | number }) {
   const tile = useTile(id as string);
 
   if (!tile) return null;
 
   return <Tile cells={[tile]} />;
-});
+};

@@ -14,14 +14,10 @@ type Updater<T> = Dispatch<SetStateAction<T>>;
 
 export function useLocalTurnData(): readonly [
   GameSessionTypes['TurnData'] | undefined,
-  Updater<GameSessionTypes['TurnData']>,
+  Updater<GameSessionTypes['TurnData'] | undefined>,
 ] {
   const sessionId = useGameSessionId();
-  return useLocalStorage<GameSessionTypes['TurnData'] | undefined>(
-    `${sessionId}:localTurnData`,
-    undefined,
-    false,
-  );
+  return useLocalStorage<any>(`${sessionId}:localTurnData`, undefined, false);
 }
 
 const sendTurnMutation = graphql(
@@ -46,7 +42,8 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
 }): {
   currentTurn: TurnData | null;
   prepareTurn: Updater<TurnData>;
-  submitPreparedTurn: () => Promise<void>;
+  submitTurn: (data?: TurnData) => Promise<void>;
+  resetTurn: () => void;
   dirty: boolean;
   error: string | null;
   submitting: boolean;
@@ -79,24 +76,34 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
     },
     [setLocalTurnData, session, gameDefinition, playerState],
   );
-  const submitPreparedTurn = useCallback(async () => {
-    await sendTurn({
-      variables: {
-        input: {
-          gameSessionId: session.id,
-          turn: {
-            data: localTurnData,
+  const submitTurn = useCallback(
+    async (dataOverride?: TurnData) => {
+      if (dataOverride) {
+        prepareTurn(dataOverride);
+      }
+      await sendTurn({
+        variables: {
+          input: {
+            gameSessionId: session.id,
+            turn: {
+              data: localTurnData,
+            },
           },
         },
-      },
-    });
-  }, [localTurnData]);
+      });
+    },
+    [localTurnData, prepareTurn, sendTurn, session.id],
+  );
+  const resetTurn = useCallback(() => {
+    setLocalTurnData(undefined);
+  }, [setLocalTurnData]);
   return {
     currentTurn: localTurnData ?? serverTurn?.data,
     prepareTurn,
-    submitPreparedTurn,
+    submitTurn,
     dirty: !!localTurnData,
     error,
     submitting: loading,
+    resetTurn,
   };
 }

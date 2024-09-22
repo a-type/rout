@@ -1,27 +1,24 @@
-import { withGame, useGameClient } from '../gameClient.js';
 import { DrawCanvas } from './DrawCanvas.js';
 
-export interface DescribeProps {}
+export interface DescribeProps {
+  illustration: any;
+  illustratorId: string;
+  onDescription: (description: string) => void;
+}
 
-export const Describe = withGame(function Describe({}: DescribeProps) {
-  const client = useGameClient();
-  const prompts = client.state?.prompts;
-
+export const Describe = function Describe({
+  illustration,
+  illustratorId,
+  onDescription,
+}: DescribeProps) {
   return (
     <div>
-      <DrawCanvas
-        readonly
-        value={prompts?.illustration}
-        userId={prompts?.illustratorId ?? ''}
-      />
+      <DrawCanvas readonly value={illustration} playerId={illustratorId} />
       <form
         onSubmit={(ev) => {
           ev.preventDefault();
           const description = (ev.target as any).description.value;
-          client.prepareTurn((prev) => ({
-            ...prev,
-            description,
-          }));
+          onDescription(description);
         }}
       >
         <label>
@@ -32,4 +29,4 @@ export const Describe = withGame(function Describe({}: DescribeProps) {
       </form>
     </div>
   );
-});
+};

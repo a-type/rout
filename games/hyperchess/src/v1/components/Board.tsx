@@ -1,6 +1,6 @@
 import { withGame } from '@long-game/game-client';
 import { GameBoard, GameBoardBackground } from '@long-game/game-ui';
-import { useGameClient } from '../gameClient.js';
+import { hooks } from '../gameClient.js';
 import { ChessGrid } from './ChessGrid.js';
 import { deserializePosition } from '../rules.js';
 import { ChessPiece } from './ChessPiece.js';
@@ -8,7 +8,7 @@ import { ChessPiece } from './ChessPiece.js';
 export interface BoardProps {}
 
 export const Board = withGame(function Board({}: BoardProps) {
-  const client = useGameClient();
+  const playerState = hooks.usePlayerState();
 
   return (
     <GameBoard
@@ -33,7 +33,7 @@ export const Board = withGame(function Board({}: BoardProps) {
         <ChessGrid />
       </GameBoardBackground>
 
-      {Object.entries(client.prospectiveState.board).map(([pos, piece]) =>
+      {Object.entries(playerState.board).map(([pos, piece]) =>
         piece ? (
           <ChessPiece
             key={pos}

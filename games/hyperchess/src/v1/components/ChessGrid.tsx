@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
-import { useGameClient, withGame } from '../gameClient.js';
+import { hooks } from '../gameClient.js';
 import { useGrid } from '@long-game/game-ui';
 
 export interface ChessGridProps {}
 
-export const ChessGrid = withGame(function ChessGrid({}: ChessGridProps) {
-  const client = useGameClient();
+export const ChessGrid = function ChessGrid({}: ChessGridProps) {
+  const state = hooks.usePlayerState();
   const { size: gridSize } = useGrid();
-  const boardSize = client.state.boardSize;
+  const boardSize = state.boardSize;
 
   const setup = useCallback((el: HTMLCanvasElement) => {
     if (!el) return;
@@ -35,4 +35,4 @@ export const ChessGrid = withGame(function ChessGrid({}: ChessGridProps) {
       height={gridSize * boardSize}
     />
   );
-});
+};

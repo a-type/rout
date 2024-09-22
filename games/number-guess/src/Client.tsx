@@ -15,10 +15,11 @@ export function Client() {
 export default Client;
 
 const LocalGuess = function LocalGuess() {
-  const { currentTurn, prepareTurn, submitPreparedTurn, dirty, error } =
-    useCurrentTurn({
+  const { currentTurn, prepareTurn, submitTurn, dirty, error } = useCurrentTurn(
+    {
       onError: alert,
-    });
+    },
+  );
 
   const guess = currentTurn?.guess ?? 0;
 
@@ -34,7 +35,7 @@ const LocalGuess = function LocalGuess() {
           prepareTurn({ guess: num });
         }}
       />
-      {dirty && <button onClick={() => submitPreparedTurn()}>Submit</button>}
+      {dirty && <button onClick={() => submitTurn()}>Submit</button>}
       {error && <div>{error}</div>}
     </div>
   );

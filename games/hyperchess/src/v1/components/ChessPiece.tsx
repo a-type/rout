@@ -1,7 +1,7 @@
 import { GamePiece } from '@long-game/game-ui';
 import { Piece, Position } from '../gameDefinition.js';
 import { PieceVisual } from './visuals/PieceVisual.js';
-import { withGame, useGameClient } from '../gameClient.js';
+import { hooks } from '../gameClient.js';
 import { toast } from '@a-type/ui';
 
 export interface ChessPieceProps {
@@ -9,7 +9,7 @@ export interface ChessPieceProps {
   position: Position;
 }
 
-export const ChessPiece = withGame(function ChessPiece({
+export const ChessPiece = function ChessPiece({
   piece,
   position,
 }: ChessPieceProps) {
@@ -18,18 +18,18 @@ export const ChessPiece = withGame(function ChessPiece({
     position,
   };
 
-  const client = useGameClient();
-  const player = client.players.find((p) => p.user.id === piece.playerId);
+  const player = hooks.usePlayer(piece.playerId);
+  const { prepareTurn, submitTurn, resetTurn } = hooks.useCurrentTurn();
 
   return (
     <GamePiece
       onTap={() => {
-        toast(`${player?.user.name ?? 'Someone'}'s ${piece.type}`);
+        toast(`${player?.name ?? 'Someone'}'s ${piece.type}`);
       }}
       value={value}
       onChange={async (updates, tools) => {
         try {
-          client.prepareTurn((prev) => ({
+          prepareTurn((prev) => ({
             ...prev,
             moves: [
               ...(prev?.moves ?? []),
@@ -39,16 +39,15 @@ export const ChessPiece = withGame(function ChessPiece({
               },
             ],
           }));
-          client.validateCurrentTurn();
-          await client.submitTurn();
+          await submitTurn();
         } catch (err) {
-          client.resetCurrentTurn();
+          resetTurn();
           toast((err as any).message);
           tools.revert();
         }
       }}
     >
-      <PieceVisual type={piece.type} color={player?.user.color ?? 'gray'} />
+      <PieceVisual type={piece.type} color={player?.color ?? 'gray'} />
     </GamePiece>
   );
-});
+};

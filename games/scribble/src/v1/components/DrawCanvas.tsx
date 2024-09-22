@@ -1,6 +1,6 @@
-import { useGameClient, withGame } from '../gameClient.js';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { colors, PlayerColorPalette } from '@long-game/common';
+import { hooks } from '../gameClient.js';
 
 export interface DrawCanvasProps {
   description?: string;
@@ -8,25 +8,24 @@ export interface DrawCanvasProps {
   value?: string;
   onChange?: (value: string) => void;
   readonly?: boolean;
-  userId: string;
+  playerId: string;
   Logic?: typeof DrawCanvasLogic;
 }
 
 const SIZE = 256;
 
-export const DrawCanvas = withGame(function DrawCanvas({
+export const DrawCanvas = function DrawCanvas({
   value,
   description,
   describerId,
   onChange,
   readonly,
-  userId,
+  playerId: userId,
   // mainly for hot reloading purposes
   Logic = DrawCanvasLogic,
 }: DrawCanvasProps) {
-  const client = useGameClient();
-
-  const player = client.getMember(userId);
+  const state = hooks.usePlayerState();
+  const player = hooks.usePlayer(userId);
   const [logic] = useState(
     () => new Logic(colors[player?.color ?? 'gray'], value),
   );
@@ -41,8 +40,8 @@ export const DrawCanvas = withGame(function DrawCanvas({
       )}
       <canvas
         ref={logic.setCanvas}
-        width={client.state?.imageSize}
-        height={client.state?.imageSize}
+        width={state.imageSize}
+        height={state.imageSize}
         className="w-[vmax] aspect-square border-2 border-black border-solid"
       />
       {!readonly && (
@@ -74,7 +73,7 @@ export const DrawCanvas = withGame(function DrawCanvas({
       )}
     </div>
   );
-});
+};
 
 class DrawCanvasLogic {
   private canvas: HTMLCanvasElement | null = null;
