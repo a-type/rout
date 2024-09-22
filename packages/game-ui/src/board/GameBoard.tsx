@@ -26,7 +26,10 @@ export function GameBoard({
   className,
   id,
 }: GameBoardProps) {
-  const viewport = useCreateViewport(viewportConfig);
+  const viewport = useCreateViewport({
+    ...viewportConfig,
+    panLimits: canvasConfig?.limits,
+  });
   const canvas = useCreateCanvas({
     viewport,
     autoUpdateViewport: true,
@@ -38,6 +41,7 @@ export function GameBoard({
       <ViewportRoot viewport={viewport} className={className}>
         <CanvasRoot canvas={canvas}>{children}</CanvasRoot>
       </ViewportRoot>
+      {/* <DebugLayer viewport={viewport} canvas={canvas} /> */}
     </GridContext.Provider>
   );
 }

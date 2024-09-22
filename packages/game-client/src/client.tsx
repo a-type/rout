@@ -293,21 +293,12 @@ export class GameClient<
       data: typeof turn === 'function' ? turn(this.currentTurn?.data) : turn,
     };
 
-    if (!this.state) {
-      this.error = "The game hasn't loaded yet. Try again?";
-      return;
-    }
-
     this.currentLocalTurn = newTurn;
     this.error = null;
     this.dirty = true;
   }
 
   validateCurrentTurn() {
-    if (!this.state) {
-      this.error = "The game hasn't loaded yet. Try again?";
-      return;
-    }
     if (!this.currentTurn) {
       this.error = "You haven't made a move yet.";
       return;
@@ -321,7 +312,7 @@ export class GameClient<
     });
     if (validationMessage) {
       this.error = validationMessage;
-      return;
+      throw new LongGameError(LongGameError.Code.BadRequest, validationMessage);
     }
   }
 
@@ -341,9 +332,6 @@ export class GameClient<
 
     // validate locally before submitting
     this.validateCurrentTurn();
-    if (this.error) {
-      throw new LongGameError(LongGameError.Code.BadRequest, this.error);
-    }
 
     const result = await graphqlClient.mutate({
       mutation: graphql(

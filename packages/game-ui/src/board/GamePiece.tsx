@@ -9,7 +9,10 @@ import { useGrid } from './GameBoard.js';
 
 export interface GamePieceProps {
   value: GamePieceData;
-  onChange: (updates: Omit<GamePieceData, 'id'>) => void;
+  onChange: (
+    updates: Omit<GamePieceData, 'id'>,
+    tools: { revert: () => void },
+  ) => void | Promise<void>;
   onTap?: () => void;
   className?: string;
   disableSelect?: boolean;
@@ -45,22 +48,43 @@ export function GamePiece({
     },
     disableSelect,
     metadata,
-    onDrop: (event, self) => {
+    onDrop: async (event, self) => {
       event.preventDefault();
-      onChange({
-        position: {
-          x: Math.round(event.position.x / gridSize),
-          y: Math.round(event.position.y / gridSize),
+      let reverted = false;
+      const tools = {
+        revert: () => {
+          reverted = true;
+          self.update({
+            position: gridPosition,
+            parent: value.containerId,
+          });
         },
-        containerId: event.containerId,
-      });
-      self.update({
-        parent: event.containerId,
-        position: {
-          x: Math.round(event.position.x / gridSize) * gridSize,
-          y: Math.round(event.position.y / gridSize) * gridSize,
-        },
-      });
+      };
+      try {
+        await onChange(
+          {
+            position: {
+              x: Math.round(event.position.x / gridSize),
+              y: Math.round(event.position.y / gridSize),
+            },
+            containerId: event.containerId,
+          },
+          tools,
+        );
+        if (!reverted) {
+          self.update({
+            parent: event.containerId,
+            position: {
+              x: Math.round(event.position.x / gridSize) * gridSize,
+              y: Math.round(event.position.y / gridSize) * gridSize,
+            },
+          });
+        }
+      } catch (err) {
+        if (!reverted) {
+          tools.revert();
+        }
+      }
     },
     onTap,
   });

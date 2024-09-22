@@ -22,8 +22,10 @@ export const Board = withGame(function Board({}: BoardProps) {
       viewportConfig={{
         zoomLimits: {
           min: 'fit',
-          max: 1.5,
+          max: 4,
         },
+        panLimitMode: 'viewport',
+        defaultCenter: { x: 32 * 4, y: 32 * 4 },
       }}
       className="w-full h-full"
     >
@@ -31,13 +33,15 @@ export const Board = withGame(function Board({}: BoardProps) {
         <ChessGrid />
       </GameBoardBackground>
 
-      {Object.entries(client.prospectiveState.board).map(([pos, piece]) => (
-        <ChessPiece
-          key={pos}
-          piece={piece}
-          position={deserializePosition(pos)}
-        />
-      ))}
+      {Object.entries(client.prospectiveState.board).map(([pos, piece]) =>
+        piece ? (
+          <ChessPiece
+            key={pos}
+            piece={piece}
+            position={deserializePosition(pos)}
+          />
+        ) : null,
+      )}
     </GameBoard>
   );
 });

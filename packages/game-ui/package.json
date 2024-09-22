@@ -22,7 +22,7 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@a-type/react-space": "0.2.6"
+    "@a-type/react-space": "0.2.8"
   },
   "devDependencies": {
     "@a-type/ui": "1.1.16",

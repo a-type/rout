@@ -19,7 +19,7 @@ export const ChessPiece = withGame(function ChessPiece({
   };
 
   const client = useGameClient();
-  const player = client.players.find((p) => p.id === piece.playerId);
+  const player = client.players.find((p) => p.user.id === piece.playerId);
 
   return (
     <GamePiece
@@ -27,17 +27,25 @@ export const ChessPiece = withGame(function ChessPiece({
         toast(`${player?.user.name ?? 'Someone'}'s ${piece.type}`);
       }}
       value={value}
-      onChange={(updates) => {
-        client.prepareTurn((prev) => ({
-          ...prev,
-          moves: [
-            ...(prev?.moves ?? []),
-            {
-              from: position,
-              to: updates.position,
-            },
-          ],
-        }));
+      onChange={async (updates, tools) => {
+        try {
+          client.prepareTurn((prev) => ({
+            ...prev,
+            moves: [
+              ...(prev?.moves ?? []),
+              {
+                from: position,
+                to: updates.position,
+              },
+            ],
+          }));
+          client.validateCurrentTurn();
+          await client.submitTurn();
+        } catch (err) {
+          client.resetCurrentTurn();
+          toast((err as any).message);
+          tools.revert();
+        }
       }}
     >
       <PieceVisual type={piece.type} color={player?.user.color ?? 'gray'} />

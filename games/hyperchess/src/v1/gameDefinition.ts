@@ -64,9 +64,6 @@ export const gameDefinition: GameDefinition<
       if (piece.playerId !== turn.userId) {
         return 'Not your piece';
       }
-      if (playerState.board[serializePosition(move.to)]) {
-        return 'Piece already at destination';
-      }
       if (
         !isValidPieceMove({
           board: playerState.board,
