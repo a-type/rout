@@ -112,6 +112,16 @@ GameSessionState.implement({
         return [];
       },
     }),
+    // just for convenience's sake
+    playerId: t.field({
+      type: 'ID',
+      nullable: false,
+      authScopes: { user: true },
+      resolve: (state, _, ctx) => {
+        assert(ctx.session);
+        return ctx.session.userId;
+      },
+    }),
   }),
 });
 

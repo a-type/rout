@@ -7,6 +7,11 @@
       "production": "./dist/esm/index.js",
       "development": "./src/index.ts",
       "default": "./dist/esm/index.js"
+    },
+    "./client": {
+      "production": "./dist/esm/client/index.js",
+      "development": "./src/client/index.ts",
+      "default": "./dist/esm/client/index.js"
     }
   },
   "type": "module",
@@ -21,6 +26,7 @@
     "graphql-sse": "^2.5.3",
     "mobx": "6.13.1",
     "mobx-react-lite": "4.0.7",
+    "valtio": "^2.0.0",
     "zustand": "4.5.5"
   },
   "peerDependencies": {

@@ -4,6 +4,7 @@ import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
 import { GameSession } from './gameSession.js';
 import { encodeGameSessionStateId } from './gameSessionState.js';
+import { User } from './user.js';
 
 builder.mutationFields((t) => ({
   submitTurn: t.field({
@@ -137,6 +138,11 @@ builder.objectType('Turn', {
       type: 'Int',
       resolve: (obj) => obj.roundIndex,
       nullable: false,
+    }),
+    player: t.field({
+      type: User,
+      nullable: false,
+      resolve: (obj) => obj.userId,
     }),
   }),
 });

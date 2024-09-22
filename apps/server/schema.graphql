@@ -105,6 +105,7 @@ type GameSessionPostGame {
 type GameSessionState implements Node {
   currentTurn: Turn
   id: ID!
+  playerId: ID!
   playerState: JSON
   rounds: [Round!]!
   status: GameSessionStatusValue
@@ -218,6 +219,7 @@ type Subscription {
 type Turn {
   createdAt: DateTime!
   data: JSON!
+  player: User!
   roundIndex: Int!
   userId: ID!
 }
@@ -242,7 +244,7 @@ input UpdateUserInfoInput {
 """A user of Long Game"""
 type User implements Node {
   color: UserColor!
-  email: String!
+  email: String
   id: ID!
   imageUrl: String
   isViewer: Boolean!

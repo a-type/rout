@@ -1,7 +1,7 @@
-import { createGameClient } from '@long-game/game-client';
+import { create } from '@long-game/game-client/client';
 import { gameDefinition } from './gameDefinition.js';
 
-const { useGameClient, withGame } = createGameClient(gameDefinition);
+const { useCurrentTurn, usePriorRounds } = create(gameDefinition);
 
 export function Client() {
   return (
@@ -14,9 +14,13 @@ export function Client() {
 
 export default Client;
 
-const LocalGuess = withGame(function LocalGuess() {
-  const client = useGameClient();
-  const guess = client.currentTurn?.data.guess ?? 0;
+const LocalGuess = function LocalGuess() {
+  const { currentTurn, prepareTurn, submitPreparedTurn, dirty, error } =
+    useCurrentTurn({
+      onError: alert,
+    });
+
+  const guess = currentTurn?.guess ?? 0;
 
   return (
     <div>
@@ -27,33 +31,31 @@ const LocalGuess = withGame(function LocalGuess() {
         onChange={(e) => {
           let num = e.target.valueAsNumber;
           if (isNaN(num)) num = 0;
-          client.prepareTurn({ guess: num });
+          prepareTurn({ guess: num });
         }}
       />
-      {client.dirty && (
-        <button onClick={() => client.submitTurn()}>Submit</button>
-      )}
-      {client.error && <div>{client.error}</div>}
+      {dirty && <button onClick={() => submitPreparedTurn()}>Submit</button>}
+      {error && <div>{error}</div>}
     </div>
   );
-});
+};
 
-const History = withGame(function History() {
-  const client = useGameClient();
+const History = function History() {
+  const log = usePriorRounds();
 
   return (
     <div>
       <h1>History</h1>
       <ul>
-        {client.previousRoundsWithUsers.map((round) => (
+        {log.map((round) => (
           <li key={round.roundIndex}>
             <div>Round {round.roundIndex + 1}</div>
             <ul>
               {round.turns.map((turn) => (
-                <li key={turn.userId}>
+                <li key={turn.player.id}>
                   {turn.data.guess} -{' '}
                   {turn.createdAt ? new Date(turn.createdAt).toString() : ''} by{' '}
-                  {turn.user.name}
+                  {turn.player.name}
                   {turn.data.result && ` - ${turn.data.result}`}
                 </li>
               ))}
@@ -63,4 +65,4 @@ const History = withGame(function History() {
       </ul>
     </div>
   );
-});
+};

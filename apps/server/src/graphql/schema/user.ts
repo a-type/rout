@@ -130,8 +130,14 @@ User.implement({
       resolve: (user) => user.friendlyName || user.fullName || 'Anonymous',
       nullable: false,
     }),
-    email: t.exposeString('email', {
-      nullable: false,
+    email: t.field({
+      type: 'String',
+      resolve: (user, _, ctx) => {
+        if (ctx.session?.userId === user.id) {
+          return user.email;
+        }
+        return null;
+      },
     }),
     imageUrl: t.exposeString('imageUrl'),
     color: t.field({
