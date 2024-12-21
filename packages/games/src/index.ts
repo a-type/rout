@@ -1,14 +1,8 @@
-import hyperchess from '@long-game/game-hyperchess';
-import scribble from '@long-game/game-scribble';
-import numberGuess from '@long-game/game-number-guess';
-import neuron from '@long-game/game-neuron';
 import { GameModule } from '@long-game/game-definition';
+import numberGuess from '@long-game/game-number-guess';
 
 const games: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
-  [neuron.id]: neuron,
-  [scribble.id]: scribble,
-  [hyperchess.id]: hyperchess,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 
