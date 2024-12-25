@@ -1,9 +1,4 @@
-import {
-  Form,
-  FormikForm,
-  SubmitButton,
-  TextField,
-} from '@a-type/ui/components/forms';
+import { FormikForm, SubmitButton, TextField } from '@a-type/ui';
 import { graphql, useMutation } from '@long-game/game-client';
 
 const sendFriendInviteMutation = graphql(`

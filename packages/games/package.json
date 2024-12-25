@@ -11,15 +11,15 @@
   },
   "type": "module",
   "scripts": {
-    "//dev": "tsc -w",
     "build": "tsc"
   },
   "dependencies": {
     "@long-game/game-number-guess": "workspace:*",
-    "@long-game/game-definition": "workspace:*"
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/game-territory": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "5.5.4",
-    "@types/react": "^18.2.46"
+    "typescript": "catalog:",
+    "@types/react": "catalog:"
   }
 }

@@ -9,3 +9,5 @@ export function useGameSessionId() {
   }
   return sessionId;
 }
+
+export const GameSessionProvider = GameSessionContext.Provider;

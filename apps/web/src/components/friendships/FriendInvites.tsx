@@ -1,5 +1,4 @@
-import { Avatar } from '@a-type/ui/components/avatar';
-import { Button } from '@a-type/ui/components/button';
+import { Avatar, Button } from '@a-type/ui';
 import {
   FragmentOf,
   graphql,
@@ -9,7 +8,7 @@ import {
 } from '@long-game/game-client';
 
 const friendInviteFragment = graphql(`
-  fragment FriendInvite on Friendship {
+  fragment FriendInvite on Friendship @_unmask {
     id
     friend {
       id
@@ -39,7 +38,8 @@ const friendInvitesQuery = graphql(
 
 export function FriendInvites() {
   const { data, refetch } = useSuspenseQuery(friendInvitesQuery);
-  const invites = data?.friendships?.connection.edges.map((edge) => edge.node);
+  const invites =
+    data?.friendships?.connection?.edges.map((edge) => edge.node) ?? [];
 
   if (!invites) {
     return null;

@@ -220,6 +220,7 @@ type Turn {
   createdAt: DateTime!
   data: JSON!
   player: User!
+  playerId: ID!
   roundIndex: Int!
   userId: ID!
 }

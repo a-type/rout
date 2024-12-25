@@ -1,18 +1,18 @@
 import { assert } from '@a-type/utils';
-import { builder } from '../builder.js';
-import { createResults, keyIndexes } from '../dataloaders.js';
+import { LongGameError } from '@long-game/common';
 import {
   id,
   isPrefixedId,
   PrefixedId,
   type GameSessionMembership as DBGameSessionMembership,
 } from '@long-game/db';
+import { z } from 'zod';
+import { validateAccessToGameSession } from '../../data/gameSession.js';
+import { builder } from '../builder.js';
+import { createResults, keyIndexes } from '../dataloaders.js';
 import { assignTypeName, hasTypeName } from '../relay.js';
 import { GameSession } from './gameSession.js';
 import { User } from './user.js';
-import { z } from 'zod';
-import { validateAccessToGameSession } from '../../data/gameSession.js';
-import { LongGameError } from '@long-game/common';
 
 builder.queryFields((t) => ({
   memberships: t.field({
@@ -57,8 +57,6 @@ builder.mutationFields((t) => ({
     resolve: async (_, { input: { gameSessionId, userId } }, ctx) => {
       assert(ctx.session);
       await validateAccessToGameSession(gameSessionId, ctx.session);
-
-      console.log(gameSessionId, userId);
 
       const membership = await ctx.db
         .insertInto('GameSessionMembership')

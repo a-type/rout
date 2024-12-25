@@ -1,7 +1,8 @@
 import {
+  CanvasBackground,
   CanvasConfig,
   CanvasRoot,
-  CanvasBackground,
+  DebugLayer,
   useCreateCanvas,
   useCreateViewport,
   ViewportConfig,
@@ -16,15 +17,17 @@ export interface GameBoardProps {
   gridSize?: number;
   className?: string;
   id?: string;
+  debug?: boolean;
 }
 
-export function GameBoard({
+function GameBoardBase({
   viewportConfig,
   canvasConfig,
   children,
   gridSize = 1,
   className,
   id,
+  debug,
 }: GameBoardProps) {
   const viewport = useCreateViewport({
     ...viewportConfig,
@@ -41,12 +44,16 @@ export function GameBoard({
       <ViewportRoot viewport={viewport} className={className}>
         <CanvasRoot canvas={canvas}>{children}</CanvasRoot>
       </ViewportRoot>
-      {/* <DebugLayer viewport={viewport} canvas={canvas} /> */}
+      {debug && <DebugLayer viewport={viewport} canvas={canvas} />}
     </GridContext.Provider>
   );
 }
 
 export const GameBoardBackground = CanvasBackground;
+
+export const GameBoard = Object.assign(GameBoardBase, {
+  Background: GameBoardBackground,
+});
 
 const GridContext = createContext<{ size: number }>({ size: 1 });
 

@@ -1,8 +1,8 @@
-import { useSubscription, useSuspenseQuery } from '@apollo/client';
+import { useMutation, useSubscription, useSuspenseQuery } from '@apollo/client';
 import { graphql } from '@long-game/graphql';
-import { useGameSessionId } from './useSessionId.js';
-import { useGameSession } from './useGameSession.js';
 import { useMemo } from 'react';
+import { useGameSession } from './useGameSession.js';
+import { useGameSessionId } from './useSessionId.js';
 
 const chatFragment = graphql(`
   fragment ClientChat on ChatMessage @_unmask {
@@ -10,6 +10,11 @@ const chatFragment = graphql(`
     createdAt
     userId
     message
+    user {
+      id
+      name
+      imageUrl
+    }
   }
 `);
 
@@ -122,4 +127,22 @@ export function useCombinedLog<T>() {
     combined.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
     return combined;
   }, [chat, rounds]);
+}
+
+const sendChatMutation = graphql(
+  `
+    mutation CreateChat($gameSessionId: ID!, $message: String!) {
+      sendMessage(input: { gameSessionId: $gameSessionId, message: $message }) {
+        id
+      }
+    }
+  `,
+);
+
+export function useSendChat() {
+  const sessionId = useGameSessionId();
+  const [createChatMutation] = useMutation(sendChatMutation);
+  return (message: string) => {
+    // send message
+  };
 }

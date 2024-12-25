@@ -2,9 +2,9 @@ import { GameRound } from '@long-game/common';
 import { GameSession } from '@long-game/db';
 import {
   GameDefinition,
-  Turn,
   GameRandom,
   GameStatus,
+  Turn,
 } from '@long-game/game-definition';
 
 export type RequiredGameSession = Pick<
@@ -25,7 +25,7 @@ export class GameSessionState {
     public turns: {
       createdAt: string;
       data: any;
-      userId: string;
+      playerId: string;
       roundIndex: number;
     }[],
     readonly members: { id: string }[],
@@ -36,18 +36,18 @@ export class GameSessionState {
   }
 
   get globalState(): any {
-    if (!this.gameSession.startedAt)
-      return this.gameDefinition.getInitialGlobalState({
-        random: new GameRandom(this.gameSession.randomSeed),
-        members: this.members,
-      });
+    const random = new GameRandom(this.gameSession.randomSeed);
+    const initialState = this.gameDefinition.getInitialGlobalState({
+      random,
+      members: this.members,
+    });
 
     // only apply previous round moves! current round hasn't
     // yet been settled
     return this.gameDefinition.getState({
-      initialState: this.gameSession.initialState,
+      initialState,
       rounds: this.previousRounds,
-      random: new GameRandom(this.gameSession.randomSeed),
+      random,
       members: this.members,
     });
   }

@@ -1,4 +1,4 @@
-import { Avatar } from '@a-type/ui/components/avatar';
+import { Avatar } from '@a-type/ui';
 import { graphql, useSuspenseQuery } from '@long-game/game-client';
 
 export const friendsListQuery = graphql(
@@ -30,7 +30,7 @@ export function FriendsList() {
     <div>
       <h1>Friends</h1>
       <ul className="p-0">
-        {data.friendships?.connection.edges.map(({ node: { id, friend } }) => (
+        {data.friendships?.connection?.edges.map(({ node: { id, friend } }) => (
           <li className="flex flex-row gap-2 items-center" key={id}>
             <Avatar imageSrc={friend.imageUrl ?? undefined} />
             {friend.name}

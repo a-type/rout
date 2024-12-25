@@ -69,7 +69,7 @@ builder.mutationFields((t) => ({
         turn: {
           data: null,
           ...turn,
-          userId: userId,
+          playerId: userId,
         },
         members,
         roundIndex: currentRound.roundIndex,
@@ -103,7 +103,10 @@ builder.mutationFields((t) => ({
         .executeTakeFirstOrThrow();
 
       // apply the turn to the game state before propagating
-      state.addTurn(createdTurn);
+      state.addTurn({
+        ...createdTurn,
+        playerId: createdTurn.userId,
+      });
 
       ctx.pubsub.publishGameStateChanged({
         gameSessionState: state,
@@ -121,7 +124,12 @@ builder.objectType('Turn', {
   fields: (t) => ({
     userId: t.field({
       type: 'ID',
-      resolve: (obj) => obj.userId,
+      resolve: (obj) => obj.playerId,
+      nullable: false,
+    }),
+    playerId: t.field({
+      type: 'ID',
+      resolve: (obj) => obj.playerId,
       nullable: false,
     }),
     data: t.field({
@@ -142,7 +150,7 @@ builder.objectType('Turn', {
     player: t.field({
       type: User,
       nullable: false,
-      resolve: (obj) => obj.userId,
+      resolve: (obj) => obj.playerId,
     }),
   }),
 });

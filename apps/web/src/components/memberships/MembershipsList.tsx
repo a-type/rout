@@ -51,6 +51,9 @@ function MembershipItem({
 }) {
   const membership = readFragment(membershipFragment, frag);
   const game = games[membership.gameSession.gameId];
+  if (!game) {
+    return <div>Game not found</div>;
+  }
   return (
     <Link to={`/session/${membership.gameSession.id}`}>
       {game.title} | Invite: {membership.status}

@@ -12,7 +12,7 @@ export type ChatMessage = RawChatMessage & {
     id: string;
     name: string;
     imageUrl: string | null;
-  };
+  } | null;
 };
 
 export type GameLogItem<PublicTurnData extends BaseTurnData> =

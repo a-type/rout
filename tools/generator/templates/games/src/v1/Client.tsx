@@ -1,27 +1,10 @@
-import { GameClientProvider, withGame, useGameClient } from './gameClient.js';
-import { ComponentProps } from 'react';
+import { create } from '@long-game/game-client/client';
+import { gameDefinition } from './gameDefinition.js';
 
-export interface ClientProps {
-  session: ComponentProps<typeof GameClientProvider>['session'];
-}
+const { useCurrentTurn, usePriorRounds } = create(gameDefinition);
 
-export function Client({ session }: ClientProps) {
-  return (
-    <GameClientProvider session={session}>
-      <ExampleGameUI />
-    </GameClientProvider>
-  );
+export function Client() {
+  return <div>TODO</div>;
 }
 
 export default Client;
-
-// Game UI components must be wrapped in withGame and
-// rendered as children of a GameClientProvider.
-// You can utilize useGameClient() to get the client,
-// then access the client's state properties, which will
-// be reactive.
-const ExampleGameUI = withGame(function ExampleGameUI() {
-  const client = useGameClient();
-
-  return <div>{/* Your game UI goes here */}</div>;
-});

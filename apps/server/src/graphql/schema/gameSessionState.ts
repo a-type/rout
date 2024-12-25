@@ -1,9 +1,9 @@
 import { assert } from '@a-type/utils';
+import { PrefixedId } from '@long-game/db';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
-import { PrefixedId } from '@long-game/db';
 
 builder.subscriptionFields((t) => ({
   gameSessionStateChanged: t.field({
@@ -57,7 +57,7 @@ GameSessionState.implement({
         assert(ctx.session);
         const viewerId = ctx.session.userId;
         const turn = state.currentRound.turns.find(
-          (turn) => turn.userId === viewerId,
+          (turn) => turn.playerId === viewerId,
         );
         if (turn) {
           return assignTypeName('Turn')(

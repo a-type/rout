@@ -1,27 +1,18 @@
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   DialogTrigger,
-} from '@a-type/ui/components/dialog';
-import {
   FormikForm,
+  Icon,
   SubmitButton,
   TextField,
   useField,
-  useValues,
-} from '@a-type/ui/components/forms';
+} from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
-import { Button } from '@a-type/ui/components/button/Button';
-import { Icon } from '@a-type/ui/components/icon';
+import { graphql, useMutation, useSuspenseQuery } from '@long-game/game-client';
 import { useState } from 'react';
-import {
-  graphql,
-  useMutation,
-  useQuery,
-  useSuspenseQuery,
-} from '@long-game/game-client';
 import { meQuery } from './queries.js';
 
 export interface EditProfileProps {

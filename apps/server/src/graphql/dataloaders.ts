@@ -1,11 +1,10 @@
 import { LongGameError } from '@long-game/common';
-import { GQLContext } from './context.js';
-import DataLoader from 'dataloader';
-import { GameSession, User, isPrefixedId, PrefixedId } from '@long-game/db';
-import { decodeGameSessionStateId } from './schema/gameSessionState.js';
+import { GameSession, isPrefixedId, User } from '@long-game/db';
 import { GameSessionState } from '@long-game/game-state';
-import { assignTypeName } from './relay.js';
 import games from '@long-game/games';
+import DataLoader from 'dataloader';
+import { GQLContext } from './context.js';
+import { assignTypeName } from './relay.js';
 
 export function keyIndexes(ids: readonly string[]) {
   return Object.fromEntries(ids.map((id, index) => [id, index]));
@@ -123,7 +122,7 @@ async function getGameState(
   const turns = await ctx.db
     .selectFrom('GameTurn')
     .where('gameSessionId', '=', gameSession.id)
-    .select(['data', 'userId', 'createdAt', 'roundIndex'])
+    .select(['data', 'userId as playerId', 'createdAt', 'roundIndex'])
     .orderBy('createdAt', 'asc')
     .execute();
   const members = await ctx.db

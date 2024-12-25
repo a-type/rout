@@ -1,17 +1,10 @@
-import { Divider } from '@a-type/ui/components/divider';
-import { H1 } from '@a-type/ui/components/typography';
+import { Avatar, Divider, H1 } from '@a-type/ui';
+import { colors } from '@long-game/common';
+import { FragmentOf, graphql, readFragment } from '@long-game/game-client';
+import { clientSessionFragment } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Suspense } from 'react';
 import { NoGameFound } from './NoGameFound.jsx';
-import {
-  FragmentOf,
-  graphql,
-  readFragment,
-  useSuspenseQuery,
-} from '@long-game/game-client';
-import { clientSessionFragment } from '../../../../../packages/game-definition/src/fragments.js';
-import { Avatar } from '@a-type/ui/components/avatar';
-import { colors } from '@long-game/common';
 
 export const postGameSessionFragment = graphql(
   `

@@ -7,7 +7,13 @@ export function usePlayers() {
 
 export function usePlayer(playerId: string) {
   const players = usePlayers();
-  return players.find((player) => player.id === playerId);
+  return (
+    players.find((player) => player.id === playerId) ?? {
+      id: playerId,
+      name: 'Anonymous',
+      color: 'gray',
+    }
+  );
 }
 
 export function usePlayerId() {

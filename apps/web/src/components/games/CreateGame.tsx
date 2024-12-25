@@ -1,4 +1,4 @@
-import { Button } from '@a-type/ui/components/button';
+import { Button } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { graphql, useMutation } from '@long-game/game-client';
 import { useNavigate } from '@verdant-web/react-router';

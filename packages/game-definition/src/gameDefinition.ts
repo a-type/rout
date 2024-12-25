@@ -1,13 +1,13 @@
-import { ComponentType } from 'react';
-import { GameRandom } from './random.js';
 import { GameRound } from '@long-game/common';
 import { FragmentOf } from '@long-game/graphql';
+import { ComponentType } from 'react';
 import { clientSessionFragment } from './fragments.js';
+import { GameRandom } from './random.js';
 
-export type BaseTurnData = object;
+export type BaseTurnData = Record<string, unknown>;
 
 export interface LocalTurn<TurnData extends BaseTurnData> {
-  userId: string;
+  playerId: string;
   data: TurnData;
 }
 

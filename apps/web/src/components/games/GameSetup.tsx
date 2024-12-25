@@ -1,9 +1,4 @@
-import { Avatar } from '@a-type/ui/components/avatar';
-import { Button } from '@a-type/ui/components/button';
-import { Divider } from '@a-type/ui/components/divider';
-import { H1, H2 } from '@a-type/ui/components/typography';
-import { GamePicker } from './GamePicker.jsx';
-import games from '@long-game/games';
+import { Avatar, Button, Divider, H1, H2 } from '@a-type/ui';
 import {
   FragmentOf,
   graphql,
@@ -11,7 +6,9 @@ import {
   useMutation,
   useSuspenseQuery,
 } from '@long-game/game-client';
+import games from '@long-game/games';
 import { friendsListQuery } from '../friendships/FriendsList.jsx';
+import { GamePicker } from './GamePicker.jsx';
 
 const membersFragment = graphql(`
   fragment GameSetupMembersFragment on GameSessionMembership {

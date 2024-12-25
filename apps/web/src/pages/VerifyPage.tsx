@@ -1,7 +1,7 @@
-import { EmailCompleteSignupForm } from '@/components/auth/EmailCompleteSignupForm.jsx';
-import { PageContent, PageRoot } from '@a-type/ui/components/layouts';
-import { H1, P } from '@a-type/ui/components/typography';
-import { useNavigate, useSearchParams } from '@verdant-web/react-router';
+import { API_ORIGIN } from '@/config.js';
+import { EmailCompleteSignupForm } from '@a-type/auth-client';
+import { H1, P, PageContent, PageRoot } from '@a-type/ui';
+import { useSearchParams } from '@verdant-web/react-router';
 
 export interface VerifyPageProps {}
 
@@ -25,7 +25,11 @@ export function VerifyPage({}: VerifyPageProps) {
     <PageRoot>
       <PageContent>
         <H1>Complete your signup</H1>
-        <EmailCompleteSignupForm code={code} email={email} />
+        <EmailCompleteSignupForm
+          endpoint={`${API_ORIGIN}/auth/complete-email-signup`}
+          code={code}
+          email={email}
+        />
       </PageContent>
     </PageRoot>
   );

@@ -20,7 +20,7 @@
     "@radix-ui/colors": "^3.0.0"
   },
   "devDependencies": {
-    "typescript": "5.5.4",
-    "vitest": "1.2.0"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

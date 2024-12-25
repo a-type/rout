@@ -11,19 +11,18 @@
   },
   "type": "module",
   "scripts": {
-    "//dev": "tsc -w",
     "build": "tsc"
   },
   "dependencies": {
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "typescript": "5.5.4",
-    "@types/react": "^18.2.28",
-    "@types/react-dom": "^18.2.13"
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
   }
 }

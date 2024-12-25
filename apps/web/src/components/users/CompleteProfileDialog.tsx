@@ -1,10 +1,6 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@a-type/ui/components/dialog';
-import { EditProfileForm } from './EditProfile.jsx';
+import { Dialog, DialogContent, DialogTitle } from '@a-type/ui';
 import { useSuspenseQuery } from '@long-game/game-client';
+import { EditProfileForm } from './EditProfile.jsx';
 import { meQuery } from './queries.js';
 
 export function CompleteProfileDialog() {

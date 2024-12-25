@@ -1,7 +1,7 @@
-import { makeRoutes, Router, Outlet } from '@verdant-web/react-router';
-import HomePage from './HomePage.jsx';
-import GameSessionPage from './GameSessionPage.jsx';
+import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
 import { lazy } from 'react';
+import GameSessionPage from './GameSessionPage.jsx';
+import HomePage from './HomePage.jsx';
 
 const routes = makeRoutes([
   {

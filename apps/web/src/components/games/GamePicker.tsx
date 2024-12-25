@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@a-type/ui/components/select';
+} from '@a-type/ui';
 import games from '@long-game/games';
 
 export interface GamePickerProps {

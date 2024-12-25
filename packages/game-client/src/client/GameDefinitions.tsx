@@ -1,12 +1,12 @@
-import { GameDefinition } from '@long-game/game-definition';
+import { GameDefinition, GameModule } from '@long-game/game-definition';
 import { createContext, useContext } from 'react';
 
-const GameDefinitionContext = createContext<Record<string, GameDefinition>>({});
+const GameDefinitionContext = createContext<Record<string, GameModule>>({});
 export const GameDefinitions = ({
   definitions,
   children,
 }: {
-  definitions: Record<string, GameDefinition>;
+  definitions: Record<string, GameModule>;
   children: React.ReactNode;
 }) => {
   return (
@@ -15,11 +15,18 @@ export const GameDefinitions = ({
     </GameDefinitionContext.Provider>
   );
 };
-export function useGameDefinition(gameId: string) {
+export function useGameDefinition(
+  gameId: string,
+  version: string,
+): GameDefinition {
   const definitions = useContext(GameDefinitionContext);
   const definition = definitions[gameId];
   if (!definition) {
     throw new Error(`Game definition not found for ${gameId}`);
   }
-  return definition;
+  const versionDef = definition.versions.find((v) => v.version === version);
+  if (!versionDef) {
+    throw new Error(`Game version not found for ${gameId} ${version}`);
+  }
+  return versionDef;
 }

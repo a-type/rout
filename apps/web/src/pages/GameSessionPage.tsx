@@ -1,15 +1,15 @@
-import { graphql, useSuspenseQuery } from '@long-game/game-client';
-import { useParams } from '@verdant-web/react-router';
-import { Spinner } from '@a-type/ui/components/spinner';
-import {
-  GameSetup,
-  gameSetupSessionFragment,
-} from '@/components/games/GameSetup.js';
 import {
   GameRecap,
   postGameSessionFragment,
 } from '@/components/games/GameRecap.js';
 import { GameSession } from '@/components/games/GameSession.js';
+import {
+  GameSetup,
+  gameSetupSessionFragment,
+} from '@/components/games/GameSetup.js';
+import { PageContent, PageRoot, Spinner } from '@a-type/ui';
+import { graphql, useSuspenseQuery } from '@long-game/game-client';
+import { useParams } from '@verdant-web/react-router';
 
 const gameSessionPageQuery = graphql(
   `
@@ -38,9 +38,21 @@ export function GameSessionPage() {
     return <Spinner />;
   }
   if (!session.startedAt) {
-    return <GameSetup gameSession={session} onRefetch={refetch} />;
+    return (
+      <PageRoot>
+        <PageContent>
+          <GameSetup gameSession={session} onRefetch={refetch} />
+        </PageContent>
+      </PageRoot>
+    );
   } else if (session.state.status === 'completed') {
-    return <GameRecap gameSession={session} />;
+    return (
+      <PageRoot>
+        <PageContent>
+          <GameRecap gameSession={session} />
+        </PageContent>
+      </PageRoot>
+    );
   }
   return <GameSession gameSessionId={sessionId} />;
 }

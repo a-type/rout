@@ -1,9 +1,6 @@
-import { Avatar } from '@a-type/ui/components/avatar';
-import { Button } from '@a-type/ui/components/button';
-import { FormikForm, TextAreaField } from '@a-type/ui/components/forms';
-import { RelativeTime } from '@a-type/ui/components/relativeTime';
-import { withClassName } from '@a-type/ui/hooks';
-import { withGame, useGameClient, ChatMessage } from '@long-game/game-client';
+import { Avatar, RelativeTime, withClassName } from '@a-type/ui';
+import { ChatMessage } from '@long-game/game-client';
+import { useCombinedLog } from '@long-game/game-client/client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const GameLogRoot = withClassName(
@@ -35,16 +32,15 @@ export function GameLogChat({ message, user, createdAt }: ChatMessage) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-row items-center gap-2 text-sm font-bold">
-        <Avatar imageSrc={user.imageUrl ?? undefined} />
-        <span>{user.name}</span>
+        <Avatar imageSrc={user?.imageUrl ?? undefined} />
+        <span>{user?.name ?? 'Anonymous'}</span>
       </div>
       <div className="whitespace-pre-wrap">{message}</div>
     </div>
   );
 }
 
-export function GameLogTimestamp({ value }: { value: string }) {
-  // TODO: relativetime should take string/Date
+export function GameLogTimestamp({ value }: { value: Date }) {
   return (
     <span className="text-xs text-gray-500 italic">
       <RelativeTime value={new Date(value).getTime()} />
@@ -52,29 +48,28 @@ export function GameLogTimestamp({ value }: { value: string }) {
   );
 }
 
-export const GameLogChatInput = withGame(function GameLogChatBox() {
-  const client = useGameClient();
+export function GameLogChatInput() {
+  // const client = useClient();
 
-  return (
-    <FormikForm
-      initialValues={{ message: '' }}
-      onSubmit={({ message }, bag) => {
-        client.sendChatMessage(message);
-        bag.resetForm();
-      }}
-      className="flex-0-0-auto"
-    >
-      <TextAreaField name="message" placeholder="Send a message..." />
-      <Button type="submit">Send</Button>
-    </FormikForm>
-  );
-});
+  // return (
+  //   <FormikForm
+  //     initialValues={{ message: '' }}
+  //     onSubmit={({ message }, bag) => {
+  //       client.sendChatMessage(message);
+  //       bag.resetForm();
+  //     }}
+  //     className="flex-0-0-auto"
+  //   >
+  //     <TextAreaField name="message" placeholder="Send a message..." />
+  //     <Button type="submit">Send</Button>
+  //   </FormikForm>
+  // );
 
-export const BasicGameLog = withGame(function BasicGameLog(props: {
-  className?: string;
-}) {
-  const client = useGameClient();
-  const log = client.combinedGameLog;
+  return <div>TODO</div>;
+}
+
+export function BasicGameLog(props: { className?: string }) {
+  const log = useCombinedLog();
 
   return (
     <GameLogRoot {...props}>
@@ -93,7 +88,7 @@ export const BasicGameLog = withGame(function BasicGameLog(props: {
       <GameLogChatInput />
     </GameLogRoot>
   );
-});
+}
 
 function useStayScrolledToBottom() {
   const ref = useRef<HTMLDivElement>(null);

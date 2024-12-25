@@ -1,6 +1,6 @@
+import { useSuspenseQuery } from '@apollo/client';
 import { graphql } from '@long-game/graphql';
 import { useGameSessionId } from './useSessionId.js';
-import { useSuspenseQuery } from '@apollo/client';
 
 export const gameSessionStateFragment = graphql(`
   fragment ClientSessionState on GameSessionState @_unmask {
@@ -35,6 +35,7 @@ export const gameSessionFragment = graphql(
     fragment ClientSession on GameSession @_unmask {
       id
       gameId
+      gameVersion
       members {
         id
         user {

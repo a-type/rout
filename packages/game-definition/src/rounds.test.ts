@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getPeriodStart, roundFormat } from './rounds.js';
 
 describe('game round helpers', () => {
@@ -116,19 +116,19 @@ describe('game round helpers', () => {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 0,
-              userId: '1',
+              playerId: '1',
             },
             {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 0,
-              userId: '2',
+              playerId: '2',
             },
             {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 1,
-              userId: '1',
+              playerId: '1',
             },
           ],
         }),

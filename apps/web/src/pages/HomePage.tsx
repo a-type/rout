@@ -5,11 +5,7 @@ import { CreateGame } from '@/components/games/CreateGame.jsx';
 import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
 import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
 import { EditProfileButton } from '@/components/users/EditProfile.jsx';
-import {
-  PageContent,
-  PageNowPlaying,
-  PageRoot,
-} from '@a-type/ui/components/layouts';
+import { PageContent, PageNowPlaying, PageRoot } from '@a-type/ui';
 
 export interface HomePageProps {}
 
