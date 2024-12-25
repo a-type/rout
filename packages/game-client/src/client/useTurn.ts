@@ -12,11 +12,11 @@ type SetStateAction<S> = S | ((prevState: S) => S);
 type Updater<T> = Dispatch<SetStateAction<T>>;
 
 export function useLocalTurnData<TurnData>(): readonly [
-  TurnData | undefined,
-  Updater<TurnData | undefined>,
+  TurnData | null,
+  Updater<TurnData | null>,
 ] {
   const sessionId = useGameSessionId();
-  return useLocalStorage<any>(`${sessionId}:localTurnData`, undefined, false);
+  return useLocalStorage<any>(`${sessionId}:localTurnData`, null, true);
 }
 
 const sendTurnMutation = graphql(
@@ -89,12 +89,12 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
           },
         },
       });
-      setLocalTurnData(undefined);
+      setLocalTurnData(null);
     },
     [localTurnData, prepareTurn, sendTurn, session.id],
   );
   const resetTurn = useCallback(() => {
-    setLocalTurnData(undefined);
+    setLocalTurnData(null);
   }, [setLocalTurnData]);
   return {
     currentTurn: localTurnData ?? (serverTurn?.data as any),
