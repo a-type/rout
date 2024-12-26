@@ -34,6 +34,42 @@ it('finds all territories', () => {
   ]);
 });
 
+it('finds territories adjacent to one another from different players', () => {
+  const grid = [
+    [
+      { playerId: '1', power: 1 },
+      { playerId: '1', power: 1 },
+      { playerId: '2', power: 1 },
+    ],
+    [
+      { playerId: '1', power: 1 },
+      { playerId: '2', power: 1 },
+      { playerId: '2', power: 1 },
+    ],
+  ];
+  const territories = getAllTerritories(grid);
+  expect(territories).toEqual([
+    {
+      playerId: '1',
+      cells: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+      ],
+      totalPower: 3,
+    },
+    {
+      playerId: '2',
+      cells: [
+        { x: 2, y: 0 },
+        { x: 2, y: 1 },
+        { x: 1, y: 1 },
+      ],
+      totalPower: 3,
+    },
+  ]);
+});
+
 it('finds contiguous territories to an empty cell', () => {
   const grid = [
     [

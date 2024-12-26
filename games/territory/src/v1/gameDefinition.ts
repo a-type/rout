@@ -226,7 +226,7 @@ const applyRoundToGlobalState = (
         for (const cell of territory.cells) {
           globalState.grid[cell.y][cell.x] = {
             playerId: null,
-            power: 1,
+            power: 0,
           };
         }
       }

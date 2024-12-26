@@ -53,12 +53,12 @@ function discoverWholeTerritory(
   if (visited[y][x]) {
     return null;
   }
-  visited[y][x] = true;
   const cell = grid[y][x];
   if (!cell.playerId || (territory && cell.playerId !== territory.playerId)) {
     return null;
   }
 
+  visited[y][x] = true;
   if (!territory) {
     territory = {
       playerId: cell.playerId,
@@ -82,43 +82,17 @@ function discoverWholeTerritory(
  */
 export const getAllTerritories = (grid: GridCell[][]) => {
   const territories: Territory[] = [];
-  const cellToTerritoryMap: Record<string, Territory> = {};
   const visited = Array.from({ length: grid.length }, () =>
     Array.from({ length: grid[0].length }, () => false),
   );
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
-      const cell = grid[y][x];
-      if (!cell.playerId) {
+      if (visited[y][x]) {
         continue;
       }
-      // check all adjacent cells for territories that match the
-      // player, if so add it to that territory
-      let assigned = false;
-      const adjacents = getAdjacents({ x, y }, grid.length);
-      for (const adjacent of adjacents) {
-        const adjacentCell = grid[adjacent.y][adjacent.x];
-        if (
-          adjacentCell.playerId === cell.playerId &&
-          cellToTerritoryMap[getCoordinateKey(adjacent)]
-        ) {
-          const territory = cellToTerritoryMap[getCoordinateKey(adjacent)];
-          territory.cells.push({ x, y });
-          territory.totalPower += cell.power;
-          cellToTerritoryMap[getCoordinateKey({ x, y })] = territory;
-          assigned = true;
-          break;
-        }
-      }
-
-      if (!assigned) {
-        const territory = {
-          playerId: cell.playerId,
-          cells: [{ x, y }],
-          totalPower: cell.power,
-        };
+      const territory = discoverWholeTerritory(grid, x, y, visited);
+      if (territory) {
         territories.push(territory);
-        cellToTerritoryMap[getCoordinateKey({ x, y })] = territory;
       }
     }
   }
@@ -160,4 +134,60 @@ export const getUnclaimedCells = (grid: GridCell[][]) => {
 
 export function getCoordinateKey({ x, y }: Coordinate) {
   return `${x},${y}`;
+}
+
+/**
+ * Grades each cell by 'containment' within the territory.
+ * Boundary cells are rated lower, cells with more neighbors are rated higher,
+ * and cells which are interior to other cells are rated highest.
+ *
+ * This is done by taking each cell and counting the minimum number of
+ * cells that must be traversed to reach the boundary of the territory.
+ */
+export function getInnermostCell(territory: Pick<Territory, 'cells'>) {
+  let innermostCell: Coordinate | null = null;
+  let innermostDistance = 0;
+  for (const cell of territory.cells) {
+    const distance = getDistanceToBoundary(cell, territory.cells);
+    if (distance > innermostDistance) {
+      innermostDistance = distance;
+      innermostCell = cell;
+    }
+  }
+  return innermostCell;
+}
+
+/**
+ * Returns the minimum number of cells that must be traversed to reach the boundary
+ * of the territory from the given cell.
+ */
+function getDistanceToBoundary(cell: Coordinate, territory: Coordinate[]) {
+  let posXDistance = 0;
+  let posYDistance = 0;
+  let negXDistance = 0;
+  let negYDistance = 0;
+
+  let x = cell.x;
+  while (territory.some((c) => c.x === x)) {
+    posXDistance++;
+    x++;
+  }
+  x = cell.x;
+  while (territory.some((c) => c.x === x)) {
+    negXDistance++;
+    x--;
+  }
+
+  let y = cell.y;
+  while (territory.some((c) => c.y === y)) {
+    posYDistance++;
+    y++;
+  }
+  y = cell.y;
+  while (territory.some((c) => c.y === y)) {
+    negYDistance++;
+    y--;
+  }
+
+  return Math.min(posXDistance, negXDistance, posYDistance, negYDistance);
 }
