@@ -9,13 +9,7 @@ import {
 
 export type RequiredGameSession = Pick<
   GameSession,
-  | 'id'
-  | 'gameId'
-  | 'initialState'
-  | 'timezone'
-  | 'randomSeed'
-  | 'gameVersion'
-  | 'startedAt'
+  'id' | 'gameId' | 'timezone' | 'randomSeed' | 'gameVersion' | 'startedAt'
 >;
 
 export class GameSessionState {

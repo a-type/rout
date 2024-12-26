@@ -2,6 +2,9 @@ type ChatMessage implements Node {
   createdAt: DateTime!
   id: ID!
   message: String!
+  position: Point
+  roundIndex: Int
+  sceneId: String
   user: User
   userId: ID!
 }
@@ -153,6 +156,16 @@ type PageInfo {
   startCursor: String
 }
 
+type Point {
+  x: Int
+  y: Int
+}
+
+input PointInput {
+  x: Int!
+  y: Int!
+}
+
 input PrepareGameSessionInput {
   """The ID of the game to play."""
   gameId: ID!
@@ -180,6 +193,9 @@ type Round {
 input SendChatMessageInput {
   gameSessionId: ID!
   message: String!
+  position: PointInput
+  roundIndex: Int
+  sceneId: String
 }
 
 type SendChatMessageResult {

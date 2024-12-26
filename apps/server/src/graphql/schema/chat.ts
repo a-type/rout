@@ -1,5 +1,10 @@
 import { assert } from '@a-type/utils';
 import { id, isPrefixedId, PrefixedId } from '@long-game/db';
+import { encodeBase64 } from '@pothos/core';
+import {
+  resolveCursorConnection,
+  ResolveCursorConnectionArgs,
+} from '@pothos/plugin-relay';
 import { z } from 'zod';
 import { validateAccessToGameSession } from '../../data/gameSession.js';
 import {
@@ -9,11 +14,6 @@ import {
 } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { User } from './user.js';
-import { encodeBase64 } from '@pothos/core';
-import {
-  resolveCursorConnection,
-  ResolveCursorConnectionArgs,
-} from '@pothos/plugin-relay';
 
 builder.mutationFields((t) => ({
   sendMessage: t.field({
@@ -31,6 +31,14 @@ builder.mutationFields((t) => ({
               isPrefixedId(v, 'gs'),
             ),
             message: z.string(),
+            position: z
+              .object({
+                x: z.number(),
+                y: z.number(),
+              })
+              .optional(),
+            roundIndex: z.number().optional(),
+            sceneId: z.string().optional(),
           }),
         },
       }),
@@ -48,6 +56,9 @@ builder.mutationFields((t) => ({
           gameSessionId: gameSessionId,
           message: input.message,
           userId: ctx.session.userId,
+          position: input.position,
+          roundIndex: input.roundIndex,
+          sceneId: input.sceneId,
         })
         .returningAll()
         .executeTakeFirstOrThrow();
@@ -108,6 +119,16 @@ export const ChatMessage = builder.node('ChatMessage', {
       type: 'DateTime',
       resolve: (obj) => new Date(obj.createdAt),
       nullable: false,
+    }),
+    position: t.field({
+      type: 'Point',
+      resolve: (obj) => obj.position,
+    }),
+    roundIndex: t.exposeInt('roundIndex', {
+      nullable: true,
+    }),
+    sceneId: t.exposeString('sceneId', {
+      nullable: true,
     }),
   }),
   id: {
@@ -180,5 +201,10 @@ builder.inputType('SendChatMessageInput', {
     message: t.string({
       required: true,
     }),
+    position: t.field({
+      type: 'PointInput',
+    }),
+    roundIndex: t.int(),
+    sceneId: t.string(),
   }),
 });

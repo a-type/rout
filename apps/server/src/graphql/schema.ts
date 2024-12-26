@@ -1,5 +1,6 @@
 import { builder } from './builder.js';
 import './schema/chat.js';
+import './schema/common.js';
 import './schema/friendship.js';
 import './schema/gameSession.js';
 import './schema/gameSessionMembership.js';

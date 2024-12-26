@@ -164,6 +164,9 @@ export async function up(db: Kysely<any>) {
     .addColumn('friendId', 'text', (col) =>
       col.notNull().references('User.id').onDelete('cascade'),
     )
+    .addColumn('initiatorId', 'text', (c) =>
+      c.references('User.id').onDelete('cascade'),
+    )
     .addColumn('status', 'text', (col) => col.notNull())
     .addUniqueConstraint('Friendship_userId_friendId_unique', [
       'userId',

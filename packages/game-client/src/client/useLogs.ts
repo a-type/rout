@@ -15,6 +15,12 @@ const chatFragment = graphql(`
       name
       imageUrl
     }
+    position {
+      x
+      y
+    }
+    roundIndex
+    sceneId
   }
 `);
 
@@ -131,18 +137,41 @@ export function useCombinedLog<T>() {
 
 const sendChatMutation = graphql(
   `
-    mutation CreateChat($gameSessionId: ID!, $message: String!) {
-      sendMessage(input: { gameSessionId: $gameSessionId, message: $message }) {
-        id
+    mutation CreateChat($input: SendChatMessageInput!) {
+      sendMessage(input: $input) {
+        message {
+          id
+          ...ClientChat
+        }
       }
     }
   `,
+  [chatFragment],
 );
 
 export function useSendChat() {
   const sessionId = useGameSessionId();
+  const gameSession = useGameSession();
   const [createChatMutation] = useMutation(sendChatMutation);
-  return (message: string) => {
-    // send message
+  return async (
+    message: string,
+    config?: {
+      position?: { x: number; y: number };
+      sceneId?: string;
+    },
+  ) => {
+    // send message and
+    // add it to the local chat log optimistically
+    await createChatMutation({
+      variables: {
+        input: {
+          gameSessionId: sessionId,
+          message,
+          position: config?.position ?? null,
+          sceneId: config?.sceneId ?? null,
+          roundIndex: gameSession.state.currentTurn?.roundIndex ?? null,
+        },
+      },
+    });
   };
 }

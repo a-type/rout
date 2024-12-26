@@ -1,10 +1,4 @@
-import {
-  ColumnType,
-  Generated,
-  Insertable,
-  Selectable,
-  Updateable,
-} from 'kysely';
+import { ColumnType, Insertable, Selectable, Updateable } from 'kysely';
 import { PrefixedId } from './utils.js';
 
 type CreatedAtColumn = ColumnType<string, string | undefined, never>;
@@ -86,7 +80,6 @@ export interface GameSessionTable {
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
   timezone: string;
-  initialState: any;
   startedAt: ColumnType<string | null, string | undefined, string | undefined>;
   randomSeed: ColumnType<string, string | undefined, string | undefined>;
   // does not relate to anything in the db; game information is
@@ -140,6 +133,7 @@ export interface FriendshipTable {
 
   userId: PrefixedId<'u'>;
   friendId: PrefixedId<'u'>;
+  initiatorId: PrefixedId<'u'>;
   status: 'pending' | 'accepted' | 'declined';
 }
 
@@ -155,6 +149,14 @@ export interface ChatMessageTable {
   userId: PrefixedId<'u'>;
   gameSessionId: PrefixedId<'gs'>;
   message: string;
+  // chats can optionally be placed on the game board somewhere
+  position: { x: number; y: number } | null;
+  // chats can be associated with a round
+  roundIndex: number | null;
+  // chats can optionally be associated with a scene in the game.
+  // this does not relate to any tables in the database, it is
+  // interpreted per-game
+  sceneId: string | null;
 }
 
 export type ChatMessage = Selectable<ChatMessageTable>;

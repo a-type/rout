@@ -1,10 +1,4 @@
 import { LongGameError } from '@long-game/common';
-import SchemaBuilder from '@pothos/core';
-import { GQLContext } from './context.js';
-import RelayPlugin from '@pothos/plugin-relay';
-import DataloaderPlugin from '@pothos/plugin-dataloader';
-import AuthPlugin from '@pothos/plugin-scope-auth';
-import ZodPlugin from '@pothos/plugin-zod';
 import {
   ChatMessage,
   Friendship,
@@ -14,14 +8,21 @@ import {
   PrefixedId,
   User,
 } from '@long-game/db';
-import { GameSessionState } from '@long-game/game-state';
 import { Turn } from '@long-game/game-definition';
+import { GameSessionState } from '@long-game/game-state';
+import SchemaBuilder from '@pothos/core';
+import DataloaderPlugin from '@pothos/plugin-dataloader';
+import RelayPlugin from '@pothos/plugin-relay';
+import AuthPlugin from '@pothos/plugin-scope-auth';
+import ZodPlugin from '@pothos/plugin-zod';
+import { GQLContext } from './context.js';
 import PrefixedIdPlugin from './plugins/prefixedId/prefixedIdPlugin.js';
 
 export const builder = new SchemaBuilder<{
   Context: GQLContext;
   Objects: {
     User: User;
+    Point: { x: number; y: number };
 
     Friendship: Friendship;
     FriendshipResponseResult: {
@@ -71,6 +72,7 @@ export const builder = new SchemaBuilder<{
   };
   Inputs: {
     UpdateUserInfoInput: { name?: string | null; color?: string | null };
+    PointInput: { x: number; y: number };
 
     PrepareGameSessionInput: { gameId: string };
     UpdateGameSessionInput: { gameSessionId: PrefixedId<'gs'>; gameId: string };
@@ -106,6 +108,9 @@ export const builder = new SchemaBuilder<{
     SendChatMessageInput: {
       gameSessionId: PrefixedId<'gs'>;
       message: string;
+      position?: { x: number; y: number } | null;
+      roundIndex?: number | null;
+      sceneId?: string | null;
     };
   };
   Scalars: {

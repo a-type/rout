@@ -8,12 +8,8 @@ import {
   jsonArrayFrom,
   PrefixedId,
 } from '@long-game/db';
-import { GameRandom, getLatestVersion } from '@long-game/game-definition';
+import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
-import {
-  resolveCursorConnection,
-  ResolveCursorConnectionArgs,
-} from '@pothos/plugin-relay';
 import { z } from 'zod';
 import { builder } from '../builder.js';
 import { assignTypeName, hasTypeName } from '../relay.js';
@@ -65,7 +61,6 @@ builder.mutationFields((t) => ({
             gameVersion: getLatestVersion(game).version,
             // TODO: configurable + automatic detection?
             timezone: 'America/New_York',
-            initialState: {},
             randomSeed: genericId(),
           })
           .returningAll()
@@ -217,14 +212,6 @@ builder.mutationFields((t) => ({
         .updateTable('GameSession')
         .set({
           startedAt: dateTime(),
-          initialState: gameDefinition.getInitialGlobalState({
-            // altering the seed here so that the first moves don't receive
-            // the same random values as the initial state.
-            random: new GameRandom(gameSession.randomSeed + 'INITIAL'),
-            members: gameSession.members.map(({ id }) => ({
-              id: id ?? 'u-anonymous',
-            })),
-          }),
           gameVersion: gameDefinition.version,
         })
         .where('GameSession.id', '=', gameSessionId)

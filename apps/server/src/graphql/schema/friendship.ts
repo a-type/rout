@@ -1,19 +1,19 @@
-import { builder } from '../builder.js';
-import { createResults, keyIndexes } from '../dataloaders.js';
+import { assert } from '@a-type/utils';
+import { LongGameError } from '@long-game/common';
 import {
   Friendship as DBFriendship,
   id,
   isPrefixedId,
   PrefixedId,
 } from '@long-game/db';
-import { assignTypeName } from '../relay.js';
-import { z } from 'zod';
-import { assert } from '@a-type/utils';
-import { LongGameError } from '@long-game/common';
-import { User } from './user.js';
-import { GQLContext } from '../context.js';
 import { encodeBase64 } from '@pothos/core';
 import { resolveOffsetConnection } from '@pothos/plugin-relay';
+import { z } from 'zod';
+import { builder } from '../builder.js';
+import { GQLContext } from '../context.js';
+import { createResults, keyIndexes } from '../dataloaders.js';
+import { assignTypeName } from '../relay.js';
+import { User } from './user.js';
 
 builder.queryFields((t) => ({
   friendships: t.field({
@@ -96,6 +96,7 @@ builder.mutationFields((t) => ({
           id: id('f'),
           userId,
           friendId,
+          initiatorId: ctx.session.userId,
           status: 'pending',
         })
         .returningAll()
@@ -363,6 +364,15 @@ async function getFriendships(
       '=',
       input?.status,
     );
+
+    if (input.status === 'pending') {
+      // only show pending where initiator is not user
+      friendshipsQueryBuilder = friendshipsQueryBuilder.where(
+        'initiatorId',
+        '!=',
+        userId,
+      );
+    }
   }
 
   return friendshipsQueryBuilder.execute();
