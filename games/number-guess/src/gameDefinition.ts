@@ -1,4 +1,4 @@
-import { roundFormat, GameDefinition } from '@long-game/game-definition';
+import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { lazy } from 'react';
 
 export type GlobalState = {
@@ -50,7 +50,7 @@ export const gameDefinition: GameDefinition<
       return {};
     } else {
       const lastGuess = previousRound.turns.find(
-        (turn) => turn.userId === playerId,
+        (turn) => turn.playerId === playerId,
       );
       if (!lastGuess) {
         return {};
@@ -71,7 +71,7 @@ export const gameDefinition: GameDefinition<
   },
 
   getPublicTurn: ({ turn, globalState, viewerId }) => {
-    if (viewerId !== turn.userId) {
+    if (viewerId !== turn.playerId) {
       return turn;
     }
 
@@ -101,7 +101,7 @@ export const gameDefinition: GameDefinition<
         // exclude nulls - users which have left the game or
         // otherwise invalid moves...
         winnerIds: turnsThatGuessedRight
-          .map((move) => move.userId)
+          .map((move) => move.playerId)
           .filter((id): id is string => !!id),
       };
     }

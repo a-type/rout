@@ -2,11 +2,11 @@
   "compilerOptions": {
     "noImplicitAny": true,
     "noLib": false,
-    "target": "es2017",
+    "target": "es2022",
     "sourceMap": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["dom", "esnext", "webworker"],
+    "lib": ["dom", "esnext"],
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
