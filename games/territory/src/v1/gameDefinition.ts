@@ -181,10 +181,10 @@ const applyRoundToGlobalState = (
         ];
       }),
     );
+    console.log('player territories', JSON.stringify(playerTerritories));
     // iterate over all players, removing 1 power from one of their territories until
     // one or no players remain. for players with multiple territories involved, begin
     // with the most powerful (they are already sorted for this) and alternate each iteration.
-    let playerIndex = 0;
     const playerTerritoryIndexes = Object.fromEntries(
       Object.keys(playerTerritories).map<[string, number]>((playerId) => {
         return [playerId, 0];
@@ -192,32 +192,50 @@ const applyRoundToGlobalState = (
     );
     const depletedTerritories: Territory[] = [];
     while (Object.keys(playerTerritories).length > 1) {
-      const playerId = battleGroup[playerIndex];
-      const territoryIndex = playerTerritoryIndexes[playerId];
-      const territory = playerTerritories[playerId][territoryIndex];
-      territory.totalPower -= 1;
-      // remove power from any cell in the territory which has some available. doesn't
-      // matter which cell we choose, since the power is shared.
-      for (const cell of territory.cells) {
-        if (globalState.grid[cell.y][cell.x].power > 0) {
-          globalState.grid[cell.y][cell.x].power -= 1;
-          break;
+      // each round applies to every remaining player
+      const playersInThisBattle = Object.keys(playerTerritories);
+      for (const playerId of playersInThisBattle) {
+        let territoryIndex = playerTerritoryIndexes[playerId];
+        const territory = playerTerritories[playerId][territoryIndex];
+        territory.totalPower -= 1;
+        console.log(
+          'subtracted 1 power from',
+          playerId,
+          'territory',
+          territoryIndex,
+        );
+        // remove power from any cell in the territory which has some available. doesn't
+        // matter which cell we choose, since the power is shared.
+        for (const cell of territory.cells) {
+          if (globalState.grid[cell.y][cell.x].power > 0) {
+            globalState.grid[cell.y][cell.x].power -= 1;
+            break;
+          }
         }
-      }
-      if (territory.totalPower === 0) {
-        playerTerritories[playerId].splice(territoryIndex, 1);
-        depletedTerritories.push(territory);
-        if (playerTerritories[playerId].length === 0) {
-          delete playerTerritories[playerId];
+        if (territory.totalPower === 0) {
+          console.log('territory depleted', playerId, territoryIndex);
+          playerTerritories[playerId].splice(territoryIndex, 1);
+          depletedTerritories.push(territory);
+          // decrement territory index to avoid skipping over the next
+          // territory
+          playerTerritoryIndexes[playerId] = --territoryIndex;
+          if (playerTerritories[playerId].length === 0) {
+            delete playerTerritories[playerId];
+          }
         }
-      }
-      playerIndex = (playerIndex + 1) % battleGroup.length;
-      // player may have been removed if their territory was depleted
-      if (playerTerritories[playerId]) {
-        playerTerritoryIndexes[playerId] =
-          (territoryIndex + 1) % playerTerritories[playerId].length;
-      } else {
-        playerTerritoryIndexes[playerId] = 0;
+        // player may have been removed if their territory was depleted
+        if (playerTerritories[playerId]) {
+          playerTerritoryIndexes[playerId] =
+            (territoryIndex + 1) % playerTerritories[playerId].length;
+          console.log(
+            'next territory for',
+            playerId,
+            'is',
+            playerTerritoryIndexes[playerId],
+          );
+        } else {
+          playerTerritoryIndexes[playerId] = 0;
+        }
       }
     }
     // remove any depleted territories
