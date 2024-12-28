@@ -87,7 +87,7 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members }) => {
-    const gridSize = 16 + members.length * 2;
+    const gridSize = 8 + members.length * 2;
     const grid = Array.from({ length: gridSize }, () =>
       Array.from({ length: gridSize }, () => ({
         playerId: null,
