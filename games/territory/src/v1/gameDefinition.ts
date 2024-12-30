@@ -55,14 +55,15 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {
-    // only allow 1 placement for now
-    if (turn.data.placements.length !== 1) {
-      return 'Must place exactly 1 tile';
+    if (turn.data.placements.length > 2) {
+      return 'You can place up to 2 tiles';
     }
     // only allow placement in empty cell
-    const [placement] = turn.data.placements;
-    if (playerState.grid[placement.y][placement.x].playerId) {
-      return 'Cell already occupied';
+    for (const placement of turn.data.placements) {
+      const ownerPlayer = playerState.grid[placement.y][placement.x].playerId;
+      if (ownerPlayer !== null && ownerPlayer !== turn.playerId) {
+        return 'Cell already occupied';
+      }
     }
   },
 
@@ -73,15 +74,21 @@ export const gameDefinition: GameDefinition<
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
     // apply the placement to the grid
-    const grid = playerState.grid.map((row) => [...row]);
-    const [placement] = prospectiveTurn.data.placements;
-    grid[placement.y][placement.x] = {
-      playerId: prospectiveTurn.playerId,
-      power: 1,
-    };
-    return {
-      grid,
-    };
+    const grid = JSON.parse(JSON.stringify(playerState.grid));
+    for (const placement of prospectiveTurn.data.placements) {
+      if (
+        grid[placement.y][placement.x].playerId === prospectiveTurn.playerId
+      ) {
+        grid[placement.y][placement.x].power += 1;
+      } else {
+        grid[placement.y][placement.x] = {
+          playerId: prospectiveTurn.playerId,
+          power: 1,
+        };
+      }
+    }
+
+    return { grid };
   },
 
   // run on server
@@ -104,9 +111,10 @@ export const gameDefinition: GameDefinition<
   },
 
   getState: ({ initialState, random, rounds }) => {
-    return rounds.reduce(applyRoundToGlobalState, {
-      ...initialState,
-    });
+    return rounds.reduce(
+      applyRoundToGlobalState,
+      JSON.parse(JSON.stringify(initialState)),
+    );
   },
 
   getPublicTurn: ({ turn }) => {
@@ -141,21 +149,49 @@ const applyRoundToGlobalState = (
   globalState: GlobalState,
   round: GameRound<Turn<TurnData>>,
 ): GlobalState => {
-  // find identical placements and run battles
-  const collisionMap: Record<string, string[]> = {};
+  // find identical placements and run battles. values in this map
+  // are player id -> number of placed units
+  const collisionMap: Record<string, Record<string, number>> = {};
   for (const turn of round.turns) {
-    const [placement] = turn.data.placements;
-    const key = `${placement.x},${placement.y}`;
-    collisionMap[key] = collisionMap[key] || [];
-    // TODO: validate this in framework
-    if (!turn.playerId) {
-      throw new Error('Turn missing player ID');
+    for (const placement of turn.data.placements) {
+      const key = `${placement.x},${placement.y}`;
+      collisionMap[key] = collisionMap[key] || {};
+      // TODO: validate this in framework
+      if (!turn.playerId) {
+        throw new Error('Turn missing player ID');
+      }
+      if (!collisionMap[key][turn.playerId]) {
+        collisionMap[key][turn.playerId] = 0;
+      }
+      collisionMap[key][turn.playerId] += 1;
     }
-    collisionMap[key].push(turn.playerId);
+  }
+
+  // first apply all placements not in battles to set up
+  // the grid for the battle phase and reinforce any existing
+  // territories
+  for (const turn of round.turns) {
+    for (const placement of turn.data.placements) {
+      if (
+        Object.keys(collisionMap[`${placement.x},${placement.y}`]).length === 1
+      ) {
+        // if an existing cell of the same player is here, we augment it
+        if (
+          globalState.grid[placement.y][placement.x].playerId === turn.playerId
+        ) {
+          globalState.grid[placement.y][placement.x].power += 1;
+        } else {
+          globalState.grid[placement.y][placement.x] = {
+            playerId: turn.playerId,
+            power: 1,
+          };
+        }
+      }
+    }
   }
 
   const battles = Object.entries(collisionMap).filter(
-    ([coordKey, players]) => players.length > 1,
+    ([coordKey, players]) => Object.keys(players).length > 1,
   );
   for (const [coordKey, battleGroup] of battles) {
     const coordinate = coordKey.split(',').map((n) => parseInt(n, 10));
@@ -165,23 +201,32 @@ const applyRoundToGlobalState = (
       coordinate[1],
     );
     const playerTerritories = Object.fromEntries(
-      battleGroup.map<[string, Territory[]]>((playerId) => {
-        return [
-          playerId,
-          // sort territories most powerful first
-          [
-            // everyone gets to count the battlefield
-            {
+      Object.entries(battleGroup).map<[string, Territory[]]>(
+        ([playerId, deployed]) => {
+          // if the player has no other territories, just return the battlefield.
+          const territories = involvedTerritories
+            .filter((t) => t.playerId === playerId)
+            .sort((a, b) => b.totalPower - a.totalPower);
+          if (territories.length === 0) {
+            return [
               playerId,
-              cells: [{ x: coordinate[0], y: coordinate[1] }],
-              totalPower: 1,
-            },
-            ...involvedTerritories.filter((t) => t.playerId === playerId),
-          ].sort((a, b) => b.totalPower - a.totalPower),
-        ];
-      }),
+              [
+                {
+                  playerId,
+                  cells: [{ x: coordinate[0], y: coordinate[1] }],
+                  totalPower: deployed,
+                },
+              ],
+            ];
+          }
+
+          // otherwise, add the battlefield power to an arbitrary territory
+          territories[0].totalPower += deployed;
+          territories[0].cells.push({ x: coordinate[0], y: coordinate[1] });
+          return [playerId, territories];
+        },
+      ),
     );
-    console.log('player territories', JSON.stringify(playerTerritories));
     // iterate over all players, removing 1 power from one of their territories until
     // one or no players remain. for players with multiple territories involved, begin
     // with the most powerful (they are already sorted for this) and alternate each iteration.
@@ -198,12 +243,6 @@ const applyRoundToGlobalState = (
         let territoryIndex = playerTerritoryIndexes[playerId];
         const territory = playerTerritories[playerId][territoryIndex];
         territory.totalPower -= 1;
-        console.log(
-          'subtracted 1 power from',
-          playerId,
-          'territory',
-          territoryIndex,
-        );
         // remove power from any cell in the territory which has some available. doesn't
         // matter which cell we choose, since the power is shared.
         for (const cell of territory.cells) {
@@ -213,7 +252,6 @@ const applyRoundToGlobalState = (
           }
         }
         if (territory.totalPower === 0) {
-          console.log('territory depleted', playerId, territoryIndex);
           playerTerritories[playerId].splice(territoryIndex, 1);
           depletedTerritories.push(territory);
           // decrement territory index to avoid skipping over the next
@@ -227,12 +265,6 @@ const applyRoundToGlobalState = (
         if (playerTerritories[playerId]) {
           playerTerritoryIndexes[playerId] =
             (territoryIndex + 1) % playerTerritories[playerId].length;
-          console.log(
-            'next territory for',
-            playerId,
-            'is',
-            playerTerritoryIndexes[playerId],
-          );
         } else {
           playerTerritoryIndexes[playerId] = 0;
         }
@@ -259,17 +291,6 @@ const applyRoundToGlobalState = (
     }
 
     // the battle is done!
-  }
-
-  // apply all placements not in battles
-  for (const turn of round.turns) {
-    const [placement] = turn.data.placements;
-    if (collisionMap[`${placement.x},${placement.y}`].length === 1) {
-      globalState.grid[placement.y][placement.x] = {
-        playerId: turn.playerId,
-        power: 1,
-      };
-    }
   }
 
   return globalState;

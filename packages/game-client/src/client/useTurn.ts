@@ -47,7 +47,7 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
   submitting: boolean;
 } {
   const session = useGameSession();
-  const { currentTurn: serverTurn, playerState } = session.state;
+  const { currentTurn: serverTurn, playerState, playerId } = session.state;
   const [localTurnData, setLocalTurnData] = useLocalTurnData<TurnData>();
   const [error, setError] = useState<string | null>(null);
   const gameDefinition = useGameDefinition(session.gameId, session.gameVersion);
@@ -58,7 +58,7 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
         playerState: session.state.playerState,
         turn: {
           data: turn,
-          playerId: playerState.playerId,
+          playerId,
         },
         members: session.members.map((member) => member.user),
         roundIndex: session.state.currentTurn?.roundIndex ?? 0,
@@ -72,7 +72,7 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
       }
       setLocalTurnData(turn as any);
     },
-    [setLocalTurnData, session, gameDefinition, playerState],
+    [setLocalTurnData, session, gameDefinition, playerState, playerId],
   );
   const submitTurn = useCallback(
     async (dataOverride?: TurnData) => {

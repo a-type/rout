@@ -132,8 +132,31 @@ export const getUnclaimedCells = (grid: GridCell[][]) => {
   return unclaimed;
 };
 
+export const getFlatCoordinates = (grid: GridCell[][]) => {
+  const flat: Coordinate[] = [];
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      flat.push({ x, y });
+    }
+  }
+  return flat;
+};
+
 export function getCoordinateKey({ x, y }: Coordinate) {
   return `${x},${y}`;
+}
+
+export function getOwner(grid: GridCell[][], coordinate: Coordinate) {
+  return grid[coordinate.y][coordinate.x].playerId;
+}
+
+export function canPlayCell(
+  grid: GridCell[][],
+  coordinate: Coordinate,
+  playerId: string,
+) {
+  const owner = getOwner(grid, coordinate);
+  return !owner || owner === playerId;
 }
 
 /**
@@ -190,4 +213,12 @@ function getDistanceToBoundary(cell: Coordinate, territory: Coordinate[]) {
   }
 
   return Math.min(posXDistance, negXDistance, posYDistance, negYDistance);
+}
+
+export function hasCoordinate(list: Coordinate[], coord: Coordinate) {
+  return list.some((c) => c.x === coord.x && c.y === coord.y);
+}
+
+export function withoutCoordinate(list: Coordinate[], coord: Coordinate) {
+  return list.filter((c) => c.x !== coord.x || c.y !== coord.y);
 }

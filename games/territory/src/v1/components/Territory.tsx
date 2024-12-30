@@ -1,7 +1,7 @@
 import { colors } from '@long-game/common';
 import { usePlayer } from '@long-game/game-client/client';
 import { useGrid } from '@long-game/game-ui';
-import { useCurrentTurn } from '../gameClient.js';
+import { useCurrentTurn, usePlayerId } from '../gameClient.js';
 import { getInnermostCell } from '../utils.js';
 
 export interface TerritoryProps {
@@ -59,22 +59,22 @@ function TerritoryCell({
     ({ x: px, y: py }) => px === x && py === y,
   );
 
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: `${x * size}px`,
-        top: `${y * size}px`,
-        width: size,
-        height: size,
-        backgroundColor: colors[color].default,
-        opacity: isPendingTurnSelection ? 0.5 : 1,
-        border: isPendingTurnSelection
-          ? `2px dotted ${colors[color].range[11]}`
-          : 'none',
-      }}
-    >
-      {children}
-    </div>
-  );
+  const ownId = usePlayerId();
+  const isOwned = playerId === ownId;
+
+  const style = {
+    position: 'absolute',
+    left: `${x * size}px`,
+    top: `${y * size}px`,
+    width: size,
+    height: size,
+    backgroundColor: colors[color].default,
+    opacity: isPendingTurnSelection ? 0.5 : 1,
+    border: isPendingTurnSelection
+      ? `2px dotted ${colors[color].range[11]}`
+      : 'none',
+    pointerEvents: 'none',
+  } as const;
+
+  return <div style={style}>{children}</div>;
 }

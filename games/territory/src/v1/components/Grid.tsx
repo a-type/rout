@@ -1,8 +1,14 @@
 import { Button } from '@a-type/ui';
 import { GameBoard, useGrid } from '@long-game/game-ui';
-import { useCurrentTurn } from '../gameClient.js';
-import { GridCell } from '../gameDefinition.js';
-import { getAllTerritories, getUnclaimedCells } from '../utils.js';
+import { useCurrentTurn, usePlayerId } from '../gameClient.js';
+import { Coordinate, GridCell } from '../gameDefinition.js';
+import {
+  canPlayCell,
+  getAllTerritories,
+  getFlatCoordinates,
+  hasCoordinate,
+  withoutCoordinate,
+} from '../utils.js';
 import { Territory } from './Territory.js';
 
 export interface GridProps {
@@ -13,8 +19,8 @@ const CELL_SIZE = 16;
 
 export function Grid({ value }: GridProps) {
   const territories = getAllTerritories(value);
-  const unclaimedCells = getUnclaimedCells(value);
-  console.log(territories);
+  const allCells = getFlatCoordinates(value);
+  const playerId = usePlayerId();
 
   const gridSize = value.length;
 
@@ -41,7 +47,14 @@ export function Grid({ value }: GridProps) {
         },
       }}
     >
-      {/* <GridPattern size={gridSize} /> */}
+      {allCells.map((c) => (
+        <CellButton
+          key={`${c.x},${c.y}`}
+          x={c.x}
+          y={c.y}
+          disabled={!canPlayCell(value, c, playerId)}
+        />
+      ))}
       {territories.map((t) => (
         <Territory
           key={t.cells.map((c) => `${c.x},${c.y}`).join(' ')}
@@ -50,45 +63,48 @@ export function Grid({ value }: GridProps) {
           totalPower={t.totalPower}
         />
       ))}
-      {unclaimedCells.map((c) => (
-        <UnclaimedCell key={`${c.x},${c.y}`} x={c.x} y={c.y} />
-      ))}
     </GameBoard>
   );
 }
 
-function GridPattern({ size }: { size: number }) {
-  const { size: cellSize } = useGrid();
-  return (
-    <div
-      className="bg-black absolute"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${size}, ${cellSize - 2}fr)`,
-        gap: '1px',
-        width: `${size * cellSize}px`,
-        height: `${size * cellSize}px`,
-      }}
-    >
-      {Array.from({ length: size * size }).map((_, i) => (
-        <div key={i} className="bg-white w-full h-full" />
-      ))}
-    </div>
-  );
-}
-
-function UnclaimedCell({ x, y }: { x: number; y: number }) {
+function CellButton({
+  x,
+  y,
+  disabled,
+}: {
+  x: number;
+  y: number;
+  disabled: boolean;
+}) {
   const { size: cellSize } = useGrid();
 
-  const turn = useCurrentTurn();
+  const turn = useCurrentTurn({
+    onError: console.error,
+  });
+
   const selectCell = () => {
-    turn.prepareTurn({
-      placements: [{ x, y }],
-    });
+    const currentPlacements =
+      turn.currentTurn?.placements ?? new Array<Coordinate>();
+    const hasRemainingSelection = currentPlacements.length < 2;
+    if (hasCoordinate(currentPlacements, { x, y }) && !hasRemainingSelection) {
+      console.log('removing', x, y);
+      turn.prepareTurn({
+        placements: withoutCoordinate(currentPlacements, { x, y }),
+      });
+    } else if (hasRemainingSelection) {
+      console.log('adding', x, y);
+      turn.prepareTurn({
+        placements: [...currentPlacements, { x, y }],
+      });
+    }
   };
 
-  const isPendingTurnSelection = turn.currentTurn?.placements.some(
-    ({ x: px, y: py }) => px === x && py === y,
+  const isPendingTurnSelection = hasCoordinate(
+    turn.currentTurn?.placements ?? [],
+    {
+      x,
+      y,
+    },
   );
 
   return (
@@ -100,8 +116,9 @@ function UnclaimedCell({ x, y }: { x: number; y: number }) {
         width: cellSize,
         height: cellSize,
       }}
-      color={isPendingTurnSelection ? 'primary' : 'default'}
+      color="default"
       onClick={selectCell}
+      disabled={disabled}
     />
   );
 }
