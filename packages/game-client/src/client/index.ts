@@ -1,5 +1,6 @@
 export * from './create.js';
 export * from './GameDefinitions.jsx';
+export * from './GameHistoryContext.jsx';
 export * from './useGameSession.js';
 export * from './useLogs.js';
 export * from './usePlayers.js';

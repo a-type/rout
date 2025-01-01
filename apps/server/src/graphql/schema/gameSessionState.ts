@@ -38,14 +38,14 @@ GameSessionState.implement({
     playerState: t.field({
       type: 'JSON',
       authScopes: { user: true },
-      resolve: async (state, _, ctx) => {
+      args: {
+        roundIndex: t.arg.int({ required: false }),
+      },
+      resolve: async (state, { roundIndex }, ctx) => {
         const { userId } = ctx.session!;
-        return state.gameDefinition.getPlayerState({
-          globalState: state.globalState,
+        return state.getPlayerStateAtRound({
           playerId: userId,
-          roundIndex: state.currentRound.roundIndex,
-          members: state.members,
-          rounds: state.rounds,
+          roundIndex: roundIndex ?? state.currentRound.roundIndex,
         });
       },
     }),
@@ -121,6 +121,11 @@ GameSessionState.implement({
         assert(ctx.session);
         return ctx.session.userId;
       },
+    }),
+    currentRoundIndex: t.field({
+      type: 'Int',
+      authScopes: { user: true },
+      resolve: (state) => state.currentRoundIndex,
     }),
   }),
 });

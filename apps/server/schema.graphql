@@ -106,10 +106,11 @@ type GameSessionPostGame {
 }
 
 type GameSessionState implements Node {
+  currentRoundIndex: Int
   currentTurn: Turn
   id: ID!
   playerId: ID!
-  playerState: JSON
+  playerState(roundIndex: Int): JSON
   rounds: [Round!]!
   status: GameSessionStatusValue
   winnerIds: [ID!]

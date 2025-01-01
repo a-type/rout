@@ -109,4 +109,33 @@ export class GameSessionState {
   addTurn(turn: Turn<any>) {
     this.turns.push(turn);
   }
+
+  getPlayerStateAtRound({
+    playerId,
+    roundIndex,
+  }: {
+    playerId: string;
+    roundIndex: number;
+  }) {
+    const random = new GameRandom(this.gameSession.randomSeed);
+    const rounds = this.rounds.filter(
+      (round) => round.roundIndex <= roundIndex,
+    );
+    const globalState = this.gameDefinition.getState({
+      initialState: this.gameDefinition.getInitialGlobalState({
+        random,
+        members: this.members,
+      }),
+      members: this.members,
+      random,
+      rounds,
+    });
+    return this.gameDefinition.getPlayerState({
+      globalState,
+      playerId,
+      roundIndex,
+      members: this.members,
+      rounds,
+    });
+  }
 }

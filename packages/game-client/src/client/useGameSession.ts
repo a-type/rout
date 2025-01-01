@@ -8,12 +8,13 @@ export const gameSessionStateFragment = graphql(`
     playerId
     status
     winnerIds
-    playerState
+    playerState(roundIndex: null)
     currentTurn {
       userId
       data
       roundIndex
     }
+    currentRoundIndex
     rounds {
       roundIndex
       turns {

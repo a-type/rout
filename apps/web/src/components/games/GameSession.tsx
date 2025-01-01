@@ -1,6 +1,9 @@
 import { ErrorBoundary } from '@a-type/ui';
 import { graphql, useSuspenseQuery } from '@long-game/game-client';
-import { GameSessionProvider } from '@long-game/game-client/client';
+import {
+  GameHistoryProvider,
+  GameSessionProvider,
+} from '@long-game/game-client/client';
 import games from '@long-game/games';
 import { FC } from 'react';
 import { NoGameFound } from './NoGameFound.js';
@@ -47,7 +50,9 @@ export const GameSession: FC<GameSessionProps> = ({ gameSessionId }) => {
   return (
     <ErrorBoundary>
       <GameSessionProvider value={session.id}>
-        <Client />
+        <GameHistoryProvider>
+          <Client />
+        </GameHistoryProvider>
       </GameSessionProvider>
     </ErrorBoundary>
   );

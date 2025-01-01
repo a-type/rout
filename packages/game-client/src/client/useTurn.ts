@@ -45,6 +45,7 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
   dirty: boolean;
   error: string | null;
   submitting: boolean;
+  roundIndex: number;
 } {
   const session = useGameSession();
   const { currentTurn: serverTurn, playerState, playerId } = session.state;
@@ -55,7 +56,7 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
   const prepareTurn = useCallback(
     async (turn: unknown) => {
       const error = gameDefinition.validateTurn({
-        playerState: session.state.playerState,
+        playerState,
         turn: {
           data: turn,
           playerId,
@@ -104,5 +105,6 @@ export function useCurrentTurn<TurnData extends BaseTurnData>({
     error,
     submitting: loading,
     resetTurn,
+    roundIndex: serverTurn?.roundIndex ?? 0,
   };
 }
