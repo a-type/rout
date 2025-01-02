@@ -10,6 +10,8 @@ export function RoundHistoryControl({}: RoundHistoryControlProps) {
     state: { currentRoundIndex: latestRoundIndex },
   } = useGameSession();
 
+  const lastDisplayedRound = latestRoundIndex - 2;
+
   return (
     <Box>
       {(roundIndex === 'current' || roundIndex > 0) && (
@@ -18,7 +20,7 @@ export function RoundHistoryControl({}: RoundHistoryControlProps) {
           color="ghost"
           onClick={() => {
             setRoundIndex(
-              roundIndex === 'current' ? latestRoundIndex - 1 : roundIndex - 1,
+              roundIndex === 'current' ? lastDisplayedRound : roundIndex - 1,
             );
           }}
         >
@@ -46,13 +48,13 @@ export function RoundHistoryControl({}: RoundHistoryControlProps) {
           <Select.Item value="current">Latest Round</Select.Item>
         </Select.Content>
       </Select>
-      {roundIndex !== 'current' && roundIndex < latestRoundIndex && (
+      {roundIndex !== 'current' && roundIndex <= lastDisplayedRound && (
         <Button
           size="icon-small"
           color="ghost"
           onClick={() => {
             setRoundIndex(
-              roundIndex === latestRoundIndex - 1 ? 'current' : roundIndex + 1,
+              roundIndex === lastDisplayedRound ? 'current' : roundIndex + 1,
             );
           }}
         >

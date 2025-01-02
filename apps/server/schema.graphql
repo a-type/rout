@@ -100,6 +100,11 @@ type GameSessionMembership implements Node {
   user: User!
 }
 
+type GameSessionPlayerStatus {
+  hasPlayedTurn: Boolean!
+  player: User!
+}
+
 type GameSessionPostGame {
   globalState: JSON
   winnerIds: [ID!]
@@ -111,6 +116,7 @@ type GameSessionState implements Node {
   id: ID!
   playerId: ID!
   playerState(roundIndex: Int): JSON
+  playerStatuses: [GameSessionPlayerStatus!]!
   rounds: [Round!]!
   status: GameSessionStatusValue
   winnerIds: [ID!]

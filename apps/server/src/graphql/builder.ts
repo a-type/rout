@@ -51,6 +51,10 @@ export const builder = new SchemaBuilder<{
       globalState: any;
       winnerIds: PrefixedId<'u'>[];
     };
+    GameSessionPlayerStatus: {
+      sessionState: GameSessionState;
+      playerId: PrefixedId<'u'>;
+    };
 
     ChatMessage: ChatMessage;
     GameChat: {

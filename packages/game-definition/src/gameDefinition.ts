@@ -7,7 +7,7 @@ import { GameRandom } from './random.js';
 export type BaseTurnData = Record<string, unknown>;
 
 export interface LocalTurn<TurnData extends BaseTurnData> {
-  playerId: string;
+  playerId: `u-${string}`;
   data: TurnData;
 }
 

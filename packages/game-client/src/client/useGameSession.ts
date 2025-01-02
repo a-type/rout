@@ -28,6 +28,14 @@ export const gameSessionStateFragment = graphql(`
         }
       }
     }
+    playerStatuses {
+      player {
+        id
+        name
+        color
+      }
+      hasPlayedTurn
+    }
   }
 `);
 

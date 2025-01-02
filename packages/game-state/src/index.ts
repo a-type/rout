@@ -1,5 +1,5 @@
 import { GameRound } from '@long-game/common';
-import { GameSession } from '@long-game/db';
+import { GameSession, PrefixedId } from '@long-game/db';
 import {
   GameDefinition,
   GameRandom,
@@ -19,10 +19,10 @@ export class GameSessionState {
     public turns: {
       createdAt: string;
       data: any;
-      playerId: string;
+      playerId: PrefixedId<'u'>;
       roundIndex: number;
     }[],
-    readonly members: { id: string }[],
+    readonly members: { id: PrefixedId<'u'> }[],
   ) {}
 
   get id(): `gss-${string}` {
@@ -118,7 +118,10 @@ export class GameSessionState {
     roundIndex: number;
   }) {
     const random = new GameRandom(this.gameSession.randomSeed);
-    const rounds = this.rounds.filter(
+    // only compute using previous (settled) rounds. we never
+    // want to leak future information to players, and players will
+    // calculate the prospective state themselves using their own info.
+    const rounds = this.previousRounds.filter(
       (round) => round.roundIndex <= roundIndex,
     );
     const globalState = this.gameDefinition.getState({
@@ -137,5 +140,9 @@ export class GameSessionState {
       members: this.members,
       rounds,
     });
+  }
+
+  getHasPlayedTurn(playerId: string) {
+    return this.currentRound.turns.some((turn) => turn.playerId === playerId);
   }
 }

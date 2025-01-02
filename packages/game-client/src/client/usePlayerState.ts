@@ -69,7 +69,7 @@ export function usePlayerState<S, T extends BaseTurnData>(): S {
         playerId: session.state.playerId,
         prospectiveTurn: {
           data: currentTurn,
-          playerId: session.state.playerId,
+          playerId: session.state.playerId as `u-${string}`,
         },
       })
     : viewingPlayerState;

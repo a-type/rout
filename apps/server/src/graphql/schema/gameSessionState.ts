@@ -4,6 +4,7 @@ import { validateAccessToGameSession } from '../../data/gameSession.js';
 import { EVENT_LABELS, GameStateChangedEvent } from '../../services/pubsub.js';
 import { builder } from '../builder.js';
 import { assignTypeName } from '../relay.js';
+import { User } from './user.js';
 
 builder.subscriptionFields((t) => ({
   gameSessionStateChanged: t.field({
@@ -126,6 +127,32 @@ GameSessionState.implement({
       type: 'Int',
       authScopes: { user: true },
       resolve: (state) => state.currentRoundIndex,
+    }),
+    playerStatuses: t.field({
+      type: ['GameSessionPlayerStatus'],
+      authScopes: { user: true },
+      nullable: false,
+      resolve: (state) => {
+        return state.members.map((player) => ({
+          playerId: player.id,
+          sessionState: state,
+        }));
+      },
+    }),
+  }),
+});
+
+builder.objectType('GameSessionPlayerStatus', {
+  fields: (t) => ({
+    player: t.field({
+      type: User,
+      resolve: (s) => s.playerId,
+      nullable: false,
+    }),
+    hasPlayedTurn: t.field({
+      type: 'Boolean',
+      resolve: (s) => s.sessionState.getHasPlayedTurn(s.playerId),
+      nullable: false,
     }),
   }),
 });
