@@ -1,0 +1,36 @@
+{
+  "name": "@long-game/services",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./public-api": {
+      "development": "./public-api-service/src/index.ts",
+      "import": "./public-api-service/src/index.ts",
+      "types": "./public-api-service/src/index.ts"
+    },
+    "./game-session": {
+      "development": "./game-session-service/src/index.ts",
+      "import": "./game-session-service/src/index.ts",
+      "types": "./game-session-service/src/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "pnpm run --filter @long-game/services --parallel \"/^dev:.*/\"",
+    "dev:db": "wrangler dev -c db-service/wrangler.toml --port 3111",
+    "dev:public-api": "sleep 2 && wrangler dev -c public-api-service/wrangler.toml --port 3101",
+    "dev:game-session": "sleep 3 && wrangler dev -c game-session-service/wrangler.toml --port 3102",
+    "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core-d1 --local -c db/wrangler.toml",
+    "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core-d1 --remote -c db/wrangler.toml"
+  },
+  "dependencies": {
+    "hono": "catalog:",
+    "@long-game/db": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@a-type/auth": "catalog:",
+    "@a-type/utils": "catalog:",
+    "zod": "catalog:",
+    "@hono/zod-validator": "catalog:"
+  }
+}

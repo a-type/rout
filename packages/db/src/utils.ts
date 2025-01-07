@@ -29,6 +29,14 @@ export function isPrefixedId<
   return id.includes('-') && (!prefix || id.startsWith(prefix + '-'));
 }
 
+export function assertPrefixedId<
+  Prefix extends ResourceIdPrefix = ResourceIdPrefix,
+>(id: string, prefix?: Prefix): asserts id is PrefixedId<Prefix> {
+  if (!isPrefixedId(id, prefix)) {
+    throw new Error(`Invalid id: ${id}`);
+  }
+}
+
 export function idToType(id: string): ResourceTypeName {
   const prefix = id.split('-')[0] as ResourceIdPrefix;
   if (!resourceIdTypes[prefix]) {

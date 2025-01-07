@@ -13,10 +13,8 @@ export interface Database {
   Account: AccountTable;
   VerificationCode: VerificationCodeTable;
   GameSession: GameSessionTable;
-  GameTurn: GameTurnTable;
   GameSessionMembership: GameSessionMembershipTable;
   Friendship: FriendshipTable;
-  ChatMessage: ChatMessageTable;
 }
 
 export interface UserTable {
@@ -26,7 +24,7 @@ export interface UserTable {
   fullName: string | null;
   friendlyName: string | null;
   email: string;
-  emailVerifiedAt: string | null;
+  emailVerifiedAt: Date | null;
   imageUrl: string | null;
   color: string | null;
   password: string | null;
@@ -80,7 +78,8 @@ export interface GameSessionTable {
   createdAt: CreatedAtColumn;
   updatedAt: UpdatedAtColumn;
   timezone: string;
-  startedAt: ColumnType<string | null, string | undefined, string | undefined>;
+  startedAt: ColumnType<Date | null, Date | undefined, Date | undefined>;
+  endedAt: ColumnType<Date | null, Date | undefined, Date | undefined>;
   randomSeed: ColumnType<string, string | undefined, string | undefined>;
   // does not relate to anything in the db; game information is
   // defined in code.
@@ -92,22 +91,6 @@ export type GameSession = Selectable<GameSessionTable>;
 export type NewGameSession = Insertable<GameSessionTable>;
 export type GameSessionUpdate = Updateable<GameSessionTable>;
 
-export interface GameTurnTable {
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
-
-  // primary key is composite of these 3 columns
-  gameSessionId: PrefixedId<'gs'>;
-  userId: PrefixedId<'u'>;
-  roundIndex: number;
-  // the main contents will be game dependent, see game-definition
-  data: any;
-}
-
-export type GameTurn = Selectable<GameTurnTable>;
-export type NewGameTurn = Insertable<GameTurnTable>;
-export type GameTurnUpdate = Updateable<GameTurnTable>;
-
 export interface GameSessionMembershipTable {
   id: PrefixedId<'gsm'>;
   createdAt: CreatedAtColumn;
@@ -116,8 +99,8 @@ export interface GameSessionMembershipTable {
   gameSessionId: PrefixedId<'gs'>;
   inviterId: PrefixedId<'u'>;
   userId: PrefixedId<'u'>;
-  expiresAt: ColumnType<string, string | undefined, string | undefined>;
-  claimedAt: ColumnType<string, string | undefined, string | undefined>;
+  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  claimedAt: ColumnType<Date, Date | undefined, Date | undefined>;
   status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
 }
 
@@ -140,25 +123,3 @@ export interface FriendshipTable {
 export type Friendship = Selectable<FriendshipTable>;
 export type NewFriendship = Insertable<FriendshipTable>;
 export type FriendshipUpdate = Updateable<FriendshipTable>;
-
-export interface ChatMessageTable {
-  id: PrefixedId<'cm'>;
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
-
-  userId: PrefixedId<'u'>;
-  gameSessionId: PrefixedId<'gs'>;
-  message: string;
-  // chats can optionally be placed on the game board somewhere
-  position: { x: number; y: number } | null;
-  // chats can be associated with a round
-  roundIndex: number | null;
-  // chats can optionally be associated with a scene in the game.
-  // this does not relate to any tables in the database, it is
-  // interpreted per-game
-  sceneId: string | null;
-}
-
-export type ChatMessage = Selectable<ChatMessageTable>;
-export type NewChatMessage = Insertable<ChatMessageTable>;
-export type ChatMessageUpdate = Updateable<ChatMessageTable>;

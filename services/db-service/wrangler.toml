@@ -1,0 +1,14 @@
+name = "db-service"
+compatibility_date = "2025-01-01"
+main = "src/index.ts"
+node_compat = true
+
+[[d1_databases]]
+binding = "D1"
+database_name = "prod-long-game-core"
+database_id = "19289791-c695-4c46-8ad9-116b947fce1d"
+
+[[services]]
+binding = "STORE"
+service = "db-service"
+entrypoint = "AdminStore"

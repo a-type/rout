@@ -1,0 +1,32 @@
+{
+  "name": "@long-game/app",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@a-type/auth-client": "catalog:",
+    "@a-type/ui": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@long-game/services": "workspace:*",
+    "@verdant-web/react-router": "0.6.4",
+    "hono": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@tanstack/react-query": "5.62.15"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@unocss/transformer-variant-group": "catalog:",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "unocss": "catalog:",
+    "vite": "^5.0.10",
+    "vite-plugin-pwa": "^0.17.4",
+    "wrangler": "^3.99.0"
+  }
+}

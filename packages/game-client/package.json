@@ -6,11 +6,13 @@
     ".": {
       "production": "./dist/esm/index.js",
       "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
       "default": "./dist/esm/index.js"
     },
     "./client": {
       "production": "./dist/esm/client/index.js",
       "development": "./src/client/index.ts",
+      "workerd": "./src/client/index.ts",
       "default": "./dist/esm/client/index.js"
     }
   },
