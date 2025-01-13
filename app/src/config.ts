@@ -1,11 +1,11 @@
-export const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || 'localhost:3101';
+export const API_ORIGIN =
+  import.meta.env.VITE_PUBLIC_API_ORIGIN || 'localhost:3101';
 export const SECURE =
   typeof window !== 'undefined' && window.location.protocol === 'https:';
 export const API_HOST_HTTP = (SECURE ? 'https://' : 'http://') + API_ORIGIN;
 export const API_HOST_WS = (SECURE ? 'wss://' : 'ws://') + API_ORIGIN;
 export const UI_HOST_HTTP = import.meta.env.VITE_PUBLIC_URL;
+export const GAME_SESSION_API_ORIGIN = import.meta.env
+  .VITE_GAME_SESSION_API_ORIGIN;
 
 export const APP_NAME = 'Long Game';
-
-export const PRICE_MONTHLY_DOLLARS = 4;
-export const PRICE_YEARLY_DOLLARS = 48;

@@ -1,3 +1,4 @@
+import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Button,
   Dialog,
@@ -11,44 +12,31 @@ import {
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
-import { graphql, useMutation, useSuspenseQuery } from '@long-game/game-client';
 import { useState } from 'react';
-import { meQuery } from './queries.js';
 
 export interface EditProfileProps {
   onSave?: () => void;
 }
 
-const updateMe = graphql(`
-  mutation UpdateMe($input: UpdateUserInfoInput!) {
-    updateUserInfo(input: $input) {
-      id
-      name
-      color
-    }
-  }
-`);
-
 const randomColor = randomItem(Object.keys(colors));
 
 export function EditProfileForm({ onSave }: EditProfileProps) {
-  const { data } = useSuspenseQuery(meQuery);
-  const initial = data.me;
-  const [save] = useMutation(updateMe);
+  const { data: initial } = sdkHooks.useGetMe();
+  const updateMutation = sdkHooks.useUpdateMe();
 
   return (
     <FormikForm
       initialValues={{
-        name: initial?.name ?? '',
+        displayName: initial?.displayName ?? '',
         color: initial?.color ?? randomColor,
       }}
       enableReinitialize
       onSubmit={async (values) => {
-        await save({ variables: { input: values } });
+        await updateMutation.mutateAsync(values);
         onSave?.();
       }}
     >
-      <TextField required name="name" label="Username" />
+      <TextField required name="displayName" label="Display name" />
       <ColorPickerField />
       <DialogActions>
         <SubmitButton>Save</SubmitButton>

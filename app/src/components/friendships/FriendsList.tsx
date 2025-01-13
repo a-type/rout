@@ -1,39 +1,17 @@
+import { sdkHooks } from '@/services/publicSdk';
 import { Avatar } from '@a-type/ui';
-import { graphql, useSuspenseQuery } from '@long-game/game-client';
-
-export const friendsListQuery = graphql(
-  `
-    query FriendsList {
-      friendships(input: { status: accepted }) {
-        id
-        connection {
-          edges {
-            node {
-              id
-              friend {
-                id
-                name
-                imageUrl
-              }
-            }
-          }
-        }
-      }
-    }
-  `,
-);
 
 export function FriendsList() {
-  const { data } = useSuspenseQuery(friendsListQuery);
+  const { data } = sdkHooks.useGetFriendships();
 
   return (
     <div>
       <h1>Friends</h1>
       <ul className="p-0">
-        {data.friendships?.connection?.edges.map(({ node: { id, friend } }) => (
-          <li className="flex flex-row gap-2 items-center" key={id}>
+        {data.map((friend) => (
+          <li className="flex flex-row gap-2 items-center" key={friend.id}>
             <Avatar imageSrc={friend.imageUrl ?? undefined} />
-            {friend.name}
+            {friend.displayName}
           </li>
         ))}
       </ul>

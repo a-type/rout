@@ -1,26 +1,21 @@
 import { GameRecap } from '@/components/games/GameRecap.js';
 import { GameSession } from '@/components/games/GameSession.js';
 import { GameSetup } from '@/components/games/GameSetup.js';
-import { gameSessionApiClient } from '@/services/gameSessions';
+import { sdkHooks } from '@/services/publicSdk';
 import { PageContent, PageRoot } from '@a-type/ui';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { PrefixedId } from '@long-game/common';
 import { useParams } from '@verdant-web/react-router';
 
 export function GameSessionPage() {
-  const { sessionId } = useParams();
+  const { sessionId } = useParams<{
+    sessionId: PrefixedId<'gs'>;
+  }>();
 
-  const { data: status } = useSuspenseQuery({
-    queryKey: ['gameSession', sessionId, 'status'],
-    queryFn: async ({ queryKey: [_, sessionId] }) => {
-      const response = await gameSessionApiClient[':id'].status.$get({
-        param: { id: sessionId },
-      });
-      const body = await response.json();
-      return body;
-    },
+  const { data } = sdkHooks.useGetGameSessionStatus({
+    id: sessionId,
   });
 
-  if (status === 'pending') {
+  if (data.status === 'pending') {
     return (
       <PageRoot>
         <PageContent>
@@ -28,7 +23,7 @@ export function GameSessionPage() {
         </PageContent>
       </PageRoot>
     );
-  } else if (status === 'completed') {
+  } else if (data.status === 'completed') {
     return (
       <PageRoot>
         <PageContent>

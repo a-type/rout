@@ -1,7 +1,4 @@
 import { GameRound } from '@long-game/common';
-import { FragmentOf } from '@long-game/graphql';
-import { ComponentType } from 'react';
-import { clientSessionFragment } from './fragments.js';
 import { GameRandom } from './random.js';
 
 export type BaseTurnData = Record<string, unknown>;
@@ -126,14 +123,6 @@ export type GameDefinition<
    * - Rounds advance when all players submit turns
    */
   getRoundIndex: RoundIndexDecider<GlobalState, TurnData>;
-
-  // CLIENT ONLY
-
-  Client: ComponentType;
-  GameRecap: ComponentType<{
-    globalState: GlobalState;
-    session: FragmentOf<typeof clientSessionFragment>;
-  }>;
 };
 
 export type RoundIndexDecider<

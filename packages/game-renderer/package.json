@@ -1,0 +1,29 @@
+{
+  "name": "@long-game/game-renderer",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "development": "./src/index.tsx",
+      "workerd": "./src/index.tsx",
+      "production": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@long-game/game-number-guess-renderer": "workspace:*",
+    "@long-game/game-territory-renderer": "workspace:*",
+    "@long-game/game-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/react": "catalog:"
+  }
+}

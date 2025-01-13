@@ -1,16 +1,10 @@
-import { publicApiClient } from '@/services/publicApi.js';
+import { sdkHooks } from '@/services/publicSdk.js';
 import { Dialog, DialogContent, DialogTitle } from '@a-type/ui';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { PlayerColorName } from '@long-game/common';
 import { EditProfileForm } from './EditProfile.jsx';
 
 export function CompleteProfileDialog() {
-  const { data: me } = useSuspenseQuery({
-    queryKey: ['me'],
-    queryFn: async () => {
-      const response = await publicApiClient.users.me.$get();
-      return await response.json();
-    },
-  });
+  const { data: me } = sdkHooks.useGetMe();
 
   const open = !!me && incompleteProfile(me);
 
@@ -26,6 +20,9 @@ export function CompleteProfileDialog() {
   );
 }
 
-function incompleteProfile(me: { name: string; color: string | null }) {
-  return !me.name || !me.color;
+function incompleteProfile(me: {
+  displayName: string;
+  color: PlayerColorName;
+}) {
+  return !me.displayName || !me.color;
 }

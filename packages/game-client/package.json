@@ -8,12 +8,6 @@
       "development": "./src/index.ts",
       "workerd": "./src/index.ts",
       "default": "./dist/esm/index.js"
-    },
-    "./client": {
-      "production": "./dist/esm/client/index.js",
-      "development": "./src/client/index.ts",
-      "workerd": "./src/client/index.ts",
-      "default": "./dist/esm/client/index.js"
     }
   },
   "type": "module",
@@ -21,17 +15,12 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@apollo/client": "3.10.8",
-    "@long-game/graphql": "workspace:*",
-    "graphql": "^16.9.0",
-    "graphql-sse": "^2.5.3",
-    "mobx": "6.13.1",
-    "mobx-react-lite": "4.0.7",
     "valtio": "^2.0.0",
-    "zustand": "4.5.5"
+    "@long-game/services": "workspace:*",
+    "zod": "catalog:"
   },
   "peerDependencies": {
-    "@a-type/auth-client": "catalog:",
+    "@a-type/auth-fetch": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@paralleldrive/cuid2": "2.2.2",
@@ -39,12 +28,13 @@
     "react": "catalog:"
   },
   "devDependencies": {
-    "@a-type/auth-client": "catalog:",
+    "@a-type/auth-fetch": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@paralleldrive/cuid2": "2.2.2",
     "@tanstack/react-query": "5.53.3",
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "hono": "catalog:"
   }
 }

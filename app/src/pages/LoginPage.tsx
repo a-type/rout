@@ -3,7 +3,7 @@ import {
   EmailSigninForm,
   EmailSignupForm,
   OAuthSigninButton,
-} from '@a-type/auth-client';
+} from '@a-type/auth-ui';
 import { H1, H2, PageContent, PageRoot } from '@a-type/ui';
 import { useSearchParams } from '@verdant-web/react-router';
 

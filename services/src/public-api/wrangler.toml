@@ -1,0 +1,21 @@
+name = "public-api-service"
+compatibility_date = "2025-01-01"
+main = "./index.ts"
+account_id = "5f843fcad78a2f4e1fee091c1d6c21ab"
+
+compatibility_flags = ["nodejs_compat"]
+
+[[services]]
+binding = "PUBLIC_STORE"
+service = "db-service"
+entrypoint = "PublicStore"
+
+[[services]]
+binding = "ADMIN_STORE"
+service = "db-service"
+entrypoint = "AdminStore"
+
+[[services]]
+binding = "GAME_SESSION_STATE"
+service = "game-session-service"
+entrypoint = "GameSessionState"

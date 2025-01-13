@@ -1,8 +1,6 @@
+import { createFetch } from '@a-type/auth-fetch';
 import { LongGameError } from '@long-game/common';
 import { API_ORIGIN, HOME_ORIGIN } from './config.js';
-import { createFetch } from '@a-type/auth-client';
-
-export { refreshSession } from '@a-type/auth-client';
 
 export const fetch = createFetch({
   refreshSessionEndpoint: `${API_ORIGIN}/auth/refresh`,
@@ -12,9 +10,6 @@ export const fetch = createFetch({
       return longGameError.code === LongGameError.Code.SessionExpired;
     }
     return false;
-  },
-  headers: {
-    'x-csrf-token': 'csrf',
   },
 });
 

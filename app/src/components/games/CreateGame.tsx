@@ -1,24 +1,16 @@
+import { sdkHooks } from '@/services/publicSdk';
 import { Button } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { graphql, useMutation } from '@long-game/game-client';
 import { useNavigate } from '@verdant-web/react-router';
 
-const createGameMutation = graphql(`
-  mutation CreateGameSession($gameId: ID!) {
-    prepareGameSession(input: { gameId: $gameId }) {
-      id
-    }
-  }
-`);
-
 export function CreateGame() {
-  const [mutate] = useMutation(createGameMutation);
+  const mutation = sdkHooks.usePrepareGameSession();
 
   const navigate = useNavigate();
 
   const create = async () => {
-    const result = await mutate({ variables: { gameId: 'number-guess' } });
-    const gameSessionId = result.data?.prepareGameSession?.id;
+    const result = await mutation.mutateAsync({ gameId: 'number-guess' });
+    const gameSessionId = result?.sessionId;
     if (!gameSessionId) {
       throw new LongGameError(
         LongGameError.Code.Unknown,

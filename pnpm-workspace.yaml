@@ -2,7 +2,7 @@ packages:
   - 'packages/*'
   - 'apps/*'
   - 'tests/*'
-  - 'games/*'
+  - 'games/**/*'
   - 'app'
   - 'services'
 
@@ -17,9 +17,12 @@ catalog:
   '@unocss/transformer-variant-group': 0.65.2
   vitest: 2.1.8
   '@a-type/react-space': 0.2.16
-  '@a-type/auth-client': 1.0.13
+  '@a-type/auth-fetch': ^1.0.0
+  '@a-type/auth-ui': ^1.0.0
   '@a-type/auth': 1.2.3
   '@a-type/utils': 1.1.4
   hono: 4.6.16
   zod: ^3.24.1
   '@hono/zod-validator': ^0.4.2
+  '@cloudflare/workers-types': ^4.20241230.0
+  '@paralleldrive/cuid2': ^2.2.2

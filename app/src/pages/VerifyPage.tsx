@@ -1,5 +1,5 @@
 import { API_ORIGIN } from '@/config.js';
-import { EmailCompleteSignupForm } from '@a-type/auth-client';
+import { EmailCompleteSignupForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
 import { useSearchParams } from '@verdant-web/react-router';
 

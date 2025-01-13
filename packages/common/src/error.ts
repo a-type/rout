@@ -30,6 +30,13 @@ export class LongGameError extends Error {
     return new LongGameError(code, message);
   };
 
+  static throwIfError = (res: Response): void => {
+    const error = LongGameError.fromResponse(res);
+    if (error) {
+      throw error;
+    }
+  };
+
   constructor(
     public code: LongGameErrorCode,
     message: string = `LongGameError: ${code}`,

@@ -1,58 +1,41 @@
+import { sdkHooks } from '@/services/publicSdk.js';
 import { ErrorBoundary } from '@a-type/ui';
-import { graphql, useSuspenseQuery } from '@long-game/game-client';
-import {
-  GameHistoryProvider,
-  GameSessionProvider,
-} from '@long-game/game-client/client';
+import { GameSessionProvider } from '@long-game/game-client';
+import { GameRenderer } from '@long-game/game-renderer';
 import games from '@long-game/games';
 import { FC } from 'react';
 import { NoGameFound } from './NoGameFound.js';
-
-const gameSessionQuery = graphql(
-  `
-    query GameSessionMain($gameSessionId: ID!) {
-      gameSession(id: $gameSessionId) {
-        id
-        gameId
-        gameVersion
-      }
-    }
-  `,
-  [],
-);
 
 export interface GameSessionProps {
   gameSessionId: string;
 }
 
 export const GameSession: FC<GameSessionProps> = ({ gameSessionId }) => {
-  const { data } = useSuspenseQuery(gameSessionQuery, {
-    variables: {
-      gameSessionId,
-    },
+  const { data } = sdkHooks.useGetGameSessionSummary({
+    id: gameSessionId,
   });
 
-  if (!data?.gameSession) {
+  if (!data) {
     return <NoGameFound />;
   }
-  const session = data.gameSession;
 
-  const game = games[session.gameId];
-  const gameDefinition = game?.versions.find(
-    (g) => g.version === session.gameVersion,
+  const gameModule = games[data.session.gameId];
+  const gameDefinition = gameModule?.versions.find(
+    (version) => version.version === data.session.gameVersion,
   );
 
-  if (!game || !gameDefinition) {
+  if (!gameDefinition) {
     return <NoGameFound />;
   }
 
-  const { Client } = gameDefinition;
   return (
     <ErrorBoundary>
-      <GameSessionProvider value={session.id}>
-        <GameHistoryProvider>
-          <Client />
-        </GameHistoryProvider>
+      <GameSessionProvider
+        gameSessionId={gameSessionId}
+        gameDefinition={gameDefinition}
+        gameId={data.session.gameId}
+      >
+        <GameRenderer />
       </GameSessionProvider>
     </ErrorBoundary>
   );

@@ -1,0 +1,11 @@
+name = "game-session-service"
+compatibility_date = "2025-01-01"
+main = "./index.ts"
+account_id = "5f843fcad78a2f4e1fee091c1d6c21ab"
+
+compatibility_flags = ["nodejs_compat"]
+
+[[services]]
+binding = "PUBLIC_STORE"
+service = "db-service"
+entrypoint = "PublicStore"

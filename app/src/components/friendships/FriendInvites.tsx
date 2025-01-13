@@ -1,49 +1,9 @@
+import { sdkHooks } from '@/services/publicSdk';
 import { Avatar, Button } from '@a-type/ui';
-import {
-  FragmentOf,
-  graphql,
-  readFragment,
-  useMutation,
-  useSuspenseQuery,
-} from '@long-game/game-client';
-
-const friendInviteFragment = graphql(`
-  fragment FriendInvite on Friendship @_unmask {
-    id
-    friend {
-      id
-      name
-      imageUrl
-    }
-  }
-`);
-
-const friendInvitesQuery = graphql(
-  `
-    query FriendInvites {
-      friendships(input: { status: pending }) {
-        id
-        connection {
-          edges {
-            node {
-              ...FriendInvite
-            }
-          }
-        }
-      }
-    }
-  `,
-  [friendInviteFragment],
-);
+import { FriendshipInvitation } from '@long-game/game-client';
 
 export function FriendInvites() {
-  const { data, refetch } = useSuspenseQuery(friendInvitesQuery);
-  const invites =
-    data?.friendships?.connection?.edges.map((edge) => edge.node) ?? [];
-
-  if (!invites) {
-    return null;
-  }
+  const { data: invites, refetch } = sdkHooks.useGetFriendshipInvites();
 
   return (
     <div>
@@ -57,50 +17,26 @@ export function FriendInvites() {
   );
 }
 
-const respondMutation = graphql(`
-  mutation RespondToFriendInvite($id: ID!, $response: FriendshipStatus!) {
-    respondToFriendshipInvite(
-      input: { friendshipId: $id, response: $response }
-    ) {
-      friendships(input: { status: accepted }) {
-        id
-        connection {
-          edges {
-            node {
-              status
-              friend {
-                id
-                name
-                imageUrl
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`);
-
 function FriendInvite({
   invite,
   onRespond,
 }: {
-  invite: FragmentOf<typeof friendInviteFragment>;
+  invite: FriendshipInvitation;
   onRespond: () => void;
 }) {
-  const data = readFragment(friendInviteFragment, invite);
-  const [respond] = useMutation(respondMutation);
+  const respondMutation = sdkHooks.useRespondToFriendshipInvite();
   return (
     <li className="row">
-      <Avatar imageSrc={data.friend.imageUrl ?? ''} name={data.friend.name} />
-      {data.friend.name} invited you to be friends
+      <Avatar
+        imageSrc={invite.otherUser?.imageUrl ?? ''}
+        name={invite.otherUser?.displayName}
+      />
+      {invite.otherUser?.displayName ?? 'Someone'} invited you to be friends
       <Button
         onClick={async () => {
-          await respond({
-            variables: {
-              id: data.id,
-              response: 'accepted',
-            },
+          await respondMutation.mutateAsync({
+            id: invite.id,
+            response: 'accepted',
           });
           onRespond();
         }}
@@ -109,11 +45,9 @@ function FriendInvite({
       </Button>
       <Button
         onClick={async () => {
-          await respond({
-            variables: {
-              id: data.id,
-              response: 'declined',
-            },
+          await respondMutation.mutateAsync({
+            id: invite.id,
+            response: 'declined',
           });
           onRespond();
         }}

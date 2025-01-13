@@ -6,12 +6,13 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@a-type/auth-client": "catalog:",
+    "@a-type/auth-ui": "catalog:",
     "@a-type/ui": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/games": "workspace:*",
+    "@long-game/game-renderer": "workspace:*",
     "@long-game/services": "workspace:*",
     "@verdant-web/react-router": "0.6.4",
     "hono": "catalog:",

@@ -1,0 +1,29 @@
+{
+  "name": "@long-game/game-number-guess-renderer",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/esm/index.js",
+      "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@long-game/game-number-guess-definition": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
+  }
+}

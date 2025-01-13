@@ -1,5 +1,5 @@
 import { API_HOST_HTTP } from '@/config.js';
-import { ResetPasswordForm } from '@a-type/auth-client';
+import { ResetPasswordForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
 import { useSearchParams } from '@verdant-web/react-router';
 
