@@ -122,6 +122,9 @@ export class GameSessionSdk<TGame extends GameDefinition> extends PublicSdk {
       transformInput: this.#getDefaultInput,
     },
   );
+  getSummary = this.sdkQuery('getSummary', this.gameSessionRpc[':id'].$get, {
+    transformInput: this.#getDefaultInput,
+  });
   getMembers = this.sdkQuery(
     'getMembers',
     this.gameSessionRpc[':id'].members.$get,

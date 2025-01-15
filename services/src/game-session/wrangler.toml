@@ -9,3 +9,11 @@ compatibility_flags = ["nodejs_compat"]
 binding = "PUBLIC_STORE"
 service = "db-service"
 entrypoint = "PublicStore"
+
+[[durable_objects.bindings]]
+name = "GAME_SESSION_STATE"
+class_name = "GameSessionState"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["GameSessionState"]

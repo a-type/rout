@@ -1,4 +1,4 @@
-import { API_HOST_HTTP } from '@/config.js';
+import { API_ORIGIN } from '@/config.js';
 import {
   EmailSigninForm,
   EmailSignupForm,
@@ -18,20 +18,18 @@ export function LoginPage({}: LoginPageProps) {
       <PageContent>
         <H1>Login or Sign Up</H1>
         <OAuthSigninButton
-          endpoint={`${API_HOST_HTTP}/auth/provider/google/login`}
+          endpoint={`${API_ORIGIN}/auth/provider/google/login`}
           returnTo={returnTo}
         >
           Google
         </OAuthSigninButton>
         <H2>Sign in with email</H2>
         <EmailSigninForm
-          endpoint={`${API_HOST_HTTP}/auth/email-login`}
-          resetPasswordEndpoint={`${API_HOST_HTTP}/auth/begin-reset-password`}
+          endpoint={`${API_ORIGIN}/auth/email-login`}
+          resetPasswordEndpoint={`${API_ORIGIN}/auth/begin-reset-password`}
         />
         <H2>Sign up with email</H2>
-        <EmailSignupForm
-          endpoint={`${API_HOST_HTTP}/auth/begin-email-signup`}
-        />
+        <EmailSignupForm endpoint={`${API_ORIGIN}/auth/begin-email-signup`} />
       </PageContent>
     </PageRoot>
   );

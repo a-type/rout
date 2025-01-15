@@ -1,26 +1,36 @@
 import { Avatar, AvatarList, AvatarListItemRoot, clsx } from '@a-type/ui';
 import { colors } from '@long-game/common';
-import { useGameSession } from '@long-game/game-client/client';
+import { hooks } from '../hooks';
 
 export interface PlayerStatusesProps {}
 
 export function PlayerStatuses({}: PlayerStatusesProps) {
-  const { state } = useGameSession();
+  const {
+    data: { playerStatuses },
+  } = hooks.useGetSummary();
+  const { data: members } = hooks.useGetMembers();
+
+  const memberStatusList = members.map((member) => {
+    return {
+      player: member,
+      status: playerStatuses[member.id],
+    };
+  });
 
   return (
-    <AvatarList count={state.playerStatuses.length}>
-      {state.playerStatuses.map((status, index) => (
-        <AvatarListItemRoot index={index} key={status.player.id}>
+    <AvatarList count={memberStatusList.length}>
+      {memberStatusList.map(({ status, player }, index) => (
+        <AvatarListItemRoot index={index} key={player.id}>
           <Avatar
-            name={status.player.name}
+            name={player.displayName}
             style={{
-              background: colors[status.player.color].range[3],
+              background: colors[player.color].range[3],
               borderWidth: 2,
               borderStyle: 'solid',
             }}
             className={clsx(
               'border border-solid border-2px',
-              status.hasPlayedTurn ? 'border-accent' : 'border-gray-5',
+              status.hasPlayed ? 'border-accent' : 'border-gray-5',
             )}
           />
         </AvatarListItemRoot>

@@ -517,7 +517,8 @@ export class AdminStore extends WorkerEntrypoint<Env> {
 
   async insertUser({
     plaintextPassword,
-    friendlyName,
+    friendlyName: __,
+    fullName: _,
     ...user
   }: Omit<AuthUser, 'id' | 'password'> & {
     plaintextPassword?: string | null;

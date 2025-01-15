@@ -1,7 +1,8 @@
 import { Avatar, RelativeTime, withClassName } from '@a-type/ui';
-import { ChatMessage } from '@long-game/game-client';
-import { useCombinedLog } from '@long-game/game-client/client';
+import { GameSessionChatMessage } from '@long-game/common';
+import { GameSessionMembers } from '@long-game/game-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { hooks } from './hooks';
 
 export const GameLogRoot = withClassName(
   'div',
@@ -28,12 +29,16 @@ export const GameLogItem = withClassName(
   'flex flex-col gap-1 items-start',
 );
 
-export function GameLogChat({ message, user, createdAt }: ChatMessage) {
+export function GameLogChat({
+  content: message,
+  user,
+  createdAt,
+}: GameSessionChatMessage & { user?: GameSessionMembers[number] }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-row items-center gap-2 text-sm font-bold">
         <Avatar imageSrc={user?.imageUrl ?? undefined} />
-        <span>{user?.name ?? 'Anonymous'}</span>
+        <span>{user?.displayName ?? 'Anonymous'}</span>
       </div>
       <div className="whitespace-pre-wrap">{message}</div>
     </div>
@@ -69,7 +74,8 @@ export function GameLogChatInput() {
 }
 
 export function BasicGameLog(props: { className?: string }) {
-  const log = useCombinedLog();
+  const { data: log } = hooks.useGetCombinedLog();
+  const { data: members } = hooks.useGetMembers();
 
   return (
     <GameLogRoot {...props}>
@@ -77,7 +83,10 @@ export function BasicGameLog(props: { className?: string }) {
         {log.map((entry, i) => (
           <GameLogItem key={i}>
             {entry.type === 'chat' ? (
-              <GameLogChat {...entry.chatMessage} />
+              <GameLogChat
+                {...entry.chatMessage}
+                user={members.find((m) => m.id === entry.chatMessage.authorId)}
+              />
             ) : (
               <div>Round {entry.round.roundIndex + 1}</div>
             )}

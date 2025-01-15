@@ -1,9 +1,11 @@
-import { useCurrentTurn } from '@long-game/game-client/client';
+import { hooks } from '../hooks';
 
 export interface TurnErrorProps {}
 
 export function TurnError({}: TurnErrorProps) {
-  const { error } = useCurrentTurn();
+  const {
+    data: { error },
+  } = hooks.useGetCurrentTurn();
 
   if (error) {
     return <span>{error}</span>;

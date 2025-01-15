@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
-import { handleError, sessionMiddleware } from '../middleware';
+import { handleError } from '../middleware';
 import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
 import { gameSessionInvitationsRouter } from './routers/gameSessionInvitations';
@@ -39,7 +39,6 @@ const app = new Hono()
     }),
   )
   .use(logger())
-  .use(sessionMiddleware)
   .get('/', (ctx) => ctx.text('Hello, world!'))
   .route('/auth', authRouter)
   .route('/users', usersRouter)

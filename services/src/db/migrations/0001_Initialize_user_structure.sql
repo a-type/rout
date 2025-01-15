@@ -8,7 +8,8 @@ create table User (
 	email text not null unique,
 	imageUrl text,
 	password text,
-	emailVerifiedAt datetime
+	emailVerifiedAt datetime,
+	color text null
 );
 
 create table Account (

@@ -14,8 +14,8 @@ export interface Bindings {
   SESSION_SECRET: string;
 
   // services
-  PUBLIC_STORE: PublicStore;
-  ADMIN_STORE: AdminStore;
+  PUBLIC_STORE: Service<PublicStore>;
+  ADMIN_STORE: Service<AdminStore>;
   GAME_SESSION_STATE: DurableObjectNamespace<GameSessionState>;
 }
 

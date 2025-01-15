@@ -1,4 +1,4 @@
-import { API_HOST_HTTP } from '@/config.js';
+import { API_ORIGIN } from '@/config.js';
 import { ResetPasswordForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
 import { useSearchParams } from '@verdant-web/react-router';
@@ -28,7 +28,7 @@ export function ResetPasswordPage({}: ResetPasswordPageProps) {
         <ResetPasswordForm
           code={code}
           email={email}
-          endpoint={`${API_HOST_HTTP}/auth/complete-email-signup`}
+          endpoint={`${API_ORIGIN}/auth/complete-email-signup`}
         />
       </PageContent>
     </PageRoot>

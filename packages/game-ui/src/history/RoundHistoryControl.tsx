@@ -1,16 +1,14 @@
 import { Box, Button, Icon, Select } from '@a-type/ui';
-import { useGameSession } from '@long-game/game-client/client';
-import { useViewingRoundIndex } from '../../../game-client/src/GameHistoryContext.js';
+import { useViewingRoundIndex } from '@long-game/game-client';
+import { hooks } from '../hooks';
 
 export interface RoundHistoryControlProps {}
 
 export function RoundHistoryControl({}: RoundHistoryControlProps) {
   const [roundIndex, setRoundIndex] = useViewingRoundIndex();
-  const {
-    state: { currentRoundIndex: _latestRoundIndex },
-  } = useGameSession();
+  const { data: summary } = hooks.useGetSummary();
 
-  const latestRoundIndex = _latestRoundIndex ?? 0;
+  const latestRoundIndex = summary.currentRoundIndex;
   const lastDisplayedRound = latestRoundIndex - 2;
 
   return (

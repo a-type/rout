@@ -15,13 +15,14 @@ export type QueryFactory<Output, Input> = {
   __isQuery: true;
 };
 
-export class BaseSdk {
+export class BaseSdk extends EventTarget {
   protected readonly gameSessionRpc: ReturnType<typeof gameSessionHc>;
   protected readonly apiRpc: ReturnType<typeof apiHc>;
 
   readonly queryClient = queryClient;
 
   constructor() {
+    super();
     this.gameSessionRpc = gameSessionHc(
       import.meta.env.VITE_GAME_SESSION_API_ORIGIN,
       { fetch },
@@ -56,6 +57,7 @@ export class BaseSdk {
           return result;
         } catch (e) {
           console.error(e);
+          this.dispatchEvent(new ErrorEvent('error', { error: e }));
           if (LongGameError.isInstance(e)) {
             throw e;
           }

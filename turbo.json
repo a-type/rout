@@ -11,10 +11,8 @@
       "inputs": ["**/*.tsx", "**/*.ts", "**/*.test.tsx", "**/*.test.ts"]
     },
     "dev": {
-      "cache": false
-    },
-    "setup": {
-      "cache": false
+      "cache": false,
+      "persistent": true
     }
   }
 }

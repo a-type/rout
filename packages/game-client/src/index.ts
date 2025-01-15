@@ -1,7 +1,8 @@
 export * from './fetch.js';
-export * from './GameSessionContext.jsx';
+export { useViewingRoundIndex } from './GameHistoryContext.js';
+export * from './GameSessionContext.js';
 export * from './hooks.js';
-export * from './queryClient.jsx';
-export * from './sdk/index';
+export * from './queryClient.js';
+export * from './sdk/index.js';
 export * from './types.js';
 export * from './useStorage.js';

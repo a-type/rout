@@ -1,17 +1,18 @@
 import { Button } from '@a-type/ui';
-import { useCurrentTurn } from '@long-game/game-client/client';
+import { hooks } from '../hooks';
 
 export interface SubmitTurnProps {}
 
 export function SubmitTurn({}: SubmitTurnProps) {
-  const currentTurn = useCurrentTurn();
+  const submit = hooks.useSubmitTurn();
+  const { data: currentTurn } = hooks.useGetCurrentTurn();
 
   return (
     <Button
       className="items-center justify-center text-xl"
       color={currentTurn.error ? 'destructive' : 'primary'}
-      disabled={!!currentTurn.error || !currentTurn.dirty}
-      onClick={() => currentTurn.submitTurn()}
+      disabled={!!currentTurn.error || !currentTurn.local}
+      onClick={() => submit.mutate(undefined)}
     >
       Submit Turn
     </Button>

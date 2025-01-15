@@ -37,6 +37,13 @@ export class LongGameError extends Error {
     }
   };
 
+  static wrap = (err: Error): LongGameError => {
+    if (LongGameError.isInstance(err)) {
+      return err;
+    }
+    return new LongGameError(LongGameErrorCode.Unknown, err.message, err);
+  };
+
   constructor(
     public code: LongGameErrorCode,
     message: string = `LongGameError: ${code}`,

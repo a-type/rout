@@ -14,30 +14,32 @@
   },
   "scripts": {
     "dev": "pnpm run --filter @long-game/services --parallel \"/^dev:.*/\"",
-    "dev:client": "pnpm run build-client --watch --preserveWatchOutput",
+    "dev:client": "pnpm run build:client --watch --preserveWatchOutput",
     "dev:db": "wrangler dev -c src/db/wrangler.toml --port 3111",
     "dev:public-api:run": "sleep 2 && wrangler dev -c src/public-api/wrangler.toml --port 3101",
     "dev:game-session:run": "sleep 3 && wrangler dev -c src/game-session/wrangler.toml --port 3102",
-    "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core-d1 --local -c src/db/wrangler.toml",
-    "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core-d1 --remote -c src/db/wrangler.toml",
+    "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core --local -c src/db/wrangler.toml",
+    "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core --remote -c src/db/wrangler.toml",
     "build": "pnpm run --filter @long-game/services --parallel \"/^build:.*/\"",
     "build:client": "tsc -p tsconfig.client.json",
     "createUser": "node ./scripts/createUser.mjs"
   },
   "dependencies": {
-    "hono": "catalog:",
-    "@long-game/common": "workspace:*",
-    "@long-game/games": "workspace:*",
-    "@long-game/game-definition": "workspace:*",
     "@a-type/auth": "catalog:",
-    "@a-type/utils": "catalog:",
+    "@a-type/auth-email-ses": "^2.1.4",
     "@a-type/kysely": "1.1.1",
-    "zod": "catalog:",
+    "@a-type/utils": "catalog:",
     "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "better-sqlite3": "11.2.1",
+    "hono": "catalog:",
+    "jose": "^5.9.6",
     "kysely": "^0.27.5",
     "kysely-d1": "^0.3.0",
     "kysely-plugin-serialize": "0.6.3",
-    "better-sqlite3": "11.2.1"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11"
