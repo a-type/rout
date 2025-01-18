@@ -12,7 +12,14 @@ export function getSocketToken(
     sub: session.userId,
     aud: gameSessionId,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
-  });
+  })
+    .setProtectedHeader({
+      alg: 'HS256',
+    })
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .setSubject(session.userId)
+    .setAudience(gameSessionId);
   return builder.sign(encoder.encode(secret));
 }
 

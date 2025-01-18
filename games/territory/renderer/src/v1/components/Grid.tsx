@@ -1,4 +1,5 @@
 import { Button } from '@a-type/ui';
+import { withGame } from '@long-game/game-client';
 import {
   Coordinate,
   GridCell,
@@ -18,12 +19,10 @@ export interface GridProps {
 
 const CELL_SIZE = 16;
 
-export function Grid({ value }: GridProps) {
+export const Grid = withGame(function Grid({ value }: GridProps) {
   const territories = getAllTerritories(value);
   const allCells = getFlatCoordinates(value);
-  const {
-    data: { id: playerId },
-  } = hooks.useGetMe();
+  const { userId: playerId } = hooks.useGameSuite();
 
   const gridSize = value.length;
 
@@ -68,9 +67,9 @@ export function Grid({ value }: GridProps) {
       ))}
     </GameBoard>
   );
-}
+});
 
-function CellButton({
+const CellButton = withGame(function CellButton({
   x,
   y,
   disabled,
@@ -81,28 +80,26 @@ function CellButton({
 }) {
   const { size: cellSize } = useGrid();
 
-  const {
-    data: { turn, local },
-  } = hooks.useGetCurrentTurn();
-  const prepareTurn = hooks.usePrepareTurn();
+  const { currentTurn, prepareTurn } = hooks.useGameSuite();
 
   const selectCell = () => {
-    const currentPlacements = turn.data?.placements ?? new Array<Coordinate>();
+    const currentPlacements =
+      currentTurn?.placements ?? new Array<Coordinate>();
     const hasRemainingSelection = currentPlacements.length < 2;
     if (hasCoordinate(currentPlacements, { x, y }) && !hasRemainingSelection) {
       console.log('removing', x, y);
-      prepareTurn.mutate({
+      prepareTurn({
         placements: withoutCoordinate(currentPlacements, { x, y }),
       });
     } else if (hasRemainingSelection) {
       console.log('adding', x, y);
-      prepareTurn.mutate({
+      prepareTurn({
         placements: [...currentPlacements, { x, y }],
       });
     }
   };
 
-  const isPendingTurnSelection = hasCoordinate(turn.data?.placements ?? [], {
+  const isPendingTurnSelection = hasCoordinate(currentTurn?.placements ?? [], {
     x,
     y,
   });
@@ -121,4 +118,4 @@ function CellButton({
       disabled={disabled}
     />
   );
-}
+});

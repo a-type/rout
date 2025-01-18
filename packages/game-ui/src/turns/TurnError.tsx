@@ -1,15 +1,13 @@
-import { hooks } from '../hooks';
+import { useGameSuite, withGame } from '@long-game/game-client';
 
 export interface TurnErrorProps {}
 
-export function TurnError({}: TurnErrorProps) {
-  const {
-    data: { error },
-  } = hooks.useGetCurrentTurn();
+export const TurnError = withGame(function TurnError({}: TurnErrorProps) {
+  const suite = useGameSuite();
 
-  if (error) {
-    return <span>{error}</span>;
+  if (suite.turnError) {
+    return <span>{suite.turnError}</span>;
   }
 
   return null;
-}
+});

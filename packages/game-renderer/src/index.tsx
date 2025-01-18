@@ -1,8 +1,8 @@
-import { useGameSession } from '@long-game/game-client';
+import { useGameSuite } from '@long-game/game-client';
 import { renderers } from './mapping';
 
 export function GameRenderer() {
-  const { gameSessionId, gameDefinition, gameId } = useGameSession();
+  const { gameSessionId, gameDefinition, gameId } = useGameSuite();
   const gameRenderers = renderers[gameId];
   if (!gameRenderers) {
     return <div>Game not found</div>;

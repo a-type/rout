@@ -1,27 +1,24 @@
-import { GameSessionSdk, hookifySdk } from '@long-game/game-client';
+import { typedHooks, withGame } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
-
-const hooks = hookifySdk<GameSessionSdk<typeof gameDefinition>>();
+import { GameControls } from '@long-game/game-ui';
+const hooks = typedHooks<typeof gameDefinition>();
 
 export function Client() {
   return (
     <>
       <LocalGuess />
-      <History />
+      <LastGuess />
+      <GameControls />
     </>
   );
 }
 
 export default Client;
 
-const LocalGuess = function LocalGuess() {
-  const {
-    data: { turn: currentTurn, local: dirty, error },
-  } = hooks.useGetCurrentTurn();
-  const prepareTurn = hooks.usePrepareTurn();
-  const submitTurn = hooks.useSubmitTurn();
+const LocalGuess = withGame(function LocalGuess() {
+  const { currentTurn, prepareTurn } = hooks.useGameSuite();
 
-  const guess = currentTurn.data?.guess ?? 0;
+  const guess = currentTurn?.guess ?? 0;
 
   return (
     <div>
@@ -32,40 +29,17 @@ const LocalGuess = function LocalGuess() {
         onChange={(e) => {
           let num = e.target.valueAsNumber;
           if (isNaN(num)) num = 0;
-          prepareTurn.mutate({ guess: num });
+          prepareTurn({ guess: num });
         }}
       />
-      {dirty && (
-        <button onClick={() => submitTurn.mutate(undefined)}>Submit</button>
-      )}
-      {error && <div>{error}</div>}
     </div>
   );
-};
+});
 
-const History = function History() {
-  const { data: log } = hooks.useGetRounds();
+const LastGuess = withGame(() => {
+  const { playerState } = hooks.useGameSuite();
 
-  return (
-    <div>
-      <h1>History</h1>
-      <ul>
-        {log.map((round) => (
-          <li key={round.roundIndex}>
-            <div>Round {round.roundIndex + 1}</div>
-            <ul>
-              {round.turns.map((turn) => (
-                <li key={turn.player.id}>
-                  {turn.data.guess} -{' '}
-                  {turn.createdAt ? new Date(turn.createdAt).toString() : ''} by{' '}
-                  {turn.player.name}
-                  {turn.data.result && ` - ${turn.data.result}`}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+  if (!playerState.lastGuessResult) return null;
+
+  return <span>Last guess: {playerState.lastGuessResult}</span>;
+});

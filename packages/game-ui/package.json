@@ -4,15 +4,16 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
-      "development": "./src/index.ts",
+      "production": "./dist/index.js",
       "workerd": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsc -w --preserveWatchOutput"
   },
   "peerDependencies": {
     "react": "catalog:",

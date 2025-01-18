@@ -1,3 +1,3 @@
 import { Client as v1 } from './v1/Client';
 
-export { v1 };
+export default { 'v1.0': v1 };

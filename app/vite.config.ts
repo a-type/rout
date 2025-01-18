@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 export default defineConfig(({ mode }) => ({
   plugins: [UnoCSS(), react()],
   optimizeDeps: {
-    exclude: ['@a-type/ui', '@long-game/game-client'],
+    exclude: ['@a-type/ui', '@long-game/game-client', '@long-game/game-ui'],
     include: [
       'react/jsx-runtime',
       'react',
@@ -27,6 +27,19 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 3100,
+    proxy: {
+      '/public-api': {
+        target: 'http://localhost:3101',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/public-api/, ''),
+      },
+      '/game-session-api': {
+        target: 'http://localhost:3102',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/game-session-api/, ''),
+        ws: true,
+      },
+    },
   },
   build: {
     sourcemap: true,

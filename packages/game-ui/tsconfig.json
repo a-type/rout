@@ -1,11 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     "declaration": true,
-    "declarationDir": "./dist/typings",
+    "declarationDir": "./dist",
     "declarationMap": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "composite": true
   },
   "include": ["src"]
 }

@@ -10,3 +10,4 @@ dist/
 .turbo
 .dev.vars
 .wrangler
+tsconfig.tsbuildinfo

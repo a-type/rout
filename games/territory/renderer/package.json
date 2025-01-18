@@ -4,10 +4,11 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
+      "production": "./dist/index.js",
       "development": "./src/index.ts",
       "workerd": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",
@@ -19,6 +20,8 @@
     "@long-game/game-territory-definition": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/game-ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

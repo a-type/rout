@@ -1,5 +1,5 @@
-import * as numberGuess from '@long-game/game-number-guess-renderer';
-import * as territory from '@long-game/game-territory-renderer';
+import numberGuess from '@long-game/game-number-guess-renderer';
+import territory from '@long-game/game-territory-renderer';
 import { FC } from 'react';
 
 export const renderers: Record<

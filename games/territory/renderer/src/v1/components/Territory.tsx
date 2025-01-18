@@ -1,4 +1,5 @@
 import { colors, PrefixedId } from '@long-game/common';
+import { withGame } from '@long-game/game-client';
 import { getInnermostCell } from '@long-game/game-territory-definition/v1';
 import { useGrid } from '@long-game/game-ui';
 import { hooks } from '../gameClient';
@@ -39,7 +40,7 @@ export function Territory({ playerId, cells, totalPower }: TerritoryProps) {
   );
 }
 
-function TerritoryCell({
+const TerritoryCell = withGame(function TerritoryCell({
   x,
   y,
   playerId,
@@ -51,21 +52,15 @@ function TerritoryCell({
   children?: React.ReactNode;
 }) {
   const { size } = useGrid();
-  const {
-    data: { turn },
-  } = hooks.useGetCurrentTurn();
-  const {
-    data: { color },
-  } = hooks.useGetPlayer(playerId);
+  const suite = hooks.useGameSuite();
 
-  const isPendingTurnSelection = turn.data?.placements.some(
+  const isPendingTurnSelection = suite.currentTurn?.placements.some(
     ({ x: px, y: py }) => px === x && py === y,
   );
 
-  const {
-    data: { id: ownId },
-  } = hooks.useGetMe();
-  const isOwned = playerId === ownId;
+  const { color } = suite.players[playerId];
+
+  const isOwned = playerId === suite.userId;
 
   const style = {
     position: 'absolute',
@@ -82,4 +77,4 @@ function TerritoryCell({
   } as const;
 
   return <div style={style}>{children}</div>;
-}
+});

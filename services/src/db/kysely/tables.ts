@@ -82,6 +82,7 @@ export interface GameSessionInvitationTable {
   expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
   claimedAt: ColumnType<Date, Date | undefined, Date | undefined>;
   status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
+  role: 'player' | 'spectator';
 }
 
 export type GameSessionInvitation = Selectable<GameSessionInvitationTable>;

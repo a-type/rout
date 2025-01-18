@@ -19,7 +19,7 @@ catalog:
   '@a-type/react-space': 0.2.16
   '@a-type/auth-fetch': ^1.0.0
   '@a-type/auth-ui': ^1.0.0
-  '@a-type/auth': 1.3.6
+  '@a-type/auth': 1.3.7
   '@a-type/utils': 1.1.4
   hono: 4.6.16
   zod: ^3.24.1

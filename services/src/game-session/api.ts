@@ -7,7 +7,7 @@ import {
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
-import { getLatestVersion, Turn } from '@long-game/game-definition';
+import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
@@ -21,6 +21,7 @@ import {
   loggedInMiddleware,
   SessionWithPrefixedIds,
 } from '../middleware';
+import { configuredCors } from '../middleware/cors';
 import { Env } from './env';
 import { getSocketToken } from './socketTokens';
 
@@ -56,6 +57,7 @@ const openGameSessionMiddleware = createMiddleware<{
       'You were not invited to this game session.',
     );
   }
+  ctx.set('myInvitation', myInvitation);
   if (
     myInvitation.status === 'declined' ||
     myInvitation.status === 'expired' ||
@@ -79,11 +81,14 @@ const openGameSessionMiddleware = createMiddleware<{
 });
 
 const gameSessionStateApp = new Hono<{ Bindings: Env }>()
+  .use(configuredCors())
   .use(openGameSessionMiddleware)
   .get('/', async (ctx) => {
     const state = ctx.get('gameSessionState');
-    const summary = await state.getSummary();
-    return ctx.json(summary);
+    const userId = ctx.get('session').userId;
+    const info = await state.getSummary(userId);
+    const body = wrapRpcData(info);
+    return ctx.json(body);
   })
   .get('/playerState', async (ctx) => {
     const userId = ctx.get('session').userId;
@@ -95,7 +100,11 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
   .get('/currentTurn', async (ctx) => {
     const userId = ctx.get('session').userId;
     const state = ctx.get('gameSessionState');
-    const currentTurn = (await state.getCurrentTurn(userId)) as Turn<any>;
+    const currentTurn = (await state.getCurrentTurn(userId)) as {
+      data: {};
+      roundIndex: number;
+      playerId: string;
+    };
     return ctx.json(currentTurn);
   })
   .get('/members', async (ctx) => {
@@ -126,7 +135,7 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
     const [members, invitations, summary] = await Promise.all([
       userStore.getGameSessionMembers(sessionId),
       userStore.getInvitationsToGameSession(sessionId),
-      state.getSummary(),
+      state.getInfo(),
     ]);
 
     return ctx.json({
@@ -161,7 +170,7 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
   .post('/start', async (ctx) => {
     const state = ctx.get('gameSessionState');
     state.startGame();
-    const summary = await state.getSummary();
+    const summary = await state.getInfo();
     return ctx.json({ session: summary });
   })
   .put(
@@ -176,7 +185,7 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
       const { gameId } = ctx.req.valid('json');
       const state = ctx.get('gameSessionState');
       state.updateGame(gameId, getLatestVersion(games[gameId]).version);
-      const summary = await state.getSummary();
+      const summary = await state.getInfo();
       return ctx.json({ session: summary });
     },
   )
@@ -224,10 +233,6 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
       ctx.env.SOCKET_TOKEN_SECRET,
     );
     return ctx.json({ token });
-  })
-  .all('/socket', async (ctx) => {
-    const state = ctx.get('gameSessionState');
-    return state.fetch(ctx.req.raw);
   });
 
 export const api = new Hono<{ Bindings: Env }>()
@@ -236,6 +241,7 @@ export const api = new Hono<{ Bindings: Env }>()
   .use(loggedInMiddleware)
   .post(
     '/',
+    configuredCors(),
     zValidator(
       'json',
       z.object({
@@ -262,6 +268,7 @@ export const api = new Hono<{ Bindings: Env }>()
       const randomSeed = crypto.randomUUID();
       const userId = ctx.get('session').userId;
       await sessionState.initialize({
+        id: sessionId,
         randomSeed,
         gameId: game.id,
         gameVersion: gameDefinition.version,
@@ -281,6 +288,12 @@ export const api = new Hono<{ Bindings: Env }>()
       return ctx.json({ sessionId });
     },
   )
+  .all('/:id/socket', async (ctx) => {
+    const state = ctx.env.GAME_SESSION_STATE.get(
+      ctx.env.GAME_SESSION_STATE.idFromName(ctx.req.param('id')),
+    );
+    return state.fetch(ctx.req.raw);
+  })
   .route('/:id', gameSessionStateApp);
 
 export type AppType = typeof api;

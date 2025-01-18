@@ -4,25 +4,32 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
-      "development": "./src/index.ts",
+      "import": "./dist/index.js",
       "workerd": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "valtio": "^2.0.0",
     "@long-game/services": "workspace:*",
+    "mobx": "^6.13.5",
+    "mobx-react-lite": "^4.1.0",
+    "optics-ts": "^2.4.1",
+    "signia": "^0.1.5",
+    "signia-react": "^0.1.5",
+    "valtio": "^2.0.0",
     "zod": "catalog:"
   },
   "peerDependencies": {
     "@a-type/auth-fetch": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
     "@paralleldrive/cuid2": "2.2.2",
     "@tanstack/react-query": "5.53.1",
     "react": "catalog:"
@@ -34,7 +41,7 @@
     "@paralleldrive/cuid2": "2.2.2",
     "@tanstack/react-query": "5.53.3",
     "@types/react": "catalog:",
-    "typescript": "catalog:",
-    "hono": "catalog:"
+    "hono": "catalog:",
+    "typescript": "catalog:"
   }
 }

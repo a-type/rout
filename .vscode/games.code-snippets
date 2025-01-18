@@ -3,14 +3,15 @@
     "scope": "typescriptreact",
     "prefix": "rgc",
     "body": [
-      "import { withGame, useGameClient } from '${1:../gameClient.js}';",
+      "import { withGame } from '@long-game/game-client';",
+      "import { hooks } from '${1:../gameClient.js}';",
       "",
       "export interface ${2:${TM_FILENAME/(.*)\\..+$/$1/}}Props {",
       "  $3",
       "}",
       "",
       "export const $2 = withGame(function $2({ $4 }: $2Props) {",
-      "  const client = useGameClient();",
+      "  const suite = hooks.useGameSuite();",
       "  return <div>TODO</div>;",
       "});"
     ]

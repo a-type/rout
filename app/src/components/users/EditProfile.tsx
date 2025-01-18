@@ -1,3 +1,4 @@
+import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Button,
@@ -12,6 +13,7 @@ import {
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
+import { Link } from '@verdant-web/react-router';
 import { useState } from 'react';
 
 export interface EditProfileProps {
@@ -82,6 +84,9 @@ export function EditProfileButton() {
       </DialogTrigger>
       <DialogContent>
         <EditProfileForm onSave={() => setOpen(false)} />
+        <Button asChild color="destructive">
+          <Link to={`${API_ORIGIN}/auth/logout`}>Logout</Link>
+        </Button>
       </DialogContent>
     </Dialog>
   );

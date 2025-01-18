@@ -1,14 +1,21 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   assertPrefixedId,
+  ClientMessage,
+  ClientRequestChatMessage,
+  ClientSendChatMessage,
+  ClientSubmitTurnMessage,
   GameRound,
   GameSessionChatMessage,
+  GameSessionPlayerStatus,
+  id,
   LongGameError,
   PrefixedId,
+  ServerMessage,
 } from '@long-game/common';
 import {
+  BaseTurnData,
   GameRandom,
-  GameStatus,
   getLatestVersion,
   Turn,
 } from '@long-game/game-definition';
@@ -18,13 +25,13 @@ import { Hono } from 'hono/quick';
 import { z } from 'zod';
 import { api } from './api';
 import { Env } from './env';
-import { ServerMessage } from './socketProtocol';
 import { verifySocketToken } from './socketTokens';
 
 /**
  * The basic initial data required to set up a game.
  */
 export type GameSessionBaseData = {
+  id: PrefixedId<'gs'>;
   randomSeed: string;
   startedAt: Date | null;
   endedAt: Date | null;
@@ -47,6 +54,13 @@ export type GameSessionMember = {
   id: PrefixedId<'u'>;
 };
 
+type SocketSessionInfo = {
+  gameSessionId: string;
+  userId: PrefixedId<'u'>;
+  socketId: string;
+  status: 'pending' | 'ready' | 'closed';
+};
+
 /**
  * Game Session State is responsible for storing the data required to compute
  * the state of a game session at any given time. This includes the game
@@ -61,10 +75,9 @@ export class GameSessionState extends DurableObject<Env> {
    */
   #globalStateCache: unknown[] = [];
   #miniApp;
-  #socketInfo = new Map<
-    WebSocket,
-    { gameSessionId: string; userId: PrefixedId<'u'> }
-  >();
+  #socketInfo = new Map<WebSocket, SocketSessionInfo>();
+  // map of socket id -> messages waiting to be sent until socket is confirmed
+  #messageBacklogs = new Map<string, ServerMessage[]>();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -85,7 +98,7 @@ export class GameSessionState extends DurableObject<Env> {
     });
 
     // this mini Hono app handles websocket connections
-    this.#miniApp = new Hono<{ Bindings: Env }>().all(
+    this.#miniApp = new Hono().all(
       '/:id/socket',
       zValidator(
         'query',
@@ -107,14 +120,21 @@ export class GameSessionState extends DurableObject<Env> {
         const token = ctx.req.valid('query').token;
         const { aud: gameSessionId, sub: userId } = await verifySocketToken(
           token,
-          ctx.env.SOCKET_TOKEN_SECRET,
+          this.env.SOCKET_TOKEN_SECRET,
         );
 
         assertPrefixedId(userId, 'u');
 
-        const verifiedDOId =
-          this.env.GAME_SESSION_STATE.idFromName(gameSessionId);
-        if (verifiedDOId !== this.ctx.id) {
+        if (!this.#sessionData) {
+          throw new LongGameError(
+            LongGameError.Code.BadRequest,
+            'Session data not initialized',
+          );
+        }
+        if (gameSessionId !== this.#sessionData.id) {
+          console.warn(
+            `Socket token for wrong DO: given ${gameSessionId}, this session ID is ${this.ctx.id.name}`,
+          );
           throw new LongGameError(
             LongGameError.Code.BadRequest,
             "Please don't try to hack us :(",
@@ -126,20 +146,39 @@ export class GameSessionState extends DurableObject<Env> {
 
         this.ctx.acceptWebSocket(server);
         // attaching the data directly to the socket allows it to survive hibernation of this DO
-        client.serializeAttachment({ gameSessionId, userId });
+        server.serializeAttachment({ gameSessionId, userId });
 
-        // send events to all other clients to indicate the newly joined user. this happens
-        // before info registration just for convenience so we don't need to filter out sending
-        // back to the new socket.
-        await this.#sendSocketMessage({
-          type: 'playerConnected',
-          playerId: userId,
+        // map the socket to the token info for later reference.
+        this.#socketInfo.set(server, {
+          gameSessionId,
+          userId,
+          status: 'pending',
+          socketId: crypto.randomUUID(),
         });
 
-        // map the client socket to the token info for later reference.
-        this.#socketInfo.set(client, { gameSessionId, userId });
-
-        // TODO: send chat backlog to the new user
+        (async () => {
+          // send connection notice to other players
+          this.#sendSocketMessage({
+            type: 'playerStatusChange',
+            playerId: userId,
+            playerStatus: {
+              latestPlayedRoundIndex:
+                this.getPlayerLatestPlayedRoundIndex(userId),
+              online: true,
+            },
+          });
+          // send start of chat backlog to the new player (this will enqueue for delivery later)
+          const { messages, nextToken } = this.getChatForPlayer(userId, {
+            limit: 100,
+          });
+          if (messages.length) {
+            this.#sendSocketMessage({
+              type: 'chat',
+              messages: messages,
+              nextToken,
+            });
+          }
+        })();
 
         return new Response(null, {
           status: 101,
@@ -195,7 +234,7 @@ export class GameSessionState extends DurableObject<Env> {
   initialize(
     data: Pick<
       GameSessionBaseData,
-      'randomSeed' | 'gameId' | 'gameVersion' | 'members' | 'timezone'
+      'id' | 'randomSeed' | 'gameId' | 'gameVersion' | 'members' | 'timezone'
     >,
   ) {
     this.#sessionData = {
@@ -309,16 +348,22 @@ export class GameSessionState extends DurableObject<Env> {
    * Defaults to current round.
    */
   getPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number): any {
-    if (!this.#sessionData) {
-      throw new Error('Session data not initialized');
-    }
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex && roundIndex >= currentRoundIndex) {
+    if (roundIndex && roundIndex > currentRoundIndex) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
       );
     }
+    return this.#internalGetPlayerState(playerId, roundIndex);
+  }
+
+  // unvalidated versions
+  #internalGetPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number) {
+    if (!this.#sessionData) {
+      throw new Error('Session data not initialized');
+    }
+    const currentRoundIndex = this.getCurrentRoundIndex();
     const resolvedRoundIndex = roundIndex ?? currentRoundIndex - 1;
     const globalState = this.getGlobalState(roundIndex);
     return this.gameDefinition.getPlayerState({
@@ -327,7 +372,7 @@ export class GameSessionState extends DurableObject<Env> {
       roundIndex: resolvedRoundIndex,
       members: this.#sessionData.members,
       rounds: this.getRounds({ upTo: resolvedRoundIndex + 1 }),
-    });
+    }) as any;
   }
 
   getPublicRounds(playerId: PrefixedId<'u'>, { upTo }: { upTo?: number } = {}) {
@@ -407,25 +452,57 @@ export class GameSessionState extends DurableObject<Env> {
   /**
    * Gets information relevant to the status of players in the current round.
    */
-  getPlayerStatuses(): Record<string, { hasPlayed: boolean }> {
-    const currentRound = this.getCurrentRound();
+  getPlayerStatuses(): Record<string, GameSessionPlayerStatus> {
     return (this.#sessionData?.members ?? []).reduce<
-      Record<string, { hasPlayed: boolean }>
+      Record<string, GameSessionPlayerStatus>
     >((acc, member) => {
       acc[member.id] = {
-        hasPlayed: currentRound.turns.some(
-          (turn) => turn.playerId === member.id,
-        ),
+        latestPlayedRoundIndex: this.getPlayerLatestPlayedRoundIndex(member.id),
+        online: this.#socketInfo.values().some((v) => v.userId === member.id),
       };
       return acc;
     }, {});
+  }
+
+  getPlayerLatestPlayedRoundIndex(playerId: PrefixedId<'u'>) {
+    return Math.max(
+      ...this.#turns
+        .filter((turn) => turn.playerId === playerId)
+        .map((turn) => turn.roundIndex),
+    );
   }
 
   /**
    * Adds (and stores) a turn to the game session for the current
    * round.
    */
-  addTurn(playerId: PrefixedId<'u'>, turn: any) {
+  addTurn(playerId: PrefixedId<'u'>, turn: BaseTurnData) {
+    if (!this.#sessionData) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Game session has not been initialized',
+      );
+    }
+
+    const currentTurn = this.getCurrentTurn(playerId);
+    if (currentTurn.data) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'You have already submitted your turn for this round',
+      );
+    }
+    const validationError = this.gameDefinition.validateTurn({
+      members: this.#sessionData.members,
+      turn: {
+        data: turn,
+        playerId,
+      },
+      playerState: this.getPlayerState(playerId),
+      roundIndex: this.getCurrentRoundIndex(),
+    });
+    if (validationError) {
+      throw new LongGameError(LongGameError.Code.BadRequest, validationError);
+    }
     const currentRoundIndex = this.getCurrentRoundIndex();
     this.#turns.push({
       roundIndex: currentRoundIndex,
@@ -434,9 +511,40 @@ export class GameSessionState extends DurableObject<Env> {
       playerId,
     });
     this.ctx.storage.put('turns', this.#turns);
+    this.#sendSocketMessage({
+      type: 'playerStatusChange',
+      playerId,
+      playerStatus: {
+        latestPlayedRoundIndex: currentRoundIndex,
+        online: true,
+      },
+    });
+
+    // see if this turn completed the round
+    const newRoundIndex = this.getCurrentRoundIndex();
+    if (newRoundIndex > currentRoundIndex) {
+      this.#broadcastRoundChange(newRoundIndex);
+    }
   }
 
-  getCurrentTurn(playerId: PrefixedId<'u'>): GameSessionTurn | null {
+  #broadcastRoundChange = (roundIndex: number) => {
+    for (const member of this.#sessionData?.members ?? []) {
+      this.#sendSocketMessage(
+        {
+          type: 'roundChange',
+          playerState: this.getPlayerState(member.id, roundIndex),
+          currentRoundIndex: roundIndex,
+        },
+        { to: [member.id] },
+      );
+    }
+  };
+
+  getCurrentTurn(playerId: PrefixedId<'u'>): {
+    data: any;
+    roundIndex: number;
+    playerId: PrefixedId<'u'>;
+  } {
     const currentRoundIndex = this.getCurrentRoundIndex();
     return (
       this.#turns.find(
@@ -454,13 +562,14 @@ export class GameSessionState extends DurableObject<Env> {
   /**
    * Get the game status, which indicates game progress and outcome.
    */
-  getStatus(): GameStatus {
+  getStatus() {
     if (!this.#sessionData?.startedAt) {
       return {
         status: 'pending',
       };
     }
 
+    console.log(JSON.stringify(this.getRounds({ upTo: 'current' })));
     return this.gameDefinition.getStatus({
       globalState: this.getGlobalState(),
       members: this.#sessionData.members,
@@ -468,7 +577,7 @@ export class GameSessionState extends DurableObject<Env> {
     });
   }
 
-  getSummary() {
+  getInfo() {
     if (!this.#sessionData) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -476,31 +585,176 @@ export class GameSessionState extends DurableObject<Env> {
       );
     }
     return {
-      id: this.ctx.id.toString(),
+      id: this.#sessionData.id,
       status: this.getStatus(),
-      members: this.#sessionData.members,
-      playerStatuses: this.getPlayerStatuses(),
       gameId: this.#sessionData.gameId,
       gameVersion: this.#sessionData.gameVersion,
+    };
+  }
+
+  getSummary(userId: PrefixedId<'u'>) {
+    if (!this.#sessionData) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Game session has not been initialized',
+      );
+    }
+    return {
+      ...this.getInfo(),
       currentRoundIndex: this.getCurrentRoundIndex(),
+      members: this.#sessionData.members,
+      playerState: this.getPlayerState(userId) as {},
+      currentTurn: this.getCurrentTurn(userId),
+      playerStatuses: this.getPlayerStatuses(),
     };
   }
 
   addChatMessage(message: GameSessionChatMessage) {
     this.#chat.push(message);
+    this.#chat.sort((a, b) => a.createdAt - b.createdAt);
     this.ctx.storage.put('chat', this.#chat);
-  }
-
-  getChatForPlayer(playerId: PrefixedId<'u'>): GameSessionChatMessage[] {
-    return this.#chat.filter((message) => {
-      if (message.recipientIds) {
-        return message.recipientIds.includes(playerId);
-      }
-      return true;
+    // publish to all sockets
+    this.#sendSocketMessage({
+      type: 'chat',
+      messages: [message],
     });
   }
 
-  async webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {}
+  getChatForPlayer(
+    playerId: PrefixedId<'u'>,
+    pagination: {
+      limit: number;
+      nextToken?: string | null;
+    } = { limit: 100 },
+  ): { messages: GameSessionChatMessage[]; nextToken: string | null } {
+    const slice: GameSessionChatMessage[] = [];
+    const before = pagination.nextToken
+      ? parseInt(pagination.nextToken, 10)
+      : null;
+
+    let nextToken: string | null = null;
+    for (let i = this.#chat.length - 1; i >= 0; i--) {
+      const message = this.#chat[i];
+      if (before && message.createdAt < before) {
+        nextToken = message.createdAt.toString();
+        break;
+      }
+      if (message.recipientIds?.includes(playerId) || !message.recipientIds) {
+        slice.push(message);
+      }
+      if (slice.length === pagination?.limit) {
+        const nextMessage = this.#chat[i - 1];
+        if (nextMessage) {
+          nextToken = nextMessage.createdAt.toString();
+        }
+        break;
+      }
+    }
+
+    return { messages: slice, nextToken };
+  }
+
+  async webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {
+    // any message is sufficient to confirm the socket is open
+    const info = this.#socketInfo.get(ws);
+    if (!info) {
+      console.warn(
+        'Received message from untracked socket',
+        ws.deserializeAttachment(),
+      );
+      return;
+    }
+    if (info.status === 'pending') {
+      info.status = 'ready';
+      console.log(
+        'Socket ready',
+        info.socketId,
+        info.userId,
+        'sending backlog',
+      );
+      this.#messageBacklogs.get(info.socketId)?.forEach((msg) => {
+        ws.send(JSON.stringify(msg));
+      });
+    }
+    const parsed = JSON.parse(message.toString()) as ClientMessage;
+    this.#onClientMessage(parsed, ws, info);
+  }
+
+  #onClientMessage = async (
+    msg: ClientMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    try {
+      switch (msg.type) {
+        case 'sendChat':
+          await this.#onClientSendChat(msg, ws, info);
+          break;
+        case 'submitTurn':
+          await this.#onClientSubmitTurn(msg, ws, info);
+          break;
+        case 'requestChat':
+          await this.#onClientRequestChat(msg, ws, info);
+          break;
+      }
+      // ack the message for the client
+      ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
+    } catch (err) {
+      console.error('Error handling message', err);
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message,
+          responseTo: msg.messageId,
+        }),
+      );
+    }
+  };
+
+  #onClientSendChat = async (
+    msg: ClientSendChatMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    const { content, recipientIds, position, sceneId } = msg.message;
+    const message: GameSessionChatMessage = {
+      id: id('cm'),
+      createdAt: Date.now(),
+      authorId: info.userId,
+      content,
+      recipientIds,
+      position,
+      sceneId,
+    };
+    this.addChatMessage(message);
+  };
+
+  #onClientSubmitTurn = async (
+    msg: ClientSubmitTurnMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    console.log(`Received turn from ${info.userId}`, msg.turn);
+    this.addTurn(info.userId, msg.turn);
+  };
+
+  #onClientRequestChat = async (
+    msg: ClientRequestChatMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    const { messages, nextToken } = this.getChatForPlayer(info.userId, {
+      limit: 100,
+      nextToken: msg.nextToken,
+    });
+    this.#sendSocketMessage({
+      type: 'chat',
+      messages,
+      nextToken,
+      responseTo: msg.messageId,
+    });
+  };
 
   async webSocketClose(
     ws: WebSocket,
@@ -522,8 +776,14 @@ export class GameSessionState extends DurableObject<Env> {
     if (info) {
       // inform other clients that this user has left
       this.#sendSocketMessage({
-        type: 'playerDisconnected',
+        type: 'playerStatusChange',
         playerId: info.userId,
+        playerStatus: {
+          latestPlayedRoundIndex: this.getPlayerLatestPlayedRoundIndex(
+            info.userId,
+          ),
+          online: false,
+        },
       });
     }
     this.#socketInfo.delete(ws);
@@ -538,11 +798,27 @@ export class GameSessionState extends DurableObject<Env> {
     } = {},
   ) => {
     const sockets = Array.from(this.#socketInfo.entries());
-    for (const [ws, { userId }] of sockets) {
+    for (const [ws, { userId, status, socketId }] of sockets) {
       if (to && !to.includes(userId)) {
         continue;
       }
-      ws.send(JSON.stringify(msg));
+      if (status === 'pending') {
+        // push to backlog
+        let backlog = this.#messageBacklogs.get(socketId);
+        if (!backlog) {
+          backlog = [];
+          this.#messageBacklogs.set(socketId, backlog);
+        }
+        backlog.push(msg);
+        console.log('backlogged message for socket', socketId, userId, backlog);
+      } else if (status === 'closed') {
+        this.#socketInfo.delete(ws);
+        console.error(
+          `Cannot send message to closed socket: { userId: ${userId}, socketId: ${socketId} }`,
+        );
+      } else {
+        ws.send(JSON.stringify(msg));
+      }
     }
   };
 }

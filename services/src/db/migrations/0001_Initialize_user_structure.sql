@@ -67,7 +67,9 @@ create table GameSessionInvitation (
 	gameSessionId text not null,
 	inviterId text references User(id) on delete set null,
 	userId text not null references User(id) on delete cascade,
-	role text not null,
+	role text not null default 'player',
+	status text not null default 'pending',
+	expiresAt datetime not null,
 
 	constraint GameSessionInvitation_role_check check (role in ('player', 'spectator'))
 );

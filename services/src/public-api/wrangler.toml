@@ -5,6 +5,11 @@ account_id = "5f843fcad78a2f4e1fee091c1d6c21ab"
 
 compatibility_flags = ["nodejs_compat"]
 
+
+[observability]
+enabled = true
+head_sampling_rate = 1 # optional. default = 1.
+
 [vars]
 UI_ORIGIN = "https://long-game.gfor.rest"
 

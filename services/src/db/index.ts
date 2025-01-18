@@ -259,6 +259,7 @@ export class AuthedStore extends RpcTarget {
         userId: this.#userId,
         inviterId: this.#userId,
         status: 'accepted',
+        role: 'player',
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -340,6 +341,7 @@ export class AuthedStore extends RpcTarget {
         userId,
         status: 'pending',
         inviterId: this.#userId,
+        role: 'player',
       })
       .onConflict((b) => b.columns(['gameSessionId', 'userId']).doNothing())
       .returningAll()

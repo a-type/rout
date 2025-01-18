@@ -12,10 +12,13 @@ declare module '@a-type/auth' {
 
 export const sessions = new SessionManager<Context<Env>>({
   getSessionConfig(ctx) {
+    const apiDomain = new URL(ctx.env.API_ORIGIN).hostname;
+    const topLevelDomain = apiDomain.split('.').slice(-2).join('.');
     return {
       cookieName: 'lg-session',
       cookieOptions: {
         sameSite: 'lax',
+        domain: topLevelDomain,
       },
       expiration: ctx.env.NODE_ENV === 'production' ? '1d' : '1m',
       async createSession(userId) {
@@ -40,7 +43,9 @@ export const sessions = new SessionManager<Context<Env>>({
       audience: ctx.env.UI_ORIGIN,
       issuer: ctx.env.API_ORIGIN,
       mode: 'production',
-      refreshPath: '/auth/refresh',
+      refreshPath: ctx.env.API_ORIGIN.includes('localhost')
+        ? '/public-api/auth/refresh'
+        : '/auth/refresh',
       refreshTokenCookieName: 'lg-refresh',
     };
   },

@@ -1,8 +1,7 @@
 import { Avatar, RelativeTime, withClassName } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
-import { GameSessionMembers } from '@long-game/game-client';
+import { PlayerInfo, useGameSuite, withGame } from '@long-game/game-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { hooks } from './hooks';
 
 export const GameLogRoot = withClassName(
   'div',
@@ -29,11 +28,13 @@ export const GameLogItem = withClassName(
   'flex flex-col gap-1 items-start',
 );
 
-export function GameLogChat({
+export const GameLogChat = withGame(function GameLogChat({
   content: message,
   user,
   createdAt,
-}: GameSessionChatMessage & { user?: GameSessionMembers[number] }) {
+}: GameSessionChatMessage & {
+  user?: PlayerInfo;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-row items-center gap-2 text-sm font-bold">
@@ -43,9 +44,9 @@ export function GameLogChat({
       <div className="whitespace-pre-wrap">{message}</div>
     </div>
   );
-}
+});
 
-export function GameLogTimestamp({ value }: { value: Date }) {
+export function GameLogTimestamp({ value }: { value: Date | number }) {
   return (
     <span className="text-xs text-gray-500 italic">
       <RelativeTime value={new Date(value).getTime()} />
@@ -73,9 +74,12 @@ export function GameLogChatInput() {
   return <div>TODO</div>;
 }
 
-export function BasicGameLog(props: { className?: string }) {
-  const { data: log } = hooks.useGetCombinedLog();
-  const { data: members } = hooks.useGetMembers();
+export const BasicGameLog = withGame(function BasicGameLog(props: {
+  className?: string;
+}) {
+  const suite = useGameSuite();
+  const log = suite.combinedLog;
+  const players = suite.players;
 
   return (
     <GameLogRoot {...props}>
@@ -85,10 +89,10 @@ export function BasicGameLog(props: { className?: string }) {
             {entry.type === 'chat' ? (
               <GameLogChat
                 {...entry.chatMessage}
-                user={members.find((m) => m.id === entry.chatMessage.authorId)}
+                user={players[entry.chatMessage.authorId]}
               />
             ) : (
-              <div>Round {entry.round.roundIndex + 1}</div>
+              <div>todo: round logs</div>
             )}
             <GameLogTimestamp value={entry.timestamp} />
           </GameLogItem>
@@ -97,7 +101,7 @@ export function BasicGameLog(props: { className?: string }) {
       <GameLogChatInput />
     </GameLogRoot>
   );
-}
+});
 
 function useStayScrolledToBottom() {
   const ref = useRef<HTMLDivElement>(null);
