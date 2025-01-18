@@ -170,8 +170,8 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
   .post('/start', async (ctx) => {
     const state = ctx.get('gameSessionState');
     state.startGame();
-    const summary = await state.getInfo();
-    return ctx.json({ session: summary });
+    const status = await state.getStatus();
+    return ctx.json({ status });
   })
   .put(
     '/',

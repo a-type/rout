@@ -78,6 +78,12 @@ export class PublicSdk extends BaseSdk {
   });
   startGameSession = this.sdkMutation(this.gameSessionRpc[':id'].start.$post, {
     transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+    onSuccess: (output, vars) => {
+      this.queryClient.setQueryData(
+        ['getGameSessionStatus', { id: vars.id }],
+        output.status,
+      );
+    },
   });
   updateGameSession = this.sdkMutation(this.gameSessionRpc[':id'].$put, {
     transformInput: (input: { id: string; gameId: string }) => ({
