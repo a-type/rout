@@ -17,39 +17,17 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   );
   // we have to get a token first
   const token = await getSocketToken(gameSessionId);
-  const websocket = new WebSocket(
+  const websocket = new ReconnectingWebsocket(
     `${socketOrigin}/${gameSessionId}/socket?token=${token}`,
   );
-  const backlog: string[] = [];
-  function bufferedSend(msg: string) {
-    if (websocket.readyState === WebSocket.OPEN) {
-      websocket.send(JSON.stringify(msg));
-    } else {
-      backlog.push(msg);
-    }
-  }
-  function onMessage(event: MessageEvent) {
-    const message = JSON.parse(event.data);
+  const unsubRootMessages = websocket.onMessage((message) => {
     console.debug('Received message', message);
-  }
-  websocket.addEventListener('message', onMessage);
-  function onOpen() {
-    console.debug('Socket connected');
-    backlog.forEach((msg) => bufferedSend(msg));
-  }
-  websocket.addEventListener('open', onOpen);
-  function onClose() {
-    console.debug('Socket closed');
-  }
-  websocket.addEventListener('close', onClose);
-  function onError(event: Event) {
-    console.error('Socket error', event);
-  }
-  websocket.addEventListener('error', onError);
+  });
+  const unsubErrors = websocket.onError(console.error);
 
   function send<T extends ClientMessageWithoutId>(message: T) {
     (message as any).messageId = Math.random().toString().slice(2);
-    bufferedSend(JSON.stringify(message));
+    websocket.send(JSON.stringify(message));
   }
 
   const unsubs: (() => void)[] = [];
@@ -61,21 +39,18 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     const messageId = Math.random().toString().slice(2);
     (message as any).messageId = messageId;
     const response = new Promise<ServerMessage>((resolve, reject) => {
-      websocket.addEventListener('message', function handler(event) {
-        unsubs.push(() => {
-          websocket.removeEventListener('message', handler);
-        });
-        const message = JSON.parse(event.data) as ServerMessage;
+      const unsub = websocket.onMessage(function handler(message) {
         if (message.responseTo === messageId) {
-          websocket.removeEventListener('message', handler);
+          unsub();
           resolve(message);
         }
       });
+      unsubs.push(unsub);
       setTimeout(() => {
         reject(new Error('Request timed out'));
       }, 5000);
     });
-    bufferedSend(JSON.stringify(message));
+    websocket.send(JSON.stringify(message));
     return response as Promise<Response>;
   }
 
@@ -83,25 +58,19 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     type: T,
     handler: (message: ServerMessageByType<T>) => void,
   ) {
-    function listener(event: MessageEvent) {
-      const message = JSON.parse(event.data) as ServerMessage;
+    const unsub = websocket.onMessage((message) => {
       if (message.type === type) {
         handler(message as ServerMessageByType<T>);
       }
-    }
-    websocket.addEventListener('message', listener);
-    const unsub = () => {
-      websocket.removeEventListener('message', listener);
-    };
+    });
     unsubs.push(unsub);
     return unsub;
   }
 
   function unsubscribeAll() {
     unsubs.forEach((unsub) => unsub());
-    websocket.removeEventListener('message', onMessage);
-    websocket.removeEventListener('open', onOpen);
-    websocket.removeEventListener('close', onClose);
+    unsubErrors();
+    unsubRootMessages();
   }
 
   setInterval(() => {
@@ -129,4 +98,83 @@ async function getSocketToken(gameSessionId: string) {
   }
   const body = await res.json();
   return body.token;
+}
+
+class ReconnectingWebsocket {
+  private websocket: WebSocket = null!;
+  private messageEvents = new EventTarget();
+  private errorEvents = new EventTarget();
+  private backlog: string[] = [];
+
+  constructor(private url: string) {
+    this.reconnect();
+  }
+
+  send(message: string) {
+    if (this.websocket.readyState === WebSocket.OPEN) {
+      this.websocket.send(message);
+    } else {
+      this.backlog.push(message);
+    }
+  }
+
+  onMessage(handler: (event: ServerMessage) => void) {
+    function wrappedHandler(event: Event) {
+      if (event instanceof MessageEvent) {
+        const msg = JSON.parse(event.data) as ServerMessage;
+        handler(msg);
+      }
+    }
+    this.messageEvents.addEventListener('message', wrappedHandler);
+    return () => {
+      this.messageEvents.removeEventListener('message', wrappedHandler);
+    };
+  }
+
+  onError(handler: (event: Event) => void) {
+    this.errorEvents.addEventListener('error', handler);
+    return () => {
+      this.errorEvents.removeEventListener('error', handler);
+    };
+  }
+
+  close() {
+    this.websocket.close();
+  }
+
+  reconnect() {
+    this.websocket = new WebSocket(this.url);
+    this.websocket.addEventListener('open', () => {
+      console.log('Socket connected');
+      if (this.backlog.length) {
+        this.backlog.forEach((msg) => this.websocket.send(msg));
+        this.backlog = [];
+      }
+    });
+    this.websocket.addEventListener('close', (ev) => {
+      if (ev.code === 1000) {
+        return;
+      }
+
+      setTimeout(() => {
+        this.reconnect();
+      }, 3000);
+    });
+    this.websocket.addEventListener('message', (event) => {
+      this.messageEvents.dispatchEvent(
+        new MessageEvent('message', {
+          data: event.data,
+        }),
+      );
+    });
+    this.websocket.addEventListener('error', (event) => {
+      const err =
+        event instanceof ErrorEvent ? event.error : new Error('Unknown error');
+      this.errorEvents.dispatchEvent(
+        new ErrorEvent('error', {
+          error: err,
+        }),
+      );
+    });
+  }
 }

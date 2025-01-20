@@ -508,6 +508,7 @@ export class GameSessionState extends DurableObject<Env> {
       throw new LongGameError(LongGameError.Code.BadRequest, validationError);
     }
     const currentRoundIndex = this.getCurrentRoundIndex();
+    console.log(`Adding turn for ${playerId} in round ${currentRoundIndex}`);
     this.#turns.push({
       roundIndex: currentRoundIndex,
       createdAt: new Date().toUTCString(),
@@ -677,9 +678,8 @@ export class GameSessionState extends DurableObject<Env> {
       );
       return;
     }
-    console.log(info);
     if (info.status === 'pending') {
-      info.status = 'ready';
+      this.updateSocketInfo(ws, { ...info, status: 'ready' });
       console.log(
         'Socket ready',
         info.socketId,

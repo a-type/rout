@@ -16,18 +16,20 @@
     "dev": "tsc -w --preserveWatchOutput"
   },
   "peerDependencies": {
+    "@a-type/ui": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "@a-type/ui": "catalog:"
+    "react-dom": "catalog:"
   },
   "dependencies": {
+    "@a-type/react-space": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@a-type/react-space": "catalog:"
+    "@verdant-web/react-router": "catalog:",
+    "valtio": "^2.0.0"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:"
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
   }
 }

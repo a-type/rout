@@ -1,7 +1,14 @@
 import { PrefixedId } from '@long-game/common';
 import { GameDefinition } from '@long-game/game-definition';
 import { observer } from 'mobx-react-lite';
-import { createContext, ReactNode, use, useContext, useRef } from 'react';
+import {
+  ComponentType,
+  createContext,
+  ReactNode,
+  use,
+  useContext,
+  useRef,
+} from 'react';
 import {
   createGameSessionSuite,
   GameSessionSuite,
@@ -25,7 +32,15 @@ class PromiseWithCurrent<T> {
 
 const stateCache: Map<PrefixedId<'gs'>, PromiseWithCurrent<any>> = new Map();
 
-export const withGame = observer;
+export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
+  Component: ComponentType<T & { gameSuite: GameSessionSuite<G> }>,
+): ComponentType<T> {
+  const ObservedComp = observer(Component as any);
+  return function WithGame(props: T) {
+    const gameSuite = useGameSuite<G>();
+    return <ObservedComp {...props} gameSuite={gameSuite} />;
+  };
+}
 
 export function GameSessionProvider({
   gameSessionId,
@@ -79,8 +94,14 @@ export function typedHooks<TGame extends GameDefinition>() {
     const suite = useGameSuite<TGame>();
     return suite.playerState;
   }
+  function withGameTyped<T = unknown>(
+    Comp: ComponentType<T & { gameSuite: GameSessionSuite<TGame> }>,
+  ) {
+    return withGame<T, TGame>(Comp);
+  }
   return {
     useGameSuite: useGameSuiteTyped,
     usePlayerState,
+    withGame: withGameTyped,
   };
 }

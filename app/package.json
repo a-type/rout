@@ -15,7 +15,7 @@
     "@long-game/game-renderer": "workspace:*",
     "@long-game/services": "workspace:*",
     "@long-game/game-ui": "workspace:*",
-    "@verdant-web/react-router": "0.7.1",
+    "@verdant-web/react-router": "catalog:",
     "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

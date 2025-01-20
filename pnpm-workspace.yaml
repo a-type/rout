@@ -26,3 +26,4 @@ catalog:
   '@hono/zod-validator': ^0.4.2
   '@cloudflare/workers-types': ^4.20241230.0
   '@paralleldrive/cuid2': ^2.2.2
+  '@verdant-web/react-router': 0.7.1

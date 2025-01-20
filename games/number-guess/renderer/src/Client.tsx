@@ -1,6 +1,7 @@
 import { Box, Input } from '@a-type/ui';
-import { typedHooks, withGame } from '@long-game/game-client';
+import { typedHooks } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
+
 const hooks = typedHooks<typeof gameDefinition>();
 
 export function Client() {
@@ -14,9 +15,8 @@ export function Client() {
 
 export default Client;
 
-const LocalGuess = withGame(function LocalGuess() {
-  const { currentTurn, prepareTurn } = hooks.useGameSuite();
-
+const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
+  const { currentTurn, prepareTurn } = gameSuite;
   const guess = currentTurn?.guess ?? 0;
 
   return (
@@ -35,9 +35,7 @@ const LocalGuess = withGame(function LocalGuess() {
   );
 });
 
-const LastGuess = withGame(() => {
-  const { playerState } = hooks.useGameSuite();
-
+const LastGuess = hooks.withGame(({ gameSuite: { playerState } }) => {
   if (!playerState.lastGuessResult) return null;
 
   return <Box p="lg">Last guess: {playerState.lastGuessResult}</Box>;

@@ -42,6 +42,9 @@ catalogs:
     '@unocss/transformer-variant-group':
       specifier: 0.65.2
       version: 0.65.2
+    '@verdant-web/react-router':
+      specifier: 0.7.1
+      version: 0.7.1
     hono:
       specifier: 4.6.16
       version: 4.6.16
@@ -129,7 +132,7 @@ importers:
         specifier: 5.62.15
         version: 5.62.15(react@19.0.0)
       '@verdant-web/react-router':
-        specifier: 0.7.1
+        specifier: 'catalog:'
         version: 0.7.1(react@19.0.0)
       hono:
         specifier: 'catalog:'
@@ -404,12 +407,18 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@verdant-web/react-router':
+        specifier: 'catalog:'
+        version: 0.7.1(react@19.0.0)
       react:
         specifier: 'catalog:'
         version: 19.0.0
       react-dom:
         specifier: 'catalog:'
         version: 19.0.0(react@19.0.0)
+      valtio:
+        specifier: ^2.0.0
+        version: 2.1.2(@types/react@19.0.7)(react@19.0.0)
     devDependencies:
       '@types/react':
         specifier: 'catalog:'

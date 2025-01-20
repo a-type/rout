@@ -1,10 +1,9 @@
 import { Box } from '@a-type/ui';
-import { withGame } from '@long-game/game-client';
 import { GameControls } from '@long-game/game-ui';
 import { Grid } from './components/Grid.js';
 import { hooks } from './gameClient.js';
 
-export const Client = withGame(function Client() {
+export const Client = hooks.withGame(function Client({ gameSuite }) {
   const { grid } = hooks.usePlayerState();
   return (
     <Box className="w-full h-full">

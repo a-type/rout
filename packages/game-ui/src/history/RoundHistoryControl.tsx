@@ -16,11 +16,10 @@ export const RoundHistoryControl = withGame(
     const lastDisplayedRound = latestRoundIndex - 2;
 
     return (
-      <Box>
+      <Box align="center center">
         {(roundIndex === 'current' || roundIndex > 0) && (
           <Button
             size="icon-small"
-            color="ghost"
             onClick={() => {
               setRoundIndex(
                 roundIndex === 'current' ? lastDisplayedRound : roundIndex - 1,
@@ -40,7 +39,7 @@ export const RoundHistoryControl = withGame(
             }
           }}
         >
-          <Select.Trigger />
+          <Select.Trigger size="small" />
           <Select.Content>
             {/* Note: specifically skipping latest index, which === current */}
             {Array.from({ length: latestRoundIndex }).map((_, i) => (
@@ -51,23 +50,25 @@ export const RoundHistoryControl = withGame(
             <Select.Item value="current">Latest Round</Select.Item>
           </Select.Content>
         </Select>
-        {roundIndex !== 'current' && roundIndex <= lastDisplayedRound && (
-          <Button
-            size="icon-small"
-            color="ghost"
-            onClick={() => {
-              setRoundIndex(
-                roundIndex === lastDisplayedRound ? 'current' : roundIndex + 1,
-              );
-            }}
-          >
-            <Icon name="arrowRight" />
-          </Button>
-        )}
+        <Button
+          size="icon-small"
+          onClick={() => {
+            if (roundIndex === 'current') {
+              return;
+            }
+            setRoundIndex(
+              roundIndex === lastDisplayedRound ? 'current' : roundIndex + 1,
+            );
+          }}
+          disabled={
+            roundIndex === lastDisplayedRound || roundIndex === 'current'
+          }
+        >
+          <Icon name="arrowRight" />
+        </Button>
         {roundIndex !== 'current' && (
           <Button
             size="icon-small"
-            color="ghost"
             onClick={() => {
               setRoundIndex('current');
             }}
