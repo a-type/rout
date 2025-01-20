@@ -6,7 +6,8 @@
     "declarationDir": "./dist",
     "declarationMap": true,
     "lib": ["ESNext", "DOM"],
-    "composite": true
+    "composite": true,
+    "rootDir": "./src"
   },
   "include": ["src"]
 }

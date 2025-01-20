@@ -20,6 +20,14 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   const websocket = new WebSocket(
     `${socketOrigin}/${gameSessionId}/socket?token=${token}`,
   );
+  const backlog: string[] = [];
+  function bufferedSend(msg: string) {
+    if (websocket.readyState === WebSocket.OPEN) {
+      websocket.send(JSON.stringify(msg));
+    } else {
+      backlog.push(msg);
+    }
+  }
   function onMessage(event: MessageEvent) {
     const message = JSON.parse(event.data);
     console.debug('Received message', message);
@@ -27,6 +35,7 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   websocket.addEventListener('message', onMessage);
   function onOpen() {
     console.debug('Socket connected');
+    backlog.forEach((msg) => bufferedSend(msg));
   }
   websocket.addEventListener('open', onOpen);
   function onClose() {
@@ -40,7 +49,7 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
 
   function send<T extends ClientMessageWithoutId>(message: T) {
     (message as any).messageId = Math.random().toString().slice(2);
-    websocket.send(JSON.stringify(message));
+    bufferedSend(JSON.stringify(message));
   }
 
   const unsubs: (() => void)[] = [];
@@ -66,7 +75,7 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
         reject(new Error('Request timed out'));
       }, 5000);
     });
-    websocket.send(JSON.stringify(message));
+    bufferedSend(JSON.stringify(message));
     return response as Promise<Response>;
   }
 
@@ -98,6 +107,7 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   setInterval(() => {
     send({ type: 'ping' });
   }, 10000);
+  send({ type: 'ping' });
 
   return {
     send,

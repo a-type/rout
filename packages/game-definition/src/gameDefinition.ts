@@ -1,4 +1,4 @@
-import { GameRound } from '@long-game/common';
+import { GameRound, GameStatus } from '@long-game/common';
 import { GameRandom } from './random.js';
 
 export type BaseTurnData = Record<string, unknown>;
@@ -13,18 +13,6 @@ export interface Turn<TurnData extends BaseTurnData>
   createdAt: string;
   roundIndex: number;
 }
-
-export type GameStatus =
-  | {
-      status: 'pending';
-    }
-  | {
-      status: 'active';
-    }
-  | {
-      status: 'completed';
-      winnerIds: string[];
-    };
 
 export type GameDefinition<
   GlobalState = any,

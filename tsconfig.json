@@ -2,7 +2,7 @@
   "compilerOptions": {
     "noImplicitAny": true,
     "noLib": false,
-    "target": "ESNext",
+    "target": "ES2022",
     "sourceMap": true,
     "module": "Preserve",
     "moduleResolution": "bundler",

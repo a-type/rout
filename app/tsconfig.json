@@ -26,7 +26,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "customConditions": ["development"]
+    "customConditions": ["development"],
+
+    "composite": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../packages/game-ui"
+    }
+  ]
 }

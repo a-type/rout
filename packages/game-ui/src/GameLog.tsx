@@ -1,4 +1,11 @@
-import { Avatar, RelativeTime, withClassName } from '@a-type/ui';
+import {
+  Avatar,
+  FormikForm,
+  RelativeTime,
+  SubmitButton,
+  TextAreaField,
+  withClassName,
+} from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { PlayerInfo, useGameSuite, withGame } from '@long-game/game-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -55,23 +62,23 @@ export function GameLogTimestamp({ value }: { value: Date | number }) {
 }
 
 export function GameLogChatInput() {
-  // const client = useClient();
+  const suite = useGameSuite();
 
-  // return (
-  //   <FormikForm
-  //     initialValues={{ message: '' }}
-  //     onSubmit={({ message }, bag) => {
-  //       client.sendChatMessage(message);
-  //       bag.resetForm();
-  //     }}
-  //     className="flex-0-0-auto"
-  //   >
-  //     <TextAreaField name="message" placeholder="Send a message..." />
-  //     <Button type="submit">Send</Button>
-  //   </FormikForm>
-  // );
-
-  return <div>TODO</div>;
+  return (
+    <FormikForm
+      initialValues={{ message: '' }}
+      onSubmit={({ message }, bag) => {
+        suite.sendChat({
+          content: message,
+        });
+        bag.resetForm();
+      }}
+      className="flex-0-0-auto"
+    >
+      <TextAreaField name="message" placeholder="Send a message..." />
+      <SubmitButton type="submit">Send</SubmitButton>
+    </FormikForm>
+  );
 }
 
 export const BasicGameLog = withGame(function BasicGameLog(props: {

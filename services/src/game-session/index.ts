@@ -8,6 +8,7 @@ import {
   GameRound,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
+  GameStatus,
   id,
   LongGameError,
   PrefixedId,
@@ -145,11 +146,9 @@ export class GameSessionState extends DurableObject<Env> {
         const [client, server] = Object.values(webSocketPair);
 
         this.ctx.acceptWebSocket(server);
-        // attaching the data directly to the socket allows it to survive hibernation of this DO
-        server.serializeAttachment({ gameSessionId, userId });
 
         // map the socket to the token info for later reference.
-        this.#socketInfo.set(server, {
+        this.updateSocketInfo(server, {
           gameSessionId,
           userId,
           status: 'pending',
@@ -186,6 +185,11 @@ export class GameSessionState extends DurableObject<Env> {
         });
       },
     );
+  }
+
+  private updateSocketInfo(ws: WebSocket, info: SocketSessionInfo) {
+    this.#socketInfo.set(ws, info);
+    ws.serializeAttachment(info);
   }
 
   async fetch(request: Request) {
@@ -523,7 +527,17 @@ export class GameSessionState extends DurableObject<Env> {
     // see if this turn completed the round
     const newRoundIndex = this.getCurrentRoundIndex();
     if (newRoundIndex > currentRoundIndex) {
-      this.#broadcastRoundChange(newRoundIndex);
+      // see if the game is over
+      const status = this.getStatus();
+      if (status.status === 'completed') {
+        this.#sendSocketMessage({
+          type: 'statusChange',
+          status,
+        });
+      } else {
+        // broadcast the new round to all players to continue the game
+        this.#broadcastRoundChange(newRoundIndex);
+      }
     }
   }
 
@@ -562,14 +576,13 @@ export class GameSessionState extends DurableObject<Env> {
   /**
    * Get the game status, which indicates game progress and outcome.
    */
-  getStatus() {
+  getStatus(): GameStatus {
     if (!this.#sessionData?.startedAt) {
       return {
         status: 'pending',
       };
     }
 
-    console.log(JSON.stringify(this.getRounds({ upTo: 'current' })));
     return this.gameDefinition.getStatus({
       globalState: this.getGlobalState(),
       members: this.#sessionData.members,
@@ -664,6 +677,7 @@ export class GameSessionState extends DurableObject<Env> {
       );
       return;
     }
+    console.log(info);
     if (info.status === 'pending') {
       info.status = 'ready';
       console.log(

@@ -2,4 +2,5 @@
   "files.exclude": {
     "**/node_modules": true
   }
+  // "unocss.root": ["./app", "./packages/game-ui", "./games/*/renderer"]
 }

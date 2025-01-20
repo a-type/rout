@@ -20,3 +20,16 @@ export async function getSummary(gameSessionId: string) {
   const init = await initRes.json();
   return init;
 }
+
+export async function getPlayers(gameSessionId: string) {
+  const res = await gameSessionRpc[':id'].members.$get({
+    param: { id: gameSessionId },
+  });
+  if (!res.ok) {
+    throw new LongGameError(
+      LongGameError.Code.Unknown,
+      'Failed to get players',
+    );
+  }
+  return await res.json();
+}

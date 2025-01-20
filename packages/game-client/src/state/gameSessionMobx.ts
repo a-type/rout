@@ -1,12 +1,14 @@
 import {
   GameSessionChatMessage,
   GameSessionPlayerStatus,
+  GameStatus,
   LongGameError,
   PlayerColorName,
   PrefixedId,
   ServerChatMessage,
   ServerPlayerStatusChangeMessage,
   ServerRoundChangeMessage,
+  ServerStatusChangeMessage,
 } from '@long-game/common';
 import {
   GameDefinition,
@@ -15,8 +17,8 @@ import {
   Turn,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
-import { action, computed, makeObservable, observable } from 'mobx';
-import { getSummary } from './api.js';
+import { action, computed, observable } from 'mobx';
+import { getPlayers, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
 export type PlayerInfo = {
@@ -27,16 +29,20 @@ export type PlayerInfo = {
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
-  confirmedPlayerState: GetPlayerState<TGame>;
-  remoteCurrentTurn: {
+  @observable accessor confirmedPlayerState: GetPlayerState<TGame>;
+  @observable accessor remoteCurrentTurn: {
     data: GetTurnData<TGame> | null;
     roundIndex: number;
     playerId: PrefixedId<'u'>;
   };
-  localTurnData: GetTurnData<TGame> | null;
-  playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
-  players: Record<PrefixedId<'u'>, PlayerInfo>;
-  chat: GameSessionChatMessage[] = [];
+  @observable accessor localTurnData: GetTurnData<TGame> | null;
+  @observable accessor playerStatuses: Record<
+    PrefixedId<'u'>,
+    GameSessionPlayerStatus
+  >;
+  @observable accessor players: Record<PrefixedId<'u'>, PlayerInfo>;
+  @observable accessor chat: GameSessionChatMessage[] = [];
+  @observable accessor gameStatus: GameStatus;
 
   // static
   gameId: string;
@@ -58,6 +64,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       id: PrefixedId<'gs'>;
       members: { id: PrefixedId<'u'> }[];
       gameDefinition: TGame;
+      status: GameStatus;
     },
     private ctx: {
       socket: GameSocket;
@@ -71,6 +78,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.gameVersion = init.gameVersion;
     this.gameSessionId = init.id;
     this.members = init.members;
+    this.gameStatus = init.status;
     this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
       (acc, member) => {
         acc[member.id] = {
@@ -85,40 +93,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     );
     this.gameDefinition = init.gameDefinition;
 
-    makeObservable(this, {
-      confirmedPlayerState: observable,
-      remoteCurrentTurn: observable,
-      localTurnData: observable,
-      playerStatuses: observable,
-      players: observable,
-      chat: observable,
-
-      turnError: computed,
-      userId: computed,
-      playerState: computed,
-      turnWasSubmitted: computed,
-      currentTurn: computed,
-      roundIndex: computed,
-      combinedLog: computed,
-
-      prepareTurn: action,
-      submitTurn: action,
-      sendChat: action,
-    });
-    // private fields require manual typing
-    makeObservable<
-      GameSessionSuite<TGame>,
-      'addChat' | 'onPlayerStatusChange' | 'removeChat'
-    >(this, {
-      addChat: action,
-      onPlayerStatusChange: action,
-      removeChat: action,
-    });
-
     this.connectSocket(ctx.socket);
+    this.fetchMembers();
   }
 
-  get playerState(): GetPlayerState<TGame> {
+  @computed get playerState(): GetPlayerState<TGame> {
     const baseState = this.confirmedPlayerState;
     const userId = this.userId;
     const localTurnData = this.localTurnData;
@@ -132,7 +111,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     });
   }
 
-  get currentTurn() {
+  @computed get currentTurn() {
     const localTurn = this.localTurnData;
     const remoteTurn = this.remoteCurrentTurn.data;
 
@@ -141,15 +120,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return null;
   }
 
-  get roundIndex() {
+  @computed get roundIndex() {
     return this.remoteCurrentTurn.roundIndex;
   }
 
-  get turnWasSubmitted() {
+  @computed get turnWasSubmitted() {
     return !!this.remoteCurrentTurn.data;
   }
 
-  get turnError() {
+  @computed get turnError() {
     const baseState = this.confirmedPlayerState;
     const roundIndex = this.remoteCurrentTurn.roundIndex;
     const userId = this.userId;
@@ -167,11 +146,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     );
   }
 
-  get userId() {
+  @computed get userId() {
     return this.remoteCurrentTurn.playerId;
   }
 
-  get combinedLog() {
+  @computed get combinedLog() {
     const chat = this.chat;
     // todo: round history
     // const rounds = this.rounds;
@@ -182,25 +161,32 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }));
   }
 
-  prepareTurn = (turn: GetTurnData<TGame>) => {
+  @action prepareTurn = (turn: GetTurnData<TGame>) => {
     this.localTurnData = turn;
   };
 
-  submitTurn = async (override?: GetTurnData<TGame>) => {
+  @action submitTurn = async (override?: GetTurnData<TGame>) => {
     if (override) {
       this.prepareTurn(override);
+    }
+    const localTurnData = this.localTurnData;
+    if (!localTurnData) {
+      return 'Play a turn first!';
     }
     const error = this.turnError;
     if (error) {
       return error;
     }
-    await this.ctx.socket.request({
+    const response = await this.ctx.socket.request({
       type: 'submitTurn',
-      turn: this.localTurnData,
+      turn: localTurnData,
     });
+    if (response.type === 'error') {
+      return response.message;
+    }
   };
 
-  sendChat = async (message: {
+  @action sendChat = async (message: {
     content: string;
     recipientIds?: PrefixedId<'u'>[];
     position?: { x: number; y: number };
@@ -220,7 +206,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.removeChat(tempId);
   };
 
-  loadMoreChat = async () => {
+  @action loadMoreChat = async () => {
     if (this.#chatNextToken) {
       this.ctx.socket.send({
         type: 'requestChat',
@@ -233,6 +219,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     socket.subscribe('chat', this.onChat);
     socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
     socket.subscribe('roundChange', this.onRoundChange);
+    socket.subscribe('statusChange', this.onStatusChange);
   };
 
   private onChat = (msg: ServerChatMessage) => {
@@ -242,7 +229,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
-  private addChat = (msg: GameSessionChatMessage) => {
+  @action private addChat = (msg: GameSessionChatMessage) => {
     this.chat.push(msg);
     this.chat.sort((a, b) => a.createdAt - b.createdAt);
     this.chat = this.chat.filter((msg, i, arr) => {
@@ -253,15 +240,17 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     });
   };
 
-  private removeChat = (id: string) => {
+  @action private removeChat = (id: string) => {
     this.chat = this.chat.filter((msg) => msg.id !== id);
   };
 
-  private onPlayerStatusChange = (msg: ServerPlayerStatusChangeMessage) => {
+  @action private onPlayerStatusChange = (
+    msg: ServerPlayerStatusChangeMessage,
+  ) => {
     this.playerStatuses[msg.playerId] = msg.playerStatus;
   };
 
-  private onRoundChange = (msg: ServerRoundChangeMessage) => {
+  @action private onRoundChange = (msg: ServerRoundChangeMessage) => {
     if (msg.currentRoundIndex !== this.remoteCurrentTurn.roundIndex) {
       this.remoteCurrentTurn = {
         data: null,
@@ -270,6 +259,19 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       };
       this.confirmedPlayerState = msg.playerState as any;
     }
+  };
+
+  @action private onStatusChange = (msg: ServerStatusChangeMessage) => {
+    this.gameStatus = msg.status;
+  };
+
+  private fetchMembers = async () => {
+    const members = await getPlayers(this.gameSessionId);
+    members.forEach(
+      action((member) => {
+        this.players[member.id] = member;
+      }),
+    );
   };
 }
 

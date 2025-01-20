@@ -1,11 +1,21 @@
 import react from '@vitejs/plugin-react-swc';
 import UnoCSS from 'unocss/vite';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [UnoCSS(), react()],
+  plugins: [
+    UnoCSS({
+      content: {
+        pipeline: {
+          include: [/\.(ts|tsx)($|\?)/, /@long-game/],
+        },
+        filesystem: ['../packages/game-ui/src/**/*'],
+      },
+    }),
+    react(),
+  ],
   optimizeDeps: {
     exclude: ['@a-type/ui', '@long-game/game-client', '@long-game/game-ui'],
     include: [

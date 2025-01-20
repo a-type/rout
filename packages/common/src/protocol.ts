@@ -1,6 +1,6 @@
 import { GameSessionChatInit, GameSessionChatMessage } from './chat';
 import { PrefixedId } from './ids';
-import { GameSessionPlayerStatus } from './status';
+import { GameSessionPlayerStatus, GameStatus } from './status';
 
 export interface BaseServerMessage {
   responseTo?: string;
@@ -24,6 +24,11 @@ export interface ServerRoundChangeMessage extends BaseServerMessage {
   currentRoundIndex: number;
 }
 
+export interface ServerStatusChangeMessage extends BaseServerMessage {
+  type: 'statusChange';
+  status: GameStatus;
+}
+
 // general-purpose ack for client messages
 export interface ServerAckMessage extends BaseServerMessage {
   type: 'ack';
@@ -39,7 +44,8 @@ export type ServerMessage =
   | ServerChatMessage
   | ServerAckMessage
   | ServerRoundChangeMessage
-  | ServerErrorMessage;
+  | ServerErrorMessage
+  | ServerStatusChangeMessage;
 
 export type ServerMessageType = ServerMessage['type'];
 export type ServerMessageByType<T extends ServerMessageType> = Extract<

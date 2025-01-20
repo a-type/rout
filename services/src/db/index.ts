@@ -284,7 +284,7 @@ export class AuthedStore extends RpcTarget {
       .innerJoin('User', 'GameSessionInvitation.userId', 'User.id')
       .where('gameSessionId', '=', gameSessionId)
       .where('status', '=', 'accepted')
-      .selectAll('User')
+      .select(['User.id', 'User.color', 'User.displayName', 'User.imageUrl'])
       .execute();
 
     return users.map((u) => {

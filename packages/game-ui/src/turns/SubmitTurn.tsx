@@ -8,7 +8,7 @@ export const SubmitTurn = withGame(function SubmitTurn({}: SubmitTurnProps) {
 
   return (
     <Button
-      className="items-center justify-center text-xl"
+      className="items-center justify-center"
       color={suite.turnError ? 'destructive' : 'primary'}
       disabled={!!suite.turnError || suite.turnWasSubmitted}
       onClick={() => suite.submitTurn()}

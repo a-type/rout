@@ -68,12 +68,18 @@ importers:
 
   .:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 1.3.4(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@clack/prompts':
         specifier: 0.9.0
         version: 0.9.0
       '@cloudflare/workers-types':
         specifier: 'catalog:'
         version: 4.20241230.0
+      '@unocss/transformer-variant-group':
+        specifier: ^65.4.2
+        version: 65.4.2
       cp-tpl:
         specifier: 1.0.9
         version: 1.0.9
@@ -110,6 +116,9 @@ importers:
       '@long-game/game-renderer':
         specifier: workspace:*
         version: link:../packages/game-renderer
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../packages/game-ui
       '@long-game/games':
         specifier: workspace:*
         version: link:../packages/games
@@ -169,6 +178,9 @@ importers:
 
   games/number-guess/renderer:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 1.3.4(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
@@ -3159,6 +3171,9 @@ packages:
   '@unocss/core@0.65.2':
     resolution: {integrity: sha512-37zj1w/6TENsUMzRRmlH5LqUcLGTTjGHrUeZ5KZyeDk+osB/rHSCw0VqqqvL6a7cOHgaW88JgfgKDt5ijRZyFA==}
 
+  '@unocss/core@65.4.2':
+    resolution: {integrity: sha512-VmXy5D25por+pt9LBlKZ3gk4rOE5ldm80MyVOEnLcpaFb9LqB0g/8qUU9/Dk3TSA+ZPeoGm53Juo0p8LMFIigA==}
+
   '@unocss/extractor-arbitrary-variants@0.65.2':
     resolution: {integrity: sha512-G+Fq7i2mTyFv+RdkbahGJFwUR9FbsGCHi+Wt8Eb7cbELWi/R4mUftfW9/q6NaIRKvmLywjWbEQ31qTJIQEO+PQ==}
 
@@ -3213,6 +3228,9 @@ packages:
 
   '@unocss/transformer-variant-group@0.65.2':
     resolution: {integrity: sha512-Sh/WKN7lys2TUVnA3Nu7Yn3rLqy0OqfWSf6PbY1RKAD+N7cRlabu3vJF0gIMwV+rmVQnHs/k9BWjNPlB56Kl/A==}
+
+  '@unocss/transformer-variant-group@65.4.2':
+    resolution: {integrity: sha512-a5xjR9mPUo7n6wD3nO5tcEcH7j0ks25E3d100XdNUeVUJeszzMAeLZ/uYrkd6Z3amyLLxwVOkAdYcczGhKdsbA==}
 
   '@unocss/vite@0.65.2':
     resolution: {integrity: sha512-MC2PqDB2tbYky7s1XTBoOAdtvUIwwl65qL1UbHTLYiWO9Q704IZUYvrdtpgieR+8IPu2dG2vUyIe3dbD4zPf9g==}
@@ -5094,11 +5112,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  use-sync-external-store@1.2.2:
-    resolution: {integrity: sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
   use-sync-external-store@1.4.0:
     resolution: {integrity: sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==}
@@ -8319,7 +8332,7 @@ snapshots:
       fast-deep-equal: 3.1.3
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
-      use-sync-external-store: 1.2.2(react@19.0.0)
+      use-sync-external-store: 1.4.0(react@19.0.0)
 
   '@tiptap/starter-kit@2.10.3':
     dependencies:
@@ -8464,6 +8477,8 @@ snapshots:
 
   '@unocss/core@0.65.2': {}
 
+  '@unocss/core@65.4.2': {}
+
   '@unocss/extractor-arbitrary-variants@0.65.2':
     dependencies:
       '@unocss/core': 0.65.2
@@ -8558,6 +8573,10 @@ snapshots:
   '@unocss/transformer-variant-group@0.65.2':
     dependencies:
       '@unocss/core': 0.65.2
+
+  '@unocss/transformer-variant-group@65.4.2':
+    dependencies:
+      '@unocss/core': 65.4.2
 
   '@unocss/vite@0.65.2(rollup@2.79.1)(vite@6.0.7(@types/node@22.10.2)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.7.3))':
     dependencies:
@@ -10758,10 +10777,6 @@ snapshots:
       tslib: 2.7.0
     optionalDependencies:
       '@types/react': 19.0.7
-
-  use-sync-external-store@1.2.2(react@19.0.0):
-    dependencies:
-      react: 19.0.0
 
   use-sync-external-store@1.4.0(react@19.0.0):
     dependencies:

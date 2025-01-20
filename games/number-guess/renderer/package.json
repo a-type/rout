@@ -15,6 +15,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@a-type/ui": "catalog:",
     "@long-game/game-number-guess-definition": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",

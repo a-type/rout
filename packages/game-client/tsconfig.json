@@ -6,7 +6,7 @@
     "rootDir": "./src",
     "lib": ["es2017", "dom", "dom.iterable", "ES2021"],
     "useDefineForClassFields": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": false,
     "declarationDir": "./dist",
     "declaration": true,
     "declarationMap": true,
