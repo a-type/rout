@@ -90,6 +90,18 @@ export class PublicSdk extends BaseSdk {
       json: { gameId: input.gameId },
       param: { id: input.id },
     }),
+    onSuccess: (output, vars) => {
+      this.queryClient.setQueryData(
+        ['getGameSessionStatus', { id: vars.id }],
+        output.session.status,
+      );
+      this.queryClient.invalidateQueries({
+        queryKey: ['getGameSessionSummary', { id: vars.id }],
+      });
+      this.queryClient.invalidateQueries({
+        queryKey: ['getGameSessionPregame', { id: vars.id }],
+      });
+    },
   });
   getGameSessionStatus = this.sdkQuery(
     'getGameSessionStatus',
