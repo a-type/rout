@@ -2,12 +2,20 @@ import { zValidator } from '@hono/zod-validator';
 import { LongGameError } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { userStoreMiddleware } from '../../middleware';
+import { sessionMiddleware, userStoreMiddleware } from '../../middleware';
 import { Env } from '../config/ctx';
 
 export const usersRouter = new Hono<Env>()
-  .get('/me', userStoreMiddleware, async (ctx) => {
-    const user = await ctx.get('userStore').getMe();
+  .get('/me', sessionMiddleware, async (ctx) => {
+    const session = ctx.get('session');
+    if (!session) {
+      return ctx.json(null);
+    }
+
+    const userStore = await ctx.env.PUBLIC_STORE.getStoreForUser(
+      session.userId,
+    );
+    const user = await userStore.getMe();
     if (!user) {
       throw new LongGameError(
         LongGameError.Code.InternalServerError,

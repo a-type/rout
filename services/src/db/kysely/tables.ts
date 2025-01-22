@@ -1,11 +1,17 @@
 import { PrefixedId } from '@long-game/common';
 import { ColumnType, Insertable, Selectable, Updateable } from 'kysely';
 
-type CreatedAtColumn = ColumnType<string, string | undefined, never>;
-type UpdatedAtColumn = ColumnType<
+// date serialization: Dates go in, strings come out.
+type DateColumnRequired = ColumnType<string, Date, Date>;
+type DateColumnOptional = ColumnType<
+  string | null,
+  Date | undefined,
+  Date | null | undefined
+> | null;
+type DateColumnGenerated = ColumnType<
   string,
-  string | undefined,
-  string | undefined
+  Date | undefined,
+  Date | null | undefined
 >;
 
 export interface Database {
@@ -14,20 +20,21 @@ export interface Database {
   VerificationCode: VerificationCodeTable;
   GameSessionInvitation: GameSessionInvitationTable;
   Friendship: FriendshipTable;
+  FriendshipInvitation: FriendshipInvitationTable;
 }
 
 export interface UserTable {
   id: PrefixedId<'u'>;
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
   displayName: string;
   email: string;
-  emailVerifiedAt: Date | null;
+  emailVerifiedAt: DateColumnOptional;
   imageUrl: string | null;
   color: string | null;
   password: string | null;
   stripeCustomerId: string | null;
-  acceptedTosAt: ColumnType<Date, Date | undefined, Date | undefined> | null;
+  acceptedTosAt: DateColumnOptional;
   sendEmailUpdates: ColumnType<boolean, boolean | undefined, boolean>;
 }
 
@@ -37,8 +44,8 @@ export type UserUpdate = Updateable<UserTable>;
 
 export interface AccountTable {
   id: PrefixedId<'a'>;
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
 
   type: string;
   provider: string;
@@ -46,7 +53,7 @@ export interface AccountTable {
   refreshToken: string | null;
   accessToken: string | null;
   tokenType: string | null;
-  accessTokenExpiresAt: ColumnType<Date, Date | undefined, Date> | null;
+  accessTokenExpiresAt: DateColumnOptional;
   scope: string | null;
   idToken: string | null;
   userId: PrefixedId<'u'>;
@@ -58,13 +65,13 @@ export type AccountUpdate = Updateable<AccountTable>;
 
 export interface VerificationCodeTable {
   id: PrefixedId<'vc'>;
-  createdAt: ColumnType<Date, Date | undefined, never>;
-  updatedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnOptional;
 
   code: string;
   email: string;
   name: string;
-  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  expiresAt: DateColumnOptional;
 }
 
 export type VerificationCode = Selectable<VerificationCodeTable>;
@@ -73,14 +80,14 @@ export type VerificationCodeUpdate = Updateable<VerificationCodeTable>;
 
 export interface GameSessionInvitationTable {
   id: PrefixedId<'gsi'>;
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
 
   gameSessionId: PrefixedId<'gs'>;
   inviterId: PrefixedId<'u'>;
   userId: PrefixedId<'u'>;
-  expiresAt: ColumnType<Date, Date | undefined, Date | undefined>;
-  claimedAt: ColumnType<Date, Date | undefined, Date | undefined>;
+  expiresAt: DateColumnRequired;
+  claimedAt: DateColumnOptional;
   status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
   role: 'player' | 'spectator';
 }
@@ -92,15 +99,25 @@ export type GameSessionInvitationUpdate =
 
 export interface FriendshipTable {
   id: PrefixedId<'f'>;
-  createdAt: CreatedAtColumn;
-  updatedAt: UpdatedAtColumn;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
 
   userId: PrefixedId<'u'>;
   friendId: PrefixedId<'u'>;
   initiatorId: PrefixedId<'u'>;
-  status: 'pending' | 'accepted' | 'declined';
 }
 
 export type Friendship = Selectable<FriendshipTable>;
 export type NewFriendship = Insertable<FriendshipTable>;
 export type FriendshipUpdate = Updateable<FriendshipTable>;
+
+export interface FriendshipInvitationTable {
+  id: PrefixedId<'fi'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+
+  inviterId: PrefixedId<'u'>;
+  email: string;
+  expiresAt: DateColumnRequired;
+  status: 'pending' | 'accepted' | 'declined' | 'blocked';
+}

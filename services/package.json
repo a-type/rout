@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@a-type/auth": "catalog:",
-    "@a-type/auth-email-ses": "^2.1.4",
+    "@a-type/auth-email-ses": "^2.1.8",
     "@a-type/kysely": "1.1.1",
     "@a-type/utils": "catalog:",
     "@hono/zod-validator": "catalog:",

@@ -9,6 +9,7 @@ export class PublicSdk extends BaseSdk {
       imageUrl?: string;
       sendEmailUpdates?: boolean;
     }) => ({ json: input }),
+    invalidate: [['getMe']],
   });
   getFriendships = this.sdkQuery(
     'getFriendships',
@@ -17,19 +18,20 @@ export class PublicSdk extends BaseSdk {
   getFriendshipInvites = this.sdkQuery(
     'getFriendshipInvites',
     this.apiRpc.friendships.invites.$get,
-  );
-  getFriendshipRequests = this.sdkQuery(
-    'getFriendshipRequests',
-    this.apiRpc.friendships.requests.$get,
+    {
+      transformInput: (input: { direction: 'incoming' | 'outgoing' }) => ({
+        query: { direction: input.direction },
+      }),
+    },
   );
   sendFriendshipInvite = this.sdkMutation(
-    this.apiRpc.friendships.create.$post,
+    this.apiRpc.friendships.invites.$post,
     {
       transformInput: (input: { email: string }) => ({ json: input }),
     },
   );
   respondToFriendshipInvite = this.sdkMutation(
-    this.apiRpc.friendships.respond[':id'].$post,
+    this.apiRpc.friendships.invites[':id'].$post,
     {
       transformInput: (input: {
         response: 'accepted' | 'declined';
@@ -38,6 +40,18 @@ export class PublicSdk extends BaseSdk {
         json: { response: input.response },
         param: { id: input.id },
       }),
+      invalidate: [
+        ['getPublicFriendInvite'],
+        ['getFriendshipInvites'],
+        ['getFriendships'],
+      ],
+    },
+  );
+  getPublicFriendshipInvite = this.sdkQuery(
+    'getPublicFriendshipInvite',
+    this.apiRpc.friendships.invites[':id'].$get,
+    {
+      transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
   getGameSessions = this.sdkQuery(
@@ -58,6 +72,7 @@ export class PublicSdk extends BaseSdk {
         json: { response: input.response },
         param: { id: input.id },
       }),
+      invalidate: [['getGameSessionInvitations', 'getGameSessionPregame']],
     },
   );
   sendGameSessionInvitation = this.sdkMutation(
@@ -66,6 +81,7 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { userId: string; gameSessionId: string }) => ({
         json: input,
       }),
+      invalidate: [['getGameSessionInvitations']],
     },
   );
 
@@ -142,3 +158,9 @@ export type GameSession = InferReturnData<PublicSdk['getGameSessions']>[number];
 export type GameSessionInvitation = InferReturnData<
   PublicSdk['getGameSessionInvitations']
 >[number];
+export type FriendshipInvitationPublicInfo = InferReturnData<
+  PublicSdk['getPublicFriendshipInvite']
+>;
+export type GameSessionPregame = InferReturnData<
+  PublicSdk['getGameSessionPregame']
+>;

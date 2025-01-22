@@ -1,5 +1,4 @@
 import { Box } from '@a-type/ui';
-import { GameControls } from '@long-game/game-ui';
 import { Grid } from './components/Grid.js';
 import { hooks } from './gameClient.js';
 
@@ -8,7 +7,6 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
   return (
     <Box className="w-full h-full">
       <Grid value={grid} />
-      <GameControls />
     </Box>
   );
 });

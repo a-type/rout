@@ -1,3 +1,4 @@
+import { toast } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { hookifySdk, PublicSdk } from '@long-game/game-client';
 
@@ -19,6 +20,8 @@ publicSdk.addEventListener('error', (ev) => {
       if (!isOnLoginPage) {
         window.location.href = '/login';
       }
+    } else {
+      toast.error(asLongGameError.message);
     }
   }
 });

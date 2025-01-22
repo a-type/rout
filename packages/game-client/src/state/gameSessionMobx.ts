@@ -17,7 +17,7 @@ import {
   Turn,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
-import { action, computed, observable } from 'mobx';
+import { action, autorun, computed, observable } from 'mobx';
 import { getPlayers, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
@@ -95,6 +95,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
     this.connectSocket(ctx.socket);
     this.fetchMembers();
+    this.setupLocalTurnStorage();
   }
 
   @computed get playerState(): GetPlayerState<TGame> {
@@ -106,8 +107,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
     return this.gameDefinition.getProspectivePlayerState({
       playerState: baseState,
-      prospectiveTurn: localTurnData,
-      playerId: userId,
+      prospectiveTurn: {
+        data: localTurnData,
+        playerId: userId,
+      },
     });
   }
 
@@ -160,6 +163,17 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       timestamp: msg.createdAt,
     }));
   }
+
+  getPlayer = (id: PrefixedId<'u'>) => {
+    return (
+      this.players[id] ?? {
+        id,
+        displayName: 'Loading...',
+        imageUrl: null,
+        color: 'gray',
+      }
+    );
+  };
 
   @action prepareTurn = (turn: GetTurnData<TGame>) => {
     this.localTurnData = turn;
@@ -272,6 +286,18 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         this.players[member.id] = member;
       }),
     );
+  };
+
+  private setupLocalTurnStorage = () => {
+    const userId = this.userId;
+    const key = `game-session-${this.gameSessionId}-local-turn-${userId}`;
+    const localTurn = localStorage.getItem(key);
+    if (localTurn) {
+      this.localTurnData = JSON.parse(localTurn);
+    }
+    autorun(() => {
+      localStorage.setItem(key, JSON.stringify(this.localTurnData));
+    });
   };
 }
 

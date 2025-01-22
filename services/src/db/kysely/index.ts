@@ -5,7 +5,7 @@ export { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/sqlite';
 
 import { TimestampsPlugin } from '@a-type/kysely';
 import { D1Dialect } from 'kysely-d1';
-import { SerializePlugin } from 'kysely-plugin-serialize';
+import { defaultDeserializer, SerializePlugin } from 'kysely-plugin-serialize';
 
 export function createDb(bindings: { DB: any }) {
   return new Kysely<Database>({
@@ -16,7 +16,16 @@ export function createDb(bindings: { DB: any }) {
       new TimestampsPlugin({
         ignoredTables: ['<d1_migrations>'],
       }),
-      new SerializePlugin(),
+      new SerializePlugin({
+        deserializer: (value) => {
+          const deserialized = defaultDeserializer(value);
+          if (deserialized instanceof Date) {
+            // do not deserialize dates.
+            return deserialized.toUTCString();
+          }
+          return deserialized;
+        },
+      }),
     ],
   });
 }

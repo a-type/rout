@@ -42,15 +42,15 @@ export const gameDefinition: GameDefinition<
     return playerState;
   },
 
-  // players see nothing; all state is secret in this game.
-  getPlayerState: ({ globalState, playerId, roundIndex, rounds }) => {
-    const previousRound = rounds[roundIndex - 1];
+  getPlayerState: ({ globalState, playerId, rounds }) => {
+    const previousRound = rounds[rounds.length - 1];
     if (!previousRound) {
       return {};
     } else {
       const lastGuess = previousRound.turns.find(
         (turn) => turn.playerId === playerId,
       );
+      console.log('lastGuess', lastGuess);
       if (!lastGuess) {
         return {};
       }

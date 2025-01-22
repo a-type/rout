@@ -2,6 +2,8 @@ import { sdkHooks } from '@/services/publicSdk.js';
 import { Avatar, Button, Divider, H1, H2 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
+import { SendInvite } from '../friendships/SendInvite.js';
+import { GameJoinPreview } from './GameJoinPreview.js';
 import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
@@ -16,12 +18,15 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
   });
   const pendingInviteForMe =
     pregame.myInvitation.status === 'pending' ? pregame.myInvitation : null;
-  const respondToInviteMutation = sdkHooks.useRespondToGameSessionInvitation();
 
   const game = games[pregame.session.gameId];
   const insufficientPlayers =
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
+
+  if (pendingInviteForMe) {
+    return <GameJoinPreview myInvite={pendingInviteForMe} pregame={pregame} />;
+  }
 
   return (
     <div>
@@ -38,31 +43,19 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
         }}
       />
       <Divider />
+      <GameSetupMembers sessionId={gameSessionId} />
       <GameSetupInviteFriends sessionId={gameSessionId} />
       <Divider />
-      {pendingInviteForMe ? (
-        <Button
-          onClick={async () => {
-            await respondToInviteMutation.mutateAsync({
-              id: pendingInviteForMe.id,
-              response: 'accepted',
-            });
-          }}
-        >
-          Accept Invite
-        </Button>
-      ) : (
-        <Button
-          onClick={async () => {
-            await startGameMutation.mutateAsync({
-              id: gameSessionId,
-            });
-          }}
-          disabled={insufficientPlayers}
-        >
-          {insufficientPlayers ? 'Need more players' : 'Start Game'}
-        </Button>
-      )}
+      <Button
+        onClick={async () => {
+          await startGameMutation.mutateAsync({
+            id: gameSessionId,
+          });
+        }}
+        disabled={insufficientPlayers}
+      >
+        {insufficientPlayers ? 'Need more players' : 'Start Game'}
+      </Button>
     </div>
   );
 }
@@ -81,7 +74,9 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
   const { data: friends } = sdkHooks.useGetFriendships();
   const friendsNotInvited = friends.filter(
     (friendship) =>
-      !pregame.invitations.some((invite) => invite.user?.id === friendship.id),
+      !pregame.invitations.some(
+        (invite) => invite.user?.id === friendship.id,
+      ) && !pregame.members.some((member) => member.id === friendship.id),
   );
 
   const inviteMutation = sdkHooks.useSendGameSessionInvitation();
@@ -131,6 +126,27 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
             </li>
           );
         })}
+      </ul>
+      <SendInvite />
+    </div>
+  );
+}
+
+function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
+  const { data: pregame } = sdkHooks.useGetGameSessionPregame({
+    id: sessionId,
+  });
+
+  return (
+    <div>
+      <H2>Members</H2>
+      <ul>
+        {pregame.members.map((member) => (
+          <li className="row" key={member.id}>
+            <Avatar imageSrc={member.imageUrl} />
+            {member.displayName}
+          </li>
+        ))}
       </ul>
     </div>
   );

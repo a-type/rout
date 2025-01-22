@@ -168,8 +168,12 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
     },
   )
   .post('/start', async (ctx) => {
+    const id = ctx.get('gameSessionId');
     const state = ctx.get('gameSessionState');
-    state.startGame();
+    // make sure we've locked in the correct members
+    const members = await ctx.get('userStore').getGameSessionMembers(id);
+    await state.updateMembers(members);
+    await state.startGame();
     const status = await state.getStatus();
     return ctx.json({ status });
   })

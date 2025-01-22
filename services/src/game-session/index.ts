@@ -262,7 +262,13 @@ export class GameSessionState extends DurableObject<Env> {
         'Cannot update members after game has started',
       );
     }
-    this.setSessionData({ members });
+    // make sure we don't store extra data here. we only
+    // need the id
+    this.setSessionData({
+      members: members.map((m) => ({
+        id: m.id,
+      })),
+    });
   }
 
   updateGame(gameId: string, gameVersion: string) {
@@ -308,6 +314,13 @@ export class GameSessionState extends DurableObject<Env> {
     return Boolean(this.#sessionData);
   }
 
+  /**
+   * Returns the active round index. 0 is the first round.
+   * Note that despite this value being the current round,
+   * all information delivered to the player should use
+   * getPublicRoundIndex, which is 1 behind. The current round
+   * will include submitted turns before the round is complete.
+   */
   getCurrentRoundIndex(): number {
     if (!this.#sessionData?.startedAt) {
       return 0;
@@ -321,6 +334,10 @@ export class GameSessionState extends DurableObject<Env> {
     });
   }
 
+  getPublicRoundIndex(): number {
+    return this.getCurrentRoundIndex() - 1;
+  }
+
   /**
    * Computes turns into grouped rounds, optionally up to (not including)
    * the specified round
@@ -328,13 +345,16 @@ export class GameSessionState extends DurableObject<Env> {
   getRounds({
     upTo,
   }: {
+    /**
+     * INCLUSIVE round index to stop at. If not provided, all rounds are returned.
+     */
     upTo?: number | 'current';
   } = {}): GameRound<GameSessionTurn>[] {
     const resolvedUpTo =
       upTo === 'current' ? this.getCurrentRoundIndex() : upTo;
     // group turns into rounds, providing up to the specified round if needed
     return this.#turns.reduce<GameRound<GameSessionTurn>[]>((acc, turn) => {
-      if (resolvedUpTo !== undefined && turn.roundIndex >= resolvedUpTo) {
+      if (resolvedUpTo !== undefined && turn.roundIndex > resolvedUpTo) {
         return acc;
       }
       const round = acc[turn.roundIndex] ?? {
@@ -353,7 +373,7 @@ export class GameSessionState extends DurableObject<Env> {
    */
   getPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number): any {
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex && roundIndex > currentRoundIndex) {
+    if (roundIndex && roundIndex >= currentRoundIndex) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
@@ -367,27 +387,28 @@ export class GameSessionState extends DurableObject<Env> {
     if (!this.#sessionData) {
       throw new Error('Session data not initialized');
     }
-    const currentRoundIndex = this.getCurrentRoundIndex();
-    const resolvedRoundIndex = roundIndex ?? currentRoundIndex - 1;
+    const publicRoundIndex = this.getPublicRoundIndex();
+    const resolvedRoundIndex = roundIndex ?? publicRoundIndex;
+    console.log('getting player state for ', playerId, resolvedRoundIndex);
     const globalState = this.getGlobalState(roundIndex);
+    console.log('global state', globalState);
     return this.gameDefinition.getPlayerState({
       globalState,
       playerId,
-      roundIndex: resolvedRoundIndex,
       members: this.#sessionData.members,
-      rounds: this.getRounds({ upTo: resolvedRoundIndex + 1 }),
+      rounds: this.getRounds({ upTo: resolvedRoundIndex }),
     }) as any;
   }
 
   getPublicRounds(playerId: PrefixedId<'u'>, { upTo }: { upTo?: number } = {}) {
-    const currentRoundIndex = this.getCurrentRoundIndex();
-    if (upTo && upTo >= currentRoundIndex) {
+    const publicRoundIndex = this.getPublicRoundIndex();
+    if (upTo && upTo > publicRoundIndex) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
       );
     }
-    const resolvedUpTo = upTo ?? currentRoundIndex - 1;
+    const resolvedUpTo = upTo ?? publicRoundIndex;
     return this.getRounds({ upTo: resolvedUpTo }).map((round) => {
       return {
         ...round,
@@ -416,12 +437,14 @@ export class GameSessionState extends DurableObject<Env> {
     });
     // check cache first. we never cache the current round (since it's mutable)
     // so we skip if no roundIndex is provided
-    if (roundIndex && this.#globalStateCache[roundIndex]) {
+    if (roundIndex !== undefined && this.#globalStateCache[roundIndex]) {
       return this.#globalStateCache[roundIndex];
     }
+    const rounds = this.getRounds({ upTo: roundIndex });
+    console.log('global state rounds', rounds);
     const computed = this.gameDefinition.getState({
       initialState,
-      rounds: this.getRounds({ upTo: roundIndex }),
+      rounds,
       random,
       members: this.#sessionData.members,
     });
@@ -501,7 +524,7 @@ export class GameSessionState extends DurableObject<Env> {
         data: turn,
         playerId,
       },
-      playerState: this.getPlayerState(playerId),
+      playerState: this.getPlayerState(playerId, this.getPublicRoundIndex()),
       roundIndex: this.getCurrentRoundIndex(),
     });
     if (validationError) {
@@ -543,11 +566,12 @@ export class GameSessionState extends DurableObject<Env> {
   }
 
   #broadcastRoundChange = (roundIndex: number) => {
+    console.log('Broadcasting round change to all players', roundIndex);
     for (const member of this.#sessionData?.members ?? []) {
       this.#sendSocketMessage(
         {
           type: 'roundChange',
-          playerState: this.getPlayerState(member.id, roundIndex),
+          playerState: this.getPlayerState(member.id, roundIndex - 1),
           currentRoundIndex: roundIndex,
         },
         { to: [member.id] },

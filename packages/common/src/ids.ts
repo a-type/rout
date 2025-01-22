@@ -4,6 +4,7 @@ export const resourceIdTypes = {
   u: 'User',
   a: 'Account',
   f: 'Friendship',
+  fi: 'FriendshipInvitation',
   cm: 'ChatMessage',
   gs: 'GameSession',
   gsi: 'GameSessionInvitation',

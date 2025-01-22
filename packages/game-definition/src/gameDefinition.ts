@@ -1,10 +1,10 @@
-import { GameRound, GameStatus } from '@long-game/common';
+import { GameRound, GameStatus, PrefixedId } from '@long-game/common';
 import { GameRandom } from './random.js';
 
 export type BaseTurnData = Record<string, unknown>;
 
 export interface LocalTurn<TurnData extends BaseTurnData> {
-  playerId: `u-${string}`;
+  playerId: PrefixedId<'u'>;
   data: TurnData;
 }
 
@@ -45,7 +45,6 @@ export type GameDefinition<
   getProspectivePlayerState: (data: {
     playerState: PlayerState;
     prospectiveTurn: LocalTurn<TurnData>;
-    playerId: string;
   }) => PlayerState;
 
   // SERVER ONLY
@@ -70,8 +69,15 @@ export type GameDefinition<
   getPlayerState: (data: {
     globalState: GlobalState;
     playerId: string;
-    roundIndex: number;
     members: { id: string }[];
+    /**
+     * All rounds which have been played. These are all reflected
+     * in globalState, but are available for reference. If a current
+     * round is in progress, it is not included here -- you should not
+     * use the the current round to compute player state as it may leak
+     * information about other players' moves. If you really need this
+     * maybe we can include it as a separate parameter just to be safe?
+     */
     rounds: GameRound<Turn<TurnData>>[];
   }) => PlayerState;
   /**

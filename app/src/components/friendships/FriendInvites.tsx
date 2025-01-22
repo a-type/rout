@@ -3,7 +3,9 @@ import { Avatar, Button } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
 
 export function FriendInvites() {
-  const { data: invites, refetch } = sdkHooks.useGetFriendshipInvites();
+  const { data: invites, refetch } = sdkHooks.useGetFriendshipInvites({
+    direction: 'incoming',
+  });
 
   return (
     <div>

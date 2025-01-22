@@ -131,7 +131,7 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
   const selfId = gameSuite.userId;
 
   if (!latestMessage) {
-    const me = players[selfId];
+    const me = gameSuite.getPlayer(selfId);
     return (
       <Box direction="row" gap="sm" p="none" items="center">
         <Avatar imageSrc={me.imageUrl} />
@@ -183,7 +183,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
 export const BasicGameLog = withGame<{ className?: string }>(
   function BasicGameLog({ gameSuite, ...props }) {
     const openNative = useSnapshot(localState).open;
-    const isLarge = useMediaQuery('(min-width: 768px)');
+    const isLarge = useMediaQuery('(min-width: 1024px)');
     const open = isLarge || openNative;
 
     return (

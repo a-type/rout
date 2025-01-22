@@ -58,7 +58,7 @@ const TerritoryCell = withGame(function TerritoryCell({
     ({ x: px, y: py }) => px === x && py === y,
   );
 
-  const { color } = suite.players[playerId];
+  const { color } = suite.getPlayer(playerId);
 
   const isOwned = playerId === suite.userId;
 

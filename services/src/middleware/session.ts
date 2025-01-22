@@ -67,3 +67,29 @@ export const userStoreMiddleware = createMiddleware<{
   ctx.set('userStore', userStore);
   return next();
 });
+
+/**
+ * Only useful for endpoints that may be public or private.
+ * Other middleware exported from this module is more convenient
+ * by ensuring logged in status and/or providing userStore.
+ */
+export const sessionMiddleware = createMiddleware<{
+  Variables: {
+    session: SessionWithPrefixedIds | null;
+  };
+  Bindings: Env['Bindings'];
+}>(async (ctx, next) => {
+  let session: SessionWithPrefixedIds | null = null;
+  try {
+    session = await getRequestSessionOrThrow(ctx);
+  } catch (err) {
+    if (err instanceof LongGameError) {
+      if (err.code === LongGameError.Code.Unauthorized) {
+        return next();
+      }
+    }
+    throw err;
+  }
+  ctx.set('session', session);
+  return next();
+});

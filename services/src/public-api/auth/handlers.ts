@@ -38,9 +38,7 @@ export const authHandlers = createHandlers<Context<Env>>({
       return {
         ...value,
         // weird shimming required for Dates...
-        expiresAt: value.expiresAt
-          ? new Date(await value.expiresAt.getTime())
-          : null,
+        expiresAt: value.expiresAt ? new Date(value.expiresAt) : null,
       };
     },
     async getUserByEmail(email) {
@@ -53,7 +51,7 @@ export const authHandlers = createHandlers<Context<Env>>({
         friendlyName: value.displayName,
         // weird shimming required for Dates...
         emailVerifiedAt: value.emailVerifiedAt
-          ? new Date(await value.emailVerifiedAt.getTime())
+          ? new Date(value.emailVerifiedAt)
           : null,
       };
     },
@@ -82,7 +80,7 @@ export const authHandlers = createHandlers<Context<Env>>({
         friendlyName: value.displayName,
         // weird shimming required for Dates...
         emailVerifiedAt: value.emailVerifiedAt
-          ? new Date(await value.emailVerifiedAt.getTime())
+          ? new Date(value.emailVerifiedAt)
           : null,
       };
     },

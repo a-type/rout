@@ -1,4 +1,5 @@
 export * from './board.js';
+export * from './brand.js';
 export * from './chat.js';
 export * from './colors.js';
 export * from './error.js';

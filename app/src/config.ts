@@ -5,5 +5,3 @@ export const SECURE =
 export const UI_ORIGIN = import.meta.env.VITE_PUBLIC_URL;
 export const GAME_SESSION_API_ORIGIN = import.meta.env
   .VITE_GAME_SESSION_API_ORIGIN;
-
-export const APP_NAME = 'Long Game';

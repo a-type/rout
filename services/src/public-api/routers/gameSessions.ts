@@ -6,6 +6,7 @@ import { EnvWith } from '../config/ctx';
 export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
   .use(userStoreMiddleware)
   .get('/', async (ctx) => {
-    const sessions = await ctx.get('userStore').getGameSessions();
+    const userStore = ctx.get('userStore');
+    const sessions = await userStore.getGameSessions();
     return ctx.json(wrapRpcData(sessions));
   });

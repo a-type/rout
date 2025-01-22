@@ -51,13 +51,26 @@ create table Friendship (
 	userId text not null references User(id) on delete cascade,
 	friendId text not null references User(id) on delete cascade,
 	initiatorId text not null references User(id) on delete cascade,
-	status text not null,
 
-	constraint Friendship_status_check check (status in ('pending', 'accepted', 'rejected', 'blocked')),
 	constraint Friendship_userId_not_equal_friendId check (userId != friendId),
 	constraint Friendship_userId_friendId_ordering check (userId < friendId),
 	constraint Friendship_userId_friendId_unique unique (userId, friendId)
 );
+
+create table FriendshipInvitation (
+	id text primary key,
+	createdAt datetime default (strftime('%FT%R:%fZ')) not null,
+	updatedAt datetime default (strftime('%FT%R:%fZ')) not null,
+	inviterId text not null references User(id) on delete cascade,
+	email text not null,
+	status text not null default 'pending',
+	expiresAt datetime not null,
+
+	constraint FriendshipInvitation_status_check check (status in ('pending', 'accepted', 'rejected', 'blocked')),
+	constraint FriendshipInvitation_inviterId_email_unique unique (inviterId, email)
+);
+
+create index FriendshipInvitation_email_index on FriendshipInvitation(email);
 
 create table GameSessionInvitation (
 	id text primary key,
@@ -71,5 +84,7 @@ create table GameSessionInvitation (
 	status text not null default 'pending',
 	expiresAt datetime not null,
 
-	constraint GameSessionInvitation_role_check check (role in ('player', 'spectator'))
+	constraint GameSessionInvitation_role_check check (role in ('player', 'spectator')),
+	constraint GameSessionInvitation_status_check check (status in ('pending', 'accepted', 'rejected', 'blocked')),
+	constraint GameSessionInvitation_gameSessionId_userId_unique unique (gameSessionId, userId)
 );

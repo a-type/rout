@@ -30,7 +30,9 @@ export const RoundHistoryControl = withGame(
           </Button>
         )}
         <Select
-          value={roundIndex.toString()}
+          value={
+            roundIndex === latestRoundIndex ? 'current' : roundIndex.toString()
+          }
           onValueChange={(v) => {
             if (v === 'current') {
               setRoundIndex('current');
@@ -42,12 +44,12 @@ export const RoundHistoryControl = withGame(
           <Select.Trigger size="small" />
           <Select.Content>
             {/* Note: specifically skipping latest index, which === current */}
-            {Array.from({ length: latestRoundIndex }).map((_, i) => (
+            {Array.from({ length: latestRoundIndex - 1 }).map((_, i) => (
               <Select.Item key={i} value={i.toString()}>
                 Round {i + 1}
               </Select.Item>
             ))}
-            <Select.Item value="current">Latest Round</Select.Item>
+            <Select.Item value="current">Round {latestRoundIndex}</Select.Item>
           </Select.Content>
         </Select>
         <Button

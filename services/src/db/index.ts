@@ -92,19 +92,43 @@ export class AuthedStore extends RpcTarget {
    * Confirmed friendships
    */
   async getFriendships() {
-    const builder = this.#db
+    const result = await this.#db
       .selectFrom('Friendship')
-      .innerJoin('User', 'Friendship.friendId', 'User.id')
       .where((eb) =>
         eb.or([
           eb('userId', '=', this.#userId),
           eb('friendId', '=', this.#userId),
         ]),
       )
-      .where('status', '=', 'accepted')
-      .selectAll('User');
+      .select([
+        'Friendship.id',
+        'Friendship.createdAt',
+        'Friendship.updatedAt',
+        (eb) =>
+          jsonObjectFrom(
+            eb
+              .selectFrom('User')
+              .where((eb) =>
+                eb.or([
+                  eb('User.id', '=', eb.ref('Friendship.userId')),
+                  eb('User.id', '=', eb.ref('Friendship.friendId')),
+                ]),
+              )
+              .where('User.id', '!=', this.#userId)
+              .select([
+                'User.id',
+                'User.color',
+                'User.imageUrl',
+                'User.displayName',
+              ]),
+          ).as('friend'),
+      ])
+      .execute();
 
-    return builder.execute();
+    function nonNullFilter<T>(v: T): v is NonNullable<T> {
+      return v !== null;
+    }
+    return result.map((r) => r.friend).filter(nonNullFilter);
   }
 
   /**
@@ -115,16 +139,8 @@ export class AuthedStore extends RpcTarget {
   }: {
     direction: 'incoming' | 'outgoing';
   }) {
-    return this.#db
-      .selectFrom('Friendship')
-      .where((eb) =>
-        eb.or([
-          eb('friendId', '=', this.#userId),
-          eb('userId', '=', this.#userId),
-        ]),
-      )
-      .where('status', 'in', ['pending', 'declined'])
-      .where('initiatorId', direction === 'incoming' ? '!=' : '=', this.#userId)
+    const builder = this.#db
+      .selectFrom('FriendshipInvitation')
       .select([
         'id',
         'status',
@@ -132,13 +148,7 @@ export class AuthedStore extends RpcTarget {
           jsonObjectFrom(
             eb
               .selectFrom('User')
-              .where((eb) =>
-                eb.or([
-                  eb(eb.ref('User.id'), '=', eb.ref('Friendship.userId')),
-                  eb(eb.ref('User.id'), '=', eb.ref('Friendship.friendId')),
-                ]),
-              )
-              .where('User.id', '!=', this.#userId)
+              .whereRef('User.id', '=', 'FriendshipInvitation.inviterId')
               .select([
                 'User.id',
                 'User.color',
@@ -147,73 +157,58 @@ export class AuthedStore extends RpcTarget {
               ]),
           ).as('otherUser'),
       ])
-      .execute();
+      .where('status', '=', 'pending');
+    if (direction === 'outgoing') {
+      return builder.where('inviterId', '=', this.#userId).execute();
+    } else {
+      const { email } = await this.#db
+        .selectFrom('User')
+        .where('id', '=', this.#userId)
+        .select('email')
+        .executeTakeFirstOrThrow();
+      return builder.where('email', '=', email).execute();
+    }
   }
 
-  async sendFriendshipInvite(invitedEmail: string) {
-    const invitedUser = await this.#db
-      .selectFrom('User')
-      .where('email', '=', invitedEmail)
-      .selectAll()
-      .executeTakeFirst();
-
-    if (!invitedUser) {
-      throw new Error('User not found');
-    }
-
-    const [userId, friendId] = [this.#userId, invitedUser.id].sort();
-
-    const existing = await this.#db
-      .selectFrom('Friendship')
-      .where('userId', '=', userId)
-      .where('friendId', '=', friendId)
-      .select(['status', 'id'])
-      .executeTakeFirst();
-
-    if (existing) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'Friendship already exists',
-      );
-    }
-
+  async insertFriendshipInvite(invitedEmail: string) {
     const friendship = await this.#db
-      .insertInto('Friendship')
+      .insertInto('FriendshipInvitation')
       .values({
-        id: id('f'),
-        userId,
-        friendId,
+        id: id('fi'),
+        inviterId: this.#userId,
         status: 'pending',
-        initiatorId: this.#userId,
+        email: invitedEmail,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .returning('id')
+      .onConflict((b) => b.columns(['inviterId', 'email']).doNothing())
       .executeTakeFirstOrThrow();
 
     return friendship;
   }
 
   async respondToFriendshipInvite(
-    friendshipId: PrefixedId<'f'>,
+    friendshipId: PrefixedId<'fi'>,
     status: 'accepted' | 'declined',
   ) {
     const friendship = await this.#db
-      .selectFrom('Friendship')
-      .where('id', '=', friendshipId)
-      .select(['status', 'userId', 'friendId'])
+      .selectFrom('FriendshipInvitation')
+      .where('FriendshipInvitation.id', '=', friendshipId)
+      .select([
+        'FriendshipInvitation.status',
+        'FriendshipInvitation.inviterId',
+        'FriendshipInvitation.email',
+        'FriendshipInvitation.expiresAt',
+      ])
+      .innerJoin('User', 'FriendshipInvitation.email', 'User.email')
+      .where('User.id', '=', this.#userId)
       .executeTakeFirstOrThrow(
         () =>
           new LongGameError(
             LongGameError.Code.NotFound,
-            'Friendship not found',
+            'Friendship Invite not found',
           ),
       );
-
-    if (![friendship.friendId, friendship.userId].includes(this.#userId)) {
-      throw new LongGameError(
-        LongGameError.Code.Forbidden,
-        'You are not a participant in this friendship',
-      );
-    }
 
     if (friendship.status !== 'pending') {
       throw new LongGameError(
@@ -222,12 +217,33 @@ export class AuthedStore extends RpcTarget {
       );
     }
 
+    if (new Date(friendship.expiresAt) < new Date()) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Friendship invite has expired',
+      );
+    }
+
     const updated = await this.#db
-      .updateTable('Friendship')
+      .updateTable('FriendshipInvitation')
       .set({ status })
       .where('id', '=', friendshipId)
       .returningAll()
       .execute();
+
+    if (status === 'accepted') {
+      const [userId, friendId] = [this.#userId, friendship.inviterId].sort();
+      await this.#db
+        .insertInto('Friendship')
+        .values({
+          id: id('f'),
+          userId,
+          friendId,
+          initiatorId: friendship.inviterId,
+        })
+        .onConflict((b) => b.columns(['userId', 'friendId']).doNothing())
+        .execute();
+    }
 
     return updated;
   }
@@ -260,6 +276,7 @@ export class AuthedStore extends RpcTarget {
         inviterId: this.#userId,
         status: 'accepted',
         role: 'player',
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -342,6 +359,7 @@ export class AuthedStore extends RpcTarget {
         status: 'pending',
         inviterId: this.#userId,
         role: 'player',
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
       })
       .onConflict((b) => b.columns(['gameSessionId', 'userId']).doNothing())
       .returningAll()
@@ -447,6 +465,22 @@ export class PublicStore extends WorkerEntrypoint<Env> {
 
   async getStoreForUser(userId: PrefixedId<'u'>) {
     return new AuthedStore(userId, this.#db);
+  }
+
+  async getPublicFriendInvite(inviteId: PrefixedId<'fi'>) {
+    return this.#db
+      .selectFrom('FriendshipInvitation')
+      .innerJoin('User', 'FriendshipInvitation.inviterId', 'User.id')
+      .where('id', '=', inviteId)
+      .select([
+        'FriendshipInvitation.id',
+        'FriendshipInvitation.status',
+        'FriendshipInvitation.email',
+        'FriendshipInvitation.expiresAt',
+        'User.displayName as inviterDisplayName',
+        'User.id as inviterId',
+      ])
+      .executeTakeFirst();
   }
 
   async testRpc() {
