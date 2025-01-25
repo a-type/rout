@@ -1,5 +1,4 @@
 export * from './fetch';
-export { useViewingRoundIndex } from './GameHistoryContext';
 export * from './hooks';
 export * from './hooks/GameSessionProvider';
 export * from './queryClient';

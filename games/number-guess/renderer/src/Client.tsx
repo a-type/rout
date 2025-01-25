@@ -16,14 +16,15 @@ export function Client() {
 export default Client;
 
 const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const { currentTurn, prepareTurn } = gameSuite;
-  const guess = currentTurn?.guess ?? 0;
+  const { prepareTurn, isViewingCurrentRound, viewingTurn } = gameSuite;
+  const guess = viewingTurn?.guess ?? 0;
 
   return (
     <Box direction="col" p="lg">
       <h1>Guess</h1>
       <Input
         type="number"
+        disabled={!isViewingCurrentRound}
         value={guess}
         onChange={(e) => {
           let num = e.target.valueAsNumber;
@@ -35,8 +36,8 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   );
 });
 
-const LastGuess = hooks.withGame(({ gameSuite: { playerState } }) => {
-  if (!playerState.lastGuessResult) return null;
+const LastGuess = hooks.withGame(({ gameSuite: { finalState } }) => {
+  if (!finalState.lastGuessResult) return null;
 
-  return <Box p="lg">Last guess: {playerState.lastGuessResult}</Box>;
+  return <Box p="lg">Last guess: {finalState.lastGuessResult}</Box>;
 });

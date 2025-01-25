@@ -1,4 +1,5 @@
 import {
+  GameRoundSummary,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
   GameStatus,
@@ -13,12 +14,12 @@ import {
 import {
   GameDefinition,
   GetPlayerState,
+  GetPublicTurnData,
   GetTurnData,
-  Turn,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable } from 'mobx';
-import { getPlayers, getSummary } from './api.js';
+import { getPlayers, getPublicRound, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
 export type PlayerInfo = {
@@ -29,12 +30,6 @@ export type PlayerInfo = {
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
-  @observable accessor confirmedPlayerState: GetPlayerState<TGame>;
-  @observable accessor remoteCurrentTurn: {
-    data: GetTurnData<TGame> | null;
-    roundIndex: number;
-    playerId: PrefixedId<'u'>;
-  };
   @observable accessor localTurnData: GetTurnData<TGame> | null;
   @observable accessor playerStatuses: Record<
     PrefixedId<'u'>,
@@ -43,6 +38,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @observable accessor players: Record<PrefixedId<'u'>, PlayerInfo>;
   @observable accessor chat: GameSessionChatMessage[] = [];
   @observable accessor gameStatus: GameStatus;
+  @observable accessor rounds: GameRoundSummary<
+    GetTurnData<TGame>,
+    GetPublicTurnData<TGame>,
+    GetPlayerState<TGame>
+  >[] = [];
+  @observable accessor viewingRoundIndex = 0;
+  @observable accessor suspended: Promise<void> | null = null;
 
   // static
   gameId: string;
@@ -50,6 +52,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   gameSessionId: PrefixedId<'gs'>;
   gameDefinition: TGame;
   members: { id: PrefixedId<'u'> }[];
+  playerId: PrefixedId<'u'>;
 
   // non-reactive
   #chatNextToken: string | null = null;
@@ -57,7 +60,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   constructor(
     init: {
       playerState: GetPlayerState<TGame>;
-      currentTurn: Turn<GetTurnData<TGame>>;
+      currentRound: GameRoundSummary<
+        GetTurnData<TGame>,
+        GetPublicTurnData<TGame>,
+        GetPlayerState<TGame>
+      >;
       playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
       gameId: string;
       gameVersion: string;
@@ -65,20 +72,23 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       members: { id: PrefixedId<'u'> }[];
       gameDefinition: TGame;
       status: GameStatus;
+      playerId: PrefixedId<'u'>;
     },
     private ctx: {
       socket: GameSocket;
     },
   ) {
-    this.confirmedPlayerState = init.playerState;
-    this.remoteCurrentTurn = init.currentTurn;
+    this.viewingRoundIndex = init.currentRound.roundIndex;
     this.localTurnData = null;
+    this.rounds = new Array(init.currentRound.roundIndex).fill(null);
+    this.rounds[init.currentRound.roundIndex] = init.currentRound;
     this.playerStatuses = init.playerStatuses;
     this.gameId = init.gameId;
     this.gameVersion = init.gameVersion;
     this.gameSessionId = init.id;
     this.members = init.members;
     this.gameStatus = init.status;
+    this.playerId = init.playerId;
     this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
       (acc, member) => {
         acc[member.id] = {
@@ -98,43 +108,95 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.setupLocalTurnStorage();
   }
 
-  @computed get playerState(): GetPlayerState<TGame> {
-    const baseState = this.confirmedPlayerState;
-    const userId = this.userId;
-    const localTurnData = this.localTurnData;
+  @computed get viewingRound() {
+    return this.rounds[this.viewingRoundIndex];
+  }
 
-    if (!localTurnData) return baseState;
+  @computed get latestRoundIndex() {
+    return this.rounds.length - 1;
+  }
 
-    return this.gameDefinition.getProspectivePlayerState({
-      playerState: baseState,
-      prospectiveTurn: {
-        data: localTurnData,
-        playerId: userId,
-      },
-    });
+  @computed get latestRound() {
+    return this.rounds[this.latestRoundIndex];
+  }
+
+  /**
+   * The starting state for the currently viewed round, aka the final
+   * state of the prior round.
+   */
+  @computed get initialState(): GetPlayerState<TGame> {
+    return this.viewingRound.initialPlayerState;
+  }
+
+  /**
+   * The final state for the currently viewed round.  When viewing the current round,
+   * this is the initial state, since no turns have been played. After
+   * your local turn has been played, this reflects the prospective
+   * result of that turn (with no other player turns considered). Once the round
+   * is resolved, it will be updated.
+   */
+  @computed get finalState(): GetPlayerState<TGame> {
+    const { latestRoundIndex, viewingRoundIndex, localTurnData } = this;
+    const viewingRound = this.rounds[viewingRoundIndex];
+    const nextRound = this.rounds[viewingRoundIndex + 1];
+
+    if (viewingRoundIndex === latestRoundIndex) {
+      // for current round, apply prospective turn to initial state
+      if (!localTurnData) return viewingRound.initialPlayerState;
+
+      return this.gameDefinition.getProspectivePlayerState({
+        playerState: viewingRound.initialPlayerState,
+        prospectiveTurn: {
+          data: localTurnData,
+          playerId: this.playerId,
+        },
+      });
+    }
+
+    // since historical rounds need to be loaded, we may not have the next
+    // round available, theoretically. Implementation should prevent this
+    // from actually being rendered, but either way, we should handle it.
+    // Presently, we just return the initial state.
+    if (!nextRound) {
+      return this.initialState;
+    }
+    return nextRound.initialPlayerState;
   }
 
   @computed get currentTurn() {
-    const localTurn = this.localTurnData;
-    const remoteTurn = this.remoteCurrentTurn.data;
+    const { localTurnData: localTurn, latestRound } = this;
+    const remoteTurn = latestRound.yourTurnData;
 
     if (localTurn) return localTurn;
     if (remoteTurn) return remoteTurn;
     return null;
   }
 
-  @computed get roundIndex() {
-    return this.remoteCurrentTurn.roundIndex;
+  /**
+   * If the viewed round is the active round, this will
+   * include a locally drafted turn. Otherwise, it will
+   * show your turn from the historical round, if you had one.
+   */
+  @computed get viewingTurn(): GetTurnData<TGame> | null {
+    const { viewingRound, localTurnData, latestRound } = this;
+
+    if (viewingRound.roundIndex === latestRound.roundIndex) {
+      return localTurnData ?? viewingRound.yourTurnData;
+    }
+    return viewingRound.yourTurnData;
+  }
+
+  @computed get isViewingCurrentRound() {
+    return this.viewingRoundIndex === this.latestRoundIndex;
   }
 
   @computed get turnWasSubmitted() {
-    return !!this.remoteCurrentTurn.data;
+    return !!this.latestRound.yourTurnData;
   }
 
   @computed get turnError() {
-    const baseState = this.confirmedPlayerState;
-    const roundIndex = this.remoteCurrentTurn.roundIndex;
-    const userId = this.userId;
+    const baseState = this.latestRound.initialPlayerState;
+    const roundIndex = this.latestRound.roundIndex;
     if (!this.localTurnData) return null;
     return (
       this.gameDefinition.validateTurn({
@@ -142,15 +204,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         playerState: baseState,
         roundIndex,
         turn: {
-          playerId: userId,
+          playerId: this.playerId,
           data: this.localTurnData,
         },
       }) || null
     );
-  }
-
-  @computed get userId() {
-    return this.remoteCurrentTurn.playerId;
   }
 
   @computed get combinedLog() {
@@ -191,12 +249,16 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     if (error) {
       return error;
     }
+    const submittingToRound = this.latestRoundIndex;
     const response = await this.ctx.socket.request({
       type: 'submitTurn',
-      turn: localTurnData,
+      turnData: localTurnData,
     });
     if (response.type === 'error') {
       return response.message;
+    } else {
+      // locally update the submitted round with our turn
+      this.rounds[submittingToRound].yourTurnData = localTurnData;
     }
   };
 
@@ -210,7 +272,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.addChat({
       id: tempId,
       createdAt: Date.now(),
-      authorId: this.userId,
+      authorId: this.playerId,
       ...message,
     });
     await this.ctx.socket.request({
@@ -227,6 +289,28 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         nextToken: this.#chatNextToken,
       });
     }
+  };
+
+  @action loadRound = async (roundIndex: number) => {
+    if (roundIndex < 0 || roundIndex > this.latestRoundIndex) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Cannot get data for round ${roundIndex}. Current round is ${this.latestRoundIndex}`,
+      );
+    }
+
+    const existing = this.rounds[roundIndex];
+    if (existing) {
+      this.viewingRoundIndex = roundIndex;
+      return;
+    }
+
+    this.suspended = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
+      action((res) => {
+        this.rounds[roundIndex] = res;
+        this.viewingRoundIndex = roundIndex;
+      }),
+    );
   };
 
   private connectSocket = (socket: GameSocket) => {
@@ -265,13 +349,16 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   };
 
   @action private onRoundChange = (msg: ServerRoundChangeMessage) => {
-    if (msg.currentRoundIndex !== this.remoteCurrentTurn.roundIndex) {
-      this.remoteCurrentTurn = {
-        data: null,
-        roundIndex: msg.currentRoundIndex,
-        playerId: this.remoteCurrentTurn.playerId,
-      };
-      this.confirmedPlayerState = msg.playerState as any;
+    // always best to update our data regardless; server knows best.
+    this.rounds[msg.completedRound.roundIndex] = msg.completedRound;
+    this.rounds[msg.newRound.roundIndex] = msg.newRound;
+    // reset turn data for new round
+    this.localTurnData = null;
+
+    // update current state if the round has advanced and we were viewing
+    // the current round
+    if (this.viewingRoundIndex === msg.completedRound.roundIndex) {
+      this.viewingRoundIndex = msg.newRound.roundIndex;
     }
   };
 
@@ -288,9 +375,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     );
   };
 
-  private setupLocalTurnStorage = () => {
-    const userId = this.userId;
-    const key = `game-session-${this.gameSessionId}-local-turn-${userId}`;
+  @action private setupLocalTurnStorage = () => {
+    const key = `game-session-${this.gameSessionId}-local-turn-${this.playerId}`;
     const localTurn = localStorage.getItem(key);
     if (localTurn) {
       this.localTurnData = JSON.parse(localTurn);
@@ -323,7 +409,8 @@ export async function createGameSessionSuite<TGame extends GameDefinition>(
       ...init,
       // some of the typings break - basically ones which have generics/any in them
       playerState: init.playerState as any,
-      currentTurn: init.currentTurn as any,
+      currentRound: init.currentRound as any,
+      playerId: init.playerId,
       gameDefinition,
     },
     { socket },

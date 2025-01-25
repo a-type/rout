@@ -1,83 +1,76 @@
 import { Box, Button, Icon, Select } from '@a-type/ui';
-import {
-  useGameSuite,
-  useViewingRoundIndex,
-  withGame,
-} from '@long-game/game-client';
+import { useGameSuite, withGame } from '@long-game/game-client';
+import { useTransition } from 'react';
 
 export interface RoundHistoryControlProps {}
 
 export const RoundHistoryControl = withGame(
   function RoundHistoryControl({}: RoundHistoryControlProps) {
-    const [roundIndex, setRoundIndex] = useViewingRoundIndex();
     const suite = useGameSuite();
 
-    const latestRoundIndex = suite.roundIndex;
-    const lastDisplayedRound = latestRoundIndex - 2;
+    const roundIndex = suite.viewingRoundIndex;
+    const latestRoundIndex = suite.latestRoundIndex;
+    const isCurrent = suite.isViewingCurrentRound;
+
+    const [transitioning, startTransition] = useTransition();
+
+    const loadRound = (index: number) => {
+      startTransition(() => {
+        suite.loadRound(index);
+      });
+    };
 
     return (
       <Box align="center center">
-        {(roundIndex === 'current' || roundIndex > 0) && (
-          <Button
-            size="icon-small"
-            onClick={() => {
-              setRoundIndex(
-                roundIndex === 'current' ? lastDisplayedRound : roundIndex - 1,
-              );
-            }}
-          >
-            <Icon name="arrowLeft" />
-          </Button>
-        )}
+        <Button
+          size="icon-small"
+          onClick={() => {
+            loadRound(roundIndex - 1);
+          }}
+          disabled={roundIndex === 0}
+        >
+          <Icon name="arrowLeft" />
+        </Button>
+
         <Select
-          value={
-            roundIndex === latestRoundIndex ? 'current' : roundIndex.toString()
-          }
+          value={roundIndex.toString()}
           onValueChange={(v) => {
-            if (v === 'current') {
-              setRoundIndex('current');
-            } else {
-              setRoundIndex(parseInt(v, 10));
-            }
+            const asInt = parseInt(v, 10);
+            loadRound(asInt);
           }}
         >
           <Select.Trigger size="small" />
           <Select.Content>
             {/* Note: specifically skipping latest index, which === current */}
-            {Array.from({ length: latestRoundIndex - 1 }).map((_, i) => (
+            {Array.from({ length: latestRoundIndex + 1 }).map((_, i) => (
               <Select.Item key={i} value={i.toString()}>
                 Round {i + 1}
               </Select.Item>
             ))}
-            <Select.Item value="current">Round {latestRoundIndex}</Select.Item>
           </Select.Content>
         </Select>
         <Button
           size="icon-small"
           onClick={() => {
-            if (roundIndex === 'current') {
+            if (isCurrent) {
               return;
             }
-            setRoundIndex(
-              roundIndex === lastDisplayedRound ? 'current' : roundIndex + 1,
-            );
+            loadRound(roundIndex + 1);
           }}
-          disabled={
-            roundIndex === lastDisplayedRound || roundIndex === 'current'
-          }
+          disabled={isCurrent}
         >
           <Icon name="arrowRight" />
         </Button>
-        {roundIndex !== 'current' && (
-          <Button
-            size="icon-small"
-            onClick={() => {
-              setRoundIndex('current');
-            }}
-          >
-            <Icon name="arrowRight" />
-          </Button>
-        )}
+        <Button
+          size="icon-small"
+          onClick={() => {
+            loadRound(latestRoundIndex);
+          }}
+          disabled={isCurrent}
+          className={isCurrent ? 'hidden' : ''}
+        >
+          <Icon name="arrowRight" />
+        </Button>
       </Box>
     );
   },

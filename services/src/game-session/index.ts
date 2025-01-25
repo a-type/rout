@@ -6,6 +6,7 @@ import {
   ClientSendChatMessage,
   ClientSubmitTurnMessage,
   GameRound,
+  GameRoundSummary,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
   GameStatus,
@@ -42,7 +43,7 @@ export type GameSessionBaseData = {
   gameVersion: string;
 };
 
-export type GameSessionTurn = Turn<any>;
+export type GameSessionTurn = Turn<{}>;
 
 /**
  * These member stubs connect to User ids in the core database,
@@ -71,10 +72,6 @@ export class GameSessionState extends DurableObject<Env> {
   #sessionData: GameSessionBaseData | null = null;
   #turns: GameSessionTurn[] = [];
   #chat: GameSessionChatMessage[] = [];
-  /**
-   * Precomputed global states per-round
-   */
-  #globalStateCache: unknown[] = [];
   #miniApp;
   #socketInfo = new Map<WebSocket, SocketSessionInfo>();
   // map of socket id -> messages waiting to be sent until socket is confirmed
@@ -161,8 +158,6 @@ export class GameSessionState extends DurableObject<Env> {
             type: 'playerStatusChange',
             playerId: userId,
             playerStatus: {
-              latestPlayedRoundIndex:
-                this.getPlayerLatestPlayedRoundIndex(userId),
               online: true,
             },
           });
@@ -339,7 +334,7 @@ export class GameSessionState extends DurableObject<Env> {
   }
 
   /**
-   * Computes turns into grouped rounds, optionally up to (not including)
+   * Computes turns into grouped rounds, optionally up to (and including)
    * the specified round
    */
   getRounds({
@@ -389,9 +384,7 @@ export class GameSessionState extends DurableObject<Env> {
     }
     const publicRoundIndex = this.getPublicRoundIndex();
     const resolvedRoundIndex = roundIndex ?? publicRoundIndex;
-    console.log('getting player state for ', playerId, resolvedRoundIndex);
     const globalState = this.getGlobalState(roundIndex);
-    console.log('global state', globalState);
     return this.gameDefinition.getPlayerState({
       globalState,
       playerId,
@@ -423,6 +416,43 @@ export class GameSessionState extends DurableObject<Env> {
     });
   }
 
+  getPublicRound(
+    playerId: PrefixedId<'u'>,
+    roundIndex: number,
+  ): GameRoundSummary<{}, {}, {}> {
+    const currentRoundIndex = this.getCurrentRoundIndex();
+    if (roundIndex > currentRoundIndex) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot access current or future round states. Play your turn to see what comes next!',
+      );
+    }
+    const round = this.getRound(roundIndex);
+    const globalState = this.getGlobalState(roundIndex);
+    const playerState = this.#internalGetPlayerState(playerId, roundIndex - 1);
+    return {
+      ...round,
+      initialPlayerState: playerState as {},
+      yourTurnData:
+        round.turns.find((t) => t.playerId === playerId)?.data ?? null,
+      turns: round.turns.map((turn) => {
+        // do not show turn data for the current round, only show which players have
+        // played a turn.
+        if (roundIndex === currentRoundIndex) {
+          return {
+            playerId: turn.playerId,
+            data: null,
+          };
+        }
+        return this.gameDefinition.getPublicTurn({
+          turn,
+          globalState,
+          viewerId: playerId,
+        });
+      }),
+    };
+  }
+
   /**
    * Get the global state for a particular round. Defaults to current round.
    */
@@ -435,11 +465,6 @@ export class GameSessionState extends DurableObject<Env> {
       random,
       members: this.#sessionData.members,
     });
-    // check cache first. we never cache the current round (since it's mutable)
-    // so we skip if no roundIndex is provided
-    if (roundIndex !== undefined && this.#globalStateCache[roundIndex]) {
-      return this.#globalStateCache[roundIndex];
-    }
     const rounds = this.getRounds({ upTo: roundIndex });
     console.log('global state rounds', rounds);
     const computed = this.gameDefinition.getState({
@@ -448,9 +473,6 @@ export class GameSessionState extends DurableObject<Env> {
       random,
       members: this.#sessionData.members,
     });
-    if (roundIndex) {
-      this.#globalStateCache[roundIndex] = computed;
-    }
     return computed;
   }
 
@@ -484,7 +506,6 @@ export class GameSessionState extends DurableObject<Env> {
       Record<string, GameSessionPlayerStatus>
     >((acc, member) => {
       acc[member.id] = {
-        latestPlayedRoundIndex: this.getPlayerLatestPlayedRoundIndex(member.id),
         online: this.#socketInfo.values().some((v) => v.userId === member.id),
       };
       return acc;
@@ -518,6 +539,14 @@ export class GameSessionState extends DurableObject<Env> {
         'You have already submitted your turn for this round',
       );
     }
+
+    if (this.getStatus().status !== 'active') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Game is ${this.getStatus().status}, cannot play a turn`,
+      );
+    }
+
     const validationError = this.gameDefinition.validateTurn({
       members: this.#sessionData.members,
       turn: {
@@ -540,11 +569,11 @@ export class GameSessionState extends DurableObject<Env> {
     });
     this.ctx.storage.put('turns', this.#turns);
     this.#sendSocketMessage({
-      type: 'playerStatusChange',
-      playerId,
-      playerStatus: {
-        latestPlayedRoundIndex: currentRoundIndex,
-        online: true,
+      type: 'turnPlayed',
+      turn: {
+        playerId,
+        // turn data for current round is not public.
+        data: null,
       },
     });
 
@@ -558,10 +587,10 @@ export class GameSessionState extends DurableObject<Env> {
           type: 'statusChange',
           status,
         });
-      } else {
-        // broadcast the new round to all players to continue the game
-        this.#broadcastRoundChange(newRoundIndex);
       }
+      // broadcast the new round to all players even if game is over. this will
+      // allow players to see the final state of the game while in-session.
+      this.#broadcastRoundChange(newRoundIndex);
     }
   }
 
@@ -571,8 +600,8 @@ export class GameSessionState extends DurableObject<Env> {
       this.#sendSocketMessage(
         {
           type: 'roundChange',
-          playerState: this.getPlayerState(member.id, roundIndex - 1),
-          currentRoundIndex: roundIndex,
+          completedRound: this.getPublicRound(member.id, roundIndex - 1),
+          newRound: this.getPublicRound(member.id, roundIndex),
         },
         { to: [member.id] },
       );
@@ -591,7 +620,6 @@ export class GameSessionState extends DurableObject<Env> {
           turn.roundIndex === currentRoundIndex && turn.playerId === playerId,
       ) ?? {
         data: null,
-        createdAt: new Date().toUTCString(),
         playerId,
         roundIndex: currentRoundIndex,
       }
@@ -637,12 +665,13 @@ export class GameSessionState extends DurableObject<Env> {
         'Game session has not been initialized',
       );
     }
+    const currentRoundIndex = this.getCurrentRoundIndex();
     return {
       ...this.getInfo(),
-      currentRoundIndex: this.getCurrentRoundIndex(),
+      playerId: userId,
       members: this.#sessionData.members,
       playerState: this.getPlayerState(userId) as {},
-      currentTurn: this.getCurrentTurn(userId),
+      currentRound: this.getPublicRound(userId, currentRoundIndex),
       playerStatuses: this.getPlayerStatuses(),
     };
   }
@@ -773,8 +802,8 @@ export class GameSessionState extends DurableObject<Env> {
     ws: WebSocket,
     info: SocketSessionInfo,
   ) => {
-    console.log(`Received turn from ${info.userId}`, msg.turn);
-    this.addTurn(info.userId, msg.turn);
+    console.log(`Received turn from ${info.userId}`, msg.turnData);
+    this.addTurn(info.userId, msg.turnData);
   };
 
   #onClientRequestChat = async (
@@ -817,9 +846,6 @@ export class GameSessionState extends DurableObject<Env> {
         type: 'playerStatusChange',
         playerId: info.userId,
         playerStatus: {
-          latestPlayedRoundIndex: this.getPlayerLatestPlayedRoundIndex(
-            info.userId,
-          ),
           online: false,
         },
       });

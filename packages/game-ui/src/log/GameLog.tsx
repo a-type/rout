@@ -128,7 +128,7 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
   const log = gameSuite.combinedLog;
   const latestMessage = log[log.length - 1];
   const players = gameSuite.players;
-  const selfId = gameSuite.userId;
+  const selfId = gameSuite.playerId;
 
   if (!latestMessage) {
     const me = gameSuite.getPlayer(selfId);
@@ -207,15 +207,15 @@ export const BasicGameLog = withGame<{ className?: string }>(
                 }, 50);
               }
             }}
-            className="w-full"
+            className="w-full font-normal"
           >
             <GameLogCollapsed />
           </Button>
         </CollapsibleSimple>
-        <Collapsible open={open} className="relative w-full md:h-full">
-          <CollapsibleContent className="md:h-full [&[data-state='closed']]:opacity-0">
+        <Collapsible open={open} className="relative w-full lg:h-full">
+          <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
             <Button
-              className="absolute top-0 right-0 md:hidden"
+              className="absolute top-0 right-0 lg:hidden"
               size="icon-small"
               onClick={() => {
                 localState.open = false;
@@ -223,7 +223,7 @@ export const BasicGameLog = withGame<{ className?: string }>(
             >
               <Icon name="x" />
             </Button>
-            <Box p="sm" align="stretch stretch" className="w-full md:h-full">
+            <Box p="sm" align="stretch stretch" className="w-full lg:h-full">
               <GameLogFull />
             </Box>
           </CollapsibleContent>

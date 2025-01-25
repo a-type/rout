@@ -1,13 +1,4 @@
-import { create } from '@long-game/game-client/client';
-import { gameDefinition } from '@long-game/game-{{name}}-definition/v1';
+import { typedHooks } from '@long-game/game-client';
+import { gameDefinition } from '@long-game/game-{{todo}}-definition/v1';
 
-export const {
-  useCurrentTurn,
-  usePriorRounds,
-  usePlayerState,
-  useChat,
-  useCombinedLog,
-  usePlayer,
-  usePlayerId,
-  usePlayers,
-} = create(gameDefinition);
+export const hooks = typedHooks<typeof gameDefinition>();

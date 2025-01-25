@@ -1,23 +1,26 @@
 import { Avatar, AvatarList, AvatarListItemRoot, clsx } from '@a-type/ui';
 import { colors } from '@long-game/common';
-import { useGameSuite, withGame } from '@long-game/game-client';
+import { withGame } from '@long-game/game-client';
 
 export interface PlayerStatusesProps {}
 
-export const PlayerStatuses = withGame(
-  function PlayerStatuses({}: PlayerStatusesProps) {
-    const gameSuite = useGameSuite();
+export const PlayerStatuses = withGame<PlayerStatusesProps>(
+  function PlayerStatuses({ gameSuite }) {
+    const { viewingRound } = gameSuite;
 
     const memberStatusList = gameSuite.members.map((member) => {
       return {
         player: gameSuite.players[member.id],
         status: gameSuite.playerStatuses[member.id],
+        hasPlayed: viewingRound?.turns.some(
+          (turn) => turn.playerId === member.id,
+        ),
       };
     });
 
     return (
       <AvatarList count={memberStatusList.length}>
-        {memberStatusList.map(({ status, player }, index) => (
+        {memberStatusList.map(({ status, player, hasPlayed }, index) => (
           <AvatarListItemRoot index={index} key={player.id}>
             <Avatar
               name={player.displayName}
@@ -28,9 +31,7 @@ export const PlayerStatuses = withGame(
               }}
               className={clsx(
                 'border border-solid border-2px',
-                status.latestPlayedRoundIndex === gameSuite.roundIndex
-                  ? 'border-accent'
-                  : 'border-gray-5',
+                hasPlayed ? 'border-accent' : 'border-gray-5',
               )}
             />
           </AvatarListItemRoot>

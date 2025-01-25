@@ -2,7 +2,6 @@ import { zValidator } from '@hono/zod-validator';
 import {
   assertPrefixedId,
   id,
-  isPrefixedId,
   LongGameError,
   PrefixedId,
   wrapRpcData,
@@ -90,23 +89,6 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
     const body = wrapRpcData(info);
     return ctx.json(body);
   })
-  .get('/playerState', async (ctx) => {
-    const userId = ctx.get('session').userId;
-    const state = ctx.get('gameSessionState');
-    // @ts-ignore
-    const playerState = (await state.getPlayerState(userId)) as any;
-    return ctx.json(playerState);
-  })
-  .get('/currentTurn', async (ctx) => {
-    const userId = ctx.get('session').userId;
-    const state = ctx.get('gameSessionState');
-    const currentTurn = (await state.getCurrentTurn(userId)) as {
-      data: {};
-      roundIndex: number;
-      playerId: string;
-    };
-    return ctx.json(currentTurn);
-  })
   .get('/members', async (ctx) => {
     const userStore = ctx.get('userStore');
     const members = await userStore.getGameSessionMembers(
@@ -145,26 +127,20 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
       session: summary,
     });
   })
-  .get('/chat', async (ctx) => {
-    const userId = ctx.get('session').userId;
-    const state = ctx.get('gameSessionState');
-    const chat = await state.getChatForPlayer(userId);
-    return ctx.json(wrapRpcData(chat));
-  })
   .get(
-    '/rounds',
+    '/rounds/:index',
     zValidator(
-      'query',
+      'param',
       z.object({
-        upTo: z.number().optional(),
+        index: z.coerce.number().int(),
       }),
     ),
     async (ctx) => {
       const state = ctx.get('gameSessionState');
-      const rounds = await state.getPublicRounds(ctx.get('session').userId, {
-        upTo: ctx.req.valid('query').upTo,
-      });
-      return ctx.json(wrapRpcData(rounds));
+      const roundIndex = ctx.req.valid('param').index;
+      const userId = ctx.get('session').userId;
+      const round = await state.getPublicRound(userId, roundIndex);
+      return ctx.json(wrapRpcData(round));
     },
   )
   .post('/start', async (ctx) => {
@@ -191,43 +167,6 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
       state.updateGame(gameId, getLatestVersion(games[gameId]).version);
       const summary = await state.getInfo();
       return ctx.json({ session: summary });
-    },
-  )
-  .put(
-    '/turn',
-    zValidator(
-      'json',
-      z.object({
-        turn: z.object({}),
-      }),
-    ),
-    async (ctx) => {
-      const { turn } = ctx.req.valid('json');
-      const state = ctx.get('gameSessionState');
-      state.addTurn(ctx.get('session').userId, turn);
-      return ctx.json({ success: true });
-    },
-  )
-  .post(
-    '/chat',
-    zValidator(
-      'json',
-      z.object({
-        content: z.string(),
-        recipientIds: z.array(z.custom((v) => isPrefixedId(v, 'u'))).optional(),
-      }),
-    ),
-    async (ctx) => {
-      const { content, recipientIds } = ctx.req.valid('json');
-      const state = ctx.get('gameSessionState');
-      state.addChatMessage({
-        id: id('cm'),
-        authorId: ctx.get('session').userId,
-        content,
-        createdAt: Date.now(),
-        recipientIds: recipientIds as PrefixedId<'u'>[],
-      });
-      return ctx.json({ success: true });
     },
   )
   .get('/socketToken', async (ctx) => {

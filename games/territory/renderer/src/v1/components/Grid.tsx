@@ -19,10 +19,13 @@ export interface GridProps {
 
 const CELL_SIZE = 16;
 
-export const Grid = withGame(function Grid({ value }: GridProps) {
+export const Grid = hooks.withGame<GridProps>(function Grid({
+  value,
+  gameSuite,
+}) {
   const territories = getAllTerritories(value);
   const allCells = getFlatCoordinates(value);
-  const { userId: playerId } = hooks.useGameSuite();
+  const { playerId } = gameSuite;
 
   const gridSize = value.length;
 

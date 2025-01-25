@@ -1,5 +1,6 @@
 import { GameSessionChatInit, GameSessionChatMessage } from './chat';
 import { PrefixedId } from './ids';
+import { GameRoundSummary } from './rounds';
 import { GameSessionPlayerStatus, GameStatus } from './status';
 
 export interface BaseServerMessage {
@@ -20,8 +21,19 @@ export interface ServerChatMessage extends BaseServerMessage {
 
 export interface ServerRoundChangeMessage extends BaseServerMessage {
   type: 'roundChange';
-  playerState: unknown;
-  currentRoundIndex: number;
+  newRound: GameRoundSummary<any, any, any>;
+  completedRound: GameRoundSummary<any, any, any>;
+}
+
+export interface ServerTurnPlayedMessage extends BaseServerMessage {
+  type: 'turnPlayed';
+  /**
+   * Note: turn data for the current round is not public, which is
+   * basically how this message will be used. But 'data' is possibly
+   * a placeholder for future use if real-time turn information is
+   * ever supported? idk.
+   */
+  turn: { playerId: string; data: unknown };
 }
 
 export interface ServerStatusChangeMessage extends BaseServerMessage {
@@ -45,7 +57,8 @@ export type ServerMessage =
   | ServerAckMessage
   | ServerRoundChangeMessage
   | ServerErrorMessage
-  | ServerStatusChangeMessage;
+  | ServerStatusChangeMessage
+  | ServerTurnPlayedMessage;
 
 export type ServerMessageType = ServerMessage['type'];
 export type ServerMessageByType<T extends ServerMessageType> = Extract<
@@ -68,7 +81,7 @@ export interface ClientSendChatMessage extends BaseClientMessage {
 
 export interface ClientSubmitTurnMessage extends BaseClientMessage {
   type: 'submitTurn';
-  turn: { [K: string]: unknown };
+  turnData: { [K: string]: unknown };
 }
 
 export interface ClientRequestChatMessage extends BaseClientMessage {

@@ -5,6 +5,7 @@ import {
   ComponentType,
   createContext,
   ReactNode,
+  Suspense,
   use,
   useContext,
   useRef,
@@ -38,6 +39,12 @@ export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
   const ObservedComp = observer(Component as any);
   return function WithGame(props: T) {
     const gameSuite = useGameSuite<G>();
+    // if the suite is loading some state, suspend, so that the wrapped component
+    // always has loaded data when rendered.
+    const loadingPromise = gameSuite.suspended;
+    if (loadingPromise) {
+      use(loadingPromise);
+    }
     return <ObservedComp {...props} gameSuite={gameSuite} />;
   };
 }
@@ -60,9 +67,12 @@ export function GameSessionProvider({
     }
   }
 
+  // for debugging
+  (window as any).gameSuite = cached?.current;
+
   return (
     <GameSessionContext.Provider value={cached?.current}>
-      {children}
+      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
     </GameSessionContext.Provider>
   );
 }
@@ -90,10 +100,6 @@ export function typedHooks<TGame extends GameDefinition>() {
   function useGameSuiteTyped() {
     return useGameSuite<TGame>();
   }
-  function usePlayerState() {
-    const suite = useGameSuite<TGame>();
-    return suite.playerState;
-  }
   function withGameTyped<T = unknown>(
     Comp: ComponentType<T & { gameSuite: GameSessionSuite<TGame> }>,
   ) {
@@ -101,7 +107,6 @@ export function typedHooks<TGame extends GameDefinition>() {
   }
   return {
     useGameSuite: useGameSuiteTyped,
-    usePlayerState,
     withGame: withGameTyped,
   };
 }

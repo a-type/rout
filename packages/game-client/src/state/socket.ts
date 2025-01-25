@@ -15,10 +15,9 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     /^http/,
     'ws',
   );
-  // we have to get a token first
-  const token = await getSocketToken(gameSessionId);
   const websocket = new ReconnectingWebsocket(
-    `${socketOrigin}/${gameSessionId}/socket?token=${token}`,
+    `${socketOrigin}/${gameSessionId}/socket`,
+    gameSessionId,
   );
   const unsubRootMessages = websocket.onMessage((message) => {
     console.debug('Received message', message);
@@ -101,17 +100,17 @@ async function getSocketToken(gameSessionId: string) {
 }
 
 class ReconnectingWebsocket {
-  private websocket: WebSocket = null!;
+  private websocket: WebSocket | null = null;
   private messageEvents = new EventTarget();
   private errorEvents = new EventTarget();
   private backlog: string[] = [];
 
-  constructor(private url: string) {
+  constructor(private url: string, private gameSessionId: string) {
     this.reconnect();
   }
 
   send(message: string) {
-    if (this.websocket.readyState === WebSocket.OPEN) {
+    if (this.websocket?.readyState === WebSocket.OPEN) {
       this.websocket.send(message);
     } else {
       this.backlog.push(message);
@@ -139,19 +138,22 @@ class ReconnectingWebsocket {
   }
 
   close() {
-    this.websocket.close();
+    this.websocket?.close();
   }
 
-  reconnect() {
-    this.websocket = new WebSocket(this.url);
-    this.websocket.addEventListener('open', () => {
+  async reconnect() {
+    const token = await getSocketToken(this.gameSessionId);
+    const url = new URL(this.url);
+    url.searchParams.set('token', token);
+    const websocket = (this.websocket = new WebSocket(url));
+    websocket.addEventListener('open', () => {
       console.log('Socket connected');
       if (this.backlog.length) {
-        this.backlog.forEach((msg) => this.websocket.send(msg));
+        this.backlog.forEach((msg) => websocket.send(msg));
         this.backlog = [];
       }
     });
-    this.websocket.addEventListener('close', (ev) => {
+    websocket.addEventListener('close', (ev) => {
       if (ev.code === 1000) {
         return;
       }
@@ -160,14 +162,14 @@ class ReconnectingWebsocket {
         this.reconnect();
       }, 3000);
     });
-    this.websocket.addEventListener('message', (event) => {
+    websocket.addEventListener('message', (event) => {
       this.messageEvents.dispatchEvent(
         new MessageEvent('message', {
           data: event.data,
         }),
       );
     });
-    this.websocket.addEventListener('error', (event) => {
+    websocket.addEventListener('error', (event) => {
       const err =
         event instanceof ErrorEvent ? event.error : new Error('Unknown error');
       this.errorEvents.dispatchEvent(

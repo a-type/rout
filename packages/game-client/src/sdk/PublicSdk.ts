@@ -72,7 +72,7 @@ export class PublicSdk extends BaseSdk {
         json: { response: input.response },
         param: { id: input.id },
       }),
-      invalidate: [['getGameSessionInvitations', 'getGameSessionPregame']],
+      invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
     },
   );
   sendGameSessionInvitation = this.sdkMutation(
