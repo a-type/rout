@@ -18,7 +18,7 @@ import {
   GetTurnData,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
-import { action, autorun, computed, observable } from 'mobx';
+import { action, autorun, computed, observable, runInAction } from 'mobx';
 import { getPlayers, getPublicRound, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
@@ -136,18 +136,18 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    * is resolved, it will be updated.
    */
   @computed get finalState(): GetPlayerState<TGame> {
-    const { latestRoundIndex, viewingRoundIndex, localTurnData } = this;
+    const { latestRoundIndex, viewingRoundIndex, currentTurn } = this;
     const viewingRound = this.rounds[viewingRoundIndex];
     const nextRound = this.rounds[viewingRoundIndex + 1];
 
     if (viewingRoundIndex === latestRoundIndex) {
       // for current round, apply prospective turn to initial state
-      if (!localTurnData) return viewingRound.initialPlayerState;
+      if (!currentTurn) return viewingRound.initialPlayerState;
 
       return this.gameDefinition.getProspectivePlayerState({
         playerState: viewingRound.initialPlayerState,
         prospectiveTurn: {
-          data: localTurnData,
+          data: currentTurn,
           playerId: this.playerId,
         },
       });
@@ -192,6 +192,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @computed get turnWasSubmitted() {
     return !!this.latestRound.yourTurnData;
+  }
+
+  /**
+   * Even if the player submitted a turn for this round,
+   * this will tell you if they've made changes since and
+   * need to resubmit to the server.
+   */
+  @computed get canSubmitTurn() {
+    return !!this.localTurnData;
   }
 
   @computed get turnError() {
@@ -257,8 +266,12 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     if (response.type === 'error') {
       return response.message;
     } else {
-      // locally update the submitted round with our turn
-      this.rounds[submittingToRound].yourTurnData = localTurnData;
+      // locally update the submitted round with our turn and
+      // reset local turn data
+      runInAction(() => {
+        this.rounds[submittingToRound].yourTurnData = localTurnData;
+        this.localTurnData = null;
+      });
     }
   };
 

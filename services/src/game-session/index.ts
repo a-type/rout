@@ -532,14 +532,6 @@ export class GameSessionState extends DurableObject<Env> {
       );
     }
 
-    const currentTurn = this.getCurrentTurn(playerId);
-    if (currentTurn.data) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'You have already submitted your turn for this round',
-      );
-    }
-
     if (this.getStatus().status !== 'active') {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -561,13 +553,26 @@ export class GameSessionState extends DurableObject<Env> {
     }
     const currentRoundIndex = this.getCurrentRoundIndex();
     console.log(`Adding turn for ${playerId} in round ${currentRoundIndex}`);
-    this.#turns.push({
+
+    const newTurn = {
       roundIndex: currentRoundIndex,
       createdAt: new Date().toUTCString(),
       data: turn,
       playerId,
-    });
+    };
+
+    // replace existing user turn if they have one this round. we let
+    // users update their turns until the round is over.
+    const existingTurnIndex = this.#turns.findIndex(
+      (t) => t.roundIndex === currentRoundIndex && t.playerId === playerId,
+    );
+    if (existingTurnIndex !== -1) {
+      this.#turns[existingTurnIndex] = newTurn;
+    } else {
+      this.#turns.push(newTurn);
+    }
     this.ctx.storage.put('turns', this.#turns);
+
     this.#sendSocketMessage({
       type: 'turnPlayed',
       turn: {
@@ -636,10 +641,14 @@ export class GameSessionState extends DurableObject<Env> {
       };
     }
 
+    // status is for publicly available data, not internal data
+    const publicRoundIndex = this.getPublicRoundIndex();
+    // otherwise we'd end the game as soon as one player played a turn
+    // that met conditions. this way we wait for the round to complete.
     return this.gameDefinition.getStatus({
       globalState: this.getGlobalState(),
       members: this.#sessionData.members,
-      rounds: this.getRounds({ upTo: 'current' }),
+      rounds: this.getRounds({ upTo: publicRoundIndex }),
     });
   }
 
