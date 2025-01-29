@@ -1,7 +1,8 @@
-import 'virtual:uno.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import 'virtual:uno.css';
 import { App } from './App.js';
+import './main.css';
 
 function main() {
   const root = createRoot(document.getElementById('root')!);

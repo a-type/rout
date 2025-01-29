@@ -7,7 +7,7 @@ export function MembershipsList() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1>Memberships</h1>
+      <h1>Games</h1>
       {memberships?.map((i) => (
         <Box key={i.gameSessionId} direction="row" justify="between" asChild>
           <Link to={`/session/${i.gameSessionId}`}>

@@ -25,8 +25,12 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
+    "@react-three/drei": "^9.121.4",
+    "@react-three/fiber": "catalog:",
+    "@types/three": "^0.172.0",
     "@verdant-web/react-router": "catalog:",
-    "valtio": "^2.0.0"
+    "three": "^0.172.0",
+    "valtio": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

@@ -26,6 +26,10 @@ const routes = makeRoutes([
     component: lazy(() => import('./ResetPasswordPage.jsx')),
   },
   {
+    path: '/friends',
+    component: lazy(() => import('./FriendsPage.jsx')),
+  },
+  {
     path: '/session/:sessionId',
     component: GameSessionPage,
   },
