@@ -42,11 +42,6 @@ export default defineConfig(({ mode }) => ({
         target: 'http://localhost:3101',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/public-api/, ''),
-      },
-      '/game-session-api': {
-        target: 'http://localhost:3102',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/game-session-api/, ''),
         ws: true,
       },
     },

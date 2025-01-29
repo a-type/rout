@@ -5,17 +5,16 @@ import {
   GetPublicTurnData,
   GetTurnData,
 } from '@long-game/game-definition';
-import { hcWithType as gameSessionHc } from '@long-game/services/game-session';
+import { hcWithType as apiHc } from '@long-game/services/public-api';
 import type { InferResponseType } from 'hono/client';
 import { fetch } from '../fetch';
 
-export const gameSessionRpc = gameSessionHc(
-  import.meta.env.VITE_GAME_SESSION_API_ORIGIN,
-  { fetch },
-);
+export const apiRpc = apiHc(import.meta.env.VITE_PUBLIC_API_ORIGIN, {
+  fetch,
+});
 
 export async function getSummary(gameSessionId: PrefixedId<'gs'>) {
-  const initRes = await gameSessionRpc[':id'].$get({
+  const initRes = await apiRpc.gameSessions[':id'].$get({
     param: { id: gameSessionId },
   });
   if (!initRes.ok) {
@@ -29,7 +28,7 @@ export async function getSummary(gameSessionId: PrefixedId<'gs'>) {
 }
 
 export async function getPlayers(gameSessionId: PrefixedId<'gs'>) {
-  const res = await gameSessionRpc[':id'].members.$get({
+  const res = await apiRpc.gameSessions[':id'].members.$get({
     param: { id: gameSessionId },
   });
   if (!res.ok) {
@@ -43,13 +42,13 @@ export async function getPlayers(gameSessionId: PrefixedId<'gs'>) {
 
 // unfortunately need to fix the type a bit here
 export type PublicRoundResponse = InferResponseType<
-  (typeof gameSessionRpc)[':id']['rounds'][':index']['$get']
+  (typeof apiRpc)['gameSessions'][':id']['rounds'][':index']['$get']
 >;
 export async function getPublicRound<TGame extends GameDefinition>(
   gameSessionId: PrefixedId<'gs'>,
   roundIndex: number,
 ) {
-  const res = await gameSessionRpc[':id'].rounds[':index'].$get({
+  const res = await apiRpc['gameSessions'][':id'].rounds[':index'].$get({
     param: { id: gameSessionId, index: roundIndex.toString() },
   });
   if (!res.ok) {

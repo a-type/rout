@@ -7,13 +7,15 @@ import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
 import { gameSessionInvitationsRouter } from './routers/gameSessionInvitations';
 import { gameSessionsRouter } from './routers/gameSessions';
+import { socketRouter } from './routers/socket';
 import { usersRouter } from './routers/users';
 
 const app = new Hono()
   .onError(handleError)
   .use(requestId())
-  .use(configuredCors())
   .use(logger())
+  .route('/socket', socketRouter)
+  .use(configuredCors())
   .get('/', (ctx) => ctx.text('Hello, world!'))
   .route('/auth', authRouter)
   .route('/users', usersRouter)
@@ -24,3 +26,5 @@ const app = new Hono()
 export default app;
 
 export type AppType = typeof app;
+
+export { GameSessionState } from './durableObjects/GameSessionState';

@@ -1,6 +1,6 @@
 import type { AdminStore, PublicStore } from '../../db';
-import { GameSessionState } from '../../game-session';
 import { SessionWithPrefixedIds } from '../../middleware';
+import type { GameSessionState } from '../durableObjects/GameSessionState';
 
 export interface Bindings {
   // env
@@ -12,6 +12,7 @@ export interface Bindings {
   EMAIL_PASS: string;
   NODE_ENV: string;
   SESSION_SECRET: string;
+  SOCKET_TOKEN_SECRET: string;
 
   // services
   PUBLIC_STORE: Service<PublicStore>;

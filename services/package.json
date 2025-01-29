@@ -6,10 +6,6 @@
     "./public-api": {
       "default": "./dist/public-api/hc.js",
       "types": "./dist/public-api/hc.d.js"
-    },
-    "./game-session": {
-      "default": "./dist/game-session/hc.js",
-      "types": "./dist/game-session/hc.d.js"
     }
   },
   "scripts": {
@@ -17,7 +13,6 @@
     "dev:client": "pnpm run build:client --watch --preserveWatchOutput",
     "dev:db": "wrangler dev -c src/db/wrangler.toml --port 3111",
     "dev:public-api:run": "sleep 2 && wrangler dev -c src/public-api/wrangler.toml --port 3101",
-    "dev:game-session:run": "sleep 3 && wrangler dev -c src/game-session/wrangler.toml --port 3102",
     "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core --local -c src/db/wrangler.toml",
     "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core --remote -c src/db/wrangler.toml",
     "build": "pnpm run --filter @long-game/services --parallel \"/^build:.*/\"",

@@ -33,7 +33,10 @@ const routes = makeRoutes([
     path: '/session/:sessionId',
     component: GameSessionPage,
   },
-
+  {
+    path: '/settings',
+    component: lazy(() => import('./SettingsPage.jsx')),
+  },
   {
     path: '*',
     component: () => <div>404</div>,

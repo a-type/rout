@@ -1,20 +1,13 @@
-import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk.js';
 import {
+  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTrigger,
   FormikForm,
-  Icon,
   SubmitButton,
   TextField,
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
-import { Link } from '@verdant-web/react-router';
-import { useState } from 'react';
 
 export interface EditProfileProps {
   onSave?: () => void;
@@ -40,9 +33,9 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
     >
       <TextField required name="displayName" label="Display name" />
       <ColorPickerField />
-      <DialogActions>
+      <Box justify="end" className="w-full">
         <SubmitButton>Save</SubmitButton>
-      </DialogActions>
+      </Box>
     </FormikForm>
   );
 }
@@ -70,24 +63,5 @@ function ColorPickerField() {
         </Button>
       ))}
     </div>
-  );
-}
-
-export function EditProfileButton() {
-  const [open, setOpen] = useState(false);
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="icon">
-          <Icon name="gear" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <EditProfileForm onSave={() => setOpen(false)} />
-        <Button asChild color="destructive">
-          <Link to={`${API_ORIGIN}/auth/logout`}>Logout</Link>
-        </Button>
-      </DialogContent>
-    </Dialog>
   );
 }

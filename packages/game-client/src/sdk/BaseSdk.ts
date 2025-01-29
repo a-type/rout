@@ -1,5 +1,4 @@
 import { LongGameError } from '@long-game/common';
-import { hcWithType as gameSessionHc } from '@long-game/services/game-session';
 import { hcWithType as apiHc } from '@long-game/services/public-api';
 import {
   UseMutationOptions,
@@ -16,17 +15,12 @@ export type QueryFactory<Output, Input> = {
 };
 
 export class BaseSdk extends EventTarget {
-  protected readonly gameSessionRpc: ReturnType<typeof gameSessionHc>;
   protected readonly apiRpc: ReturnType<typeof apiHc>;
 
   readonly queryClient = queryClient;
 
   constructor() {
     super();
-    this.gameSessionRpc = gameSessionHc(
-      import.meta.env.VITE_GAME_SESSION_API_ORIGIN,
-      { fetch },
-    );
     this.apiRpc = apiHc(import.meta.env.VITE_PUBLIC_API_ORIGIN, { fetch });
   }
 

@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { LongGameError } from '@long-game/common';
+import { isPrefixedId, LongGameError } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { sessionMiddleware, userStoreMiddleware } from '../../middleware';
@@ -40,5 +40,27 @@ export const usersRouter = new Hono<Env>()
       const body = ctx.req.valid('json');
       const updated = await ctx.get('userStore').updateMe(body);
       return ctx.json(updated);
+    },
+  )
+  .get(
+    '/:id',
+    userStoreMiddleware,
+    zValidator(
+      'param',
+      z.object({
+        id: z.custom((v) => isPrefixedId(v, 'u')),
+      }),
+    ),
+    async (ctx) => {
+      const id = ctx.req.valid('param').id;
+      const userStore = ctx.get('userStore');
+      const user = await userStore.getUser(id);
+      if (!user) {
+        throw new LongGameError(
+          LongGameError.Code.InternalServerError,
+          'User not found',
+        );
+      }
+      return ctx.json(user);
     },
   );

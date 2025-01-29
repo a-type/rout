@@ -143,7 +143,7 @@ const COLORS = {
 export function Topography({ className, ...rest }: TopographyProps) {
   const [state] = useState(() => proxy({ scale: 1 }));
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
-    state.scale = Math.max(0, (1000 - Math.min(width, height)) / 1000);
+    state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000);
   });
 
   const mode = useSyncExternalStore(subscribeToColorModeChange, () =>
@@ -164,11 +164,12 @@ export function Topography({ className, ...rest }: TopographyProps) {
   return (
     <div className={className} style={{ background: backgroundCss }} ref={ref}>
       <Canvas
-        className="animate-fade-in animate-duration-8s"
+        className="animate-fade-in animate-duration-2s"
         orthographic
         gl={{
           antialias: true,
         }}
+        flat
         camera={{
           zoom: 1,
           position: [0, 0, 1],
@@ -247,8 +248,12 @@ export const TopographyBackground = withClassName(
 export const TopographyButton = ({ children, ...props }: ButtonProps) => {
   return (
     <Button {...props} className="relative z-10 overflow-hidden">
-      {!props.disabled && <TopographyBackground />}
-      <div className="relative z-1">{children}</div>
+      {!props.disabled && (
+        <TopographyBackground className="[:hover>&]:[filter:brightness(1.5)]" />
+      )}
+      <div className="relative z-1 flex flex-row gap-2 items-center">
+        {children}
+      </div>
     </Button>
   );
 };

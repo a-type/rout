@@ -6,5 +6,6 @@ export * from './decoration/Topography';
 export * from './layout/GameLayout';
 export * from './log/GameLog';
 export * from './turns/SubmitTurn';
+export * from './withSuspense';
 
 export * from '@a-type/react-space';

@@ -1,20 +1,27 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box } from '@a-type/ui';
-import { Link } from '@verdant-web/react-router';
+import { Card, H1 } from '@a-type/ui';
+import { useEffect } from 'react';
+import { GameSummaryCard } from './GameSummaryCard';
 
 export function MembershipsList() {
-  const { data: memberships } = sdkHooks.useGetGameSessions();
+  const {
+    data: { sessions, errors },
+  } = sdkHooks.useGetGameSessions();
+
+  useEffect(() => {
+    if (errors?.length) {
+      errors.forEach(console.error);
+    }
+  }, [errors]);
 
   return (
     <div className="flex flex-col gap-3">
-      <h1>Games</h1>
-      {memberships?.map((i) => (
-        <Box key={i.gameSessionId} direction="row" justify="between" asChild>
-          <Link to={`/session/${i.gameSessionId}`}>
-            <Box>{i.gameSessionId}</Box>
-          </Link>
-        </Box>
-      ))}
+      <H1>Games</H1>
+      <Card.Grid>
+        {sessions?.map((session) => (
+          <GameSummaryCard key={session.id} session={session} />
+        ))}
+      </Card.Grid>
     </div>
   );
 }

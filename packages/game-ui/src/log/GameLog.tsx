@@ -102,13 +102,14 @@ export function GameLogChatInput() {
         });
         bag.resetForm();
       }}
-      className="flex-0-0-auto items-end"
+      className="flex-0-0-auto items-stretch"
     >
       {(form) => (
-        <>
+        <div className="relative">
           <TextAreaField
             name="message"
             placeholder="Send a message..."
+            className="pb-4"
             inputRef={fieldRef}
             onKeyDown={(ev) => {
               if (ev.key === 'Enter' && !ev.shiftKey) {
@@ -117,8 +118,14 @@ export function GameLogChatInput() {
               }
             }}
           />
-          <SubmitButton type="submit">Send</SubmitButton>
-        </>
+          <SubmitButton
+            type="submit"
+            size="icon"
+            className="absolute right-1 bottom-1 shadow-md"
+          >
+            <Icon name="send" />
+          </SubmitButton>
+        </div>
       )}
     </FormikForm>
   );

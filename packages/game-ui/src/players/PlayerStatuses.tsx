@@ -24,6 +24,7 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
           <AvatarListItemRoot index={index} key={player.id}>
             <Avatar
               name={player.displayName}
+              imageSrc={player.imageUrl}
               style={{
                 background: colors[player.color].range[3],
                 borderWidth: 2,

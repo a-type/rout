@@ -7,10 +7,13 @@ export function FriendsList() {
   return (
     <div>
       <h1>Friends</h1>
-      <ul className="p-0">
+      <ul className="p-0 grid grid-cols-3 md:grid-cols-6">
         {data.map((friend) => (
-          <li className="flex flex-row gap-2 items-center" key={friend.id}>
-            <Avatar imageSrc={friend.imageUrl ?? undefined} />
+          <li className="flex flex-col gap-2 items-center" key={friend.id}>
+            <Avatar
+              imageSrc={friend.imageUrl ?? undefined}
+              className="w-full h-auto rounded-full aspect-square"
+            />
             {friend.displayName}
           </li>
         ))}

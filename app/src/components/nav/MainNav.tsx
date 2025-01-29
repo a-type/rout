@@ -8,10 +8,10 @@ export function MainNav({}: MainNavProps) {
   const isHome = routes.some((route) => route.path === '/');
   const isFriends = routes.some((route) => route.path === '/friends');
   return (
-    <NavBar>
-      <span className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl">
+    <NavBar className="md:(mt-8 rounded-md bg-overlay)">
+      {/* <span className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl">
         rout!
-      </span>
+      </span> */}
       <NavBar.Item asChild active={isHome}>
         <Link to="/">
           <NavBar.ItemIcon name="home" />

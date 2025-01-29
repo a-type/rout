@@ -1,10 +1,16 @@
 // uno.config.ts
-import { defineConfig } from 'unocss';
-import variantGroup from '@unocss/transformer-variant-group';
 import preset from '@a-type/ui/uno-preset';
+import variantGroup from '@unocss/transformer-variant-group';
+import { defineConfig } from 'unocss';
 
 export default defineConfig({
-  presets: [preset()],
+  presets: [
+    preset({
+      borderScale: 2,
+      roundedness: 0.75,
+      scale: 'lg',
+    }),
+  ],
   transformers: [variantGroup()],
   preflights: [
     {

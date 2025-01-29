@@ -1,4 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
+import { Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { TopographyButton } from '@long-game/game-ui';
 import { useNavigate } from '@verdant-web/react-router';
@@ -20,5 +21,9 @@ export function CreateGame() {
     navigate(`/session/${gameSessionId}`);
   };
 
-  return <TopographyButton onClick={create}>New Game</TopographyButton>;
+  return (
+    <TopographyButton onClick={create}>
+      <Icon name="plus" /> New Game
+    </TopographyButton>
+  );
 }

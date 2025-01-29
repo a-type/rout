@@ -11,6 +11,9 @@ export class PublicSdk extends BaseSdk {
     }) => ({ json: input }),
     invalidate: [['getMe']],
   });
+  getUser = this.sdkQuery('getUser', this.apiRpc.users[':id'].$get, {
+    transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+  });
   getFriendships = this.sdkQuery(
     'getFriendships',
     this.apiRpc.friendships.$get,
@@ -81,27 +84,30 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { userId: string; gameSessionId: string }) => ({
         json: input,
       }),
-      invalidate: [['getGameSessionInvitations']],
+      invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
     },
   );
 
   // yeah this is on the game session API, but it's
   // kind of more useful here.
-  prepareGameSession = this.sdkMutation(this.gameSessionRpc.index.$post, {
+  prepareGameSession = this.sdkMutation(this.apiRpc.gameSessions.$post, {
     transformInput: (input: { gameId: string }) => ({
       json: { gameId: input.gameId },
     }),
   });
-  startGameSession = this.sdkMutation(this.gameSessionRpc[':id'].start.$post, {
-    transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
-    onSuccess: (output, vars) => {
-      this.queryClient.setQueryData(
-        ['getGameSessionStatus', { id: vars.id }],
-        output.status,
-      );
+  startGameSession = this.sdkMutation(
+    this.apiRpc.gameSessions[':id'].start.$post,
+    {
+      transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+      onSuccess: (output, vars) => {
+        this.queryClient.setQueryData(
+          ['getGameSessionStatus', { id: vars.id }],
+          output.status,
+        );
+      },
     },
-  });
-  updateGameSession = this.sdkMutation(this.gameSessionRpc[':id'].$put, {
+  );
+  updateGameSession = this.sdkMutation(this.apiRpc.gameSessions[':id'].$put, {
     transformInput: (input: { id: string; gameId: string }) => ({
       json: { gameId: input.gameId },
       param: { id: input.id },
@@ -121,28 +127,28 @@ export class PublicSdk extends BaseSdk {
   });
   getGameSessionStatus = this.sdkQuery(
     'getGameSessionStatus',
-    this.gameSessionRpc[':id'].status.$get,
+    this.apiRpc.gameSessions[':id'].status.$get,
     {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
   getGameSessionSummary = this.sdkQuery(
     'getGameSessionSummary',
-    this.gameSessionRpc[':id'].$get,
+    this.apiRpc.gameSessions[':id'].summary.$get,
     {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
   getGameSessionMembers = this.sdkQuery(
     'getGameSessionMembers',
-    this.gameSessionRpc[':id'].members.$get,
+    this.apiRpc.gameSessions[':id'].members.$get,
     {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
   getGameSessionPregame = this.sdkQuery(
     'getGameSessionPregame',
-    this.gameSessionRpc[':id'].pregame.$get,
+    this.apiRpc.gameSessions[':id'].pregame.$get,
     {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
@@ -154,7 +160,9 @@ export type FriendshipInvitation = InferReturnData<
   PublicSdk['getFriendshipInvites']
 >[number];
 export type Self = InferReturnData<PublicSdk['getMe']>;
-export type GameSession = InferReturnData<PublicSdk['getGameSessions']>[number];
+export type GameSession = InferReturnData<
+  PublicSdk['getGameSessions']
+>['sessions'][number];
 export type GameSessionInvitation = InferReturnData<
   PublicSdk['getGameSessionInvitations']
 >[number];
@@ -163,4 +171,7 @@ export type FriendshipInvitationPublicInfo = InferReturnData<
 >;
 export type GameSessionPregame = InferReturnData<
   PublicSdk['getGameSessionPregame']
+>;
+export type GameSessionSummary = InferReturnData<
+  PublicSdk['getGameSessionSummary']
 >;

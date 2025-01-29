@@ -25,9 +25,8 @@ import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
 import { Hono } from 'hono/quick';
 import { z } from 'zod';
-import { api } from './api';
-import { Env } from './env';
-import { verifySocketToken } from './socketTokens';
+import { verifySocketToken } from '../auth/socketTokens';
+import { Bindings as Env } from '../config/ctx';
 
 /**
  * The basic initial data required to set up a game.
@@ -97,7 +96,7 @@ export class GameSessionState extends DurableObject<Env> {
 
     // this mini Hono app handles websocket connections
     this.#miniApp = new Hono().all(
-      '/:id/socket',
+      '/socket',
       zValidator(
         'query',
         z.object({
@@ -652,7 +651,7 @@ export class GameSessionState extends DurableObject<Env> {
     });
   }
 
-  getInfo() {
+  getSummary() {
     if (!this.#sessionData) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -664,10 +663,11 @@ export class GameSessionState extends DurableObject<Env> {
       status: this.getStatus(),
       gameId: this.#sessionData.gameId,
       gameVersion: this.#sessionData.gameVersion,
+      members: this.#sessionData.members,
     };
   }
 
-  getSummary(userId: PrefixedId<'u'>) {
+  getDetails(userId: PrefixedId<'u'>) {
     if (!this.#sessionData) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -676,9 +676,8 @@ export class GameSessionState extends DurableObject<Env> {
     }
     const currentRoundIndex = this.getCurrentRoundIndex();
     return {
-      ...this.getInfo(),
+      ...this.getSummary(),
       playerId: userId,
-      members: this.#sessionData.members,
       playerState: this.getPlayerState(userId) as {},
       currentRound: this.getPublicRound(userId, currentRoundIndex),
       playerStatuses: this.getPlayerStatuses(),
@@ -895,7 +894,3 @@ export class GameSessionState extends DurableObject<Env> {
     }
   };
 }
-
-export default {
-  fetch: api.fetch,
-};

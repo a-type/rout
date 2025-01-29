@@ -6,17 +6,17 @@ import {
   ServerMessageByType,
   ServerMessageType,
 } from '@long-game/common';
-import { gameSessionRpc } from './api';
+import { apiRpc } from './api';
 
 export type GameSocket = Awaited<ReturnType<typeof connectToSocket>>;
 
 export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
-  const socketOrigin = import.meta.env.VITE_GAME_SESSION_API_ORIGIN.replace(
+  const socketOrigin = import.meta.env.VITE_PUBLIC_API_ORIGIN.replace(
     /^http/,
     'ws',
   );
   const websocket = new ReconnectingWebsocket(
-    `${socketOrigin}/${gameSessionId}/socket`,
+    `${socketOrigin}/socket`,
     gameSessionId,
   );
   const unsubRootMessages = websocket.onMessage((message) => {
@@ -86,7 +86,7 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
 }
 
 async function getSocketToken(gameSessionId: string) {
-  const res = await gameSessionRpc[':id'].socketToken.$get({
+  const res = await apiRpc.gameSessions[':id'].socketToken.$get({
     param: { id: gameSessionId },
   });
   if (!res.ok) {

@@ -29,6 +29,21 @@ export class UserStore extends RpcTarget {
     return user;
   }
 
+  #fillUserDefaults = <TU extends { id: PrefixedId<'u'> }>(
+    user: TU,
+  ): TU & {
+    color: PlayerColorName;
+    displayName: string;
+    imageUrl: string | null;
+  } => {
+    return {
+      color: 'gray',
+      displayName: 'Anonymous',
+      imageUrl: null,
+      ...user,
+    };
+  };
+
   async getMe() {
     const user = await this.#db
       .selectFrom('User')
@@ -40,10 +55,32 @@ export class UserStore extends RpcTarget {
       throw new LongGameError(LongGameError.Code.NotFound, 'User not found');
     }
 
-    return {
+    return this.#fillUserDefaults(user);
+  }
+
+  /**
+   * Gets user info. If the logged in user is friends with
+   * this person, their full info will be returned. Otherwise,
+   * anonymized info will be returned.
+   */
+  async getUser(id: PrefixedId<'u'>) {
+    const user = await this.#db
+      .selectFrom('User')
+      .innerJoin('Friendship', 'User.id', 'Friendship.userId')
+      .where('User.id', '=', id)
+      .where((eb) =>
+        eb.or([
+          eb('Friendship.userId', '=', this.#userId),
+          eb('Friendship.friendId', '=', this.#userId),
+        ]),
+      )
+      .select(['User.id', 'User.color', 'User.imageUrl', 'User.displayName'])
+      .executeTakeFirst();
+
+    return this.#fillUserDefaults({
+      id,
       ...user,
-      color: (user.color === null ? 'gray' : user.color) as PlayerColorName,
-    };
+    });
   }
 
   async updateMe({

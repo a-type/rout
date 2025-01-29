@@ -1,28 +1,22 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   assertPrefixedId,
-  id,
   LongGameError,
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
+import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import { requestId } from 'hono/request-id';
 import { z } from 'zod';
-import { GameSessionState } from '.';
-import type { UserStore } from '../db';
-import type { GameSessionInvitation } from '../db/kysely';
-import {
-  handleError,
-  loggedInMiddleware,
-  SessionWithPrefixedIds,
-} from '../middleware';
-import { configuredCors } from '../middleware/cors';
-import { Env } from './env';
-import { getSocketToken } from './socketTokens';
+import type { UserStore } from '../../db';
+import type { GameSessionInvitation } from '../../db/kysely';
+import { SessionWithPrefixedIds } from '../../middleware';
+import { getSocketToken } from '../auth/socketTokens';
+import { Bindings, Env } from '../config/ctx';
+import { GameSessionState } from '../durableObjects/GameSessionState';
 
 const openGameSessionMiddleware = createMiddleware<{
   Variables: {
@@ -33,9 +27,9 @@ const openGameSessionMiddleware = createMiddleware<{
     // accessing the game session state
     myInvitation: GameSessionInvitation;
     // easier just to drop this on since we have it
-    userStore: UserStore;
+    userStore: RpcStub<UserStore>;
   };
-  Bindings: Env;
+  Bindings: Bindings;
 }>(async (ctx, next) => {
   const id = ctx.req.param('id');
   if (!id) {
@@ -68,33 +62,37 @@ const openGameSessionMiddleware = createMiddleware<{
     );
   }
   const durableObjectId = ctx.env.GAME_SESSION_STATE.idFromName(id);
-  const sessionState = ctx.env.GAME_SESSION_STATE.get(durableObjectId);
+  const sessionState = await ctx.env.GAME_SESSION_STATE.get(durableObjectId);
   if (!sessionState.getIsInitialized()) {
     throw new Error(
       'Game session not initialized. POST to gameSessions/prepare on the public API.',
     );
   }
-  ctx.set('gameSessionState', sessionState);
+  ctx.set('gameSessionState', sessionState as any);
   ctx.set('gameSessionId', id);
   return next();
 });
 
-const gameSessionStateApp = new Hono<{ Bindings: Env }>()
-  .use(configuredCors())
+export const gameSessionRouter = new Hono<Env>()
   .use(openGameSessionMiddleware)
   .get('/', async (ctx) => {
     const state = ctx.get('gameSessionState');
     const userId = ctx.get('session').userId;
-    const info = await state.getSummary(userId);
+    const info = await state.getDetails(userId);
     const body = wrapRpcData(info);
     return ctx.json(body);
+  })
+  .get('/summary', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    const summary = await state.getSummary();
+    return ctx.json(wrapRpcData(summary));
   })
   .get('/members', async (ctx) => {
     const userStore = ctx.get('userStore');
     const members = await userStore.getGameSessionMembers(
       ctx.get('gameSessionId'),
     );
-    return ctx.json(members);
+    return ctx.json(wrapRpcData(members));
   })
   .get('/invitations', async (ctx) => {
     const userStore = ctx.get('userStore');
@@ -117,7 +115,7 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
     const [members, invitations, summary] = await Promise.all([
       userStore.getGameSessionMembers(sessionId),
       userStore.getInvitationsToGameSession(sessionId),
-      state.getInfo(),
+      state.getSummary(),
     ]);
 
     return ctx.json({
@@ -165,7 +163,7 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
       const { gameId } = ctx.req.valid('json');
       const state = ctx.get('gameSessionState');
       state.updateGame(gameId, getLatestVersion(games[gameId]).version);
-      const summary = await state.getInfo();
+      const summary = await state.getSummary();
       return ctx.json({ session: summary });
     },
   )
@@ -177,66 +175,3 @@ const gameSessionStateApp = new Hono<{ Bindings: Env }>()
     );
     return ctx.json({ token });
   });
-
-export const api = new Hono<{ Bindings: Env }>()
-  .onError(handleError)
-  .use(requestId())
-  .use(loggedInMiddleware)
-  .post(
-    '/',
-    configuredCors(),
-    zValidator(
-      'json',
-      z.object({
-        gameId: z.string(),
-      }),
-    ),
-    async (ctx) => {
-      const { gameId } = ctx.req.valid('json');
-      const game = games[gameId];
-
-      if (!game) {
-        throw new LongGameError(
-          LongGameError.Code.BadRequest,
-          'Game not found',
-        );
-      }
-      const gameDefinition = getLatestVersion(game);
-
-      const sessionId = id('gs');
-      const durableObjectId = ctx.env.GAME_SESSION_STATE.idFromName(sessionId);
-      const sessionState = await ctx.env.GAME_SESSION_STATE.get(
-        durableObjectId,
-      );
-      const randomSeed = crypto.randomUUID();
-      const userId = ctx.get('session').userId;
-      await sessionState.initialize({
-        id: sessionId,
-        randomSeed,
-        gameId: game.id,
-        gameVersion: gameDefinition.version,
-        members: [
-          {
-            id: userId,
-          },
-        ],
-        // TODO: configurable / automatic detection
-        timezone: 'America/New_York',
-      });
-
-      // insert founding membership so the user can find this session
-      const userStore = await ctx.env.PUBLIC_STORE.getStoreForUser(userId);
-      await userStore.insertFoundingGameMembership(sessionId);
-
-      return ctx.json({ sessionId });
-    },
-  )
-  .all('/:id/socket', async (ctx) => {
-    const state = ctx.env.GAME_SESSION_STATE.get(
-      ctx.env.GAME_SESSION_STATE.idFromName(ctx.req.param('id')),
-    );
-    return state.fetch(ctx.req.raw);
-  })
-  .route('/:id', gameSessionStateApp);
-
-export type AppType = typeof api;
