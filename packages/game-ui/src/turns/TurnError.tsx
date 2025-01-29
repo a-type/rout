@@ -1,13 +1,13 @@
-import { useCurrentTurn } from '@long-game/game-client/client';
+import { useGameSuite, withGame } from '@long-game/game-client';
 
 export interface TurnErrorProps {}
 
-export function TurnError({}: TurnErrorProps) {
-  const { error } = useCurrentTurn();
+export const TurnError = withGame(function TurnError({}: TurnErrorProps) {
+  const suite = useGameSuite();
 
-  if (error) {
-    return <span>{error}</span>;
+  if (suite.turnError) {
+    return <span>{suite.turnError}</span>;
   }
 
   return null;
-}
+});

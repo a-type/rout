@@ -1,8 +1,11 @@
-export * from './board/GameBoard.js';
-export * from './board/GamePiece.js';
-export * from './board/GamePlacement.js';
-export * from './controls/GameControls.js';
-export * from './GameLog.js';
-export * from './turns/SubmitTurn.js';
+export * from './board/GameBoard';
+export * from './board/GamePiece';
+export * from './board/GamePlacement';
+export * from './controls/GameControls';
+export * from './decoration/Topography';
+export * from './layout/GameLayout';
+export * from './log/GameLog';
+export * from './turns/SubmitTurn';
+export * from './withSuspense';
 
 export * from '@a-type/react-space';

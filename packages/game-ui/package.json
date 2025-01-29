@@ -4,28 +4,36 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
-      "development": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "production": "./dist/index.js",
+      "workerd": "./src/index.ts",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsc -w --preserveWatchOutput"
   },
   "peerDependencies": {
+    "@a-type/ui": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "@a-type/ui": "catalog:"
+    "react-dom": "catalog:"
   },
   "dependencies": {
+    "@a-type/react-space": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@a-type/react-space": "catalog:"
+    "@react-three/drei": "^9.121.4",
+    "@react-three/fiber": "catalog:",
+    "@types/three": "^0.172.0",
+    "@verdant-web/react-router": "catalog:",
+    "three": "^0.172.0",
+    "valtio": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:"
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
   }
 }

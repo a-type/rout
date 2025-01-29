@@ -1,0 +1,42 @@
+{
+  "name": "@long-game/services",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./public-api": {
+      "default": "./dist/public-api/hc.js",
+      "types": "./dist/public-api/hc.d.js"
+    }
+  },
+  "scripts": {
+    "dev": "pnpm run --filter @long-game/services --parallel \"/^dev:.*/\"",
+    "dev:client": "pnpm run build:client --watch --preserveWatchOutput",
+    "dev:db": "wrangler dev -c src/db/wrangler.toml --port 3111",
+    "dev:public-api:run": "sleep 2 && wrangler dev -c src/public-api/wrangler.toml --port 3101",
+    "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core --local -c src/db/wrangler.toml",
+    "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core --remote -c src/db/wrangler.toml",
+    "build": "pnpm run --filter @long-game/services --parallel \"/^build:.*/\"",
+    "build:client": "tsc -p tsconfig.client.json",
+    "createUser": "node ./scripts/createUser.mjs"
+  },
+  "dependencies": {
+    "@a-type/auth": "catalog:",
+    "@a-type/auth-email-ses": "^2.1.8",
+    "@a-type/kysely": "1.1.1",
+    "@a-type/utils": "catalog:",
+    "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "better-sqlite3": "11.2.1",
+    "hono": "catalog:",
+    "jose": "^5.9.6",
+    "kysely": "^0.27.5",
+    "kysely-d1": "^0.3.0",
+    "kysely-plugin-serialize": "0.6.3",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11"
+  }
+}

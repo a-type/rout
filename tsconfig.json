@@ -2,11 +2,11 @@
   "compilerOptions": {
     "noImplicitAny": true,
     "noLib": false,
-    "target": "es2022",
+    "target": "ES2022",
     "sourceMap": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["dom", "esnext"],
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext"],
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,15 +15,10 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "downlevelIteration": true,
+    "experimentalDecorators": true,
     "isolatedModules": true,
     "customConditions": ["development"],
-    "plugins": [
-      {
-        "name": "gql.tada/ts-plugin",
-        "schema": "./apps/server/schema.graphql",
-        "tadaOutputLocation": "./packages/graphql/src/graphql-env.d.ts"
-      }
-    ]
+    "types": ["@cloudflare/workers-types"]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

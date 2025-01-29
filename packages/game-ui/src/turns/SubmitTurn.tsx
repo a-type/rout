@@ -1,19 +1,22 @@
-import { Button } from '@a-type/ui';
-import { useCurrentTurn } from '@long-game/game-client/client';
+import { Tooltip } from '@a-type/ui';
+import { useGameSuite, withGame } from '@long-game/game-client';
+import { TopographyButton } from '../decoration/Topography';
 
 export interface SubmitTurnProps {}
 
-export function SubmitTurn({}: SubmitTurnProps) {
-  const currentTurn = useCurrentTurn();
+export const SubmitTurn = withGame(function SubmitTurn({}: SubmitTurnProps) {
+  const suite = useGameSuite();
 
   return (
-    <Button
-      className="items-center justify-center text-xl"
-      color={currentTurn.error ? 'destructive' : 'primary'}
-      disabled={!!currentTurn.error || !currentTurn.dirty}
-      onClick={() => currentTurn.submitTurn()}
-    >
-      Submit Turn
-    </Button>
+    <Tooltip disabled={!suite.turnError} content={suite.turnError}>
+      <TopographyButton
+        className="items-center justify-center"
+        color={suite.turnError ? 'destructive' : 'primary'}
+        disabled={!!suite.turnError || !suite.canSubmitTurn}
+        onClick={() => suite.submitTurn()}
+      >
+        {suite.turnWasSubmitted ? 'Update' : 'Submit'} Turn
+      </TopographyButton>
+    </Tooltip>
   );
-}
+});

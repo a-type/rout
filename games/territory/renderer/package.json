@@ -1,0 +1,34 @@
+{
+  "name": "@long-game/game-territory-renderer",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/index.js",
+      "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@long-game/game-territory-definition": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/game-ui": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
+  }
+}

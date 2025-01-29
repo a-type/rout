@@ -1,1 +1,1 @@
-./apps/web/uno.config.ts
+./app/uno.config.ts

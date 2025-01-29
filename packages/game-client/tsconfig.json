@@ -2,13 +2,15 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "lib": ["es2017", "dom", "dom.iterable", "ES2021"],
     "useDefineForClassFields": true,
     "experimentalDecorators": false,
-    "declarationDir": "./dist/typings",
+    "declarationDir": "./dist",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "composite": true
   },
   "include": ["./src"],
   "exclude": ["node_modules", "./dist"]

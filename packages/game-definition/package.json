@@ -6,6 +6,7 @@
     ".": {
       "production": "./dist/esm/index.js",
       "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
       "default": "./dist/esm/index.js"
     }
   },
@@ -16,7 +17,6 @@
   },
   "dependencies": {
     "@long-game/common": "workspace:*",
-    "@long-game/graphql": "workspace:*",
     "date-fns": "^2.30.0",
     "seedrandom": "^3.0.5"
   },

@@ -1,13 +1,10 @@
-import { GameRound } from '@long-game/common';
-import { FragmentOf } from '@long-game/graphql';
-import { ComponentType } from 'react';
-import { clientSessionFragment } from './fragments.js';
+import { GameRound, GameStatus, PrefixedId } from '@long-game/common';
 import { GameRandom } from './random.js';
 
 export type BaseTurnData = Record<string, unknown>;
 
 export interface LocalTurn<TurnData extends BaseTurnData> {
-  playerId: `u-${string}`;
+  playerId: PrefixedId<'u'>;
   data: TurnData;
 }
 
@@ -16,18 +13,6 @@ export interface Turn<TurnData extends BaseTurnData>
   createdAt: string;
   roundIndex: number;
 }
-
-export type GameStatus =
-  | {
-      status: 'pending';
-    }
-  | {
-      status: 'active';
-    }
-  | {
-      status: 'completed';
-      winnerIds: string[];
-    };
 
 export type GameDefinition<
   GlobalState = any,
@@ -60,7 +45,6 @@ export type GameDefinition<
   getProspectivePlayerState: (data: {
     playerState: PlayerState;
     prospectiveTurn: LocalTurn<TurnData>;
-    playerId: string;
   }) => PlayerState;
 
   // SERVER ONLY
@@ -85,8 +69,15 @@ export type GameDefinition<
   getPlayerState: (data: {
     globalState: GlobalState;
     playerId: string;
-    roundIndex: number;
     members: { id: string }[];
+    /**
+     * All rounds which have been played. These are all reflected
+     * in globalState, but are available for reference. If a current
+     * round is in progress, it is not included here -- you should not
+     * use the the current round to compute player state as it may leak
+     * information about other players' moves. If you really need this
+     * maybe we can include it as a separate parameter just to be safe?
+     */
     rounds: GameRound<Turn<TurnData>>[];
   }) => PlayerState;
   /**
@@ -126,14 +117,6 @@ export type GameDefinition<
    * - Rounds advance when all players submit turns
    */
   getRoundIndex: RoundIndexDecider<GlobalState, TurnData>;
-
-  // CLIENT ONLY
-
-  Client: ComponentType;
-  GameRecap: ComponentType<{
-    globalState: GlobalState;
-    session: FragmentOf<typeof clientSessionFragment>;
-  }>;
 };
 
 export type RoundIndexDecider<

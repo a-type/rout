@@ -5,6 +5,7 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
       "production": "./dist/esm/index.js",
       "default": "./dist/esm/index.js"
     }
@@ -14,12 +15,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@long-game/game-number-guess": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/game-territory": "workspace:*"
+    "@long-game/game-number-guess-definition": "workspace:*",
+    "@long-game/game-territory-definition": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:"
+    "typescript": "catalog:"
   }
 }
