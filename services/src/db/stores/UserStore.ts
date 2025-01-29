@@ -313,12 +313,61 @@ export class UserStore extends RpcTarget {
     return membership;
   }
 
-  async getGameSessions() {
-    return this.#db
+  // just base64 encoded. CF workers don't have Node stuff so
+  #encodeCursor = (val: string) => btoa(val);
+  #decodeCursor = (val: string) => atob(val);
+
+  async getGameSessions(
+    filter: {
+      status?: 'pending' | 'accepted' | 'declined' | 'expired';
+      first?: number;
+      after?: string;
+    } = {
+      first: 10,
+    },
+  ) {
+    let builder = this.#db
       .selectFrom('GameSessionInvitation')
       .where('GameSessionInvitation.userId', '=', this.#userId)
-      .select('GameSessionInvitation.gameSessionId')
-      .execute();
+      .select([
+        'GameSessionInvitation.gameSessionId',
+        'GameSessionInvitation.status',
+        'GameSessionInvitation.createdAt',
+      ])
+      .orderBy('GameSessionInvitation.createdAt', 'desc');
+
+    if (filter.status) {
+      builder = builder.where(
+        'GameSessionInvitation.status',
+        '=',
+        filter.status,
+      );
+    }
+
+    if (filter.first) {
+      builder = builder.limit(filter.first + 1);
+    }
+
+    if (filter.after) {
+      const cursor = this.#decodeCursor(filter.after);
+      builder = builder.where('GameSessionInvitation.createdAt', '>', cursor);
+    }
+
+    const results = await builder.execute();
+    const hasNextPage = Boolean(filter.first && results.length > filter.first);
+    if (hasNextPage) {
+      // toss out sentinel value
+      results.pop();
+    }
+
+    const endCursor = results[results.length - 1]?.createdAt ?? null;
+    return {
+      results,
+      pageInfo: {
+        hasNextPage,
+        endCursor: endCursor ? this.#encodeCursor(endCursor) : null,
+      },
+    };
   }
 
   /**

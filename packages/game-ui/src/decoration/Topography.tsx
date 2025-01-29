@@ -164,7 +164,7 @@ export function Topography({ className, ...rest }: TopographyProps) {
   return (
     <div className={className} style={{ background: backgroundCss }} ref={ref}>
       <Canvas
-        className="animate-fade-in animate-duration-2s"
+        className="animate-fade-in animate-duration-1s"
         orthographic
         gl={{
           antialias: true,
@@ -181,6 +181,7 @@ export function Topography({ className, ...rest }: TopographyProps) {
           far: 1,
         }}
       >
+        <color attach="background" args={[background]} />
         <TopographyMesh
           {...rest}
           background={background}
