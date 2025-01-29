@@ -1,3 +1,4 @@
+import { setColorMode } from '@a-type/ui';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import 'virtual:uno.css';
@@ -14,3 +15,11 @@ function main() {
 }
 
 main();
+
+// default to dark mode
+if (
+  typeof window !== 'undefined' &&
+  !window.localStorage.getItem('colorMode')
+) {
+  setColorMode('dark');
+}

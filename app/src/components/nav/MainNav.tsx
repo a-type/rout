@@ -10,7 +10,7 @@ export function MainNav({}: MainNavProps) {
   return (
     <NavBar>
       <span className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl">
-        Rout!
+        rout!
       </span>
       <NavBar.Item asChild active={isHome}>
         <Link to="/">

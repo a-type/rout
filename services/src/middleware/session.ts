@@ -2,7 +2,7 @@ import { AuthError, Session } from '@a-type/auth';
 import { assertPrefixedId, LongGameError, PrefixedId } from '@long-game/common';
 import { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import type { AuthedStore } from '../db/index.js';
+import type { UserStore } from '../db/index.js';
 import { sessions } from '../public-api/auth/session.js';
 import { Env } from '../public-api/config/ctx.js';
 
@@ -56,7 +56,7 @@ export const loggedInMiddleware = createMiddleware<{
 
 export const userStoreMiddleware = createMiddleware<{
   Variables: {
-    userStore: Rpc.Stub<AuthedStore>;
+    userStore: Rpc.Stub<UserStore>;
     session: SessionWithPrefixedIds;
   };
   Bindings: Env['Bindings'];

@@ -1,4 +1,11 @@
-import { Button, ButtonProps, useSize, withClassName } from '@a-type/ui';
+import {
+  Button,
+  ButtonProps,
+  getColorMode,
+  subscribeToColorModeChange,
+  useSize,
+  withClassName,
+} from '@a-type/ui';
 import { shaderMaterial } from '@react-three/drei';
 import {
   Canvas,
@@ -6,35 +13,19 @@ import {
   useFrame,
   type ThreeElement,
 } from '@react-three/fiber';
-import { useRef, useState } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import { Color, ShaderMaterial } from 'three';
 import { proxy } from 'valtio';
 
 export interface TopographyProps {
-  background?: string;
-  gradient?: [string, string];
+  background?: number;
+  gradient?: [number, number];
   speed?: number;
   className?: string;
 }
 
-function resolveColor(color: string): Color {
-  if (color.startsWith('var(')) {
-    const val = document.documentElement.style.getPropertyValue(color);
-    if (val) return resolveColor(val.replace('#', ''));
-    return resolveColor('ffff00');
-  }
-  const raw = color.replace('#', '');
-
-  if (raw.length === 3) {
-    const [r, g, b] = raw.split('');
-    return new Color(`#${r}${r}${g}${g}${b}${b}`);
-  }
-
-  if (raw.length === 6) {
-    return new Color(`#${raw}`);
-  }
-
-  return new Color('white');
+function resolveColor(color: number): Color {
+  return new Color(color);
 }
 
 const TopographyMaterial = shaderMaterial(
@@ -116,7 +107,8 @@ void main() {
 	float mag = smoothstep(12., 0., abs(fract(v*10.0)-0.5)/fwidth(v));
 	vec4 color = mix(vec4(uStartColor,1.0), vec4(uEndColor,1.0), v+0.5);
 
-	gl_FragColor = mix(vec4(uBGColor,1.0), color, mag);
+	gl_FragColor = mix(vec4(uBGColor,1.0), color, mag * mag);
+  // gl_FragColor = vec4(uStartColor, 1.0);
 }
 `,
 ) as unknown as typeof ShaderMaterial & {
@@ -126,6 +118,7 @@ void main() {
   uBGColor: Color;
   uScale: number;
   uSpeed: number;
+  key: string;
 };
 
 declare module '@react-three/fiber' {
@@ -136,22 +129,46 @@ declare module '@react-three/fiber' {
 
 extend({ TopographyMaterial });
 
-export function Topography({
-  className,
-  background = '#fffaff',
-  ...rest
-}: TopographyProps) {
+const COLORS = {
+  light: {
+    background: 0xfffaff,
+    gradient: [0xff9fff, 0xa0a0ff],
+  },
+  dark: {
+    background: 0x29196e,
+    gradient: [0x622862, 0xb3b1d0],
+  },
+};
+
+export function Topography({ className, ...rest }: TopographyProps) {
   const [state] = useState(() => proxy({ scale: 1 }));
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
-    state.scale = Math.max(0, (2000 - Math.min(width, height)) / 1000);
-    console.log(state.scale);
+    state.scale = Math.max(0, (1000 - Math.min(width, height)) / 1000);
   });
 
+  const mode = useSyncExternalStore(subscribeToColorModeChange, () =>
+    getColorMode(),
+  );
+  const resolvedMode =
+    mode === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : mode;
+  const backgroundCss = rest.background ?? COLORS[resolvedMode].background;
+  const background = resolveColor(backgroundCss);
+  const gradient = (rest.gradient ?? COLORS[resolvedMode].gradient).map(
+    resolveColor,
+  ) as [Color, Color];
+
   return (
-    <div className={className} style={{ background }} ref={ref}>
+    <div className={className} style={{ background: backgroundCss }} ref={ref}>
       <Canvas
         className="animate-fade-in animate-duration-8s"
         orthographic
+        gl={{
+          antialias: true,
+        }}
         camera={{
           zoom: 1,
           position: [0, 0, 1],
@@ -163,23 +180,29 @@ export function Topography({
           far: 1,
         }}
       >
-        <TopographyMesh {...rest} background={background} state={state} />
+        <TopographyMesh
+          {...rest}
+          background={background}
+          gradient={gradient}
+          state={state}
+        />
       </Canvas>
     </div>
   );
 }
 
 function TopographyMesh({
-  background = '#fffaff',
-  gradient = ['#0fff0ff', '#a0a0ff'],
-  speed,
+  background: uBGColor,
+  gradient: [uStartColor, uEndColor],
+  speed: uSpeed,
   state,
-}: TopographyProps & { state: { scale: number } }) {
+}: {
+  state: { scale: number };
+  speed?: number;
+  background: Color;
+  gradient: [Color, Color];
+}) {
   const materialRef = useRef<typeof TopographyMaterial>(null);
-
-  const uBGColor = resolveColor(background);
-  const uStartColor = resolveColor(gradient[0]);
-  const uEndColor = resolveColor(gradient[1]);
 
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)',
@@ -191,12 +214,16 @@ function TopographyMesh({
     if (materialRef.current) {
       materialRef.current.uTime = clock.getElapsedTime();
       materialRef.current.uScale = state.scale;
+      materialRef.current.uStartColor = uStartColor;
+      materialRef.current.uEndColor = uEndColor;
+      materialRef.current.uBGColor = uBGColor;
     }
   });
 
   return (
     <mesh>
       <topographyMaterial
+        key={TopographyMaterial.key}
         ref={materialRef}
         uniforms={{
           uTime: { value: 0 },
@@ -204,7 +231,7 @@ function TopographyMesh({
           uEndColor: { value: uEndColor },
           uBGColor: { value: uBGColor },
           uScale: { value: 1 },
-          uSpeed: { value: 1 },
+          uSpeed: { value: uSpeed ?? 1 },
         }}
       />
       <planeGeometry args={[2, 2]} />

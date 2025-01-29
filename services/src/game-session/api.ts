@@ -13,7 +13,7 @@ import { createMiddleware } from 'hono/factory';
 import { requestId } from 'hono/request-id';
 import { z } from 'zod';
 import { GameSessionState } from '.';
-import type { AuthedStore } from '../db';
+import type { UserStore } from '../db';
 import type { GameSessionInvitation } from '../db/kysely';
 import {
   handleError,
@@ -33,7 +33,7 @@ const openGameSessionMiddleware = createMiddleware<{
     // accessing the game session state
     myInvitation: GameSessionInvitation;
     // easier just to drop this on since we have it
-    userStore: AuthedStore;
+    userStore: UserStore;
   };
   Bindings: Env;
 }>(async (ctx, next) => {
