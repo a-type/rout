@@ -22,7 +22,7 @@ export function HomePage({}: HomePageProps) {
       <TopographyBackground />
       <PageContent>
         <div className="w-full h-20vh relative flex items-center justify-center">
-          <H1 className="!font-[Knewave] ![font-size:12vmin] text-center relative z-1">
+          <H1 className="!font-[Knewave] ![font-size:12vmin] font-400 text-center relative z-1">
             rout!
           </H1>
           <div className="flex flex-row absolute top-0 right-0 p-4">

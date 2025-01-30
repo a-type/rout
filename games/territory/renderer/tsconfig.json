@@ -6,7 +6,8 @@
     "declarationMap": true,
     "declarationDir": "./dist",
     "lib": ["DOM", "ESNext", "DOM.Iterable"],
-    "composite": true
+    "composite": true,
+    "rootDir": "./src"
   },
   "include": ["src"],
   "references": [

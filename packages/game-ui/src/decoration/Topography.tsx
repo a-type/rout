@@ -143,7 +143,7 @@ const COLORS = {
 export function Topography({ className, ...rest }: TopographyProps) {
   const [state] = useState(() => proxy({ scale: 1 }));
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
-    state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000);
+    state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
   });
 
   const mode = useSyncExternalStore(subscribeToColorModeChange, () =>

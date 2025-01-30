@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Card, H1 } from '@a-type/ui';
+import { Card } from '@a-type/ui';
 import { useEffect } from 'react';
 import { GameSummaryCard } from './GameSummaryCard';
 
@@ -16,7 +16,7 @@ export function MembershipsList() {
 
   return (
     <div className="flex flex-col gap-3">
-      <H1>Games</H1>
+      <h2 className="font-300 text-md uppercase my-0 mx-4">Games</h2>
       <Card.Grid>
         {sessions?.map((session) => (
           <GameSummaryCard key={session.id} session={session} />

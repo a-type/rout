@@ -21,7 +21,6 @@ jobs:
         run: pnpm run build
         env:
           VITE_PUBLIC_API_ORIGIN: ${{ vars.PUBLIC_API_ORIGIN }}
-          VITE_GAME_SESSION_API_ORIGIN: ${{ vars.GAME_SESSION_API_ORIGIN }}
           VITE_APP_ORIGIN: ${{ vars.APP_ORIGIN }}
 
       - name: Verify cloudflare token
@@ -44,13 +43,6 @@ jobs:
           packageManager: pnpm
           workingDirectory: ./services
           command: deploy -c ./src/public-api/wrangler.toml
-      - name: Deploy Game Session API
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          packageManager: pnpm
-          workingDirectory: ./services
-          command: deploy -c ./src/game-session/wrangler.toml
 
       - name: Deploy Public App
         uses: cloudflare/wrangler-action@v3
@@ -58,4 +50,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           packageManager: pnpm
           workingDirectory: ./app
-          command: pages deploy dist --project-name=app
+          command: pages deploy dist --project-name=long-game-app

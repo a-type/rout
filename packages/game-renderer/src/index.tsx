@@ -2,7 +2,7 @@ import { useGameSuite } from '@long-game/game-client';
 import { renderers } from './mapping';
 
 export function GameRenderer() {
-  const { gameSessionId, gameDefinition, gameId } = useGameSuite();
+  const { gameDefinition, gameId } = useGameSuite();
   const gameRenderers = renderers[gameId];
   if (!gameRenderers) {
     return <div>Game not found</div>;
@@ -13,5 +13,5 @@ export function GameRenderer() {
     return <div>Version not found</div>;
   }
 
-  return <Client gameSessionId={gameSessionId} />;
+  return <Client />;
 }

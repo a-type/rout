@@ -81,10 +81,10 @@ describe('game round helpers', () => {
           gameTimeZone: 'America/New_York',
           members: [
             {
-              id: '1',
+              id: 'u-1',
             },
             {
-              id: '2',
+              id: 'u-2',
             },
           ],
           // games can start at anytime during the day...
@@ -116,19 +116,19 @@ describe('game round helpers', () => {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 0,
-              playerId: '1',
+              playerId: 'u-1',
             },
             {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 0,
-              playerId: '2',
+              playerId: 'u-2',
             },
             {
               createdAt: '2024-01-13T20:00:00Z',
               data: {},
               roundIndex: 1,
-              playerId: '1',
+              playerId: 'u-1',
             },
           ],
         }),

@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     ".": {
-      "development": "./src/index.tsx",
+      "//development": "./src/index.tsx",
       "workerd": "./src/index.tsx",
       "production": "./dist/esm/index.js",
       "default": "./dist/esm/index.js"

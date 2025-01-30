@@ -26,8 +26,8 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
         type="number"
         disabled={!isViewingCurrentRound}
         value={guess}
-        onChange={(e) => {
-          let num = e.target.valueAsNumber;
+        onValueChange={(v) => {
+          let num = parseInt(v);
           if (isNaN(num)) num = 0;
           prepareTurn({ guess: num });
         }}

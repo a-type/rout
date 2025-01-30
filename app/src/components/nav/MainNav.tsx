@@ -9,7 +9,7 @@ export function MainNav({}: MainNavProps) {
   const isFriends = routes.some((route) => route.path === '/friends');
   return (
     <NavBar className="md:(mt-8 rounded-md bg-overlay)">
-      {/* <span className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl">
+      {/* <span className="hidden sm-block font-[Knewave] font-300 text-center w-full p-2 text-xl">
         rout!
       </span> */}
       <NavBar.Item asChild active={isHome}>
