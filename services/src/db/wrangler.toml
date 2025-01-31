@@ -1,4 +1,4 @@
-name = "db-service"
+name = "prod-long-game-db-service"
 compatibility_date = "2025-01-01"
 main = "./index.ts"
 account_id = "5f843fcad78a2f4e1fee091c1d6c21ab"
@@ -17,5 +17,5 @@ database_id = "19289791-c695-4c46-8ad9-116b947fce1d"
 
 [[services]]
 binding = "STORE"
-service = "db-service"
+service = "prod-long-game-db-service"
 entrypoint = "AdminStore"
