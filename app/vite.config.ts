@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
         pipeline: {
           include: [/\.(ts|tsx)($|\?)/, /@long-game/],
         },
-        filesystem: ['../packages/game-ui/src/**/*'],
+        filesystem: ['../packages/*/src/**/*'],
       },
     }),
     react(),

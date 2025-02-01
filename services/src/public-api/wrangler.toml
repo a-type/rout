@@ -11,7 +11,8 @@ enabled = true
 head_sampling_rate = 1 # optional. default = 1.
 
 [vars]
-UI_ORIGIN = "https://long-game.gfor.rest"
+UI_ORIGIN = "https://play.rout.games"
+EMAIL_USER = "noreply@rout.games"
 
 [[services]]
 binding = "PUBLIC_STORE"

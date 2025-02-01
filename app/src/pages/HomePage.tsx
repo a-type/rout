@@ -11,7 +11,7 @@ import {
   PageNowPlaying,
   PageRoot,
 } from '@a-type/ui';
-import { TopographyBackground } from '@long-game/game-ui';
+import { GameIllustration1, TopographyBackground } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
 
 export interface HomePageProps {}
@@ -33,6 +33,7 @@ export function HomePage({}: HomePageProps) {
             </Button>
           </div>
         </div>
+        <GameIllustration1 />
         <MembershipsList />
         <PageNowPlaying unstyled className="items-center justify-center">
           <CreateGame />

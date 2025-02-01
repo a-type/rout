@@ -2,6 +2,7 @@ export * from './board/GameBoard';
 export * from './board/GamePiece';
 export * from './board/GamePlacement';
 export * from './controls/GameControls';
+export * from './decoration/GameIllustration1';
 export * from './decoration/Topography';
 export * from './layout/GameLayout';
 export * from './log/GameLog';

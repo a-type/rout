@@ -8,16 +8,16 @@ export const email = new Email<Context<Env>>({
   provider: new SesEmailProvider({
     async getConnectionInfo(ctx) {
       return {
-        accessKeyId: 'TODO',
-        secretAccessKey: 'TODO',
-        region: 'us-east-2',
+        accessKeyId: ctx.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: ctx.env.AWS_SECRET_ACCESS_KEY,
+        region: 'us-east-1',
       };
     },
   }),
 
   async getConfig(ctx) {
     return {
-      from: 'long-game@gfor.rest',
+      from: ctx.env.EMAIL_FROM,
       uiOrigin: ctx.env.UI_ORIGIN,
       appName: APP_NAME,
       emailHost: 'smtp.zoho.com',
