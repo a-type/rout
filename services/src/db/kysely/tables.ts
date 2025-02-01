@@ -71,7 +71,7 @@ export interface VerificationCodeTable {
   code: string;
   email: string;
   name: string;
-  expiresAt: DateColumnOptional;
+  expiresAt: DateColumnRequired;
 }
 
 export type VerificationCode = Selectable<VerificationCodeTable>;

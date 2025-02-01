@@ -2,7 +2,7 @@ import { GameRecap } from '@/components/games/GameRecap.js';
 import { GameSession } from '@/components/games/GameSession.js';
 import { GameSetup } from '@/components/games/GameSetup.js';
 import { sdkHooks } from '@/services/publicSdk';
-import { PageContent, PageRoot } from '@a-type/ui';
+import { H1, PageContent, PageRoot } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { useParams } from '@verdant-web/react-router';
 
@@ -19,6 +19,7 @@ export function GameSessionPage() {
     return (
       <PageRoot>
         <PageContent>
+          <H1>Start a game</H1>
           <GameSetup gameSessionId={sessionId} />
         </PageContent>
       </PageRoot>

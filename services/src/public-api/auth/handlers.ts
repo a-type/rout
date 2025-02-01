@@ -87,5 +87,13 @@ export const authHandlers = createHandlers<Context<Env>>({
     insertVerificationCode(data) {
       return ctx.env.ADMIN_STORE.insertVerificationCode(data);
     },
+    async getVerificationCode(email, code) {
+      const value = await ctx.env.ADMIN_STORE.getVerificationCode(email, code);
+      if (!value) return value;
+      return {
+        ...value,
+        expiresAt: new Date(value.expiresAt),
+      };
+    },
   }),
 });

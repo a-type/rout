@@ -119,10 +119,10 @@ export const gameSessionRouter = new Hono<Env>()
     ]);
 
     return ctx.json({
-      members,
-      invitations,
+      members: wrapRpcData(members),
+      invitations: wrapRpcData(invitations),
       myInvitation,
-      session: summary,
+      session: wrapRpcData(summary),
     });
   })
   .get(

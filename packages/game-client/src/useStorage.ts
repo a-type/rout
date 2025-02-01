@@ -30,11 +30,12 @@ function makeUseStorage(
     const snapshot = useSnapshot(cache);
     const storedValue = (snapshot[key] ?? initialValue) as T;
 
+    const hasValue = snapshot[key] !== undefined;
     useEffect(() => {
-      if (snapshot[key] === undefined && writeInitialValue) {
+      if (!hasValue && writeInitialValue) {
         storage.setItem(key, JSON.stringify(initialValue));
       }
-    }, [!!snapshot[key], initialValue, writeInitialValue, key]);
+    }, [hasValue, initialValue, writeInitialValue, key]);
 
     // Return a wrapped version of useState's setter function that
     // persists the new value to localStorage. It's throttled to prevent
