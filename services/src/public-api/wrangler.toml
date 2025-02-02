@@ -12,7 +12,9 @@ head_sampling_rate = 1 # optional. default = 1.
 
 [vars]
 UI_ORIGIN = "https://play.rout.games"
-EMAIL_USER = "noreply@rout.games"
+API_ORIGIN = "https://api.rout.games"
+NODE_ENV = "production"
+EMAIL_FROM = "noreply@rout.games"
 
 [[services]]
 binding = "PUBLIC_STORE"
