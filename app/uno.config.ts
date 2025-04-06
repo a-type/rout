@@ -9,6 +9,16 @@ export default defineConfig({
       borderScale: 2,
       roundedness: 0.6,
       scale: 'lg',
+      customTheme: {
+        primary: {
+          hue: 290,
+          hueRotate: -5,
+        },
+        accent: {
+          hue: 90,
+          hueRotate: 4,
+        },
+      },
     }),
   ],
   transformers: [variantGroup()],
