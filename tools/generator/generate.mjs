@@ -1,20 +1,11 @@
 #!/usr/bin/env node
 
-import {
-  intro,
-  outro,
-  spinner,
-  text,
-  confirm,
-  note,
-  select,
-  isCancel,
-} from '@clack/prompts';
+import { intro, isCancel, outro, select, spinner, text } from '@clack/prompts';
+import { exec } from 'child_process';
 import { cpTpl } from 'cp-tpl';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as url from 'url';
-import * as fs from 'fs/promises';
-import { exec } from 'child_process';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -123,8 +114,9 @@ async function addGameToGamesPackage(gameName) {
   const gamesPackageJsonContent = await fs.readFile(gamesPackageJson, 'utf-8');
   const gamesPackageJsonParsed = JSON.parse(gamesPackageJsonContent);
 
-  gamesPackageJsonParsed.dependencies[`@long-game/game-${gameName}`] =
-    'workspace:*';
+  gamesPackageJsonParsed.dependencies[
+    `@long-game/game-${gameName}-definition`
+  ] = 'workspace:*';
 
   await fs.writeFile(
     gamesPackageJson,
@@ -144,7 +136,7 @@ async function addGameToGamesPackage(gameName) {
 
   // add the import to the top
   gamesIndexLines.unshift(
-    `import ${gameName} from '@long-game/game-${gameName}';`,
+    `import ${gameName} from '@long-game/game-${gameName}-definition';`,
   );
 
   await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));

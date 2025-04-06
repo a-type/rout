@@ -21,7 +21,7 @@ export const RoundHistoryControl = withGame(
     };
 
     return (
-      <Box align="center center">
+      <Box layout="center center">
         <Button
           size="icon-small"
           onClick={() => {

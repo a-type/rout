@@ -248,7 +248,11 @@ export const TopographyBackground = withClassName(
 
 export const TopographyButton = ({ children, ...props }: ButtonProps) => {
   return (
-    <Button {...props} className="relative z-10 overflow-hidden">
+    <Button
+      {...props}
+      color="primary"
+      className="relative z-10 overflow-hidden"
+    >
       {!props.disabled && (
         <TopographyBackground className="[:hover>&]:[filter:brightness(1.5)]" />
       )}

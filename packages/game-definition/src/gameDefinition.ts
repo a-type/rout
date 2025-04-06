@@ -80,11 +80,21 @@ export type GameDefinition<
      */
     rounds: GameRound<Turn<TurnData>>[];
   }) => PlayerState;
+
+  applyRoundToGlobalState?: (data: {
+    globalState: GlobalState;
+    round: GameRound<Turn<TurnData>>;
+    random: GameRandom;
+    members: { id: string }[];
+    initialState: GlobalState;
+    rounds: GameRound<Turn<TurnData>>[];
+  }) => GlobalState;
+
   /**
-   * This is the computed current state of the game. It should be deterministic.
-   * It's computed from the initial state and all moves.
+   * Allows overriding all the underlying logic of computing the
+   * game state as an alternative to applyRoundToGlobalState.
    */
-  getState: (data: {
+  getState?: (data: {
     initialState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
     random: GameRandom;
@@ -140,6 +150,42 @@ export interface GameModule {
   title: string;
 }
 
+export function validateGameDefinition(game: GameDefinition) {
+  if (!game.getState && !game.applyRoundToGlobalState) {
+    throw new Error(
+      `Game ${game.version} must define either getState or applyRoundToGlobalState`,
+    );
+  }
+}
+
 export function getLatestVersion(game: GameModule): GameDefinition {
   return game.versions[game.versions.length - 1];
+}
+
+export function getGameState(
+  game: GameDefinition,
+  data: {
+    rounds: GameRound<any>[];
+    randomSeed: string;
+    members: { id: string }[];
+  },
+) {
+  const random = new GameRandom(data.randomSeed);
+  const initialState = game.getInitialGlobalState({
+    random,
+    members: data.members,
+  });
+  if (game.getState) {
+    return game.getState({ ...data, initialState, random });
+  } else {
+    return data.rounds.reduce((state, round) => {
+      return game.applyRoundToGlobalState!({
+        ...data,
+        initialState,
+        globalState: state,
+        round,
+        random,
+      });
+    }, initialState);
+  }
 }

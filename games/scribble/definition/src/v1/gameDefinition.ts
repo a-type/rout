@@ -1,15 +1,23 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 
+export type SequenceItem = {
+  /** Can remain null if this is the first round and item is description-only */
+  drawing: string | null;
+  description: string | null;
+};
+
 export type GlobalState = {
-  // TODO: internal state the server manages
+  sequence: SequenceItem[];
 };
 
 export type PlayerState = {
-  // TODO: public state available for players
+  describe: SequenceItem;
+  draw: SequenceItem;
 };
 
 export type TurnData = {
-  // TODO: what data can players submit in their moves?
+  description: string;
+  drawing: string;
 };
 
 export const gameDefinition: GameDefinition<
@@ -24,29 +32,41 @@ export const gameDefinition: GameDefinition<
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
-  validateTurn: ({ playerState, turn }) => {
-    // TODO: return error string if the moves are invalid
-  },
+  validateTurn: ({ playerState, turn }) => {},
 
   // run on client
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
+    return playerState;
   },
 
   // run on server
 
   getInitialGlobalState: ({ members }) => {
     // TODO: return the initial global state. possibly randomizing initial conditions.
+    return {
+      sequence: [],
+    };
   },
 
   getPlayerState: ({ globalState, playerId }) => {
     // TODO: compute the player state from the global state
+    return {
+      describe: {
+        drawing: null,
+        description: null,
+      },
+      draw: {
+        drawing: null,
+        description: null,
+      },
+    };
   },
 
-  applyRoundToGlobalState: ({ globalState, round, random, members }) => {
-    // TODO: how does the round affect the global state?
+  applyRoundToGlobalState: ({ globalState, round }) => {
+    return globalState;
   },
 
   getPublicTurn: ({ turn }) => {
@@ -57,5 +77,8 @@ export const gameDefinition: GameDefinition<
 
   getStatus: ({ globalState, rounds }) => {
     // TODO: when is the game over? who won?
+    return {
+      status: 'active',
+    };
   },
 };

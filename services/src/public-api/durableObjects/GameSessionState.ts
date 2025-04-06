@@ -17,7 +17,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
-  GameRandom,
+  getGameState,
   getLatestVersion,
   Turn,
 } from '@long-game/game-definition';
@@ -459,17 +459,11 @@ export class GameSessionState extends DurableObject<Env> {
     if (!this.#sessionData) {
       throw new Error('Session data not initialized');
     }
-    const random = new GameRandom(this.#sessionData.randomSeed);
-    const initialState = this.gameDefinition.getInitialGlobalState({
-      random,
-      members: this.#sessionData.members,
-    });
     const rounds = this.getRounds({ upTo: roundIndex });
     console.log('global state rounds', rounds);
-    const computed = this.gameDefinition.getState({
-      initialState,
+    const computed = getGameState(this.gameDefinition, {
       rounds,
-      random,
+      randomSeed: this.#sessionData.randomSeed,
       members: this.#sessionData.members,
     });
     return computed;

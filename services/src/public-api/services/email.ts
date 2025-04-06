@@ -20,7 +20,6 @@ export const email = new Email<Context<Env>>({
       from: ctx.env.EMAIL_FROM,
       uiOrigin: ctx.env.UI_ORIGIN,
       appName: APP_NAME,
-      emailHost: 'smtp.zoho.com',
       developerName: 'Grant',
     };
   },

@@ -230,7 +230,7 @@ export const BasicGameLog = withGame<{ className?: string }>(
             >
               <Icon name="x" />
             </Button>
-            <Box p="sm" align="stretch stretch" className="w-full lg:h-full">
+            <Box p="sm" layout="stretch stretch" className="w-full lg:h-full">
               <GameLogFull />
             </Box>
           </CollapsibleContent>

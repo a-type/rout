@@ -1,17 +1,18 @@
 import { clsx } from '@a-type/ui';
 
-export interface GameIllustration1Props {}
+export interface GameIllustration1Props {
+  className?: string;
+}
 
-export function GameIllustration1({}: GameIllustration1Props) {
+export function GameIllustration1({ className }: GameIllustration1Props) {
   const floatClass = `[animation-name:game-illustration-1-float] animate-iteration-count-infinite animate-duration-25s [animation-timing-function:linear]`;
   return (
-    <div>
+    <div className={className}>
       <svg
-        width="512"
-        height="512"
         viewBox="0 0 512 512"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-auto"
       >
         <style>
           {`
