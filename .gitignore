@@ -8,6 +8,6 @@ dist/
 .env
 .env*
 .turbo
-.dev.vars
+*.vars
 .wrangler
 tsconfig.tsbuildinfo

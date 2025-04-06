@@ -4,6 +4,7 @@ import { API_ORIGIN, HOME_ORIGIN } from './config.js';
 
 export const fetch = createFetch({
   refreshSessionEndpoint: `${API_ORIGIN}/auth/refresh`,
+  logoutEndpoint: `${API_ORIGIN}/auth/logout`,
   isSessionExpired: (res) => {
     const longGameError = LongGameError.fromResponse(res);
     if (longGameError) {

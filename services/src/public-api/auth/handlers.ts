@@ -13,6 +13,10 @@ export const authHandlers = createHandlers<Context<Env>>({
   },
   getRedirectConfig: (ctx) => ({
     defaultReturnToOrigin: ctx.env.UI_ORIGIN,
+    allowedReturnToOrigin(origin) {
+      if (origin === ctx.env.UI_ORIGIN) return true;
+      return false;
+    },
   }),
   providers: {
     google: new GoogleCloudflareProvider({

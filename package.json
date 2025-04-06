@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "setup": "turbo run setup",
+    "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
     "gen": "node ./tools/generator/generate.mjs",
     "gql:doctor": "gql.tada doctor",

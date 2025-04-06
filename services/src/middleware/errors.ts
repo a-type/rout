@@ -1,3 +1,4 @@
+import { AuthError } from '@a-type/auth';
 import { LongGameError } from '@long-game/common';
 import { ZodError } from 'zod';
 
@@ -23,6 +24,10 @@ export function handleError(reason: unknown): Response {
         'x-long-game-error': LongGameError.Code.BadRequest.toString(),
       },
     });
+  }
+
+  if (reason instanceof AuthError) {
+    return reason.toResponse();
   }
 
   console.error('Unknown error:', reason);
