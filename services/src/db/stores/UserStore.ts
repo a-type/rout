@@ -64,6 +64,10 @@ export class UserStore extends RpcTarget {
    * anonymized info will be returned.
    */
   async getUser(id: PrefixedId<'u'>) {
+    if (id === this.#userId) {
+      return this.getMe();
+    }
+
     const user = await this.#db
       .selectFrom('User')
       .innerJoin('Friendship', 'User.id', 'Friendship.userId')
