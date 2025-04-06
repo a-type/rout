@@ -31,7 +31,7 @@ if (isCancel(template)) {
 }
 
 const name = await text({
-  message: 'What is the name of the package?',
+  message: 'What is the name of the package? (use kebab-case)',
   validate: (value) => {
     if (!value) {
       return 'Please enter a name';
