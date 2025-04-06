@@ -175,6 +175,59 @@ importers:
         specifier: ^3.99.0
         version: 3.99.0(@cloudflare/workers-types@4.20250124.3)
 
+  games/gudnak/definition:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.4(@types/node@22.10.2)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/gudnak/renderer:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-client':
+        specifier: workspace:*
+        version: link:../../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+      '@long-game/game-gudnak-definition':
+        specifier: workspace:*
+        version: link:../definition
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../../../packages/game-ui
+      react:
+        specifier: 'catalog:'
+        version: 19.0.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.0.8
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.0.3(@types/react@19.0.8)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.4(@types/node@22.10.2)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
   games/number-guess/definition:
     dependencies:
       '@long-game/game-definition':
@@ -503,6 +556,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-gudnak-definition':
+        specifier: workspace:*
+        version: link:../../games/gudnak/definition
       '@long-game/game-number-guess-definition':
         specifier: workspace:*
         version: link:../../games/number-guess/definition

@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/esm",
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "./dist/typings",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "composite": true
+  },
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../../../packages/game-client"
+    },
+    {
+      "path": "../../../packages/game-ui"
+    }
+  ]
+}
