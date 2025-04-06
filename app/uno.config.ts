@@ -7,7 +7,7 @@ export default defineConfig({
   presets: [
     preset({
       borderScale: 2,
-      roundedness: 0.75,
+      roundedness: 0.6,
       scale: 'lg',
     }),
   ],
