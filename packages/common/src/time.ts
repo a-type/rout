@@ -1,4 +1,4 @@
-import { fromZonedTime } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz/fromZonedTime';
 
 /**
  * Converts an abstract idea of "day, time" into

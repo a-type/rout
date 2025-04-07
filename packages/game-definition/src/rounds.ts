@@ -3,8 +3,8 @@
  */
 
 import { withTimezone } from '@long-game/common';
+import add from 'date-fns/add';
 import { RoundIndexDecider } from './gameDefinition.js';
-import add from 'date-fns/add/index.js';
 
 export type PeriodType = 'days' | 'hours' | 'minutes';
 
