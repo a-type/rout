@@ -18,7 +18,8 @@
   "dependencies": {
     "@long-game/common": "workspace:*",
     "date-fns": "^2.30.0",
-    "seedrandom": "^3.0.5"
+    "seedrandom": "^3.0.5",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

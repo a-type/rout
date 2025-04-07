@@ -87,7 +87,7 @@ export const friendshipsRouter = new Hono<Env>()
     userStoreMiddleware,
     zValidator(
       'json',
-      z.object({ response: z.enum(['accepted', 'declined']) }),
+      z.object({ response: z.enum(['accepted', 'declined', 'retracted']) }),
     ),
     async (ctx) => {
       const { response } = ctx.req.valid('json');

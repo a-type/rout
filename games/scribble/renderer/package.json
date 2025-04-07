@@ -16,18 +16,19 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@long-game/game-scribble-definition": "workspace:*",
-    "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/game-scribble-definition": "workspace:*",
     "@long-game/game-ui": "workspace:*",
+    "perfect-freehand": "^1.2.2",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "catalog:",
     "@types/react": "catalog:",
-    "@types/react-dom": "catalog:"
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

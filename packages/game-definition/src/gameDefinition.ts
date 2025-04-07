@@ -79,6 +79,8 @@ export type GameDefinition<
      * maybe we can include it as a separate parameter just to be safe?
      */
     rounds: GameRound<Turn<TurnData>>[];
+    /** easier than counting rounds */
+    roundIndex: number;
   }) => PlayerState;
 
   applyRoundToGlobalState?: (data: {
@@ -87,7 +89,9 @@ export type GameDefinition<
     random: GameRandom;
     members: { id: string }[];
     initialState: GlobalState;
+    /** Prior rounds */
     rounds: GameRound<Turn<TurnData>>[];
+    roundIndex: number;
   }) => GlobalState;
 
   /**
@@ -178,13 +182,14 @@ export function getGameState(
   if (game.getState) {
     return game.getState({ ...data, initialState, random });
   } else {
-    return data.rounds.reduce((state, round) => {
+    return data.rounds.reduce((state, round, i) => {
       return game.applyRoundToGlobalState!({
         ...data,
         initialState,
         globalState: state,
         round,
         random,
+        roundIndex: i,
       });
     }, initialState);
   }

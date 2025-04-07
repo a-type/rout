@@ -18,7 +18,7 @@ export function LoginPage({}: LoginPageProps) {
   return (
     <Box className="w-full h-full" layout="center center">
       <TopographyBackground />
-      <Box p="md" className="flex-col lg:flex-row m-auto relative z-1" gap="md">
+      <Box p className="flex-col lg:flex-row m-auto relative z-1" gap>
         <Box
           d={{
             sm: 'col-reverse',
@@ -33,7 +33,7 @@ export function LoginPage({}: LoginPageProps) {
           <GameIllustration1 className="h-15vh lg:h-40vh" />
         </Box>
         <Tabs value={tab} defaultValue="login" asChild>
-          <Box items="center" d="col" gap="md">
+          <Box items="center" d="col" gap container="reset">
             <Tabs.List className="justify-center w-full">
               <Tabs.Trigger value="login" asChild color="default">
                 <Link to="?tab=login">Log in</Link>
@@ -43,7 +43,7 @@ export function LoginPage({}: LoginPageProps) {
               </Tabs.Trigger>
             </Tabs.List>
             <Tabs.Content value="login" asChild>
-              <Box d="col" gap="md" items="center">
+              <Box d="col" gap items="center">
                 <OAuthSigninButton
                   endpoint={`${API_ORIGIN}/auth/provider/google/login`}
                   returnTo={returnTo}
@@ -51,7 +51,7 @@ export function LoginPage({}: LoginPageProps) {
                 >
                   Log in with Google
                 </OAuthSigninButton>
-                <Box d="col" p="md" gap="md" surface>
+                <Box d="col" p gap surface>
                   <H2>Log in with email</H2>
                   <EmailSigninForm
                     endpoint={`${API_ORIGIN}/auth/email-login`}
@@ -61,7 +61,7 @@ export function LoginPage({}: LoginPageProps) {
               </Box>
             </Tabs.Content>
             <Tabs.Content value="signup" asChild>
-              <Box d="col" gap="md" items="center">
+              <Box d="col" gap items="center">
                 <OAuthSigninButton
                   endpoint={`${API_ORIGIN}/auth/provider/google/login`}
                   returnTo={returnTo}
@@ -69,7 +69,7 @@ export function LoginPage({}: LoginPageProps) {
                 >
                   Sign up with Google
                 </OAuthSigninButton>
-                <Box d="col" p="md" gap="md" surface>
+                <Box d="col" p gap surface>
                   <H2>Sign up with email</H2>
                   <EmailSignupForm
                     endpoint={`${API_ORIGIN}/auth/begin-email-signup`}

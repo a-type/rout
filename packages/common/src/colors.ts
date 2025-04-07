@@ -1,17 +1,17 @@
 import {
-  red,
-  crimson,
-  plum,
-  violet,
-  indigo,
   blue,
-  teal,
-  lime,
   bronze,
-  orange,
-  yellow,
-  mint,
+  crimson,
   gray,
+  indigo,
+  lime,
+  mint,
+  orange,
+  plum,
+  red,
+  teal,
+  violet,
+  yellow,
 } from '@radix-ui/colors';
 
 // this is verbose and manual, because color
@@ -38,6 +38,7 @@ export const colors = {
     ],
     default: red.red9,
     defaultText: 'white',
+    okHue: 22.9,
   },
   crimson: {
     range: [
@@ -56,6 +57,7 @@ export const colors = {
     ],
     default: crimson.crimson9,
     defaultText: 'white',
+    okHue: 1.3,
   },
   plum: {
     range: [
@@ -74,6 +76,7 @@ export const colors = {
     ],
     default: plum.plum9,
     defaultText: 'white',
+    okHue: 322.09,
   },
   violet: {
     range: [
@@ -92,6 +95,7 @@ export const colors = {
     ],
     default: violet.violet9,
     defaultText: 'white',
+    okHue: 288.1,
   },
   indigo: {
     range: [
@@ -110,6 +114,7 @@ export const colors = {
     ],
     default: indigo.indigo9,
     defaultText: 'white',
+    okHue: 267.08,
   },
   blue: {
     range: [
@@ -128,6 +133,7 @@ export const colors = {
     ],
     default: blue.blue9,
     defaultText: 'white',
+    okHue: 251.81,
   },
   teal: {
     range: [
@@ -146,6 +152,7 @@ export const colors = {
     ],
     default: teal.teal9,
     defaultText: 'white',
+    okHue: 182.01,
   },
   lime: {
     range: [
@@ -164,6 +171,7 @@ export const colors = {
     ],
     default: lime.lime9,
     defaultText: 'white',
+    okHue: 126.09,
   },
   bronze: {
     range: [
@@ -182,6 +190,7 @@ export const colors = {
     ],
     default: bronze.bronze9,
     defaultText: 'white',
+    okHue: 44.29,
   },
   orange: {
     range: [
@@ -200,6 +209,7 @@ export const colors = {
     ],
     default: orange.orange9,
     defaultText: 'white',
+    okHue: 44.8,
   },
   yellow: {
     range: [
@@ -218,6 +228,7 @@ export const colors = {
     ],
     default: yellow.yellow9,
     defaultText: 'black',
+    okHue: 102.14,
   },
   mint: {
     range: [
@@ -236,6 +247,7 @@ export const colors = {
     ],
     default: mint.mint9,
     defaultText: 'black',
+    okHue: 177.97,
   },
   gray: {
     range: [
@@ -254,6 +266,7 @@ export const colors = {
     ],
     default: gray.gray9,
     defaultText: 'black',
+    okHue: 0,
   },
 };
 

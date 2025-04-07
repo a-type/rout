@@ -39,7 +39,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
   }
 
   return (
-    <Box p="md" d="col" gap="md">
+    <Box p d="col" gap>
       <H2>Who's in</H2>
       <GameSetupMembers sessionId={gameSessionId} />
       <H2>Invite friends</H2>
@@ -144,7 +144,7 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
                 <Box
                   className={clsx(
                     'absolute top--1 right--1 rounded-full p-2',
-                    entry.status === 'pending' ? 'bg-gray-2' : 'bg-accent',
+                    entry.status === 'pending' ? 'bg-gray' : 'bg-accent',
                   )}
                 >
                   <Icon name={entry.status === 'pending' ? 'send' : 'plus'} />

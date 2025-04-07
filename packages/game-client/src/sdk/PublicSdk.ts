@@ -37,7 +37,7 @@ export class PublicSdk extends BaseSdk {
     this.apiRpc.friendships.invites[':id'].$post,
     {
       transformInput: (input: {
-        response: 'accepted' | 'declined';
+        response: 'accepted' | 'declined' | 'retracted';
         id: string;
       }) => ({
         json: { response: input.response },

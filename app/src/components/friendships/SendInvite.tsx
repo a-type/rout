@@ -8,7 +8,7 @@ export function SendInvite() {
 
   if (showSent) {
     return (
-      <Box>
+      <Box d="col" surface="primary" p gap>
         Invite sent!
         <Button color="ghost" onClick={() => setShowSent(false)}>
           Invite someone else
@@ -18,15 +18,17 @@ export function SendInvite() {
   }
 
   return (
-    <FormikForm
-      initialValues={{ email: '' }}
-      onSubmit={async (values) => {
-        await sendMutation.mutateAsync({ email: values.email });
-        setShowSent(true);
-      }}
-    >
-      <TextField name="email" label="Email" type="email" />
-      <SubmitButton>Invite someone new</SubmitButton>
-    </FormikForm>
+    <Box d="col" surface="primary" p gap>
+      <FormikForm
+        initialValues={{ email: '' }}
+        onSubmit={async (values) => {
+          await sendMutation.mutateAsync({ email: values.email });
+          setShowSent(true);
+        }}
+      >
+        <TextField name="email" label="Email" type="email" />
+        <SubmitButton>Invite someone new</SubmitButton>
+      </FormikForm>
+    </Box>
   );
 }

@@ -31,9 +31,9 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
   return (
-    <Box direction="col">
+    <Box direction="col" gap>
       <H1>Join Game</H1>
-      <Box>
+      <Box gap>
         <AvatarList count={pregame.members.length}>
           {pregame.members.map((member, i) => (
             <AvatarListItem

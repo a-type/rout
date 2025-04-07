@@ -5,7 +5,7 @@ import {
   id,
 } from '@long-game/common';
 import { RpcTarget } from 'cloudflare:workers';
-import { DB, jsonObjectFrom } from '../kysely/index.js';
+import { DB, jsonObjectFrom, sql } from '../kysely/index.js';
 
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;
@@ -177,18 +177,21 @@ export class UserStore extends RpcTarget {
       .select([
         'id',
         'status',
-        (eb) =>
-          jsonObjectFrom(
-            eb
-              .selectFrom('User')
-              .whereRef('User.id', '=', 'FriendshipInvitation.inviterId')
-              .select([
-                'User.id',
-                'User.color',
-                'User.imageUrl',
-                'User.displayName',
-              ]),
-          ).as('otherUser'),
+        'email',
+        direction === 'incoming'
+          ? (eb) =>
+              jsonObjectFrom(
+                eb
+                  .selectFrom('User')
+                  .select([
+                    'User.id',
+                    'User.color',
+                    'User.imageUrl',
+                    'User.displayName',
+                  ])
+                  .whereRef('User.id', '=', 'FriendshipInvitation.inviterId'),
+              ).as('otherUser')
+          : sql<null>`NULL`.as('otherUser'),
       ])
       .where('status', '=', 'pending');
     if (direction === 'outgoing') {
@@ -222,7 +225,7 @@ export class UserStore extends RpcTarget {
 
   async respondToFriendshipInvite(
     friendshipId: PrefixedId<'fi'>,
-    status: 'accepted' | 'declined',
+    status: 'accepted' | 'declined' | 'retracted',
   ) {
     const friendship = await this.#db
       .selectFrom('FriendshipInvitation')
@@ -255,6 +258,21 @@ export class UserStore extends RpcTarget {
         LongGameError.Code.BadRequest,
         'Friendship invite has expired',
       );
+    }
+
+    if (status === 'retracted') {
+      // deletes the invite -- but only if it was created by the user
+      if (friendship.inviterId !== this.#userId) {
+        throw new LongGameError(
+          LongGameError.Code.Forbidden,
+          'You cannot retract this invite',
+        );
+      }
+      await this.#db
+        .deleteFrom('FriendshipInvitation')
+        .where('id', '=', friendshipId)
+        .executeTakeFirstOrThrow();
+      return;
     }
 
     const updated = await this.#db

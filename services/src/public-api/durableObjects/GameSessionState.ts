@@ -389,6 +389,7 @@ export class GameSessionState extends DurableObject<Env> {
       playerId,
       members: this.#sessionData.members,
       rounds: this.getRounds({ upTo: resolvedRoundIndex }),
+      roundIndex: resolvedRoundIndex,
     }) as any;
   }
 
