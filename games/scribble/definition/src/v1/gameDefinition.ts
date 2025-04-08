@@ -1,10 +1,11 @@
+import { PrefixedId } from '@long-game/common';
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { getPlayerSequenceIndexes } from './ordering';
 
 export interface DescriptionItem {
   kind: 'description';
   description: string;
-  playerId: string;
+  playerId: PrefixedId<'u'>;
 }
 
 export interface Drawing {
@@ -17,7 +18,7 @@ export interface Drawing {
 export interface DrawingItem {
   kind: 'drawing';
   drawing: Drawing;
-  playerId: string;
+  playerId: PrefixedId<'u'>;
 }
 
 export interface StartItem {
@@ -26,6 +27,10 @@ export interface StartItem {
 }
 
 export type SequenceItem = StartItem | DescriptionItem | DrawingItem;
+export type TaskCompletion =
+  | StartItem
+  | Omit<DescriptionItem, 'playerId'>
+  | Omit<DrawingItem, 'playerId'>;
 
 export type GlobalState = {
   sequences: SequenceItem[][];
@@ -41,7 +46,7 @@ export type PlayerState = {
 };
 
 export type TurnData = {
-  taskCompletions: SequenceItem[];
+  taskCompletions: TaskCompletion[];
 };
 
 export const gameDefinition: GameDefinition<
@@ -56,11 +61,57 @@ export const gameDefinition: GameDefinition<
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
-  validateTurn: ({ playerState, turn }) => {},
+  validateTurn: ({ playerState, turn }) => {
+    if (turn.data.taskCompletions.length !== 2) {
+      return 'You must complete both tasks. Use the tabs to switch between them!';
+    }
+    // check that completions match their prompts
+    for (let i = 0; i < turn.data.taskCompletions.length; i++) {
+      const taskCompletion = turn.data.taskCompletions[i];
+
+      if (!taskCompletion) {
+        return 'You must complete both tasks. Use the tabs to switch between them!';
+      }
+
+      const prompt = playerState.tasks[i];
+      if (taskCompletion.kind === 'description') {
+        switch (prompt.kind) {
+          case 'start':
+            if (prompt.type !== 'description')
+              return 'You must complete a description';
+          case 'description':
+            return 'You must complete a description';
+        }
+      } else if (taskCompletion.kind === 'drawing') {
+        switch (prompt.kind) {
+          case 'start':
+            if (prompt.type !== 'drawing') return 'You must complete a drawing';
+          case 'drawing':
+            return 'You must complete a drawing';
+        }
+      } else {
+        return 'Invalid task completion... this is a bug!';
+      }
+
+      // check that a description is not empty
+      if (taskCompletion.kind === 'description') {
+        if (
+          !taskCompletion.description ||
+          taskCompletion.description.length < 10
+        ) {
+          return 'Please write something a bit longer.';
+        }
+      } else if (taskCompletion.kind === 'drawing') {
+        if (!taskCompletion.drawing || !taskCompletion.drawing.strokes.length) {
+          return 'Please draw something.';
+        }
+      }
+    }
+  },
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  getProspectivePlayerState: ({ playerId, playerState, prospectiveTurn }) => {
     // match tasks to completions and add them to history
     return {
       ...playerState,
@@ -68,7 +119,7 @@ export const gameDefinition: GameDefinition<
         ...playerState.history,
         playerState.tasks.map((task, index) => [
           task,
-          prospectiveTurn.data.taskCompletions[index],
+          { playerId, ...prospectiveTurn.data.taskCompletions[index] },
         ]),
       ],
     };
@@ -131,7 +182,12 @@ export const gameDefinition: GameDefinition<
         playerIndex,
       });
       sequenceIndexes.forEach((seqIndex, i) => {
-        sequences[seqIndex].push(turn.data.taskCompletions[i]);
+        sequences[seqIndex].push(
+          taskCompletionToSequenceItem(
+            turn.data.taskCompletions[i],
+            turn.playerId,
+          ),
+        );
       });
     });
     return {
@@ -150,3 +206,22 @@ export const gameDefinition: GameDefinition<
     };
   },
 };
+
+function taskCompletionToSequenceItem(
+  taskCompletion: TaskCompletion,
+  playerId: PrefixedId<'u'>,
+): SequenceItem {
+  if (taskCompletion.kind === 'drawing') {
+    return {
+      ...taskCompletion,
+      playerId,
+    };
+  } else if (taskCompletion.kind === 'description') {
+    return {
+      ...taskCompletion,
+      playerId,
+    };
+  } else {
+    return taskCompletion;
+  }
+}

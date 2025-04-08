@@ -11,3 +11,4 @@ export * from './rounds.js';
 export * from './rpcUtil.js';
 export * from './status.js';
 export * from './time.js';
+export * from './types.js';

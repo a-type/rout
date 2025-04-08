@@ -25,6 +25,7 @@
     "turbo": "2.3.3",
     "typescript": "catalog:",
     "unocss": "catalog:",
-    "wrangler": "3.99.0"
+    "wrangler": "3.99.0",
+    "vitest": "catalog:"
   }
 }

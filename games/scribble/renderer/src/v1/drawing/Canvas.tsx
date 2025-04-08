@@ -1,34 +1,31 @@
-import { clsx } from '@a-type/ui';
+import { Box, Button, clsx } from '@a-type/ui';
 import { colors, PrefixedId } from '@long-game/common';
 import { Drawing } from '@long-game/game-scribble-definition/v1';
+import { PlayerAvatar } from '@long-game/game-ui';
 import { getStroke } from 'perfect-freehand';
-import { useState } from 'react';
+import { PointerEvent, useState } from 'react';
 import { hooks } from '../gameClient';
 
 export interface CanvasProps {
-  readonly: boolean;
+  readonly?: boolean;
   drawing: Drawing;
   playerId: PrefixedId<'u'>;
-  onChange: (value: Drawing) => void;
+  onChange?: (value: Drawing) => void;
 }
 
-const options = {
-  size: 32,
-  thinning: 0.5,
-  smoothing: 0.5,
-  streamline: 0.5,
-  easing: (t: number) => t,
-  start: {
-    taper: 0,
-    easing: (t: number) => t,
-    cap: true,
-  },
-  end: {
-    taper: 100,
-    easing: (t: number) => t,
-    cap: true,
-  },
-};
+function getStrokeOptions(size: number) {
+  return {
+    size,
+    smoothing: 0.01,
+  };
+}
+
+function getSvgPoint(e: PointerEvent<SVGSVGElement>) {
+  const point = e.currentTarget.createSVGPoint();
+  point.x = e.clientX;
+  point.y = e.clientY;
+  return point.matrixTransform(e.currentTarget.getScreenCTM()!.inverse());
+}
 
 export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   readonly,
@@ -40,60 +37,167 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   const player = gameSuite.getPlayer(playerId);
 
   const [points, setPoints] = useState<number[][]>([]);
+  const [color, setColor] = useState<'dark' | 'light' | 'contrast'>('contrast');
+  const [size, setSize] = useState(2);
 
-  const stroke = getStroke(points, options);
+  const stroke = getStroke(points, getStrokeOptions(size));
   const pathData = getSvgPathFromStroke(stroke);
 
   const palette = colors[player.color];
 
   return (
-    <svg
-      onPointerDown={
-        readonly
-          ? undefined
-          : (e) => {
-              e.currentTarget.setPointerCapture(e.pointerId);
-              setPoints([[e.pageX, e.pageY, e.pressure]]);
-            }
-      }
-      onPointerMove={
-        readonly
-          ? undefined
-          : (e) => {
-              if (e.buttons !== 1) return;
-              setPoints([...points, [e.pageX, e.pageY, e.pressure]]);
-            }
-      }
-      onPointerUp={
-        readonly
-          ? undefined
-          : () => {
-              setPoints([]);
-              onChange({
-                ...drawing,
-                strokes: [
-                  ...drawing.strokes,
-                  {
-                    path: points,
-                    color: 'dark',
-                  },
-                ],
-              });
-            }
-      }
-      style={
-        {
-          '--dyn-primary-source': palette.okHue,
-          '--dyn-accent-source': palette.okHue,
-        } as any
-      }
-      className={clsx('touch-none', 'theme')}
-    >
-      {points && <path d={pathData} />}
-      {drawing.strokes.map((stroke, i) => (
-        <Stroke stroke={stroke} key={i} />
-      ))}
-    </svg>
+    <>
+      <Box
+        full="width"
+        d="col"
+        gap
+        p
+        container="reset"
+        items="center"
+        style={
+          {
+            '--dyn-primary-source': palette.okHue,
+            '--dyn-accent-source': palette.okHue,
+          } as any
+        }
+        className={clsx('theme', 'override-light')}
+      >
+        {!readonly && (
+          <>
+            <Box
+              justify="between"
+              gap
+              surface
+              d={{
+                default: 'col',
+                sm: 'row',
+              }}
+              items="center"
+            >
+              <Box gap>
+                <Button
+                  toggled={color === 'contrast'}
+                  color="ghost"
+                  onClick={() => setColor('contrast')}
+                >
+                  <div className="bg-black w-8 h-8 rounded-full" />
+                </Button>
+                <Button
+                  toggled={color === 'dark'}
+                  color="ghost"
+                  onClick={() => setColor('dark')}
+                >
+                  <div className="bg-primary-dark w-8 h-8 rounded-full" />
+                </Button>
+                <Button
+                  toggled={color === 'light'}
+                  color="ghost"
+                  onClick={() => setColor('light')}
+                >
+                  <div className="bg-primary-light w-8 h-8 rounded-full" />
+                </Button>
+              </Box>
+              <Box gap>
+                <Button
+                  toggled={size === 1}
+                  color="ghost"
+                  onClick={() => setSize(1)}
+                >
+                  <div className="bg-black w-4px h-4px rounded-full" />
+                </Button>
+                <Button
+                  toggled={size === 2}
+                  color="ghost"
+                  onClick={() => setSize(2)}
+                >
+                  <div className="bg-black w-8px h-8px rounded-full" />
+                </Button>
+                <Button
+                  toggled={size === 8}
+                  color="ghost"
+                  onClick={() => setSize(8)}
+                >
+                  <div className="bg-black w-16px h-16px rounded-full" />
+                </Button>
+              </Box>
+            </Box>
+            <Box className="color-gray-dark text-xs">
+              No, there's no eraser!
+            </Box>
+          </>
+        )}
+        <svg
+          viewBox="0 0 100 100"
+          onPointerDown={
+            readonly
+              ? undefined
+              : (e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  const finalPoint = getSvgPoint(e);
+                  setPoints([[finalPoint.x, finalPoint.y, e.pressure]]);
+                }
+          }
+          onPointerMove={
+            readonly
+              ? undefined
+              : (e) => {
+                  if (e.buttons !== 1) return;
+                  const finalPoint = getSvgPoint(e);
+                  setPoints([
+                    ...points,
+                    [finalPoint.x, finalPoint.y, e.pressure],
+                  ]);
+                }
+          }
+          onPointerUp={
+            readonly
+              ? undefined
+              : () => {
+                  const stroke = getStroke(points, getStrokeOptions(size));
+                  onChange?.({
+                    ...drawing,
+                    strokes: [
+                      ...drawing.strokes,
+                      {
+                        path: stroke,
+                        color,
+                      },
+                    ],
+                  });
+                  setPoints([]);
+                }
+          }
+          className={clsx(
+            'touch-none aspect-1 w-100% max-w-800px bg-white max-h-60vh rounded-lg',
+            'theme',
+          )}
+        >
+          {drawing.strokes.map((stroke, i) => (
+            <Stroke stroke={stroke} key={i} />
+          ))}
+          {points && (
+            <path
+              d={pathData}
+              className={clsx({
+                'fill-primary-light': color === 'light',
+                'fill-primary-dark': color === 'dark',
+                'fill-black': color === 'contrast',
+              })}
+            />
+          )}
+        </svg>
+      </Box>
+      {playerId !== gameSuite.playerId && (
+        <Box
+          gap
+          p="sm"
+          items="center"
+          className="mx-auto text-xs color-gray-dark"
+        >
+          Drawing by <PlayerAvatar playerId={playerId} /> {player.displayName}
+        </Box>
+      )}
+    </>
   );
 });
 
@@ -106,14 +210,10 @@ const Stroke = hooks.withGame<{
     <path
       d={pathData}
       className={clsx({
-        'stroke-primary-light': stroke.color === 'light',
-        'stroke-primary-dark': stroke.color === 'dark',
-        'stroke-primary-ink': stroke.color === 'contrast',
+        'fill-primary-light': stroke.color === 'light',
+        'fill-primary-dark': stroke.color === 'dark',
+        'fill-black': stroke.color === 'contrast',
       })}
-      fill="none"
-      strokeWidth="4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     />
   );
 });

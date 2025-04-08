@@ -71,7 +71,7 @@ export const GameLogChat = withGame(function GameLogChat({
 
 export function GameLogTimestamp({ value }: { value: Date | number }) {
   return (
-    <span className="text-xs text-gray-500 italic pl-8">
+    <span className="text-xs text-gray-dark italic pl-8">
       <RelativeTime value={new Date(value).getTime()} />
     </span>
   );
@@ -222,7 +222,7 @@ export const BasicGameLog = withGame<{ className?: string }>(
         <Collapsible open={open} className="relative w-full lg:h-full">
           <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
             <Button
-              className="absolute top-0 right-0 lg:hidden"
+              className="absolute top-0 right-0 z-1 lg:hidden"
               size="icon-small"
               onClick={() => {
                 localState.open = false;

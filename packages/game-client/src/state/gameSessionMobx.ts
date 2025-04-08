@@ -150,6 +150,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
           data: currentTurn,
           playerId: this.playerId,
         },
+        playerId: this.playerId,
       });
     }
 

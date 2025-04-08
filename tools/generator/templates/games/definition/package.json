@@ -10,10 +10,10 @@
       "default": "./dist/esm/index.js"
     },
     "./v1": {
-      "production": "./dist/esm/v1/gameDefinition.js",
-      "development": "./src/v1/gameDefinition.ts",
-      "workerd": "./src/v1/gameDefinition.ts",
-      "default": "./dist/esm/v1/gameDefinition.js"
+      "production": "./dist/esm/v1/index.js",
+      "development": "./src/v1/index.ts",
+      "workerd": "./src/v1/index.ts",
+      "default": "./dist/esm/v1/index.js"
     }
   },
   "type": "module",

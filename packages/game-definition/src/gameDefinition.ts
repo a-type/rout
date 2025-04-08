@@ -43,6 +43,7 @@ export type GameDefinition<
    * the player the new position of the piece.
    */
   getProspectivePlayerState: (data: {
+    playerId: PrefixedId<'u'>;
     playerState: PlayerState;
     prospectiveTurn: LocalTurn<TurnData>;
   }) => PlayerState;

@@ -6,6 +6,8 @@ export * from './decoration/GameIllustration1';
 export * from './decoration/Topography';
 export * from './layout/GameLayout';
 export * from './log/GameLog';
+export * from './players/PlayerAvatar';
+export * from './players/PlayerName';
 export * from './turns/SubmitTurn';
 export * from './withSuspense';
 
