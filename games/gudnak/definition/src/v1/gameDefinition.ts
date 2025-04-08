@@ -1,17 +1,29 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { deckDefinitions } from './decks';
-import { draw, shuffleDeck } from './gameStateHelpers';
+import { deploy, draw, shuffleDeck } from './gameStateHelpers';
+import { v4 as uuid } from 'uuid';
 
-type Board = Record<string, string[]>;
+export type Card = {
+  cardId: string;
+  instanceId: string;
+};
+export type CardStack = Card[];
+export type Board = CardStack[][];
+export type Coordinate = { x: number; y: number };
 type DrawAction = { type: 'draw' };
-type DeployAction = { type: 'deploy'; cardId: string; target: string };
-type MoveAction = { type: 'move'; cardId: string; target: string };
+type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
+type MoveAction = {
+  type: 'move';
+  card: Card;
+  source: Coordinate;
+  target: Coordinate;
+};
 type Action = DrawAction | DeployAction | MoveAction;
 
 type PlayerHiddenState = {
-  deck: string[];
-  hand: string[];
-  discard: string[];
+  deck: Card[];
+  hand: Card[];
+  discard: Card[];
 };
 
 export type GlobalState = {
@@ -23,8 +35,8 @@ export type GlobalState = {
 
 export type PlayerState = {
   board: Board;
-  hand: string[];
-  discard: string[];
+  hand: Card[];
+  discard: Card[];
 };
 
 export type TurnData = {
@@ -58,12 +70,16 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members }) => {
-    // TODO: return the initial global state. possibly randomizing initial conditions.
     let state = {
-      board: {},
+      board: Array.from({ length: 3 }, () =>
+        Array.from({ length: 3 }, () => [] as CardStack),
+      ),
       playerState: members.reduce((acc, member) => {
         acc[member.id] = {
-          deck: [...deckDefinitions.deck1.list],
+          deck: [...deckDefinitions.deck1.list].map((id) => ({
+            cardId: id,
+            instanceId: uuid(),
+          })),
           hand: [],
           discard: [],
         };
@@ -91,6 +107,21 @@ export const gameDefinition: GameDefinition<
   },
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
+    round.turns.forEach((turn) => {
+      const { action } = turn.data;
+      const playerId = turn.playerId;
+
+      switch (action.type) {
+        case 'draw': {
+          globalState = draw(globalState, playerId, 1);
+          break;
+        }
+        case 'deploy': {
+          globalState = deploy(globalState, action.card, action.target);
+          break;
+        }
+      }
+    });
     return globalState;
   },
 

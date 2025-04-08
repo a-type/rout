@@ -22,8 +22,9 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/common": "workspace:*"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "typescript": "catalog:",

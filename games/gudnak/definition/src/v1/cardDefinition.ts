@@ -1,7 +1,8 @@
 type Trait = 'brute' | 'soldier' | 'hunter' | 'token' | 'demon' | 'hero';
 type Faction = 'gloaming' | 'refractory' | 'shardsword' | 'delguon' | 'neutral';
 
-type FighterCard = {
+export type FighterCard = {
+  kind: 'fighter';
   name: string;
   power: number;
   abilities: {
@@ -13,7 +14,8 @@ type FighterCard = {
   faction: Faction;
 };
 
-type TacticCard = {
+export type TacticCard = {
+  kind: 'tactic';
   name: string;
   cost: number;
   ability: string;
@@ -24,6 +26,7 @@ export type CardDefinition = FighterCard | TacticCard;
 
 export const cardDefinitions = {
   'solaran-soldier-3': {
+    kind: 'fighter',
     name: 'Solaran Soldier',
     power: 3,
     traits: ['soldier'],
@@ -37,6 +40,7 @@ export const cardDefinitions = {
     ],
   },
   'solaran-soldier-2': {
+    kind: 'fighter',
     name: 'Solaran Soldier',
     power: 2,
     traits: ['soldier'],
@@ -50,6 +54,7 @@ export const cardDefinitions = {
     ],
   },
   'solaran-soldier-1': {
+    kind: 'fighter',
     name: 'Solaran Soldier',
     power: 1,
     traits: ['soldier'],
@@ -61,6 +66,13 @@ export const cardDefinitions = {
         description: 'This fighter has +1 when Attacking Hunters.',
       },
     ],
+  },
+  tempo: {
+    kind: 'tactic',
+    name: 'Tempo',
+    cost: 0,
+    faction: 'refractory',
+    ability: 'Gain an action',
   },
 } satisfies Record<string, CardDefinition>;
 
