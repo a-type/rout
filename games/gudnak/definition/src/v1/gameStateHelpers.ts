@@ -143,6 +143,14 @@ export function validateMove(
   if (!card) {
     return 'Invalid card';
   }
+
+  const { x: sourceX, y: sourceY } = source;
+  const { x: targetX, y: targetY } = target;
+  const dx = Math.abs(sourceX - targetX);
+  const dy = Math.abs(sourceY - targetY);
+  if (dx > 1 || dy > 1 || (dx === 0 && dy === 0)) {
+    return 'Invalid move (not adjacent)';
+  }
   const stack = getStack(board, source);
   if (stack.length === 0) {
     return 'Invalid source (no stack)';
