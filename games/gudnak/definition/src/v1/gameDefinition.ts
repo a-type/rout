@@ -208,11 +208,14 @@ export const gameDefinition: GameDefinition<
           const playerIdx = globalState.playerOrder.indexOf(playerId);
           const nextPlayerIdx =
             (playerIdx + 1) % globalState.playerOrder.length;
+          const nextPlayer = globalState.playerOrder[nextPlayerIdx];
           globalState = {
             ...globalState,
-            currentPlayer: globalState.playerOrder[nextPlayerIdx],
+            currentPlayer: nextPlayer,
             actions: 2,
           };
+          globalState = draw(globalState, nextPlayer, 1);
+          // TODO: handle when you have no cards in deck or are sieged
           break;
         }
       }

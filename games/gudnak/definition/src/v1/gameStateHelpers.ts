@@ -194,31 +194,29 @@ export function move(
     throw new Error(moveErr);
   }
   let performMove = false;
+  let winner: Card | null = null;
   const { x: sourceX, y: sourceY } = source;
   const { x: targetX, y: targetY } = target;
   const { board } = gameState;
   let nextBoard = [...board];
   const sourceStack = getStack(board, source);
   const targetStack = getStack(board, target);
-  const targetTopCard = getTopCard(sourceStack);
+  const targetTopCard = getTopCard(targetStack);
   if (targetStack.length === 0 || !targetTopCard) {
     performMove = true;
   } else {
-    if (targetTopCard.ownerId !== card.ownerId) {
-      // resolve combat
-      const winner = resolveCombat(card, targetTopCard);
-      console.log('winner:', winner ?? 'none');
-      if (winner && winner === card) {
-        nextBoard = removeTopCard(nextBoard, target);
-        if (getStack(nextBoard, target).length === 0) {
-          performMove = true;
-        }
-      } else if (winner && winner === targetTopCard) {
-        nextBoard = removeTopCard(nextBoard, source);
-      } else {
-        nextBoard = removeTopCard(nextBoard, source);
-        nextBoard = removeTopCard(nextBoard, target);
+    // resolve combat
+    winner = resolveCombat(card, targetTopCard);
+    if (winner && winner === card) {
+      nextBoard = removeTopCard(nextBoard, target);
+      if (getStack(nextBoard, target).length === 0) {
+        performMove = true;
       }
+    } else if (winner && winner === targetTopCard) {
+      nextBoard = removeTopCard(nextBoard, source);
+    } else {
+      nextBoard = removeTopCard(nextBoard, source);
+      nextBoard = removeTopCard(nextBoard, target);
     }
   }
   if (performMove) {
@@ -232,6 +230,7 @@ export function move(
     target,
     sourceStack,
     targetTopCard,
+    winner,
     board: JSON.stringify(board),
     nextBoard: JSON.stringify(nextBoard),
   });
@@ -245,6 +244,12 @@ export function move(
 export function resolveCombat(attacker: Card, defender: Card) {
   const attackerDef = cardDefinitions[attacker.cardId as ValidCardId];
   const defenderDef = cardDefinitions[defender.cardId as ValidCardId];
+  console.log('resolve combat', {
+    attacker,
+    defender,
+    attackerDef,
+    defenderDef,
+  });
   if (!attackerDef || !defenderDef) {
     throw new Error('Invalid card');
   }
@@ -252,9 +257,12 @@ export function resolveCombat(attacker: Card, defender: Card) {
     throw new Error('Not a fighter');
   }
   if (attackerDef.power > defenderDef.power) {
+    console.log('attacker wins');
     return attacker;
   } else if (attackerDef.power < defenderDef.power) {
+    console.log('defender wins');
     return defender;
   }
+  console.log('tie');
   return null;
 }
