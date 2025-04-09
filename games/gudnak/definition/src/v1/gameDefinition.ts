@@ -105,6 +105,7 @@ export const gameDefinition: GameDefinition<
     const { actions, board, deckCount, active, side, cardState } = playerState;
     const {
       data: { action },
+      playerId,
     } = turn;
     if (!active) {
       return 'Not your turn';
@@ -142,6 +143,7 @@ export const gameDefinition: GameDefinition<
       const card = cardState[action.cardInstanceId];
       const moveError = validateMove(
         board,
+        playerId,
         cardState,
         card,
         action.source,

@@ -168,6 +168,7 @@ export function spendActions(gameState: GlobalState, count: number = 1) {
 
 export function validateMove(
   board: Board,
+  playerId: string,
   cardState: Record<string, Card>,
   card: Card,
   source: Coordinate,
@@ -179,6 +180,9 @@ export function validateMove(
 
   if (card.fatigued) {
     return 'Invalid card (fatigued)';
+  }
+  if (card.ownerId !== playerId) {
+    return 'Invalid card (not your card)';
   }
 
   const { x: sourceX, y: sourceY } = source;
