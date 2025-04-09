@@ -18,6 +18,7 @@ const traitToEmoji: Record<string, string> = {
 
 type BaseCardProps = {
   selected?: boolean;
+  fatigued?: boolean;
   color?: string;
   onClick?: () => void;
 };
@@ -26,6 +27,7 @@ function FighterCard({
   cardData,
   onClick,
   selected,
+  fatigued,
   color,
 }: BaseCardProps & { cardData: FighterCard }) {
   return (
@@ -34,6 +36,7 @@ function FighterCard({
       border
       p="md"
       style={{
+        opacity: fatigued ? 0.6 : 1,
         maxWidth: '200px',
         borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
@@ -91,16 +94,26 @@ export function Card({
   info: CardType;
 }) {
   const { players } = useGameSuite();
-  const { cardId, ownerId } = info;
+  const { cardId, ownerId, fatigued } = info;
   // @ts-expect-error Fix this up
   const player: PlayerInfo = players[ownerId];
-  const { color } = player;
+  const { color } = player ?? { color: 'black' };
 
   // @ts-expect-error Fix this up
   const cardData = cardDefinitions[cardId];
+  if (!cardData) {
+    throw new Error(`Card ${cardId} not found`);
+  }
 
   if (cardData.kind === 'fighter') {
-    return <FighterCard cardData={cardData} color={color} {...rest} />;
+    return (
+      <FighterCard
+        cardData={cardData}
+        color={color}
+        fatigued={fatigued}
+        {...rest}
+      />
+    );
   }
   return <TacticCard cardData={cardData} color={color} {...rest} />;
 }

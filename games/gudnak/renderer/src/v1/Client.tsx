@@ -14,14 +14,8 @@ export function Client() {
 }
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const {
-    prepareTurn,
-    isViewingCurrentRound,
-    viewingTurn,
-    finalState,
-    turnError,
-  } = gameSuite;
-  const { hand, board, active, actions } = finalState;
+  const { prepareTurn, finalState, turnError } = gameSuite;
+  const { hand, board, active, actions, deckCount } = finalState;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [selectedSpace, setSelectedSpace] = useState<{
@@ -68,6 +62,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           <span>Waiting on opponent...</span>
         )}
         <span>Actions: {actions}</span>
+        <span>Deck count: {deckCount}</span>
         <span>{turnError}</span>
       </Box>
       <Board
@@ -87,7 +82,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             prepareTurn({
               action: {
                 type: 'move',
-                card: topCard,
+                cardInstanceId: topCard,
                 source: selectedSpace,
                 target: coord,
               },

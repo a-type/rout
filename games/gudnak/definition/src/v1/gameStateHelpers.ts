@@ -1,11 +1,13 @@
 import { GameRandom } from '@long-game/game-definition';
 import { cardDefinitions, ValidCardId } from './cardDefinition';
-import {
+import type {
   Board,
   Card,
   CardStack,
   Coordinate,
-  type GlobalState,
+  Side,
+  GlobalState,
+  Space,
 } from './gameDefinition';
 
 export function getTopCard(stack: CardStack | null) {
@@ -79,46 +81,76 @@ export function matchingTag(a: ValidCardId, b: ValidCardId): boolean {
   return aDef.traits.some((trait) => bDef.traits.includes(trait));
 }
 
-export function canDeploy(
+export function validateDeploy(
   board: Board,
+  cardState: Record<string, Card>,
+  side: Side,
   card: Card,
   target: Coordinate,
-): boolean {
+): string | undefined {
+  const deployableSpaces = [...getBackRowCoords(side), getGatesCoord(side)];
+  if (
+    !deployableSpaces.some(
+      (space) => space.x === target.x && space.y === target.y,
+    )
+  ) {
+    return 'Invalid deploy (not deployable space)';
+  }
   const stack = getStack(board, target);
   if (stack.length === 0) {
-    return true;
+    return;
   }
-  const topCard = getTopCard(stack);
-  if (!topCard) {
-    return true;
+  const topCardId = getTopCard(stack);
+  if (!topCardId) {
+    return;
   }
+  const topCard = cardState[topCardId];
   if (topCard.ownerId !== card.ownerId) {
-    return false;
+    return 'Invalid deploy (not same owner)';
   }
-  return matchingTag(topCard.cardId as ValidCardId, card.cardId as ValidCardId);
+  const hasMatchingTag = matchingTag(
+    topCard.cardId as ValidCardId,
+    card.cardId as ValidCardId,
+  );
+  if (!hasMatchingTag) {
+    return 'Invalid deploy (no matching tag)';
+  }
+  return;
 }
 
 export function deploy(
   globalState: GlobalState,
-  card: Card,
+  cardInstanceId: string,
   target: Coordinate,
 ): GlobalState {
-  if (!canDeploy(globalState.board, card, target)) {
-    throw new Error('Invalid deploy');
-  }
-  const { x, y } = target;
   const { board } = globalState;
+  const card = globalState.cardState[cardInstanceId];
+  const playerState = globalState.playerState[card.ownerId];
+  // const deployErr = validateDeploy(
+  //   board,
+  //   globalState.cardState,
+  //   playerState.side,
+  //   card,
+  //   target,
+  // );
+  // if (deployErr) {
+  //   throw new Error(deployErr);
+  // }
+  const { x, y } = target;
   const stack = getStack(board, target);
-  const newStack = [...stack, card];
+  const newStack = [...stack, card.instanceId];
   const newBoard = [...board];
   newBoard[y][x] = newStack;
-  const playerState = globalState.playerState[globalState.currentPlayer];
   const newPlayerState = {
     ...playerState,
-    hand: playerState.hand.filter((c) => c.instanceId !== card.instanceId),
+    hand: playerState.hand.filter((id) => id !== card.instanceId),
   };
   return {
     ...globalState,
+    cardState: {
+      ...globalState.cardState,
+      [cardInstanceId]: { ...card, fatigued: true },
+    },
     board: newBoard,
     playerState: {
       ...globalState.playerState,
@@ -136,12 +168,17 @@ export function spendActions(gameState: GlobalState, count: number = 1) {
 
 export function validateMove(
   board: Board,
+  cardState: Record<string, Card>,
   card: Card,
   source: Coordinate,
   target: Coordinate,
 ): string | undefined {
   if (!card) {
     return 'Invalid card';
+  }
+
+  if (card.fatigued) {
+    return 'Invalid card (fatigued)';
   }
 
   const { x: sourceX, y: sourceY } = source;
@@ -155,18 +192,22 @@ export function validateMove(
   if (stack.length === 0) {
     return 'Invalid source (no stack)';
   }
-  const topCard = getTopCard(stack);
-  if (!topCard) {
+  const topCardId = getTopCard(stack);
+  if (!topCardId) {
     return 'Invalid source (no top card)';
   }
-  if (topCard.instanceId !== card.instanceId) {
+  if (topCardId !== card.instanceId) {
     return 'Invalid source (not top card)';
   }
   const targetStack = getStack(board, target);
   if (targetStack.length === 0) {
     return;
   }
-  const targetTopCard = getTopCard(targetStack);
+  const targetTopCardId = getTopCard(targetStack);
+  if (!targetTopCardId) {
+    return 'Invalid target (no top card)';
+  }
+  const targetTopCard = cardState[targetTopCardId];
   if (!targetTopCard) {
     return 'Invalid target (no top card)';
   }
@@ -188,19 +229,69 @@ export function removeTopCard(board: Board, coord: Coordinate) {
   return newBoard;
 }
 
+export function addToDiscard(gameState: GlobalState, card: Card) {
+  return {
+    ...gameState,
+    playerState: {
+      ...gameState.playerState,
+      [card.ownerId]: {
+        ...gameState.playerState[card.ownerId],
+        discard: [...gameState.playerState[card.ownerId].discard, card],
+      },
+    },
+  };
+}
+
+export function mill(
+  gameState: GlobalState,
+  playerId: string,
+  count: number = 1,
+) {
+  const playerState = gameState.playerState[playerId];
+  if (playerState.deck.length === 0) {
+    return gameState;
+  }
+  const milledCards = playerState.deck.slice(0, count);
+  const remainingDeck = playerState.deck.slice(count);
+  return {
+    ...gameState,
+    playerState: {
+      ...gameState.playerState,
+      [playerId]: {
+        ...playerState,
+        deck: remainingDeck,
+        discard: [...playerState.discard, ...milledCards],
+      },
+    },
+  };
+}
+
 // moves a card from source to target
 // moves the whole stack
 // if moving into another player, resolve combat instead
 export function move(
   gameState: GlobalState,
-  card: Card,
+  cardInstanceId: string,
   source: Coordinate,
   target: Coordinate,
 ): GlobalState {
-  const moveErr = validateMove(gameState.board, card, source, target);
-  if (moveErr) {
-    throw new Error(moveErr);
-  }
+  const card = gameState.cardState[cardInstanceId];
+  console.log('move', {
+    source,
+    target,
+    card,
+  });
+
+  // const moveErr = validateMove(
+  //   gameState.board,
+  //   gameState.cardState,
+  //   card,
+  //   source,
+  //   target,
+  // );
+  // if (moveErr) {
+  //   throw new Error(moveErr);
+  // }
   let performMove = false;
   let winner: Card | null = null;
   const { x: sourceX, y: sourceY } = source;
@@ -209,7 +300,10 @@ export function move(
   let nextBoard = [...board];
   const sourceStack = getStack(board, source);
   const targetStack = getStack(board, target);
-  const targetTopCard = getTopCard(targetStack);
+  const targetTopCardId = getTopCard(targetStack);
+  const targetTopCard = targetTopCardId
+    ? gameState.cardState[targetTopCardId]
+    : null;
   if (targetStack.length === 0 || !targetTopCard) {
     performMove = true;
   } else {
@@ -245,6 +339,10 @@ export function move(
 
   return {
     ...gameState,
+    cardState: {
+      ...gameState.cardState,
+      [cardInstanceId]: { ...card, fatigued: true },
+    },
     board: nextBoard,
   };
 }
@@ -273,4 +371,45 @@ export function resolveCombat(attacker: Card, defender: Card) {
   }
   console.log('tie');
   return null;
+}
+
+export function getBackRowCoords(side: Side): Coordinate[] {
+  const backRow = side === 'top' ? 0 : 2;
+  return [
+    { x: 0, y: backRow },
+    { x: 2, y: backRow },
+  ];
+}
+
+export function getGatesCoord(side: Side) {
+  return side === 'top' ? { x: 1, y: 0 } : { x: 1, y: 2 };
+}
+
+export function getSpecialSpaces(
+  gameState: GlobalState,
+  playerIds: string[],
+): Space[] {
+  const specialSpaces: Space[] = [];
+  playerIds.forEach((playerId) => {
+    const playerState = gameState.playerState[playerId];
+    const backRowCoords = getBackRowCoords(playerState.side);
+    backRowCoords.forEach((coord) => {
+      specialSpaces.push({
+        coordinate: coord,
+        type: 'backRow',
+        ownerId: playerId,
+      });
+    });
+    const gatesCoord = getGatesCoord(playerState.side);
+    specialSpaces.push({
+      coordinate: gatesCoord,
+      type: 'gate',
+      ownerId: playerId,
+    });
+  });
+  return specialSpaces;
+}
+
+export function getCardIdsFromBoard(board: Board): string[] {
+  return board.flatMap((row) => row.flatMap((stack) => stack));
 }

@@ -1,32 +1,44 @@
-import {
-  GameDefinition,
-  roundFormat,
-  RoundIndexDecider,
-} from '@long-game/game-definition';
+import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import { deckDefinitions } from './decks';
 import {
-  canDeploy,
+  validateDeploy,
   validateMove,
   deploy,
   draw,
   move,
   shuffleDeck,
   spendActions,
+  getSpecialSpaces,
+  getGatesCoord,
+  getTopCard,
+  getStack,
+  mill,
+  getCardIdsFromBoard,
 } from './gameStateHelpers';
+
+export type Side = 'top' | 'bottom';
+
+type SpaceType = 'gate' | 'backRow' | 'none';
+export type Space = {
+  coordinate: Coordinate;
+  type: SpaceType;
+  ownerId: string | null;
+};
 
 export type Card = {
   cardId: string;
   instanceId: string;
   ownerId: string;
+  fatigued: boolean;
 };
-export type CardStack = Card[];
+export type CardStack = string[];
 export type Board = CardStack[][];
 export type Coordinate = { x: number; y: number };
 type DrawAction = { type: 'draw' };
 type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
 type MoveAction = {
   type: 'move';
-  card: Card;
+  cardInstanceId: string;
   source: Coordinate;
   target: Coordinate;
 };
@@ -34,13 +46,15 @@ type EndTurnAction = { type: 'endTurn' };
 type Action = DrawAction | DeployAction | MoveAction | EndTurnAction;
 
 type PlayerHiddenState = {
-  deck: Card[];
-  hand: Card[];
-  discard: Card[];
+  deck: string[];
+  hand: string[];
+  discard: string[];
+  side: Side;
 };
 
 export type GlobalState = {
   board: Board;
+  cardState: Record<string, Card>;
   playerState: Record<string, PlayerHiddenState>;
   playerOrder: string[];
   currentPlayer: string;
@@ -49,11 +63,14 @@ export type GlobalState = {
 
 export type PlayerState = {
   board: Board;
+  cardState: Record<string, Card>;
+  specialSpaces: Space[];
   hand: Card[];
   discard: Card[];
   deckCount: number;
   active: boolean;
   actions: number;
+  side: Side;
 };
 
 export type TurnData = {
@@ -62,7 +79,8 @@ export type TurnData = {
 
 function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
   return ({ turns, members }) => {
-    // rounds advance when all members have played a turn
+    // rounds advance when any player goes
+    // requires us to validate active player in turn validation
     const maxRoundIndex = turns.reduce((max, turn) => {
       return Math.max(max, turn.roundIndex);
     }, 0);
@@ -84,7 +102,7 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {
-    const { actions, board, deckCount, active } = playerState;
+    const { actions, board, deckCount, active, side, cardState } = playerState;
     const {
       data: { action },
     } = turn;
@@ -107,15 +125,25 @@ export const gameDefinition: GameDefinition<
       return;
     }
     if (action.type === 'deploy') {
-      if (!canDeploy(board, action.card, action.target)) {
-        return 'Invalid deploy';
+      const deployError = validateDeploy(
+        board,
+        cardState,
+        side,
+        action.card,
+        action.target,
+      );
+      if (deployError) {
+        return deployError;
       }
+      return;
     }
 
     if (action.type === 'move') {
+      const card = cardState[action.cardInstanceId];
       const moveError = validateMove(
         board,
-        action.card,
+        cardState,
+        card,
         action.source,
         action.target,
       );
@@ -137,19 +165,25 @@ export const gameDefinition: GameDefinition<
 
   getInitialGlobalState: ({ members, random }) => {
     const playerOrder = random.shuffle(members.map((m) => m.id));
-    let state = {
+    const cardState: Record<string, Card> = {};
+    let state: GlobalState = {
       board: Array.from({ length: 3 }, () =>
         Array.from({ length: 3 }, () => [] as CardStack),
       ),
-      playerState: members.reduce((acc, member) => {
+      cardState,
+      playerState: members.reduce((acc, member, idx) => {
+        const cards = [...deckDefinitions.deck1.list].map((id) => ({
+          cardId: id,
+          instanceId: random.id(),
+          ownerId: member.id,
+          fatigued: false,
+        }));
+        cards.forEach((card) => (cardState[card.instanceId] = card));
         acc[member.id] = {
-          deck: [...deckDefinitions.deck1.list].map((id) => ({
-            cardId: id,
-            instanceId: random.id(),
-            ownerId: member.id,
-          })),
+          deck: cards.map((c) => c.instanceId),
           hand: [],
           discard: [],
+          side: idx === 0 ? 'top' : 'bottom',
         };
         return acc;
       }, {} as Record<string, PlayerHiddenState>),
@@ -167,14 +201,26 @@ export const gameDefinition: GameDefinition<
     return state;
   },
 
-  getPlayerState: ({ globalState, playerId }) => {
+  getPlayerState: ({ globalState, playerId, members }) => {
+    const { playerState, currentPlayer, actions, board } = globalState;
+    const { hand, deck, discard, side } = playerState[playerId];
+    const visibleCardIds = [...hand, ...discard, ...getCardIdsFromBoard(board)];
     return {
-      board: globalState.board,
-      hand: globalState.playerState[playerId].hand,
-      discard: globalState.playerState[playerId].discard,
-      deckCount: globalState.playerState[playerId].deck.length,
-      active: globalState.currentPlayer === playerId,
-      actions: globalState.actions,
+      board,
+      cardState: visibleCardIds.reduce((acc, id) => {
+        acc[id] = globalState.cardState[id];
+        return acc;
+      }, {} as Record<string, Card>),
+      hand: hand.map((instanceId) => globalState.cardState[instanceId]),
+      discard: discard.map((instanceId) => globalState.cardState[instanceId]),
+      deckCount: deck.length,
+      active: currentPlayer === playerId,
+      actions,
+      side,
+      specialSpaces: getSpecialSpaces(
+        globalState,
+        members.map((m) => m.id),
+      ),
     };
   },
 
@@ -190,14 +236,18 @@ export const gameDefinition: GameDefinition<
           break;
         }
         case 'deploy': {
-          globalState = deploy(globalState, action.card, action.target);
+          globalState = deploy(
+            globalState,
+            action.card.instanceId,
+            action.target,
+          );
           globalState = spendActions(globalState);
           break;
         }
         case 'move': {
           globalState = move(
             globalState,
-            action.card,
+            action.cardInstanceId,
             action.source,
             action.target,
           );
@@ -214,8 +264,35 @@ export const gameDefinition: GameDefinition<
             currentPlayer: nextPlayer,
             actions: 2,
           };
-          globalState = draw(globalState, nextPlayer, 1);
-          // TODO: handle when you have no cards in deck or are sieged
+          // Remove fatigue from all cards in the board
+          globalState = {
+            ...globalState,
+            cardState: Object.fromEntries(
+              Object.entries(globalState.cardState).map(([id, card]) => [
+                id,
+                {
+                  ...card,
+                  fatigued: false,
+                },
+              ]),
+            ),
+          };
+
+          const siegeLocation = getGatesCoord(
+            globalState.playerState[nextPlayer].side,
+          );
+          const siegeCardId = getTopCard(
+            getStack(globalState.board, siegeLocation),
+          );
+          const siegeCardOwner = siegeCardId
+            ? globalState.cardState[siegeCardId]?.ownerId
+            : null;
+
+          if (!siegeCardOwner || siegeCardOwner === nextPlayer) {
+            globalState = draw(globalState, nextPlayer);
+          } else {
+            globalState = mill(globalState, nextPlayer);
+          }
           break;
         }
       }
