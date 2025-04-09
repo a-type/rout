@@ -1,17 +1,18 @@
+import { GameRandom } from '@long-game/game-definition';
 import { cardDefinitions, ValidCardId } from './cardDefinition';
 import {
+  Board,
   Card,
   CardStack,
   Coordinate,
   type GlobalState,
 } from './gameDefinition';
 
-function fisherYatesShuffle<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+export function getTopCard(stack: CardStack | null) {
+  if (!stack || stack.length === 0) {
+    return null;
   }
-  return array;
+  return stack[stack.length - 1];
 }
 
 export function draw(
@@ -40,6 +41,7 @@ export function draw(
 
 export function shuffleDeck(
   globalState: GlobalState,
+  random: GameRandom,
   playerId: string,
 ): GlobalState {
   const { deck, ...playerState } = globalState.playerState[playerId];
@@ -49,24 +51,20 @@ export function shuffleDeck(
       ...globalState.playerState,
       [playerId]: {
         ...playerState,
-        deck: fisherYatesShuffle(deck),
+        deck: random.shuffle(deck),
       },
     },
   };
 }
 
 // Gets the stack at a position on the board
-export function getStack(
-  globalState: GlobalState,
-  coord: Coordinate,
-): CardStack {
-  const { board } = globalState;
+export function getStack(board: Board, coord: Coordinate): CardStack {
   const { x, y } = coord;
   // return null if out of bounds
   if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
     throw new Error('Out of bounds');
   }
-  return board[x][y];
+  return board[y][x];
 }
 
 export function matchingTag(a: ValidCardId, b: ValidCardId): boolean {
@@ -82,17 +80,22 @@ export function matchingTag(a: ValidCardId, b: ValidCardId): boolean {
 }
 
 export function canDeploy(
-  globalState: GlobalState,
-  cardId: string,
+  board: Board,
+  card: Card,
   target: Coordinate,
 ): boolean {
-  const stack = getStack(globalState, target);
+  const stack = getStack(board, target);
   if (stack.length === 0) {
     return true;
   }
-  const topCard = stack[stack.length - 1];
-  const topCardId = topCard.cardId;
-  return matchingTag(topCardId as ValidCardId, cardId as ValidCardId);
+  const topCard = getTopCard(stack);
+  if (!topCard) {
+    return true;
+  }
+  if (topCard.ownerId !== card.ownerId) {
+    return false;
+  }
+  return matchingTag(topCard.cardId as ValidCardId, card.cardId as ValidCardId);
 }
 
 export function deploy(
@@ -100,15 +103,15 @@ export function deploy(
   card: Card,
   target: Coordinate,
 ): GlobalState {
-  if (!canDeploy(globalState, card.cardId, target)) {
+  if (!canDeploy(globalState.board, card, target)) {
     throw new Error('Invalid deploy');
   }
   const { x, y } = target;
   const { board } = globalState;
-  const stack = board[y][x];
+  const stack = getStack(board, target);
   const newStack = [...stack, card];
   const newBoard = [...board];
-  newBoard[x][y] = newStack;
+  newBoard[y][x] = newStack;
   const playerState = globalState.playerState[globalState.currentPlayer];
   const newPlayerState = {
     ...playerState,
@@ -122,4 +125,136 @@ export function deploy(
       [globalState.currentPlayer]: newPlayerState,
     },
   };
+}
+
+export function spendActions(gameState: GlobalState, count: number = 1) {
+  return {
+    ...gameState,
+    actions: gameState.actions - count,
+  };
+}
+
+export function validateMove(
+  board: Board,
+  card: Card,
+  source: Coordinate,
+  target: Coordinate,
+): string | undefined {
+  if (!card) {
+    return 'Invalid card';
+  }
+  const stack = getStack(board, source);
+  if (stack.length === 0) {
+    return 'Invalid source (no stack)';
+  }
+  const topCard = getTopCard(stack);
+  if (!topCard) {
+    return 'Invalid source (no top card)';
+  }
+  if (topCard.instanceId !== card.instanceId) {
+    return 'Invalid source (not top card)';
+  }
+  const targetStack = getStack(board, target);
+  if (targetStack.length === 0) {
+    return;
+  }
+  const targetTopCard = getTopCard(targetStack);
+  if (!targetTopCard) {
+    return 'Invalid target (no top card)';
+  }
+  if (targetTopCard.ownerId === card.ownerId) {
+    return 'Invalid target (same owner)';
+  }
+  return;
+}
+
+export function removeTopCard(board: Board, coord: Coordinate) {
+  const { x, y } = coord;
+  const stack = getStack(board, coord);
+  if (stack.length === 0) {
+    return board;
+  }
+  const newStack = stack.slice(0, stack.length - 1);
+  const newBoard = [...board];
+  newBoard[y][x] = newStack;
+  return newBoard;
+}
+
+// moves a card from source to target
+// moves the whole stack
+// if moving into another player, resolve combat instead
+export function move(
+  gameState: GlobalState,
+  card: Card,
+  source: Coordinate,
+  target: Coordinate,
+): GlobalState {
+  const moveErr = validateMove(gameState.board, card, source, target);
+  if (moveErr) {
+    throw new Error(moveErr);
+  }
+  let performMove = false;
+  const { x: sourceX, y: sourceY } = source;
+  const { x: targetX, y: targetY } = target;
+  const { board } = gameState;
+  let nextBoard = [...board];
+  const sourceStack = getStack(board, source);
+  const targetStack = getStack(board, target);
+  const targetTopCard = getTopCard(sourceStack);
+  if (targetStack.length === 0 || !targetTopCard) {
+    performMove = true;
+  } else {
+    if (targetTopCard.ownerId !== card.ownerId) {
+      // resolve combat
+      const winner = resolveCombat(card, targetTopCard);
+      console.log('winner:', winner ?? 'none');
+      if (winner && winner === card) {
+        nextBoard = removeTopCard(nextBoard, target);
+        if (getStack(nextBoard, target).length === 0) {
+          performMove = true;
+        }
+      } else if (winner && winner === targetTopCard) {
+        nextBoard = removeTopCard(nextBoard, source);
+      } else {
+        nextBoard = removeTopCard(nextBoard, source);
+        nextBoard = removeTopCard(nextBoard, target);
+      }
+    }
+  }
+  if (performMove) {
+    // remove stack from source and add to target
+    nextBoard[sourceY][sourceX] = [];
+    nextBoard[targetY][targetX] = sourceStack;
+  }
+
+  console.log('move', {
+    source,
+    target,
+    sourceStack,
+    targetTopCard,
+    board: JSON.stringify(board),
+    nextBoard: JSON.stringify(nextBoard),
+  });
+
+  return {
+    ...gameState,
+    board: nextBoard,
+  };
+}
+
+export function resolveCombat(attacker: Card, defender: Card) {
+  const attackerDef = cardDefinitions[attacker.cardId as ValidCardId];
+  const defenderDef = cardDefinitions[defender.cardId as ValidCardId];
+  if (!attackerDef || !defenderDef) {
+    throw new Error('Invalid card');
+  }
+  if (attackerDef.kind !== 'fighter' || defenderDef.kind !== 'fighter') {
+    throw new Error('Not a fighter');
+  }
+  if (attackerDef.power > defenderDef.power) {
+    return attacker;
+  } else if (attackerDef.power < defenderDef.power) {
+    return defender;
+  }
+  return null;
 }

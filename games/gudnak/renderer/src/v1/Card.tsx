@@ -1,9 +1,11 @@
 import { Box } from '@a-type/ui';
+import { PlayerInfo, useGameSuite } from '@long-game/game-client';
 import {
   cardDefinitions,
   type FighterCard,
   type TacticCard,
 } from '@long-game/game-gudnak-definition';
+import { type Card as CardType } from '@long-game/game-gudnak-definition/v1';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -16,6 +18,7 @@ const traitToEmoji: Record<string, string> = {
 
 type BaseCardProps = {
   selected?: boolean;
+  color?: string;
   onClick?: () => void;
 };
 
@@ -23,6 +26,7 @@ function FighterCard({
   cardData,
   onClick,
   selected,
+  color,
 }: BaseCardProps & { cardData: FighterCard }) {
   return (
     <Box
@@ -31,6 +35,7 @@ function FighterCard({
       p="md"
       style={{
         maxWidth: '200px',
+        borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
       onClick={onClick}
@@ -63,6 +68,7 @@ function TacticCard({
   cardData,
   onClick,
   selected,
+  color,
 }: BaseCardProps & { cardData: TacticCard }) {
   return (
     <Box className="w-full h-full" onClick={onClick}>
@@ -79,15 +85,22 @@ function TacticCard({
 }
 
 export function Card({
-  id,
+  info,
   ...rest
 }: BaseCardProps & {
-  id: keyof typeof cardDefinitions;
+  info: CardType;
 }) {
-  const cardData = cardDefinitions[id];
+  const { players } = useGameSuite();
+  const { cardId, ownerId } = info;
+  // @ts-expect-error Fix this up
+  const player: PlayerInfo = players[ownerId];
+  const { color } = player;
+
+  // @ts-expect-error Fix this up
+  const cardData = cardDefinitions[cardId];
 
   if (cardData.kind === 'fighter') {
-    return <FighterCard cardData={cardData} {...rest} />;
+    return <FighterCard cardData={cardData} color={color} {...rest} />;
   }
-  return <TacticCard cardData={cardData} {...rest} />;
+  return <TacticCard cardData={cardData} color={color} {...rest} />;
 }

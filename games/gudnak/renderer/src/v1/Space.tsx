@@ -5,9 +5,11 @@ import { ValidCardId } from '../../../definition/src/v1/cardDefinition';
 
 export function Space({
   stack,
+  selected,
   onClick,
 }: {
   stack: CardStack;
+  selected?: boolean;
   onClick?: () => void;
 }) {
   const topCard = stack[stack.length - 1];
@@ -17,9 +19,13 @@ export function Space({
       className="w-full h-full"
       border
       p="md"
-      style={{ minWidth: '100px', minHeight: '100px' }}
+      style={{
+        minWidth: '100px',
+        minHeight: '100px',
+        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+      }}
     >
-      {topCard ? <Card id={topCard.cardId as ValidCardId} /> : null}
+      {topCard ? <Card info={topCard} /> : null}
     </Box>
   );
 }

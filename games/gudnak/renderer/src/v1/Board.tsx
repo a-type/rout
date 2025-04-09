@@ -4,9 +4,11 @@ import { Space } from './Space';
 
 export function Board({
   state,
+  selectedSpace,
   onClick,
 }: {
   state: Board;
+  selectedSpace: Coordinate | null;
   onClick?: (coord: Coordinate) => void;
 }) {
   return (
@@ -17,6 +19,10 @@ export function Board({
             <Space
               key={columnIndex}
               stack={space}
+              selected={
+                selectedSpace?.x === columnIndex &&
+                selectedSpace?.y === rowIndex
+              }
               onClick={() => {
                 onClick?.({ x: columnIndex, y: rowIndex });
               }}
