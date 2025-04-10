@@ -6,6 +6,7 @@ import {
   InvalidMoveReason,
   InvalidDeployReason,
   INVALID_DEPLOY_CODES,
+  getStack,
 } from './gameStateHelpers';
 
 export type AbilityDefinition = {
@@ -127,6 +128,35 @@ export const abilityDefinitions = {
         if (hasAdjacentFriendlyCard) {
           return invalidReasons.filter(
             (reason) => reason !== INVALID_DEPLOY_CODES.INVALID_SPACE,
+          );
+        }
+        return invalidReasons;
+      },
+    },
+  },
+  pickup: {
+    name: 'Pickup',
+    type: 'deploy',
+    description:
+      'Deploy this fighter on top of any fighter you control in your Back Row, regardless of trait.',
+    effect: {
+      modifyValidateDeploy: ({ invalidReasons }) => {
+        return invalidReasons.filter(
+          (reason) => reason !== INVALID_DEPLOY_CODES.NO_MATCHING_TAG,
+        );
+      },
+    },
+  },
+  delivery: {
+    name: 'Delivery',
+    type: 'active',
+    description: 'Move this fighter to any unoccupied square.',
+    effect: {
+      modifyValidateMove: ({ invalidReasons, target, board }) => {
+        const isUnoccupied = getStack(board, target).length === 0;
+        if (isUnoccupied) {
+          return invalidReasons.filter(
+            (reason) => reason !== INVALID_MOVE_CODES.NOT_ADJACENT,
           );
         }
         return invalidReasons;

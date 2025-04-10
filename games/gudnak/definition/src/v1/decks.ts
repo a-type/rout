@@ -18,6 +18,7 @@ export const deckDefinitions: Record<string, DeckDefinition> = {
       'dawnbringer-brute-2',
       'solaran-cavalry',
       'bullgryff-rider',
+      'bullgryff',
       'tempo',
     ],
   },

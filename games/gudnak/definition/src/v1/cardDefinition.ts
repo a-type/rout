@@ -194,6 +194,28 @@ export const cardDefinitions = {
       },
     ],
   },
+  bullgryff: {
+    kind: 'fighter',
+    name: 'Bullgryff',
+    power: 2,
+    traits: ['hero'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'pickup',
+        name: 'Pickup',
+        type: 'deploy',
+        description:
+          'Deploy this fighter on top of any fighter you control in your Back Row, regardless of trait.',
+      },
+      {
+        id: 'delivery',
+        name: 'Delivery',
+        type: 'action',
+        description: 'Move this fighter to any unoccupied square.',
+      },
+    ],
+  },
   tempo: {
     kind: 'tactic',
     name: 'Tempo',

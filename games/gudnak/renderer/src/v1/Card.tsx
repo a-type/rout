@@ -37,7 +37,8 @@ function FighterCard({
       p="md"
       style={{
         opacity: fatigued ? 0.6 : 1,
-        maxWidth: '200px',
+        width: '150px',
+        height: '150px',
         borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
@@ -74,14 +75,25 @@ function TacticCard({
   color,
 }: BaseCardProps & { cardData: TacticCard }) {
   return (
-    <Box className="w-full h-full" onClick={onClick}>
-      <Box className="flex flex-col">
-        <Box className="flex flex-row">
+    <Box
+      className="w-full h-full"
+      border
+      p="md"
+      style={{
+        width: '150px',
+        height: '150px',
+        borderColor: color,
+        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+      }}
+      onClick={onClick}
+    >
+      <Box className="flex flex-col w-full">
+        <Box className="flex flex-row gap-2">
           <div>{cardData.cost}</div>
           <div>{cardData.name}</div>
         </Box>
         <hr className="w-full" />
-        <div>{cardData.ability}</div>
+        <div className="text-xs">{cardData.ability}</div>
       </Box>
     </Box>
   );
