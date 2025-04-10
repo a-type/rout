@@ -126,22 +126,22 @@ export const gameDefinition: GameDefinition<
       return;
     }
     if (action.type === 'deploy') {
-      const deployError = validateDeploy(
+      const deployErrors = validateDeploy(
         board,
         cardState,
         side,
         action.card,
         action.target,
       );
-      if (deployError) {
-        return deployError;
+      if (deployErrors) {
+        return deployErrors[0];
       }
       return;
     }
 
     if (action.type === 'move') {
       const card = cardState[action.cardInstanceId];
-      const moveError = validateMove(
+      const moveErrors = validateMove(
         board,
         playerId,
         cardState,
@@ -149,8 +149,8 @@ export const gameDefinition: GameDefinition<
         action.source,
         action.target,
       );
-      if (moveError) {
-        return moveError;
+      if (moveErrors) {
+        return moveErrors[0];
       }
     }
   },

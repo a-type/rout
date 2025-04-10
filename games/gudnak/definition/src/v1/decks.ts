@@ -7,11 +7,17 @@ type DeckDefinition = {
 
 export const deckDefinitions: Record<string, DeckDefinition> = {
   deck1: {
-    name: 'Deck 1',
+    name: 'Refractory Mobility',
     list: [
-      ...Array.from({ length: 5 }, (_, i) => 'solaran-soldier-3' as const),
-      ...Array.from({ length: 5 }, (_, i) => 'solaran-soldier-2' as const),
-      ...Array.from({ length: 10 }, (_, i) => 'solaran-soldier-1' as const),
+      'solaran-soldier-3',
+      ...Array.from({ length: 2 }, (_, i) => 'solaran-soldier-2' as const),
+      ...Array.from({ length: 2 }, (_, i) => 'solaran-soldier-1' as const),
+      'dusklight-hunter-2',
+      'dusklight-hunter-1',
+      'dawnbringer-brute-3',
+      'dawnbringer-brute-2',
+      'solaran-cavalry',
+      'tempo',
     ],
   },
 };

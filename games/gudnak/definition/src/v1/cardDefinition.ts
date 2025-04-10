@@ -1,4 +1,6 @@
-type Trait = 'brute' | 'soldier' | 'hunter' | 'token' | 'demon' | 'hero';
+import { ValidAbilityId } from './abilityDefinition';
+
+export type Trait = 'brute' | 'soldier' | 'hunter' | 'token' | 'demon' | 'hero';
 type Faction = 'gloaming' | 'refractory' | 'shardsword' | 'delguon' | 'neutral';
 
 export type FighterCard = {
@@ -6,6 +8,7 @@ export type FighterCard = {
   name: string;
   power: number;
   abilities: {
+    id: ValidAbilityId;
     type: 'action' | 'deploy' | 'passive';
     name: string;
     description: string;
@@ -33,6 +36,7 @@ export const cardDefinitions = {
     faction: 'refractory',
     abilities: [
       {
+        id: 'superior-coordination',
         name: 'Superior Coordination',
         type: 'passive',
         description: 'This fighter has +1 when Attacking Hunters.',
@@ -47,6 +51,7 @@ export const cardDefinitions = {
     faction: 'refractory',
     abilities: [
       {
+        id: 'superior-coordination',
         name: 'Superior Coordination',
         type: 'passive',
         description: 'This fighter has +1 when Attacking Hunters.',
@@ -61,9 +66,131 @@ export const cardDefinitions = {
     faction: 'refractory',
     abilities: [
       {
+        id: 'superior-coordination',
         name: 'Superior Coordination',
         type: 'passive',
         description: 'This fighter has +1 when Attacking Hunters.',
+      },
+    ],
+  },
+  'dawnbringer-brute-3': {
+    kind: 'fighter',
+    name: 'Dawnbringer Brute',
+    power: 3,
+    traits: ['brute'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'overwhelming-strength',
+        name: 'Overwhelming Strength',
+        type: 'action',
+        description: 'This fighter has +1 when Attacking Soldiers.',
+      },
+    ],
+  },
+  'dawnbringer-brute-2': {
+    kind: 'fighter',
+    name: 'Dawnbringer Brute',
+    power: 2,
+    traits: ['brute'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'overwhelming-strength',
+        name: 'Overwhelming Strength',
+        type: 'action',
+        description: 'This fighter has +1 when Attacking Soldiers.',
+      },
+    ],
+  },
+  'dawnbringer-brute-1': {
+    kind: 'fighter',
+    name: 'Dawnbringer Brute',
+    power: 1,
+    traits: ['brute'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'overwhelming-strength',
+        name: 'Overwhelming Strength',
+        type: 'action',
+        description: 'This fighter has +1 when Attacking Soldiers.',
+      },
+    ],
+  },
+  'dusklight-hunter-3': {
+    kind: 'fighter',
+    name: 'Dusklight Hunter',
+    power: 3,
+    traits: ['hunter'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'armor-piercing',
+        name: 'Armor Piercing',
+        type: 'passive',
+        description: 'This fighter has +1 when Attacking Brutes.',
+      },
+    ],
+  },
+  'dusklight-hunter-2': {
+    kind: 'fighter',
+    name: 'Dusklight Hunter',
+    power: 2,
+    traits: ['hunter'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'armor-piercing',
+        name: 'Armor Piercing',
+        type: 'passive',
+        description: 'This fighter has +1 when Attacking Brutes.',
+      },
+    ],
+  },
+  'dusklight-hunter-1': {
+    kind: 'fighter',
+    name: 'Dusklight Hunter',
+    power: 1,
+    traits: ['hunter'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'armor-piercing',
+        name: 'Armor Piercing',
+        type: 'passive',
+        description: 'This fighter has +1 when Attacking Brutes.',
+      },
+    ],
+  },
+  'solaran-cavalry': {
+    kind: 'fighter',
+    name: 'Solaran Cavalry',
+    power: 2,
+    traits: ['hero', 'soldier'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'noble-steed',
+        name: 'Noble Steed',
+        type: 'passive',
+        description: 'This fighter may take actions while fatigued.',
+      },
+    ],
+  },
+  'bullgryff-rider': {
+    kind: 'fighter',
+    name: 'Bullgryff Rider',
+    power: 3,
+    traits: ['hero'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'fell-swoop',
+        name: 'Fell Swoop',
+        type: 'passive',
+        description:
+          'You may Deploy or Move this fighter to any unoccupied square adjacent to a friendly fighter.',
       },
     ],
   },
@@ -72,7 +199,7 @@ export const cardDefinitions = {
     name: 'Tempo',
     cost: 0,
     faction: 'refractory',
-    ability: 'Gain an action',
+    ability: 'Gain an action.',
   },
 } satisfies Record<string, CardDefinition>;
 
