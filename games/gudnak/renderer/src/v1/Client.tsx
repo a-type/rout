@@ -4,6 +4,8 @@ import { Card } from './Card';
 import { Board } from './Board';
 import { useState } from 'react';
 import { type Card as CardType } from '@long-game/game-gudnak-definition/v1';
+import { cardDefinitions } from '@long-game/game-gudnak-definition';
+import { type ValidCardId } from '../../../definition/src/v1/cardDefinition';
 
 export function Client() {
   return (
@@ -14,7 +16,7 @@ export function Client() {
 }
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const { prepareTurn, finalState, turnError } = gameSuite;
+  const { prepareTurn, finalState, turnError, localTurnData } = gameSuite;
   const { hand, board, active, actions, deckCount } = finalState;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
@@ -32,6 +34,12 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             key={index}
             info={card}
             onClick={() => {
+              const cardDef = cardDefinitions[card.cardId as ValidCardId];
+              const isTactic = cardDef.kind === 'tactic';
+              if (isTactic) {
+                prepareTurn({ action: { type: 'tactic', card } });
+                return;
+              }
               setSelectedCard(card);
             }}
           />
@@ -64,6 +72,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         <span>Actions: {actions}</span>
         <span>Deck count: {deckCount}</span>
         <span>{turnError}</span>
+        <span>{JSON.stringify(localTurnData)}</span>
       </Box>
       <Board
         selectedSpace={selectedSpace}

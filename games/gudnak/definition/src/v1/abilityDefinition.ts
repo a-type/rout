@@ -1,5 +1,5 @@
 import { FighterCard } from './cardDefinition';
-import { Board, Card } from './gameDefinition';
+import { Board, Card, GlobalState } from './gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -9,34 +9,47 @@ import {
   getStack,
 } from './gameStateHelpers';
 
-export type AbilityDefinition = {
+type FighterEffect = {
+  modifyCombatPower?: (props: {
+    attacker: FighterCard;
+    defender: FighterCard;
+    basePower: number;
+  }) => number;
+  checkFatigued?: (props: { card: FighterCard }) => boolean;
+  modifyValidateMove?: (props: {
+    invalidReasons: InvalidMoveReason[];
+    card: Card;
+    cardState: Record<string, Card>;
+    source: { x: number; y: number };
+    target: { x: number; y: number };
+    board: Board;
+  }) => InvalidMoveReason[] | null;
+  modifyValidateDeploy?: (props: {
+    invalidReasons: InvalidDeployReason[];
+    card: Card;
+    cardState: Record<string, Card>;
+    target: { x: number; y: number };
+    board: Board;
+  }) => InvalidDeployReason[] | null;
+};
+
+type TacticEffect = {
+  modifyGameStateOnPlay?: (props: { globalState: GlobalState }) => GlobalState;
+};
+
+export type FighterAbility = {
   name: string;
   type: 'passive' | 'active' | 'deploy';
   description: string;
-  effect: {
-    modifyCombatPower?: (props: {
-      attacker: FighterCard;
-      defender: FighterCard;
-      basePower: number;
-    }) => number;
-    checkFatigued?: (props: { card: FighterCard }) => boolean;
-    modifyValidateMove?: (props: {
-      invalidReasons: InvalidMoveReason[];
-      card: Card;
-      cardState: Record<string, Card>;
-      source: { x: number; y: number };
-      target: { x: number; y: number };
-      board: Board;
-    }) => InvalidMoveReason[] | null;
-    modifyValidateDeploy?: (props: {
-      invalidReasons: InvalidDeployReason[];
-      card: Card;
-      cardState: Record<string, Card>;
-      target: { x: number; y: number };
-      board: Board;
-    }) => InvalidDeployReason[] | null;
-  };
+  effect: FighterEffect;
 };
+
+export type TacticAbility = {
+  type: 'tactic';
+  effect: TacticEffect;
+};
+
+export type AbilityDefinition = FighterAbility | TacticAbility;
 
 export type EffectType = keyof AbilityDefinition['effect'];
 
@@ -160,6 +173,17 @@ export const abilityDefinitions = {
           );
         }
         return invalidReasons;
+      },
+    },
+  },
+  tempo: {
+    type: 'tactic',
+    effect: {
+      modifyGameStateOnPlay: ({ globalState }) => {
+        return {
+          ...globalState,
+          actions: globalState.actions + 1,
+        };
       },
     },
   },

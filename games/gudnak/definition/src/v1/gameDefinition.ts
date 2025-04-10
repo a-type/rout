@@ -14,7 +14,9 @@ import {
   getStack,
   mill,
   getCardIdsFromBoard,
+  playTactic,
 } from './gameStateHelpers';
+import { cardDefinitions, ValidCardId } from './cardDefinition';
 
 export type Side = 'top' | 'bottom';
 
@@ -35,6 +37,7 @@ export type CardStack = string[];
 export type Board = CardStack[][];
 export type Coordinate = { x: number; y: number };
 type DrawAction = { type: 'draw' };
+type TacticAction = { type: 'tactic'; card: Card };
 type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
 type MoveAction = {
   type: 'move';
@@ -43,7 +46,12 @@ type MoveAction = {
   target: Coordinate;
 };
 type EndTurnAction = { type: 'endTurn' };
-type Action = DrawAction | DeployAction | MoveAction | EndTurnAction;
+type Action =
+  | DrawAction
+  | DeployAction
+  | MoveAction
+  | EndTurnAction
+  | TacticAction;
 
 type PlayerHiddenState = {
   deck: string[];
@@ -112,7 +120,7 @@ export const gameDefinition: GameDefinition<
     }
     if (action.type === 'endTurn') {
       if (actions > 0) {
-        return 'You have actions left';
+        return 'You have remaining actions you must use';
       }
       return;
     }
@@ -122,6 +130,26 @@ export const gameDefinition: GameDefinition<
     if (action.type === 'draw') {
       if (deckCount === 0) {
         return 'You have no cards left in your deck';
+      }
+      return;
+    }
+    if (action.type === 'tactic') {
+      const card = cardState[action.card.instanceId];
+      const cardDef = cardDefinitions[card.cardId as ValidCardId];
+      if (!card) {
+        return 'Card not found';
+      }
+      if (card.ownerId !== playerId) {
+        return 'You do not own this card';
+      }
+      if (!cardDef) {
+        return 'Card definition not found';
+      }
+      if (cardDef.kind !== 'tactic') {
+        return 'Card is not a tactic';
+      }
+      if (actions < cardDef.cost) {
+        return 'You do not have enough actions to play this tactic';
       }
       return;
     }
@@ -254,6 +282,10 @@ export const gameDefinition: GameDefinition<
             action.target,
           );
           globalState = spendActions(globalState);
+          break;
+        }
+        case 'tactic': {
+          globalState = playTactic(globalState, action.card);
           break;
         }
         case 'endTurn': {

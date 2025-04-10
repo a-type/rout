@@ -14,7 +14,7 @@ import type {
   GlobalState,
   Space,
 } from './gameDefinition';
-import { abilityDefinitions } from './abilityDefinition';
+import { abilityDefinitions, ValidAbilityId } from './abilityDefinition';
 
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {
@@ -525,4 +525,34 @@ export function getAdjacentCardInstanceIds(
     .map((c) => getTopCard(getStack(board, c)))
     .filter(Boolean);
   return adjacentCards as string[];
+}
+
+export function playTactic(globalState: GlobalState, card: Card): GlobalState {
+  const cardDef = cardDefinitions[card.cardId as ValidCardId];
+  if (!cardDef || cardDef.kind !== 'tactic') {
+    throw new Error('Invalid card');
+  }
+  // move card from hand to discard
+  const playerState = globalState.playerState[card.ownerId];
+  const newPlayerState = {
+    ...playerState,
+    hand: playerState.hand.filter((id) => id !== card.instanceId),
+    discard: [...playerState.discard, card.instanceId],
+  };
+  let nextState = {
+    ...globalState,
+    playerState: {
+      ...globalState.playerState,
+      [card.ownerId]: newPlayerState,
+    },
+  };
+  nextState = spendActions(nextState, cardDef.cost);
+
+  const ability = abilityDefinitions[card.cardId as ValidAbilityId];
+  if ('modifyGameStateOnPlay' in ability.effect) {
+    nextState = ability.effect.modifyGameStateOnPlay({
+      globalState: nextState,
+    });
+  }
+  return nextState;
 }
