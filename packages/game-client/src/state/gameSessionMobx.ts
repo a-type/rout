@@ -13,13 +13,14 @@ import {
 } from '@long-game/common';
 import {
   GameDefinition,
+  GetGlobalState,
   GetPlayerState,
   GetPublicTurnData,
   GetTurnData,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction } from 'mobx';
-import { getPlayers, getPublicRound, getSummary } from './api.js';
+import { getPlayers, getPostgame, getPublicRound, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
 export type PlayerInfo = {
@@ -45,6 +46,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   >[] = [];
   @observable accessor viewingRoundIndex = 0;
   @observable accessor suspended: Promise<void> | null = null;
+  @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
 
   // static
   gameId: string;
@@ -106,6 +108,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.connectSocket(ctx.socket);
     this.fetchMembers();
     this.setupLocalTurnStorage();
+    if (this.gameStatus.status === 'completed') {
+      this.loadPostgame();
+    }
   }
 
   @computed get viewingRound() {
@@ -388,6 +393,17 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @action private onStatusChange = (msg: ServerStatusChangeMessage) => {
     this.gameStatus = msg.status;
+    // prefetch postgame when status is completed
+    if (msg.status.status === 'completed') {
+      this.loadPostgame();
+    }
+  };
+
+  @action private loadPostgame = async () => {
+    const promise = getPostgame(this.gameSessionId);
+    this.suspended = promise.then();
+    const postgame = await promise;
+    this.postgameGlobalState = postgame.globalState;
   };
 
   private fetchMembers = async () => {

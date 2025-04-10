@@ -382,7 +382,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
     const publicRoundIndex = this.getPublicRoundIndex();
     const resolvedRoundIndex = roundIndex ?? publicRoundIndex;
-    const globalState = this.getGlobalState(roundIndex);
+    const globalState = this.#getGlobalStateUnchecked(roundIndex);
     const rounds = this.getRounds({ upTo: resolvedRoundIndex });
     const playerTurn =
       rounds[resolvedRoundIndex]?.turns.find((t) => t.playerId === playerId) ||
@@ -412,7 +412,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         turns: round.turns.map((turn) => {
           return this.gameDefinition.getPublicTurn({
             turn,
-            globalState: this.getGlobalState(round.roundIndex),
+            globalState: this.#getGlobalStateUnchecked(round.roundIndex),
             viewerId: playerId,
           });
         }),
@@ -432,7 +432,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       );
     }
     const round = this.getRound(roundIndex);
-    const globalState = this.getGlobalState(roundIndex);
+    const globalState = this.#getGlobalStateUnchecked(roundIndex);
     const playerState = this.#internalGetPlayerState(playerId, roundIndex - 1);
     return {
       ...round,
@@ -460,7 +460,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   /**
    * Get the global state for a particular round. Defaults to current round.
    */
-  getGlobalState(roundIndex?: number): any {
+  #getGlobalStateUnchecked(roundIndex?: number): unknown {
     if (!this.#sessionData) {
       throw new Error('Session data not initialized');
     }
@@ -471,6 +471,25 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       members: this.#sessionData.members,
     });
     return computed;
+  }
+
+  /**
+   * User-facing ability to get global state after game has ended.
+   */
+  getGlobalState(): unknown {
+    if (!this.#sessionData) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Session data not initialized',
+      );
+    }
+    if (this.getStatus().status !== 'completed') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Game session has not ended yet',
+      );
+    }
+    return this.#getGlobalStateUnchecked();
   }
 
   /**
@@ -643,7 +662,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     // otherwise we'd end the game as soon as one player played a turn
     // that met conditions. this way we wait for the round to complete.
     return this.gameDefinition.getStatus({
-      globalState: this.getGlobalState(),
+      globalState: this.#getGlobalStateUnchecked(),
       members: this.#sessionData.members,
       rounds: this.getRounds({ upTo: publicRoundIndex }),
     });

@@ -126,6 +126,15 @@ export const gameSessionRouter = new Hono<Env>()
       session: wrapRpcData(summary),
     });
   })
+  .get('/postgame', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    // @ts-ignore - excessive... etc...
+    const globalState = await state.getGlobalState();
+
+    return ctx.json({
+      globalState: wrapRpcData(globalState as Disposable),
+    });
+  })
   .get(
     '/rounds/:index',
     zValidator(

@@ -10,7 +10,7 @@ export const GameLayoutRoot = withClassName(
 export const GameLayoutMain = withClassName(
   'div',
   '[grid-area:main]',
-  'pt-xl',
+  'pt-xl overflow-auto max-h-full',
   'lg:border-l lg:border-l-black lg:border-l-solid lg:pt-0',
 );
 

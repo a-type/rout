@@ -11,6 +11,7 @@ import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { useState } from 'react';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
+import { ratingEmoji } from './ratings';
 import './RatingsPrompt.css';
 
 export interface RatingsPromptProps {
@@ -186,10 +187,3 @@ function RatingPicker({
     </Box>
   );
 }
-
-const ratingEmoji = {
-  accurate: '🎯',
-  funny: '😂',
-  talented: '🎨',
-  perplexing: '🤔',
-};

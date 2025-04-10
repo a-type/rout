@@ -3,6 +3,7 @@ import {
   DescriptionItem,
   DrawingItem,
 } from '@long-game/game-scribble-definition/v1';
+import { DescriptionText } from './DescriptionText';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
 
@@ -12,7 +13,7 @@ export interface DescriptionResultProps {
 }
 
 export const DescriptionResult = hooks.withGame<DescriptionResultProps>(
-  function DescriptionResult({ gameSuite, drawing, item }) {
+  function DescriptionResult({ drawing, item }) {
     return (
       <Box d="col" gap items="center">
         {drawing ? (
@@ -22,7 +23,7 @@ export const DescriptionResult = hooks.withGame<DescriptionResultProps>(
             You decided to write...
           </Box>
         )}
-        <Box className="text-2xl italic">"{item.description}"</Box>
+        <DescriptionText>{item.description}</DescriptionText>
       </Box>
     );
   },

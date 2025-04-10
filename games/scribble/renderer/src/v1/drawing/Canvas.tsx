@@ -1,10 +1,10 @@
 import { Box, Button, clsx } from '@a-type/ui';
 import { colors, PrefixedId } from '@long-game/common';
 import { Drawing } from '@long-game/game-scribble-definition/v1';
-import { PlayerAvatar } from '@long-game/game-ui';
 import { getStroke } from 'perfect-freehand';
 import { PointerEvent, useState } from 'react';
 import { hooks } from '../gameClient';
+import { PlayerAttribution } from '../PlayerAttribution';
 
 export interface CanvasProps {
   readonly?: boolean;
@@ -12,6 +12,7 @@ export interface CanvasProps {
   playerId: PrefixedId<'u'>;
   onChange?: (value: Drawing) => void;
   className?: string;
+  forceAttribution?: boolean;
 }
 
 function getStrokeOptions(size: number) {
@@ -35,6 +36,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   playerId,
   onChange,
   className,
+  forceAttribution,
 }) {
   const player = gameSuite.getPlayer(playerId);
 
@@ -195,14 +197,14 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
           )}
         </svg>
       </Box>
-      {playerId !== gameSuite.playerId && (
+      {(forceAttribution || playerId !== gameSuite.playerId) && (
         <Box
           gap
           p="sm"
           items="center"
           className="mx-auto text-xs color-gray-dark"
         >
-          Drawing by <PlayerAvatar playerId={playerId} /> {player.displayName}
+          Drawing by <PlayerAttribution playerId={playerId} />
         </Box>
       )}
     </Box>

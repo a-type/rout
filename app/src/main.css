@@ -2,3 +2,7 @@
   font-family: 'Knewave';
   src: url(/fonts/Knewave-Regular.ttf) format('ttf');
 }
+
+#root {
+  min-height: 0;
+}

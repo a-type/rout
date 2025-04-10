@@ -63,3 +63,16 @@ export async function getPublicRound<TGame extends GameDefinition>(
     GetPlayerState<TGame>
   >;
 }
+
+export async function getPostgame(gameSessionId: PrefixedId<'gs'>) {
+  const res = await apiRpc.gameSessions[':id'].postgame.$get({
+    param: { id: gameSessionId },
+  });
+  if (!res.ok) {
+    throw new LongGameError(
+      LongGameError.Code.Unknown,
+      'Failed to get global state',
+    );
+  }
+  return await res.json();
+}
