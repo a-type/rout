@@ -1,38 +1,57 @@
-import { GameRecap } from '@/components/games/GameRecap.js';
-import { GameSession } from '@/components/games/GameSession.js';
 import { GameSetup } from '@/components/games/GameSetup.js';
-import { sdkHooks } from '@/services/publicSdk';
-import { PageContent, PageRoot } from '@a-type/ui';
+import { Box, ErrorBoundary, PageContent, PageRoot, Spinner } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
+import { GameSessionProvider, withGame } from '@long-game/game-client';
+import { GameRenderer } from '@long-game/game-renderer';
+import { GameControls, GameLayout } from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
+import { Suspense } from 'react';
 
 export function GameSessionPage() {
   const { sessionId } = useParams<{
     sessionId: PrefixedId<'gs'>;
   }>();
 
-  const { data } = sdkHooks.useGetGameSessionStatus({
-    id: sessionId,
-  });
-
-  if (data.status === 'pending') {
-    return (
-      <PageRoot>
-        <PageContent>
-          <GameSetup gameSessionId={sessionId} />
-        </PageContent>
-      </PageRoot>
-    );
-  } else if (data.status === 'completed') {
-    return (
-      <PageRoot>
-        <PageContent>
-          <GameRecap gameSessionId={sessionId} />
-        </PageContent>
-      </PageRoot>
-    );
-  }
-  return <GameSession gameSessionId={sessionId} />;
+  return (
+    <ErrorBoundary fallback={<div>Ooops, something went wrong 😥.</div>}>
+      <GameSessionProvider gameSessionId={sessionId}>
+        <GameSessionRenderer />
+      </GameSessionProvider>
+    </ErrorBoundary>
+  );
 }
+
+const GameSessionRenderer = withGame(function GameSessionRenderer({
+  gameSuite,
+}) {
+  const sessionId = gameSuite.gameSessionId;
+  switch (gameSuite.gameStatus.status) {
+    case 'pending':
+      return (
+        <PageRoot>
+          <PageContent>
+            <GameSetup gameSessionId={sessionId} />
+          </PageContent>
+        </PageRoot>
+      );
+    default:
+      return (
+        <GameLayout>
+          <GameLayout.Main>
+            <Suspense
+              fallback={
+                <Box full layout="center center">
+                  <Spinner />
+                </Box>
+              }
+            >
+              <GameRenderer />
+            </Suspense>
+          </GameLayout.Main>
+          <GameControls />
+        </GameLayout>
+      );
+  }
+});
 
 export default GameSessionPage;

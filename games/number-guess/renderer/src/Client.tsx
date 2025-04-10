@@ -4,14 +4,22 @@ import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
 
 const hooks = typedHooks<typeof gameDefinition>();
 
-export function Client() {
+export const Client = hooks.withGame(function Client({ gameSuite }) {
+  if (gameSuite.gameStatus.status === 'completed') {
+    return (
+      <Box full layout="center center">
+        You win!
+      </Box>
+    );
+  }
+
   return (
     <>
       <LocalGuess />
       <LastGuess />
     </>
   );
-}
+});
 
 export default Client;
 

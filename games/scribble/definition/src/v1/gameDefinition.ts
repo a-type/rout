@@ -91,8 +91,8 @@ export const gameDefinition: GameDefinition<
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
-  validateTurn: ({ playerState, turn }) => {
-    if (turn.data.taskCompletions.length !== 2) {
+  validateTurn: ({ playerState, turn, roundIndex }) => {
+    if (turn.data.taskCompletions.length !== 2 && roundIndex < RATING_ROUND) {
       return 'You must complete both tasks. Use the tabs to switch between them!';
     }
     // check that completions match their prompts
@@ -121,6 +121,29 @@ export const gameDefinition: GameDefinition<
             break;
           case 'drawing':
             return 'You must complete a drawing';
+        }
+      } else if (taskCompletion.kind === 'ratings-completion') {
+        // number of ratings should equal the number of tasks to rate
+        const task = prompt as RatingTask;
+        if (task.tasksToRate.length !== taskCompletion.ratings.length) {
+          return 'You must rate every item.';
+        }
+        // check that keys match
+        for (let i = 0; i < taskCompletion.ratings.length; i++) {
+          const rating = taskCompletion.ratings[i];
+          if (rating.key !== task.tasksToRate[i].key) {
+            return `Invalid key: ${rating.key}`;
+          }
+        }
+        // check that the ratings are valid
+        for (const rating of taskCompletion.ratings) {
+          if (
+            !['accurate', 'funny', 'talented', 'perplexing'].includes(
+              rating.rating,
+            )
+          ) {
+            return `Invalid rating: ${rating.rating}`;
+          }
         }
       } else {
         return 'Invalid task completion... this is a bug!';
@@ -175,6 +198,45 @@ export const gameDefinition: GameDefinition<
     roundIndex,
   }) => {
     const playerIndex = members.findIndex((member) => member.id === playerId);
+    if (roundIndex === RATING_ROUND) {
+      // in this final round we give the player a list of tasks to rate
+      const tasksToRate: RatingAssignment[] = [];
+      // basically just all the prompts this player made, and their completions
+      for (let i = 0; i < roundIndex - 1; i++) {
+        const indexes = getPlayerSequenceIndexes({
+          sequenceCount: globalState.sequences.length,
+          roundIndex: i,
+          playerIndex,
+        });
+        for (const seqIndex of indexes) {
+          const sequence = globalState.sequences[seqIndex];
+          const prompt = sequence[i];
+          if (prompt.kind === 'description' || prompt.kind === 'drawing') {
+            const completion = sequence[i + 1];
+            if (
+              completion.kind === 'description' ||
+              completion.kind === 'drawing'
+            ) {
+              tasksToRate.push({
+                prompt,
+                completion,
+                key: `${seqIndex}-${i + 1}`,
+              });
+            }
+          }
+        }
+      }
+      return {
+        tasks: [
+          {
+            kind: 'ratings',
+            tasksToRate,
+          },
+        ],
+        submitted: playerTurn?.data.taskCompletions,
+      };
+    }
+
     const indexes = getPlayerSequenceIndexes({
       sequenceCount: globalState.sequences.length,
       roundIndex,
@@ -201,9 +263,36 @@ export const gameDefinition: GameDefinition<
     members,
     random,
   }) => {
-    // add the new turn to the sequences
     const sequences = [...globalState.sequences];
-    round.turns.forEach((turn, i) => {
+
+    if (roundIndex === RATING_ROUND) {
+      round.turns.forEach((turn) => {
+        const completion = turn.data.taskCompletions[0];
+        if (completion.kind !== 'ratings-completion') {
+          throw new Error('Expected ratings completion for the ratings round');
+        }
+        // assign ratings to the item they are rating
+        for (const rating of completion.ratings) {
+          const { sequenceIndex, itemIndex } = parseItemKey(rating.key);
+          const sequence = sequences[sequenceIndex];
+          const item = sequence[itemIndex];
+          if (item.kind === 'description' || item.kind === 'drawing') {
+            item.ratings ??= [];
+            item.ratings.push({
+              ...rating,
+              playerId: turn.playerId,
+            });
+          }
+        }
+      });
+      return {
+        ...globalState,
+        sequences,
+      };
+    }
+
+    // add the new turn to the sequences
+    round.turns.forEach((turn) => {
       const playerIndex = members.findIndex(
         (member) => member.id === turn.playerId,
       );
@@ -215,19 +304,7 @@ export const gameDefinition: GameDefinition<
       sequenceIndexes.forEach((seqIndex, i) => {
         const completion = turn.data.taskCompletions[i];
         if (completion.kind === 'ratings-completion') {
-          // assign ratings to the item they are rating
-          for (const rating of completion.ratings) {
-            const { sequenceIndex, itemIndex } = parseItemKey(rating.key);
-            const sequence = sequences[sequenceIndex];
-            const item = sequence[itemIndex];
-            if (item.kind === 'description' || item.kind === 'drawing') {
-              item.ratings ??= [];
-              item.ratings.push({
-                ...rating,
-                playerId: turn.playerId,
-              });
-            }
-          }
+          throw new Error('Ratings completion should not be here');
         } else {
           sequences[seqIndex].push(
             taskCompletionToSequenceItem(completion, turn.playerId),
@@ -235,6 +312,7 @@ export const gameDefinition: GameDefinition<
         }
       });
     });
+
     return {
       ...globalState,
       sequences,

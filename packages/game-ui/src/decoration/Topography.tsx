@@ -1,6 +1,7 @@
 import {
   Button,
   ButtonProps,
+  ErrorBoundary,
   getColorMode,
   subscribeToColorModeChange,
   useSize,
@@ -163,32 +164,34 @@ export function Topography({ className, ...rest }: TopographyProps) {
 
   return (
     <div className={className} style={{ background: backgroundCss }} ref={ref}>
-      <Canvas
-        className="animate-fade-in animate-duration-1s"
-        orthographic
-        gl={{
-          antialias: true,
-        }}
-        flat
-        camera={{
-          zoom: 1,
-          position: [0, 0, 1],
-          left: -1,
-          right: 1,
-          top: 1,
-          bottom: -1,
-          near: -1,
-          far: 1,
-        }}
-      >
-        <color attach="background" args={[background]} />
-        <TopographyMesh
-          {...rest}
-          background={background}
-          gradient={gradient}
-          state={state}
-        />
-      </Canvas>
+      <ErrorBoundary fallback={null}>
+        <Canvas
+          className="animate-fade-in animate-duration-1s"
+          orthographic
+          gl={{
+            antialias: true,
+          }}
+          flat
+          camera={{
+            zoom: 1,
+            position: [0, 0, 1],
+            left: -1,
+            right: 1,
+            top: 1,
+            bottom: -1,
+            near: -1,
+            far: 1,
+          }}
+        >
+          <color attach="background" args={[background]} />
+          <TopographyMesh
+            {...rest}
+            background={background}
+            gradient={gradient}
+            state={state}
+          />
+        </Canvas>
+      </ErrorBoundary>
     </div>
   );
 }

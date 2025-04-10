@@ -11,6 +11,7 @@ import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { useState } from 'react';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
+import './RatingsPrompt.css';
 
 export interface RatingsPromptProps {
   task: RatingTask;
@@ -26,7 +27,7 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
       }
       const gap = ratings.ratings.findIndex((r) => !r);
       if (gap === -1) {
-        return ratings.ratings.length;
+        return ratings.ratings.length - 1;
       }
       return gap;
     });
@@ -34,9 +35,22 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
     const current = task.tasksToRate[index];
 
     return (
-      <Box d="col" gap items="center">
-        <RatingView assignment={current} index={index} />
-        <Box items="center" justify="between">
+      <Box d="col" gap items="center" full className="flex-1">
+        <RatingView
+          key={index}
+          assignment={current}
+          index={index}
+          onRated={() => {
+            setTimeout(() => {
+              if (index === task.tasksToRate.length - 1) {
+                gameSuite.submitTurn();
+              } else {
+                setIndex(index + 1);
+              }
+            }, 2500);
+          }}
+        />
+        <Box items="center" justify="between" gap="lg">
           <Button
             size="icon"
             disabled={index === 0}
@@ -44,7 +58,7 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
           >
             <Icon name="arrowLeft" />
           </Button>
-          <Box className="text-3xl">
+          <Box className="text-2xl">
             {index + 1} / {task.tasksToRate.length}
           </Box>
           <Button
@@ -63,7 +77,8 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
 const RatingView = hooks.withGame<{
   assignment: RatingAssignment;
   index: number;
-}>(function RatingView({ assignment, index, gameSuite }) {
+  onRated: () => void;
+}>(function RatingView({ assignment, index, gameSuite, onRated }) {
   const { currentTurn } = gameSuite;
   const ratings = currentTurn?.taskCompletions[0] as
     | RatingCompletion
@@ -85,12 +100,27 @@ const RatingView = hooks.withGame<{
         },
       ],
     });
+    onRated();
   };
 
   return (
-    <Box d="col" gap items="center">
+    <Box d="col" gap items="center" className="flex-1">
       <RatingPromptDisplay item={assignment.prompt} />
-      <RatingCompletionDisplay item={assignment.completion} />
+      <div className="relative mb-auto">
+        <RatingCompletionDisplay item={assignment.completion} />
+        {rating && (
+          <div
+            style={
+              {
+                '--size': '10vmin',
+              } as any
+            }
+            className="absolute top-[calc(var(--size)/-2)] right-[calc(var(--size)/-2)] animate-fall animate-rating font-size-[var(--size)] z10 -translate-50%"
+          >
+            {ratingEmoji[rating]}
+          </div>
+        )}
+      </div>
       <RatingPicker value={rating} onChange={rate} />
     </Box>
   );
@@ -126,7 +156,7 @@ function RatingCompletionDisplay({
   item: DescriptionItem | DrawingItem;
 }) {
   return (
-    <Box surface p className="animate-bounce-in-up">
+    <Box surface p className="animate-fall">
       <RatingPromptDisplay item={item} />
     </Box>
   );
@@ -140,39 +170,26 @@ function RatingPicker({
   onChange: (rating: Rating['rating']) => void;
 }) {
   return (
-    <Box gap justify="between" items="center">
-      <Button
-        size="icon"
-        color="ghost"
-        onClick={() => onChange('accurate')}
-        toggled={value === 'accurate'}
-      >
-        🎯
-      </Button>
-      <Button
-        size="icon"
-        color="ghost"
-        onClick={() => onChange('funny')}
-        toggled={value === 'funny'}
-      >
-        😂
-      </Button>
-      <Button
-        size="icon"
-        color="ghost"
-        onClick={() => onChange('talented')}
-        toggled={value === 'talented'}
-      >
-        🎨
-      </Button>
-      <Button
-        size="icon"
-        color="ghost"
-        onClick={() => onChange('perplexing')}
-        toggled={value === 'perplexing'}
-      >
-        🤔
-      </Button>
+    <Box gap justify="between" items="center" className="text-2xl">
+      {Object.keys(ratingEmoji).map((rating) => (
+        <Button
+          key={rating}
+          size="icon"
+          color="ghost"
+          onClick={() => onChange(rating as Rating['rating'])}
+          toggled={value === (rating as Rating['rating'])}
+          className="font-size-inherit"
+        >
+          {ratingEmoji[rating as Rating['rating']]}
+        </Button>
+      ))}
     </Box>
   );
 }
+
+const ratingEmoji = {
+  accurate: '🎯',
+  funny: '😂',
+  talented: '🎨',
+  perplexing: '🤔',
+};

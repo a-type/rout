@@ -1,14 +1,12 @@
-import { Box } from '@a-type/ui';
-import { Grid } from './components/Grid.js';
 import { hooks } from './gameClient.js';
+import { Gameplay } from './Gameplay.js';
+import { GameRecap } from './GameRecap.js';
 
 export const Client = hooks.withGame(function Client({ gameSuite }) {
-  const { grid } = gameSuite.finalState;
-  return (
-    <Box className="w-full h-full">
-      <Grid value={grid} />
-    </Box>
-  );
+  if (gameSuite.gameStatus.status === 'completed') {
+    return <GameRecap />;
+  }
+  return <Gameplay />;
 });
 
 export default Client;

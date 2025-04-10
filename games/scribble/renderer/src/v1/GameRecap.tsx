@@ -1,11 +1,8 @@
-import { GlobalState } from '@long-game/game-scribble-definition/v1';
+import { Box } from '@a-type/ui';
+import { hooks } from './gameClient';
 
-export interface GameRecapProps {
-  globalState: GlobalState;
-}
-
-export function GameRecap({ globalState }: GameRecapProps) {
-  return <div>Your post-game recap goes here</div>;
-}
+export const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
+  return <Box>The game is over!</Box>;
+});
 
 export default GameRecap;

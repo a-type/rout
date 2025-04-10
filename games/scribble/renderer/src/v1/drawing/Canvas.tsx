@@ -11,6 +11,7 @@ export interface CanvasProps {
   drawing: Drawing;
   playerId: PrefixedId<'u'>;
   onChange?: (value: Drawing) => void;
+  className?: string;
 }
 
 function getStrokeOptions(size: number) {
@@ -33,6 +34,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   gameSuite,
   playerId,
   onChange,
+  className,
 }) {
   const player = gameSuite.getPlayer(playerId);
 
@@ -46,13 +48,19 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   const palette = colors[player.color];
 
   return (
-    <>
+    <Box
+      d="col"
+      gap="xs"
+      items="center"
+      full="width"
+      container="reset"
+      className={className}
+      p
+    >
       <Box
         full="width"
         d="col"
         gap
-        p
-        container="reset"
         items="center"
         style={
           {
@@ -168,7 +176,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
                 }
           }
           className={clsx(
-            'touch-none aspect-1 w-100% max-w-800px bg-white max-h-60vh rounded-lg',
+            'touch-none aspect-1 w-100% max-w-60vh bg-white rounded-lg',
             'theme',
           )}
         >
@@ -197,7 +205,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
           Drawing by <PlayerAvatar playerId={playerId} /> {player.displayName}
         </Box>
       )}
-    </>
+    </Box>
   );
 });
 

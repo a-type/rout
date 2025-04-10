@@ -321,18 +321,20 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       );
     }
 
-    const existing = this.rounds[roundIndex];
-    if (existing) {
-      this.viewingRoundIndex = roundIndex;
-      return;
-    }
-
     this.suspended = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
       action((res) => {
         this.rounds[roundIndex] = res;
-        this.viewingRoundIndex = roundIndex;
       }),
     );
+    return this.suspended;
+  };
+
+  @action showRound = async (roundIndex: number) => {
+    if (!this.rounds[roundIndex]) {
+      await this.loadRound(roundIndex);
+    }
+
+    this.viewingRoundIndex = roundIndex;
   };
 
   private connectSocket = (socket: GameSocket) => {

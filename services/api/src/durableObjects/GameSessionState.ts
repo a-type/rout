@@ -465,7 +465,6 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       throw new Error('Session data not initialized');
     }
     const rounds = this.getRounds({ upTo: roundIndex });
-    console.log('global state rounds', rounds);
     const computed = getGameState(this.gameDefinition, {
       rounds,
       randomSeed: this.#sessionData.randomSeed,
@@ -881,7 +880,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
           this.#messageBacklogs.set(socketId, backlog);
         }
         backlog.push(msg);
-        console.log('backlogged message for socket', socketId, userId, backlog);
+        // console.log('backlogged message for socket', socketId, userId, backlog);
       } else if (status === 'closed') {
         this.#socketInfo.delete(ws);
         console.error(
