@@ -20,6 +20,9 @@ export const deckDefinitions: Record<string, DeckDefinition> = {
       'bullgryff-rider',
       'bullgryff',
       'tempo',
+      'reposition',
+      'forced-march',
+      'rapid-deployment',
     ],
   },
 };

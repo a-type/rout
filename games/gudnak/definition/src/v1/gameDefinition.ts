@@ -15,8 +15,17 @@ import {
   mill,
   getCardIdsFromBoard,
   playTactic,
+  validateTargets,
+  findMatchingFreeAction,
+  spendFreeAction,
+  clearFreeActions,
 } from './gameStateHelpers';
 import { cardDefinitions, ValidCardId } from './cardDefinition';
+import {
+  abilityDefinitions,
+  EffectInput,
+  ValidAbilityId,
+} from './abilityDefinition';
 
 export type Side = 'top' | 'bottom';
 
@@ -37,7 +46,7 @@ export type CardStack = string[];
 export type Board = CardStack[][];
 export type Coordinate = { x: number; y: number };
 type DrawAction = { type: 'draw' };
-type TacticAction = { type: 'tactic'; card: Card };
+type TacticAction = { type: 'tactic'; card: Card; input: EffectInput };
 type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
 type MoveAction = {
   type: 'move';
@@ -46,12 +55,18 @@ type MoveAction = {
   target: Coordinate;
 };
 type EndTurnAction = { type: 'endTurn' };
-type Action =
+export type Action =
   | DrawAction
   | DeployAction
   | MoveAction
   | EndTurnAction
   | TacticAction;
+
+export type FreeAction = {
+  type: 'deploy' | 'move';
+  cardInstanceId?: string;
+  count?: number;
+};
 
 type PlayerHiddenState = {
   deck: string[];
@@ -67,6 +82,7 @@ export type GlobalState = {
   playerOrder: string[];
   currentPlayer: string;
   actions: number;
+  freeActions: FreeAction[];
 };
 
 export type PlayerState = {
@@ -79,6 +95,7 @@ export type PlayerState = {
   active: boolean;
   actions: number;
   side: Side;
+  freeActions: FreeAction[];
 };
 
 export type TurnData = {
@@ -110,7 +127,8 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {
-    const { actions, board, deckCount, active, side, cardState } = playerState;
+    const { actions, board, deckCount, active, side, cardState, freeActions } =
+      playerState;
     const {
       data: { action },
       playerId,
@@ -124,7 +142,9 @@ export const gameDefinition: GameDefinition<
       }
       return;
     }
-    if (actions <= 0) {
+    const matchingFreeAction = findMatchingFreeAction(action, freeActions);
+
+    if (actions <= 0 && !matchingFreeAction) {
       return 'You have no actions left';
     }
     if (action.type === 'draw') {
@@ -136,6 +156,7 @@ export const gameDefinition: GameDefinition<
     if (action.type === 'tactic') {
       const card = cardState[action.card.instanceId];
       const cardDef = cardDefinitions[card.cardId as ValidCardId];
+      const abilityDef = abilityDefinitions[card.cardId as ValidAbilityId];
       if (!card) {
         return 'Card not found';
       }
@@ -145,11 +166,22 @@ export const gameDefinition: GameDefinition<
       if (!cardDef) {
         return 'Card definition not found';
       }
-      if (cardDef.kind !== 'tactic') {
+      if (cardDef.kind !== 'tactic' || abilityDef.type !== 'tactic') {
         return 'Card is not a tactic';
       }
-      if (actions < cardDef.cost) {
+      if (actions < cardDef.cost && !matchingFreeAction) {
         return 'You do not have enough actions to play this tactic';
+      }
+      if ('input' in abilityDef) {
+        const targetErrors = validateTargets(
+          playerState,
+          playerId,
+          abilityDef.input.targets,
+          action.input.targets,
+        );
+        if (targetErrors) {
+          return targetErrors[0];
+        }
       }
       return;
     }
@@ -220,6 +252,7 @@ export const gameDefinition: GameDefinition<
       playerOrder,
       currentPlayer: playerOrder[0],
       actions: 2,
+      freeActions: [],
     };
 
     // shuffle decks and draw 5 cards for each player
@@ -232,7 +265,8 @@ export const gameDefinition: GameDefinition<
   },
 
   getPlayerState: ({ globalState, playerId, members }) => {
-    const { playerState, currentPlayer, actions, board } = globalState;
+    const { playerState, currentPlayer, actions, board, freeActions } =
+      globalState;
     const { hand, deck, discard, side } = playerState[playerId];
     const visibleCardIds = [...hand, ...discard, ...getCardIdsFromBoard(board)];
     return {
@@ -246,6 +280,7 @@ export const gameDefinition: GameDefinition<
       deckCount: deck.length,
       active: currentPlayer === playerId,
       actions,
+      freeActions,
       side,
       specialSpaces: getSpecialSpaces(
         globalState,
@@ -258,11 +293,16 @@ export const gameDefinition: GameDefinition<
     round.turns.forEach((turn) => {
       const { action } = turn.data;
       const playerId = turn.playerId;
+      const matchingFreeAction = findMatchingFreeAction(
+        action,
+        globalState.freeActions,
+      );
 
       switch (action.type) {
         case 'draw': {
           globalState = draw(globalState, playerId, 1);
           globalState = spendActions(globalState);
+          globalState = clearFreeActions(globalState);
           break;
         }
         case 'deploy': {
@@ -271,7 +311,12 @@ export const gameDefinition: GameDefinition<
             action.card.instanceId,
             action.target,
           );
-          globalState = spendActions(globalState);
+          if (matchingFreeAction) {
+            globalState = spendFreeAction(globalState, matchingFreeAction);
+          } else {
+            globalState = spendActions(globalState);
+            globalState = clearFreeActions(globalState);
+          }
           break;
         }
         case 'move': {
@@ -281,14 +326,21 @@ export const gameDefinition: GameDefinition<
             action.source,
             action.target,
           );
-          globalState = spendActions(globalState);
+          if (matchingFreeAction) {
+            globalState = spendFreeAction(globalState, matchingFreeAction);
+          } else {
+            globalState = spendActions(globalState);
+            globalState = clearFreeActions(globalState);
+          }
           break;
         }
         case 'tactic': {
-          globalState = playTactic(globalState, action.card);
+          globalState = clearFreeActions(globalState);
+          globalState = playTactic(globalState, action.card, action.input);
           break;
         }
         case 'endTurn': {
+          globalState = clearFreeActions(globalState);
           const playerIdx = globalState.playerOrder.indexOf(playerId);
           const nextPlayerIdx =
             (playerIdx + 1) % globalState.playerOrder.length;

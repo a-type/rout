@@ -1,5 +1,11 @@
 import { FighterCard } from './cardDefinition';
-import { Board, Card, GlobalState } from './gameDefinition';
+import {
+  Board,
+  Card,
+  Coordinate,
+  FreeAction,
+  GlobalState,
+} from './gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -7,6 +13,9 @@ import {
   InvalidDeployReason,
   INVALID_DEPLOY_CODES,
   getStack,
+  swapCardPositions,
+  getAllBoardCoordinates,
+  getTopCard,
 } from './gameStateHelpers';
 
 type FighterEffect = {
@@ -34,7 +43,10 @@ type FighterEffect = {
 };
 
 type TacticEffect = {
-  modifyGameStateOnPlay?: (props: { globalState: GlobalState }) => GlobalState;
+  modifyGameStateOnPlay?: (props: {
+    globalState: GlobalState;
+    input: EffectInput;
+  }) => GlobalState;
 };
 
 export type FighterAbility = {
@@ -44,8 +56,37 @@ export type FighterAbility = {
   effect: FighterEffect;
 };
 
+export type CardTarget = {
+  kind: 'card';
+  instanceId: string;
+};
+
+export type CoordinateTarget = {
+  kind: 'coordinate';
+  x: number;
+  y: number;
+};
+
+export type Target = CardTarget | CoordinateTarget;
+
+export type EffectInput = {
+  targets: Target[];
+};
+
+export type EffectTargetDefinition = {
+  description: string;
+  type: 'coordinate';
+  controller: 'player' | 'opponent' | 'any' | 'none';
+};
+
+// Represents an input to choose one or more targets for the effect
+export type EffectInputDefinition = {
+  targets: EffectTargetDefinition[];
+};
+
 export type TacticAbility = {
   type: 'tactic';
+  input?: EffectInputDefinition;
   effect: TacticEffect;
 };
 
@@ -183,6 +224,81 @@ export const abilityDefinitions = {
         return {
           ...globalState,
           actions: globalState.actions + 1,
+        };
+      },
+    },
+  },
+  reposition: {
+    type: 'tactic',
+    input: {
+      targets: [
+        {
+          description: 'Choose 1st target fighter',
+          type: 'coordinate',
+          controller: 'player',
+        },
+        {
+          description: 'Choose 2nd target fighter',
+          type: 'coordinate',
+          controller: 'player',
+        },
+      ],
+    },
+    effect: {
+      modifyGameStateOnPlay({ globalState, input }) {
+        const [sourceCoord, targetCoord] = input.targets;
+        if (
+          sourceCoord.kind !== 'coordinate' ||
+          targetCoord.kind !== 'coordinate'
+        ) {
+          throw new Error('Invalid targets');
+        }
+        if (!sourceCoord || !targetCoord) {
+          throw new Error('Invalid coordinates');
+        }
+        return {
+          ...globalState,
+          board: swapCardPositions(globalState.board, sourceCoord, targetCoord),
+        };
+      },
+    },
+  },
+  'rapid-deployment': {
+    type: 'tactic',
+    effect: {
+      modifyGameStateOnPlay({ globalState }) {
+        return {
+          ...globalState,
+          freeActions: [
+            ...globalState.freeActions,
+            { type: 'deploy', count: 4 },
+          ],
+        };
+      },
+    },
+  },
+  'forced-march': {
+    type: 'tactic',
+    effect: {
+      modifyGameStateOnPlay({ globalState }) {
+        const ownedFighters = getAllBoardCoordinates(globalState.board)
+          .map((coord) => {
+            const topCardInstanceId = getTopCard(
+              getStack(globalState.board, coord),
+            );
+            if (!topCardInstanceId) return false;
+            return globalState.cardState[topCardInstanceId];
+          })
+          .filter((card) => {
+            return card && card.ownerId === globalState.currentPlayer;
+          }) as Card[];
+        const nextFreeActions: FreeAction[] = ownedFighters.map((f) => ({
+          type: 'move',
+          cardInstanceId: f.instanceId,
+        }));
+        return {
+          ...globalState,
+          freeActions: [...globalState.freeActions, ...nextFreeActions],
         };
       },
     },

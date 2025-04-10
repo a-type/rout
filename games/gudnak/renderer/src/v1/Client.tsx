@@ -5,7 +5,14 @@ import { Board } from './Board';
 import { useState } from 'react';
 import { type Card as CardType } from '@long-game/game-gudnak-definition/v1';
 import { cardDefinitions } from '@long-game/game-gudnak-definition';
-import { type ValidCardId } from '../../../definition/src/v1/cardDefinition';
+import type { ValidCardId } from '../../../definition/src/v1/cardDefinition';
+import {
+  abilityDefinitions,
+  type EffectTargetDefinition,
+  type ValidAbilityId,
+  type Target,
+  type CoordinateTarget,
+} from '../../../definition/src/v1/abilityDefinition';
 
 export function Client() {
   return (
@@ -17,13 +24,20 @@ export function Client() {
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const { prepareTurn, finalState, turnError, localTurnData } = gameSuite;
-  const { hand, board, active, actions, deckCount } = finalState;
+  const { hand, board, active, actions, deckCount, freeActions } = finalState;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [selectedSpace, setSelectedSpace] = useState<{
     x: number;
     y: number;
   } | null>(null);
+  const [queuedTargetInputs, setQueuedTargetInputs] = useState<
+    EffectTargetDefinition[]
+  >([]);
+  const [chosenTargets, setChosenTargets] = useState<Target[]>([]);
+  const nextTargetInput =
+    queuedTargetInputs.length > 0 ? queuedTargetInputs[0] : null;
+  const choosingTargets = !!nextTargetInput;
 
   return (
     <Box className="w-full h-full mt-10 flex flex-col p-5 gap-2">
@@ -37,7 +51,24 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               const cardDef = cardDefinitions[card.cardId as ValidCardId];
               const isTactic = cardDef.kind === 'tactic';
               if (isTactic) {
-                prepareTurn({ action: { type: 'tactic', card } });
+                const abilityDef =
+                  abilityDefinitions[card.cardId as ValidAbilityId];
+                if (abilityDef.type !== 'tactic') {
+                  throw new Error('Card is not a tactic');
+                }
+                if ('input' in abilityDef) {
+                  const targetInputs = abilityDef.input.targets;
+                  setQueuedTargetInputs(targetInputs);
+                  setSelectedCard(card);
+                } else {
+                  prepareTurn({
+                    action: {
+                      type: 'tactic',
+                      card,
+                      input: { targets: chosenTargets },
+                    },
+                  });
+                }
                 return;
               }
               setSelectedCard(card);
@@ -71,6 +102,14 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         )}
         <span>Actions: {actions}</span>
         <span>Deck count: {deckCount}</span>
+        {freeActions.length > 0 && (
+          <span>
+            Free {freeActions[0].type} action (x {freeActions[0].count ?? 1})
+          </span>
+        )}
+        {choosingTargets ? (
+          <span>{queuedTargetInputs[0].description}</span>
+        ) : null}
         <span>{turnError}</span>
         <span>{JSON.stringify(localTurnData)}</span>
       </Box>
@@ -78,6 +117,30 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         selectedSpace={selectedSpace}
         state={board}
         onClick={(coord) => {
+          if (choosingTargets && nextTargetInput.type === 'coordinate') {
+            const target: CoordinateTarget = {
+              kind: 'coordinate',
+              x: coord.x,
+              y: coord.y,
+            };
+
+            if (queuedTargetInputs.length === 1 && selectedCard) {
+              prepareTurn({
+                action: {
+                  type: 'tactic',
+                  card: selectedCard,
+                  input: { targets: [...chosenTargets, target] },
+                },
+              });
+              setSelectedCard(null);
+              setChosenTargets([]);
+              setQueuedTargetInputs([]);
+            } else {
+              setChosenTargets((prev) => [...prev, target]);
+              setQueuedTargetInputs((prev) => prev.slice(1));
+            }
+            return;
+          }
           if (selectedCard) {
             prepareTurn({
               action: { type: 'deploy', card: selectedCard, target: coord },

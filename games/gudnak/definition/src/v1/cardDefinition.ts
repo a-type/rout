@@ -223,6 +223,29 @@ export const cardDefinitions = {
     faction: 'refractory',
     ability: 'Gain an action.',
   },
+  reposition: {
+    kind: 'tactic',
+    name: 'Reposition',
+    cost: 1,
+    faction: 'refractory',
+    ability: 'Swap the position of 2 fighters you control.',
+  },
+  'forced-march': {
+    kind: 'tactic',
+    name: 'Forced March',
+    cost: 1,
+    faction: 'refractory',
+    ability:
+      'You may Move each fighter you control (following the rules for the Move action).',
+  },
+  'rapid-deployment': {
+    kind: 'tactic',
+    name: 'Rapid Deployment',
+    cost: 1,
+    faction: 'refractory',
+    ability:
+      'Deploy up to 4 fighters (following the rules for the Deploy action).',
+  },
 } satisfies Record<string, CardDefinition>;
 
 export type ValidCardId = keyof typeof cardDefinitions;

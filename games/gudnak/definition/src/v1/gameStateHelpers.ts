@@ -13,8 +13,17 @@ import type {
   Side,
   GlobalState,
   Space,
+  PlayerState,
+  FreeAction,
+  Action,
 } from './gameDefinition';
-import { abilityDefinitions, ValidAbilityId } from './abilityDefinition';
+import {
+  abilityDefinitions,
+  EffectInput,
+  EffectTargetDefinition,
+  Target,
+  ValidAbilityId,
+} from './abilityDefinition';
 
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {
@@ -65,11 +74,19 @@ export function shuffleDeck(
   };
 }
 
+export function validCoordinate(board: Board, coord: Coordinate): boolean {
+  const { x, y } = coord;
+  if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
+    return false;
+  }
+  return true;
+}
+
 // Gets the stack at a position on the board
 export function getStack(board: Board, coord: Coordinate): CardStack {
   const { x, y } = coord;
   // return null if out of bounds
-  if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
+  if (!validCoordinate(board, coord)) {
     throw new Error('Out of bounds');
   }
   return board[y][x];
@@ -200,6 +217,13 @@ export function spendActions(gameState: GlobalState, count: number = 1) {
   return {
     ...gameState,
     actions: gameState.actions - count,
+  };
+}
+
+export function clearFreeActions(gameState: GlobalState) {
+  return {
+    ...gameState,
+    freeActions: [],
   };
 }
 
@@ -527,7 +551,11 @@ export function getAdjacentCardInstanceIds(
   return adjacentCards as string[];
 }
 
-export function playTactic(globalState: GlobalState, card: Card): GlobalState {
+export function playTactic(
+  globalState: GlobalState,
+  card: Card,
+  input: EffectInput,
+): GlobalState {
   const cardDef = cardDefinitions[card.cardId as ValidCardId];
   if (!cardDef || cardDef.kind !== 'tactic') {
     throw new Error('Invalid card');
@@ -552,7 +580,139 @@ export function playTactic(globalState: GlobalState, card: Card): GlobalState {
   if ('modifyGameStateOnPlay' in ability.effect) {
     nextState = ability.effect.modifyGameStateOnPlay({
       globalState: nextState,
+      input,
     });
   }
   return nextState;
+}
+
+export function swapCardPositions(
+  board: Board,
+  source: Coordinate,
+  target: Coordinate,
+) {
+  const sourceStack = getStack(board, source);
+  const targetStack = getStack(board, target);
+  const newBoard = [...board];
+  newBoard[source.y][source.x] = targetStack;
+  newBoard[target.y][target.x] = sourceStack;
+  return newBoard;
+}
+
+export function findCoordFromCard(
+  board: Board,
+  cardInstanceId: string,
+): Coordinate | null {
+  for (let y = 0; y < board.length; y++) {
+    for (let x = 0; x < board[y].length; x++) {
+      const stack = getStack(board, { x, y });
+      if (stack && stack.includes(cardInstanceId)) {
+        return { x, y };
+      }
+    }
+  }
+  return null;
+}
+
+const INVALID_TARGET_CODES = {
+  NUMBER_OF_TARGETS: 'Invalid target (invalid number of targets)',
+  COORDINATE: 'Invalid target (invalid coordinate)',
+  OWNER: 'Invalid target (invalid owner)',
+} as const;
+type InvalidTargetCode = keyof typeof INVALID_TARGET_CODES;
+export type InvalidTargetReason =
+  (typeof INVALID_TARGET_CODES)[InvalidTargetCode];
+
+export function validateTargets(
+  playerState: PlayerState,
+  playerId: string,
+  targetDefinition: EffectTargetDefinition[],
+  targets: Target[],
+): InvalidTargetReason[] | null {
+  const { cardState, board } = playerState;
+  if (targets.length !== targetDefinition.length) {
+    return [INVALID_TARGET_CODES.NUMBER_OF_TARGETS];
+  }
+  const invalidTargets = targets.flatMap((target, idx) => {
+    const targetDef = targetDefinition[idx];
+    const reasons = [] as InvalidTargetReason[];
+    if (target.kind === 'coordinate') {
+      const coord = target as Coordinate;
+      if (!validCoordinate(board, coord)) {
+        reasons.push(INVALID_TARGET_CODES.COORDINATE);
+      }
+      if (targetDef.controller !== 'any') {
+        const stack = getStack(board, coord);
+        const topCardId = getTopCard(stack);
+        if (targetDef.controller === 'none') {
+          if (topCardId) {
+            reasons.push(INVALID_TARGET_CODES.OWNER);
+          }
+        } else if (topCardId) {
+          const topCard = cardState[topCardId];
+          const controller =
+            topCard.ownerId === playerId ? 'player' : 'opponent';
+          if (targetDef.controller !== controller) {
+            reasons.push(INVALID_TARGET_CODES.OWNER);
+          }
+        } else {
+          reasons.push(INVALID_TARGET_CODES.OWNER);
+        }
+      }
+    }
+    return [];
+  });
+  if (invalidTargets.length === 0) {
+    return null;
+  }
+  return invalidTargets;
+}
+
+export function findMatchingFreeAction(
+  action: Action,
+  freeActions: FreeAction[],
+): FreeAction | null {
+  const freeAction = freeActions.find((a) => {
+    if (action.type !== a.type) {
+      return false;
+    }
+    if (!a.cardInstanceId) {
+      return true;
+    }
+    if (action.type === 'deploy') {
+      return a.cardInstanceId === action.card.instanceId;
+    }
+    if (action.type === 'move') {
+      return a.cardInstanceId === action.cardInstanceId;
+    }
+  });
+  return freeAction ?? null;
+}
+
+export function spendFreeAction(gameState: GlobalState, action: FreeAction) {
+  const freeActions = gameState.freeActions
+    .map((a) => {
+      if (a !== action) {
+        return a;
+      }
+      if (a.count && a.count > 1) {
+        return { ...a, count: a.count - 1 };
+      }
+      return null;
+    })
+    .filter(Boolean) as FreeAction[];
+  return {
+    ...gameState,
+    freeActions,
+  };
+}
+
+export function getAllBoardCoordinates(board: Board): Coordinate[] {
+  const coordinates: Coordinate[] = [];
+  for (let y = 0; y < board.length; y++) {
+    for (let x = 0; x < board[y].length; x++) {
+      coordinates.push({ x, y });
+    }
+  }
+  return coordinates;
 }
