@@ -453,7 +453,7 @@ export function resolveCombat(attacker: Card, defender: Card) {
     throw new Error('Not a fighter');
   }
   const attackerPower = determineCombatPower(true, attackerDef, defenderDef);
-  const defenderPower = determineCombatPower(false, defenderDef, attackerDef);
+  const defenderPower = determineCombatPower(false, attackerDef, defenderDef);
   if (attackerPower > defenderPower) {
     console.log('attacker wins');
     return attacker;
@@ -518,6 +518,10 @@ export function getAdjacentCardInstanceIds(
     { x, y: y + 1 },
   ];
   const adjacentCards = adjacentCoords
+    .filter(
+      (c) =>
+        c.x >= 0 && c.x < board[0].length && c.y >= 0 && c.y < board.length,
+    )
     .map((c) => getTopCard(getStack(board, c)))
     .filter(Boolean);
   return adjacentCards as string[];
