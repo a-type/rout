@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "declaration": false,
+    "types": [
+      "./src/worker-types.d.ts",
+      "../db/src/worker-types.d.ts",
+      "@cloudflare/workers-types"
+    ]
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -243,8 +243,16 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     );
   };
 
-  @action prepareTurn = (turn: GetTurnData<TGame>) => {
-    this.localTurnData = turn;
+  @action prepareTurn = (
+    turn:
+      | GetTurnData<TGame>
+      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
+  ) => {
+    if (typeof turn === 'function') {
+      this.localTurnData = (turn as any)(this.localTurnData ?? null);
+    } else {
+      this.localTurnData = turn;
+    }
   };
 
   @action submitTurn = async (override?: GetTurnData<TGame>) => {
@@ -383,7 +391,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   private fetchMembers = async () => {
     const members = await getPlayers(this.gameSessionId);
     members.forEach(
-      action((member) => {
+      action((member: any) => {
         this.players[member.id] = member;
       }),
     );

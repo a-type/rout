@@ -1,6 +1,5 @@
 import { Box, H2 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { TaskCompletion } from '@long-game/game-scribble-definition/v1';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
@@ -42,30 +41,18 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
         drawing={completion.drawing}
         playerId={playerId}
         onChange={(drawing) => {
-          if (!currentTurn) {
-            const completions: TaskCompletion[] = new Array(2).fill(null);
-            completions[taskIndex] = {
+          gameSuite.prepareTurn((curr) => {
+            if (!curr) {
+              curr = {
+                taskCompletions: [],
+              };
+            }
+            curr.taskCompletions[taskIndex] = {
               kind: 'drawing',
               drawing,
             };
-            gameSuite.prepareTurn({
-              taskCompletions: completions,
-            });
-          } else {
-            gameSuite.prepareTurn({
-              ...currentTurn,
-              taskCompletions: currentTurn.taskCompletions.map((c, i) => {
-                if (i === taskIndex) {
-                  return {
-                    ...c,
-                    kind: 'drawing',
-                    drawing,
-                  };
-                }
-                return c;
-              }),
-            });
-          }
+            return curr;
+          });
         }}
       />
     </Box>

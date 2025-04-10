@@ -2,10 +2,22 @@ import { PrefixedId } from '@long-game/common';
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { getPlayerSequenceIndexes } from './ordering';
 
+const PROMPT_ROUNDS = 8;
+const RATING_ROUND = PROMPT_ROUNDS + 1;
+
+type ItemKey = `${number}-${number}`;
+
+export interface Rating {
+  key: ItemKey;
+  playerId: PrefixedId<'u'>;
+  rating: 'accurate' | 'funny' | 'talented' | 'perplexing';
+}
+
 export interface DescriptionItem {
   kind: 'description';
   description: string;
   playerId: PrefixedId<'u'>;
+  ratings?: Rating[];
 }
 
 export interface Drawing {
@@ -19,6 +31,7 @@ export interface DrawingItem {
   kind: 'drawing';
   drawing: Drawing;
   playerId: PrefixedId<'u'>;
+  ratings?: Rating[];
 }
 
 export interface StartItem {
@@ -27,22 +40,39 @@ export interface StartItem {
 }
 
 export type SequenceItem = StartItem | DescriptionItem | DrawingItem;
+
+export interface RatingAssignment {
+  prompt: DescriptionItem | DrawingItem;
+  completion: DescriptionItem | DrawingItem;
+  key: ItemKey;
+}
+
+export interface RatingTask {
+  kind: 'ratings';
+  // a number of pairs of tasks and completions the user should rate
+  tasksToRate: RatingAssignment[];
+}
+
+export type Task = SequenceItem | RatingTask;
+
+export interface RatingCompletion {
+  kind: 'ratings-completion';
+  ratings: Omit<Rating, 'playerId'>[];
+}
+
 export type TaskCompletion =
-  | StartItem
-  | Omit<DescriptionItem, 'playerId'>
-  | Omit<DrawingItem, 'playerId'>;
+  | Omit<DescriptionItem, 'playerId' | 'id'>
+  | Omit<DrawingItem, 'playerId' | 'id'>
+  | RatingCompletion;
 
 export type GlobalState = {
   sequences: SequenceItem[][];
 };
 
 export type PlayerState = {
-  tasks: SequenceItem[];
-  // pairs of drawing and description which this player has
-  // previously completed. their contribution will always be
-  // the last item in the grouping
-  // [ [ [task, completion], [task, completion] ], [ [task, completion], [task, completion] ] ... ]
-  history: SequenceItem[][][];
+  tasks: Task[];
+  // converted to sequence items to make them easier to render generically
+  submitted?: TaskCompletion[];
 };
 
 export type TurnData = {
@@ -53,7 +83,7 @@ export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
   TurnData,
-  TurnData
+  {}
 > = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -78,14 +108,17 @@ export const gameDefinition: GameDefinition<
         switch (prompt.kind) {
           case 'start':
             if (prompt.type !== 'description')
-              return 'You must complete a description';
+              return 'You must provide a starting prompt';
+            break;
           case 'description':
             return 'You must complete a description';
         }
       } else if (taskCompletion.kind === 'drawing') {
         switch (prompt.kind) {
           case 'start':
-            if (prompt.type !== 'drawing') return 'You must complete a drawing';
+            if (prompt.type !== 'drawing')
+              return 'You must provide a starting drawing';
+            break;
           case 'drawing':
             return 'You must complete a drawing';
         }
@@ -115,13 +148,9 @@ export const gameDefinition: GameDefinition<
     // match tasks to completions and add them to history
     return {
       ...playerState,
-      history: [
-        ...playerState.history,
-        playerState.tasks.map((task, index) => [
-          task,
-          { playerId, ...prospectiveTurn.data.taskCompletions[index] },
-        ]),
-      ],
+      submitted: prospectiveTurn.data.taskCompletions.filter(
+        (c) => c && c.kind !== 'ratings-completion',
+      ),
     };
   },
 
@@ -138,38 +167,40 @@ export const gameDefinition: GameDefinition<
     };
   },
 
-  getPlayerState: ({ globalState, playerId, rounds, members }) => {
+  getPlayerState: ({
+    globalState,
+    playerId,
+    playerTurn,
+    members,
+    roundIndex,
+  }) => {
     const playerIndex = members.findIndex((member) => member.id === playerId);
-    const roundIndex = rounds.length;
-    const history = new Array(Math.max(0, roundIndex - 1))
-      .fill(null)
-      .map((_, i) => {
-        const sequenceIndexes = getPlayerSequenceIndexes({
-          sequenceCount: globalState.sequences.length,
-          roundIndex: i,
-          playerIndex,
-        });
-        // get previous and current items for this round index for each sequence the player played on that round
-        return sequenceIndexes.map((seqIndex) => {
-          return globalState.sequences[seqIndex].slice(i - 1, i);
-        });
-      });
-    // player's tasks are the latest prompts from each sequence they are assigned this round
-    const tasks = getPlayerSequenceIndexes({
+    const indexes = getPlayerSequenceIndexes({
       sequenceCount: globalState.sequences.length,
       roundIndex,
       playerIndex,
-    }).map((seqIndex, taskIndex) => {
+    });
+    // player's tasks are the latest prompts from each sequence they are assigned this round
+    const tasks = indexes.map((seqIndex) => {
       const sequencePrompt = globalState.sequences[seqIndex][roundIndex];
       return sequencePrompt;
     });
+
+    const submitted = playerTurn?.data.taskCompletions;
+
     return {
-      history,
       tasks,
+      submitted,
     };
   },
 
-  applyRoundToGlobalState: ({ globalState, round, roundIndex, members }) => {
+  applyRoundToGlobalState: ({
+    globalState,
+    round,
+    roundIndex,
+    members,
+    random,
+  }) => {
     // add the new turn to the sequences
     const sequences = [...globalState.sequences];
     round.turns.forEach((turn, i) => {
@@ -182,12 +213,26 @@ export const gameDefinition: GameDefinition<
         playerIndex,
       });
       sequenceIndexes.forEach((seqIndex, i) => {
-        sequences[seqIndex].push(
-          taskCompletionToSequenceItem(
-            turn.data.taskCompletions[i],
-            turn.playerId,
-          ),
-        );
+        const completion = turn.data.taskCompletions[i];
+        if (completion.kind === 'ratings-completion') {
+          // assign ratings to the item they are rating
+          for (const rating of completion.ratings) {
+            const { sequenceIndex, itemIndex } = parseItemKey(rating.key);
+            const sequence = sequences[sequenceIndex];
+            const item = sequence[itemIndex];
+            if (item.kind === 'description' || item.kind === 'drawing') {
+              item.ratings ??= [];
+              item.ratings.push({
+                ...rating,
+                playerId: turn.playerId,
+              });
+            }
+          }
+        } else {
+          sequences[seqIndex].push(
+            taskCompletionToSequenceItem(completion, turn.playerId),
+          );
+        }
       });
     });
     return {
@@ -197,10 +242,19 @@ export const gameDefinition: GameDefinition<
   },
 
   getPublicTurn: ({ turn }) => {
-    return turn;
+    return {
+      ...turn,
+      data: {},
+    };
   },
 
   getStatus: ({ globalState, rounds }) => {
+    if (rounds.length > RATING_ROUND) {
+      return {
+        status: 'completed',
+        winnerIds: [],
+      };
+    }
     return {
       status: 'active',
     };
@@ -208,7 +262,7 @@ export const gameDefinition: GameDefinition<
 };
 
 function taskCompletionToSequenceItem(
-  taskCompletion: TaskCompletion,
+  taskCompletion: Exclude<TaskCompletion, RatingCompletion>,
   playerId: PrefixedId<'u'>,
 ): SequenceItem {
   if (taskCompletion.kind === 'drawing') {
@@ -224,4 +278,15 @@ function taskCompletionToSequenceItem(
   } else {
     return taskCompletion;
   }
+}
+
+function parseItemKey(key: ItemKey): {
+  sequenceIndex: number;
+  itemIndex: number;
+} {
+  const [sequenceIndex, itemIndex] = key.split('-').map(Number);
+  return {
+    sequenceIndex,
+    itemIndex,
+  };
 }

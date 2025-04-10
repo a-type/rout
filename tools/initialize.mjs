@@ -57,8 +57,8 @@ const appEnv = `VITE_PUBLIC_API_ORIGIN=http://localhost:3101
 await tasks([
   {
     task: async (msg) => {
-      const serviceDirs = readdirSync(join(process.cwd(), 'services/src'));
-      for (const path of serviceDirs.filter((dir) => dir !== 'middleware')) {
+      const serviceDirs = readdirSync(join(process.cwd(), 'services'));
+      for (const path of serviceDirs) {
         await writeFile(
           join(process.cwd(), 'services/src', path, '.dev.vars'),
           devVars,

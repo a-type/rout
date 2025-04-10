@@ -1,8 +1,5 @@
 import { Box, H2, TextArea } from '@a-type/ui';
-import {
-  DrawingItem,
-  TaskCompletion,
-} from '@long-game/game-scribble-definition/v1';
+import { DrawingItem } from '@long-game/game-scribble-definition/v1';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
 
@@ -48,30 +45,22 @@ export const WritePrompt = hooks.withGame<WritePromptProps>(
           }
           value={completion.description}
           onValueChange={(v) => {
-            if (!currentTurn) {
-              const completions: TaskCompletion[] = new Array(2).fill(null);
+            gameSuite.prepareTurn((curr) => {
+              if (!curr) {
+                curr = {
+                  taskCompletions: [],
+                };
+              }
+              const completions = [...(curr.taskCompletions ?? [])];
               completions[taskIndex] = {
                 kind: 'description',
                 description: v,
               };
-              gameSuite.prepareTurn({
+              return {
+                ...curr,
                 taskCompletions: completions,
-              });
-            } else {
-              gameSuite.prepareTurn({
-                ...currentTurn,
-                taskCompletions: currentTurn.taskCompletions.map((c, i) => {
-                  if (i === taskIndex) {
-                    return {
-                      ...c,
-                      kind: 'description',
-                      description: v,
-                    };
-                  }
-                  return c;
-                }),
-              });
-            }
+              };
+            });
           }}
         />
       </Box>

@@ -80,6 +80,7 @@ export type GameDefinition<
      * maybe we can include it as a separate parameter just to be safe?
      */
     rounds: GameRound<Turn<TurnData>>[];
+    playerTurn: Turn<TurnData> | null;
     /** easier than counting rounds */
     roundIndex: number;
   }) => PlayerState;

@@ -10,7 +10,7 @@
       "}",
       "",
       "export const $2 = hooks.withGame<$2Props>(function $2({ gameSuite, $4 }) {",
-      "  return <div>TODO</div>;",
+      "  return $0;",
       "});"
     ]
   }
