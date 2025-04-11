@@ -22,6 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@a-type/auth": "catalog:",
     "@a-type/utils": "catalog:",
     "@hono/zod-validator": "catalog:",
     "@long-game/common": "workspace:*",
