@@ -42,6 +42,9 @@ catalogs:
     '@types/react-dom':
       specifier: ^19.0.3
       version: 19.0.3
+    '@unocss/cli':
+      specifier: 0.65.2
+      version: 0.65.2
     '@unocss/transformer-variant-group':
       specifier: 0.65.2
       version: 0.65.2
@@ -512,6 +515,9 @@ importers:
         specifier: 'catalog:'
         version: 2.1.3(@types/react@19.0.8)(react@19.0.0)
     devDependencies:
+      '@long-game/scripts':
+        specifier: workspace:*
+        version: link:../scripts
       '@types/react':
         specifier: 'catalog:'
         version: 19.0.8
@@ -537,6 +543,24 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
+
+  packages/scripts:
+    dependencies:
+      '@types/node':
+        specifier: 22.14.0
+        version: 22.14.0
+      '@unocss/cli':
+        specifier: 'catalog:'
+        version: 0.65.2(rollup@4.30.1)
+      copyfiles:
+        specifier: 'catalog:'
+        version: 2.4.1
+      minimist:
+        specifier: 1.2.8
+        version: 1.2.8
+      unocss:
+        specifier: 'catalog:'
+        version: 0.65.2(postcss@8.4.49)(rollup@4.30.1)(vite@6.0.7(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.7.3))
 
   services:
     devDependencies:
@@ -4464,6 +4488,9 @@ packages:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
 
+  minimist@1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
@@ -5059,9 +5086,6 @@ packages:
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
-
-  tinyexec@0.3.1:
-    resolution: {integrity: sha512-WiCJLEECkO18gwqIp6+hJg0//p23HXp4S+gGtAKu3mI2F2/sXC4FvHvXvB0zJVVaTPhx1/tOwdbRsa1sOBIKqQ==}
 
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
@@ -5794,7 +5818,7 @@ snapshots:
   '@antfu/install-pkg@0.4.1':
     dependencies:
       package-manager-detector: 0.2.0
-      tinyexec: 0.3.1
+      tinyexec: 0.3.2
 
   '@antfu/utils@0.7.10': {}
 
@@ -9163,9 +9187,9 @@ snapshots:
 
   builtin-modules@3.3.0: {}
 
-  bundle-require@5.1.0(esbuild@0.23.1):
+  bundle-require@5.1.0(esbuild@0.24.2):
     dependencies:
-      esbuild: 0.23.1
+      esbuild: 0.24.2
       load-tsconfig: 0.2.5
 
   cac@6.7.14: {}
@@ -9908,9 +9932,9 @@ snapshots:
 
   importx@0.5.1:
     dependencies:
-      bundle-require: 5.1.0(esbuild@0.23.1)
+      bundle-require: 5.1.0(esbuild@0.24.2)
       debug: 4.4.0
-      esbuild: 0.23.1
+      esbuild: 0.24.2
       jiti: 2.4.2
       pathe: 1.1.2
       tsx: 4.19.2
@@ -10220,6 +10244,8 @@ snapshots:
   minimatch@5.1.6:
     dependencies:
       brace-expansion: 2.0.1
+
+  minimist@1.2.8: {}
 
   mkdirp@1.0.4: {}
 
@@ -10833,8 +10859,6 @@ snapshots:
   tiny-warning@1.0.3: {}
 
   tinybench@2.9.0: {}
-
-  tinyexec@0.3.1: {}
 
   tinyexec@0.3.2: {}
 

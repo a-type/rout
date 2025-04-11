@@ -723,6 +723,8 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     const before = pagination.nextToken
       ? parseInt(pagination.nextToken, 10)
       : null;
+    const roundIndex = this.getPublicRoundIndex();
+    const status = this.getStatus();
 
     let nextToken: string | null = null;
     for (let i = this.#chat.length - 1; i >= 0; i--) {
@@ -731,7 +733,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         nextToken = message.createdAt.toString();
         break;
       }
-      if (message.recipientIds?.includes(playerId) || !message.recipientIds) {
+      if (this.#canPlayerSeeChat(playerId, message, roundIndex, status)) {
         slice.push(message);
       }
       if (slice.length === pagination?.limit) {
@@ -744,6 +746,26 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
 
     return { messages: slice, nextToken };
+  }
+
+  #canPlayerSeeChat(
+    playerId: PrefixedId<'u'>,
+    message: GameSessionChatMessage,
+    roundIndex: number,
+    status: GameStatus,
+  ) {
+    if (message.roundIndex !== undefined) {
+      if (message.roundIndex > roundIndex) {
+        return false;
+      }
+      if (message.roundIndex === -1 && status.status !== 'completed') {
+        return false;
+      }
+    }
+    if (message.recipientIds && !message.recipientIds.includes(playerId)) {
+      return false;
+    }
+    return true;
   }
 
   async webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {

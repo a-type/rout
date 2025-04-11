@@ -2,9 +2,10 @@ import { Box, Chip, H2, Tabs } from '@a-type/ui';
 import {
   DescriptionItem,
   DrawingItem,
+  ItemKey,
   SequenceItem,
 } from '@long-game/game-scribble-definition/v1';
-import { PlayerAvatar } from '@long-game/game-ui';
+import { PlayerAvatar, SpatialChat } from '@long-game/game-ui';
 import { DescriptionText } from './DescriptionText';
 import { PlayerAttribution } from './PlayerAttribution';
 import { Canvas } from './drawing/Canvas';
@@ -59,8 +60,12 @@ const RecapSequence = hooks.withGame<{
   return (
     <Box d="col" gap items="center" className="w-full">
       <H2>Sequence {index + 1}</H2>
-      {sequence.map((item, index) => (
-        <RecapItem item={item} key={`item-${index}`} />
+      {sequence.map((item, itemIndex) => (
+        <RecapItem
+          item={item}
+          key={`item-${itemIndex}`}
+          itemKey={`${index}-${itemIndex}`}
+        />
       ))}
     </Box>
   );
@@ -68,31 +73,34 @@ const RecapSequence = hooks.withGame<{
 
 const RecapItem = hooks.withGame<{
   item: SequenceItem;
-}>(function RecapItem({ item }) {
+  itemKey: ItemKey;
+}>(function RecapItem({ item, itemKey }) {
   if (item.kind === 'start') return null;
 
   return (
-    <Box surface d="col" gap items="center" className="relative">
-      {item.kind === 'drawing' ? (
-        <Box d="col" gap items="center">
-          <Canvas
-            readonly
-            forceAttribution
-            drawing={item.drawing}
-            playerId={item.playerId}
-          />
-        </Box>
-      ) : (
-        <Box d="col" gap items="center">
-          <DescriptionText>{item.description}</DescriptionText>
-          <PlayerAttribution
-            playerId={item.playerId}
-            className="text-xs color-gray-dark"
-          />
-        </Box>
-      )}
-      <RecapRating item={item} />
-    </Box>
+    <SpatialChat sceneId={itemKey} visualize timing="endgame">
+      <Box surface d="col" gap items="center" className="relative">
+        {item.kind === 'drawing' ? (
+          <Box d="col" gap items="center">
+            <Canvas
+              readonly
+              forceAttribution
+              drawing={item.drawing}
+              playerId={item.playerId}
+            />
+          </Box>
+        ) : (
+          <Box d="col" gap items="center">
+            <DescriptionText>{item.description}</DescriptionText>
+            <PlayerAttribution
+              playerId={item.playerId}
+              className="text-xs color-gray-dark"
+            />
+          </Box>
+        )}
+        <RecapRating item={item} />
+      </Box>
+    </SpatialChat>
   );
 });
 

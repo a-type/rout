@@ -20,6 +20,17 @@ export type GameSessionChatMessage = {
    * to these recipients.
    */
   recipientIds?: PrefixedId<'u'>[];
+  /**
+   * If specified, this message should only be visible
+   * to other players *after* the indicated round. This puts
+   * the chat message in the same class of data as, say, turns:
+   * information about the game state which shouldn't be revealed
+   * until all players have moved forward.
+   *
+   * A -1 value indicates the message should only be visible
+   * after the game is over.
+   */
+  roundIndex?: number;
 };
 
 export type GameSessionChatInit = Omit<

@@ -13,9 +13,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts && pnpm build:css",
+    "build": "pnpm build:ts && pnpm build:css && pnpm build:uno",
     "build:ts": "tsc",
     "build:css": "copyfiles src/**/*.css dist -u=1",
+    "build:uno": "scripts uno ./dist",
     "test": "vitest"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "vitest": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "copyfiles": "catalog:"
+    "copyfiles": "catalog:",
+    "@long-game/scripts": "workspace:*"
   }
 }

@@ -5,7 +5,7 @@ import { getPlayerSequenceIndexes } from './ordering';
 const PROMPT_ROUNDS = 8;
 const RATING_ROUND = PROMPT_ROUNDS + 1;
 
-type ItemKey = `${number}-${number}`;
+export type ItemKey = `${number}-${number}`;
 
 export interface Rating {
   key: ItemKey;

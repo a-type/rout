@@ -294,6 +294,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     recipientIds?: PrefixedId<'u'>[];
     position?: { x: number; y: number };
     sceneId?: string;
+    roundIndex?: number;
   }) => {
     const tempId = `cm-pending-${Math.random().toString().slice(2)}` as const;
     this.addChat({

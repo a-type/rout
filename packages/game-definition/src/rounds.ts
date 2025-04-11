@@ -3,7 +3,7 @@
  */
 
 import { withTimezone } from '@long-game/common';
-import add from 'date-fns/add';
+import add from 'date-fns/esm/add';
 import { RoundIndexDecider } from './gameDefinition.js';
 
 export type PeriodType = 'days' | 'hours' | 'minutes';
