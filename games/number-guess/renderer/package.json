@@ -7,7 +7,7 @@
       "production": "./dist/index.js",
       "development": "./src/index.ts",
       "workerd": "./src/index.ts",
-      "default": "./dist/index.js",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },

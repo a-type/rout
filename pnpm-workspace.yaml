@@ -5,6 +5,7 @@ packages:
   - 'games/**/*'
   - 'app'
   - 'services'
+  - 'services/*'
 
 catalog:
   '@a-type/ui': 2.0.3
@@ -30,3 +31,4 @@ catalog:
   valtio: ^2.1.3
   '@react-three/fiber': 9.1.2
   wrangler: 4.9.1
+  copyfiles: 2.4.1

@@ -8,3 +8,4 @@ export declare function createDb(bindings: {
 export type DB = Kysely<Database>;
 export { compareDates, comparePassword, dateTime, hashPassword, } from '@a-type/kysely';
 export type * from './tables.js';
+//# sourceMappingURL=index.d.ts.map

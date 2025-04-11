@@ -2,6 +2,7 @@ import { defineWorkersProject } from '@cloudflare/vitest-pool-workers/config';
 
 export default defineWorkersProject({
   test: {
+    dir: './tests',
     poolOptions: {
       workers: {
         main: './api/dist/index.js',

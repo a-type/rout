@@ -8,8 +8,8 @@ import { EnvWith } from '../config/ctx';
 import { userStoreMiddleware } from '../middleware';
 import { getGameSessionState } from '../services/gameSessions';
 
+import { UserStore } from '@long-game/service-db';
 import { RpcStub } from 'cloudflare:workers';
-import { UserStore } from '../../../db/src/index.js';
 import { GameSessionState } from '../durableObjects/GameSessionState';
 import { gameSessionRouter } from './gameSession';
 

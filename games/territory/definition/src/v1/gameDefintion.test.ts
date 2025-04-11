@@ -5,7 +5,7 @@ import { gameDefinition, GlobalState } from './gameDefinition.js';
 it('applies non-battle placements', () => {
   const random = new GameRandom('seed');
   const members = [{ id: 'u-1' }, { id: 'u-2' }];
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState: gameDefinition.getInitialGlobalState({ members, random }),
     members,
     random,
@@ -51,7 +51,7 @@ it('resolves a battle between a territory and a solo placement', () => {
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }],
     random: new GameRandom('seed'),
@@ -97,7 +97,7 @@ it('resolves a battle between two territories of different powers', () => {
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -157,7 +157,7 @@ it('resolves a battle between two territories of the same power with MAD', () =>
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -220,7 +220,7 @@ it('resolves a battle where one player has multiple adjacent territories', () =>
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -293,7 +293,7 @@ it('adds to an existing territory if player who owns it places there', () => {
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }],
     random: new GameRandom('seed'),
@@ -338,7 +338,7 @@ it('allows playing 2 tiles per turn', () => {
       ],
     ],
   };
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -416,7 +416,7 @@ it('applies correct power if both turns are used on the same empty cell', () => 
       ],
     ],
   };
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -456,7 +456,7 @@ it('resolves a battle where one player applies 2 placements directly to the batt
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),
@@ -516,7 +516,7 @@ it('involves just-placed conjoined reinforcements in battles between territories
     ],
   };
 
-  const newState = gameDefinition.getState({
+  const newState = gameDefinition.getState!({
     initialState,
     members: [{ id: 'u-1' }, { id: 'u-2' }],
     random: new GameRandom('seed'),

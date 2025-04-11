@@ -7,14 +7,11 @@ import {
 } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
+import type { GameSessionInvitation, UserStore } from '@long-game/service-db';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
-import type {
-  GameSessionInvitation,
-  UserStore,
-} from '../../../db/src/index.js';
 import { getSocketToken } from '../auth/socketTokens';
 import { Env } from '../config/ctx';
 import { GameSessionState } from '../durableObjects/GameSessionState';
@@ -130,9 +127,11 @@ export const gameSessionRouter = new Hono<Env>()
     const state = ctx.get('gameSessionState');
     // @ts-ignore - excessive... etc...
     const globalState = await state.getGlobalState();
+    const rounds = await state.getRounds();
 
     return ctx.json({
       globalState: wrapRpcData(globalState as Disposable),
+      rounds: wrapRpcData(rounds),
     });
   })
   .get(

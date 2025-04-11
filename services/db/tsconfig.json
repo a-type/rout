@@ -4,7 +4,7 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./dist",
+    "outDir": "./dist/typings",
     "types": ["./src/worker-types.d.ts", "@cloudflare/workers-types"]
   },
   "include": ["src/**/*.ts"]

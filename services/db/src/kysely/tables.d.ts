@@ -94,3 +94,4 @@ export interface FriendshipInvitationTable {
     status: 'pending' | 'accepted' | 'declined' | 'blocked';
 }
 export {};
+//# sourceMappingURL=tables.d.ts.map

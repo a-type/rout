@@ -1,5 +1,5 @@
 import { LongGameError } from '@long-game/common';
-import { hcWithType as apiHc } from '@long-game/services/public-api';
+import { hcWithType as apiHc } from '@long-game/service-api';
 import {
   UseMutationOptions,
   UseSuspenseQueryOptions,

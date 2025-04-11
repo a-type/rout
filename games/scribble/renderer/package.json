@@ -4,15 +4,18 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
+      "production": "./dist/index.js",
       "development": "./src/index.ts",
       "workerd": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm build:ts && pnpm build:css",
+    "build:ts": "tsc",
+    "build:css": "copyfiles src/**/*.css dist -u=1",
     "test": "vitest"
   },
   "dependencies": {
@@ -29,6 +32,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "copyfiles": "catalog:"
   }
 }

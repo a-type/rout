@@ -1,8 +1,8 @@
 import { Session } from '@a-type/auth';
 import { assertPrefixedId, LongGameError, PrefixedId } from '@long-game/common';
+import type { UserStore } from '@long-game/service-db';
 import { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import type { UserStore } from '../../../db/src/index.js';
 import { sessions } from '../auth/session.js';
 import { Env } from '../config/ctx.js';
 

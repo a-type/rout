@@ -14,6 +14,6 @@ interface ApiBindings {
   GAME_SESSION_STATE: DurableObjectNamespace<
     import('./index').GameSessionState
   >;
-  PUBLIC_STORE: Service<import('../../db/src/index').PublicStore>;
-  ADMIN_STORE: Service<import('../../db/src/index').AdminStore>;
+  PUBLIC_STORE: Service<import('@long-game/service-db').PublicStore>;
+  ADMIN_STORE: Service<import('@long-game/service-db').AdminStore>;
 }
