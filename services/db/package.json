@@ -31,7 +31,9 @@
     "@long-game/games": "workspace:*",
     "hono": "catalog:",
     "jose": "^5.9.6",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "kysely": "0.27.6",
+    "@a-type/kysely": "1.1.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
