@@ -625,6 +625,9 @@ importers:
       kysely-d1:
         specifier: 0.3.0
         version: 0.3.0(kysely@0.27.6)
+      kysely-plugin-serialize:
+        specifier: 0.8.2
+        version: 0.8.2(kysely@0.27.6)
       zod:
         specifier: 'catalog:'
         version: 3.24.2
@@ -4347,6 +4350,11 @@ packages:
     resolution: {integrity: sha512-9wTbE6ooLiYtBa4wPg9e4fjfcmvRtgE/2j9pAjYrIq+iz+EsH/Hj9YbtxpEXA6JoRgfulVQ1EtGj6aycGGRpYw==}
     peerDependencies:
       kysely: '*'
+
+  kysely-plugin-serialize@0.8.2:
+    resolution: {integrity: sha512-81nyTvDPGNHTzs9/Si+GW69YkcQgy2PMlkCieihEyF9EmlGY/TURUZMhVRrLV1k3Hsit+AWCfoEOLJczbK3hDw==}
+    peerDependencies:
+      kysely: '>=0.26'
 
   kysely@0.27.6:
     resolution: {integrity: sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==}
@@ -10075,6 +10083,10 @@ snapshots:
   kolorist@1.8.0: {}
 
   kysely-d1@0.3.0(kysely@0.27.6):
+    dependencies:
+      kysely: 0.27.6
+
+  kysely-plugin-serialize@0.8.2(kysely@0.27.6):
     dependencies:
       kysely: 0.27.6
 

@@ -31,7 +31,8 @@
     "zod": "catalog:",
     "kysely": "0.27.6",
     "@a-type/kysely": "1.1.1",
-    "kysely-d1": "0.3.0"
+    "kysely-d1": "0.3.0",
+    "kysely-plugin-serialize": "0.8.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
