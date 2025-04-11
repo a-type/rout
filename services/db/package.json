@@ -22,18 +22,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@a-type/auth": "catalog:",
-    "@a-type/auth-email-ses": "^2.1.8",
     "@a-type/utils": "catalog:",
     "@hono/zod-validator": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/games": "workspace:*",
     "hono": "catalog:",
-    "jose": "^5.9.6",
     "zod": "catalog:",
     "kysely": "0.27.6",
-    "@a-type/kysely": "1.1.1"
+    "@a-type/kysely": "1.1.1",
+    "kysely-d1": "0.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
