@@ -18,7 +18,7 @@
     "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",
     "build:uno": "scripts uno ./dist",
-    "dev": "pnpm run --filter @long-game/game-ui \"/^dev:.*/\" --parallel",
+    "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
     "dev:ts": "tsc -w --preserveWatchOutput",
     "dev:uno": "scripts uno ./dist -w"
   },
