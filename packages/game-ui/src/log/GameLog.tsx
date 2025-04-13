@@ -8,11 +8,11 @@ import {
   RelativeTime,
   withClassName,
 } from '@a-type/ui';
-import { GameSessionChatMessage } from '@long-game/common';
-import { PlayerInfo, withGame } from '@long-game/game-client';
+import { withGame } from '@long-game/game-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
 import { ChatForm } from '../chat/ChatForm';
+import { ChatMessage } from '../chat/ChatMessage';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 
@@ -46,27 +46,9 @@ export const GameLogItem = withClassName(
   'flex flex-col gap-1 items-start',
 );
 
-export const GameLogChat = withGame(function GameLogChat({
-  content: message,
-  user,
-  createdAt,
-}: GameSessionChatMessage & {
-  user?: PlayerInfo;
-}) {
-  return (
-    <div className="pl-4 leading-relaxed">
-      <div className="inline-flex flex-row items-center gap-2 text-sm font-bold mr-2">
-        <PlayerAvatar className="absolute left-[16px]" playerId={user?.id} />
-        <span className="ml-[24px]">{user?.displayName ?? 'Anonymous'}</span>
-      </div>
-      <span className="whitespace-pre-wrap">{message}</span>
-    </div>
-  );
-});
-
 export function GameLogTimestamp({ value }: { value: Date | number }) {
   return (
-    <span className="text-xs text-gray-dark italic pl-8">
+    <span className="text-xs text-gray-dark italic pl-sm">
       <RelativeTime value={new Date(value).getTime()} />
     </span>
   );
@@ -116,24 +98,18 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
 });
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
-  const { combinedLog: log, players } = gameSuite;
+  const { combinedLog: log } = gameSuite;
 
   return (
     <GameLogRoot {...props}>
       <GameLogList>
-        {log.map((entry, i) => (
-          <GameLogItem key={i}>
-            {entry.type === 'chat' ? (
-              <GameLogChat
-                {...entry.chatMessage}
-                user={players[entry.chatMessage.authorId]}
-              />
-            ) : (
-              <div>todo: round logs</div>
-            )}
-            <GameLogTimestamp value={entry.timestamp} />
-          </GameLogItem>
-        ))}
+        {log.map((entry, i) =>
+          entry.type === 'chat' ? (
+            <ChatMessage message={entry.chatMessage} key={i} />
+          ) : (
+            <div>todo: round logs</div>
+          ),
+        )}
       </GameLogList>
       <GameLogChatInput />
     </GameLogRoot>

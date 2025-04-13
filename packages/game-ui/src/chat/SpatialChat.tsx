@@ -1,11 +1,18 @@
 import { Box, BoxProps, clsx, Dialog, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { MouseEvent as ReactMouseEvent, useState } from 'react';
+import {
+  MouseEvent as ReactMouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { subscribe } from 'valtio';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 import { PlayerName } from '../players/PlayerName';
 import { ChatForm } from './ChatForm';
+import { spatialChatState } from './spatialChatState';
 
 export interface SpatialChatProps extends BoxProps {
   sceneId: string;
@@ -60,6 +67,7 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
         className,
       )}
       onContextMenu={handleLongPress}
+      data-scene-id={sceneId}
       {...props}
     >
       {children}
@@ -142,8 +150,22 @@ const SpatialChatBubble = withGame<{
   message: GameSessionChatMessage;
 }>(function SpatialChatBubble({ message }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const emoji = isEmoji(message.content);
+
+  useEffect(() => {
+    return subscribe(spatialChatState, () => {
+      if (spatialChatState.revealedSpatialChatId === message.id) {
+        ref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
+        setOpen(true);
+      }
+    });
+  }, [message.id]);
 
   return (
     <Popover open={!emoji && open} onOpenChange={setOpen}>
@@ -164,6 +186,7 @@ const SpatialChatBubble = withGame<{
             open && 'opacity-100',
             '[.chat-root:hover>&]:opacity-50',
           )}
+          ref={ref}
         >
           <PlayerAvatar playerId={message.authorId} size={16} />
           <span className="text-sm">{emoji ? message.content : '💬'}</span>

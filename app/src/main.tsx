@@ -1,8 +1,10 @@
 import { setColorMode } from '@a-type/ui';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import 'virtual:uno.css';
 import { App } from './App.js';
+
+import '@long-game/game-ui/css.css';
+import 'virtual:uno.css';
 import './main.css';
 
 function main() {
