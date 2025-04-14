@@ -4,16 +4,24 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "development": "./src/index.ts",
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./css.css": {
+      "import": "./dist/uno.css",
+      "types": "./dist/uno.css.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm build:ts && pnpm build:css && pnpm build:uno",
+    "build:ts": "tsc",
+    "build:css": "scripts css ./dist",
+    "build:uno": "scripts uno ./dist",
+    "dev": "pnpm run --filter @long-game/game-territory-renderer --parallel \"/^dev:.*/\"",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:uno": "scripts uno ./dist -w",
     "test": "vitest"
   },
   "dependencies": {
@@ -29,6 +37,7 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "@types/react": "catalog:",
-    "@types/react-dom": "catalog:"
+    "@types/react-dom": "catalog:",
+    "@long-game/scripts": "workspace:*"
   }
 }

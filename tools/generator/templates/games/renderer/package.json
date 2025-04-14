@@ -4,19 +4,24 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "development": "./src/index.ts",
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./css.css": {
+      "import": "./dist/uno.css",
+      "types": "./dist/uno.css.d.ts"
     }
   },
   "type": "module",
   "scripts": {
     "build": "pnpm build:ts && pnpm build:css && pnpm build:uno",
     "build:ts": "tsc",
-    "build:css": "copyfiles src/**/*.css dist -u=1",
+    "build:css": "scripts css ./dist",
     "build:uno": "scripts uno ./dist",
+    "dev": "pnpm run --filter @long-game/game-{{name}}-renderer --parallel \"/^dev:.*/\"",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:uno": "scripts uno ./dist -w",
     "test": "vitest"
   },
   "dependencies": {
@@ -33,7 +38,6 @@
     "vitest": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "copyfiles": "catalog:",
     "@long-game/scripts": "workspace:*"
   }
 }

@@ -1,9 +1,9 @@
-// uno.config.ts
 import preset from '@a-type/ui/uno-preset';
 import variantGroup from '@unocss/transformer-variant-group';
 import { defineConfig } from 'unocss';
 
-export const presetOptions = {
+// TODO: find a way to sync these with /app
+const presetOptions = {
   borderScale: 2,
   roundedness: 0.6,
   scale: 'lg',
@@ -17,23 +17,20 @@ export const presetOptions = {
       hueRotate: 4,
     },
   },
-} as Parameters<typeof preset>[0];
+};
 
 export default defineConfig({
-  presets: [preset(presetOptions)],
-  transformers: [variantGroup()],
-  preflights: [
-    {
-      getCSS: () => `
-			html, body, #root {
-				display: flex;
-				flex-direction: column;
-			}
-
-			#root {
-				flex: 1;
-			}
-		`,
-    },
+  presets: [
+    preset({
+      ...presetOptions,
+      noPreflight: true,
+    }),
   ],
+  content: {
+    pipeline: {
+      include: ['*.js'],
+    },
+  },
+  transformers: [variantGroup()],
+  details: true,
 });

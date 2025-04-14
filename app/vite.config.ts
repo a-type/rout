@@ -7,14 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
-    UnoCSS({
-      content: {
-        pipeline: {
-          include: [/\.(ts|tsx)($|\?)/, /@long-game/],
-        },
-        filesystem: ['../packages/*/src/**/*', '../games/*/src/**/*'],
-      },
-    }),
+    UnoCSS(),
     react(),
     VitePWA({
       includeManifestIcons: true,

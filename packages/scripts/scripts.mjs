@@ -2,6 +2,7 @@ import { build } from '@unocss/cli';
 import minimist from 'minimist';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import unoConfig from './uno.extract.config.mjs';
 
 const argv = minimist(process.argv.slice(2));
 
@@ -30,19 +31,40 @@ const commands = {
       // at the top of the file
 
       const cwd = process.cwd();
-      const distPath = path.relative(
-        import.meta.dirname,
-        path.resolve(cwd, relPath),
+      const distPath = path.resolve(cwd, relPath);
+      // await recursivelyAddUnoPrefixes(path.resolve(cwd, relPath));
+      await fs.writeFile(
+        path.resolve(distPath, 'uno.css.d.ts'),
+        `declare const content: string;
+        export default content;
+        `,
       );
-      await recursivelyAddUnoPrefixes(distPath);
-      console.log(`Running unocss...`);
+      console.log(`Running unocss...`, watch ? '(watch mode)' : '');
       await build({
-        cwd: import.meta.dirname,
         patterns: [`${distPath}/**/*.js`],
         outFile: `${distPath}/uno.css`,
         writeTransformed: true,
         minify: true,
         watch,
+        preflights: false,
+        config: unoConfig,
+      });
+      if (!watch) {
+        console.log(`Done!`);
+      }
+    },
+  },
+  css: {
+    // copies all CSS files from src/ to dist/ with the same
+    // folder structure
+    run: async () => {
+      const cwd = process.cwd();
+      const srcPath = path.resolve(cwd, 'src');
+      const distPath = path.resolve(cwd, relPath);
+      console.log(`Copying CSS files...`);
+      await fs.cp(srcPath, distPath, {
+        recursive: true,
+        filter: (src) => src.endsWith('.css'),
       });
       console.log(`Done!`);
     },
@@ -57,7 +79,6 @@ if (!commands[command]) {
 (async () => {
   try {
     await commands[command].run();
-    process.exit(0);
   } catch (e) {
     console.error(e);
     process.exit(1);
