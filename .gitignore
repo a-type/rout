@@ -12,3 +12,4 @@ dist/
 .wrangler
 tsconfig.tsbuildinfo
 vapidKeys.txt
+*:Zone.Identifier
