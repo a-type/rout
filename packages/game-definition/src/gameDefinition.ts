@@ -144,11 +144,32 @@ export type RoundIndexDecider<
    * Membership information is limited to things that might be
    * useful for determining round index. Try to keep this light.
    */
-  members: { id: string }[];
+  members: { id: PrefixedId<'u'> }[];
   startedAt: Date;
   currentTime: Date;
   gameTimeZone: string;
-}) => number;
+}) => {
+  roundIndex: number;
+  /**
+   * Which players can and should submit a turn.
+   * Note that for non-concurrent turn-based games,
+   * this should be the 'hotseat' player only. For
+   * concurrent turn-based games, this should
+   * be all players who have not yet submitted a turn,
+   * but not include players who have already submitted
+   * a turn. For free-play games, this should either
+   * be like concurrent, or just all players (doesn't matter
+   * much).
+   */
+  pendingTurns: PrefixedId<'u'>[];
+  /**
+   * When the system should check the round again,
+   * regardless of change to game state. Use for
+   * scheduled round advancement which does not depend
+   * on played turns.
+   */
+  checkAgainAt?: Date;
+};
 
 export interface GameModule {
   versions: GameDefinition[];

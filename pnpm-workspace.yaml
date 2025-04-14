@@ -33,3 +33,5 @@ catalog:
   '@react-three/fiber': 9.1.2
   wrangler: 4.9.1
   copyfiles: 2.4.1
+  web-push: 3.6.7
+  '@types/web-push': 3.6.4

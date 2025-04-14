@@ -11,14 +11,14 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/games": "workspace:*",
     "@long-game/game-renderer": "workspace:*",
     "@long-game/game-ui": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@tanstack/react-query": "5.62.15",
     "@verdant-web/react-router": "catalog:",
     "hono": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "@tanstack/react-query": "5.62.15"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",
@@ -28,6 +28,12 @@
     "unocss": "catalog:",
     "vite": "^6.0.7",
     "vite-plugin-pwa": "^0.21.1",
+    "workbox-core": "^7.3.0",
+    "workbox-expiration": "^7.3.0",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
+    "workbox-window": "^7.3.0",
     "wrangler": "^3.99.0"
   }
 }

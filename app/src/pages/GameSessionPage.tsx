@@ -1,9 +1,10 @@
+import { GameControls } from '@/components/games/GameControls';
 import { GameSetup } from '@/components/games/GameSetup.js';
 import { Box, ErrorBoundary, PageContent, PageRoot, Spinner } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
-import { GameControls, GameLayout } from '@long-game/game-ui';
+import { GameLayout } from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 

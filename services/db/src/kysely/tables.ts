@@ -21,6 +21,7 @@ export interface Database {
   GameSessionInvitation: GameSessionInvitationTable;
   Friendship: FriendshipTable;
   FriendshipInvitation: FriendshipInvitationTable;
+  PushSubscription: PushSubscriptionTable;
 }
 
 export interface UserTable {
@@ -121,3 +122,19 @@ export interface FriendshipInvitationTable {
   expiresAt: DateColumnRequired;
   status: 'pending' | 'accepted' | 'declined' | 'blocked';
 }
+export type FriendshipInvitation = Selectable<FriendshipInvitationTable>;
+export type NewFriendshipInvitation = Insertable<FriendshipInvitationTable>;
+export type FriendshipInvitationUpdate = Updateable<FriendshipInvitationTable>;
+
+export interface PushSubscriptionTable {
+  endpoint: string; // pk
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  userId: PrefixedId<'u'>;
+  expirationTime: DateColumnOptional;
+  p256dh: string | null;
+  auth: string | null;
+}
+export type PushSubscription = Selectable<PushSubscriptionTable>;
+export type NewPushSubscription = Insertable<PushSubscriptionTable>;
+export type PushSubscriptionUpdate = Updateable<PushSubscriptionTable>;

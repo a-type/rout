@@ -11,6 +11,8 @@ interface ApiBindings {
   GOOGLE_AUTH_CLIENT_SECRET: string;
   AWS_ACCESS_KEY_ID: string;
   AWS_SECRET_ACCESS_KEY: string;
+  VAPID_PUBLIC_KEY: string;
+  VAPID_PRIVATE_KEY: string;
   GAME_SESSION_STATE: DurableObjectNamespace<
     import('./index').GameSessionState
   >;

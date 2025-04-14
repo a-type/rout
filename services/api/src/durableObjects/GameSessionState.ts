@@ -5,6 +5,7 @@ import {
   ClientRequestChatMessage,
   ClientSendChatMessage,
   ClientSubmitTurnMessage,
+  createTurnReadyPushNotification,
   GameRound,
   GameRoundSummary,
   GameSessionChatMessage,
@@ -26,6 +27,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { Hono } from 'hono/quick';
 import { z } from 'zod';
 import { verifySocketToken } from '../auth/socketTokens';
+import { sendPushToAllUserDevices } from '../services/push';
 
 /**
  * The basic initial data required to set up a game.
@@ -54,6 +56,18 @@ export type GameSessionMember = {
   id: PrefixedId<'u'>;
 };
 
+interface GameSessionNotificationState {
+  /**
+   * Which players were notified, and when (UTC date string)
+   */
+  playersNotified: Record<PrefixedId<'u'>, string | null>;
+  /**
+   * If round index is out of date, this state should be
+   * reset.
+   */
+  roundIndex: number;
+}
+
 type SocketSessionInfo = {
   gameSessionId: string;
   userId: PrefixedId<'u'>;
@@ -70,6 +84,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   #sessionData: GameSessionBaseData | null = null;
   #turns: GameSessionTurn[] = [];
   #chat: GameSessionChatMessage[] = [];
+  #notifications: GameSessionNotificationState = {
+    roundIndex: 0,
+    playersNotified: {},
+  };
   #miniApp;
   #socketInfo = new Map<WebSocket, SocketSessionInfo>();
   // map of socket id -> messages waiting to be sent until socket is confirmed
@@ -83,6 +101,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       this.#sessionData = (await ctx.storage.get('sessionData')) || null;
       this.#turns = (await ctx.storage.get('turns')) || [];
       this.#chat = (await ctx.storage.get('chat')) || [];
+      this.#notifications = (await ctx.storage.get('notifications')) || {
+        roundIndex: 0,
+        playersNotified: {},
+      };
     });
 
     // if we've come back from hibernation, we have to repopulate our socket map
@@ -324,7 +346,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       members: this.#sessionData.members,
       startedAt: this.#sessionData.startedAt,
       turns: this.#turns,
-    });
+    }).roundIndex;
   }
 
   getPublicRoundIndex(): number {
@@ -537,6 +559,72 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   }
 
   /**
+   * Call after material changes are made to the game
+   * state. This will recompute the round and send or
+   * schedule notifications to players.
+   */
+  #sendOrScheduleNotifications = async () => {
+    // TODO: consolidate
+    const roundState = this.gameDefinition.getRoundIndex({
+      currentTime: new Date(),
+      gameTimeZone: this.#sessionData?.timezone ?? 'UTC',
+      members: this.#sessionData?.members ?? [],
+      startedAt: this.#sessionData?.startedAt ?? new Date(),
+      turns: this.#turns,
+    });
+    const newRoundIndex = roundState.roundIndex;
+    if (newRoundIndex !== this.#notifications.roundIndex) {
+      // reset notifications state
+      this.#notifications.roundIndex = newRoundIndex;
+      this.#notifications.playersNotified = {};
+    }
+    // check if we need to notify players
+    for (const playerId of roundState.pendingTurns) {
+      if (!this.#notifications.playersNotified[playerId]) {
+        try {
+          await this.#notifyPlayerOfTurn(playerId);
+          // mark notified
+          this.#notifications.playersNotified[playerId] =
+            new Date().toUTCString();
+        } catch (err) {
+          console.error(
+            `Failed to send player notification to ${playerId}`,
+            err,
+          );
+        }
+      }
+    }
+    this.ctx.storage.put('notifications', this.#notifications);
+    // schedule any required alarm
+    if (roundState.checkAgainAt) {
+      this.ctx.storage.setAlarm(roundState.checkAgainAt.getTime());
+    }
+  };
+
+  async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
+    console.info(`Notifying player ${playerId} of turn`);
+    if (!this.#sessionData) {
+      throw new LongGameError(
+        LongGameError.Code.InternalServerError,
+        'Session data not initialized',
+      );
+    }
+    await sendPushToAllUserDevices(
+      playerId,
+      createTurnReadyPushNotification(
+        this.#sessionData.id,
+        this.#sessionData.gameId,
+        this.#sessionData.gameVersion,
+      ),
+      this.env,
+    );
+  }
+
+  async alarm() {
+    this.#sendOrScheduleNotifications();
+  }
+
+  /**
    * Adds (and stores) a turn to the game session for the current
    * round.
    */
@@ -613,6 +701,8 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       // allow players to see the final state of the game while in-session.
       this.#broadcastRoundChange(newRoundIndex);
     }
+
+    this.#sendOrScheduleNotifications();
   }
 
   #broadcastRoundChange = (roundIndex: number) => {

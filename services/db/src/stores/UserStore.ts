@@ -1,11 +1,16 @@
 import {
+  id,
   LongGameError,
   PlayerColorName,
   PrefixedId,
-  id,
 } from '@long-game/common';
 import { RpcTarget } from 'cloudflare:workers';
-import { DB, jsonObjectFrom, sql } from '../kysely/index.js';
+import {
+  DB,
+  jsonObjectFrom,
+  NewPushSubscription,
+  sql,
+} from '../kysely/index.js';
 
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;
@@ -552,5 +557,42 @@ export class UserStore extends RpcTarget {
       .execute();
 
     return value.filter((v) => !!v.user);
+  }
+
+  async createPushSubscription(data: Omit<NewPushSubscription, 'userId'>) {
+    await this.#db
+      .insertInto('PushSubscription')
+      .values({
+        endpoint: data.endpoint,
+        userId: this.#userId,
+        auth: data.auth,
+        p256dh: data.p256dh,
+        expirationTime: data.expirationTime,
+      })
+      .onConflict((cb) =>
+        cb.column('endpoint').doUpdateSet({
+          auth: data.auth,
+          p256dh: data.p256dh,
+          userId: this.#userId,
+          expirationTime: data.expirationTime,
+        }),
+      )
+      .execute();
+  }
+
+  async deletePushSubscription(endpoint: string) {
+    await this.#db
+      .deleteFrom('PushSubscription')
+      .where('endpoint', '=', endpoint)
+      .where('userId', '=', this.#userId)
+      .executeTakeFirstOrThrow();
+  }
+
+  async listPushSubscriptions() {
+    return this.#db
+      .selectFrom('PushSubscription')
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .execute();
   }
 }

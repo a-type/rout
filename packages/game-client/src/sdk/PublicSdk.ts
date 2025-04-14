@@ -153,6 +153,24 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
+
+  createPushSubscription = this.sdkMutation(this.apiRpc.push.$post, {
+    transformInput: (input: {
+      endpoint: string;
+      keys: { auth: string; p256dh: string };
+      expirationTime?: number;
+    }) => ({
+      json: input,
+    }),
+  });
+  deletePushSubscription = this.sdkMutation(
+    this.apiRpc.push[':endpoint'].$delete,
+    {
+      transformInput: (input: { endpoint: string }) => ({
+        param: { endpoint: input.endpoint },
+      }),
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];

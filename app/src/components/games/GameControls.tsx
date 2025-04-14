@@ -1,13 +1,14 @@
+import { PushSubscriptionToggle } from '@/components/push/PushSubscriptionToggle';
 import { Box } from '@a-type/ui';
-import { RoundHistoryControl } from '../history/RoundHistoryControl.js';
 import {
+  BasicGameLog,
   GameLayoutControls,
   GameLayoutSecondaryControls,
-} from '../layout/GameLayout.js';
-import { BasicGameLog } from '../log/GameLog.js';
-import { PlayerStatuses } from '../players/PlayerStatuses.js';
-import { SubmitTurn } from '../turns/SubmitTurn.js';
-import { NavigationControls } from './NavigationControls.js';
+  NavigationControls,
+  PlayerStatuses,
+  RoundHistoryControl,
+  SubmitTurn,
+} from '@long-game/game-ui';
 
 export interface GameControlsProps {}
 
@@ -24,6 +25,7 @@ export function GameControls({}: GameControlsProps) {
       <GameLayoutSecondaryControls>
         <NavigationControls />
         <RoundHistoryControl />
+        <PushSubscriptionToggle />
       </GameLayoutSecondaryControls>
     </>
   );
