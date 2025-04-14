@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
         description: 'Never lose touch',
         theme_color: '#6466bd',
         background_color: '#19181a',
-        scope: 'https://rout.games/',
+        scope: 'https://play.rout.games/',
         icons,
         start_url: '/?utm_source=homescreen',
         display: 'standalone',

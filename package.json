@@ -9,7 +9,8 @@
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
-    "gen": "node ./tools/generator/generate.mjs"
+    "gen": "node ./tools/generator/generate.mjs",
+    "wrangler": "wrangler"
   },
   "keywords": [],
   "author": "",
