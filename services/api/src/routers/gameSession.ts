@@ -118,7 +118,9 @@ export const gameSessionRouter = new Hono<Env>()
 
     // while in pregame, double check that vital data is
     // synced to the DO...
-    state.updateMembers(members);
+    if (summary.status.status === 'pending') {
+      state.updateMembers(members);
+    }
 
     return ctx.json({
       members: wrapRpcData(members),
