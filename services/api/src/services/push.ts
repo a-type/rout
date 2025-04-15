@@ -8,7 +8,7 @@ export async function sendPushToAllUserDevices(
 ) {
   const publicKey = env.VAPID_PUBLIC_KEY;
   const privateKey = env.VAPID_PRIVATE_KEY;
-  webPush.setVapidDetails(env.EMAIL_FROM, publicKey, privateKey);
+  webPush.setVapidDetails('mailto:' + env.EMAIL_FROM, publicKey, privateKey);
 
   const userStore = await env.PUBLIC_STORE.getStoreForUser(userId);
 
