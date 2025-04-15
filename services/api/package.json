@@ -31,13 +31,12 @@
     "@long-game/service-db": "workspace:*",
     "hono": "catalog:",
     "jose": "^5.9.6",
-    "web-push": "catalog:",
+    "@block65/webcrypto-web-push": "1.0.2",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.8.14",
     "@types/node": "^22.14.0",
-    "vitest": "catalog:",
-    "@types/web-push": "catalog:"
+    "vitest": "catalog:"
   }
 }

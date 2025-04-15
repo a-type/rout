@@ -1,14 +1,14 @@
+import { buildPushPayload, PushMessage } from '@block65/webcrypto-web-push';
 import { LongGameError, PrefixedId } from '@long-game/common';
-import webPush from 'web-push';
 
 export async function sendPushToAllUserDevices(
   userId: PrefixedId<'u'>,
-  payload: any,
+  data: any,
   env: ApiBindings,
 ) {
   const publicKey = env.VAPID_PUBLIC_KEY;
   const privateKey = env.VAPID_PRIVATE_KEY;
-  webPush.setVapidDetails('mailto:' + env.EMAIL_FROM, publicKey, privateKey);
+  const subject = `mailto:${env.EMAIL_FROM}`;
 
   const userStore = await env.PUBLIC_STORE.getStoreForUser(userId);
 
@@ -21,17 +21,29 @@ export async function sendPushToAllUserDevices(
         'Missing auth or p256dh in subscription',
       );
     }
-    try {
-      await webPush.sendNotification(
-        {
-          endpoint: subscription.endpoint,
-          keys: {
-            auth: subscription.auth,
-            p256dh: subscription.p256dh,
-          },
+    const message: PushMessage = {
+      data,
+    };
+    const payload = await buildPushPayload(
+      message,
+      {
+        endpoint: subscription.endpoint,
+        keys: {
+          auth: subscription.auth,
+          p256dh: subscription.p256dh,
         },
-        JSON.stringify(payload),
-      );
+        expirationTime: subscription.expirationTime
+          ? new Date(subscription.expirationTime).getTime()
+          : null,
+      },
+      {
+        privateKey,
+        publicKey,
+        subject,
+      },
+    );
+    try {
+      await fetch(subscription.endpoint, payload);
     } catch (err) {
       if (isPushError(err)) {
         if (err.statusCode >= 400 && err.statusCode < 500) {
