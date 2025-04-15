@@ -13,3 +13,5 @@ export type GameStatus =
       status: 'completed';
       winnerIds: string[];
     };
+
+export type GameStatusValue = GameStatus['status'];

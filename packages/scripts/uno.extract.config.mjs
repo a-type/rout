@@ -7,6 +7,7 @@ const presetOptions = {
   borderScale: 2,
   roundedness: 0.6,
   scale: 'lg',
+  saturation: 100,
   customTheme: {
     primary: {
       hue: 290,

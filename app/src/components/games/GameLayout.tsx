@@ -29,4 +29,5 @@ export const GameLayoutSecondaryControls = withClassName(
 export const GameLayout = Object.assign(GameLayoutRoot, {
   Main: GameLayoutMain,
   Controls: GameLayoutControls,
+  SecondaryControls: GameLayoutSecondaryControls,
 });

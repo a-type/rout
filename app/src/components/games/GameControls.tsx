@@ -2,31 +2,34 @@ import { PushSubscriptionToggle } from '@/components/push/PushSubscriptionToggle
 import { Box } from '@a-type/ui';
 import {
   BasicGameLog,
-  GameLayoutControls,
-  GameLayoutSecondaryControls,
-  NavigationControls,
   PlayerStatuses,
   RoundHistoryControl,
   SubmitTurn,
 } from '@long-game/game-ui';
+import { GameLayout } from './GameLayout';
+import { NavigationControls } from './NavigationControls';
 
-export interface GameControlsProps {}
+export interface GameControlsProps {
+  pregame?: boolean;
+}
 
-export function GameControls({}: GameControlsProps) {
+export function GameControls({ pregame }: GameControlsProps) {
   return (
     <>
-      <GameLayoutControls>
+      <GameLayout.Controls>
         <BasicGameLog className="flex-1" />
-        <Box gap="md" justify="between" p="md" items="center">
-          <PlayerStatuses />
-          <SubmitTurn />
-        </Box>
-      </GameLayoutControls>
-      <GameLayoutSecondaryControls>
+        {!pregame && (
+          <Box gap="md" justify="between" p="md" items="center">
+            <PlayerStatuses />
+            <SubmitTurn />
+          </Box>
+        )}
+      </GameLayout.Controls>
+      <GameLayout.SecondaryControls>
         <NavigationControls />
-        <RoundHistoryControl />
-        <PushSubscriptionToggle />
-      </GameLayoutSecondaryControls>
+        {!pregame && <RoundHistoryControl />}
+        <PushSubscriptionToggle showWhenEnabled />
+      </GameLayout.SecondaryControls>
     </>
   );
 }

@@ -1,5 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
-import { isPrefixedId, wrapRpcData } from '@long-game/common';
+import { isPrefixedId, PrefixedId, wrapRpcData } from '@long-game/common';
+import { UserStore } from '@long-game/service-db';
+import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { userStoreMiddleware } from '../middleware';
@@ -29,7 +31,15 @@ export const gameSessionInvitationsRouter = new Hono()
     async (ctx) => {
       const { id } = ctx.req.valid('param');
       const { response } = ctx.req.valid('json');
-      await ctx.get('userStore').respondToGameSessionInvitation(id, response);
+      const userStore = ctx.get('userStore');
+      const invite = await userStore.respondToGameSessionInvitation(
+        id,
+        response,
+      );
+
+      // go ahead and update the session now
+      await updateGameSessionMembers(ctx.env, userStore, invite.gameSessionId);
+
       return ctx.json({ success: true });
     },
   )
@@ -50,3 +60,14 @@ export const gameSessionInvitationsRouter = new Hono()
       return ctx.json({ success: true });
     },
   );
+
+async function updateGameSessionMembers(
+  env: ApiBindings,
+  userStore: RpcStub<UserStore>,
+  gameSessionId: PrefixedId<'gs'>,
+) {
+  const durableObjectId = env.GAME_SESSION_STATE.idFromString(gameSessionId);
+  const sessionState = await env.GAME_SESSION_STATE.get(durableObjectId);
+  const members = await userStore.getGameSessionMembers(gameSessionId);
+  await sessionState.updateMembers(members);
+}

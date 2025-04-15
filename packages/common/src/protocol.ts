@@ -41,6 +41,20 @@ export interface ServerStatusChangeMessage extends BaseServerMessage {
   status: GameStatus;
 }
 
+/**
+ * Sent during pregame if a different game is chosen. All game
+ * state must be re-initialized. Use the HTTP API to fetch new
+ * data.
+ */
+export interface ServerGameChangeMessage extends BaseServerMessage {
+  type: 'gameChange';
+}
+
+export interface ServerGameMembersChangeMessage extends BaseServerMessage {
+  type: 'membersChange';
+  members: { id: PrefixedId<'u'> }[];
+}
+
 // general-purpose ack for client messages
 export interface ServerAckMessage extends BaseServerMessage {
   type: 'ack';
@@ -58,7 +72,9 @@ export type ServerMessage =
   | ServerRoundChangeMessage
   | ServerErrorMessage
   | ServerStatusChangeMessage
-  | ServerTurnPlayedMessage;
+  | ServerTurnPlayedMessage
+  | ServerGameChangeMessage
+  | ServerGameMembersChangeMessage;
 
 export type ServerMessageType = ServerMessage['type'];
 export type ServerMessageByType<T extends ServerMessageType> = Extract<

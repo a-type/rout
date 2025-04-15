@@ -1,3 +1,4 @@
+import { MainNav } from '@/components/nav/MainNav';
 import { ColorModeToggle } from '@/components/settings/ColorModeToggle';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { API_ORIGIN } from '@/config';
@@ -7,11 +8,10 @@ import {
   Divider,
   H1,
   H2,
-  Icon,
   PageContent,
+  PageNav,
   PageRoot,
 } from '@a-type/ui';
-import { Link } from '@verdant-web/react-router';
 
 export interface SettingsPageProps {}
 
@@ -19,16 +19,14 @@ export function SettingsPage({}: SettingsPageProps) {
   return (
     <PageRoot>
       <PageContent>
-        <Box d="col">
-          <Box items="center">
-            <Link to="/">
-              <Icon name="arrowLeft" />
-            </Link>
-            <H1>Settings</H1>
-          </Box>
+        <Box d="col" gap>
+          <H1>Settings</H1>
+
           <Divider />
-          <H2>You</H2>
-          <EditProfileForm />
+          <Box d="col" gap>
+            <H2>You</H2>
+            <EditProfileForm />
+          </Box>
           <Divider />
           <ColorModeToggle />
           <Divider />
@@ -39,6 +37,9 @@ export function SettingsPage({}: SettingsPageProps) {
           </form>
         </Box>
       </PageContent>
+      <PageNav>
+        <MainNav />
+      </PageNav>
     </PageRoot>
   );
 }

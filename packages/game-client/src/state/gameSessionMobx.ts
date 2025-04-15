@@ -7,6 +7,7 @@ import {
   PlayerColorName,
   PrefixedId,
   ServerChatMessage,
+  ServerGameMembersChangeMessage,
   ServerPlayerStatusChangeMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
@@ -31,14 +32,14 @@ export type PlayerInfo = {
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
-  @observable accessor localTurnData: GetTurnData<TGame> | null;
-  @observable accessor playerStatuses: Record<
+  @observable accessor localTurnData!: GetTurnData<TGame> | null;
+  @observable accessor playerStatuses!: Record<
     PrefixedId<'u'>,
     GameSessionPlayerStatus
   >;
-  @observable accessor players: Record<PrefixedId<'u'>, PlayerInfo>;
+  @observable accessor players!: Record<PrefixedId<'u'>, PlayerInfo>;
   @observable accessor chat: GameSessionChatMessage[] = [];
-  @observable accessor gameStatus: GameStatus;
+  @observable accessor gameStatus!: GameStatus;
   @observable accessor rounds: GameRoundSummary<
     GetTurnData<TGame>,
     GetPublicTurnData<TGame>,
@@ -49,11 +50,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
 
   // static
-  gameId: string;
-  gameVersion: string;
+  gameId!: string;
+  gameVersion!: string;
   gameSessionId: PrefixedId<'gs'>;
-  gameDefinition: TGame;
-  members: { id: PrefixedId<'u'> }[];
+  gameDefinition!: TGame;
+  members!: { id: PrefixedId<'u'> }[];
   playerId: PrefixedId<'u'>;
 
   // non-reactive
@@ -72,7 +73,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       gameVersion: string;
       id: PrefixedId<'gs'>;
       members: { id: PrefixedId<'u'> }[];
-      gameDefinition: TGame;
       status: GameStatus;
       playerId: PrefixedId<'u'>;
     },
@@ -80,35 +80,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       socket: GameSocket;
     },
   ) {
-    this.viewingRoundIndex = init.currentRound.roundIndex;
-    this.localTurnData = null;
-    this.rounds = new Array(init.currentRound.roundIndex).fill(null);
-    this.rounds[init.currentRound.roundIndex] = init.currentRound;
-    this.playerStatuses = init.playerStatuses;
-    this.gameId = init.gameId;
-    this.gameVersion = init.gameVersion;
-    this.gameSessionId = init.id;
-    this.members = init.members;
-    this.gameStatus = init.status;
     this.playerId = init.playerId;
-    this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
-      (acc, member) => {
-        acc[member.id] = {
-          id: member.id,
-          displayName: 'Loading...',
-          imageUrl: null,
-          color: 'gray',
-        };
-        return acc;
-      },
-      {},
-    );
-    this.gameDefinition = init.gameDefinition;
+    this.gameSessionId = init.id;
+
+    this.applyGameData(init);
 
     this.connectSocket(ctx.socket);
-    this.fetchMembers();
     this.setupLocalTurnStorage();
-    if (this.gameStatus.status === 'completed') {
+
+    if (init.status.status === 'completed') {
       this.loadPostgame();
     }
   }
@@ -348,6 +328,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
     socket.subscribe('roundChange', this.onRoundChange);
     socket.subscribe('statusChange', this.onStatusChange);
+    socket.subscribe('gameChange', this.onGameChange);
+    socket.subscribe('membersChange', this.onMembersChange);
   };
 
   private onChat = (msg: ServerChatMessage) => {
@@ -426,6 +408,70 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       localStorage.setItem(key, JSON.stringify(this.localTurnData));
     });
   };
+
+  @action private onGameChange = async () => {
+    const newData = await getSummary(this.gameSessionId);
+    this.applyGameData(newData);
+  };
+
+  @action private applyGameData = (init: {
+    playerState: any;
+    currentRound: GameRoundSummary<any, any, any>;
+    playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
+    gameId: string;
+    gameVersion: string;
+    status: GameStatus;
+    members: { id: PrefixedId<'u'> }[];
+  }) => {
+    this.gameDefinition = games[init.gameId].versions.find(
+      (v) => v.version === init.gameVersion,
+    ) as TGame;
+    if (!this.gameDefinition) {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Game definition not found',
+      );
+    }
+    this.viewingRoundIndex = init.currentRound.roundIndex;
+    this.localTurnData = null;
+    this.rounds = new Array(init.currentRound.roundIndex).fill(null);
+    this.rounds[init.currentRound.roundIndex] = init.currentRound;
+    this.playerStatuses = init.playerStatuses;
+    this.gameId = init.gameId;
+    this.gameVersion = init.gameVersion;
+    this.members = init.members;
+    this.gameStatus = init.status;
+    this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
+      (acc, member) => {
+        acc[member.id] = {
+          id: member.id,
+          displayName: 'Loading...',
+          imageUrl: null,
+          color: 'gray',
+        };
+        return acc;
+      },
+      {},
+    );
+    this.fetchMembers();
+  };
+
+  @action private onMembersChange = (msg: ServerGameMembersChangeMessage) => {
+    this.members = msg.members;
+    this.players = msg.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
+      (acc, member) => {
+        acc[member.id] = this.players[member.id] ?? {
+          id: member.id,
+          displayName: 'Loading...',
+          imageUrl: null,
+          color: 'gray',
+        };
+        return acc;
+      },
+      {},
+    );
+    this.fetchMembers();
+  };
 }
 
 export async function createGameSessionSuite<TGame extends GameDefinition>(
@@ -433,18 +479,6 @@ export async function createGameSessionSuite<TGame extends GameDefinition>(
 ): Promise<GameSessionSuite<TGame>> {
   const init = await getSummary(gameSessionId);
   const socket = await connectToSocket(gameSessionId);
-
-  const gameModule = games[init.gameId];
-  const gameDefinition = gameModule.versions.find(
-    (v) => v.version === init.gameVersion,
-  ) as TGame;
-  if (!gameDefinition) {
-    throw new LongGameError(
-      LongGameError.Code.Unknown,
-      'Game definition not found',
-    );
-  }
-
   return new GameSessionSuite(
     {
       ...init,
@@ -452,7 +486,6 @@ export async function createGameSessionSuite<TGame extends GameDefinition>(
       playerState: init.playerState as any,
       currentRound: init.currentRound as any,
       playerId: init.playerId,
-      gameDefinition,
     },
     { socket },
   );

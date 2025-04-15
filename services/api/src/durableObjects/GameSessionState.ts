@@ -284,6 +284,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         id: m.id,
       })),
     });
+    this.#sendSocketMessage({
+      type: 'membersChange',
+      members: this.#sessionData.members,
+    });
   }
 
   updateGame(gameId: string, gameVersion: string) {
@@ -300,6 +304,9 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       );
     }
     this.setSessionData({ gameId, gameVersion });
+    this.#sendSocketMessage({
+      type: 'gameChange',
+    });
   }
 
   startGame() {
@@ -323,6 +330,12 @@ export class GameSessionState extends DurableObject<ApiBindings> {
 
     // start the game
     this.setSessionData({ startedAt: new Date() });
+
+    // update any connected sockets of the new status
+    this.#sendSocketMessage({
+      type: 'statusChange',
+      status: this.getStatus(),
+    });
   }
 
   getIsInitialized(): boolean {
@@ -790,9 +803,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Game session has not been initialized',
       );
     }
+    const summary = this.getSummary();
     const currentRoundIndex = this.getCurrentRoundIndex();
     return {
-      ...this.getSummary(),
+      ...summary,
       playerId: userId,
       playerState: this.getPlayerState(userId) as {},
       currentRound: this.getPublicRound(userId, currentRoundIndex),

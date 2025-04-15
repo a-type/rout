@@ -116,6 +116,10 @@ export const gameSessionRouter = new Hono<Env>()
       state.getSummary(),
     ]);
 
+    // while in pregame, double check that vital data is
+    // synced to the DO...
+    state.updateMembers(members);
+
     return ctx.json({
       members: wrapRpcData(members),
       invitations: wrapRpcData(invitations),

@@ -9,11 +9,11 @@ import {
   H2,
   Icon,
   withClassName,
+  withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
 import { SendInvite } from '../friendships/SendInvite.js';
-import { GameJoinPreview } from './GameJoinPreview.js';
 import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
@@ -26,37 +26,35 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: gameSessionId,
   });
-  const pendingInviteForMe =
-    pregame.myInvitation.status === 'pending' ? pregame.myInvitation : null;
-
   const game = games[pregame.session.gameId];
   const insufficientPlayers =
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
-  if (pendingInviteForMe) {
-    return <GameJoinPreview myInvite={pendingInviteForMe} pregame={pregame} />;
-  }
-
   return (
-    <Box p d="col" gap>
-      <H2>Who's in</H2>
-      <GameSetupMembers sessionId={gameSessionId} />
-      <H2>Invite friends</H2>
-      <GameSetupInviteFriends sessionId={gameSessionId} />
+    <Box p d="col" gap className="m-auto max-w-800px">
+      <Box d="col" gap>
+        <H1>Game Setup</H1>
+        <label htmlFor="game-picker">Game</label>
+        <GamePicker
+          id="game-picker"
+          value={pregame.session.gameId}
+          onChange={async (gameId) => {
+            await updateGameMutation.mutateAsync({
+              id: gameSessionId,
+              gameId,
+            });
+          }}
+          loading={updateGameMutation.isPending}
+        />
+      </Box>
       <Divider />
-      <H1>Game Setup</H1>
-      <label htmlFor="game-picker">Game</label>
-      <GamePicker
-        id="game-picker"
-        value={pregame.session.gameId}
-        onChange={async (gameId) => {
-          await updateGameMutation.mutateAsync({
-            id: gameSessionId,
-            gameId,
-          });
-        }}
-      />
+      <Box d="col">
+        <H2>Who's in</H2>
+        <GameSetupMembers sessionId={gameSessionId} />
+        <H2>Invite friends</H2>
+        <GameSetupInviteFriends sessionId={gameSessionId} />
+      </Box>
       <Divider />
 
       <Button
@@ -114,16 +112,7 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
       <PeopleGrid>
         {entries?.map((entry) => {
           return (
-            <Box
-              asChild
-              d="col"
-              surface
-              p="sm"
-              gap="sm"
-              items="center"
-              className="relative"
-              key={entry.id}
-            >
+            <PeopleGridItem asChild key={entry.id}>
               <button
                 className="b-none color-inherit text-sm cursor-pointer hover:bg-gray-2 focus-visible:focus-shadow"
                 disabled={
@@ -142,15 +131,18 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
                 />
                 <span>{entry.displayName}</span>
                 <Box
+                  gap
+                  items="center"
                   className={clsx(
                     'absolute top--1 right--1 rounded-full p-2',
                     entry.status === 'pending' ? 'bg-gray' : 'bg-accent',
                   )}
                 >
+                  {entry.status === 'pending' && <span>Sent</span>}
                   <Icon name={entry.status === 'pending' ? 'send' : 'plus'} />
                 </Box>
               </button>
-            </Box>
+            </PeopleGridItem>
           );
         })}
       </PeopleGrid>
@@ -167,19 +159,33 @@ function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
   return (
     <PeopleGrid>
       {pregame.members.map((member) => (
-        <Box d="col" surface p="sm" gap="sm" items="center" key={member.id}>
+        <PeopleGridItem key={member.id}>
           <Avatar
             className="w-full h-auto aspect-1"
             imageSrc={member.imageUrl}
           />
           <span>{member.displayName}</span>
-        </Box>
+        </PeopleGridItem>
       ))}
     </PeopleGrid>
   );
 }
 
 const PeopleGrid = withClassName(
-  Box,
-  'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2',
+  withProps(Box, {
+    gap: true,
+    p: true,
+  }),
+  'flex-wrap',
+);
+
+const PeopleGridItem = withClassName(
+  withProps(Box, {
+    d: 'col',
+    surface: true,
+    p: true,
+    gap: true,
+    items: 'center',
+  }),
+  'w-20vmax max-w-120px relative',
 );
