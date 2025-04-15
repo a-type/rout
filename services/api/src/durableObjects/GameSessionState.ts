@@ -356,6 +356,8 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       type: 'statusChange',
       status: this.getStatus(),
     });
+
+    this.#sendOrScheduleNotifications();
   }
 
   getIsInitialized(): boolean {

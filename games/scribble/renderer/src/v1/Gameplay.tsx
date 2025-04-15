@@ -28,7 +28,14 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     }
 
     return (
-      <Box p="lg" layout="center center" full>
+      <Box
+        p={{
+          default: 'sm',
+          lg: 'lg',
+        }}
+        layout="center center"
+        full
+      >
         <Tabs
           value={viewingIndex.toString()}
           onValueChange={(v) => setViewingIndex(parseInt(v, 10))}
@@ -52,7 +59,14 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
   }
 
   return (
-    <Box p="lg" layout="center center" full>
+    <Box
+      p={{
+        default: 'sm',
+        lg: 'lg',
+      }}
+      layout="center center"
+      full
+    >
       <Tabs
         value={viewingIndex.toString()}
         onValueChange={(v) => setViewingIndex(parseInt(v, 10))}
@@ -97,7 +111,7 @@ function ItemTab({
 
 function ItemTabs({ items }: { items: (SequenceItem | Task)[] }) {
   return (
-    <Tabs.List className="sticky top-[50px] justify-center z-10">
+    <Tabs.List className="sticky top-[0px] justify-center z-10">
       {items.map((item, index) => (
         <ItemTab key={index} index={index} item={item} />
       ))}

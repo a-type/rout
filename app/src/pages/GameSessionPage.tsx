@@ -7,6 +7,7 @@ import { Box, ErrorBoundary, Spinner } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
+import { usePlayerThemed } from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 
@@ -40,8 +41,9 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   gameSuite,
 }) {
   const sessionId = gameSuite.gameSessionId;
+  const { className, style } = usePlayerThemed(gameSuite.playerId);
   return (
-    <GameLayout>
+    <GameLayout className={className} style={style}>
       <GameLayout.Main>
         <Suspense
           fallback={
