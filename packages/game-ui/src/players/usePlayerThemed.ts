@@ -14,6 +14,7 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
   const palette = colors[player.color];
 
   return {
+    palette,
     className: 'theme',
     style: {
       '--dyn-primary-source': palette.okHue,

@@ -7,7 +7,7 @@ import { Box, ErrorBoundary, Spinner } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
-import { usePlayerThemed } from '@long-game/game-ui';
+import { TopographyProvider, usePlayerThemed } from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 
@@ -41,26 +41,28 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   gameSuite,
 }) {
   const sessionId = gameSuite.gameSessionId;
-  const { className, style } = usePlayerThemed(gameSuite.playerId);
+  const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
   return (
-    <GameLayout className={className} style={style}>
-      <GameLayout.Main>
-        <Suspense
-          fallback={
-            <Box full layout="center center">
-              <Spinner />
-            </Box>
-          }
-        >
-          {gameSuite.gameStatus.status === 'pending' ? (
-            <GameSetup gameSessionId={sessionId} />
-          ) : (
-            <GameRenderer />
-          )}
-        </Suspense>
-      </GameLayout.Main>
-      <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
-    </GameLayout>
+    <TopographyProvider value={{ palette: palette ?? null }}>
+      <GameLayout className={className} style={style}>
+        <GameLayout.Main>
+          <Suspense
+            fallback={
+              <Box full layout="center center">
+                <Spinner />
+              </Box>
+            }
+          >
+            {gameSuite.gameStatus.status === 'pending' ? (
+              <GameSetup gameSessionId={sessionId} />
+            ) : (
+              <GameRenderer />
+            )}
+          </Suspense>
+        </GameLayout.Main>
+        <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
+      </GameLayout>
+    </TopographyProvider>
   );
 });
 
