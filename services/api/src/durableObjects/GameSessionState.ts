@@ -610,13 +610,9 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     const newRoundIndex = roundState.roundIndex;
     if (newRoundIndex !== this.#notifications.roundIndex) {
       // reset notifications state
-      console.log(
-        `Resetting notifications state for new round ${newRoundIndex}`,
-      );
       this.#notifications.roundIndex = newRoundIndex;
       this.#notifications.playersNotified = {};
     }
-    console.log('DEBUG', 'new round state', roundState);
     // check if we need to notify players
     for (const playerId of roundState.pendingTurns) {
       if (!this.#notifications.playersNotified[playerId]) {
@@ -646,6 +642,19 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   };
 
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
+    // if player is connected with a live socket, we don't need
+    // to send a push.
+    if (
+      this.#socketInfo
+        .values()
+        .some((v) => v.userId === playerId && v.status === 'ready')
+    ) {
+      console.info(
+        `Player ${playerId} is connected over socket, not sending push`,
+      );
+      return;
+    }
+
     console.info(`Notifying player ${playerId} of turn`);
     if (!this.#sessionData) {
       throw new LongGameError(
