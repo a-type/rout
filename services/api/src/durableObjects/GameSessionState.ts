@@ -575,9 +575,13 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     const newRoundIndex = roundState.roundIndex;
     if (newRoundIndex !== this.#notifications.roundIndex) {
       // reset notifications state
+      console.log(
+        `Resetting notifications state for new round ${newRoundIndex}`,
+      );
       this.#notifications.roundIndex = newRoundIndex;
       this.#notifications.playersNotified = {};
     }
+    console.log('DEBUG', 'new round state', roundState);
     // check if we need to notify players
     for (const playerId of roundState.pendingTurns) {
       if (!this.#notifications.playersNotified[playerId]) {
@@ -592,11 +596,16 @@ export class GameSessionState extends DurableObject<ApiBindings> {
             err,
           );
         }
+      } else {
+        console.log(`Player ${playerId} already notified of turn, skipping`);
       }
     }
     this.ctx.storage.put('notifications', this.#notifications);
     // schedule any required alarm
     if (roundState.checkAgainAt) {
+      console.log(
+        `Scheduling status recheck alarm for ${roundState.checkAgainAt}`,
+      );
       this.ctx.storage.setAlarm(roundState.checkAgainAt.getTime());
     }
   };
