@@ -272,6 +272,12 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       );
     }
     if (this.#sessionData.startedAt) {
+      // game is already started, but maybe this client didn't
+      // get the message.
+      this.#sendSocketMessage({
+        type: 'statusChange',
+        status: this.getStatus(),
+      });
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot update members after game has started',
@@ -298,6 +304,12 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       );
     }
     if (this.#sessionData.startedAt) {
+      // game is already started, but maybe this client didn't
+      // get the message.
+      this.#sendSocketMessage({
+        type: 'statusChange',
+        status: this.getStatus(),
+      });
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot update game after game has started',
@@ -316,6 +328,14 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Session data not initialized',
       );
     }
+
+    if (this.#sessionData.startedAt) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Game session has already started',
+      );
+    }
+
     // last chance to update the game version before beginning play
     const gameModule = games[this.#sessionData.gameId];
     if (!gameModule) {

@@ -23,7 +23,7 @@ export const GameLayoutControls = withClassName(
 export const GameLayoutSecondaryControls = withClassName(
   'div',
   '[grid-area:main] fixed z-100 top-0 left-0 right-0 p-2 flex flex-row gap-2',
-  'lg:[grid-area:sidebarsecondary] lg:z-0 lg:relative lg:p-8 lg:bg-wash',
+  'lg:[grid-area:sidebarsecondary] lg:z-0 lg:relative lg:p-md lg:bg-wash',
 );
 
 export const GameLayout = Object.assign(GameLayoutRoot, {

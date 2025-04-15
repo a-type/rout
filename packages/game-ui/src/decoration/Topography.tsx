@@ -1,6 +1,7 @@
 import {
   Button,
   ButtonProps,
+  clsx,
   ErrorBoundary,
   getColorMode,
   subscribeToColorModeChange,
@@ -249,12 +250,16 @@ export const TopographyBackground = withClassName(
   'absolute inset-0 z-0',
 );
 
-export const TopographyButton = ({ children, ...props }: ButtonProps) => {
+export const TopographyButton = ({
+  children,
+  className,
+  ...props
+}: ButtonProps) => {
   return (
     <Button
       {...props}
       color="primary"
-      className="relative z-10 overflow-hidden"
+      className={clsx('relative z-10 overflow-hidden', className)}
     >
       {!props.disabled && (
         <TopographyBackground className="[:hover>&]:[filter:brightness(1.5)]" />

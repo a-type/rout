@@ -2,7 +2,6 @@ import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Avatar,
   Box,
-  Button,
   clsx,
   Divider,
   H1,
@@ -12,6 +11,7 @@ import {
   withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
+import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { SendInvite } from '../friendships/SendInvite.js';
 import { GamePicker } from './GamePicker.jsx';
@@ -57,16 +57,17 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
       </Box>
       <Divider />
 
-      <Button
+      <TopographyButton
         onClick={async () => {
           await startGameMutation.mutateAsync({
             id: gameSessionId,
           });
         }}
         disabled={insufficientPlayers}
+        className="items-center justify-center"
       >
         {insufficientPlayers ? 'Need more players' : 'Start Game'}
-      </Button>
+      </TopographyButton>
     </Box>
   );
 }
@@ -187,5 +188,5 @@ const PeopleGridItem = withClassName(
     gap: true,
     items: 'center',
   }),
-  'w-20vmax max-w-120px relative',
+  'w-20vmin max-w-120px relative',
 );
