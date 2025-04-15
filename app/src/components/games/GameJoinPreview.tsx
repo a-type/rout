@@ -36,7 +36,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
   return (
     <Box direction="col" layout="center center" full gap>
       <H1>Join Game</H1>
-      <Box gap>
+      <Box gap p="lg">
         <AvatarList count={pregame.members.length}>
           {pregame.members.map((member, i) => (
             <AvatarListItem

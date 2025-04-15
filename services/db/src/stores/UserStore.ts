@@ -493,6 +493,7 @@ export class UserStore extends RpcTarget {
     }
 
     if (membership.status !== 'pending') {
+      console.debug(`Invite ${inviteId} status: ${membership.status}`);
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Invite is not pending',

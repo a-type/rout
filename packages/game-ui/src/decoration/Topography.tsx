@@ -3,7 +3,7 @@ import {
   ButtonProps,
   clsx,
   ErrorBoundary,
-  getColorMode,
+  getResolvedColorMode,
   subscribeToColorModeChange,
   useSize,
   withClassName,
@@ -179,21 +179,15 @@ export function Topography({ className, ...rest }: TopographyProps) {
   });
 
   const mode = useSyncExternalStore(subscribeToColorModeChange, () =>
-    getColorMode(),
+    getResolvedColorMode(),
   );
-  const resolvedMode =
-    mode === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : mode;
   const fromPalette = palette
-    ? paletteColors(palette, resolvedMode)
+    ? paletteColors(palette, mode)
     : {
-        background: DEFAULT_COLORS[resolvedMode].background,
-        gradient: DEFAULT_COLORS[resolvedMode].gradient,
+        background: DEFAULT_COLORS[mode].background,
+        gradient: DEFAULT_COLORS[mode].gradient,
       };
-  console.log(resolvedMode, fromPalette);
+  console.log(mode, fromPalette);
   const background = resolveColor(fromPalette.background);
   const gradient = fromPalette.gradient.map(resolveColor) as [Color, Color];
 
@@ -300,7 +294,7 @@ export const TopographyButton = ({
       className={clsx('relative z-10 overflow-hidden', className)}
     >
       {!props.disabled && (
-        <TopographyBackground className="[:hover>&]:[filter:brightness(1.5)]" />
+        <TopographyBackground className="[:hover>&]:[filter:brightness(1.25)]" />
       )}
       <div className="relative z-1 flex flex-row gap-2 items-center">
         {children}

@@ -32,13 +32,20 @@ export const gameSessionInvitationsRouter = new Hono()
       const { id } = ctx.req.valid('param');
       const { response } = ctx.req.valid('json');
       const userStore = ctx.get('userStore');
-      const invite = await userStore.respondToGameSessionInvitation(
-        id,
-        response,
-      );
-
-      // go ahead and update the session now
-      await updateGameSessionMembers(ctx.env, userStore, invite.gameSessionId);
+      try {
+        const invite = await userStore.respondToGameSessionInvitation(
+          id,
+          response,
+        );
+        // go ahead and update the session now
+        await updateGameSessionMembers(
+          ctx.env,
+          userStore,
+          invite.gameSessionId,
+        );
+      } catch (err) {
+        console.error(err);
+      }
 
       return ctx.json({ success: true });
     },
@@ -66,7 +73,7 @@ async function updateGameSessionMembers(
   userStore: RpcStub<UserStore>,
   gameSessionId: PrefixedId<'gs'>,
 ) {
-  const durableObjectId = env.GAME_SESSION_STATE.idFromString(gameSessionId);
+  const durableObjectId = env.GAME_SESSION_STATE.idFromName(gameSessionId);
   const sessionState = await env.GAME_SESSION_STATE.get(durableObjectId);
   const members = await userStore.getGameSessionMembers(gameSessionId);
   await sessionState.updateMembers(members);
