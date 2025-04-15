@@ -1,4 +1,5 @@
 import { build } from '@unocss/cli';
+import copyfiles from 'copyfiles';
 import minimist from 'minimist';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -59,13 +60,21 @@ const commands = {
     // folder structure
     run: async () => {
       const cwd = process.cwd();
-      const srcPath = path.resolve(cwd, 'src');
-      const distPath = path.resolve(cwd, relPath);
+      const srcPath = 'src';
+      const distPath = relPath;
       console.log(`Copying CSS files...`);
-      await fs.cp(srcPath, distPath, {
-        recursive: true,
-        filter: (src) => src.endsWith('.css'),
-      });
+      await new Promise((res, rej) =>
+        copyfiles(
+          [srcPath + '/**/*.css', distPath],
+          {
+            up: 1,
+          },
+          (err) => {
+            if (err) rej(err);
+            else res();
+          },
+        ),
+      );
       console.log(`Done!`);
     },
   },
