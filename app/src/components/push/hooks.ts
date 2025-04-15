@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { useCallback, useEffect, useState } from 'react';
 
-const VAPID_KEY = import.meta.env.VITE_PUBLIC_VAPID_KEY;
+const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 async function getRegistration() {
   if (!('serviceWorker' in navigator)) {
