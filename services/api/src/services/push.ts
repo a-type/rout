@@ -43,33 +43,35 @@ export async function sendPushToAllUserDevices(
       },
     );
     try {
-      await fetch(subscription.endpoint, payload);
-    } catch (err) {
-      if (isPushError(err)) {
-        if (err.statusCode >= 400 && err.statusCode < 500) {
-          // remove invalid push subscription
-          await userStore.deletePushSubscription(subscription.endpoint);
-        } else {
-          // log other errors
-          console.error(
-            'Error sending push notification',
-            err,
-            subscription.endpoint,
-          );
-        }
-      } else {
-        // log other errors
+      const result = await fetch(subscription.endpoint, payload);
+      if (!result.ok) {
         console.error(
           'Error sending push notification',
-          err,
-          subscription.endpoint,
+          result.status,
+          result.statusText,
+          await result.text(),
         );
-        throw new LongGameError(
-          LongGameError.Code.InternalServerError,
-          'Error sending push notification',
-          err,
+        if (result.status >= 400 && result.status < 500) {
+          // validation error with subscription
+          await userStore.deletePushSubscription(subscription.endpoint);
+        }
+      } else {
+        console.log(
+          `Push notification sent to ${userId}'s device ${new Date()}`,
         );
       }
+    } catch (err) {
+      // log other errors
+      console.error(
+        'Error sending push notification',
+        err,
+        subscription.endpoint,
+      );
+      throw new LongGameError(
+        LongGameError.Code.InternalServerError,
+        'Error sending push notification',
+        err,
+      );
     }
   }
 }
