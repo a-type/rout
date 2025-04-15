@@ -19,7 +19,6 @@ export function PushSubscriptionToggle({
   const subscribed = useIsSubscribedToPush();
   const [subscribe, isSubscribing] = useSubscribeToPush();
   const [unsubscribe, isUnsubscribing] = useUnsubscribeFromPush();
-  const loading = isSubscribing || isUnsubscribing;
   const [open, setOpen] = useState(false);
   const canSubscribe = useCanSubscribeToPush();
 
@@ -36,7 +35,6 @@ export function PushSubscriptionToggle({
       <Dialog.Trigger asChild>
         <Button
           toggled={!!subscribed}
-          loading={loading}
           size="icon"
           color={subscribed ? 'ghost' : 'primary'}
           {...rest}
@@ -55,7 +53,11 @@ export function PushSubscriptionToggle({
             </Dialog.Description>
             <Dialog.Actions>
               <Dialog.Close>Cancel</Dialog.Close>
-              <Button color="destructive" onClick={unsubscribe}>
+              <Button
+                color="destructive"
+                onClick={unsubscribe}
+                loading={isUnsubscribing}
+              >
                 Yes, disable
               </Button>
             </Dialog.Actions>
@@ -69,7 +71,11 @@ export function PushSubscriptionToggle({
             </Dialog.Description>
             <Dialog.Actions>
               <Dialog.Close>Cancel</Dialog.Close>
-              <Button color="primary" onClick={subscribe}>
+              <Button
+                color="primary"
+                onClick={subscribe}
+                loading={isSubscribing}
+              >
                 Turn on
               </Button>
             </Dialog.Actions>

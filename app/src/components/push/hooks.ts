@@ -1,7 +1,12 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { useCallback, useEffect, useState } from 'react';
+import { proxy, useSnapshot } from 'valtio';
 
 const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+
+const subscribedState = proxy({
+  subscribed: false,
+});
 
 async function getRegistration() {
   if (!('serviceWorker' in navigator)) {
@@ -22,6 +27,10 @@ async function getRegistration() {
 
   return registration;
 }
+
+getIsSubscribedToPush().then((subscribed) => {
+  subscribedState.subscribed = !!subscribed;
+});
 
 async function subscribeToPush() {
   const registration = await getRegistration();
@@ -81,6 +90,7 @@ export function useSubscribeToPush() {
         },
         expirationTime: subscription.expirationTime || undefined,
       });
+      subscribedState.subscribed = true;
     }, [createPush]),
     createPush.isPending,
   ] as const;
@@ -111,6 +121,7 @@ export function useUnsubscribeFromPush() {
           endpoint,
         });
       }
+      subscribedState.subscribed = false;
     }, [deletePush]),
     deletePush.isPending,
   ] as const;
@@ -142,11 +153,7 @@ async function getIsSubscribedToPush() {
 }
 
 export function useIsSubscribedToPush() {
-  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
-  useEffect(() => {
-    getIsSubscribedToPush().then(setIsSubscribed);
-  }, []);
-  return isSubscribed;
+  return useSnapshot(subscribedState).subscribed;
 }
 
 export function useCanSubscribeToPush() {
