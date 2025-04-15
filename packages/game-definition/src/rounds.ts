@@ -129,20 +129,23 @@ function syncRounds(): RoundIndexDecider<any, any> {
     const lastRoundTurns = turns.filter(
       (turn) => turn.roundIndex === maxRoundIndex,
     );
-    const pendingTurns = notPlayedThisRound({
-      turns,
-      roundIndex: maxRoundIndex,
-      members,
-    });
     if (lastRoundTurns.length === members.length) {
       return {
         roundIndex: maxRoundIndex + 1,
-        pendingTurns,
+        pendingTurns: notPlayedThisRound({
+          turns,
+          roundIndex: maxRoundIndex + 1,
+          members,
+        }),
       };
     }
     return {
       roundIndex: maxRoundIndex,
-      pendingTurns,
+      pendingTurns: notPlayedThisRound({
+        turns,
+        roundIndex: maxRoundIndex,
+        members,
+      }),
     };
   };
 }
