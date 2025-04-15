@@ -3,7 +3,7 @@ import { ComponentType, lazy, LazyExoticComponent } from 'react';
 // these are defined statically since I think dynamic imports need to be
 // static for bundler analysis?
 const moduleMap = {
-  numberGuess: {
+  ['number-guess']: {
     main: () => import('@long-game/game-number-guess-renderer'),
     css: () => import('@long-game/game-number-guess-renderer/css.css'),
   },
