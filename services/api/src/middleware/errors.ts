@@ -4,17 +4,12 @@ import { ZodError } from 'zod';
 
 export function handleError(reason: unknown): Response {
   console.error(reason);
-  if (LongGameError.isInstance(reason)) {
-    if (reason.code > LongGameError.Code.InternalServerError) {
-      console.error('Unexpected LongGameError:', reason);
+  if (LongGameError.isInstance(reason) || LongGameError.isRpcInstance(reason)) {
+    const parsed = LongGameError.fromInstanceOrRpc(reason);
+    if (parsed.code > LongGameError.Code.InternalServerError) {
+      console.error('Unexpected LongGameError:', parsed);
     }
-    return new Response(JSON.stringify(reason.body), {
-      status: reason.statusCode,
-      headers: {
-        'Content-Type': 'application/json',
-        ...reason.headers,
-      },
-    });
+    return parsed.toResponse();
   }
 
   if (reason instanceof ZodError) {
