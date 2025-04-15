@@ -8,7 +8,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
-head_sampling_rate = 1 # optional. default = 1.
+head_sampling_rate = 1       # optional. default = 1.
+logs.enabled = true
+logs.invocation_logs = false
 
 [vars]
 UI_ORIGIN = "https://play.rout.games"
