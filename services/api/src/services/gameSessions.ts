@@ -7,6 +7,5 @@ export async function getGameSessionState(
   env: Context<Env>['env'],
 ) {
   const doId = await env.GAME_SESSION_STATE.idFromName(id);
-  console.log(doId);
   return await env.GAME_SESSION_STATE.get(doId);
 }

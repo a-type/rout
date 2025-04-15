@@ -50,7 +50,6 @@ export const gameDefinition: GameDefinition<
       const lastGuess = previousRound.turns.find(
         (turn) => turn.playerId === playerId,
       );
-      console.log('lastGuess', lastGuess);
       if (!lastGuess) {
         return {};
       }
