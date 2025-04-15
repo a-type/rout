@@ -35,8 +35,9 @@ export function PushSubscriptionToggle({
       <Dialog.Trigger asChild>
         <Button
           toggled={!!subscribed}
+          toggleMode="state-only"
           size="icon"
-          color={subscribed ? 'ghost' : 'primary'}
+          color={subscribed ? 'ghost' : 'contrast'}
           {...rest}
         >
           <Icon name={subscribed ? 'bell' : 'bell'} />
