@@ -110,7 +110,8 @@ function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
       return Math.max(max, turn.roundIndex);
     }, 0);
 
-    return maxRoundIndex + 1;
+    // TODO: Fix pending turns
+    return { roundIndex: maxRoundIndex + 1, pendingTurns: [] };
   };
 }
 
