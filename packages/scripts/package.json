@@ -1,0 +1,16 @@
+{
+  "name": "@long-game/scripts",
+  "bin": {
+    "scripts": "./scripts.mjs"
+  },
+  "scripts": {
+    "uno": "unocss --config uno.extract.config.ts"
+  },
+  "dependencies": {
+    "copyfiles": "catalog:",
+    "@types/node": "22.14.0",
+    "minimist": "1.2.8",
+    "unocss": "catalog:",
+    "@unocss/cli": "catalog:"
+  }
+}

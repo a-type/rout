@@ -102,10 +102,10 @@ describe('game round helpers', () => {
           gameTimeZone: 'America/New_York',
           members: [
             {
-              id: '1',
+              id: 'u-1',
             },
             {
-              id: '2',
+              id: 'u-2',
             },
           ],
           // games can start at anytime during the day...

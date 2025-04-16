@@ -4,6 +4,7 @@ import { withSuspense } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
 import { UserAvatar } from '../users/UserAvatar';
+import { GameSessionStatusChip } from './GameSessionStatusChip';
 
 export interface GameSummaryCardProps {
   session: GameSession;
@@ -34,6 +35,9 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
                 </AvatarList.ItemRoot>
               ))}
             </AvatarList>
+          </Card.Content>
+          <Card.Content unstyled>
+            <GameSessionStatusChip status={summary.status.status} />
           </Card.Content>
         </Link>
       </Card.Main>

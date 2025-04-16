@@ -5,7 +5,7 @@ import {
   GetPublicTurnData,
   GetTurnData,
 } from '@long-game/game-definition';
-import { hcWithType as apiHc } from '@long-game/services/public-api';
+import { hcWithType as apiHc } from '@long-game/service-api';
 import type { InferResponseType } from 'hono/client';
 import { fetch } from '../fetch';
 
@@ -62,4 +62,17 @@ export async function getPublicRound<TGame extends GameDefinition>(
     GetPublicTurnData<TGame>,
     GetPlayerState<TGame>
   >;
+}
+
+export async function getPostgame(gameSessionId: PrefixedId<'gs'>) {
+  const res = await apiRpc.gameSessions[':id'].postgame.$get({
+    param: { id: gameSessionId },
+  });
+  if (!res.ok) {
+    throw new LongGameError(
+      LongGameError.Code.Unknown,
+      'Failed to get global state',
+    );
+  }
+  return (await res.json()) as { globalState: any; rounds: any[] };
 }

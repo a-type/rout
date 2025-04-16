@@ -1,0 +1,44 @@
+{
+  "name": "@long-game/service-db",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/worker/index.js",
+      "types": "./dist/typings/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "pnpm run --filter @long-game/service-db --parallel \"/^dev:.*/\"",
+    "dev:db": "wrangler dev -c wrangler.toml --port 3111 --ip 127.0.0.1",
+    "migrations:create": "wrangler d1 migrations create prod-long-game-core -c wrangler.toml",
+    "migrations:apply:local": "CI=true wrangler d1 migrations apply prod-long-game-core --local -c wrangler.toml",
+    "migrations:apply:remote": "CI=true wrangler d1 migrations apply prod-long-game-core --remote -c wrangler.toml",
+    "db:run:local": "wrangler d1 execute prod-long-game-core -c wrangler.toml --local --command",
+    "build": "pnpm run --filter @long-game/service-db --parallel \"/^build:.*/\"",
+    "build:db": "wrangler deploy --dry-run --outdir dist/worker --config wrangler.toml",
+    "build:api": "tsc -p tsconfig.json",
+    "types": "pnpm run --filter @long-game/service-db --parallel \"/^types:.*/\"",
+    "types:db": "wrangler types --env-interface=DbBindings --config wrangler.toml src/worker-types.d.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@a-type/auth": "catalog:",
+    "@a-type/utils": "catalog:",
+    "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "hono": "catalog:",
+    "zod": "catalog:",
+    "kysely": "0.27.6",
+    "@a-type/kysely": "1.1.1",
+    "kysely-d1": "0.3.0",
+    "kysely-plugin-serialize": "0.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "vitest": "catalog:"
+  }
+}

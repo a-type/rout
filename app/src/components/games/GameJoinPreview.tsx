@@ -5,6 +5,7 @@ import {
   GameSessionPregame,
 } from '@long-game/game-client';
 import games from '@long-game/games';
+import { useNavigate } from '@verdant-web/react-router';
 
 export interface GameJoinPreviewProps {
   myInvite: GameSessionInvitation;
@@ -30,10 +31,12 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
+  const navigate = useNavigate();
+
   return (
-    <Box direction="col">
+    <Box direction="col" layout="center center" full gap>
       <H1>Join Game</H1>
-      <Box>
+      <Box gap p="lg">
         <AvatarList count={pregame.members.length}>
           {pregame.members.map((member, i) => (
             <AvatarListItem
@@ -53,11 +56,13 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
       <Box>
         <Button
           color="ghostDestructive"
-          onClick={() => {
-            respondToInviteMutation.mutate({
+          onClick={async () => {
+            await respondToInviteMutation.mutateAsync({
               response: 'declined',
               id: myInvite.id,
             });
+            toast('Invite declined');
+            navigate('/');
           }}
         >
           Decline

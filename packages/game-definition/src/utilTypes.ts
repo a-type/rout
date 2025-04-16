@@ -16,7 +16,8 @@ export type GetGlobalState<G extends GameDefinition> = G extends GameDefinition<
 export type GetTurnData<G extends GameDefinition> = G extends GameDefinition<
   any,
   any,
-  infer T
+  infer T,
+  any
 >
   ? T
   : never;

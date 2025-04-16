@@ -1,22 +1,20 @@
 import {
-  Avatar,
   Box,
   Button,
   Collapsible,
   CollapsibleContent,
   CollapsibleSimple,
-  FormikForm,
   Icon,
   RelativeTime,
-  SubmitButton,
-  TextAreaField,
   withClassName,
 } from '@a-type/ui';
-import { GameSessionChatMessage } from '@long-game/common';
-import { PlayerInfo, useGameSuite, withGame } from '@long-game/game-client';
+import { withGame } from '@long-game/game-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
+import { ChatForm } from '../chat/ChatForm';
+import { ChatMessage } from '../chat/ChatMessage';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { PlayerAvatar } from '../players/PlayerAvatar';
 
 const localState = proxy({
   focusChat: false,
@@ -48,100 +46,40 @@ export const GameLogItem = withClassName(
   'flex flex-col gap-1 items-start',
 );
 
-export const GameLogChat = withGame(function GameLogChat({
-  content: message,
-  user,
-  createdAt,
-}: GameSessionChatMessage & {
-  user?: PlayerInfo;
-}) {
-  return (
-    <div className="pl-4 leading-relaxed">
-      <div className="inline-flex flex-row items-center gap-2 text-sm font-bold mr-2">
-        <Avatar
-          className="absolute left-[16px]"
-          imageSrc={user?.imageUrl ?? undefined}
-        />
-        <span className="ml-[24px]">{user?.displayName ?? 'Anonymous'}</span>
-      </div>
-      <span className="whitespace-pre-wrap">{message}</span>
-    </div>
-  );
-});
-
 export function GameLogTimestamp({ value }: { value: Date | number }) {
   return (
-    <span className="text-xs text-gray-500 italic pl-8">
+    <span className="text-xs text-gray-dark italic pl-sm">
       <RelativeTime value={new Date(value).getTime()} />
     </span>
   );
 }
 
 export function GameLogChatInput() {
-  const suite = useGameSuite();
-
-  const fieldRef = useRef<HTMLTextAreaElement>(null);
+  const toolsRef = useRef<{ focus: () => void }>(null);
 
   useEffect(
     () =>
       subscribe(localState, () => {
         if (localState.focusChat) {
-          fieldRef.current?.focus();
+          toolsRef.current?.focus();
           localState.focusChat = false;
         }
       }),
     [],
   );
 
-  return (
-    <FormikForm
-      initialValues={{ message: '' }}
-      onSubmit={({ message }, bag) => {
-        suite.sendChat({
-          content: message,
-        });
-        bag.resetForm();
-      }}
-      className="flex-0-0-auto items-stretch"
-    >
-      {(form) => (
-        <div className="relative">
-          <TextAreaField
-            name="message"
-            placeholder="Send a message..."
-            className="pb-4"
-            inputRef={fieldRef}
-            onKeyDown={(ev) => {
-              if (ev.key === 'Enter' && !ev.shiftKey) {
-                ev.preventDefault();
-                form.submitForm();
-              }
-            }}
-          />
-          <SubmitButton
-            type="submit"
-            size="icon"
-            className="absolute right-1 bottom-1 shadow-md"
-          >
-            <Icon name="send" />
-          </SubmitButton>
-        </div>
-      )}
-    </FormikForm>
-  );
+  return <ChatForm toolsRef={toolsRef} />;
 }
 
 const GameLogCollapsed = withGame(({ gameSuite }) => {
   const log = gameSuite.combinedLog;
   const latestMessage = log[log.length - 1];
-  const players = gameSuite.players;
   const selfId = gameSuite.playerId;
 
   if (!latestMessage) {
-    const me = gameSuite.getPlayer(selfId);
     return (
       <Box direction="row" gap="sm" p="none" items="center">
-        <Avatar imageSrc={me.imageUrl} />
+        <PlayerAvatar playerId={selfId} />
         <span>Start chatting...</span>
       </Box>
     );
@@ -150,10 +88,7 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
   if (latestMessage.type === 'chat') {
     return (
       <Box direction="row" gap="sm" p="none" items="center">
-        <Avatar
-          imageSrc={players[latestMessage.chatMessage.authorId]?.imageUrl}
-          name={players[latestMessage.chatMessage.authorId]?.displayName}
-        />
+        <PlayerAvatar playerId={latestMessage.chatMessage.authorId} />
         <span>{latestMessage.chatMessage.content}</span>
       </Box>
     );
@@ -163,24 +98,18 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
 });
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
-  const { combinedLog: log, players } = gameSuite;
+  const { combinedLog: log } = gameSuite;
 
   return (
     <GameLogRoot {...props}>
       <GameLogList>
-        {log.map((entry, i) => (
-          <GameLogItem key={i}>
-            {entry.type === 'chat' ? (
-              <GameLogChat
-                {...entry.chatMessage}
-                user={players[entry.chatMessage.authorId]}
-              />
-            ) : (
-              <div>todo: round logs</div>
-            )}
-            <GameLogTimestamp value={entry.timestamp} />
-          </GameLogItem>
-        ))}
+        {log.map((entry, i) =>
+          entry.type === 'chat' ? (
+            <ChatMessage message={entry.chatMessage} key={i} />
+          ) : (
+            <div>todo: round logs</div>
+          ),
+        )}
       </GameLogList>
       <GameLogChatInput />
     </GameLogRoot>
@@ -222,7 +151,7 @@ export const BasicGameLog = withGame<{ className?: string }>(
         <Collapsible open={open} className="relative w-full lg:h-full">
           <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
             <Button
-              className="absolute top-0 right-0 lg:hidden"
+              className="absolute top-0 right-0 z-1 lg:hidden"
               size="icon-small"
               onClick={() => {
                 localState.open = false;

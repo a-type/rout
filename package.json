@@ -10,8 +10,7 @@
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
     "gen": "node ./tools/generator/generate.mjs",
-    "gql:doctor": "gql.tada doctor",
-    "gql:gen": "gql.tada generate-output"
+    "wrangler": "wrangler"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +24,8 @@
     "turbo": "2.3.3",
     "typescript": "catalog:",
     "unocss": "catalog:",
-    "wrangler": "3.99.0"
+    "web-push": "catalog:",
+    "wrangler": "catalog:",
+    "vitest": "catalog:"
   }
 }

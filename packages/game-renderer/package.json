@@ -4,20 +4,22 @@
   "private": true,
   "exports": {
     ".": {
-      "//development": "./src/index.tsx",
+      "development": "./src/index.tsx",
       "workerd": "./src/index.tsx",
       "production": "./dist/esm/index.js",
-      "default": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/typings/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc --customConditions []"
   },
   "dependencies": {
     "@long-game/game-number-guess-renderer": "workspace:*",
     "@long-game/game-territory-renderer": "workspace:*",
     "@long-game/game-gudnak-renderer": "workspace:*",
+    "@long-game/game-scribble-renderer": "workspace:*",
     "@long-game/game-client": "workspace:*"
   },
   "peerDependencies": {

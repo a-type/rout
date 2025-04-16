@@ -1,4 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
+import { z } from 'zod';
 
 export const resourceIdTypes = {
   u: 'User',
@@ -11,6 +12,7 @@ export const resourceIdTypes = {
   t: 'Turn',
   vc: 'VerificationCode',
 } as const;
+export type ResourceNameMap = typeof resourceIdTypes;
 export type ResourceIdPrefix = keyof typeof resourceIdTypes;
 export type ResourceTypeName = (typeof resourceIdTypes)[ResourceIdPrefix];
 export type PrefixedId<Prefix extends ResourceIdPrefix = ResourceIdPrefix> =
@@ -47,3 +49,21 @@ export function idToType(id: string): ResourceTypeName {
 export function genericId() {
   return createId();
 }
+
+// Zod shapes for different ids
+function createZodIdShape(prefix: ResourceIdPrefix) {
+  return z
+    .custom<PrefixedId<ResourceIdPrefix>>((v) => isPrefixedId(v, prefix))
+    .describe(
+      `The ID of the ${resourceIdTypes[prefix]}. ${prefix}- prefixed IDs are used for ${resourceIdTypes[prefix]}.`,
+    );
+}
+export const idShapes = Object.entries(resourceIdTypes).reduce(
+  (acc, [prefix, name]) => {
+    acc[name] = createZodIdShape(prefix as any) as any;
+    return acc;
+  },
+  {} as {
+    [K in ResourceIdPrefix as ResourceNameMap[K]]: z.ZodType<PrefixedId<K>>;
+  },
+);

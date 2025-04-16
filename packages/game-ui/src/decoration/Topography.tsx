@@ -1,11 +1,14 @@
 import {
   Button,
   ButtonProps,
-  getColorMode,
+  clsx,
+  ErrorBoundary,
+  getResolvedColorMode,
   subscribeToColorModeChange,
   useSize,
   withClassName,
 } from '@a-type/ui';
+import { PlayerColorPalette } from '@long-game/common';
 import { shaderMaterial } from '@react-three/drei';
 import {
   Canvas,
@@ -13,13 +16,17 @@ import {
   useFrame,
   type ThreeElement,
 } from '@react-three/fiber';
-import { useRef, useState, useSyncExternalStore } from 'react';
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { Color, ShaderMaterial } from 'three';
 import { proxy } from 'valtio';
 
 export interface TopographyProps {
-  background?: number;
-  gradient?: [number, number];
   speed?: number;
   className?: string;
 }
@@ -129,7 +136,7 @@ declare module '@react-three/fiber' {
 
 extend({ TopographyMaterial });
 
-const COLORS = {
+const DEFAULT_COLORS = {
   light: {
     background: 0xfffaff,
     gradient: [0xff9fff, 0xa0a0ff],
@@ -140,55 +147,84 @@ const COLORS = {
   },
 };
 
+function parseHexColor(color: string): number {
+  if (color.startsWith('#')) {
+    return parseInt(color.slice(1), 16);
+  }
+  throw new Error('invalid hex color: ' + color);
+}
+
+function paletteColors(palette: PlayerColorPalette, mode: 'light' | 'dark') {
+  const colors = palette.range.map((color) => parseHexColor(color));
+  return {
+    background: mode === 'light' ? colors[0] : colors[11],
+    gradient: [
+      colors[Math.floor(colors.length * 0.2)],
+      colors[Math.floor(colors.length * 0.8)],
+    ],
+  };
+}
+
+const TopographyContext = createContext<{ palette: PlayerColorPalette | null }>(
+  { palette: null },
+);
+export const TopographyProvider = TopographyContext.Provider;
+
 export function Topography({ className, ...rest }: TopographyProps) {
+  const ctx = useContext(TopographyContext);
+  const palette = ctx.palette;
   const [state] = useState(() => proxy({ scale: 1 }));
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
     state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
   });
 
   const mode = useSyncExternalStore(subscribeToColorModeChange, () =>
-    getColorMode(),
+    getResolvedColorMode(),
   );
-  const resolvedMode =
-    mode === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : mode;
-  const backgroundCss = rest.background ?? COLORS[resolvedMode].background;
-  const background = resolveColor(backgroundCss);
-  const gradient = (rest.gradient ?? COLORS[resolvedMode].gradient).map(
-    resolveColor,
-  ) as [Color, Color];
+  const fromPalette = palette
+    ? paletteColors(palette, mode)
+    : {
+        background: DEFAULT_COLORS[mode].background,
+        gradient: DEFAULT_COLORS[mode].gradient,
+      };
+  console.log(mode, fromPalette);
+  const background = resolveColor(fromPalette.background);
+  const gradient = fromPalette.gradient.map(resolveColor) as [Color, Color];
 
   return (
-    <div className={className} style={{ background: backgroundCss }} ref={ref}>
-      <Canvas
-        className="animate-fade-in animate-duration-1s"
-        orthographic
-        gl={{
-          antialias: true,
-        }}
-        flat
-        camera={{
-          zoom: 1,
-          position: [0, 0, 1],
-          left: -1,
-          right: 1,
-          top: 1,
-          bottom: -1,
-          near: -1,
-          far: 1,
-        }}
-      >
-        <color attach="background" args={[background]} />
-        <TopographyMesh
-          {...rest}
-          background={background}
-          gradient={gradient}
-          state={state}
-        />
-      </Canvas>
+    <div
+      className={className}
+      style={{ background: fromPalette.background }}
+      ref={ref}
+    >
+      <ErrorBoundary fallback={null}>
+        <Canvas
+          className="animate-fade-in animate-duration-1s"
+          orthographic
+          gl={{
+            antialias: true,
+          }}
+          flat
+          camera={{
+            zoom: 1,
+            position: [0, 0, 1],
+            left: -1,
+            right: 1,
+            top: 1,
+            bottom: -1,
+            near: -1,
+            far: 1,
+          }}
+        >
+          <color attach="background" args={[background]} />
+          <TopographyMesh
+            {...rest}
+            background={background}
+            gradient={gradient}
+            state={state}
+          />
+        </Canvas>
+      </ErrorBoundary>
     </div>
   );
 }
@@ -246,15 +282,19 @@ export const TopographyBackground = withClassName(
   'absolute inset-0 z-0',
 );
 
-export const TopographyButton = ({ children, ...props }: ButtonProps) => {
+export const TopographyButton = ({
+  children,
+  className,
+  ...props
+}: ButtonProps) => {
   return (
     <Button
       {...props}
       color="primary"
-      className="relative z-10 overflow-hidden"
+      className={clsx('relative z-10 overflow-hidden', className)}
     >
       {!props.disabled && (
-        <TopographyBackground className="[:hover>&]:[filter:brightness(1.5)]" />
+        <TopographyBackground className="[:hover>&]:[filter:brightness(1.25)]" />
       )}
       <div className="relative z-1 flex flex-row gap-2 items-center">
         {children}

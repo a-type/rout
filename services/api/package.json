@@ -1,0 +1,42 @@
+{
+  "name": "@long-game/service-api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/hc.js",
+      "types": "./dist/hc.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "pnpm run --filter @long-game/service-api --parallel \"/^dev:.*/\"",
+    "dev:client": "pnpm run build:api-client --watch --preserveWatchOutput",
+    "dev:public-api:run": "sleep 4 && wrangler dev -c wrangler.toml --port 3101 --ip 127.0.0.1",
+    "build": "pnpm run --filter @long-game/service-api --parallel \"/^build:.*/\"",
+    "build:api-client": "tsc -p tsconfig.client.json",
+    "build:api": "wrangler deploy --dry-run --outdir dist --config wrangler.toml",
+    "types": "pnpm run --filter @long-game/service-api --parallel \"/^types:.*/\"",
+    "types:api": "wrangler types --env-interface=ApiBindings --config wrangler.toml src/worker-types.d.ts",
+    "test:run": "vitest",
+    "wrangler": "wrangler"
+  },
+  "dependencies": {
+    "@a-type/auth": "catalog:",
+    "@a-type/auth-email-ses": "^2.1.8",
+    "@a-type/utils": "catalog:",
+    "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@long-game/service-db": "workspace:*",
+    "hono": "catalog:",
+    "jose": "^5.9.6",
+    "@block65/webcrypto-web-push": "1.0.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.8.14",
+    "@types/node": "^22.14.0",
+    "vitest": "catalog:"
+  }
+}

@@ -1,34 +1,36 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, Button } from '@a-type/ui';
+import { Avatar, Box, Button, H1 } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
 
 export function FriendInvites() {
-  const { data: invites, refetch } = sdkHooks.useGetFriendshipInvites({
+  return (
+    <Box d="col" gap>
+      <H1>Incoming Invites</H1>
+      <IncomingInvites />
+      <H1>Sent Invites</H1>
+      <OutgoingInvites />
+    </Box>
+  );
+}
+
+function IncomingInvites() {
+  const { data: invites } = sdkHooks.useGetFriendshipInvites({
     direction: 'incoming',
   });
 
   return (
-    <div>
-      <h1>Friend Invites</h1>
-      <ul>
-        {invites.map((invite) => (
-          <FriendInvite key={invite.id} invite={invite} onRespond={refetch} />
-        ))}
-      </ul>
-    </div>
+    <Box d="col" surface p gap>
+      {invites.map((invite) => (
+        <IncomingInvite key={invite.id} invite={invite} />
+      ))}
+    </Box>
   );
 }
 
-function FriendInvite({
-  invite,
-  onRespond,
-}: {
-  invite: FriendshipInvitation;
-  onRespond: () => void;
-}) {
+function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
   return (
-    <li className="row">
+    <Box items="center" surface="wash" gap p>
       <Avatar
         imageSrc={invite.otherUser?.imageUrl ?? ''}
         name={invite.otherUser?.displayName}
@@ -40,7 +42,6 @@ function FriendInvite({
             id: invite.id,
             response: 'accepted',
           });
-          onRespond();
         }}
       >
         Accept
@@ -51,11 +52,48 @@ function FriendInvite({
             id: invite.id,
             response: 'declined',
           });
-          onRespond();
         }}
       >
         Reject
       </Button>
-    </li>
+    </Box>
+  );
+}
+
+function OutgoingInvites() {
+  const { data: invites } = sdkHooks.useGetFriendshipInvites({
+    direction: 'outgoing',
+  });
+
+  return (
+    <Box d="col" surface p gap>
+      {invites.map((invite) => (
+        <OutgoingInvite key={invite.id} invite={invite} />
+      ))}
+    </Box>
+  );
+}
+
+function OutgoingInvite({ invite }: { invite: FriendshipInvitation }) {
+  const respondMutation = sdkHooks.useRespondToFriendshipInvite();
+
+  return (
+    <Box items="center" surface="wash" gap p>
+      <Avatar
+        imageSrc={invite.otherUser?.imageUrl ?? ''}
+        name={invite.otherUser?.displayName}
+      />
+      You invited {invite.email}
+      <Button
+        onClick={async () => {
+          await respondMutation.mutateAsync({
+            id: invite.id,
+            response: 'retracted',
+          });
+        }}
+      >
+        Cancel
+      </Button>
+    </Box>
   );
 }

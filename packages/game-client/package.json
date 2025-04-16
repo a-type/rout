@@ -16,7 +16,7 @@
     "dev": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@long-game/services": "workspace:*",
+    "@long-game/service-api": "workspace:*",
     "mobx": "^6.13.5",
     "mobx-react-lite": "^4.1.0",
     "optics-ts": "^2.4.1",

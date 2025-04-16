@@ -6,14 +6,21 @@
     ".": {
       "production": "./dist/index.js",
       "workerd": "./src/index.ts",
-      "default": "./dist/index.js",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./css.css": {
+      "default": "./dist/uno.css"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w --preserveWatchOutput"
+    "build": "pnpm build:ts && pnpm build:uno",
+    "build:ts": "tsc",
+    "build:uno": "scripts uno ./dist",
+    "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:uno": "scripts uno ./dist -w"
   },
   "peerDependencies": {
     "@a-type/ui": "catalog:",
@@ -34,6 +41,7 @@
   },
   "devDependencies": {
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@long-game/scripts": "workspace:*"
   }
 }

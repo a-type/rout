@@ -14,12 +14,42 @@ export class LongGameError extends Error {
   static Code = LongGameErrorCode;
   name = 'LongGameError';
 
-  static isInstance = (err: unknown): err is LongGameError =>
-    err instanceof LongGameError ||
-    (!!err &&
+  static isInstance = (err: unknown): err is LongGameError => {
+    if (err instanceof LongGameError) return true;
+    if (err instanceof Error && err.name === 'LongGameError') return true;
+    return false;
+  };
+
+  static isRpcInstance = (err: unknown) => {
+    if (
       typeof err === 'object' &&
-      'name' in err &&
-      err.name === 'LongGameError');
+      (err as any).name === 'Error' &&
+      !!(err as any).message &&
+      (err as any).message.startsWith('LongGameError: ')
+    )
+      return true;
+
+    return false;
+  };
+
+  static fromInstanceOrRpc = (err: unknown): LongGameError => {
+    if (LongGameError.isInstance(err)) return err;
+    if (
+      err &&
+      err instanceof Error &&
+      'code' in err &&
+      typeof err.code === 'number'
+    ) {
+      return new LongGameError(err.code, err.message);
+    }
+    if (err && err instanceof Error) {
+      const code = /\(code: (\d+)\)/.exec(err.message);
+      if (code) {
+        return new LongGameError(Number(code[1]), err.message);
+      }
+    }
+    return new LongGameError(LongGameErrorCode.Unknown, String(err));
+  };
 
   static fromResponse = (res: Response): LongGameError | null => {
     if (res.ok) {
@@ -46,11 +76,15 @@ export class LongGameError extends Error {
 
   constructor(
     public code: LongGameErrorCode,
-    message: string = `LongGameError: ${code}`,
+    message?: string,
     cause?: unknown,
   ) {
     // @ts-ignore
-    super(message, { cause });
+    super(message ? `${message} (code: ${code})` : `Error (code: ${code})`, {
+      cause,
+    });
+    this.name = 'LongGameError';
+    this.code = code;
   }
 
   get statusCode() {
@@ -67,4 +101,13 @@ export class LongGameError extends Error {
       'X-Long-Game-Message': this.message,
     };
   }
+
+  toResponse = (): Response =>
+    new Response(JSON.stringify(this.body), {
+      status: this.statusCode,
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.headers,
+      },
+    });
 }

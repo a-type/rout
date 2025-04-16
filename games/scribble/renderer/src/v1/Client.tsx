@@ -1,11 +1,13 @@
-import { Box } from '@a-type/ui';
-// import { usePlayerState } from './gameClient.js';
+import { hooks } from './gameClient.js';
+import { Gameplay } from './Gameplay.js';
+import GameRecap from './GameRecap.js';
 
-export function Client() {
-  // const {
-  //   /* todo */
-  // } = usePlayerState();
-  return <Box>TODO</Box>;
-}
+const Client = hooks.withGame(function Client({ gameSuite }) {
+  if (gameSuite.gameStatus.status === 'completed') {
+    return <GameRecap />;
+  }
+
+  return <Gameplay />;
+});
 
 export default Client;

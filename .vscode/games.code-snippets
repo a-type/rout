@@ -3,14 +3,14 @@
     "scope": "typescriptreact",
     "prefix": "rgc",
     "body": [
-      "import { withGame } from './gameClient';",
+      "import { hooks } from './gameClient';",
       "",
       "export interface ${2:${TM_FILENAME/(.*)\\..+$/$1/}}Props {",
       "  $3",
       "}",
       "",
-      "export const $2 = withGame<$2Props>(function $2({ gameSuite, $4 }) {",
-      "  return <div>TODO</div>;",
+      "export const $2 = hooks.withGame<$2Props>(function $2({ gameSuite, $4 }) {",
+      "  return $0;",
       "});"
     ]
   }

@@ -6,5 +6,5 @@
     "declarationDir": "./dist/typings",
     "declarationMap": true
   },
-  "include": ["src"]
+  "include": ["src", "src/index.d.ts"]
 }

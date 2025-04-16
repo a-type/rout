@@ -1,17 +1,9 @@
 import { createFetch } from '@a-type/auth-fetch';
-import { LongGameError } from '@long-game/common';
 import { API_ORIGIN, HOME_ORIGIN } from './config.js';
 
 export const fetch = createFetch({
   refreshSessionEndpoint: `${API_ORIGIN}/auth/refresh`,
   logoutEndpoint: `${API_ORIGIN}/auth/logout`,
-  isSessionExpired: (res) => {
-    const longGameError = LongGameError.fromResponse(res);
-    if (longGameError) {
-      return longGameError.code === LongGameError.Code.SessionExpired;
-    }
-    return false;
-  },
 });
 
 export function login() {

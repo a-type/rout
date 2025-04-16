@@ -13,14 +13,20 @@ export interface GamePickerProps {
   onChange: (value: string) => void;
   id?: string;
   className?: string;
+  loading?: boolean;
 }
 
-export function GamePicker({ value, onChange, ...rest }: GamePickerProps) {
+export function GamePicker({
+  value,
+  onChange,
+  loading,
+  ...rest
+}: GamePickerProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger {...rest}>
+      <SelectTrigger {...rest} loading={loading}>
         <SelectValue />
-        <SelectIcon />
+        <SelectIcon className="ml-auto" />
       </SelectTrigger>
       <SelectContent>
         {Object.entries(games).map(([gameId, game]) => (

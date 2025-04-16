@@ -2,9 +2,9 @@
  * Helpers for common round formats
  */
 
-import { withTimezone } from '@long-game/common';
+import { PrefixedId, withTimezone } from '@long-game/common';
+import add from 'date-fns/esm/add';
 import { RoundIndexDecider } from './gameDefinition.js';
-import add from 'date-fns/add/index.js';
 
 export type PeriodType = 'days' | 'hours' | 'minutes';
 
@@ -42,11 +42,46 @@ export function getPeriodStart(
   throw new Error(`Unknown period type ${periodType}`);
 }
 
+export function checkAgainAtPeriodEnd({
+  periodType,
+  periodValue,
+  currentTime,
+  gameTimeZone,
+}: {
+  periodType: PeriodType;
+  periodValue: number;
+  currentTime: Date;
+  gameTimeZone: string;
+}) {
+  return add(getPeriodStart(currentTime, periodType, gameTimeZone), {
+    [periodType]: periodValue,
+  });
+}
+
+export function notPlayedThisRound({
+  turns,
+  roundIndex,
+  members,
+}: {
+  turns: any[];
+  roundIndex: number;
+  members: { id: PrefixedId<'u'> }[];
+}) {
+  // find the turns from the last round
+  const thisRoundTurns = turns.filter((turn) => turn.roundIndex === roundIndex);
+  // find the ids of the players who played in the last round
+  const playersWhoPlayed = thisRoundTurns.map((turn) => turn.playerId);
+  // filter out the players who have played
+  return members
+    .filter((member) => !playersWhoPlayed.includes(member.id))
+    .map((m) => m.id);
+}
+
 function periodicRounds(
   periodType: PeriodType,
   periodValue: number = 1,
 ): RoundIndexDecider<any, any> {
-  return ({ startedAt, currentTime, gameTimeZone }) => {
+  return ({ startedAt, currentTime, gameTimeZone, members }) => {
     // round down start time according to period and timezone's 00:00 time.
     // for example, if the period is 1 day and the timezone is PST, then
     // the start time will be rounded down to the nearest midnight PST.
@@ -70,7 +105,16 @@ function periodicRounds(
       roundIndex++;
     }
 
-    return roundIndex;
+    return {
+      roundIndex,
+      pendingTurns: members.map((member) => member.id),
+      checkAgainAt: checkAgainAtPeriodEnd({
+        periodType,
+        periodValue,
+        currentTime,
+        gameTimeZone,
+      }),
+    };
   };
 }
 
@@ -86,9 +130,23 @@ function syncRounds(): RoundIndexDecider<any, any> {
       (turn) => turn.roundIndex === maxRoundIndex,
     );
     if (lastRoundTurns.length === members.length) {
-      return maxRoundIndex + 1;
+      return {
+        roundIndex: maxRoundIndex + 1,
+        pendingTurns: notPlayedThisRound({
+          turns,
+          roundIndex: maxRoundIndex + 1,
+          members,
+        }),
+      };
     }
-    return maxRoundIndex;
+    return {
+      roundIndex: maxRoundIndex,
+      pendingTurns: notPlayedThisRound({
+        turns,
+        roundIndex: maxRoundIndex,
+        members,
+      }),
+    };
   };
 }
 

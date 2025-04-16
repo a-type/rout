@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { readdirSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import webPush from 'web-push';
 
 async function spawnAsync(cmd, args, { cwd }) {
   return new Promise((resolve, reject) => {
@@ -40,12 +41,17 @@ for (const key of [
   secrets[key] = value;
 }
 
+const vapidKeys = webPush.generateVAPIDKeys();
 const devVars =
   `SESSION_SECRET=notsecretnotsecretnotsecretnotsecret
 SOCKET_TOKEN_SECRET=notsecretnotsecretnotsecretnotsecret
 EMAIL_FROM=noreply@rout.games
 UI_ORIGIN=http://localhost:3100
 API_ORIGIN=http://localhost:3101
+
+# push notification keys
+VAPID_PUBLIC_KEY=${vapidKeys.publicKey}
+VAPID_PRIVATE_KEY=${vapidKeys.privateKey}
 
 # real secrets
 ` +
@@ -57,8 +63,8 @@ const appEnv = `VITE_PUBLIC_API_ORIGIN=http://localhost:3101
 await tasks([
   {
     task: async (msg) => {
-      const serviceDirs = readdirSync(join(process.cwd(), 'services/src'));
-      for (const path of serviceDirs.filter((dir) => dir !== 'middleware')) {
+      const serviceDirs = readdirSync(join(process.cwd(), 'services'));
+      for (const path of serviceDirs) {
         await writeFile(
           join(process.cwd(), 'services/src', path, '.dev.vars'),
           devVars,

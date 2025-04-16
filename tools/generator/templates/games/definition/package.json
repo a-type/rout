@@ -4,16 +4,18 @@
   "private": true,
   "exports": {
     ".": {
-      "production": "./dist/esm/index.js",
+      "production": "./dist/index.js",
       "development": "./src/index.ts",
       "workerd": "./src/index.ts",
-      "default": "./dist/esm/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./v1": {
-      "production": "./dist/esm/v1/gameDefinition.js",
-      "development": "./src/v1/gameDefinition.ts",
-      "workerd": "./src/v1/gameDefinition.ts",
-      "default": "./dist/esm/v1/gameDefinition.js"
+      "production": "./dist/v1/index.js",
+      "development": "./src/v1/index.ts",
+      "workerd": "./src/v1/index.ts",
+      "import": "./dist/v1/index.js",
+      "types": "./dist/v1/index.d.ts"
     }
   },
   "type": "module",
