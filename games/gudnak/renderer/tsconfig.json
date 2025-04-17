@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "./dist",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "composite": true,
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../../../packages/game-client"
+    },
+    {
+      "path": "../../../packages/game-ui"
+    }
+  ]
+}

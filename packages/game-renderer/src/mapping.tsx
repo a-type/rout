@@ -15,6 +15,10 @@ const moduleMap = {
     main: () => import('@long-game/game-scribble-renderer'),
     css: () => import('@long-game/game-scribble-renderer/css.css'),
   },
+  gudnak: {
+    main: () => import('@long-game/game-gudnak-renderer'),
+    css: () => import('@long-game/game-gudnak-renderer/css.css'),
+  },
 };
 
 const packageCache: Record<

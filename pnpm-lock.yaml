@@ -211,6 +211,65 @@ importers:
         specifier: ^3.99.0
         version: 3.99.0(@cloudflare/workers-types@4.20250124.3)
 
+  games/gudnak/definition:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.4(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/gudnak/renderer:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-client':
+        specifier: workspace:*
+        version: link:../../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+      '@long-game/game-gudnak-definition':
+        specifier: workspace:*
+        version: link:../definition
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../../../packages/game-ui
+      react:
+        specifier: 'catalog:'
+        version: 19.0.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@long-game/scripts':
+        specifier: workspace:*
+        version: link:../../../packages/scripts
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.0.8
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.0.3(@types/react@19.0.8)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.4(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
   games/number-guess/definition:
     dependencies:
       '@long-game/game-definition':
@@ -486,6 +545,9 @@ importers:
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../game-client
+      '@long-game/game-gudnak-renderer':
+        specifier: workspace:*
+        version: link:../../games/gudnak/renderer
       '@long-game/game-number-guess-renderer':
         specifier: workspace:*
         version: link:../../games/number-guess/renderer
@@ -563,6 +625,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-gudnak-definition':
+        specifier: workspace:*
+        version: link:../../games/gudnak/definition
       '@long-game/game-number-guess-definition':
         specifier: workspace:*
         version: link:../../games/number-guess/definition
@@ -5400,6 +5465,10 @@ packages:
   utility-types@3.11.0:
     resolution: {integrity: sha512-6Z7Ma2aVEWisaL6TvBCy7P8rm2LQoPv6dJ7ecIaIixHcwfbJ0x7mWdbcwlIM5IGQxPZSFYeqRCqlOOeKoJYMkw==}
     engines: {node: '>= 4'}
+
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
@@ -11265,6 +11334,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   utility-types@3.11.0: {}
+
+  uuid@11.1.0: {}
 
   uuid@9.0.1: {}
 

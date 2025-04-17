@@ -1,0 +1,33 @@
+{
+  "name": "@long-game/game-gudnak-definition",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/esm/index.js",
+      "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
+      "default": "./dist/esm/index.js"
+    },
+    "./v1": {
+      "production": "./dist/esm/v1/gameDefinition.js",
+      "development": "./src/v1/gameDefinition.ts",
+      "workerd": "./src/v1/gameDefinition.ts",
+      "default": "./dist/esm/v1/gameDefinition.js"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
