@@ -1,11 +1,5 @@
 import { FighterCard } from './cardDefinition';
-import {
-  Board,
-  Card,
-  Coordinate,
-  FreeAction,
-  GlobalState,
-} from './gameDefinition';
+import { Board, Card, FreeAction, GlobalState } from './gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -16,6 +10,8 @@ import {
   swapCardPositions,
   getAllBoardCoordinates,
   getTopCard,
+  move,
+  findCoordFromCard,
 } from './gameStateHelpers';
 
 type FighterEffect = {
@@ -40,6 +36,11 @@ type FighterEffect = {
     target: { x: number; y: number };
     board: Board;
   }) => InvalidDeployReason[] | null;
+  validateAbilityInputs?: (props: { input: EffectInput }) => string[] | null;
+  modifyGameStateOnActivate?: (props: {
+    globalState: GlobalState;
+    input: EffectInput;
+  }) => GlobalState;
 };
 
 type TacticEffect = {
@@ -52,6 +53,7 @@ type TacticEffect = {
 export type FighterAbility = {
   name: string;
   type: 'passive' | 'active' | 'deploy';
+  input?: EffectInputDefinition;
   description: string;
   effect: FighterEffect;
 };
@@ -300,6 +302,46 @@ export const abilityDefinitions = {
           ...globalState,
           freeActions: [...globalState.freeActions, ...nextFreeActions],
         };
+      },
+    },
+  },
+  inspire: {
+    type: 'active',
+    name: 'Inspire',
+    description:
+      'Move or Attack with target adjacent friendly fighter, even if fatigued. Do not fatigue that fighter.',
+    input: {
+      targets: [
+        {
+          description: 'Choose adjacent fighter',
+          type: 'coordinate',
+          controller: 'player',
+        },
+        {
+          description: 'Choose target coordinate',
+          type: 'coordinate',
+          controller: 'player',
+        },
+      ],
+    },
+    effect: {
+      modifyGameStateOnActivate: ({ globalState, input }) => {
+        const [target1, target2] = input.targets;
+        const targetInstanceId = (target1 as CardTarget).instanceId;
+        const sourceCoordinate = findCoordFromCard(
+          globalState.board,
+          targetInstanceId,
+        );
+        if (!sourceCoordinate) {
+          return globalState;
+        }
+        globalState = move(
+          globalState,
+          targetInstanceId,
+          sourceCoordinate,
+          target2 as CoordinateTarget,
+        );
+        return globalState;
       },
     },
   },

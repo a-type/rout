@@ -2,6 +2,7 @@ import { Box } from '@a-type/ui';
 import {
   type PlayerState,
   type CardStack,
+  type Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
 import { Card } from './Card';
 import { useGameSuite } from '@long-game/game-client';
@@ -12,12 +13,14 @@ export function Space({
   ownerId,
   isGate,
   onClick,
+  onClickCard,
 }: {
   stack: CardStack;
   selected?: boolean;
   ownerId: string | null;
   isGate?: boolean;
   onClick?: () => void;
+  onClickCard?: (card: CardType) => void;
 }) {
   const { players, finalState } = useGameSuite();
   const { cardState } = finalState as PlayerState;
@@ -37,7 +40,12 @@ export function Space({
         borderStyle: isGate ? 'dashed' : 'solid',
       }}
     >
-      {topCard ? <Card info={cardState[topCard]} /> : null}
+      {topCard ? (
+        <Card
+          info={cardState[topCard]}
+          onClick={() => onClickCard?.(cardState[topCard])}
+        />
+      ) : null}
     </Box>
   );
 }

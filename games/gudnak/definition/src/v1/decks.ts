@@ -16,9 +16,12 @@ export const deckDefinitions: Record<string, DeckDefinition> = {
       'dusklight-hunter-1',
       'dawnbringer-brute-3',
       'dawnbringer-brute-2',
+      // heroes
       'solaran-cavalry',
       'bullgryff-rider',
       'bullgryff',
+      'standardbearer',
+      // tactics
       'tempo',
       'reposition',
       'forced-march',

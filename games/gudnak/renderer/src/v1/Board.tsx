@@ -3,6 +3,7 @@ import type {
   Coordinate,
   Board,
   PlayerState,
+  Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
 import { Space } from './Space';
 import { useGameSuite } from '@long-game/game-client';
@@ -11,10 +12,12 @@ export function Board({
   state,
   selectedSpace,
   onClick,
+  onClickCard,
 }: {
   state: Board;
   selectedSpace: Coordinate | null;
   onClick?: (coord: Coordinate) => void;
+  onClickCard?: (card: CardType) => void;
 }) {
   const { finalState } = useGameSuite();
   const { specialSpaces } = finalState as PlayerState;
@@ -42,6 +45,7 @@ export function Board({
                 onClick={() => {
                   onClick?.({ x: columnIndex, y: rowIndex });
                 }}
+                onClickCard={onClickCard}
               />
             );
           })}

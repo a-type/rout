@@ -2,9 +2,10 @@ import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import {
   abilityDefinitions,
   EffectInput,
+  Target,
   ValidAbilityId,
 } from './abilityDefinition';
-import { cardDefinitions, ValidCardId } from './cardDefinition';
+import { cardDefinitions, FighterCard, ValidCardId } from './cardDefinition';
 import { deckDefinitions } from './decks';
 import {
   clearFreeActions,
@@ -58,13 +59,20 @@ type MoveAction = {
   source: Coordinate;
   target: Coordinate;
 };
+type UseAbilityAction = {
+  type: 'useAbility';
+  cardInstanceId: string;
+  abilityId: string;
+  targets: Target[];
+};
 type EndTurnAction = { type: 'endTurn' };
 export type Action =
   | DrawAction
   | DeployAction
   | MoveAction
   | EndTurnAction
-  | TacticAction;
+  | TacticAction
+  | UseAbilityAction;
 
 export type FreeAction = {
   type: 'deploy' | 'move';
@@ -218,6 +226,31 @@ export const gameDefinition: GameDefinition<
         return moveErrors[0];
       }
     }
+
+    if (action.type === 'useAbility') {
+      const card = cardState[action.cardInstanceId];
+      const abilityDef = abilityDefinitions[action.abilityId as ValidAbilityId];
+      if (!card) {
+        return 'Card not found';
+      }
+      if (card.ownerId !== playerId) {
+        return 'You do not own this card';
+      }
+      if (!abilityDef) {
+        return 'Ability definition not found';
+      }
+      if ('input' in abilityDef) {
+        const targetErrors = validateTargets(
+          playerState,
+          playerId,
+          abilityDef.input.targets,
+          action.targets,
+        );
+        if (targetErrors) {
+          return targetErrors[0];
+        }
+      }
+    }
   },
 
   // run on client
@@ -343,6 +376,18 @@ export const gameDefinition: GameDefinition<
           globalState = clearFreeActions(globalState);
           globalState = playTactic(globalState, action.card, action.input);
           break;
+        }
+        case 'useAbility': {
+          const abilityId = action.abilityId as ValidAbilityId;
+          const abilityDef = abilityDefinitions[abilityId];
+          if ('modifyGameStateOnActivate' in abilityDef.effect) {
+            globalState = abilityDef.effect.modifyGameStateOnActivate({
+              globalState,
+              input: { targets: action.targets },
+            });
+          }
+          globalState = spendActions(globalState);
+          globalState = clearFreeActions(globalState);
         }
         case 'endTurn': {
           globalState = clearFreeActions(globalState);

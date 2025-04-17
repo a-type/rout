@@ -216,6 +216,23 @@ export const cardDefinitions = {
       },
     ],
   },
+  standardbearer: {
+    kind: 'fighter',
+    name: 'Standardbearer',
+    power: 1,
+    traits: ['hero', 'soldier'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'inspire',
+        type: 'action',
+        name: 'Inspire',
+        description:
+          'Move or Attack with target adjacent friendly fighter, even if fatigued. Do not fatigue that fighter.',
+      },
+    ],
+  },
+
   tempo: {
     kind: 'tactic',
     name: 'Tempo',
