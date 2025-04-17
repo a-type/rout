@@ -1,31 +1,35 @@
 import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
-import { deckDefinitions } from './decks';
-import {
-  validateDeploy,
-  validateMove,
-  deploy,
-  draw,
-  move,
-  shuffleDeck,
-  spendActions,
-  getSpecialSpaces,
-  getGatesCoord,
-  getTopCard,
-  getStack,
-  mill,
-  getCardIdsFromBoard,
-  playTactic,
-  validateTargets,
-  findMatchingFreeAction,
-  spendFreeAction,
-  clearFreeActions,
-} from './gameStateHelpers';
-import { cardDefinitions, ValidCardId } from './cardDefinition';
 import {
   abilityDefinitions,
   EffectInput,
   ValidAbilityId,
 } from './abilityDefinition';
+import { cardDefinitions, ValidCardId } from './cardDefinition';
+import { deckDefinitions } from './decks';
+import {
+  clearFreeActions,
+  deploy,
+  draw,
+  findMatchingFreeAction,
+  getCardIdsFromBoard,
+  getGatesCoord,
+  getSpecialSpaces,
+  getStack,
+  getTopCard,
+  mill,
+  move,
+  playTactic,
+  shuffleDeck,
+  spendActions,
+  spendFreeAction,
+  validateDeploy,
+  validateMove,
+  validateTargets,
+} from './gameStateHelpers';
+
+// re-export definitions used by renderer
+export * from './abilityDefinition';
+export * from './cardDefinition';
 
 export type Side = 'top' | 'bottom';
 

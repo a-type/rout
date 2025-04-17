@@ -1,18 +1,18 @@
 import { Box, Button } from '@a-type/ui';
-import { hooks } from './gameClient';
-import { Card } from './Card';
-import { Board } from './Board';
-import { useState } from 'react';
-import { type Card as CardType } from '@long-game/game-gudnak-definition/v1';
 import { cardDefinitions } from '@long-game/game-gudnak-definition';
-import type { ValidCardId } from '../../../definition/src/v1/cardDefinition';
+import type { ValidCardId } from '@long-game/game-gudnak-definition/v1';
 import {
   abilityDefinitions,
-  type EffectTargetDefinition,
-  type ValidAbilityId,
-  type Target,
+  type Card as CardType,
   type CoordinateTarget,
-} from '../../../definition/src/v1/abilityDefinition';
+  type EffectTargetDefinition,
+  type Target,
+  type ValidAbilityId,
+} from '@long-game/game-gudnak-definition/v1';
+import { useState } from 'react';
+import { Board } from './Board';
+import { Card } from './Card';
+import { hooks } from './gameClient';
 
 export function Client() {
   return (

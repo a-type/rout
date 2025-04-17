@@ -1,12 +1,13 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
-    "declarationDir": "./dist/typings",
+    "declarationDir": "./dist",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "composite": true
+    "composite": true,
+    "rootDir": "src"
   },
   "include": ["src"],
   "references": [

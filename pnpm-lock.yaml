@@ -254,6 +254,9 @@ importers:
         specifier: 'catalog:'
         version: 19.0.0(react@19.0.0)
     devDependencies:
+      '@long-game/scripts':
+        specifier: workspace:*
+        version: link:../../../packages/scripts
       '@types/react':
         specifier: 'catalog:'
         version: 19.0.8
