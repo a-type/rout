@@ -1,6 +1,6 @@
 import { intro, isCancel, outro, tasks, text } from '@clack/prompts';
 import { spawn } from 'node:child_process';
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync, lstatSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import webPush from 'web-push';
@@ -65,11 +65,13 @@ await tasks([
     task: async (msg) => {
       const serviceDirs = readdirSync(join(process.cwd(), 'services'));
       for (const path of serviceDirs) {
-        await writeFile(
-          join(process.cwd(), 'services', path, '.dev.vars'),
-          devVars,
-          { encoding: 'utf8' },
-        );
+        const dirPath = join(process.cwd(), 'services', path);
+        if (!existsSync(dirPath) || !lstatSync(dirPath).isDirectory()) {
+          continue;
+        }
+        await writeFile(join(dirPath, '.dev.vars'), devVars, {
+          encoding: 'utf8',
+        });
         msg(`Wrote to ${path}`);
       }
       return 'Wrote .dev.vars files';
