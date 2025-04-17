@@ -66,7 +66,7 @@ await tasks([
       const serviceDirs = readdirSync(join(process.cwd(), 'services'));
       for (const path of serviceDirs) {
         await writeFile(
-          join(process.cwd(), 'services/src', path, '.dev.vars'),
+          join(process.cwd(), 'services', path, '.dev.vars'),
           devVars,
           { encoding: 'utf8' },
         );
@@ -90,7 +90,7 @@ await tasks([
   {
     task: async (msg) => {
       await spawnAsync('pnpm', ['run', 'migrations:apply:local'], {
-        cwd: join(process.cwd(), 'services'),
+        cwd: join(process.cwd(), 'services/db'),
       });
       return 'Migrated database';
     },
