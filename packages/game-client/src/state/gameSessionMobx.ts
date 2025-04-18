@@ -20,7 +20,7 @@ import {
   GetTurnData,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
-import { action, autorun, computed, observable, runInAction } from 'mobx';
+import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
 import { getPlayers, getPostgame, getPublicRound, getSummary } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
@@ -471,6 +471,38 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       {},
     );
     this.fetchMembers();
+  };
+
+  debug = async () => {
+    // try loading global state (works in dev mode)
+    try {
+      await this.loadPostgame();
+    } catch (e) {
+      console.error(
+        'Error loading global postgame state. Are you running with DEV_MODE flag on backend?',
+        e,
+      );
+    }
+    const debugValue: any = {
+      ...toJS(this),
+      // toJS doesn't evaluate computed properties, so we need to
+      // do this manually.
+      latestRound: toJS(this.latestRound),
+      initialState: toJS(this.initialState),
+      finalState: toJS(this.finalState),
+      currentTurn: toJS(this.currentTurn),
+      viewingTurn: toJS(this.viewingTurn),
+      globalState: toJS(this.postgameGlobalState),
+    };
+    // remove functions
+    for (const key in debugValue) {
+      if (typeof debugValue[key] === 'function') {
+        delete debugValue[key];
+      }
+    }
+    console.log(debugValue);
+    (window as any).gameSuiteRaw = debugValue;
+    console.log('Assigned above to window.gameSuiteRaw');
   };
 }
 

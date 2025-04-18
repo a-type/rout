@@ -7,6 +7,7 @@ interface ApiBindings {
   EMAIL_FROM: string;
   UI_ORIGIN: string;
   API_ORIGIN: string;
+  DEV_MODE: boolean;
   GOOGLE_AUTH_CLIENT_ID: string;
   GOOGLE_AUTH_CLIENT_SECRET: string;
   AWS_ACCESS_KEY_ID: string;

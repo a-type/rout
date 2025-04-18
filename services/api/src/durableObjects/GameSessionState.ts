@@ -423,17 +423,17 @@ export class GameSessionState extends DurableObject<ApiBindings> {
    */
   getPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number): any {
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex && roundIndex >= currentRoundIndex) {
+    if (roundIndex && roundIndex >= currentRoundIndex && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
       );
     }
-    return this.#internalGetPlayerState(playerId, roundIndex);
+    return this.getPlayerStateUnchecked(playerId, roundIndex);
   }
 
   // unvalidated versions
-  #internalGetPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number) {
+  getPlayerStateUnchecked(playerId: PrefixedId<'u'>, roundIndex?: number) {
     if (!this.#sessionData) {
       throw new Error('Session data not initialized');
     }
@@ -482,7 +482,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     roundIndex: number,
   ): GameRoundSummary<{}, {}, {}> {
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex > currentRoundIndex) {
+    if (roundIndex > currentRoundIndex && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
@@ -490,7 +490,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
     const round = this.getRound(roundIndex);
     const globalState = this.#getGlobalStateUnchecked(roundIndex);
-    const playerState = this.#internalGetPlayerState(playerId, roundIndex - 1);
+    const playerState = this.getPlayerStateUnchecked(playerId, roundIndex - 1);
     return {
       ...round,
       initialPlayerState: playerState as {},
@@ -540,7 +540,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Session data not initialized',
       );
     }
-    if (this.getStatus().status !== 'completed') {
+    if (this.getStatus().status !== 'completed' && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Game session has not ended yet',
