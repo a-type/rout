@@ -10,6 +10,7 @@ import {
   ContinuousEffect,
   type Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
+import { Flipped } from 'react-flip-toolkit';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -37,24 +38,44 @@ function FighterCard({
   fatigued,
   continuousEffects,
   color,
+  instanceId,
 }: BaseCardProps & {
   cardData: FighterCard;
   continuousEffects?: ContinuousEffect[];
   cardStack?: CardStack;
+  instanceId: string;
 }) {
   const textColor = fatigued ? 'gray' : 'white';
   if (cardData.artUrl) {
     return (
-      <Tooltip content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}>
-        <img
-          src={cardData.artUrl}
-          width={CARD_SIZE}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick?.();
-          }}
-        />
-      </Tooltip>
+      <Flipped flipId={instanceId}>
+        {(flippedProps) => (
+          <Tooltip
+            content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
+          >
+            <Box
+              {...flippedProps}
+              className="w-full h-full"
+              border
+              style={{
+                width: CARD_SIZE,
+                height: CARD_SIZE,
+                borderColor: color,
+                background: selected
+                  ? 'rgba(255, 255, 255, 0.2)'
+                  : 'transparent',
+                color: textColor,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+            >
+              <img src={cardData.artUrl} width={CARD_SIZE} />
+            </Box>
+          </Tooltip>
+        )}
+      </Flipped>
     );
   }
 
@@ -113,14 +134,22 @@ function TacticCard({
   if (cardData.artUrl) {
     return (
       <Tooltip content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}>
-        <img
-          src={cardData.artUrl}
-          width={CARD_SIZE}
+        <Box
+          className="w-full h-full"
+          border
+          style={{
+            width: CARD_SIZE,
+            height: CARD_SIZE,
+            borderColor: color,
+            background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+          }}
           onClick={(e) => {
             e.stopPropagation();
             onClick?.();
           }}
-        />
+        >
+          <img src={cardData.artUrl} width={CARD_SIZE} />
+        </Box>
       </Tooltip>
     );
   }
@@ -162,7 +191,7 @@ export function Card({
   info: CardType;
 }) {
   const { players } = useGameSuite();
-  const { cardId, ownerId, fatigued, continuousEffects } = info;
+  const { cardId, ownerId, fatigued, continuousEffects, instanceId } = info;
   // @ts-expect-error Fix this up
   const player: PlayerInfo = players[ownerId];
   const { color } = player ?? { color: 'black' };
@@ -181,6 +210,7 @@ export function Card({
           color={color}
           fatigued={fatigued}
           continuousEffects={continuousEffects}
+          instanceId={instanceId}
           {...rest}
         />
         {stack &&
