@@ -13,6 +13,8 @@ import { useState } from 'react';
 import { Board } from './Board';
 import { Card } from './Card';
 import { hooks } from './gameClient';
+import { useTargeting } from './useTargeting';
+import { useSelect } from './useSelect';
 
 export function Client() {
   return (
@@ -24,27 +26,17 @@ export function Client() {
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const { prepareTurn, finalState, turnError, localTurnData } = gameSuite;
-  const { hand, board, active, actions, deckCount, freeActions } = finalState;
-  console.log(JSON.parse(JSON.stringify(finalState)));
-  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
-  const [selectedSpace, setSelectedSpace] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const [queuedTargetInputs, setQueuedTargetInputs] = useState<
-    EffectTargetDefinition[]
-  >([]);
-  const [chosenTargets, setChosenTargets] = useState<Target[]>([]);
-  const nextTargetInput =
-    queuedTargetInputs.length > 0 ? queuedTargetInputs[0] : null;
-  const choosingTargets = !!nextTargetInput;
+  const { hand, board, active, actions, deckCount, freeActions, cardState } =
+    finalState;
+  const selection = useSelect();
+  const targeting = useTargeting();
 
   return (
     <Box className="w-full h-full mt-10 flex flex-col p-5 gap-2">
       <Box className="flex flex-row gap-2">
         {hand.map((card, index) => (
           <Card
-            selected={selectedCard?.instanceId === card.instanceId}
+            selected={selection.card?.instanceId === card.instanceId}
             key={index}
             info={card}
             onClick={() => {
@@ -58,20 +50,20 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                 }
                 if ('input' in abilityDef) {
                   const targetInputs = abilityDef.input.targets;
-                  setQueuedTargetInputs(targetInputs);
-                  setSelectedCard(card);
+                  targeting.begin(targetInputs);
+                  selection.set(card);
                 } else {
                   prepareTurn({
                     action: {
                       type: 'tactic',
                       card,
-                      input: { targets: chosenTargets },
+                      input: { targets: targeting.chosen },
                     },
                   });
                 }
                 return;
               }
-              setSelectedCard(card);
+              selection.set(card);
             }}
           />
         ))}
@@ -107,61 +99,65 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             Free {freeActions[0].type} action (x {freeActions[0].count ?? 1})
           </span>
         )}
-        {choosingTargets ? (
-          <span>{queuedTargetInputs[0].description}</span>
-        ) : null}
+        {targeting.next ? <span>{targeting.next.description}</span> : null}
         <span>{turnError}</span>
         <span>{JSON.stringify(localTurnData)}</span>
       </Box>
       <Board
-        selectedSpace={selectedSpace}
+        selectedSpace={selection.coordinate}
         state={board}
         onClick={(coord) => {
-          if (choosingTargets && nextTargetInput.type === 'coordinate') {
+          if (targeting.next && targeting.next.type === 'coordinate') {
             const target: CoordinateTarget = {
               kind: 'coordinate',
               x: coord.x,
               y: coord.y,
             };
 
-            if (queuedTargetInputs.length === 1 && selectedCard) {
+            // TODO: Handle this in a better way
+            if (targeting.queued.length === 1 && selection.card) {
               prepareTurn({
                 action: {
                   type: 'tactic',
-                  card: selectedCard,
-                  input: { targets: [...chosenTargets, target] },
+                  card: selection.card,
+                  input: { targets: [...targeting.chosen, target] },
                 },
               });
-              setSelectedCard(null);
-              setChosenTargets([]);
-              setQueuedTargetInputs([]);
+              selection.clear();
+              targeting.clear();
             } else {
-              setChosenTargets((prev) => [...prev, target]);
-              setQueuedTargetInputs((prev) => prev.slice(1));
+              targeting.select(target);
             }
             return;
           }
-          if (selectedCard) {
+          if (selection.card) {
             prepareTurn({
-              action: { type: 'deploy', card: selectedCard, target: coord },
+              action: { type: 'deploy', card: selection.card, target: coord },
             });
-            setSelectedCard(null);
-            setSelectedSpace(null);
-          } else if (selectedSpace) {
-            const stack = board[selectedSpace.y][selectedSpace.x];
+            selection.clear();
+          } else if (selection.coordinate) {
+            const stack = board[selection.coordinate.y][selection.coordinate.x];
             if (!stack) return;
             const topCard = stack[stack.length - 1];
             prepareTurn({
               action: {
                 type: 'move',
                 cardInstanceId: topCard,
-                source: selectedSpace,
+                source: selection.coordinate,
                 target: coord,
               },
             });
-            setSelectedSpace(null);
+            selection.clear();
           } else {
-            setSelectedSpace(coord);
+            selection.set(coord);
+          }
+        }}
+        onClickCard={(card) => {
+          if (targeting.next && targeting.next.type === 'card') {
+            targeting.select({
+              kind: 'card',
+              instanceId: card.instanceId,
+            });
           }
         }}
       />

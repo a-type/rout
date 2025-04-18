@@ -77,7 +77,7 @@ export type EffectInput = {
 
 export type EffectTargetDefinition = {
   description: string;
-  type: 'coordinate';
+  type: 'coordinate' | 'card';
   controller: 'player' | 'opponent' | 'any' | 'none';
 };
 

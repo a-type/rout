@@ -272,6 +272,9 @@ export function validateMove(
   if (topCardId !== card.instanceId) {
     return [INVALID_MOVE_CODES.NOT_TOP_CARD];
   }
+  if (card.ownerId !== playerId) {
+    return [INVALID_MOVE_CODES.NOT_YOUR_CARD];
+  }
   const targetStack = getStack(board, target);
   if (targetStack.length === 0) {
     return null;
@@ -298,9 +301,6 @@ export function validateMove(
   }
   if (card.fatigued) {
     reasons.push(INVALID_MOVE_CODES.FATIGUED);
-  }
-  if (card.ownerId !== playerId) {
-    reasons.push(INVALID_MOVE_CODES.NOT_YOUR_CARD);
   }
 
   const abilities = cardDef.abilities.map((a) => abilityDefinitions[a.id]);
