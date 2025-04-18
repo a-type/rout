@@ -28,7 +28,10 @@ export function Space({
   const topCard = stack[stack.length - 1];
   return (
     <Box
-      onClick={onClick}
+      onClick={(e) => {
+        console.log('click space');
+        onClick?.();
+      }}
       className="w-full h-full"
       border
       p="md"
@@ -43,7 +46,10 @@ export function Space({
       {topCard ? (
         <Card
           info={cardState[topCard]}
-          onClick={() => onClickCard?.(cardState[topCard])}
+          onClick={() => {
+            console.log('click card');
+            onClickCard?.(cardState[topCard]);
+          }}
         />
       ) : null}
     </Box>

@@ -1,5 +1,11 @@
 import { FighterCard } from './cardDefinition';
-import { Board, Card, FreeAction, GlobalState } from './gameDefinition';
+import {
+  Board,
+  Card,
+  Coordinate,
+  FreeAction,
+  GlobalState,
+} from './gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -327,13 +333,12 @@ export const abilityDefinitions = {
     effect: {
       modifyGameStateOnActivate: ({ globalState, input }) => {
         const [target1, target2] = input.targets;
-        const targetInstanceId = (target1 as CardTarget).instanceId;
-        const sourceCoordinate = findCoordFromCard(
-          globalState.board,
-          targetInstanceId,
+        const sourceCoordinate = target1 as CoordinateTarget;
+        const targetInstanceId = getTopCard(
+          getStack(globalState.board, sourceCoordinate),
         );
-        if (!sourceCoordinate) {
-          return globalState;
+        if (!targetInstanceId) {
+          throw new Error('Invalid target');
         }
         globalState = move(
           globalState,

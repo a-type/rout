@@ -299,7 +299,7 @@ export function validateMove(
   if (targetTopCard.ownerId === card.ownerId) {
     reasons.push(INVALID_MOVE_CODES.SAME_OWNER);
   }
-  if (card.fatigued) {
+  if (checkFatigue(card)) {
     reasons.push(INVALID_MOVE_CODES.FATIGUED);
   }
 

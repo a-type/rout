@@ -42,7 +42,10 @@ function FighterCard({
         borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
     >
       <Box className="flex flex-col">
         <Box className="flex flex-row gap-2">
@@ -85,7 +88,10 @@ function TacticCard({
         borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
     >
       <Box className="flex flex-col w-full">
         <Box className="flex flex-row gap-2">
