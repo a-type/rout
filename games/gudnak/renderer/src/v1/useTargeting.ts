@@ -15,6 +15,7 @@ export function useTargeting() {
   const choosingTargets = !!nextTargetInput;
 
   const begin = (targetInputs: EffectTargetDefinition[]) => {
+    clear();
     setQueuedTargetInputs(targetInputs);
     setChosenTargets([]);
   };

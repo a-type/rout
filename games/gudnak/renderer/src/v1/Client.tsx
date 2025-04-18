@@ -20,7 +20,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const action = useGameAction();
 
   return (
-    <Box className="w-full h-full mt-10 flex flex-col p-5 gap-2">
+    <Box className="w-full h-full mt-2 flex flex-col p-3 gap-2">
       <Box className="flex flex-row gap-2 overflow-y-scroll">
         {hand.map((card, index) => (
           <Card

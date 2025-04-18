@@ -1,4 +1,4 @@
-import { Box } from '@a-type/ui';
+import { Box, Tooltip } from '@a-type/ui';
 import { PlayerInfo, useGameSuite } from '@long-game/game-client';
 import {
   cardDefinitions,
@@ -28,13 +28,14 @@ type BaseCardProps = {
   onClick?: () => void;
 };
 
+const CARD_SIZE = 200;
+
 function FighterCard({
   cardData,
   onClick,
   selected,
   fatigued,
   continuousEffects,
-  cardStack,
   color,
 }: BaseCardProps & {
   cardData: FighterCard;
@@ -42,70 +43,64 @@ function FighterCard({
   cardStack?: CardStack;
 }) {
   const textColor = fatigued ? 'gray' : 'white';
+  if (cardData.artUrl) {
+    return (
+      <Tooltip content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}>
+        <img
+          src={cardData.artUrl}
+          width={CARD_SIZE}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.();
+          }}
+        />
+      </Tooltip>
+    );
+  }
+
   return (
-    <>
-      <Box
-        className="w-full h-full"
-        border
-        p="md"
-        style={{
-          width: '150px',
-          height: '150px',
-          borderColor: color,
-          background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-          color: textColor,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.();
-        }}
-      >
-        <Box className="flex flex-col">
-          <Box className="flex flex-row gap-2">
-            <Box className="flex flex-col">
-              <div>{cardData.power}</div>
-              {cardData.traits.map((trait) => (
-                <div key={trait} className="text-xs">
-                  {traitToEmoji[trait]}
-                </div>
-              ))}
-            </Box>
-            <div>{cardData.name}</div>
+    <Box
+      className="w-full h-full"
+      border
+      p="md"
+      style={{
+        width: CARD_SIZE,
+        height: CARD_SIZE,
+        borderColor: color,
+        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+        color: textColor,
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+    >
+      <Box className="flex flex-col">
+        <Box className="flex flex-row gap-2">
+          <Box className="flex flex-col">
+            <div>{cardData.power}</div>
+            {cardData.traits.map((trait) => (
+              <div key={trait} className="text-xs">
+                {traitToEmoji[trait]}
+              </div>
+            ))}
           </Box>
-          <hr className="w-full" />
-          {cardData.abilities.map((ability, index) => (
-            <div key={index} className="text-xs">
-              <span className="font-bold">{ability.name}:&nbsp;</span>
-              <span>{ability.description}</span>
-            </div>
-          ))}
-          {continuousEffects?.map((effect, index) => (
-            <div key={index} className="text-xs">
-              <span>{effect.description}</span>
-            </div>
-          ))}
+          <div>{cardData.name}</div>
         </Box>
-      </Box>
-      {cardStack &&
-        cardStack.length > 1 &&
-        Array.from({ length: cardStack.length - 1 }).map((_, idx) => (
-          <Box
-            className="flex flex-row gap-2 border"
-            border
-            key={idx}
-            style={{
-              marginLeft: '-3px',
-              width: '10px',
-              height: '150px',
-              borderColor: color,
-              background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-              borderLeft: 'none',
-              borderTopLeftRadius: '0px',
-              borderBottomLeftRadius: '0px',
-            }}
-          ></Box>
+        <hr className="w-full" />
+        {cardData.abilities.map((ability, index) => (
+          <div key={index} className="text-xs">
+            <span className="font-bold">{ability.name}:&nbsp;</span>
+            <span>{ability.description}</span>
+          </div>
         ))}
-    </>
+        {continuousEffects?.map((effect, index) => (
+          <div key={index} className="text-xs">
+            <span>{effect.description}</span>
+          </div>
+        ))}
+      </Box>
+    </Box>
   );
 }
 
@@ -115,14 +110,29 @@ function TacticCard({
   selected,
   color,
 }: BaseCardProps & { cardData: TacticCard }) {
+  if (cardData.artUrl) {
+    return (
+      <Tooltip content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}>
+        <img
+          src={cardData.artUrl}
+          width={CARD_SIZE}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.();
+          }}
+        />
+      </Tooltip>
+    );
+  }
+
   return (
     <Box
       className="w-full h-full"
       border
       p="md"
       style={{
-        width: '150px',
-        height: '150px',
+        width: CARD_SIZE,
+        height: CARD_SIZE,
         borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
@@ -165,14 +175,33 @@ export function Card({
 
   if (cardData.kind === 'fighter') {
     return (
-      <FighterCard
-        cardStack={stack}
-        cardData={cardData}
-        color={color}
-        fatigued={fatigued}
-        continuousEffects={continuousEffects}
-        {...rest}
-      />
+      <>
+        <FighterCard
+          cardData={cardData}
+          color={color}
+          fatigued={fatigued}
+          continuousEffects={continuousEffects}
+          {...rest}
+        />
+        {stack &&
+          stack.length > 1 &&
+          Array.from({ length: stack.length - 1 }).map((_, idx) => (
+            <Box
+              className="flex flex-row gap-2 border"
+              border
+              key={idx}
+              style={{
+                marginLeft: '-3px',
+                width: '10px',
+                height: CARD_SIZE,
+                borderColor: color,
+                borderLeft: 'none',
+                borderTopLeftRadius: '0px',
+                borderBottomLeftRadius: '0px',
+              }}
+            ></Box>
+          ))}
+      </>
     );
   }
   return <TacticCard cardData={cardData} color={color} {...rest} />;

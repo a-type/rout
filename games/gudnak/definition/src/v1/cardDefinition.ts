@@ -6,6 +6,7 @@ type Faction = 'gloaming' | 'refractory' | 'shardsword' | 'delguon' | 'neutral';
 export type FighterCard = {
   kind: 'fighter';
   name: string;
+  artUrl?: string;
   power: number;
   abilities: {
     id: ValidAbilityId;
@@ -20,6 +21,7 @@ export type FighterCard = {
 export type TacticCard = {
   kind: 'tactic';
   name: string;
+  artUrl?: string;
   cost: number;
   ability: string;
   faction: Faction;
@@ -31,6 +33,8 @@ export const cardDefinitions = {
   'solaran-soldier-3': {
     kind: 'fighter',
     name: 'Solaran Soldier',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF3SLSD.jpg',
     power: 3,
     traits: ['soldier'],
     faction: 'refractory',
@@ -46,6 +50,8 @@ export const cardDefinitions = {
   'solaran-soldier-2': {
     kind: 'fighter',
     name: 'Solaran Soldier',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF2SLSD.jpg',
     power: 2,
     traits: ['soldier'],
     faction: 'refractory',
@@ -61,6 +67,8 @@ export const cardDefinitions = {
   'solaran-soldier-1': {
     kind: 'fighter',
     name: 'Solaran Soldier',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF1SLSD.jpg',
     power: 1,
     traits: ['soldier'],
     faction: 'refractory',
@@ -76,6 +84,8 @@ export const cardDefinitions = {
   'dawnbringer-brute-3': {
     kind: 'fighter',
     name: 'Dawnbringer Brute',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF3DWNB.jpg',
     power: 3,
     traits: ['brute'],
     faction: 'refractory',
@@ -91,6 +101,8 @@ export const cardDefinitions = {
   'dawnbringer-brute-2': {
     kind: 'fighter',
     name: 'Dawnbringer Brute',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF2DWNB.jpg',
     power: 2,
     traits: ['brute'],
     faction: 'refractory',
@@ -106,6 +118,8 @@ export const cardDefinitions = {
   'dawnbringer-brute-1': {
     kind: 'fighter',
     name: 'Dawnbringer Brute',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF1DWNB.jpg',
     power: 1,
     traits: ['brute'],
     faction: 'refractory',
@@ -136,6 +150,8 @@ export const cardDefinitions = {
   'dusklight-hunter-2': {
     kind: 'fighter',
     name: 'Dusklight Hunter',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF2DSKH.jpg',
     power: 2,
     traits: ['hunter'],
     faction: 'refractory',
@@ -151,6 +167,8 @@ export const cardDefinitions = {
   'dusklight-hunter-1': {
     kind: 'fighter',
     name: 'Dusklight Hunter',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF1DSKH.jpg',
     power: 1,
     traits: ['hunter'],
     faction: 'refractory',
@@ -166,6 +184,8 @@ export const cardDefinitions = {
   'solaran-cavalry': {
     kind: 'fighter',
     name: 'Solaran Cavalry',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF2HSLRC.jpg',
     power: 2,
     traits: ['hero', 'soldier'],
     faction: 'refractory',
@@ -181,6 +201,8 @@ export const cardDefinitions = {
   'bullgryff-rider': {
     kind: 'fighter',
     name: 'Bullgryff Rider',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF3HBLGR.jpg',
     power: 3,
     traits: ['hero'],
     faction: 'refractory',
@@ -197,6 +219,8 @@ export const cardDefinitions = {
   bullgryff: {
     kind: 'fighter',
     name: 'Bullgryff',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF2HBLGF.jpg',
     power: 2,
     traits: ['hero'],
     faction: 'refractory',
@@ -219,6 +243,8 @@ export const cardDefinitions = {
   standardbearer: {
     kind: 'fighter',
     name: 'Standardbearer',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF1HSTDB.jpg',
     power: 1,
     traits: ['hero', 'soldier'],
     faction: 'refractory',
@@ -236,6 +262,8 @@ export const cardDefinitions = {
   tempo: {
     kind: 'tactic',
     name: 'Tempo',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBTTMPO.jpg',
     cost: 0,
     faction: 'refractory',
     ability: 'Gain an action.',
@@ -243,6 +271,8 @@ export const cardDefinitions = {
   reposition: {
     kind: 'tactic',
     name: 'Reposition',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBTRPOS.jpg',
     cost: 1,
     faction: 'refractory',
     ability: 'Swap the position of 2 fighters you control.',
@@ -250,6 +280,8 @@ export const cardDefinitions = {
   'forced-march': {
     kind: 'tactic',
     name: 'Forced March',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBTFMRC.jpg',
     cost: 1,
     faction: 'refractory',
     ability:
@@ -258,6 +290,8 @@ export const cardDefinitions = {
   'rapid-deployment': {
     kind: 'tactic',
     name: 'Rapid Deployment',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBTRPDD.jpg',
     cost: 1,
     faction: 'refractory',
     ability:
@@ -266,6 +300,8 @@ export const cardDefinitions = {
   'battle-cleric-of-solara': {
     kind: 'fighter',
     name: 'Battle Cleric of Solara',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBF1HBTCS.jpg',
     power: 1,
     traits: ['hero', 'soldier'],
     faction: 'refractory',
@@ -282,6 +318,8 @@ export const cardDefinitions = {
   'precision-drills': {
     kind: 'tactic',
     name: 'Precision Drills',
+    artUrl:
+      'https://gudnak-artwork.nyc3.cdn.digitaloceanspaces.com/artwork/cards/400/RYBTPDRL.jpg',
     cost: 0,
     faction: 'refractory',
     ability:
