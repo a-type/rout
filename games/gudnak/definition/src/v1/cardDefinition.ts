@@ -279,6 +279,14 @@ export const cardDefinitions = {
       },
     ],
   },
+  'precision-drills': {
+    kind: 'tactic',
+    name: 'Precision Drills',
+    cost: 0,
+    faction: 'refractory',
+    ability:
+      'Friendly fighters in stacks have +1 when being Attacked until your next turn.',
+  },
 } satisfies Record<string, CardDefinition>;
 
 export type ValidCardId = keyof typeof cardDefinitions;

@@ -1,4 +1,5 @@
-import { GlobalState } from './gameDefinition';
+import { Card, GlobalState } from './gameDefinition';
+import { findCoordFromCard } from './gameStateHelpers';
 
 // TODO: Consider renaming ability effects
 export type ContinuousEffectDefinition = {
@@ -7,7 +8,13 @@ export type ContinuousEffectDefinition = {
     defend?: () => boolean;
   };
   apply?: {
-    combat?: (globalState: GlobalState) => GlobalState;
+    modifyCombatPower?: (props: {
+      globalState: GlobalState;
+      effectOwnerId: string;
+      card: Card;
+      attacker: boolean;
+      power: number;
+    }) => number;
   };
 };
 
@@ -16,6 +23,33 @@ export const continuousEffectDefinitions = {
     description: 'This fighter cannot be attacked.',
     validate: {
       defend: () => false,
+    },
+  },
+  'precision-drills': {
+    description: 'This stack has +1 when being Attacked.',
+    apply: {
+      modifyCombatPower: ({
+        globalState,
+        card,
+        effectOwnerId,
+        attacker,
+        power,
+      }) => {
+        if (attacker) {
+          return power;
+        }
+        const board = globalState.board;
+        const coordinate = findCoordFromCard(board, card.instanceId);
+        if (!coordinate) {
+          console.error(`Card ${card.instanceId} not found on board`);
+          return power;
+        }
+        const stack = board[coordinate.y][coordinate.x];
+        if (stack.length > 1 && card.ownerId === effectOwnerId) {
+          return power + 1;
+        }
+        return power;
+      },
     },
   },
 } satisfies Record<string, ContinuousEffectDefinition>;

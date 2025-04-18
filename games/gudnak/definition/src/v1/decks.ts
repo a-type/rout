@@ -27,6 +27,7 @@ export const deckDefinitions: Record<string, DeckDefinition> = {
       'reposition',
       'forced-march',
       'rapid-deployment',
+      'precision-drills',
     ],
   },
 };

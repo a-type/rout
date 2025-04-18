@@ -313,7 +313,10 @@ export function validateMove(
     targetTopCard.continuousEffects.some((effect) => {
       const effectDef =
         continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
-      return effectDef.validate?.defend && !effectDef.validate.defend();
+      if ('validate' in effectDef && 'defend' in effectDef.validate) {
+        return !effectDef.validate.defend();
+      }
+      return true;
     })
   ) {
     reasons.push(INVALID_MOVE_CODES.CANT_BE_ATTACKED);
@@ -415,7 +418,7 @@ export function move(
     performMove = true;
   } else {
     // resolve combat
-    winner = resolveCombat(card, targetTopCard);
+    winner = resolveCombat(gameState, card, targetTopCard);
     if (winner && winner === card) {
       nextBoard = removeTopCard(nextBoard, target);
       if (getStack(nextBoard, target).length === 0) {
@@ -460,28 +463,55 @@ export function checkFatigue(card: Card) {
 }
 
 export function determineCombatPower(
+  gameState: GlobalState,
   isAttacker: boolean,
-  attacker: FighterCard,
-  defender: FighterCard,
+  attacker: Card,
+  defender: Card,
 ) {
-  const cardDefinition = isAttacker ? attacker : defender;
+  const attackerDef = cardDefinitions[
+    attacker.cardId as ValidCardId
+  ] as FighterCard;
+  const defenderDef = cardDefinitions[
+    defender.cardId as ValidCardId
+  ] as FighterCard;
+  const cardDefinition = isAttacker ? attackerDef : defenderDef;
+  if (!cardDefinition) {
+    throw new Error('Invalid card');
+  }
   const abilities = cardDefinition.abilities.map(
     (a) => abilityDefinitions[a.id],
   );
-  const power = abilities.reduce((acc, ability) => {
+  let power = abilities.reduce((acc, ability) => {
     if ('modifyCombatPower' in ability.effect) {
       return ability.effect.modifyCombatPower({
-        attacker,
-        defender,
+        attacker: attackerDef,
+        defender: defenderDef,
         basePower: acc,
       });
     }
     return acc;
   }, cardDefinition.power);
+  for (const effect of gameState.continuousEffects) {
+    const effectDef =
+      continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
+    if ('apply' in effectDef && 'modifyCombatPower' in effectDef.apply) {
+      power = effectDef.apply.modifyCombatPower({
+        globalState: gameState,
+        card: isAttacker ? attacker : defender,
+        effectOwnerId: effect.ownerId,
+        attacker: isAttacker,
+        power,
+      });
+    }
+  }
   return power;
 }
 
-export function resolveCombat(attacker: Card, defender: Card) {
+export function resolveCombat(
+  gameState: GlobalState,
+  attacker: Card,
+  defender: Card,
+) {
   const attackerDef = cardDefinitions[attacker.cardId as ValidCardId];
   const defenderDef = cardDefinitions[defender.cardId as ValidCardId];
   if (!attackerDef || !defenderDef) {
@@ -490,8 +520,18 @@ export function resolveCombat(attacker: Card, defender: Card) {
   if (attackerDef.kind !== 'fighter' || defenderDef.kind !== 'fighter') {
     throw new Error('Not a fighter');
   }
-  const attackerPower = determineCombatPower(true, attackerDef, defenderDef);
-  const defenderPower = determineCombatPower(false, attackerDef, defenderDef);
+  const attackerPower = determineCombatPower(
+    gameState,
+    true,
+    attacker,
+    defender,
+  );
+  const defenderPower = determineCombatPower(
+    gameState,
+    false,
+    attacker,
+    defender,
+  );
   if (attackerPower > defenderPower) {
     console.log('attacker wins');
     return attacker;

@@ -394,6 +394,28 @@ export const abilityDefinitions = {
       },
     },
   },
+  'precision-drills': {
+    type: 'tactic',
+    effect: {
+      modifyGameStateOnPlay({ globalState }) {
+        const newContinuousEffect: ContinuousEffect = {
+          description:
+            'Friendly fighters in stacks have +1 when being Attacked until your next turn.',
+          duration: 'owners-next-turn',
+          ownerId: globalState.currentPlayer,
+          id: 'precision-drills',
+        };
+
+        return {
+          ...globalState,
+          continuousEffects: [
+            ...globalState.continuousEffects,
+            newContinuousEffect,
+          ],
+        };
+      },
+    },
+  },
 } satisfies Record<string, AbilityDefinition>;
 
 export type ValidAbilityId = keyof typeof abilityDefinitions;

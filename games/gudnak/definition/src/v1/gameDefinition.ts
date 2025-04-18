@@ -99,6 +99,7 @@ export type GlobalState = {
   currentPlayer: string;
   actions: number;
   freeActions: FreeAction[];
+  continuousEffects: ContinuousEffect[];
 };
 
 export type PlayerState = {
@@ -296,6 +297,7 @@ export const gameDefinition: GameDefinition<
       currentPlayer: playerOrder[0],
       actions: 2,
       freeActions: [],
+      continuousEffects: [],
     };
 
     // shuffle decks and draw 5 cards for each player

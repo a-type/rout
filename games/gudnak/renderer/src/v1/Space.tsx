@@ -70,6 +70,7 @@ export function Space({
     >
       {topCard ? (
         <Card
+          stack={stack}
           selected={cardSelected}
           targeted={cardTargeted}
           info={cardState[topCard]}

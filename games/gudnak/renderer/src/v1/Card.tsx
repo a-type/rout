@@ -6,6 +6,7 @@ import {
   type TacticCard,
 } from '@long-game/game-gudnak-definition';
 import {
+  CardStack,
   ContinuousEffect,
   type Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
@@ -33,54 +34,78 @@ function FighterCard({
   selected,
   fatigued,
   continuousEffects,
+  cardStack,
   color,
 }: BaseCardProps & {
   cardData: FighterCard;
   continuousEffects?: ContinuousEffect[];
+  cardStack?: CardStack;
 }) {
+  const textColor = fatigued ? 'gray' : 'white';
   return (
-    <Box
-      className="w-full h-full"
-      border
-      p="md"
-      style={{
-        opacity: fatigued ? 0.6 : 1,
-        width: '150px',
-        height: '150px',
-        borderColor: color,
-        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    >
-      <Box className="flex flex-col">
-        <Box className="flex flex-row gap-2">
-          <Box className="flex flex-col">
-            <div>{cardData.power}</div>
-            {cardData.traits.map((trait) => (
-              <div key={trait} className="text-xs">
-                {traitToEmoji[trait]}
-              </div>
-            ))}
+    <>
+      <Box
+        className="w-full h-full"
+        border
+        p="md"
+        style={{
+          width: '150px',
+          height: '150px',
+          borderColor: color,
+          background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+          color: textColor,
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        <Box className="flex flex-col">
+          <Box className="flex flex-row gap-2">
+            <Box className="flex flex-col">
+              <div>{cardData.power}</div>
+              {cardData.traits.map((trait) => (
+                <div key={trait} className="text-xs">
+                  {traitToEmoji[trait]}
+                </div>
+              ))}
+            </Box>
+            <div>{cardData.name}</div>
           </Box>
-          <div>{cardData.name}</div>
+          <hr className="w-full" />
+          {cardData.abilities.map((ability, index) => (
+            <div key={index} className="text-xs">
+              <span className="font-bold">{ability.name}:&nbsp;</span>
+              <span>{ability.description}</span>
+            </div>
+          ))}
+          {continuousEffects?.map((effect, index) => (
+            <div key={index} className="text-xs">
+              <span>{effect.description}</span>
+            </div>
+          ))}
         </Box>
-        <hr className="w-full" />
-        {cardData.abilities.map((ability, index) => (
-          <div key={index} className="text-xs">
-            <span className="font-bold">{ability.name}:&nbsp;</span>
-            <span>{ability.description}</span>
-          </div>
-        ))}
-        {continuousEffects?.map((effect, index) => (
-          <div key={index} className="text-xs">
-            <span>{effect.description}</span>
-          </div>
-        ))}
       </Box>
-    </Box>
+      {cardStack &&
+        cardStack.length > 1 &&
+        Array.from({ length: cardStack.length - 1 }).map((_, idx) => (
+          <Box
+            className="flex flex-row gap-2 border"
+            border
+            key={idx}
+            style={{
+              marginLeft: '-3px',
+              width: '10px',
+              height: '150px',
+              borderColor: color,
+              background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              borderLeft: 'none',
+              borderTopLeftRadius: '0px',
+              borderBottomLeftRadius: '0px',
+            }}
+          ></Box>
+        ))}
+    </>
   );
 }
 
@@ -120,8 +145,10 @@ function TacticCard({
 
 export function Card({
   info,
+  stack,
   ...rest
 }: BaseCardProps & {
+  stack?: CardStack;
   info: CardType;
 }) {
   const { players } = useGameSuite();
@@ -139,6 +166,7 @@ export function Card({
   if (cardData.kind === 'fighter') {
     return (
       <FighterCard
+        cardStack={stack}
         cardData={cardData}
         color={color}
         fatigued={fatigued}
