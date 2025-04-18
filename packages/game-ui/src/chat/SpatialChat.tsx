@@ -103,7 +103,7 @@ const Chatbox = withGame<{
     />
   );
 
-  const isMobile = useMediaQuery('(max-width: 1024px)');
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
     <>

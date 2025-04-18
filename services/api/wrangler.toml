@@ -15,6 +15,8 @@ UI_ORIGIN = "https://play.rout.games"
 API_ORIGIN = "https://api.rout.games"
 NODE_ENV = "production"
 EMAIL_FROM = "noreply@rout.games"
+# ! removes some state constraints - like letting client see global state for debuggin
+DEV_MODE = false
 
 [[services]]
 binding = "PUBLIC_STORE"

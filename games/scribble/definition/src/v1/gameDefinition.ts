@@ -205,7 +205,7 @@ export const gameDefinition: GameDefinition<
       for (let i = 0; i < roundIndex - 1; i++) {
         const indexes = getPlayerSequenceIndexes({
           sequenceCount: globalState.sequences.length,
-          roundIndex: i,
+          roundIndex: i + 1,
           playerIndex,
         });
         for (const seqIndex of indexes) {

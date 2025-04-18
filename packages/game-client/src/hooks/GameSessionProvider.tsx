@@ -1,5 +1,6 @@
 import { PrefixedId } from '@long-game/common';
 import { GameDefinition } from '@long-game/game-definition';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { observer } from 'mobx-react-lite';
 import {
   ComponentType,
@@ -8,30 +9,17 @@ import {
   Suspense,
   use,
   useContext,
-  useRef,
+  useEffect,
+  useState,
 } from 'react';
-import {
-  createGameSessionSuite,
-  GameSessionSuite,
-} from '../state/gameSessionMobx';
+import { useSdk } from '../hooks';
+import { PublicSdk } from '../sdk';
+import { GameSessionSuite } from '../state/gameSessionMobx';
+import { connectToSocket } from '../state/socket';
 
 export const GameSessionContext = createContext<GameSessionSuite<any> | null>(
   null,
 );
-
-class PromiseWithCurrent<T> {
-  promise: Promise<T>;
-  current: T | null = null;
-
-  constructor(promise: Promise<T>) {
-    this.promise = promise;
-    promise.then((result) => {
-      this.current = result;
-    });
-  }
-}
-
-const stateCache: Map<PrefixedId<'gs'>, PromiseWithCurrent<any>> = new Map();
 
 export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
   Component: ComponentType<T & { gameSuite: GameSessionSuite<G> }>,
@@ -56,33 +44,39 @@ export function GameSessionProvider({
   gameSessionId: PrefixedId<'gs'>;
   children: ReactNode;
 }) {
-  const cached = stateCache.get(gameSessionId);
-  if (!cached?.current) {
-    if (cached) {
-      use(cached.promise);
-    } else {
-      const promise = createGameSessionSuite(gameSessionId);
-      stateCache.set(gameSessionId, new PromiseWithCurrent(promise));
-      use(promise);
-    }
-  }
+  const sdk = useSdk() as PublicSdk;
+  const { data: details } = useSuspenseQuery(
+    sdk.getGameSessionDetails({ id: gameSessionId }),
+  );
 
+  const [gameSuite, setGameSuite] = useState(
+    () =>
+      new GameSessionSuite(details, { socket: connectToSocket(details.id) }),
+  );
+  if (gameSuite.gameSessionId !== gameSessionId) {
+    setGameSuite(
+      new GameSessionSuite(details, {
+        socket: connectToSocket(details.id),
+      }),
+    );
+  }
+  useEffect(() => gameSuite.connect(), [gameSuite]);
   // for debugging
-  (window as any).gameSuite = cached?.current;
+  (window as any).gameSuite = gameSuite;
 
   return (
-    <GameSessionContext.Provider value={cached?.current}>
+    <GameSessionContext.Provider value={gameSuite}>
       <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
     </GameSessionContext.Provider>
   );
 }
 
 export function useGameSuite<TGame extends GameDefinition>() {
-  const suite = useRef(useContext(GameSessionContext));
-  if (!suite.current) {
+  const suite = useContext(GameSessionContext);
+  if (!suite) {
     throw new Error('GameSessionProvider not found');
   }
-  return suite.current as GameSessionSuite<TGame>;
+  return suite as GameSessionSuite<TGame>;
 }
 
 export function useChat() {

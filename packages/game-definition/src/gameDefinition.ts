@@ -148,6 +148,7 @@ export type RoundIndexDecider<
   startedAt: Date;
   currentTime: Date;
   gameTimeZone: string;
+  globalState: GlobalState;
 }) => {
   roundIndex: number;
   /**

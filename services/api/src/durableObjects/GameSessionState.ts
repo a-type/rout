@@ -81,6 +81,7 @@ type SocketSessionInfo = {
  * seed, the turns applied, and the canonical game members.
  */
 export class GameSessionState extends DurableObject<ApiBindings> {
+  // storage backed fields
   #sessionData: GameSessionBaseData | null = null;
   #turns: GameSessionTurn[] = [];
   #chat: GameSessionChatMessage[] = [];
@@ -88,7 +89,11 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     roundIndex: 0,
     playersNotified: {},
   };
+
+  // a little Hono instance to handle requests
   #miniApp;
+
+  // memory fields
   #socketInfo = new Map<WebSocket, SocketSessionInfo>();
   // map of socket id -> messages waiting to be sent until socket is confirmed
   #messageBacklogs = new Map<string, ServerMessage[]>();
@@ -232,6 +237,12 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     return gameDefinition;
   }
 
+  private get orderedMembers() {
+    return (this.#sessionData?.members ?? []).sort((a, b) =>
+      a.id.localeCompare(b.id),
+    );
+  }
+
   private setSessionData(data: Partial<GameSessionBaseData>) {
     if (!this.#sessionData) {
       throw new LongGameError(
@@ -292,7 +303,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     });
     this.#sendSocketMessage({
       type: 'membersChange',
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
     });
   }
 
@@ -364,24 +375,40 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     return Boolean(this.#sessionData);
   }
 
+  #getCurrentRoundState() {
+    if (!this.#sessionData?.startedAt) {
+      return {
+        roundIndex: 0,
+        pendingTurns: [],
+        checkAgainAt: null,
+      };
+    }
+    const latestRoundFromTurns = Math.max(
+      0,
+      ...this.#turns.map((t) => t.roundIndex),
+    );
+    return this.gameDefinition.getRoundIndex({
+      currentTime: new Date(),
+      gameTimeZone: this.#sessionData.timezone,
+      members: this.orderedMembers,
+      startedAt: this.#sessionData.startedAt,
+      turns: this.#turns,
+      // WARNING: do not remove parameter.
+      // providing a set index here prevents recursion (by default
+      // getGlobalStateUnchecked uses this method, getCurrentRoundIndex)
+      globalState: this.#getGlobalStateUnchecked(latestRoundFromTurns),
+    });
+  }
   /**
+   * Computed method! Store the returned value if possible for reuse.
    * Returns the active round index. 0 is the first round.
    * Note that despite this value being the current round,
    * all information delivered to the player should use
    * getPublicRoundIndex, which is 1 behind. The current round
    * will include submitted turns before the round is complete.
    */
-  getCurrentRoundIndex(): number {
-    if (!this.#sessionData?.startedAt) {
-      return 0;
-    }
-    return this.gameDefinition.getRoundIndex({
-      currentTime: new Date(),
-      gameTimeZone: this.#sessionData.timezone,
-      members: this.#sessionData.members,
-      startedAt: this.#sessionData.startedAt,
-      turns: this.#turns,
-    }).roundIndex;
+  getCurrentRoundIndex() {
+    return this.#getCurrentRoundState().roundIndex;
   }
 
   getPublicRoundIndex(): number {
@@ -418,22 +445,42 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   }
 
   /**
+   * Returns all PRIVATE turns for the game session. This is privileged
+   * info only externally accessible in dev mode.
+   */
+  getTurns() {
+    if (!this.#sessionData) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Session data not initialized',
+      );
+    }
+    if (!this.env.DEV_MODE) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot access private turns outside of dev mode',
+      );
+    }
+    return this.#turns;
+  }
+
+  /**
    * Get the public state for a particular player at a particular round.
    * Defaults to current round.
    */
   getPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number): any {
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex && roundIndex >= currentRoundIndex) {
+    if (roundIndex && roundIndex >= currentRoundIndex && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
       );
     }
-    return this.#internalGetPlayerState(playerId, roundIndex);
+    return this.getPlayerStateUnchecked(playerId, roundIndex);
   }
 
   // unvalidated versions
-  #internalGetPlayerState(playerId: PrefixedId<'u'>, roundIndex?: number) {
+  getPlayerStateUnchecked(playerId: PrefixedId<'u'>, roundIndex?: number) {
     if (!this.#sessionData) {
       throw new Error('Session data not initialized');
     }
@@ -447,7 +494,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     return this.gameDefinition.getPlayerState({
       globalState,
       playerId,
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
       rounds,
       roundIndex: rounds.length,
       playerTurn,
@@ -482,7 +529,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     roundIndex: number,
   ): GameRoundSummary<{}, {}, {}> {
     const currentRoundIndex = this.getCurrentRoundIndex();
-    if (roundIndex > currentRoundIndex) {
+    if (roundIndex > currentRoundIndex && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot access current or future round states. Play your turn to see what comes next!',
@@ -490,7 +537,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
     const round = this.getRound(roundIndex);
     const globalState = this.#getGlobalStateUnchecked(roundIndex);
-    const playerState = this.#internalGetPlayerState(playerId, roundIndex - 1);
+    const playerState = this.getPlayerStateUnchecked(playerId, roundIndex - 1);
     return {
       ...round,
       initialPlayerState: playerState as {},
@@ -525,7 +572,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     const computed = getGameState(this.gameDefinition, {
       rounds,
       randomSeed: this.#sessionData.randomSeed,
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
     });
     return computed;
   }
@@ -540,7 +587,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Session data not initialized',
       );
     }
-    if (this.getStatus().status !== 'completed') {
+    if (this.getStatus().status !== 'completed' && !this.env.DEV_MODE) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Game session has not ended yet',
@@ -599,18 +646,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
    * schedule notifications to players.
    */
   #sendOrScheduleNotifications = async () => {
-    // TODO: consolidate
-    const roundState = this.gameDefinition.getRoundIndex({
-      currentTime: new Date(),
-      gameTimeZone: this.#sessionData?.timezone ?? 'UTC',
-      members: this.#sessionData?.members ?? [],
-      startedAt: this.#sessionData?.startedAt ?? new Date(),
-      turns: this.#turns,
-    });
-    const newRoundIndex = roundState.roundIndex;
-    if (newRoundIndex !== this.#notifications.roundIndex) {
+    const roundState = this.#getCurrentRoundState();
+    if (roundState.roundIndex !== this.#notifications.roundIndex) {
       // reset notifications state
-      this.#notifications.roundIndex = newRoundIndex;
+      this.#notifications.roundIndex = roundState.roundIndex;
       this.#notifications.playersNotified = {};
     }
     // check if we need to notify players
@@ -697,7 +736,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
 
     const validationError = this.gameDefinition.validateTurn({
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
       turn: {
         data: turn,
         playerId,
@@ -806,7 +845,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     // that met conditions. this way we wait for the round to complete.
     return this.gameDefinition.getStatus({
       globalState: this.#getGlobalStateUnchecked(),
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
       rounds: this.getRounds({ upTo: publicRoundIndex }),
     });
   }
@@ -823,7 +862,9 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       status: this.getStatus(),
       gameId: this.#sessionData.gameId,
       gameVersion: this.#sessionData.gameVersion,
-      members: this.#sessionData.members,
+      members: this.orderedMembers,
+      startedAt: this.#sessionData.startedAt?.getTime() ?? 0,
+      timezone: this.#sessionData.timezone,
     };
   }
 
