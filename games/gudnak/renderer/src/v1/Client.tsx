@@ -15,12 +15,13 @@ export function Client() {
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const { prepareTurn, finalState, turnError, localTurnData } = gameSuite;
+  console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
 
   return (
     <Box className="w-full h-full mt-10 flex flex-col p-5 gap-2">
-      <Box className="flex flex-row gap-2">
+      <Box className="flex flex-row gap-2 overflow-y-scroll">
         {hand.map((card, index) => (
           <Card
             selected={action.selection.card?.instanceId === card.instanceId}

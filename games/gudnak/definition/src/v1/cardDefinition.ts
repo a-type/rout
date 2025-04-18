@@ -263,6 +263,22 @@ export const cardDefinitions = {
     ability:
       'Deploy up to 4 fighters (following the rules for the Deploy action).',
   },
+  'battle-cleric-of-solara': {
+    kind: 'fighter',
+    name: 'Battle Cleric of Solara',
+    power: 1,
+    traits: ['hero', 'soldier'],
+    faction: 'refractory',
+    abilities: [
+      {
+        id: 'brilliant-blessing',
+        name: 'Brilliant Blessing',
+        type: 'action',
+        description:
+          'Target other friendly fighter cannot be Attacked until your next turn.',
+      },
+    ],
+  },
 } satisfies Record<string, CardDefinition>;
 
 export type ValidCardId = keyof typeof cardDefinitions;

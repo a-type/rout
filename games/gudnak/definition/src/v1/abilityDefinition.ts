@@ -1,11 +1,6 @@
 import { FighterCard } from './cardDefinition';
-import {
-  Board,
-  Card,
-  Coordinate,
-  FreeAction,
-  GlobalState,
-} from './gameDefinition';
+import { ValidContinuousEffectKey } from './continuousEffectDefinitions';
+import { Board, Card, FreeAction, GlobalState } from './gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -17,7 +12,7 @@ import {
   getAllBoardCoordinates,
   getTopCard,
   move,
-  findCoordFromCard,
+  addContinuousEffectToCard,
 } from './gameStateHelpers';
 
 type FighterEffect = {
@@ -101,6 +96,15 @@ export type TacticAbility = {
 export type AbilityDefinition = FighterAbility | TacticAbility;
 
 export type EffectType = keyof AbilityDefinition['effect'];
+
+// TODO: Consider renaming ability effects
+export type ContinuousEffect = {
+  description: string;
+  // TODO: Consider adding source
+  duration: 'end-of-turn' | 'owners-next-turn';
+  ownerId: string;
+  id: ValidContinuousEffectKey;
+};
 
 export const abilityDefinitions = {
   'superior-coordination': {
@@ -319,11 +323,13 @@ export const abilityDefinitions = {
     input: {
       targets: [
         {
+          // TODO: Validate adjacency
           description: 'Choose adjacent fighter',
           type: 'coordinate',
           controller: 'player',
         },
         {
+          // TODO: Validate adjacency to first target
           description: 'Choose target coordinate',
           type: 'coordinate',
           controller: 'player',
@@ -347,6 +353,44 @@ export const abilityDefinitions = {
           target2 as CoordinateTarget,
         );
         return globalState;
+      },
+    },
+  },
+  'brilliant-blessing': {
+    name: 'Brilliant Blessing',
+    type: 'active',
+    description:
+      'Target other friendly fighter cannot be Attacked until your next turn.',
+    input: {
+      targets: [
+        {
+          type: 'card',
+          controller: 'player',
+          description: 'Choose another target fighter',
+        },
+      ],
+    },
+    effect: {
+      modifyGameStateOnActivate: ({ globalState, input }) => {
+        const target = input.targets[0];
+        if (target.kind !== 'card') {
+          throw new Error('Invalid target');
+        }
+        const targetCard = globalState.cardState[target.instanceId];
+        if (!targetCard) {
+          throw new Error('Invalid target card');
+        }
+        const newContinuousEffect: ContinuousEffect = {
+          description: "Can't be attacked until owner's next turn",
+          duration: 'owners-next-turn',
+          ownerId: targetCard.ownerId,
+          id: 'cant-be-attacked',
+        };
+        return addContinuousEffectToCard(
+          globalState,
+          targetCard.instanceId,
+          newContinuousEffect,
+        );
       },
     },
   },

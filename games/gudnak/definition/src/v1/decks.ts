@@ -21,6 +21,7 @@ export const deckDefinitions: Record<string, DeckDefinition> = {
       'bullgryff-rider',
       'bullgryff',
       'standardbearer',
+      'battle-cleric-of-solara',
       // tactics
       'tempo',
       'reposition',

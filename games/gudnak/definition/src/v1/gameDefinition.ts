@@ -1,13 +1,15 @@
 import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import {
   abilityDefinitions,
+  ContinuousEffect,
   EffectInput,
   Target,
   ValidAbilityId,
 } from './abilityDefinition';
-import { cardDefinitions, FighterCard, ValidCardId } from './cardDefinition';
+import { cardDefinitions, ValidCardId } from './cardDefinition';
 import { deckDefinitions } from './decks';
 import {
+  applyFatigue,
   clearFreeActions,
   deploy,
   draw,
@@ -20,6 +22,7 @@ import {
   mill,
   move,
   playTactic,
+  removeTurnBasedContinuousEffects,
   shuffleDeck,
   spendActions,
   spendFreeAction,
@@ -46,6 +49,7 @@ export type Card = {
   instanceId: string;
   ownerId: string;
   fatigued: boolean;
+  continuousEffects: ContinuousEffect[];
 };
 export type CardStack = string[];
 export type Board = CardStack[][];
@@ -272,11 +276,12 @@ export const gameDefinition: GameDefinition<
       ),
       cardState,
       playerState: members.reduce((acc, member, idx) => {
-        const cards = [...deckDefinitions.deck1.list].map((id) => ({
+        const cards: Card[] = [...deckDefinitions.deck1.list].map((id) => ({
           cardId: id,
           instanceId: random.id(),
           ownerId: member.id,
           fatigued: false,
+          continuousEffects: [],
         }));
         cards.forEach((card) => (cardState[card.instanceId] = card));
         acc[member.id] = {
@@ -386,8 +391,10 @@ export const gameDefinition: GameDefinition<
               input: { targets: action.targets },
             });
           }
+          globalState = applyFatigue(globalState, action.cardInstanceId);
           globalState = spendActions(globalState);
           globalState = clearFreeActions(globalState);
+          break;
         }
         case 'endTurn': {
           globalState = clearFreeActions(globalState);
@@ -413,6 +420,10 @@ export const gameDefinition: GameDefinition<
               ]),
             ),
           };
+          globalState = removeTurnBasedContinuousEffects(
+            globalState,
+            nextPlayer,
+          );
 
           const siegeLocation = getGatesCoord(
             globalState.playerState[nextPlayer].side,

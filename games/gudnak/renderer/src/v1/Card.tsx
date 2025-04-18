@@ -5,7 +5,10 @@ import {
   type FighterCard,
   type TacticCard,
 } from '@long-game/game-gudnak-definition';
-import { type Card as CardType } from '@long-game/game-gudnak-definition/v1';
+import {
+  ContinuousEffect,
+  type Card as CardType,
+} from '@long-game/game-gudnak-definition/v1';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -29,8 +32,12 @@ function FighterCard({
   onClick,
   selected,
   fatigued,
+  continuousEffects,
   color,
-}: BaseCardProps & { cardData: FighterCard }) {
+}: BaseCardProps & {
+  cardData: FighterCard;
+  continuousEffects?: ContinuousEffect[];
+}) {
   return (
     <Box
       className="w-full h-full"
@@ -65,6 +72,11 @@ function FighterCard({
           <div key={index} className="text-xs">
             <span className="font-bold">{ability.name}:&nbsp;</span>
             <span>{ability.description}</span>
+          </div>
+        ))}
+        {continuousEffects?.map((effect, index) => (
+          <div key={index} className="text-xs">
+            <span>{effect.description}</span>
           </div>
         ))}
       </Box>
@@ -113,7 +125,7 @@ export function Card({
   info: CardType;
 }) {
   const { players } = useGameSuite();
-  const { cardId, ownerId, fatigued } = info;
+  const { cardId, ownerId, fatigued, continuousEffects } = info;
   // @ts-expect-error Fix this up
   const player: PlayerInfo = players[ownerId];
   const { color } = player ?? { color: 'black' };
@@ -130,6 +142,7 @@ export function Card({
         cardData={cardData}
         color={color}
         fatigued={fatigued}
+        continuousEffects={continuousEffects}
         {...rest}
       />
     );

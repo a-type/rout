@@ -16,6 +16,7 @@ import type {
   PlayerState,
   FreeAction,
   Action,
+  ContinuousEffect,
 } from './gameDefinition';
 import {
   abilityDefinitions,
@@ -24,6 +25,10 @@ import {
   Target,
   ValidAbilityId,
 } from './abilityDefinition';
+import {
+  continuousEffectDefinitions,
+  ValidContinuousEffectKey,
+} from './continuousEffectDefinitions';
 
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {
@@ -238,6 +243,7 @@ export const INVALID_MOVE_CODES = {
   NOT_TOP_CARD: 'Invalid source (not top card)',
   NO_TARGET: 'Invalid target (no top card)',
   SAME_OWNER: 'Invalid target (same owner)',
+  CANT_BE_ATTACKED: 'Invalid target (cannot be attacked)',
 } as const;
 
 type InvalidMoveCode = keyof typeof INVALID_MOVE_CODES;
@@ -301,6 +307,16 @@ export function validateMove(
   }
   if (checkFatigue(card)) {
     reasons.push(INVALID_MOVE_CODES.FATIGUED);
+  }
+
+  if (
+    targetTopCard.continuousEffects.some((effect) => {
+      const effectDef =
+        continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
+      return effectDef.validate?.defend && !effectDef.validate.defend();
+    })
+  ) {
+    reasons.push(INVALID_MOVE_CODES.CANT_BE_ATTACKED);
   }
 
   const abilities = cardDef.abilities.map((a) => abilityDefinitions[a.id]);
@@ -418,14 +434,12 @@ export function move(
     nextBoard[targetY][targetX] = sourceStack;
   }
 
-  return {
+  gameState = {
     ...gameState,
-    cardState: {
-      ...gameState.cardState,
-      [cardInstanceId]: { ...card, fatigued: true },
-    },
     board: nextBoard,
   };
+  gameState = applyFatigue(gameState, cardInstanceId);
+  return gameState;
 }
 
 export function checkFatigue(card: Card) {
@@ -715,4 +729,66 @@ export function getAllBoardCoordinates(board: Board): Coordinate[] {
     }
   }
   return coordinates;
+}
+
+export function addContinuousEffectToCard(
+  gameState: GlobalState,
+  cardInstanceId: string,
+  effect: ContinuousEffect,
+): GlobalState {
+  return {
+    ...gameState,
+    cardState: {
+      ...gameState.cardState,
+      [cardInstanceId]: {
+        ...gameState.cardState[cardInstanceId],
+        continuousEffects: [
+          ...gameState.cardState[cardInstanceId].continuousEffects,
+          effect,
+        ],
+      },
+    },
+  };
+}
+
+export function removeTurnBasedContinuousEffects(
+  gameState: GlobalState,
+  nextTurnOwnerId: string,
+): GlobalState {
+  return {
+    ...gameState,
+    cardState: Object.fromEntries(
+      Object.entries(gameState.cardState).map(([id, card]) => [
+        id,
+        {
+          ...card,
+          continuousEffects: card.continuousEffects?.filter((e) => {
+            if (e.duration === 'end-of-turn') {
+              return false;
+            }
+            if (e.duration === 'owners-next-turn') {
+              return e.ownerId !== nextTurnOwnerId;
+            }
+            return true;
+          }),
+        },
+      ]),
+    ),
+  };
+}
+
+export function applyFatigue(
+  gameState: GlobalState,
+  cardInstanceId: string,
+): GlobalState {
+  return {
+    ...gameState,
+    cardState: {
+      ...gameState.cardState,
+      [cardInstanceId]: {
+        ...gameState.cardState[cardInstanceId],
+        fatigued: true,
+      },
+    },
+  };
 }
