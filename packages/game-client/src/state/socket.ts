@@ -10,7 +10,7 @@ import { apiRpc } from './api';
 
 export type GameSocket = Awaited<ReturnType<typeof connectToSocket>>;
 
-export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
+export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   const socketOrigin = import.meta.env.VITE_PUBLIC_API_ORIGIN.replace(
     /^http/,
     'ws',
@@ -72,16 +72,25 @@ export async function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     unsubRootMessages();
   }
 
-  setInterval(() => {
-    send({ type: 'ping' });
-  }, 10000);
-  send({ type: 'ping' });
+  function disconnect() {
+    websocket.close();
+  }
+
+  function reconnect() {
+    websocket.reconnect();
+    return () => {
+      websocket.close();
+    };
+  }
 
   return {
     send,
     request,
     subscribe,
     unsubscribeAll,
+    disconnect,
+    reconnect,
+    id: websocket.id,
   };
 }
 
@@ -104,20 +113,32 @@ class ReconnectingWebsocket {
   private messageEvents = new EventTarget();
   private errorEvents = new EventTarget();
   private backlog: string[] = [];
-
-  constructor(private url: string, private gameSessionId: string) {
-    this.reconnect();
+  #id = Math.random().toString(36).slice(2);
+  get id() {
+    return this.#id;
   }
+  #status: 'closed' | 'open' | 'reconnecting' = 'closed';
+  get status() {
+    return this.#status;
+  }
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private abortReconnect = false;
 
-  send(message: string) {
+  constructor(private url: string, private gameSessionId: string) {}
+
+  send = (message: string) => {
+    if (this.#status === 'closed') {
+      console.log('Socket closed, cannot send', this.#id);
+      return;
+    }
     if (this.websocket?.readyState === WebSocket.OPEN) {
       this.websocket.send(message);
     } else {
       this.backlog.push(message);
     }
-  }
+  };
 
-  onMessage(handler: (event: ServerMessage) => void) {
+  onMessage = (handler: (event: ServerMessage) => void) => {
     function wrappedHandler(event: Event) {
       if (event instanceof MessageEvent) {
         const msg = JSON.parse(event.data) as ServerMessage;
@@ -128,39 +149,90 @@ class ReconnectingWebsocket {
     return () => {
       this.messageEvents.removeEventListener('message', wrappedHandler);
     };
-  }
+  };
 
-  onError(handler: (event: Event) => void) {
+  onError = (handler: (event: Event) => void) => {
     this.errorEvents.addEventListener('error', handler);
     return () => {
       this.errorEvents.removeEventListener('error', handler);
     };
-  }
+  };
 
-  close() {
-    this.websocket?.close();
-  }
+  close = () => {
+    if (this.#status === 'reconnecting') {
+      console.log('Socket waiting for connect before close', this.#id);
+      // wait for connection before closing
+      this.abortReconnect = true;
+    } else {
+      if (this.reconnectTimeout) {
+        clearTimeout(this.reconnectTimeout);
+        this.reconnectTimeout = null;
+      }
+      console.log('Socket closing', this.#id);
+      this.websocket?.close(1000, 'Closed by user');
+    }
+  };
 
-  async reconnect() {
+  reconnect = async () => {
+    if (this.abortReconnect) {
+      console.log('Cancelling abort due to explicit reconnect', this.#id);
+      this.abortReconnect = false;
+    }
+    if (this.#status === 'reconnecting') {
+      return;
+    }
+    this.#status = 'reconnecting';
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
     const token = await getSocketToken(this.gameSessionId);
     const url = new URL(this.url);
     url.searchParams.set('token', token);
+    this.websocket?.close(1000, 'Forced reconnect');
     const websocket = (this.websocket = new WebSocket(url));
+
+    let pingInterval: ReturnType<typeof setInterval> | null = null;
+
     websocket.addEventListener('open', () => {
-      console.log('Socket connected');
+      if (this.abortReconnect) {
+        console.log('Socket closed during [re]connect', this.#id);
+        this.abortReconnect = false;
+        websocket.close(1000, 'Closed during reconnect');
+        return;
+      }
+
+      console.log('Socket connected', this.#id);
+      this.#status = 'open';
+
+      websocket.send(JSON.stringify({ type: 'ping' }));
+      pingInterval = setInterval(() => {
+        websocket.send(JSON.stringify({ type: 'ping' }));
+      }, 10000);
+
       if (this.backlog.length) {
         this.backlog.forEach((msg) => websocket.send(msg));
         this.backlog = [];
       }
     });
     websocket.addEventListener('close', (ev) => {
+      this.#status = 'closed';
+      if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+      }
       if (ev.code === 1000) {
+        console.log('Socket closed normally', this.#id, ev.code, ev.reason);
         return;
       }
 
-      setTimeout(() => {
-        this.reconnect();
-      }, 3000);
+      console.log(
+        'Socket closed, reconnecting in 3s...',
+        this.#id,
+        'code',
+        ev.code,
+        ev.reason,
+      );
+      this.reconnectTimeout = setTimeout(this.reconnect, 3000);
     });
     websocket.addEventListener('message', (event) => {
       this.messageEvents.dispatchEvent(
@@ -170,6 +242,7 @@ class ReconnectingWebsocket {
       );
     });
     websocket.addEventListener('error', (event) => {
+      console.error('Socket error', this.#id, event);
       const err =
         event instanceof ErrorEvent ? event.error : new Error('Unknown error');
       this.errorEvents.dispatchEvent(
@@ -178,5 +251,5 @@ class ReconnectingWebsocket {
         }),
       );
     });
-  }
+  };
 }

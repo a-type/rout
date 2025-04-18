@@ -76,3 +76,14 @@ export async function getPostgame(gameSessionId: PrefixedId<'gs'>) {
   }
   return (await res.json()) as { globalState: any; rounds: any[] };
 }
+
+// only works in DEV_MODE. returns raw private turn data
+export async function getDevModeTurns(gameSessionId: PrefixedId<'gs'>) {
+  const res = await apiRpc.gameSessions[':id'].turns.$get({
+    param: { id: gameSessionId },
+  });
+  if (!res.ok) {
+    throw new LongGameError(LongGameError.Code.Unknown, 'Failed to get turns');
+  }
+  return await res.json();
+}

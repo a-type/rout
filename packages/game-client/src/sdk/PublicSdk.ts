@@ -132,6 +132,13 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
+  getGameSessionDetails = this.sdkQuery(
+    'getGameSessionDetails',
+    this.apiRpc.gameSessions[':id'].$get,
+    {
+      transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+    },
+  );
   getGameSessionSummary = this.sdkQuery(
     'getGameSessionSummary',
     this.apiRpc.gameSessions[':id'].summary.$get,

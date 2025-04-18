@@ -140,6 +140,12 @@ export const gameSessionRouter = new Hono<Env>()
       rounds: wrapRpcData(rounds),
     });
   })
+  // dev mode only
+  .get('/turns', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    const turns = await state.getTurns();
+    return ctx.json(wrapRpcData(turns));
+  })
   .get(
     '/rounds/:index',
     zValidator(

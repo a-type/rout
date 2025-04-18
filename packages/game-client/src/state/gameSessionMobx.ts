@@ -21,8 +21,14 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
-import { getPlayers, getPostgame, getPublicRound, getSummary } from './api.js';
-import { connectToSocket, GameSocket } from './socket.js';
+import {
+  getDevModeTurns,
+  getPlayers,
+  getPostgame,
+  getPublicRound,
+  getSummary,
+} from './api.js';
+import { GameSocket } from './socket.js';
 
 export type PlayerInfo = {
   id: PrefixedId<'u'>;
@@ -32,6 +38,7 @@ export type PlayerInfo = {
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
+  #instanceId = Math.random().toString(36).slice(2);
   @observable accessor localTurnData!: GetTurnData<TGame> | null;
   @observable accessor playerStatuses!: Record<
     PrefixedId<'u'>,
@@ -56,6 +63,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   gameDefinition!: TGame;
   members!: { id: PrefixedId<'u'> }[];
   playerId: PrefixedId<'u'>;
+  startedAt!: Date;
+  timezone!: string;
 
   // non-reactive
   #chatNextToken: string | null = null;
@@ -75,23 +84,50 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       members: { id: PrefixedId<'u'> }[];
       status: GameStatus;
       playerId: PrefixedId<'u'>;
+      startedAt: number;
+      timezone: string;
     },
     private ctx: {
       socket: GameSocket;
     },
   ) {
+    console.trace(
+      'GameSessionSuite constructor',
+      this.#instanceId,
+      'socket',
+      ctx.socket.id,
+    );
     this.playerId = init.playerId;
     this.gameSessionId = init.id;
 
     this.applyGameData(init);
 
-    this.connectSocket(ctx.socket);
+    this.subscribeSocket();
     this.setupLocalTurnStorage();
 
     if (init.status.status === 'completed') {
       this.loadPostgame();
     }
   }
+
+  connect = () => {
+    console.log(
+      'connecting...',
+      this.#instanceId,
+      'socket',
+      this.ctx.socket.id,
+    );
+    return this.ctx.socket.reconnect();
+  };
+  disconnect = () => {
+    console.log(
+      'disconnecting...',
+      this.#instanceId,
+      'socket',
+      this.ctx.socket.id,
+    );
+    this.ctx.socket.disconnect();
+  };
 
   @computed get viewingRound() {
     return this.rounds[this.viewingRoundIndex];
@@ -323,13 +359,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.viewingRoundIndex = roundIndex;
   };
 
-  private connectSocket = (socket: GameSocket) => {
-    socket.subscribe('chat', this.onChat);
-    socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
-    socket.subscribe('roundChange', this.onRoundChange);
-    socket.subscribe('statusChange', this.onStatusChange);
-    socket.subscribe('gameChange', this.onGameChange);
-    socket.subscribe('membersChange', this.onMembersChange);
+  private subscribeSocket = () => {
+    this.ctx.socket.subscribe('chat', this.onChat);
+    this.ctx.socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
+    this.ctx.socket.subscribe('roundChange', this.onRoundChange);
+    this.ctx.socket.subscribe('statusChange', this.onStatusChange);
+    this.ctx.socket.subscribe('gameChange', this.onGameChange);
+    this.ctx.socket.subscribe('membersChange', this.onMembersChange);
   };
 
   private onChat = (msg: ServerChatMessage) => {
@@ -422,6 +458,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     gameVersion: string;
     status: GameStatus;
     members: { id: PrefixedId<'u'> }[];
+    startedAt: number;
+    timezone: string;
   }) => {
     this.gameDefinition = games[init.gameId].versions.find(
       (v) => v.version === init.gameVersion,
@@ -441,6 +479,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.gameVersion = init.gameVersion;
     this.members = init.members;
     this.gameStatus = init.status;
+    this.startedAt = new Date(init.startedAt);
+    this.timezone = init.timezone;
     this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
       (acc, member) => {
         acc[member.id] = {
@@ -493,6 +533,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       currentTurn: toJS(this.currentTurn),
       viewingTurn: toJS(this.viewingTurn),
       globalState: toJS(this.postgameGlobalState),
+      turns: await getDevModeTurns(this.gameSessionId),
     };
     // remove functions
     for (const key in debugValue) {
@@ -500,25 +541,19 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         delete debugValue[key];
       }
     }
+    // add helpers
+    debugValue.getRoundIndex = () =>
+      this.gameDefinition.getRoundIndex({
+        currentTime: new Date(),
+        startedAt: this.startedAt,
+        gameTimeZone: this.timezone,
+        members: debugValue.members,
+        globalState: debugValue.globalState,
+        turns: debugValue.turns,
+      });
     console.log(debugValue);
-    (window as any).gameSuiteRaw = debugValue;
-    console.log('Assigned above to window.gameSuiteRaw');
-  };
-}
 
-export async function createGameSessionSuite<TGame extends GameDefinition>(
-  gameSessionId: PrefixedId<'gs'>,
-): Promise<GameSessionSuite<TGame>> {
-  const init = await getSummary(gameSessionId);
-  const socket = await connectToSocket(gameSessionId);
-  return new GameSessionSuite(
-    {
-      ...init,
-      // some of the typings break - basically ones which have generics/any in them
-      playerState: init.playerState as any,
-      currentRound: init.currentRound as any,
-      playerId: init.playerId,
-    },
-    { socket },
-  );
+    (window as any).gameSuiteRaw = debugValue;
+    console.log('Assigned above to window.gameSuiteRaw for further use');
+  };
 }
