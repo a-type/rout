@@ -120,15 +120,17 @@ export type TurnData = {
 };
 
 function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
-  return ({ turns, members }) => {
+  return ({ turns, members, globalState }) => {
     // rounds advance when any player goes
     // requires us to validate active player in turn validation
     const maxRoundIndex = turns.reduce((max, turn) => {
       return Math.max(max, turn.roundIndex);
     }, 0);
 
-    // TODO: Fix pending turns
-    return { roundIndex: maxRoundIndex + 1, pendingTurns: [] };
+    return {
+      roundIndex: maxRoundIndex + 1,
+      pendingTurns: [globalState.currentPlayer as `u-${string}`],
+    };
   };
 }
 
