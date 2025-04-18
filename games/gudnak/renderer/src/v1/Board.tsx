@@ -4,18 +4,22 @@ import type {
   Board,
   PlayerState,
   Card as CardType,
+  Target,
 } from '@long-game/game-gudnak-definition/v1';
 import { Space } from './Space';
 import { useGameSuite } from '@long-game/game-client';
+import { Selection } from './useSelect';
 
 export function Board({
   state,
-  selectedSpace,
+  selection,
+  targets,
   onClick,
   onClickCard,
 }: {
   state: Board;
-  selectedSpace: Coordinate | null;
+  selection: Selection;
+  targets: Target[];
   onClick?: (coord: Coordinate) => void;
   onClickCard?: (card: CardType) => void;
 }) {
@@ -36,10 +40,9 @@ export function Board({
               <Space
                 key={columnIndex}
                 stack={space}
-                selected={
-                  selectedSpace?.x === columnIndex &&
-                  selectedSpace?.y === rowIndex
-                }
+                coordinate={{ x: columnIndex, y: rowIndex }}
+                selection={selection}
+                targets={targets}
                 ownerId={ownerId}
                 isGate={isGate}
                 onClick={() => {

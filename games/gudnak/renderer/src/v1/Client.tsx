@@ -70,7 +70,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         <span>{JSON.stringify(localTurnData)}</span>
       </Box>
       <Board
-        selectedSpace={action.selection.coordinate}
+        selection={action.selection.item}
+        targets={action.targeting.chosen}
         state={board}
         onClick={(coord) => {
           if (

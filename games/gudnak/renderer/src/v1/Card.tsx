@@ -18,6 +18,7 @@ const traitToEmoji: Record<string, string> = {
 
 type BaseCardProps = {
   selected?: boolean;
+  targeted?: boolean;
   fatigued?: boolean;
   color?: string;
   onClick?: () => void;

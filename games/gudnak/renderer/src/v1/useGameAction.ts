@@ -20,21 +20,26 @@ export function useGameAction() {
     const cardDef = cardDefinitions[card.cardId as ValidCardId];
     if (cardDef.kind === 'tactic') {
       const abilityDef = abilityDefinitions[card.cardId as ValidAbilityId];
-      const turn = {
-        action: {
-          type: 'tactic',
-          card,
-          input: { targets: targeting.chosen },
-        },
-      } as const;
       if ('input' in abilityDef) {
         const targetInputs = abilityDef.input.targets;
         targeting.begin(targetInputs);
-        targeting.onTargetsComplete(() => {
-          prepareTurn(turn);
+        targeting.onTargetsComplete((targets) => {
+          prepareTurn({
+            action: {
+              type: 'tactic',
+              card,
+              input: { targets },
+            },
+          });
         });
       } else {
-        prepareTurn(turn);
+        prepareTurn({
+          action: {
+            type: 'tactic',
+            card,
+            input: { targets: targeting.chosen },
+          },
+        });
       }
     } else {
       targeting.begin([
@@ -92,6 +97,10 @@ export function useGameAction() {
       abilityDefinitions[cardDef.abilities[0].id as ValidAbilityId];
     if (!abilityDef) {
       console.error(`Ability ${card.cardId} not found`);
+      return;
+    }
+    if (abilityDef.type !== 'active') {
+      console.error(`Ability ${card.cardId} is not active`);
       return;
     }
     if ('input' in abilityDef) {
