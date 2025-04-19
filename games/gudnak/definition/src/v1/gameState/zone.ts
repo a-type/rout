@@ -1,5 +1,24 @@
 import { GameRandom } from '@long-game/game-definition';
 import type { Card, GlobalState } from '../gameDefinition';
+import { E } from 'vitest/dist/chunks/reporters.0x019-V2.js';
+
+export function addToDeck(globalState: GlobalState, card: Card): GlobalState {
+  const ownerId = card.ownerId;
+  return {
+    ...globalState,
+    playerState: {
+      ...globalState.playerState,
+      [ownerId]: {
+        ...globalState.playerState[ownerId],
+        deck: [...globalState.playerState[ownerId].deck, card.instanceId],
+      },
+    },
+    cardState: {
+      ...globalState.cardState,
+      [card.instanceId]: card,
+    },
+  };
+}
 
 export function draw(
   globalState: GlobalState,

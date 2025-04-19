@@ -1,13 +1,13 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
-  Board,
   Card,
   CardStack,
   GlobalState,
   PlayerHiddenState,
+  ValidCardId,
 } from '../gameDefinition';
-import { DeckDefinition, deckDefinitions } from '../definitions/decks';
-import { shuffleDeck, draw } from './zone';
+import { DeckDefinition } from '../definitions/decks';
+import { shuffleDeck, draw, addToDeck } from './zone';
 
 export function generateInitialGameState({
   random,
@@ -28,13 +28,9 @@ export function generateInitialGameState({
     ),
     cardState,
     playerState: members.reduce((acc, member, idx) => {
-      const cards: Card[] = [...decklists[member.id].list].map((id) => ({
-        cardId: id,
-        instanceId: random.id(),
-        ownerId: member.id,
-        fatigued: false,
-        continuousEffects: [],
-      }));
+      const cards: Card[] = [...decklists[member.id].list].map((id) =>
+        generateCard({ cardId: id, random, ownerId: member.id }),
+      );
       cards.forEach((card) => (cardState[card.instanceId] = card));
       acc[member.id] = {
         deck: cards.map((c) => c.instanceId),
@@ -58,4 +54,43 @@ export function generateInitialGameState({
   }
 
   return state;
+}
+
+export function generateCard({
+  cardId,
+  random,
+  ownerId,
+}: {
+  cardId: ValidCardId;
+  random: GameRandom;
+  ownerId: string;
+}): Card {
+  return {
+    cardId,
+    instanceId: random.id(),
+    ownerId: ownerId,
+    fatigued: false,
+    continuousEffects: [],
+  };
+}
+
+export function generateCardInDeck({
+  globalState,
+  cardId,
+  random,
+  ownerId,
+}: {
+  globalState: GlobalState;
+  cardId: ValidCardId;
+  random: GameRandom;
+  ownerId: string;
+}): GlobalState {
+  const card = {
+    cardId,
+    instanceId: random.id(),
+    ownerId: ownerId,
+    fatigued: false,
+    continuousEffects: [],
+  };
+  return addToDeck(globalState, card);
 }

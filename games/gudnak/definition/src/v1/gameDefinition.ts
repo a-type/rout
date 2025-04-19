@@ -9,15 +9,14 @@ import {
 import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './definitions/decks';
 import { findMatchingFreeAction } from './gameState/freeAction';
-import { draw, shuffleDeck } from './gameState/zone';
 import {
   validateDeploy,
   validateMove,
   validateTargets,
 } from './gameState/validation';
-import { getCardIdsFromBoard, getSpecialSpaces } from './gameState/board';
 import { applyTurn } from './gameState/applyTurn';
 import { generateInitialGameState } from './gameState/generate';
+import { getPlayerState } from './gameState/getPlayerState';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -55,6 +54,7 @@ export type UseAbilityAction = {
   type: 'useAbility';
   cardInstanceId: string;
   abilityId: string;
+  source: Coordinate;
   targets: Target[];
 };
 export type EndTurnAction = { type: 'endTurn' };
@@ -184,6 +184,7 @@ export const gameDefinition: GameDefinition<
         const targetErrors = validateTargets(
           playerState,
           playerId,
+          null,
           abilityDef.input.targets,
           action.input.targets,
         );
@@ -238,6 +239,7 @@ export const gameDefinition: GameDefinition<
         const targetErrors = validateTargets(
           playerState,
           playerId,
+          action.source,
           abilityDef.input.targets,
           action.targets,
         );
@@ -263,34 +265,17 @@ export const gameDefinition: GameDefinition<
       members,
       random,
       decklists: Object.fromEntries(
-        members.map((m) => [m.id, deckDefinitions['deck-1']]),
+        members.map((m) => [m.id, deckDefinitions['deck1']]),
       ),
     });
   },
 
   getPlayerState: ({ globalState, playerId, members }) => {
-    const { playerState, currentPlayer, actions, board, freeActions } =
-      globalState;
-    const { hand, deck, discard, side } = playerState[playerId];
-    const visibleCardIds = [...hand, ...discard, ...getCardIdsFromBoard(board)];
-    return {
-      board,
-      cardState: visibleCardIds.reduce((acc, id) => {
-        acc[id] = globalState.cardState[id];
-        return acc;
-      }, {} as Record<string, Card>),
-      hand: hand.map((instanceId) => globalState.cardState[instanceId]),
-      discard: discard.map((instanceId) => globalState.cardState[instanceId]),
-      deckCount: deck.length,
-      active: currentPlayer === playerId,
-      actions,
-      freeActions,
-      side,
-      specialSpaces: getSpecialSpaces(
-        globalState,
-        members.map((m) => m.id),
-      ),
-    };
+    return getPlayerState({
+      globalState,
+      playerId,
+      members,
+    });
   },
 
   applyRoundToGlobalState: ({ globalState, round }) => {

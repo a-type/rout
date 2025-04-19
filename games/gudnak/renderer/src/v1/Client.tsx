@@ -93,7 +93,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
 
             action.moveCard(coord);
           }}
-          onClickCard={(card) => {
+          onClickCard={(card, coord) => {
             if (
               action.targeting.next &&
               action.targeting.next.type === 'card'
@@ -104,7 +104,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               });
               return;
             }
-            action.activateAbility(card);
+            action.activateAbility(card, coord);
           }}
         />
       </Flipper>

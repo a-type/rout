@@ -79,10 +79,16 @@ export type EffectInput = {
   targets: Target[];
 };
 
+export type EffectTargetRestriction = {
+  kind: 'adjacent';
+  to: 'source' | 'previous-target';
+};
+
 export type EffectTargetDefinition = {
   description: string;
   type: 'coordinate' | 'card';
   controller: 'player' | 'opponent' | 'any' | 'none';
+  restrictions?: EffectTargetRestriction[];
 };
 
 // Represents an input to choose one or more targets for the effect
@@ -248,12 +254,12 @@ export const abilityDefinitions = {
     input: {
       targets: [
         {
-          description: 'Choose 1st target fighter',
+          description: 'Choose 1st target friendly fighter',
           type: 'coordinate',
           controller: 'player',
         },
         {
-          description: 'Choose 2nd target fighter',
+          description: 'Choose 2nd target friendly fighter',
           type: 'coordinate',
           controller: 'player',
         },
@@ -326,16 +332,26 @@ export const abilityDefinitions = {
     input: {
       targets: [
         {
-          // TODO: Validate adjacency
           description: 'Choose adjacent fighter',
           type: 'coordinate',
           controller: 'player',
+          restrictions: [
+            {
+              kind: 'adjacent',
+              to: 'source',
+            },
+          ],
         },
         {
-          // TODO: Validate adjacency to first target
           description: 'Choose target coordinate',
           type: 'coordinate',
           controller: 'player',
+          restrictions: [
+            {
+              kind: 'adjacent',
+              to: 'previous-target',
+            },
+          ],
         },
       ],
     },
