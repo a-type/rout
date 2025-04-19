@@ -10,7 +10,7 @@ export const presetOptions = {
   saturation: 100,
   customTheme: {
     primary: {
-      hue: 290,
+      hue: 280,
       hueRotate: -5,
     },
     accent: {

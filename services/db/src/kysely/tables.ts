@@ -19,6 +19,7 @@ export interface Database {
   Account: AccountTable;
   VerificationCode: VerificationCodeTable;
   GameSessionInvitation: GameSessionInvitationTable;
+  GameSessionInvitationLink: GameSessionInvitationLinkTable;
   Friendship: FriendshipTable;
   FriendshipInvitation: FriendshipInvitationTable;
   PushSubscription: PushSubscriptionTable;
@@ -92,11 +93,18 @@ export interface GameSessionInvitationTable {
   status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
   role: 'player' | 'spectator';
 }
-
 export type GameSessionInvitation = Selectable<GameSessionInvitationTable>;
 export type NewGameSessionInvitation = Insertable<GameSessionInvitationTable>;
 export type GameSessionInvitationUpdate =
   Updateable<GameSessionInvitationTable>;
+
+export interface GameSessionInvitationLinkTable {
+  id: PrefixedId<'gsl'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  gameSessionId: PrefixedId<'gs'>;
+  code: string;
+}
 
 export interface FriendshipTable {
   id: PrefixedId<'f'>;

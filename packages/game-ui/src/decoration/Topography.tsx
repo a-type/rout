@@ -139,7 +139,7 @@ extend({ TopographyMaterial });
 const DEFAULT_COLORS = {
   light: {
     background: 0xfffaff,
-    gradient: [0xff9fff, 0xa0a0ff],
+    gradient: [0xffbfff, 0xefefff],
   },
   dark: {
     background: 0x29196e,

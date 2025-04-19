@@ -31,6 +31,15 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
       .executeTakeFirst();
   }
 
+  async getGameSessionIdFromInvitationCode(code: string) {
+    const result = await this.#db
+      .selectFrom('GameSessionInvitationLink')
+      .where('code', '=', code)
+      .select(['gameSessionId'])
+      .executeTakeFirst();
+    return result?.gameSessionId;
+  }
+
   async testRpc() {
     return {
       foo: 'bar',

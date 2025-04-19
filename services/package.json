@@ -3,12 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "db:reset": "rimraf db/.wrangler && rimraf api/.wrangler && cd ./db && pnpm migrations:apply:local"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.14.0",
     "vitest": "catalog:",
-    "@cloudflare/vitest-pool-workers": "0.8.15"
+    "@cloudflare/vitest-pool-workers": "0.8.15",
+    "rimraf": "6.0.1"
   }
 }

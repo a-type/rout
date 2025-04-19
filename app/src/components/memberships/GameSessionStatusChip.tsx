@@ -10,9 +10,9 @@ export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
     <Chip
       color={
         status === 'active'
-          ? 'primary'
-          : status === 'completed'
           ? 'accent'
+          : status === 'completed'
+          ? 'primary'
           : 'neutral'
       }
     >

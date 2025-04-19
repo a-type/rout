@@ -1,4 +1,5 @@
 import {
+  genericId,
   id,
   LongGameError,
   PlayerColorName,
@@ -481,6 +482,97 @@ export class UserStore extends RpcTarget {
       .executeTakeFirstOrThrow();
 
     return invitation;
+  }
+
+  async createGameSessionInvitationLink(gameSessionId: PrefixedId<'gs'>) {
+    const ownMembership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!ownMembership) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only game session members can invite others',
+      );
+    }
+
+    const inviteId = id('gsl');
+    await this.#db
+      .insertInto('GameSessionInvitationLink')
+      .values({
+        id: inviteId,
+        gameSessionId: gameSessionId,
+        code: genericId(),
+      })
+      .onConflict((b) => b.column('gameSessionId').doNothing())
+      .executeTakeFirstOrThrow();
+
+    return inviteId;
+  }
+
+  async getGameSessionInvitationLinkCode(gameSessionId: PrefixedId<'gs'>) {
+    const query = () =>
+      this.#db
+        .selectFrom('GameSessionInvitationLink')
+        .where('gameSessionId', '=', gameSessionId)
+        .select(['code'])
+        .executeTakeFirst();
+
+    let result = await query();
+    if (!result) {
+      await this.createGameSessionInvitationLink(gameSessionId);
+      result = await query();
+      if (!result) {
+        throw new LongGameError(
+          LongGameError.Code.InternalServerError,
+          'Failed to create game session invitation link',
+        );
+      }
+    }
+
+    return result.code;
+  }
+
+  async claimGameSessionInvitationLink(linkCode: string) {
+    const link = await this.#db
+      .selectFrom('GameSessionInvitationLink')
+      .where('code', '=', linkCode)
+      .selectAll()
+      .executeTakeFirstOrThrow();
+
+    const existingMembership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', link.gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (existingMembership) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'You are already a member of this game session',
+      );
+    }
+
+    const membership = await this.#db
+      .insertInto('GameSessionInvitation')
+      .values({
+        id: id('gsi'),
+        gameSessionId: link.gameSessionId,
+        userId: this.#userId,
+        status: 'accepted',
+        inviterId: this.#userId,
+        role: 'player',
+        // doesn't matter
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return membership;
   }
 
   async respondToGameSessionInvitation(

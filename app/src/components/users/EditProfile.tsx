@@ -31,7 +31,12 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
         onSave?.();
       }}
     >
-      <TextField required name="displayName" label="Display name" />
+      <TextField
+        required
+        name="displayName"
+        label="Display name"
+        placeholder="What should we call you?"
+      />
       <ColorPickerField />
       <Box justify="end" className="w-full">
         <SubmitButton>Save</SubmitButton>

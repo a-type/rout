@@ -1,7 +1,6 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Icon } from '@a-type/ui';
+import { Button, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { TopographyButton } from '@long-game/game-ui';
 import { useNavigate } from '@verdant-web/react-router';
 
 export function CreateGame() {
@@ -22,8 +21,8 @@ export function CreateGame() {
   };
 
   return (
-    <TopographyButton onClick={create}>
+    <Button color="primary" onClick={create}>
       <Icon name="plus" /> New Game
-    </TopographyButton>
+    </Button>
   );
 }

@@ -1,3 +1,4 @@
+import { Box, ErrorBoundary } from '@a-type/ui';
 import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
 import { lazy } from 'react';
 import GameSessionPage from './GameSessionPage.jsx';
@@ -34,6 +35,10 @@ const routes = makeRoutes([
     component: GameSessionPage,
   },
   {
+    path: '/gameInvite/:code',
+    component: lazy(() => import('./GameInviteLinkPage.jsx')),
+  },
+  {
     path: '/settings',
     component: lazy(() => import('./SettingsPage.jsx')),
   },
@@ -45,8 +50,17 @@ const routes = makeRoutes([
 
 export const Pages = () => {
   return (
-    <Router routes={routes}>
-      <Outlet />
-    </Router>
+    <ErrorBoundary
+      // TODO: use error details to show different error messages
+      fallback={
+        <Box full layout="center center">
+          Something went wrong!
+        </Box>
+      }
+    >
+      <Router routes={routes}>
+        <Outlet />
+      </Router>
+    </ErrorBoundary>
   );
 };

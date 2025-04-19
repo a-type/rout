@@ -9,6 +9,7 @@ export const resourceIdTypes = {
   cm: 'ChatMessage',
   gs: 'GameSession',
   gsi: 'GameSessionInvitation',
+  gsl: 'GameSessionInvitationLink',
   t: 'Turn',
   vc: 'VerificationCode',
 } as const;

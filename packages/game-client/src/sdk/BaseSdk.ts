@@ -30,9 +30,11 @@ export class BaseSdk extends EventTarget {
     {
       transformInput,
       transformOutput,
+      enabled,
     }: {
       transformInput?: (input: Input) => TReq;
       transformOutput?: (output: TRes) => Output;
+      enabled?: (input: Input) => boolean;
     } = {},
   ): QueryFactory<Output, Input> => {
     const factory = (...args: EraseEmptyArg<Input>) => {
@@ -64,6 +66,7 @@ export class BaseSdk extends EventTarget {
       return {
         queryFn,
         queryKey: [key, input],
+        enabled: enabled ? enabled(input) : true,
       } as UseSuspenseQueryOptions<Output>;
     };
     factory.__isQuery = true as const;

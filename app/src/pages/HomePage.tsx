@@ -1,8 +1,9 @@
+import { Wordmark } from '@/components/brand/Wordmark';
 import { CreateGame } from '@/components/games/CreateGame.jsx';
 import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
 import { MainNav } from '@/components/nav/MainNav';
 import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
-import { H1, PageContent, PageNav, PageNowPlaying, PageRoot } from '@a-type/ui';
+import { PageContent, PageNav, PageNowPlaying, PageRoot } from '@a-type/ui';
 import { TopographyBackground } from '@long-game/game-ui';
 
 export interface HomePageProps {}
@@ -13,9 +14,7 @@ export function HomePage({}: HomePageProps) {
       <TopographyBackground />
       <PageContent>
         <div className="w-full h-20vh relative flex items-center justify-center">
-          <H1 className="font-fancy [font-size:12vmin] text-center relative z-1">
-            rout!
-          </H1>
+          <Wordmark />
         </div>
         <MembershipsList />
         <PageNowPlaying unstyled className="items-center justify-center">

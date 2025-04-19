@@ -7,13 +7,14 @@ import {
   H1,
   H2,
   Icon,
+  P,
   withClassName,
   withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
-import { SendInvite } from '../friendships/SendInvite.js';
+import { PublicInviteLink } from '../memberships/PublicInviteLink.js';
 import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
@@ -79,7 +80,11 @@ type GameSetupInviteEntryData = {
   status: 'accepted' | 'pending' | 'declined' | 'expired' | 'uninvited';
 };
 
-function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
+function GameSetupInviteFriends({
+  sessionId,
+}: {
+  sessionId: PrefixedId<'gs'>;
+}) {
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: sessionId,
   });
@@ -111,6 +116,11 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
   return (
     <Box d="col">
       <PeopleGrid>
+        {!entries.length && (
+          <P className="text-center color-gray-dark">
+            No friends to invite. Use the link below to get more people in!
+          </P>
+        )}
         {entries?.map((entry) => {
           return (
             <PeopleGridItem asChild key={entry.id}>
@@ -147,12 +157,17 @@ function GameSetupInviteFriends({ sessionId }: { sessionId: string }) {
           );
         })}
       </PeopleGrid>
-      <SendInvite />
+      <Box d="col" gap>
+        <H2>Send a link</H2>
+        <PublicInviteLink gameSessionId={sessionId} />
+        <P>Be careful with this link, anyone who has it can join this game.</P>
+      </Box>
     </Box>
   );
 }
 
 function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
+  const { data: me } = sdkHooks.useGetMe();
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: sessionId,
   });
@@ -165,7 +180,7 @@ function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
             className="w-full h-auto aspect-1"
             imageSrc={member.imageUrl}
           />
-          <span>{member.displayName}</span>
+          <span>{member.id === me?.id ? 'You' : member.displayName}</span>
         </PeopleGridItem>
       ))}
     </PeopleGrid>
@@ -187,6 +202,7 @@ const PeopleGridItem = withClassName(
     p: true,
     gap: true,
     items: 'center',
+    border: true,
   }),
-  'w-20vmin max-w-120px relative',
+  'w-20vmin max-w-120px relative rounded-2xl',
 );

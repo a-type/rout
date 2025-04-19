@@ -15,6 +15,20 @@ export const gameSessionInvitationsRouter = new Hono()
       .getGameSessionInvitations('pending');
     return ctx.json(wrapRpcData(invitations));
   })
+  .post(
+    '/claimCode/:code',
+    zValidator(
+      'param',
+      z.object({
+        code: z.string(),
+      }),
+    ),
+    async (ctx) => {
+      const { code } = ctx.req.valid('param');
+      await ctx.get('userStore').claimGameSessionInvitationLink(code);
+      return ctx.json({ success: true });
+    },
+  )
   .put(
     '/:id',
     zValidator(

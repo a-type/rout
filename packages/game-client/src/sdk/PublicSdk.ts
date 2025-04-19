@@ -1,3 +1,4 @@
+import { PrefixedId } from '@long-game/common';
 import { BaseSdk, InferReturnData } from './BaseSdk';
 
 export class PublicSdk extends BaseSdk {
@@ -85,6 +86,31 @@ export class PublicSdk extends BaseSdk {
         json: input,
       }),
       invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
+    },
+  );
+  getPublicGameSessionFromInviteCode = this.sdkQuery(
+    'getPublicGameSessionFromInviteCode',
+    this.apiRpc.public.publicInviteGameInfo[':code'].$get,
+    {
+      transformInput: (input: string) => ({ param: { code: input } }),
+    },
+  );
+  claimPublicGameSessionLink = this.sdkMutation(
+    this.apiRpc.gameSessionInvitations.claimCode[':code'].$post,
+    {
+      transformInput: (input: { code: string }) => ({
+        param: { code: input.code },
+      }),
+      invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
+    },
+  );
+  getPublicGameSessionLink = this.sdkQuery(
+    'getPublicGameSessionLink',
+    this.apiRpc.gameSessions[':id'].inviteLink.$get,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'> }) => ({
+        param: { id: input.id },
+      }),
     },
   );
 

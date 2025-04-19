@@ -35,10 +35,10 @@ export function LoginPage({}: LoginPageProps) {
         <Tabs value={tab} defaultValue="login" asChild>
           <Box items="center" d="col" gap container="reset">
             <Tabs.List className="justify-center w-full">
-              <Tabs.Trigger value="login" asChild color="default">
+              <Tabs.Trigger value="login" asChild color="primary">
                 <Link to="?tab=login">Log in</Link>
               </Tabs.Trigger>
-              <Tabs.Trigger value="signup" asChild color="default">
+              <Tabs.Trigger value="signup" asChild color="primary">
                 <Link to="?tab=signup">Sign up</Link>
               </Tabs.Trigger>
             </Tabs.List>
@@ -47,7 +47,7 @@ export function LoginPage({}: LoginPageProps) {
                 <OAuthSigninButton
                   endpoint={`${API_ORIGIN}/auth/provider/google/login`}
                   returnTo={returnTo}
-                  color="primary"
+                  color="accent"
                 >
                   Log in with Google
                 </OAuthSigninButton>
@@ -65,7 +65,7 @@ export function LoginPage({}: LoginPageProps) {
                 <OAuthSigninButton
                   endpoint={`${API_ORIGIN}/auth/provider/google/login`}
                   returnTo={returnTo}
-                  color="primary"
+                  color="accent"
                 >
                   Sign up with Google
                 </OAuthSigninButton>

@@ -44,9 +44,10 @@ const openGameSessionMiddleware = createMiddleware<{
   const myInvitation =
     await userStore.getGameSessionInvitationForSpecificSession(id);
   if (!myInvitation) {
+    // don't leak existence
     throw new LongGameError(
-      LongGameError.Code.Forbidden,
-      'You were not invited to this game session.',
+      LongGameError.Code.NotFound,
+      `Could not find game session ${id}`,
     );
   }
   ctx.set('myInvitation', myInvitation);
@@ -195,4 +196,13 @@ export const gameSessionRouter = new Hono<Env>()
       ctx.env.SOCKET_TOKEN_SECRET,
     );
     return ctx.json({ token });
+  })
+  .get('/inviteLink', async (ctx) => {
+    const userStore = ctx.get('userStore');
+    const gameSessionId = ctx.get('gameSessionId');
+    const code = await userStore.getGameSessionInvitationLinkCode(
+      gameSessionId,
+    );
+    const link = new URL(`/gameInvite/${code}`, ctx.env.UI_ORIGIN);
+    return ctx.json({ link: link.toString() });
   });
