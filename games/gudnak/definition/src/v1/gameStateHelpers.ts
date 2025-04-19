@@ -4,7 +4,7 @@ import {
   FighterCard,
   Trait,
   ValidCardId,
-} from './cardDefinition';
+} from './definitions/cardDefinition';
 import type {
   Board,
   Card,
@@ -24,11 +24,11 @@ import {
   EffectTargetDefinition,
   Target,
   ValidAbilityId,
-} from './abilityDefinition';
+} from './definitions/abilityDefinition';
 import {
   continuousEffectDefinitions,
   ValidContinuousEffectKey,
-} from './continuousEffectDefinitions';
+} from './definitions/continuousEffectDefinitions';
 
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {

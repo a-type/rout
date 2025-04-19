@@ -1,6 +1,6 @@
 import { FighterCard } from './cardDefinition';
 import { ValidContinuousEffectKey } from './continuousEffectDefinitions';
-import { Board, Card, FreeAction, GlobalState } from './gameDefinition';
+import { Board, Card, FreeAction, GlobalState } from '../gameDefinition';
 import {
   getAdjacentCardInstanceIds,
   INVALID_MOVE_CODES,
@@ -13,7 +13,7 @@ import {
   getTopCard,
   move,
   addContinuousEffectToCard,
-} from './gameStateHelpers';
+} from '../gameStateHelpers';
 
 type FighterEffect = {
   modifyCombatPower?: (props: {

@@ -1,4 +1,4 @@
-import { type ValidCardId } from './cardDefinition';
+import { type ValidCardId } from './definitions/cardDefinition';
 
 type DeckDefinition = {
   name: string;

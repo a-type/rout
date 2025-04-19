@@ -5,8 +5,8 @@ import {
   EffectInput,
   Target,
   ValidAbilityId,
-} from './abilityDefinition';
-import { cardDefinitions, ValidCardId } from './cardDefinition';
+} from './definitions/abilityDefinition';
+import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './decks';
 import {
   applyFatigue,
@@ -32,8 +32,8 @@ import {
 } from './gameStateHelpers';
 
 // re-export definitions used by renderer
-export * from './abilityDefinition';
-export * from './cardDefinition';
+export * from './definitions/abilityDefinition';
+export * from './definitions/cardDefinition';
 
 export type Side = 'top' | 'bottom';
 
@@ -120,7 +120,7 @@ export type TurnData = {
 };
 
 function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
-  return ({ turns, members, globalState }) => {
+  return ({ turns, globalState }) => {
     // rounds advance when any player goes
     // requires us to validate active player in turn validation
     const maxRoundIndex = turns.reduce((max, turn) => {
