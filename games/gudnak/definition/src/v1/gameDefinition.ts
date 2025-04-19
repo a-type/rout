@@ -17,6 +17,7 @@ import {
 } from './gameState/validation';
 import { getCardIdsFromBoard, getSpecialSpaces } from './gameState/board';
 import { applyTurn } from './gameState/applyTurn';
+import { generateInitialGameState } from './gameState/generate';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -71,7 +72,7 @@ export type FreeAction = {
   count?: number;
 };
 
-type PlayerHiddenState = {
+export type PlayerHiddenState = {
   deck: string[];
   hand: string[];
   discard: string[];
@@ -258,44 +259,7 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members, random }) => {
-    const playerOrder = random.shuffle(members.map((m) => m.id));
-    const cardState: Record<string, Card> = {};
-    let state: GlobalState = {
-      board: Array.from({ length: 3 }, () =>
-        Array.from({ length: 3 }, () => [] as CardStack),
-      ),
-      cardState,
-      playerState: members.reduce((acc, member, idx) => {
-        const cards: Card[] = [...deckDefinitions.deck1.list].map((id) => ({
-          cardId: id,
-          instanceId: random.id(),
-          ownerId: member.id,
-          fatigued: false,
-          continuousEffects: [],
-        }));
-        cards.forEach((card) => (cardState[card.instanceId] = card));
-        acc[member.id] = {
-          deck: cards.map((c) => c.instanceId),
-          hand: [],
-          discard: [],
-          side: idx === 0 ? 'top' : 'bottom',
-        };
-        return acc;
-      }, {} as Record<string, PlayerHiddenState>),
-      playerOrder,
-      currentPlayer: playerOrder[0],
-      actions: 2,
-      freeActions: [],
-      continuousEffects: [],
-    };
-
-    // shuffle decks and draw 5 cards for each player
-    for (const member of members) {
-      state = shuffleDeck(state, random, member.id);
-      state = draw(state, member.id, 5);
-    }
-
-    return state;
+    return generateInitialGameState({ members, random });
   },
 
   getPlayerState: ({ globalState, playerId, members }) => {

@@ -18,7 +18,7 @@ import {
   ValidContinuousEffectKey,
 } from '../definitions/continuousEffectDefinitions';
 import { checkFatigue } from './gameStateHelpers';
-import { matchingTag } from './hasTrait';
+import { matchingTag } from './card';
 
 import {
   getStack,
