@@ -1,5 +1,6 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
+  Board,
   Card,
   CardStack,
   GlobalState,

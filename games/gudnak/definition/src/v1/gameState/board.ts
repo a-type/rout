@@ -44,6 +44,19 @@ export function removeTopCard(board: Board, coord: Coordinate) {
   return newBoard;
 }
 
+export function addCardToStack(
+  board: Board,
+  coord: Coordinate,
+  cardInstanceId: string,
+): Board {
+  const { x, y } = coord;
+  const stack = getStack(board, coord);
+  const newStack = [...stack, cardInstanceId];
+  const newBoard = [...board];
+  newBoard[y][x] = newStack;
+  return newBoard;
+}
+
 export function getBackRowCoords(side: Side): Coordinate[] {
   const backRow = side === 'top' ? 0 : 2;
   return [

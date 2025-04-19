@@ -32,18 +32,17 @@ export function deploy(
     ...playerState,
     hand: playerState.hand.filter((id) => id !== card.instanceId),
   };
-  return {
+  globalState = {
     ...globalState,
-    cardState: {
-      ...globalState.cardState,
-      [cardInstanceId]: { ...card, fatigued: true },
-    },
     board: newBoard,
     playerState: {
       ...globalState.playerState,
       [globalState.currentPlayer]: newPlayerState,
     },
   };
+  globalState = applyFatigue(globalState, cardInstanceId);
+
+  return globalState;
 }
 
 export function spendActions(gameState: GlobalState, count: number = 1) {

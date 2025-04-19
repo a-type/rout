@@ -1,11 +1,9 @@
-import { GameRandom } from '@long-game/game-definition';
 import { cardDefinitions, ValidCardId } from '../definitions/cardDefinition';
 import type {
   Board,
   Card,
   Coordinate,
   Side,
-  GlobalState,
   PlayerState,
 } from '../gameDefinition';
 import {
@@ -120,6 +118,7 @@ export function validateMove(
   source: Coordinate,
   target: Coordinate,
 ): InvalidMoveReason[] | null {
+  const reasons = [] as InvalidMoveReason[];
   if (!card) {
     return [INVALID_MOVE_CODES.NO_CARD];
   }
@@ -144,45 +143,44 @@ export function validateMove(
   if (card.ownerId !== playerId) {
     return [INVALID_MOVE_CODES.NOT_YOUR_CARD];
   }
-  const targetStack = getStack(board, target);
-  if (targetStack.length === 0) {
-    return null;
-  }
-  const targetTopCardId = getTopCard(targetStack);
-  if (!targetTopCardId) {
-    return [INVALID_MOVE_CODES.NO_TARGET];
-  }
-  const targetTopCard = cardState[targetTopCardId];
-  if (!targetTopCard) {
-    return [INVALID_MOVE_CODES.NO_TARGET];
-  }
-  const reasons = [] as InvalidMoveReason[];
-
   const { x: sourceX, y: sourceY } = source;
   const { x: targetX, y: targetY } = target;
   const dx = Math.abs(sourceX - targetX);
   const dy = Math.abs(sourceY - targetY);
-  if (dx > 1 || dy > 1 || (dx === 0 && dy === 0)) {
+  if (dx + dy !== 1) {
     reasons.push(INVALID_MOVE_CODES.NOT_ADJACENT);
   }
-  if (targetTopCard.ownerId === card.ownerId) {
-    reasons.push(INVALID_MOVE_CODES.SAME_OWNER);
+
+  const targetStack = getStack(board, target);
+  if (targetStack.length > 0) {
+    const targetTopCardId = getTopCard(targetStack);
+    if (!targetTopCardId) {
+      return [INVALID_MOVE_CODES.NO_TARGET];
+    }
+    const targetTopCard = cardState[targetTopCardId];
+    if (!targetTopCard) {
+      return [INVALID_MOVE_CODES.NO_TARGET];
+    }
+
+    if (targetTopCard.ownerId === card.ownerId) {
+      reasons.push(INVALID_MOVE_CODES.SAME_OWNER);
+    }
+
+    if (
+      targetTopCard.continuousEffects.some((effect) => {
+        const effectDef =
+          continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
+        if ('validate' in effectDef && 'defend' in effectDef.validate) {
+          return !effectDef.validate.defend();
+        }
+        return true;
+      })
+    ) {
+      reasons.push(INVALID_MOVE_CODES.CANT_BE_ATTACKED);
+    }
   }
   if (checkFatigue(card)) {
     reasons.push(INVALID_MOVE_CODES.FATIGUED);
-  }
-
-  if (
-    targetTopCard.continuousEffects.some((effect) => {
-      const effectDef =
-        continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
-      if ('validate' in effectDef && 'defend' in effectDef.validate) {
-        return !effectDef.validate.defend();
-      }
-      return true;
-    })
-  ) {
-    reasons.push(INVALID_MOVE_CODES.CANT_BE_ATTACKED);
   }
 
   const abilities = cardDef.abilities.map((a) => abilityDefinitions[a.id]);
