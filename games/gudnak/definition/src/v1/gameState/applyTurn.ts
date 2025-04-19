@@ -49,7 +49,7 @@ export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
       break;
     }
     case 'endTurn': {
-      performEndTurn(globalState, playerId);
+      globalState = performEndTurn(globalState, playerId);
       break;
     }
   }
@@ -155,7 +155,14 @@ function performEndTurn(
   if (!siegeCardOwner || siegeCardOwner === nextPlayer) {
     globalState = draw(globalState, nextPlayer);
   } else {
-    globalState = mill(globalState, nextPlayer);
+    if (globalState.playerState[nextPlayer].deck.length > 0) {
+      globalState = mill(globalState, nextPlayer);
+    } else {
+      globalState = {
+        ...globalState,
+        winner: siegeCardOwner,
+      };
+    }
   }
 
   return globalState;

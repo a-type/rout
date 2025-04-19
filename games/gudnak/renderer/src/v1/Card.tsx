@@ -63,6 +63,8 @@ function FighterCard({
                 borderColor: color,
                 background: selected
                   ? 'rgba(255, 255, 255, 0.2)'
+                  : fatigued
+                  ? 'slategray'
                   : 'transparent',
                 color: textColor,
               }}
@@ -71,7 +73,11 @@ function FighterCard({
                 onClick?.();
               }}
             >
-              <img src={cardData.artUrl} width={CARD_SIZE} />
+              <img
+                src={cardData.artUrl}
+                width={CARD_SIZE}
+                style={{ opacity: fatigued ? 0.5 : 1 }}
+              />
             </Box>
           </Tooltip>
         )}

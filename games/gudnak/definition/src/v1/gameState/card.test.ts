@@ -8,8 +8,8 @@ import {
   getStack,
   getTopCard,
 } from './board';
-import { GlobalState, ValidCardId } from '../gameDefinition';
-import { abilityDefinitions } from '../definitions/abilityDefinition';
+import { Coordinate, GlobalState, ValidCardId } from '../gameDefinition';
+import { abilityDefinitions, Target } from '../definitions/abilityDefinition';
 import {
   INVALID_TARGET_CODES,
   validateDeploy,
@@ -300,8 +300,9 @@ describe('card testing', {}, () => {
 
   describe('standardbearer', {}, () => {
     it('should be able to command an ally to attack', {}, () => {
+      const members = [{ id: 'u-1' }, { id: 'u-2' }];
       let gameState = generateInitialGameState({
-        members: [{ id: 'u-1' }, { id: 'u-2' }],
+        members,
         random: new GameRandom('test'),
         decklists: {
           'u-1': {
@@ -327,6 +328,23 @@ describe('card testing', {}, () => {
         y: 2,
       });
       gameState = clearAllFatigue(gameState);
+      const source: Coordinate = { x: 0, y: 0 };
+      const targets: Target[] = [
+        { kind: 'coordinate', x: 0, y: 1 },
+        { kind: 'coordinate', x: 0, y: 2 },
+      ];
+      const validation = validateTargets(
+        getPlayerState({
+          globalState: gameState,
+          playerId: 'u-1',
+          members,
+        }),
+        'u-1',
+        source,
+        abilityDefinitions['inspire'].input.targets,
+        targets,
+      );
+      expect(validation).toBeNull();
       gameState = performUseAbility(gameState, {
         type: 'useAbility',
         abilityId: 'inspire',
@@ -335,10 +353,7 @@ describe('card testing', {}, () => {
           'u-1',
           'standardbearer',
         ).instanceId,
-        targets: [
-          { kind: 'coordinate', x: 0, y: 1 },
-          { kind: 'coordinate', x: 0, y: 2 },
-        ],
+        targets,
         source: { x: 0, y: 0 },
       });
       // expect attack to have been performed

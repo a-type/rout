@@ -274,6 +274,17 @@ export function validateTargets(
           }
           break;
         }
+        case 'not-friendly': {
+          const stack = getStack(board, coord);
+          const topCardId = getTopCard(stack);
+          if (topCardId) {
+            const topCard = cardState[topCardId];
+            if (topCard.ownerId === playerId) {
+              reasons.push(INVALID_TARGET_CODES.OWNER);
+            }
+          }
+          break;
+        }
       }
 
       if (targetDef.restrictions) {
@@ -290,7 +301,7 @@ export function validateTargets(
             }
             if (
               !otherCoordinate ||
-              getAdjacentCoordinates(board, coord).some(
+              !getAdjacentCoordinates(board, coord).some(
                 (c) => c.x === otherCoordinate.x && c.y === otherCoordinate.y,
               )
             ) {

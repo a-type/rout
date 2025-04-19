@@ -17,6 +17,7 @@ import {
   InvalidDeployReason,
   INVALID_DEPLOY_CODES,
 } from '../gameState/validation';
+import { removeFatigue } from '../gameState/card';
 
 type FighterEffect = {
   modifyCombatPower?: (props: {
@@ -87,7 +88,7 @@ export type EffectTargetRestriction = {
 export type EffectTargetDefinition = {
   description: string;
   type: 'coordinate' | 'card';
-  controller: 'player' | 'opponent' | 'any' | 'none';
+  controller: 'player' | 'opponent' | 'any' | 'none' | 'not-friendly';
   restrictions?: EffectTargetRestriction[];
 };
 
@@ -345,7 +346,7 @@ export const abilityDefinitions = {
         {
           description: 'Choose target coordinate',
           type: 'coordinate',
-          controller: 'player',
+          controller: 'not-friendly',
           restrictions: [
             {
               kind: 'adjacent',
@@ -371,6 +372,7 @@ export const abilityDefinitions = {
           sourceCoordinate,
           target2 as CoordinateTarget,
         );
+        globalState = removeFatigue(globalState, targetInstanceId);
         return globalState;
       },
     },

@@ -17,6 +17,7 @@ import {
 import { applyTurn } from './gameState/applyTurn';
 import { generateInitialGameState } from './gameState/generate';
 import { getPlayerState } from './gameState/getPlayerState';
+import { checkFatigue } from './gameState/gameStateHelpers';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -88,6 +89,7 @@ export type GlobalState = {
   actions: number;
   freeActions: FreeAction[];
   continuousEffects: ContinuousEffect[];
+  winner: string | null;
 };
 
 export type PlayerState = {
@@ -235,6 +237,9 @@ export const gameDefinition: GameDefinition<
       if (!abilityDef) {
         return 'Ability definition not found';
       }
+      if (checkFatigue(card)) {
+        return 'Card is fatigued';
+      }
       if ('input' in abilityDef) {
         const targetErrors = validateTargets(
           playerState,
@@ -289,7 +294,13 @@ export const gameDefinition: GameDefinition<
     return turn;
   },
 
-  getStatus: ({ globalState, rounds }) => {
+  getStatus: ({ globalState }) => {
+    if (globalState.winner) {
+      return {
+        status: 'completed',
+        winnerIds: [globalState.winner],
+      };
+    }
     return {
       status: 'active',
     };

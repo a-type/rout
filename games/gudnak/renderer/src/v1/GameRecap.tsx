@@ -5,7 +5,7 @@ export interface GameRecapProps {
 }
 
 export function GameRecap({ globalState }: GameRecapProps) {
-  return <div>Your post-game recap goes here</div>;
+  return <div>{globalState.winner} won the game!</div>;
 }
 
 export default GameRecap;

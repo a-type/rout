@@ -40,6 +40,7 @@ export function generateInitialGameState({
       };
       return acc;
     }, {} as Record<string, PlayerHiddenState>),
+    winner: null,
     playerOrder,
     currentPlayer: playerOrder[0],
     actions: 2,

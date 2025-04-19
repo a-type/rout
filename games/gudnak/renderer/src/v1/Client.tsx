@@ -19,6 +19,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
+  console.log('targets', action.targeting.chosen);
 
   return (
     <Box className="w-full h-full mt-2 flex flex-col p-3 gap-2">
@@ -77,6 +78,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           targets={action.targeting.chosen}
           state={board}
           onClick={(coord) => {
+            console.log('target', action.targeting);
             if (
               action.targeting.next &&
               action.targeting.next.type === 'coordinate'
