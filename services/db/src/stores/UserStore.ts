@@ -93,7 +93,6 @@ export class UserStore extends RpcTarget {
         ]),
       )
       .selectAll('u');
-    console.log(query.compile().sql);
     const user = await query.executeTakeFirst();
 
     return this.#fillUserDefaults({
