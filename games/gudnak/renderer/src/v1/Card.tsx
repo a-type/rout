@@ -39,6 +39,7 @@ function FighterCard({
   continuousEffects,
   color,
   instanceId,
+  targeted,
 }: BaseCardProps & {
   cardData: FighterCard;
   continuousEffects?: ContinuousEffect[];
@@ -61,10 +62,12 @@ function FighterCard({
                 width: CARD_SIZE,
                 height: CARD_SIZE,
                 borderColor: color,
-                background: selected
-                  ? 'rgba(255, 255, 255, 0.2)'
+                background: targeted
+                  ? 'yellow'
+                  : selected
+                  ? color
                   : fatigued
-                  ? 'slategray'
+                  ? 'gray'
                   : 'transparent',
                 color: textColor,
               }}
@@ -76,7 +79,9 @@ function FighterCard({
               <img
                 src={cardData.artUrl}
                 width={CARD_SIZE}
-                style={{ opacity: fatigued ? 0.5 : 1 }}
+                style={{
+                  opacity: fatigued ? 0.6 : targeted || selected ? 0.8 : 1,
+                }}
               />
             </Box>
           </Tooltip>
@@ -147,14 +152,20 @@ function TacticCard({
             width: CARD_SIZE,
             height: CARD_SIZE,
             borderColor: color,
-            background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+            background: selected ? color : 'transparent',
           }}
           onClick={(e) => {
             e.stopPropagation();
             onClick?.();
           }}
         >
-          <img src={cardData.artUrl} width={CARD_SIZE} />
+          <img
+            src={cardData.artUrl}
+            width={CARD_SIZE}
+            style={{
+              opacity: selected ? 0.8 : 1,
+            }}
+          />
         </Box>
       </Tooltip>
     );

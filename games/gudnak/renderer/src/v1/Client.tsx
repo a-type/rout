@@ -1,10 +1,14 @@
-import { Box, Button } from '@a-type/ui';
-import { type CoordinateTarget } from '@long-game/game-gudnak-definition/v1';
+import { Box, Button, toast } from '@a-type/ui';
+import type {
+  Target,
+  CoordinateTarget,
+} from '@long-game/game-gudnak-definition/v1';
 import { Board } from './Board';
 import { Card } from './Card';
 import { hooks } from './gameClient';
 import { useGameAction } from './useGameAction';
 import { Flipper } from 'react-flip-toolkit';
+import { useEffect } from 'react';
 
 export function Client() {
   return (
@@ -15,15 +19,49 @@ export function Client() {
 }
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const { prepareTurn, finalState, turnError, localTurnData } = gameSuite;
+  const {
+    prepareTurn,
+    finalState,
+    turnError,
+    localTurnData,
+    latestRoundIndex,
+  } = gameSuite;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
-  console.log('targets', action.targeting.chosen);
+  const targets: Target[] = action.targeting.active
+    ? action.targeting.chosen
+    : localTurnData?.action.type === 'useAbility'
+    ? localTurnData.action.targets
+    : localTurnData?.action.type === 'tactic'
+    ? localTurnData.action.input.targets
+    : localTurnData?.action.type === 'deploy' ||
+      localTurnData?.action.type == 'move'
+    ? [
+        {
+          kind: 'coordinate',
+          x: localTurnData.action.target.x,
+          y: localTurnData.action.target.y,
+        },
+      ]
+    : [];
+
+  useEffect(() => {
+    if (latestRoundIndex > 0) {
+      action.selection.clear();
+    }
+  }, [latestRoundIndex]);
+
+  useEffect(() => {
+    if (turnError) {
+      toast.error(turnError);
+    }
+  }, [turnError]);
+  console.log(action.selection.card);
 
   return (
     <Box className="w-full h-full mt-2 flex flex-col p-3 gap-2">
-      <Flipper flipKey={JSON.stringify(finalState)}>
+      <Flipper flipKey={JSON.stringify(finalState.board)}>
         <Box className="flex flex-row gap-2 overflow-y-scroll">
           {hand.map((card, index) => (
             <Card
@@ -75,14 +113,14 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         </Box>
         <Board
           selection={action.selection.item}
-          targets={action.targeting.chosen}
+          targets={targets}
           state={board}
           onClick={(coord) => {
-            console.log('target', action.targeting);
-            if (
-              action.targeting.next &&
-              action.targeting.next.type === 'coordinate'
-            ) {
+            if (!action.targeting.next) {
+              action.moveCard(coord);
+              return;
+            }
+            if (action.targeting.next.type === 'coordinate') {
               const target: CoordinateTarget = {
                 kind: 'coordinate',
                 x: coord.x,
@@ -91,22 +129,35 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
 
               action.targeting.select(target);
               return;
+            } else if (action.targeting.next.type === 'card') {
+              const stack = board[coord.y][coord.x];
+              const cardInstanceId = stack[stack.length - 1];
+              if (cardInstanceId) {
+                action.targeting.select({
+                  kind: 'card',
+                  instanceId: cardInstanceId,
+                });
+              }
             }
-
-            action.moveCard(coord);
           }}
           onClickCard={(card, coord) => {
-            if (
-              action.targeting.next &&
-              action.targeting.next.type === 'card'
-            ) {
+            if (!action.targeting.next) {
+              action.activateAbility(card, coord);
+              return;
+            }
+            if (action.targeting.next.type === 'card') {
               action.targeting.select({
                 kind: 'card',
                 instanceId: card.instanceId,
               });
               return;
+            } else if (action.targeting.next.type === 'coordinate') {
+              action.targeting.select({
+                kind: 'coordinate',
+                x: coord.x,
+                y: coord.y,
+              });
             }
-            action.activateAbility(card, coord);
           }}
         />
       </Flipper>
