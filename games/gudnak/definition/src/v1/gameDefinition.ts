@@ -33,7 +33,7 @@ export type Space = {
 };
 
 export type Card = {
-  cardId: string;
+  cardId: ValidCardId;
   instanceId: string;
   ownerId: string;
   fatigued: boolean;
@@ -259,7 +259,13 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members, random }) => {
-    return generateInitialGameState({ members, random });
+    return generateInitialGameState({
+      members,
+      random,
+      decklists: Object.fromEntries(
+        members.map((m) => [m.id, deckDefinitions['deck-1']]),
+      ),
+    });
   },
 
   getPlayerState: ({ globalState, playerId, members }) => {

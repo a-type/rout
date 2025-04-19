@@ -1,6 +1,6 @@
 import { type ValidCardId } from './cardDefinition';
 
-type DeckDefinition = {
+export type DeckDefinition = {
   name: string;
   list: ValidCardId[];
 };

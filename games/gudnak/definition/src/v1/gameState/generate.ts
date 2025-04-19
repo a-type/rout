@@ -6,17 +6,19 @@ import {
   GlobalState,
   PlayerHiddenState,
 } from '../gameDefinition';
-import { deckDefinitions } from '../definitions/decks';
+import { DeckDefinition, deckDefinitions } from '../definitions/decks';
 import { shuffleDeck, draw } from './zone';
 
 export function generateInitialGameState({
   random,
   members,
+  decklists,
 }: {
   random: GameRandom;
   members: {
     id: string;
   }[];
+  decklists: Record<string, DeckDefinition>;
 }): GlobalState {
   const playerOrder = random.shuffle(members.map((m) => m.id));
   const cardState: Record<string, Card> = {};
@@ -26,7 +28,7 @@ export function generateInitialGameState({
     ),
     cardState,
     playerState: members.reduce((acc, member, idx) => {
-      const cards: Card[] = [...deckDefinitions.deck1.list].map((id) => ({
+      const cards: Card[] = [...decklists[member.id].list].map((id) => ({
         cardId: id,
         instanceId: random.id(),
         ownerId: member.id,

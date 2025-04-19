@@ -196,7 +196,6 @@ export function Card({
   const player: PlayerInfo = players[ownerId];
   const { color } = player ?? { color: 'black' };
 
-  // @ts-expect-error Fix this up
   const cardData = cardDefinitions[cardId];
   if (!cardData) {
     throw new Error(`Card ${cardId} not found`);

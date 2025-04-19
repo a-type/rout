@@ -16,6 +16,7 @@ import {
 import { CardStack } from '../gameDefinition';
 import { generateInitialGameState } from './generate';
 import { GameRandom } from '@long-game/game-definition';
+import { deckDefinitions } from '../definitions/decks';
 
 describe('gameState/board', {}, () => {
   describe('getTopCard', {}, () => {
@@ -126,6 +127,10 @@ describe('gameState/board', {}, () => {
       const gameState = generateInitialGameState({
         members,
         random: new GameRandom('test'),
+        decklists: {
+          'u-1': deckDefinitions['deck-1'],
+          'u-2': deckDefinitions['deck-1'],
+        },
       });
       const result = getSpecialSpaces(
         gameState,
