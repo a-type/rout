@@ -1,5 +1,5 @@
 import { Card, GlobalState } from '../gameDefinition';
-import { findCoordFromCard } from '../gameStateHelpers';
+import { findCoordFromCard } from '../gameState/gameStateHelpers';
 
 // TODO: Consider renaming ability effects
 export type ContinuousEffectDefinition = {

@@ -7,29 +7,31 @@ import {
   ValidAbilityId,
 } from './definitions/abilityDefinition';
 import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
-import { deckDefinitions } from './decks';
+import { deckDefinitions } from './definitions/decks';
 import {
-  applyFatigue,
   clearFreeActions,
   deploy,
-  draw,
   findMatchingFreeAction,
-  getCardIdsFromBoard,
-  getGatesCoord,
-  getSpecialSpaces,
-  getStack,
-  getTopCard,
-  mill,
   move,
   playTactic,
   removeTurnBasedContinuousEffects,
-  shuffleDeck,
   spendActions,
   spendFreeAction,
+} from './gameState/gameStateHelpers';
+import { draw, shuffleDeck, mill } from './gameState/zone';
+import {
   validateDeploy,
   validateMove,
   validateTargets,
-} from './gameStateHelpers';
+} from './gameState/validation';
+import {
+  getCardIdsFromBoard,
+  getGatesCoord,
+  getSpecialSpaces,
+  getTopCard,
+  getStack,
+} from './gameState/board';
+import { applyFatigue } from './gameState/card';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -336,7 +338,7 @@ export const gameDefinition: GameDefinition<
     };
   },
 
-  applyRoundToGlobalState: ({ globalState, round, random, members }) => {
+  applyRoundToGlobalState: ({ globalState, round }) => {
     round.turns.forEach((turn) => {
       const { action } = turn.data;
       const playerId = turn.playerId;

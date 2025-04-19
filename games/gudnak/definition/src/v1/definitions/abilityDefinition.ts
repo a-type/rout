@@ -1,19 +1,21 @@
 import { FighterCard } from './cardDefinition';
 import { ValidContinuousEffectKey } from './continuousEffectDefinitions';
 import { Board, Card, FreeAction, GlobalState } from '../gameDefinition';
+import { move, addContinuousEffectToCard } from '../gameState/gameStateHelpers';
 import {
   getAdjacentCardInstanceIds,
-  INVALID_MOVE_CODES,
-  InvalidMoveReason,
-  InvalidDeployReason,
-  INVALID_DEPLOY_CODES,
   getStack,
   swapCardPositions,
   getAllBoardCoordinates,
   getTopCard,
-  move,
-  addContinuousEffectToCard,
-} from '../gameStateHelpers';
+} from '../gameState/board';
+
+import {
+  INVALID_MOVE_CODES,
+  InvalidMoveReason,
+  InvalidDeployReason,
+  INVALID_DEPLOY_CODES,
+} from '../gameState/validation';
 
 type FighterEffect = {
   modifyCombatPower?: (props: {
