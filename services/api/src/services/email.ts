@@ -1,12 +1,13 @@
 import { Email } from '@a-type/auth';
 import { SesEmailProvider } from '@a-type/auth-email-ses';
-import { APP_NAME } from '@long-game/common';
+import { APP_NAME, PrefixedId } from '@long-game/common';
 import { Context } from 'hono';
 import { Env } from '../config/ctx.js';
 
-export const email = new Email<Context<Env>>({
+export const email = new Email<Context>({
   provider: new SesEmailProvider({
-    async getConnectionInfo(ctx) {
+    async getConnectionInfo(baseCtx) {
+      const ctx = baseCtx as Context<Env>;
       return {
         accessKeyId: ctx.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: ctx.env.AWS_SECRET_ACCESS_KEY,
@@ -24,3 +25,27 @@ export const email = new Email<Context<Env>>({
     };
   },
 });
+
+export function sendGameInvitationEmail(
+  ctx: Context,
+  data: {
+    to: string;
+    inviterName: string;
+    userName: string;
+    gameSessionId: PrefixedId<'gs'>;
+  },
+) {
+  return email.sendCustomEmail(
+    {
+      to: data.to,
+      subject: `${data.inviterName} has invited you to play a game!`,
+      html: `<h1>Rout!</h1>
+    <p>${data.inviterName} has invited you to join their game on Rout.</p>
+    <p>Click <a href="${ctx.env.UI_ORIGIN}/session/${data.gameSessionId}">here</a> to join the game.</p>
+    <p>Have fun!</p>
+    <p>The Rout team</p>`,
+      text: `${data.inviterName} has invited you to join their game on Rout. Use this link to join the game: ${ctx.env.UI_ORIGIN}/session/${data.gameSessionId}. \nHave fun! \nThe Rout team.`,
+    },
+    ctx,
+  );
+}

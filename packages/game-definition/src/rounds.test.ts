@@ -30,6 +30,7 @@ describe('game round helpers', () => {
           'days',
           1,
         )({
+          globalState: {},
           currentTime: new Date('2024-01-13T21:00:00Z'),
           gameTimeZone: 'America/New_York',
           members: [],
@@ -47,6 +48,7 @@ describe('game round helpers', () => {
           'days',
           1,
         )({
+          globalState: {},
           currentTime: new Date('2024-01-14T21:00:00Z'),
           gameTimeZone: 'America/New_York',
           members: [],
@@ -62,6 +64,7 @@ describe('game round helpers', () => {
           'days',
           1,
         )({
+          globalState: {},
           currentTime: new Date('2024-01-15T22:00:00Z'),
           gameTimeZone: 'America/New_York',
           members: [],
@@ -77,6 +80,7 @@ describe('game round helpers', () => {
     it('returns round 0 when no turns have been played', () => {
       expect(
         roundFormat.sync()({
+          globalState: {},
           currentTime: new Date('2024-01-14T21:00:00Z'),
           gameTimeZone: 'America/New_York',
           members: [
@@ -98,6 +102,7 @@ describe('game round helpers', () => {
     it('returns round 1 when all players made 1 turn, and some have 2', () => {
       expect(
         roundFormat.sync()({
+          globalState: {},
           currentTime: new Date('2024-01-14T21:00:00Z'),
           gameTimeZone: 'America/New_York',
           members: [

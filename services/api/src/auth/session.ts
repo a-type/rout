@@ -10,8 +10,9 @@ declare module '@a-type/auth' {
   }
 }
 
-export const sessions = new SessionManager<Context<Env>>({
-  getSessionConfig(ctx) {
+export const sessions = new SessionManager<Context>({
+  getSessionConfig(baseCtx) {
+    const ctx = baseCtx as Context<Env>;
     const apiDomain = new URL(ctx.env.API_ORIGIN).hostname;
     const topLevelDomain = apiDomain.split('.').slice(-2).join('.');
     return {
