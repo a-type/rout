@@ -1,4 +1,4 @@
-import { Box } from '@a-type/ui';
+import { Box, clsx } from '@a-type/ui';
 import {
   type PlayerState,
   type CardStack,
@@ -7,8 +7,9 @@ import {
   Coordinate,
 } from '@long-game/game-gudnak-definition/v1';
 import { Card } from './Card';
-import { useGameSuite } from '@long-game/game-client';
 import { isCard, isCoordinate, Selection } from './useSelect';
+import { usePlayerThemed } from '@long-game/game-ui';
+import { hooks } from './gameClient';
 
 export function Space({
   stack,
@@ -38,9 +39,9 @@ export function Space({
       return t.x === coordinate.x && t.y === coordinate.y;
     }
   });
-  const { players, finalState } = useGameSuite();
-  const { cardState } = finalState as PlayerState;
-  const borderColor = ownerId ? (players as any)[ownerId]?.color : 'gray';
+  const { finalState } = hooks.useGameSuite();
+  const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
+  const { cardState } = finalState;
   const topCard = stack[stack.length - 1];
   const cardSelected = isCard(selection) && selection.instanceId === topCard;
   const cardTargeted = targets.some((t) => {
@@ -49,36 +50,37 @@ export function Space({
     }
   });
   return (
-    <Box
-      onClick={() => {
-        onClick?.();
-      }}
-      className="w-full h-full"
-      border
-      p="md"
-      style={{
-        minWidth: '100px',
-        minHeight: '100px',
-        background: selected
-          ? 'rgba(255, 255, 255, 0.2)'
-          : targeted
-          ? 'rgba(255, 240, 79, 0.2)'
-          : 'transparent',
-        borderColor,
-        borderStyle: isGate ? 'dashed' : 'solid',
-      }}
-    >
-      {topCard ? (
-        <Card
-          stack={stack}
-          selected={cardSelected}
-          targeted={cardTargeted}
-          info={cardState[topCard]}
-          onClick={() => {
-            onClickCard?.(cardState[topCard], coordinate);
-          }}
-        />
-      ) : null}
-    </Box>
+    <div className={clsx(className, 'w-full h-full')} style={style}>
+      <Box
+        className={clsx(
+          'w-full h-full border-primary',
+          selected && 'bg-primary-light',
+          targeted && 'bg-primary-wash',
+        )}
+        onClick={() => {
+          onClick?.();
+        }}
+        border
+        p="md"
+        style={{
+          minWidth: 200,
+          minHeight: 200,
+          borderStyle: isGate ? 'dashed' : 'solid',
+        }}
+      >
+        {topCard ? (
+          <Card
+            stack={stack}
+            selected={cardSelected}
+            targeted={cardTargeted}
+            info={cardState[topCard]}
+            instanceId={cardState[topCard].instanceId}
+            onClick={() => {
+              onClickCard?.(cardState[topCard], coordinate);
+            }}
+          />
+        ) : null}
+      </Box>
+    </div>
   );
 }

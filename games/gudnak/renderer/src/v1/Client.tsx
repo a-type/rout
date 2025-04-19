@@ -19,13 +19,8 @@ export function Client() {
 }
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const {
-    prepareTurn,
-    finalState,
-    turnError,
-    localTurnData,
-    latestRoundIndex,
-  } = gameSuite;
+  const { submitTurn, finalState, turnError, localTurnData, latestRoundIndex } =
+    gameSuite;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
@@ -60,12 +55,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   console.log(action.selection.card);
 
   return (
-    <Box className="w-full h-full mt-2 flex flex-col p-3 gap-2">
+    <Box className="w-full h-full flex flex-col p-3 gap-2">
       <Flipper flipKey={JSON.stringify(finalState.board)}>
-        <Box className="flex flex-row gap-2 overflow-y-scroll">
+        <Box className="flex flex-row gap-2 overflow-y-scroll py-2">
           {hand.map((card, index) => (
             <Card
               selected={action.selection.card?.instanceId === card.instanceId}
+              instanceId={card.instanceId}
               key={index}
               info={card}
               onClick={() => {
@@ -81,7 +77,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               <Button
                 disabled={actions <= 0}
                 onClick={() => {
-                  prepareTurn({ action: { type: 'draw' } });
+                  submitTurn({ action: { type: 'draw' } });
                 }}
               >
                 Draw
@@ -89,7 +85,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               <Button
                 disabled={actions > 0}
                 onClick={() => {
-                  prepareTurn({ action: { type: 'endTurn' } });
+                  submitTurn({ action: { type: 'endTurn' } });
                 }}
               >
                 End turn
@@ -108,8 +104,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           {action.targeting.next ? (
             <span>{action.targeting.next.description}</span>
           ) : null}
-          <span>{turnError}</span>
-          <span>{JSON.stringify(localTurnData)}</span>
+          {/* <span>{turnError}</span> */}
+          {/* <span>{JSON.stringify(localTurnData)}</span> */}
         </Box>
         <Board
           selection={action.selection.item}

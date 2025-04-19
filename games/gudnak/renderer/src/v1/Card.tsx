@@ -1,5 +1,4 @@
-import { Box, Tooltip } from '@a-type/ui';
-import { PlayerInfo, useGameSuite } from '@long-game/game-client';
+import { Box, clsx, Tooltip } from '@a-type/ui';
 import {
   cardDefinitions,
   type FighterCard,
@@ -11,6 +10,9 @@ import {
   type Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
 import { Flipped } from 'react-flip-toolkit';
+import { usePlayerThemed } from '@long-game/game-ui';
+import { useGameSuite } from '@long-game/game-client';
+import { hooks } from './gameClient';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -25,7 +27,7 @@ type BaseCardProps = {
   selected?: boolean;
   targeted?: boolean;
   fatigued?: boolean;
-  color?: string;
+  instanceId: string;
   onClick?: () => void;
 };
 
@@ -37,14 +39,12 @@ function FighterCard({
   selected,
   fatigued,
   continuousEffects,
-  color,
   instanceId,
   targeted,
 }: BaseCardProps & {
   cardData: FighterCard;
   continuousEffects?: ContinuousEffect[];
   cardStack?: CardStack;
-  instanceId: string;
 }) {
   const textColor = fatigued ? 'gray' : 'white';
   if (cardData.artUrl) {
@@ -56,20 +56,16 @@ function FighterCard({
           >
             <Box
               {...flippedProps}
-              className="w-full h-full"
+              className={clsx(
+                'w-full h-full border-primary rounded-lg bg-cover',
+                selected && 'bg-primary-light',
+                targeted && 'bg-primary-wash',
+                fatigued && 'bg-gray-800',
+              )}
               border
               style={{
                 width: CARD_SIZE,
                 height: CARD_SIZE,
-                borderColor: color,
-                background: targeted
-                  ? 'yellow'
-                  : selected
-                  ? color
-                  : fatigued
-                  ? 'gray'
-                  : 'transparent',
-                color: textColor,
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -77,11 +73,11 @@ function FighterCard({
               }}
             >
               <img
+                className={clsx(
+                  (selected || targeted || fatigued) && 'mix-blend-screen',
+                )}
                 src={cardData.artUrl}
-                width={CARD_SIZE}
-                style={{
-                  opacity: fatigued ? 0.6 : targeted || selected ? 0.8 : 1,
-                }}
+                width={CARD_SIZE - 4}
               />
             </Box>
           </Tooltip>
@@ -92,13 +88,12 @@ function FighterCard({
 
   return (
     <Box
-      className="w-full h-full"
+      className="w-full h-full border-primary"
       border
       p="md"
       style={{
         width: CARD_SIZE,
         height: CARD_SIZE,
-        borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
         color: textColor,
       }}
@@ -138,48 +133,53 @@ function FighterCard({
 
 function TacticCard({
   cardData,
+  instanceId,
   onClick,
   selected,
-  color,
 }: BaseCardProps & { cardData: TacticCard }) {
   if (cardData.artUrl) {
     return (
-      <Tooltip content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}>
-        <Box
-          className="w-full h-full"
-          border
-          style={{
-            width: CARD_SIZE,
-            height: CARD_SIZE,
-            borderColor: color,
-            background: selected ? color : 'transparent',
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick?.();
-          }}
-        >
-          <img
-            src={cardData.artUrl}
-            width={CARD_SIZE}
-            style={{
-              opacity: selected ? 0.8 : 1,
-            }}
-          />
-        </Box>
-      </Tooltip>
+      <Flipped flipId={instanceId}>
+        {(flippedProps) => (
+          <Tooltip
+            content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
+          >
+            <Box
+              {...flippedProps}
+              className={clsx(
+                'w-full h-full border-primary rounded-lg bg-cover',
+                selected && 'bg-primary-light',
+              )}
+              border
+              style={{
+                width: CARD_SIZE,
+                height: CARD_SIZE,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+            >
+              <img
+                className="mix-blend-screen"
+                src={cardData.artUrl}
+                width={CARD_SIZE - 4}
+              />
+            </Box>
+          </Tooltip>
+        )}
+      </Flipped>
     );
   }
 
   return (
     <Box
-      className="w-full h-full"
+      className="w-full h-full border-primary"
       border
       p="md"
       style={{
         width: CARD_SIZE,
         height: CARD_SIZE,
-        borderColor: color,
         background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       }}
       onClick={(e) => {
@@ -207,11 +207,10 @@ export function Card({
   stack?: CardStack;
   info: CardType;
 }) {
-  const { players } = useGameSuite();
-  const { cardId, ownerId, fatigued, continuousEffects, instanceId } = info;
-  // @ts-expect-error Fix this up
-  const player: PlayerInfo = players[ownerId];
-  const { color } = player ?? { color: 'black' };
+  const { finalState } = hooks.useGameSuite();
+  const { cardState } = finalState;
+  const { cardId, ownerId, fatigued, continuousEffects } = info;
+  const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
 
   const cardData = cardDefinitions[cardId];
   if (!cardData) {
@@ -220,35 +219,51 @@ export function Card({
 
   if (cardData.kind === 'fighter') {
     return (
-      <>
-        <FighterCard
-          cardData={cardData}
-          color={color}
-          fatigued={fatigued}
-          continuousEffects={continuousEffects}
-          instanceId={instanceId}
-          {...rest}
-        />
+      <div className={className} style={style}>
         {stack &&
           stack.length > 1 &&
-          Array.from({ length: stack.length - 1 }).map((_, idx) => (
-            <Box
-              className="flex flex-row gap-2 border"
-              border
-              key={idx}
-              style={{
-                marginLeft: '-3px',
-                width: '10px',
-                height: CARD_SIZE,
-                borderColor: color,
-                borderLeft: 'none',
-                borderTopLeftRadius: '0px',
-                borderBottomLeftRadius: '0px',
-              }}
-            ></Box>
-          ))}
-      </>
+          stack
+            .slice(0, -1)
+            .reverse()
+            .map((c, idx) => (
+              <div
+                key={idx}
+                className="absolute"
+                style={{
+                  left: `${(stack.length - idx - 1) * 30 + 5}px`,
+                }}
+              >
+                <FighterCard
+                  cardData={cardDefinitions[cardState[c].cardId] as FighterCard}
+                  fatigued={fatigued}
+                  continuousEffects={continuousEffects}
+                  instanceId={c}
+                />
+              </div>
+            ))}
+        <FighterCard
+          cardData={cardData}
+          fatigued={fatigued}
+          continuousEffects={continuousEffects}
+          {...rest}
+        />
+
+        {/* // <Box
+            //   className="flex flex-row gap-2 border-primary ml-[-3px] w-[10px] border-l-none"
+            //   border
+            //   key={idx}
+            //   style={{
+            //     height: CARD_SIZE,
+            //     borderTopLeftRadius: '0px',
+            //     borderBottomLeftRadius: '0px',
+            //   }}
+            // ></Box> */}
+      </div>
     );
   }
-  return <TacticCard cardData={cardData} color={color} {...rest} />;
+  return (
+    <div className={className} style={style}>
+      <TacticCard cardData={cardData} {...rest} />
+    </div>
+  );
 }
