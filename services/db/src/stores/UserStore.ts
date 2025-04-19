@@ -437,7 +437,7 @@ export class UserStore extends RpcTarget {
       .executeTakeFirst();
   }
 
-  async sendGameSessionInvitation(
+  async createGameSessionInvitation(
     gameSessionId: PrefixedId<'gs'>,
     userId: PrefixedId<'u'>,
   ) {
@@ -455,10 +455,11 @@ export class UserStore extends RpcTarget {
       );
     }
 
-    const invitation = await this.#db
+    const inviteId = id('gsi');
+    await this.#db
       .insertInto('GameSessionInvitation')
       .values({
-        id: id('gsi'),
+        id: inviteId,
         gameSessionId: gameSessionId,
         userId,
         status: 'pending',
@@ -467,10 +468,17 @@ export class UserStore extends RpcTarget {
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
       })
       .onConflict((b) => b.columns(['gameSessionId', 'userId']).doNothing())
-      .returningAll()
       .executeTakeFirstOrThrow();
 
-    // TODO: send notification / email
+    // because upsert doesn't return data on conflict, need to refetch
+    // the invitation
+    const invitation = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .innerJoin('User', 'GameSessionInvitation.userId', 'User.id')
+      .where('id', '=', inviteId)
+      .selectAll('GameSessionInvitation')
+      .select(['User.id', 'User.displayName', 'User.email'])
+      .executeTakeFirstOrThrow();
 
     return invitation;
   }

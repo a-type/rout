@@ -5,6 +5,7 @@ import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { userStoreMiddleware } from '../middleware';
+import { sendGameInvitationEmail } from '../services/email';
 
 export const gameSessionInvitationsRouter = new Hono()
   .use(userStoreMiddleware)
@@ -61,9 +62,17 @@ export const gameSessionInvitationsRouter = new Hono()
     ),
     async (ctx) => {
       const { gameSessionId, userId } = ctx.req.valid('json');
-      await ctx
+      const invitation = await ctx
         .get('userStore')
-        .sendGameSessionInvitation(gameSessionId, userId);
+        .createGameSessionInvitation(gameSessionId, userId);
+      const currentUser = await ctx.get('userStore').getMe();
+      // send an email to the user
+      await sendGameInvitationEmail(ctx, {
+        to: invitation.email,
+        gameSessionId,
+        inviterName: currentUser.displayName,
+        userName: invitation.displayName,
+      });
       return ctx.json({ success: true });
     },
   );
