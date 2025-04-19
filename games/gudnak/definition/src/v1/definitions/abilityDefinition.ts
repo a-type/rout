@@ -1,7 +1,8 @@
 import { FighterCard } from './cardDefinition';
 import { ValidContinuousEffectKey } from './continuousEffectDefinitions';
 import { Board, Card, FreeAction, GlobalState } from '../gameDefinition';
-import { move, addContinuousEffectToCard } from '../gameState/gameStateHelpers';
+import { move } from '../gameState/gameStateHelpers';
+import { addContinuousEffectToCard } from '../gameState/continuousEffects';
 import {
   getAdjacentCardInstanceIds,
   getStack,

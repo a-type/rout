@@ -5,9 +5,6 @@ import type {
   Coordinate,
   Side,
   GlobalState,
-  FreeAction,
-  Action,
-  ContinuousEffect,
 } from '../gameDefinition';
 import {
   abilityDefinitions,
@@ -166,89 +163,4 @@ export function playTactic(
     });
   }
   return nextState;
-}
-
-export function findMatchingFreeAction(
-  action: Action,
-  freeActions: FreeAction[],
-): FreeAction | null {
-  const freeAction = freeActions.find((a) => {
-    if (action.type !== a.type) {
-      return false;
-    }
-    if (!a.cardInstanceId) {
-      return true;
-    }
-    if (action.type === 'deploy') {
-      return a.cardInstanceId === action.card.instanceId;
-    }
-    if (action.type === 'move') {
-      return a.cardInstanceId === action.cardInstanceId;
-    }
-  });
-  return freeAction ?? null;
-}
-
-export function spendFreeAction(gameState: GlobalState, action: FreeAction) {
-  const freeActions = gameState.freeActions
-    .map((a) => {
-      if (a !== action) {
-        return a;
-      }
-      if (a.count && a.count > 1) {
-        return { ...a, count: a.count - 1 };
-      }
-      return null;
-    })
-    .filter(Boolean) as FreeAction[];
-  return {
-    ...gameState,
-    freeActions,
-  };
-}
-
-export function addContinuousEffectToCard(
-  gameState: GlobalState,
-  cardInstanceId: string,
-  effect: ContinuousEffect,
-): GlobalState {
-  return {
-    ...gameState,
-    cardState: {
-      ...gameState.cardState,
-      [cardInstanceId]: {
-        ...gameState.cardState[cardInstanceId],
-        continuousEffects: [
-          ...gameState.cardState[cardInstanceId].continuousEffects,
-          effect,
-        ],
-      },
-    },
-  };
-}
-
-export function removeTurnBasedContinuousEffects(
-  gameState: GlobalState,
-  nextTurnOwnerId: string,
-): GlobalState {
-  return {
-    ...gameState,
-    cardState: Object.fromEntries(
-      Object.entries(gameState.cardState).map(([id, card]) => [
-        id,
-        {
-          ...card,
-          continuousEffects: card.continuousEffects?.filter((e) => {
-            if (e.duration === 'end-of-turn') {
-              return false;
-            }
-            if (e.duration === 'owners-next-turn') {
-              return e.ownerId !== nextTurnOwnerId;
-            }
-            return true;
-          }),
-        },
-      ]),
-    ),
-  };
 }

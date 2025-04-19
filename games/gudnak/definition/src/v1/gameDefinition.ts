@@ -8,30 +8,15 @@ import {
 } from './definitions/abilityDefinition';
 import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './definitions/decks';
-import {
-  clearFreeActions,
-  deploy,
-  findMatchingFreeAction,
-  move,
-  playTactic,
-  removeTurnBasedContinuousEffects,
-  spendActions,
-  spendFreeAction,
-} from './gameState/gameStateHelpers';
-import { draw, shuffleDeck, mill } from './gameState/zone';
+import { findMatchingFreeAction } from './gameState/freeAction';
+import { draw, shuffleDeck } from './gameState/zone';
 import {
   validateDeploy,
   validateMove,
   validateTargets,
 } from './gameState/validation';
-import {
-  getCardIdsFromBoard,
-  getGatesCoord,
-  getSpecialSpaces,
-  getTopCard,
-  getStack,
-} from './gameState/board';
-import { applyFatigue } from './gameState/card';
+import { getCardIdsFromBoard, getSpecialSpaces } from './gameState/board';
+import { applyTurn } from './gameState/applyTurn';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -56,22 +41,22 @@ export type Card = {
 export type CardStack = string[];
 export type Board = CardStack[][];
 export type Coordinate = { x: number; y: number };
-type DrawAction = { type: 'draw' };
-type TacticAction = { type: 'tactic'; card: Card; input: EffectInput };
-type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
-type MoveAction = {
+export type DrawAction = { type: 'draw' };
+export type TacticAction = { type: 'tactic'; card: Card; input: EffectInput };
+export type DeployAction = { type: 'deploy'; card: Card; target: Coordinate };
+export type MoveAction = {
   type: 'move';
   cardInstanceId: string;
   source: Coordinate;
   target: Coordinate;
 };
-type UseAbilityAction = {
+export type UseAbilityAction = {
   type: 'useAbility';
   cardInstanceId: string;
   abilityId: string;
   targets: Target[];
 };
-type EndTurnAction = { type: 'endTurn' };
+export type EndTurnAction = { type: 'endTurn' };
 export type Action =
   | DrawAction
   | DeployAction
@@ -340,115 +325,7 @@ export const gameDefinition: GameDefinition<
 
   applyRoundToGlobalState: ({ globalState, round }) => {
     round.turns.forEach((turn) => {
-      const { action } = turn.data;
-      const playerId = turn.playerId;
-      const matchingFreeAction = findMatchingFreeAction(
-        action,
-        globalState.freeActions,
-      );
-
-      switch (action.type) {
-        case 'draw': {
-          globalState = draw(globalState, playerId, 1);
-          globalState = spendActions(globalState);
-          globalState = clearFreeActions(globalState);
-          break;
-        }
-        case 'deploy': {
-          globalState = deploy(
-            globalState,
-            action.card.instanceId,
-            action.target,
-          );
-          if (matchingFreeAction) {
-            globalState = spendFreeAction(globalState, matchingFreeAction);
-          } else {
-            globalState = spendActions(globalState);
-            globalState = clearFreeActions(globalState);
-          }
-          break;
-        }
-        case 'move': {
-          globalState = move(
-            globalState,
-            action.cardInstanceId,
-            action.source,
-            action.target,
-          );
-          if (matchingFreeAction) {
-            globalState = spendFreeAction(globalState, matchingFreeAction);
-          } else {
-            globalState = spendActions(globalState);
-            globalState = clearFreeActions(globalState);
-          }
-          break;
-        }
-        case 'tactic': {
-          globalState = clearFreeActions(globalState);
-          globalState = playTactic(globalState, action.card, action.input);
-          break;
-        }
-        case 'useAbility': {
-          const abilityId = action.abilityId as ValidAbilityId;
-          const abilityDef = abilityDefinitions[abilityId];
-          if ('modifyGameStateOnActivate' in abilityDef.effect) {
-            globalState = abilityDef.effect.modifyGameStateOnActivate({
-              globalState,
-              input: { targets: action.targets },
-            });
-          }
-          globalState = applyFatigue(globalState, action.cardInstanceId);
-          globalState = spendActions(globalState);
-          globalState = clearFreeActions(globalState);
-          break;
-        }
-        case 'endTurn': {
-          globalState = clearFreeActions(globalState);
-          const playerIdx = globalState.playerOrder.indexOf(playerId);
-          const nextPlayerIdx =
-            (playerIdx + 1) % globalState.playerOrder.length;
-          const nextPlayer = globalState.playerOrder[nextPlayerIdx];
-          globalState = {
-            ...globalState,
-            currentPlayer: nextPlayer,
-            actions: 2,
-          };
-          // Remove fatigue from all cards in the board
-          globalState = {
-            ...globalState,
-            cardState: Object.fromEntries(
-              Object.entries(globalState.cardState).map(([id, card]) => [
-                id,
-                {
-                  ...card,
-                  fatigued: false,
-                },
-              ]),
-            ),
-          };
-          globalState = removeTurnBasedContinuousEffects(
-            globalState,
-            nextPlayer,
-          );
-
-          const siegeLocation = getGatesCoord(
-            globalState.playerState[nextPlayer].side,
-          );
-          const siegeCardId = getTopCard(
-            getStack(globalState.board, siegeLocation),
-          );
-          const siegeCardOwner = siegeCardId
-            ? globalState.cardState[siegeCardId]?.ownerId
-            : null;
-
-          if (!siegeCardOwner || siegeCardOwner === nextPlayer) {
-            globalState = draw(globalState, nextPlayer);
-          } else {
-            globalState = mill(globalState, nextPlayer);
-          }
-          break;
-        }
-      }
+      globalState = applyTurn(globalState, turn);
     });
     return globalState;
   },
