@@ -71,24 +71,35 @@ export class UserStore extends RpcTarget {
    */
   async getUser(id: PrefixedId<'u'>) {
     if (id === this.#userId) {
-      return this.getMe();
+      const user = await this.getMe();
+      return {
+        ...user,
+        isFriend: false,
+        isMe: true,
+      };
     }
 
-    const user = await this.#db
-      .selectFrom('User')
-      .innerJoin('Friendship', 'User.id', 'Friendship.userId')
-      .where('User.id', '=', id)
+    const query = this.#db
+      .selectFrom('User as u')
+      .leftJoin('Friendship as f1', 'u.id', 'f1.userId')
+      .leftJoin('Friendship as f2', 'u.id', 'f2.friendId')
+      .where('u.id', '=', id)
       .where((eb) =>
         eb.or([
-          eb('Friendship.userId', '=', this.#userId),
-          eb('Friendship.friendId', '=', this.#userId),
+          eb('f1.userId', '=', this.#userId),
+          eb('f1.friendId', '=', this.#userId),
+          eb('f2.userId', '=', this.#userId),
+          eb('f2.friendId', '=', this.#userId),
         ]),
       )
-      .select(['User.id', 'User.color', 'User.imageUrl', 'User.displayName'])
-      .executeTakeFirst();
+      .selectAll('u');
+    console.log(query.compile().sql);
+    const user = await query.executeTakeFirst();
 
     return this.#fillUserDefaults({
       id,
+      isFriend: !!user,
+      isMe: false,
       ...user,
     });
   }
@@ -212,21 +223,62 @@ export class UserStore extends RpcTarget {
     }
   }
 
-  async insertFriendshipInvite(invitedEmail: string) {
-    const friendship = await this.#db
+  async insertFriendshipInvite({
+    email: providedEmail,
+    userId,
+  }: {
+    email?: string;
+    userId?: PrefixedId<'u'>;
+  }) {
+    if (!(providedEmail || userId)) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Either email or userId must be provided',
+      );
+    }
+    const email =
+      providedEmail ||
+      (
+        await this.#db
+          .selectFrom('User')
+          .where('id', '=', userId!)
+          .select('email')
+          .executeTakeFirstOrThrow()
+      ).email;
+
+    const existing = await this.#db
+      .selectFrom('FriendshipInvitation')
+      .where('inviterId', '=', this.#userId)
+      .where('email', '=', email)
+      .selectAll()
+      .executeTakeFirst();
+    if (existing) {
+      return {
+        created: false,
+        invite: existing,
+      };
+    }
+
+    await this.#db
       .insertInto('FriendshipInvitation')
       .values({
         id: id('fi'),
         inviterId: this.#userId,
         status: 'pending',
-        email: invitedEmail,
+        email,
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
-      .returning('id')
       .onConflict((b) => b.columns(['inviterId', 'email']).doNothing())
       .executeTakeFirstOrThrow();
 
-    return friendship;
+    const friendship = await this.#db
+      .selectFrom('FriendshipInvitation')
+      .where('FriendshipInvitation.inviterId', '=', this.#userId)
+      .where('FriendshipInvitation.email', '=', email)
+      .selectAll()
+      .executeTakeFirstOrThrow();
+
+    return { created: true, invite: friendship };
   }
 
   async respondToFriendshipInvite(

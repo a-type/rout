@@ -1,6 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
 import {
-  APP_NAME,
   assertPrefixedId,
   isPrefixedId,
   LongGameError,
@@ -11,7 +10,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { Env } from '../config/ctx';
 import { userStoreMiddleware } from '../middleware';
-import { email } from '../services/email';
+import { sendFriendshipInviteEmail } from '../services/email';
 
 export const friendshipsRouter = new Hono<Env>()
   .get(
@@ -50,35 +49,47 @@ export const friendshipsRouter = new Hono<Env>()
     zValidator(
       'json',
       z.object({
-        email: z.string(),
+        email: z.string().optional(),
+        userId: z
+          .custom<PrefixedId<'u'>>((v) => isPrefixedId(v, 'u'))
+          .optional(),
         landOnGameSessionId: z
           .custom<PrefixedId<'gs'>>((v) => isPrefixedId(v, 'gs'))
           .optional(),
       }),
     ),
     async (ctx) => {
-      const { email: emailAddress, landOnGameSessionId } =
-        ctx.req.valid('json');
+      const {
+        email: emailAddress,
+        userId,
+        landOnGameSessionId,
+      } = ctx.req.valid('json');
       const userStore = ctx.get('userStore');
-      const invite = await userStore.insertFriendshipInvite(emailAddress);
-      const user = await userStore.getMe();
+      const { invite, created } = await userStore.insertFriendshipInvite({
+        email: emailAddress,
+        userId,
+      });
 
-      const inviteLink = new URL(`/invite/${invite.id}`, ctx.env.UI_ORIGIN);
-      if (landOnGameSessionId) {
-        inviteLink.searchParams.set('landOnGameSessionId', landOnGameSessionId);
+      if (created) {
+        const user = await userStore.getMe();
+        const inviteLink = new URL(`/invite/${invite.id}`, ctx.env.UI_ORIGIN);
+        if (landOnGameSessionId) {
+          inviteLink.searchParams.set(
+            'landOnGameSessionId',
+            landOnGameSessionId,
+          );
+        }
+        try {
+          await sendFriendshipInviteEmail(ctx, {
+            to: invite.email,
+            inviterName: user.displayName,
+            inviteLink: inviteLink.toString(),
+          });
+        } catch (err) {
+          console.error('Failed to send email', err);
+          // continue anyway, invite will still be in their UI
+        }
       }
-      email.sendCustomEmail(
-        {
-          to: emailAddress,
-          subject: `Play games with ${user.displayName}`,
-          text: `${user.displayName} invited you to join them as a friend on ${APP_NAME}. Keep in touch in through a daily ritual of play!
-
-        Visit ${inviteLink} to get started.`,
-          html: `<p>${user.displayName} invited you to join them as a friend on ${APP_NAME}. Keep in touch in through a daily ritual of play!</p>
-          <p>Visit <a href="${inviteLink}">${inviteLink}</a> to get started.</p>`,
-        },
-        ctx as any,
-      );
       return ctx.json({ success: true });
     },
   )

@@ -2,6 +2,7 @@ import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Avatar,
   Box,
+  Button,
   clsx,
   Divider,
   H1,
@@ -14,6 +15,7 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
+import { useState } from 'react';
 import { PublicInviteLink } from '../memberships/PublicInviteLink.js';
 import { GamePicker } from './GamePicker.jsx';
 
@@ -167,7 +169,6 @@ function GameSetupInviteFriends({
 }
 
 function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
-  const { data: me } = sdkHooks.useGetMe();
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: sessionId,
   });
@@ -175,15 +176,53 @@ function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
   return (
     <PeopleGrid>
       {pregame.members.map((member) => (
-        <PeopleGridItem key={member.id}>
-          <Avatar
-            className="w-full h-auto aspect-1"
-            imageSrc={member.imageUrl}
-          />
-          <span>{member.id === me?.id ? 'You' : member.displayName}</span>
-        </PeopleGridItem>
+        <GameSetupMemberItem key={member.id} member={member} />
       ))}
     </PeopleGrid>
+  );
+}
+
+function GameSetupMemberItem({
+  member,
+}: {
+  member: {
+    id: PrefixedId<'u'>;
+    displayName: string;
+    imageUrl?: string | null;
+  };
+}) {
+  const [inviteSent, setInviteSent] = useState(false);
+  const sendFriendshipInvite = sdkHooks.useSendFriendshipInvite();
+  const { data: otherUser } = sdkHooks.useGetUser({
+    id: member.id,
+  });
+
+  return (
+    <PeopleGridItem key={member.id}>
+      <Avatar className="w-full h-auto aspect-1" imageSrc={member.imageUrl} />
+      {!otherUser.isFriend && !otherUser.isMe && (
+        <Button
+          className={clsx(
+            'absolute top--1 left-50% -translate-x-50% z-1 text-xs',
+            inviteSent ? 'bg-gray' : 'bg-accent',
+          )}
+          color="accent"
+          size="small"
+          disabled={inviteSent}
+          loading={sendFriendshipInvite.isPending}
+          onClick={async () => {
+            await sendFriendshipInvite.mutateAsync({
+              userId: member.id,
+            });
+            setInviteSent(true);
+          }}
+        >
+          {inviteSent ? <span>Sent</span> : <span>Add friend</span>}
+          <Icon name={inviteSent ? 'send' : 'plus'} className="w-10px h-10px" />
+        </Button>
+      )}
+      <span>{otherUser.isMe ? 'You' : member.displayName}</span>
+    </PeopleGridItem>
   );
 }
 

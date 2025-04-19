@@ -31,7 +31,11 @@ export class PublicSdk extends BaseSdk {
   sendFriendshipInvite = this.sdkMutation(
     this.apiRpc.friendships.invites.$post,
     {
-      transformInput: (input: { email: string }) => ({ json: input }),
+      transformInput: (input: {
+        email?: string;
+        userId?: PrefixedId<'u'>;
+        landOnGameSessionId?: PrefixedId<'gs'>;
+      }) => ({ json: input }),
     },
   );
   respondToFriendshipInvite = this.sdkMutation(

@@ -49,3 +49,25 @@ export function sendGameInvitationEmail(
     ctx,
   );
 }
+
+export function sendFriendshipInviteEmail(
+  ctx: Context,
+  data: {
+    to: string;
+    inviterName: string;
+    inviteLink: string;
+  },
+) {
+  return email.sendCustomEmail(
+    {
+      to: data.to,
+      subject: `Play games with ${data.inviterName}`,
+      text: `${data.inviterName} invited you to join them as a friend on ${APP_NAME}. Keep in touch in through a daily ritual of play!
+
+        Visit ${data.inviteLink} to get started.`,
+      html: `<p>${data.inviterName} invited you to join them as a friend on ${APP_NAME}. Keep in touch in through a daily ritual of play!</p>
+          <p>Visit <a href="${data.inviteLink}">${data.inviteLink}</a> to get started.</p>`,
+    },
+    ctx,
+  );
+}

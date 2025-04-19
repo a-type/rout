@@ -30,32 +30,38 @@ function IncomingInvites() {
 function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
   return (
-    <Box items="center" surface="wash" gap p>
-      <Avatar
-        imageSrc={invite.otherUser?.imageUrl ?? ''}
-        name={invite.otherUser?.displayName}
-      />
-      {invite.otherUser?.displayName ?? 'Someone'} invited you to be friends
-      <Button
-        onClick={async () => {
-          await respondMutation.mutateAsync({
-            id: invite.id,
-            response: 'accepted',
-          });
-        }}
-      >
-        Accept
-      </Button>
-      <Button
-        onClick={async () => {
-          await respondMutation.mutateAsync({
-            id: invite.id,
-            response: 'declined',
-          });
-        }}
-      >
-        Reject
-      </Button>
+    <Box d="col" surface="wash" gap p>
+      <Box items="center" gap>
+        <Avatar
+          imageSrc={invite.otherUser?.imageUrl ?? ''}
+          name={invite.otherUser?.displayName}
+        />
+        {invite.otherUser?.displayName ?? 'Someone'} invited you to be friends
+      </Box>
+      <Box items="center" justify="end" gap>
+        <Button
+          color="ghostDestructive"
+          onClick={async () => {
+            await respondMutation.mutateAsync({
+              id: invite.id,
+              response: 'declined',
+            });
+          }}
+        >
+          Reject
+        </Button>
+        <Button
+          color="accent"
+          onClick={async () => {
+            await respondMutation.mutateAsync({
+              id: invite.id,
+              response: 'accepted',
+            });
+          }}
+        >
+          Accept
+        </Button>
+      </Box>
     </Box>
   );
 }
