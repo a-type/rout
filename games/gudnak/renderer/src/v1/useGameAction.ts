@@ -18,6 +18,7 @@ export function useGameAction() {
 
   const playCard = (card: CardType) => {
     const cardDef = cardDefinitions[card.cardId as ValidCardId];
+    selection.set(card);
     if (cardDef.kind === 'tactic') {
       const abilityDef = abilityDefinitions[card.cardId as ValidAbilityId];
       if ('input' in abilityDef) {
@@ -66,6 +67,8 @@ export function useGameAction() {
   const moveCard = (source: Coordinate) => {
     const stack = finalState.board[source.y][source.x];
     const cardInstanceId = stack[stack.length - 1];
+    const card = finalState.cardState[cardInstanceId];
+    selection.set(card);
     targeting.begin([
       {
         controller: 'any',

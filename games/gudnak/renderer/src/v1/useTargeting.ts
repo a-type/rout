@@ -27,7 +27,6 @@ export function useTargeting() {
   };
 
   const clear = () => {
-    console.trace('clear');
     onTargetsCompleteRef.current = null;
     setQueuedTargetInputs([]);
     setChosenTargets([]);
