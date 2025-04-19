@@ -98,22 +98,25 @@ export function getCardIdsFromBoard(board: Board): string[] {
   return board.flatMap((row) => row.flatMap((stack) => stack));
 }
 
-export function getAdjacentCardInstanceIds(
+export function getAdjacentCoordinates(
   board: Board,
   coord: Coordinate,
-): string[] {
+): Coordinate[] {
   const { x, y } = coord;
-  const adjacentCoords = [
+  return [
     { x: x - 1, y },
     { x: x + 1, y },
     { x, y: y - 1 },
     { x, y: y + 1 },
-  ];
+  ].filter((c) => validCoordinate(board, c));
+}
+
+export function getAdjacentCardInstanceIds(
+  board: Board,
+  coord: Coordinate,
+): string[] {
+  const adjacentCoords = getAdjacentCoordinates(board, coord);
   const adjacentCards = adjacentCoords
-    .filter(
-      (c) =>
-        c.x >= 0 && c.x < board[0].length && c.y >= 0 && c.y < board.length,
-    )
     .map((c) => getTopCard(getStack(board, c)))
     .filter(Boolean);
   return adjacentCards as string[];

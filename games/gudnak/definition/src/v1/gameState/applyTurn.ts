@@ -1,6 +1,5 @@
 import { Turn } from '@long-game/game-definition';
 import {
-  abilityDefinitions,
   DeployAction,
   GlobalState,
   MoveAction,
@@ -8,7 +7,9 @@ import {
   UseAbilityAction,
   ValidAbilityId,
 } from '../gameDefinition';
+import { abilityDefinitions } from '../definitions/abilityDefinition';
 import {
+  clearAllFatigue,
   clearFreeActions,
   deploy,
   move,
@@ -24,10 +25,6 @@ import { applyFatigue } from './card';
 export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
   const { action } = turn.data;
   const playerId = turn.playerId;
-  const matchingFreeAction = findMatchingFreeAction(
-    action,
-    globalState.freeActions,
-  );
 
   switch (action.type) {
     case 'draw': {
@@ -52,7 +49,7 @@ export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
       break;
     }
     case 'endTurn': {
-      performEndTurn(globalState, playerId);
+      globalState = performEndTurn(globalState, playerId);
       break;
     }
   }
@@ -114,7 +111,7 @@ function performMove(
   return globalState;
 }
 
-function performUseAbility(
+export function performUseAbility(
   globalState: GlobalState,
   action: UseAbilityAction,
 ): GlobalState {
@@ -146,18 +143,7 @@ function performEndTurn(
     actions: 2,
   };
   // Remove fatigue from all cards in the board
-  globalState = {
-    ...globalState,
-    cardState: Object.fromEntries(
-      Object.entries(globalState.cardState).map(([id, card]) => [
-        id,
-        {
-          ...card,
-          fatigued: false,
-        },
-      ]),
-    ),
-  };
+  globalState = clearAllFatigue(globalState);
   globalState = removeTurnBasedContinuousEffects(globalState, nextPlayer);
 
   const siegeLocation = getGatesCoord(globalState.playerState[nextPlayer].side);
@@ -169,7 +155,14 @@ function performEndTurn(
   if (!siegeCardOwner || siegeCardOwner === nextPlayer) {
     globalState = draw(globalState, nextPlayer);
   } else {
-    globalState = mill(globalState, nextPlayer);
+    if (globalState.playerState[nextPlayer].deck.length > 0) {
+      globalState = mill(globalState, nextPlayer);
+    } else {
+      globalState = {
+        ...globalState,
+        winner: siegeCardOwner,
+      };
+    }
   }
 
   return globalState;

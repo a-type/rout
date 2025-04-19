@@ -87,7 +87,7 @@ export function useGameAction() {
     });
   };
 
-  const activateAbility = (card: CardType) => {
+  const activateAbility = (card: CardType, source: Coordinate) => {
     const cardDef = cardDefinitions[card.cardId as ValidCardId];
     if (cardDef.kind !== 'fighter' || cardDef.abilities.length === 0) {
       console.error(`Card ${card.cardId} is not a fighter or has no abilities`);
@@ -113,6 +113,7 @@ export function useGameAction() {
             abilityId: cardDef.abilities[0].id,
             cardInstanceId: card.instanceId,
             targets,
+            source,
           },
         });
       });
@@ -123,6 +124,7 @@ export function useGameAction() {
           abilityId: card.cardId as ValidAbilityId,
           cardInstanceId: card.instanceId,
           targets: [],
+          source,
         },
       });
     }

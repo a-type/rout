@@ -1,5 +1,5 @@
 import { Card, GlobalState } from '../gameDefinition';
-import { findCoordFromCard } from '../gameState/board';
+import { findCoordFromCard, getStack } from '../gameState/board';
 
 // TODO: Consider renaming ability effects
 export type ContinuousEffectDefinition = {
@@ -44,7 +44,7 @@ export const continuousEffectDefinitions = {
           console.error(`Card ${card.instanceId} not found on board`);
           return power;
         }
-        const stack = board[coordinate.y][coordinate.x];
+        const stack = getStack(board, coordinate);
         if (stack.length > 1 && card.ownerId === effectOwnerId) {
           return power + 1;
         }

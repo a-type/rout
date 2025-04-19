@@ -21,7 +21,7 @@ export function Board({
   selection: Selection;
   targets: Target[];
   onClick?: (coord: Coordinate) => void;
-  onClickCard?: (card: CardType) => void;
+  onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
   const { finalState } = useGameSuite();
   const { specialSpaces } = finalState as PlayerState;

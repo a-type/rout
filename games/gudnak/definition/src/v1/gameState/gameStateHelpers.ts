@@ -163,3 +163,18 @@ export function playTactic(
   }
   return nextState;
 }
+
+export function clearAllFatigue(globalState: GlobalState): GlobalState {
+  return {
+    ...globalState,
+    cardState: Object.fromEntries(
+      Object.entries(globalState.cardState).map(([id, card]) => [
+        id,
+        {
+          ...card,
+          fatigued: false,
+        },
+      ]),
+    ),
+  };
+}

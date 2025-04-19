@@ -128,8 +128,8 @@ describe('gameState/board', {}, () => {
         members,
         random: new GameRandom('test'),
         decklists: {
-          'u-1': deckDefinitions['deck-1'],
-          'u-2': deckDefinitions['deck-1'],
+          'u-1': deckDefinitions['deck1'],
+          'u-2': deckDefinitions['deck1'],
         },
       });
       const result = getSpecialSpaces(

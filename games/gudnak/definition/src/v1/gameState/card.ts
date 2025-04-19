@@ -44,3 +44,19 @@ export function applyFatigue(
     },
   };
 }
+
+export function removeFatigue(
+  gameState: GlobalState,
+  cardInstanceId: string,
+): GlobalState {
+  return {
+    ...gameState,
+    cardState: {
+      ...gameState.cardState,
+      [cardInstanceId]: {
+        ...gameState.cardState[cardInstanceId],
+        fatigued: false,
+      },
+    },
+  };
+}

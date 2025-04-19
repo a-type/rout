@@ -21,11 +21,13 @@ export function useTargeting() {
   };
 
   const select = (target: Target) => {
+    console.log('select', target);
     setChosenTargets((prev) => [...prev, target]);
     setQueuedTargetInputs((prev) => prev.slice(1));
   };
 
   const clear = () => {
+    console.trace('clear');
     onTargetsCompleteRef.current = null;
     setQueuedTargetInputs([]);
     setChosenTargets([]);

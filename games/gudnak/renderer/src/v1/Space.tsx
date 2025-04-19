@@ -27,7 +27,7 @@ export function Space({
   ownerId: string | null;
   isGate?: boolean;
   onClick?: () => void;
-  onClickCard?: (card: CardType) => void;
+  onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
   const selected =
     isCoordinate(selection) &&
@@ -75,7 +75,7 @@ export function Space({
           targeted={cardTargeted}
           info={cardState[topCard]}
           onClick={() => {
-            onClickCard?.(cardState[topCard]);
+            onClickCard?.(cardState[topCard], coordinate);
           }}
         />
       ) : null}

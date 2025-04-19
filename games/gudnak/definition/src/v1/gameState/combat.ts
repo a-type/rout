@@ -2,14 +2,16 @@ import {
   continuousEffectDefinitions,
   ValidContinuousEffectKey,
 } from '../definitions/continuousEffectDefinitions';
+import { type GlobalState, type Card } from '../gameDefinition';
 import {
-  type GlobalState,
-  type Card,
   cardDefinitions,
   ValidCardId,
   FighterCard,
+} from '../definitions/cardDefinition';
+import {
   abilityDefinitions,
-} from '../gameDefinition';
+  type ValidAbilityId,
+} from '../definitions/abilityDefinition';
 
 export function determineCombatPower(
   gameState: GlobalState,
@@ -27,9 +29,9 @@ export function determineCombatPower(
   if (!cardDefinition) {
     throw new Error('Invalid card');
   }
-  const abilities = cardDefinition.abilities.map(
-    (a) => abilityDefinitions[a.id],
-  );
+  const abilities = cardDefinition.abilities.map((a) => {
+    return abilityDefinitions[a.id];
+  });
   let power = abilities.reduce((acc, ability) => {
     if ('modifyCombatPower' in ability.effect) {
       return ability.effect.modifyCombatPower({

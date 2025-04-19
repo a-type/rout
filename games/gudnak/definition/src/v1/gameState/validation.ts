@@ -24,6 +24,7 @@ import {
   getGatesCoord,
   getTopCard,
   validCoordinate,
+  getAdjacentCoordinates,
 } from './board';
 
 export const INVALID_DEPLOY_CODES = {
@@ -204,10 +205,13 @@ export function validateMove(
   return finalReasons;
 }
 
-const INVALID_TARGET_CODES = {
+export const INVALID_TARGET_CODES = {
   NUMBER_OF_TARGETS: 'Invalid target (invalid number of targets)',
   COORDINATE: 'Invalid target (invalid coordinate)',
   OWNER: 'Invalid target (invalid owner)',
+  MISSING_CARD: 'Invalid target (missing card)',
+  CARD_PRESENT: 'Invalid target (card present)',
+  RESTRICTION_ADJACENT: 'Invalid target (not adjacent)',
 } as const;
 type InvalidTargetCode = keyof typeof INVALID_TARGET_CODES;
 export type InvalidTargetReason =
@@ -216,6 +220,7 @@ export type InvalidTargetReason =
 export function validateTargets(
   playerState: PlayerState,
   playerId: string,
+  source: Coordinate | null,
   targetDefinition: EffectTargetDefinition[],
   targets: Target[],
 ): InvalidTargetReason[] | null {
@@ -231,26 +236,82 @@ export function validateTargets(
       if (!validCoordinate(board, coord)) {
         reasons.push(INVALID_TARGET_CODES.COORDINATE);
       }
-      if (targetDef.controller !== 'any') {
-        const stack = getStack(board, coord);
-        const topCardId = getTopCard(stack);
-        if (targetDef.controller === 'none') {
+      switch (targetDef.controller) {
+        case 'any': {
+          break;
+        }
+        case 'none': {
+          const stack = getStack(board, coord);
+          const topCardId = getTopCard(stack);
           if (topCardId) {
-            reasons.push(INVALID_TARGET_CODES.OWNER);
+            reasons.push(INVALID_TARGET_CODES.CARD_PRESENT);
           }
-        } else if (topCardId) {
-          const topCard = cardState[topCardId];
-          const controller =
-            topCard.ownerId === playerId ? 'player' : 'opponent';
-          if (targetDef.controller !== controller) {
-            reasons.push(INVALID_TARGET_CODES.OWNER);
+          break;
+        }
+        case 'player': {
+          const stack = getStack(board, coord);
+          const topCardId = getTopCard(stack);
+          if (topCardId) {
+            const topCard = cardState[topCardId];
+            if (topCard.ownerId !== playerId) {
+              reasons.push(INVALID_TARGET_CODES.OWNER);
+            }
+          } else {
+            reasons.push(INVALID_TARGET_CODES.MISSING_CARD);
           }
-        } else {
-          reasons.push(INVALID_TARGET_CODES.OWNER);
+          break;
+        }
+        case 'opponent': {
+          const stack = getStack(board, coord);
+          const topCardId = getTopCard(stack);
+          if (topCardId) {
+            const topCard = cardState[topCardId];
+            if (topCard.ownerId === playerId) {
+              reasons.push(INVALID_TARGET_CODES.OWNER);
+            }
+          } else {
+            reasons.push(INVALID_TARGET_CODES.MISSING_CARD);
+          }
+          break;
+        }
+        case 'not-friendly': {
+          const stack = getStack(board, coord);
+          const topCardId = getTopCard(stack);
+          if (topCardId) {
+            const topCard = cardState[topCardId];
+            if (topCard.ownerId === playerId) {
+              reasons.push(INVALID_TARGET_CODES.OWNER);
+            }
+          }
+          break;
+        }
+      }
+
+      if (targetDef.restrictions) {
+        for (const restriction of targetDef.restrictions) {
+          if (restriction.kind === 'adjacent') {
+            let otherCoordinate: Coordinate | null = null;
+            if (restriction.to === 'source' && source) {
+              otherCoordinate = source;
+            } else if (
+              restriction.to === 'previous-target' &&
+              targets[idx - 1]?.kind === 'coordinate'
+            ) {
+              otherCoordinate = targets[idx - 1] as Coordinate;
+            }
+            if (
+              !otherCoordinate ||
+              !getAdjacentCoordinates(board, coord).some(
+                (c) => c.x === otherCoordinate.x && c.y === otherCoordinate.y,
+              )
+            ) {
+              reasons.push(INVALID_TARGET_CODES.RESTRICTION_ADJACENT);
+            }
+          }
         }
       }
     }
-    return [];
+    return reasons;
   });
   if (invalidTargets.length === 0) {
     return null;
