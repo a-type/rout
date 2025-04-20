@@ -2,10 +2,12 @@ import { Avatar, AvatarList, AvatarListItemRoot, clsx } from '@a-type/ui';
 import { colors } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 
-export interface PlayerStatusesProps {}
+export interface PlayerStatusesProps {
+  className?: string;
+}
 
 export const PlayerStatuses = withGame<PlayerStatusesProps>(
-  function PlayerStatuses({ gameSuite }) {
+  function PlayerStatuses({ gameSuite, className }) {
     const { viewingRound } = gameSuite;
 
     const memberStatusList = gameSuite.members.map((member) => {

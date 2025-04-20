@@ -4,20 +4,24 @@ import {
   Task,
   TaskCompletion,
 } from '@long-game/game-scribble-definition/v1';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useSnapshot } from 'valtio';
 import { DescriptionResult } from './DescriptionResult.js';
 import { DrawingResult } from './DrawingResult.js';
 import { DrawPrompt } from './DrawPrompt.js';
 import { hooks } from './gameClient.js';
+import { gameplayState } from './gameplayState.js';
 import { RatingsPrompt } from './RatingsPrompt.js';
 import { WritePrompt } from './WritePrompt.js';
 
 export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
   const { initialState, finalState, isViewingCurrentRound, viewingRoundIndex } =
     gameSuite;
-  const [viewingIndex, setViewingIndex] = useState(0);
+
+  const viewingIndex = useSnapshot(gameplayState).viewingIndex;
+  // reset the viewing index when we switch rounds
   useEffect(() => {
-    setViewingIndex(0);
+    gameplayState.viewingIndex = 0;
   }, [viewingRoundIndex]);
 
   if (!isViewingCurrentRound) {
@@ -28,17 +32,10 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     }
 
     return (
-      <Box
-        p={{
-          default: 'sm',
-          lg: 'lg',
-        }}
-        layout="center center"
-        full
-      >
+      <Box layout="center center" className="px-sm py-lg lg:px-lg" full>
         <Tabs
           value={viewingIndex.toString()}
-          onValueChange={(v) => setViewingIndex(parseInt(v, 10))}
+          onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
           className="w-full h-full flex flex-col"
         >
           <ItemTabs items={initialState.tasks} />
@@ -69,7 +66,7 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     >
       <Tabs
         value={viewingIndex.toString()}
-        onValueChange={(v) => setViewingIndex(parseInt(v, 10))}
+        onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
         className="w-full h-full flex flex-col"
       >
         <ItemTabs items={initialState.tasks} />

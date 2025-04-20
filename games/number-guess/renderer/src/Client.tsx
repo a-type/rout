@@ -1,4 +1,4 @@
-import { Box, Input } from '@a-type/ui';
+import { Box, Button, Input } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
 
@@ -24,7 +24,13 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
 export default Client;
 
 const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const { prepareTurn, isViewingCurrentRound, viewingTurn } = gameSuite;
+  const {
+    prepareTurn,
+    isViewingCurrentRound,
+    viewingTurn,
+    submitTurn,
+    canSubmitTurn,
+  } = gameSuite;
   const guess = viewingTurn?.guess ?? 0;
 
   return (
@@ -40,6 +46,9 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
           prepareTurn({ guess: num });
         }}
       />
+      <Button onClick={() => submitTurn()} disabled={!canSubmitTurn}>
+        Submit
+      </Button>
     </Box>
   );
 });

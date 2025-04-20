@@ -4,7 +4,6 @@ import {
   BasicGameLog,
   PlayerStatuses,
   RoundHistoryControl,
-  SubmitTurn,
 } from '@long-game/game-ui';
 import { GameLayout } from './GameLayout';
 import { NavigationControls } from './NavigationControls';
@@ -18,17 +17,14 @@ export function GameControls({ pregame }: GameControlsProps) {
     <>
       <GameLayout.Controls>
         <BasicGameLog className="flex-1" />
-        {!pregame && (
-          <Box gap="md" justify="between" p="md" items="center">
-            <PlayerStatuses />
-            <SubmitTurn />
-          </Box>
-        )}
       </GameLayout.Controls>
-      <GameLayout.SecondaryControls>
-        <NavigationControls />
+      <GameLayout.SecondaryControls className="justify-between">
+        <Box gap items="center">
+          <NavigationControls />
+          <PlayerStatuses className="flex-shrink-1" />
+          <PushSubscriptionToggle showWhenEnabled />
+        </Box>
         {!pregame && <RoundHistoryControl />}
-        <PushSubscriptionToggle showWhenEnabled />
       </GameLayout.SecondaryControls>
     </>
   );

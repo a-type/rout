@@ -21,7 +21,9 @@ publicSdk.addEventListener('error', (ev) => {
         window.location.href = '/login';
       }
     } else {
-      toast.error(asLongGameError.message);
+      toast.error(asLongGameError.message, {
+        id: asLongGameError.message,
+      });
     }
   }
 });
