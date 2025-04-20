@@ -28,7 +28,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     gameStatus,
     getPlayer,
   } = gameSuite;
-  console.log(JSON.parse(JSON.stringify(finalState)));
+  // console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
 
@@ -43,7 +43,6 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
       toast.error(turnError);
     }
   }, [turnError]);
-  console.log(action.selection.card);
 
   if (gameStatus.status === 'completed') {
     return (
