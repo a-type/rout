@@ -123,6 +123,7 @@ export class BaseSdk extends EventTarget {
         return result;
       } catch (e) {
         console.error(e);
+        this.dispatchEvent(new ErrorEvent('error', { error: e }));
         if (LongGameError.isInstance(e)) {
           throw e;
         }

@@ -32,7 +32,8 @@
     "@long-game/game-ui": "workspace:*",
     "perfect-freehand": "^1.2.2",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "valtio": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

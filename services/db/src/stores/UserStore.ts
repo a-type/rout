@@ -527,7 +527,7 @@ export class UserStore extends RpcTarget {
     const invitation = await this.#db
       .selectFrom('GameSessionInvitation')
       .innerJoin('User', 'GameSessionInvitation.userId', 'User.id')
-      .where('id', '=', inviteId)
+      .where('GameSessionInvitation.id', '=', inviteId)
       .selectAll('GameSessionInvitation')
       .select(['User.id', 'User.displayName', 'User.email'])
       .executeTakeFirstOrThrow();

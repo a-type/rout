@@ -3,6 +3,7 @@ import { PrefixedId } from '@long-game/common';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { Canvas } from './drawing/Canvas';
 import { hooks } from './gameClient';
+import { ProceedOrSubmit } from './ProceedOrSubmit';
 
 export interface DrawPromptProps {
   prompt: string;
@@ -55,6 +56,7 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
           });
         }}
       />
+      <ProceedOrSubmit taskIndex={taskIndex} />
     </Box>
   );
 });
