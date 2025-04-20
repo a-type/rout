@@ -13,6 +13,7 @@ import { abilityDefinitions, Target } from '../definitions/abilityDefinition';
 import {
   INVALID_TARGET_CODES,
   validateDeploy,
+  validateMove,
   validateTargets,
 } from './validation';
 import { getPlayerState } from './getPlayerState';
@@ -174,6 +175,50 @@ describe('card testing', {}, () => {
         x: 0,
         y: 0,
       });
+    });
+
+    describe('bullgryff rider', {}, () => {
+      it(
+        'should be able to move any distance next to a friendly card',
+        {},
+        () => {
+          let gameState = generateInitialGameState({
+            members: [{ id: 'u-1' }],
+            random: new GameRandom('test'),
+            decklists: {
+              'u-1': {
+                name: 'test',
+                list: ['bullgryff-rider', 'dawnbringer-brute-1'],
+              },
+            },
+          });
+          const instanceId = findCardInstanceIdFromHand(
+            gameState,
+            'u-1',
+            'bullgryff-rider',
+          );
+          const instanceId2 = findCardInstanceIdFromHand(
+            gameState,
+            'u-1',
+            'dawnbringer-brute-1',
+          );
+          if (!instanceId || !instanceId2) {
+            throw new Error('Card not found in hand');
+          }
+          deploy(gameState, instanceId2, { x: 0, y: 0 });
+          gameState = deploy(gameState, instanceId, { x: 2, y: 0 });
+          gameState = clearAllFatigue(gameState);
+          const validation = validateMove(
+            gameState.board,
+            'u-1',
+            gameState.cardState,
+            gameState.cardState[instanceId],
+            { x: 2, y: 0 },
+            { x: 0, y: 1 },
+          );
+          expect(validation).toBeNull();
+        },
+      );
     });
 
     it('should be able to move any distance', {}, () => {

@@ -175,13 +175,13 @@ export const abilityDefinitions = {
       modifyValidateMove: ({
         invalidReasons,
         board,
-        source,
+        target,
         cardState,
         card,
       }) => {
         const hasAdjacentFriendlyCard = getAdjacentCardInstanceIds(
           board,
-          source,
+          target,
         ).some((id) => cardState[id].ownerId === card.ownerId);
         if (hasAdjacentFriendlyCard) {
           return invalidReasons.filter(

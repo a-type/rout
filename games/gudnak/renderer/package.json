@@ -30,6 +30,7 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-gudnak-definition": "workspace:*",
     "@long-game/game-ui": "workspace:*",
+    "motion": "^12.7.4",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-flip-toolkit": "^7.2.4"

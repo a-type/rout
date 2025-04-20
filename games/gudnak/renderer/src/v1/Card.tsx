@@ -12,6 +12,7 @@ import {
 import { Flipped } from 'react-flip-toolkit';
 import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
+import { motion } from 'motion/react';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -53,33 +54,35 @@ function FighterCard({
           <Tooltip
             content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
           >
-            <Box
-              {...flippedProps}
-              className={clsx(
-                'w-full h-full border-primary rounded-lg bg-cover',
-                selected && 'bg-primary-light',
-                targeted && 'bg-primary-wash',
-                fatigued && 'bg-gray-300',
-              )}
-              border
-              style={{
-                width: CARD_SIZE,
-                height: CARD_SIZE,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
-            >
-              <img
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Box
+                {...flippedProps}
                 className={clsx(
-                  (selected || targeted) && 'mix-blend-screen',
-                  fatigued && 'grayscale-50 mix-blend-multiply',
+                  'w-full h-full border-primary rounded-lg bg-cover',
+                  selected && 'bg-primary-light',
+                  targeted && 'bg-primary-wash',
+                  fatigued && 'bg-gray-300',
                 )}
-                src={cardData.artUrl}
-                width={CARD_SIZE - 4}
-              />
-            </Box>
+                border
+                style={{
+                  width: CARD_SIZE,
+                  height: CARD_SIZE,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.();
+                }}
+              >
+                <img
+                  className={clsx(
+                    (selected || targeted) && 'mix-blend-screen',
+                    fatigued && 'grayscale-50 mix-blend-multiply',
+                  )}
+                  src={cardData.artUrl}
+                  width={CARD_SIZE - 4}
+                />
+              </Box>
+            </motion.div>
           </Tooltip>
         )}
       </Flipped>
@@ -144,28 +147,30 @@ function TacticCard({
           <Tooltip
             content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
           >
-            <Box
-              {...flippedProps}
-              className={clsx(
-                'w-full h-full border-primary rounded-lg bg-cover',
-                selected && 'bg-primary-light',
-              )}
-              border
-              style={{
-                width: CARD_SIZE,
-                height: CARD_SIZE,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
-            >
-              <img
-                className="mix-blend-screen"
-                src={cardData.artUrl}
-                width={CARD_SIZE - 4}
-              />
-            </Box>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Box
+                {...flippedProps}
+                className={clsx(
+                  'w-full h-full border-primary rounded-lg bg-cover',
+                  selected && 'bg-primary-light',
+                )}
+                border
+                style={{
+                  width: CARD_SIZE,
+                  height: CARD_SIZE,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.();
+                }}
+              >
+                <img
+                  className="mix-blend-screen"
+                  src={cardData.artUrl}
+                  width={CARD_SIZE - 4}
+                />
+              </Box>
+            </motion.div>
           </Tooltip>
         )}
       </Flipped>
