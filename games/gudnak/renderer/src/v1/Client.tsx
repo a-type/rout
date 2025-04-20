@@ -9,6 +9,7 @@ import { hooks } from './gameClient';
 import { useGameAction } from './useGameAction';
 import { Flipper } from 'react-flip-toolkit';
 import { useEffect } from 'react';
+import { Hand } from './Hand';
 
 export function Client() {
   return (
@@ -23,7 +24,6 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     submitTurn,
     finalState,
     turnError,
-    localTurnData,
     latestRoundIndex,
     gameStatus,
     getPlayer,
@@ -31,22 +31,6 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
-  const targets: Target[] = action.targeting.active
-    ? action.targeting.chosen
-    : localTurnData?.action.type === 'useAbility'
-    ? localTurnData.action.targets
-    : localTurnData?.action.type === 'tactic'
-    ? localTurnData.action.input.targets
-    : localTurnData?.action.type === 'deploy' ||
-      localTurnData?.action.type == 'move'
-    ? [
-        {
-          kind: 'coordinate',
-          x: localTurnData.action.target.x,
-          y: localTurnData.action.target.y,
-        },
-      ]
-    : [];
 
   useEffect(() => {
     if (latestRoundIndex > 0) {
@@ -76,20 +60,17 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   return (
     <Box className="w-full h-full flex flex-col p-3 gap-2">
       <Flipper flipKey={JSON.stringify(finalState.board)}>
-        <Box className="flex flex-row gap-2 overflow-y-scroll py-2">
-          {hand.map((card, index) => (
-            <Card
-              selected={action.selection.card?.instanceId === card.instanceId}
-              instanceId={card.instanceId}
-              key={index}
-              info={card}
-              onClick={() => {
-                action.playCard(card);
-              }}
-            />
-          ))}
-        </Box>
-        <Box className="flex flex-row gap-2 items-center my-3">
+        <Hand
+          cards={hand}
+          selectedId={action.selection.card?.instanceId ?? null}
+          onClickCard={(card) => {
+            if (!active) {
+              return;
+            }
+            action.playCard(card);
+          }}
+        />
+        <Box className="flex flex-row gap-2 items-center mt-5 mb-3">
           {active ? (
             <>
               <span className="font-bold">It's your turn!</span>
@@ -128,9 +109,12 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         </Box>
         <Board
           selection={action.selection.item}
-          targets={targets}
+          targets={action.targets}
           state={board}
           onClick={(coord) => {
+            if (!active) {
+              return;
+            }
             if (!action.targeting.next) {
               action.moveCard(coord);
               return;
@@ -156,6 +140,9 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             }
           }}
           onClickCard={(card, coord) => {
+            if (!active) {
+              return;
+            }
             if (!action.targeting.next) {
               action.activateAbility(card, coord);
               return;
