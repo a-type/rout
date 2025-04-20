@@ -19,8 +19,15 @@ export function Client() {
 }
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const { submitTurn, finalState, turnError, localTurnData, latestRoundIndex } =
-    gameSuite;
+  const {
+    submitTurn,
+    finalState,
+    turnError,
+    localTurnData,
+    latestRoundIndex,
+    gameStatus,
+    getPlayer,
+  } = gameSuite;
   console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
@@ -53,6 +60,18 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     }
   }, [turnError]);
   console.log(action.selection.card);
+
+  if (gameStatus.status === 'completed') {
+    return (
+      <Box className="w-full h-full flex flex-col p-3 gap-2">
+        <h3>Game Over</h3>
+        <span>
+          {getPlayer(gameStatus.winnerIds[0] as `u-${string}`).displayName}{' '}
+          wins!
+        </span>
+      </Box>
+    );
+  }
 
   return (
     <Box className="w-full h-full flex flex-col p-3 gap-2">

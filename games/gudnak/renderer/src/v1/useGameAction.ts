@@ -12,7 +12,7 @@ import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
 
 export function useGameAction() {
-  const { prepareTurn, finalState } = hooks.useGameSuite();
+  const { submitTurn, finalState } = hooks.useGameSuite();
   const targeting = useTargeting();
   const selection = useSelect();
 
@@ -25,7 +25,7 @@ export function useGameAction() {
         const targetInputs = abilityDef.input.targets;
         targeting.begin(targetInputs);
         targeting.onTargetsComplete((targets) => {
-          prepareTurn({
+          submitTurn({
             action: {
               type: 'tactic',
               card,
@@ -34,7 +34,7 @@ export function useGameAction() {
           });
         });
       } else {
-        prepareTurn({
+        submitTurn({
           action: {
             type: 'tactic',
             card,
@@ -53,7 +53,7 @@ export function useGameAction() {
 
       targeting.onTargetsComplete((targets) => {
         const coordinate = targets[0] as CoordinateTarget;
-        prepareTurn({
+        submitTurn({
           action: {
             type: 'deploy',
             card,
@@ -79,7 +79,7 @@ export function useGameAction() {
 
     targeting.onTargetsComplete((targets) => {
       const coordinate = targets[0] as CoordinateTarget;
-      prepareTurn({
+      submitTurn({
         action: {
           type: 'move',
           cardInstanceId: cardInstanceId,
@@ -110,7 +110,7 @@ export function useGameAction() {
       const targetInputs = abilityDef.input.targets;
       targeting.begin(targetInputs);
       targeting.onTargetsComplete((targets) => {
-        prepareTurn({
+        submitTurn({
           action: {
             type: 'useAbility',
             abilityId: cardDef.abilities[0].id,
@@ -121,7 +121,7 @@ export function useGameAction() {
         });
       });
     } else {
-      prepareTurn({
+      submitTurn({
         action: {
           type: 'useAbility',
           abilityId: card.cardId as ValidAbilityId,
