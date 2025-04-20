@@ -11,7 +11,6 @@ import {
 } from '@long-game/game-gudnak-definition/v1';
 import { Flipped } from 'react-flip-toolkit';
 import { usePlayerThemed } from '@long-game/game-ui';
-import { useGameSuite } from '@long-game/game-client';
 import { hooks } from './gameClient';
 
 const traitToEmoji: Record<string, string> = {
@@ -60,7 +59,7 @@ function FighterCard({
                 'w-full h-full border-primary rounded-lg bg-cover',
                 selected && 'bg-primary-light',
                 targeted && 'bg-primary-wash',
-                fatigued && 'bg-gray-800',
+                fatigued && 'bg-gray-300',
               )}
               border
               style={{
@@ -74,7 +73,8 @@ function FighterCard({
             >
               <img
                 className={clsx(
-                  (selected || targeted || fatigued) && 'mix-blend-screen',
+                  (selected || targeted) && 'mix-blend-screen',
+                  fatigued && 'grayscale-50 mix-blend-multiply',
                 )}
                 src={cardData.artUrl}
                 width={CARD_SIZE - 4}
@@ -247,17 +247,6 @@ export function Card({
           continuousEffects={continuousEffects}
           {...rest}
         />
-
-        {/* // <Box
-            //   className="flex flex-row gap-2 border-primary ml-[-3px] w-[10px] border-l-none"
-            //   border
-            //   key={idx}
-            //   style={{
-            //     height: CARD_SIZE,
-            //     borderTopLeftRadius: '0px',
-            //     borderBottomLeftRadius: '0px',
-            //   }}
-            // ></Box> */}
       </div>
     );
   }
