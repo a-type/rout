@@ -1,6 +1,11 @@
+import {
+  checkForUpdate,
+  updateApp,
+  updateState,
+} from '@/components/updates/updateState.js';
 import { Box, ErrorBoundary } from '@a-type/ui';
 import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
-import { lazy } from 'react';
+import { lazy, useCallback } from 'react';
 import GameSessionPage from './GameSessionPage.jsx';
 import HomePage from './HomePage.jsx';
 
@@ -49,6 +54,29 @@ const routes = makeRoutes([
 ]);
 
 export const Pages = () => {
+  const handleNavigate = useCallback(
+    (
+      location: Location,
+      ev: { state?: any; skipTransition?: boolean },
+      prev?: { pathname: string },
+    ) => {
+      checkForUpdate();
+      // only update on path changes
+      if (
+        updateState.updateAvailable &&
+        location.pathname !== prev?.pathname &&
+        !ev.state?.noUpdate
+      ) {
+        console.info('Update ready to install, intercepting navigation...');
+        updateApp(ev?.state?.isSwipeNavigation);
+        return false;
+      }
+      if (!prev) {
+        return;
+      }
+    },
+    [],
+  );
   return (
     <ErrorBoundary
       // TODO: use error details to show different error messages
@@ -58,7 +86,7 @@ export const Pages = () => {
         </Box>
       }
     >
-      <Router routes={routes}>
+      <Router routes={routes} onNavigate={handleNavigate}>
         <Outlet />
       </Router>
     </ErrorBoundary>

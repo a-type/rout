@@ -1,5 +1,6 @@
 import { ErrorBoundary, Provider as UiProvider } from '@a-type/ui';
 import { SdkProvider } from '@long-game/game-client';
+import { UpdateBanner } from './components/updates/UpdateBanner.js';
 import { Pages } from './pages/Pages.jsx';
 import { publicSdk } from './services/publicSdk.js';
 
@@ -10,6 +11,7 @@ export function App({}: AppProps) {
     <ErrorBoundary fallback={<div>Error</div>}>
       <SdkProvider value={publicSdk}>
         <UiProvider>
+          <UpdateBanner />
           <Pages />
         </UiProvider>
       </SdkProvider>
