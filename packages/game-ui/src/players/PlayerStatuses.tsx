@@ -21,7 +21,7 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
     });
 
     return (
-      <AvatarList count={memberStatusList.length}>
+      <AvatarList count={memberStatusList.length} className={className}>
         {memberStatusList.map(({ status, player, hasPlayed }, index) => (
           <AvatarListItemRoot index={index} key={player.id}>
             <Avatar
