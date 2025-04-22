@@ -78,6 +78,29 @@ const commands = {
       console.log(`Done!`);
     },
   },
+  images: {
+    // copies all CSS files from src/ to dist/ with the same
+    // folder structure
+    run: async () => {
+      const cwd = process.cwd();
+      const srcPath = 'src';
+      const distPath = relPath;
+      console.log(`Copying image files...`);
+      await new Promise((res, rej) =>
+        copyfiles(
+          [srcPath + '/**/*.png', distPath],
+          {
+            up: 1,
+          },
+          (err) => {
+            if (err) rej(err);
+            else res();
+          },
+        ),
+      );
+      console.log(`Done!`);
+    },
+  },
 };
 
 if (!commands[command]) {

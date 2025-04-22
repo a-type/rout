@@ -3,6 +3,7 @@ import { Card } from './Card';
 import type { Card as CardType } from '@long-game/game-gudnak-definition/v1';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
+import { useMediaQuery } from '@long-game/game-ui';
 
 export function Hand({
   cards,
@@ -14,12 +15,15 @@ export function Hand({
   onClickCard: (card: CardType) => void;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const isLarge = useMediaQuery('(min-width: 1024px)');
 
-  const cardWidth = 200; // Adjust based on your card width
-  const overlapOffset = 150; // Amount of overlap between cards
+  const cardSize = isLarge ? 200 : 150;
+
+  const cardWidth = cardSize; // Adjust based on your card width
+  const overlapOffset = cardSize * 0.75; // Amount of overlap between cards
 
   return (
-    <Box className="relative flex flex-row py-2" style={{ height: '200px' }}>
+    <Box className="relative flex flex-row py-2" style={{ height: cardSize }}>
       <AnimatePresence>
         {cards.map((card, index) => {
           const isHovered = hoveredIndex === index;

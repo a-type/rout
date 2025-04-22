@@ -13,5 +13,6 @@ export * from './players/PlayerStatuses';
 export * from './players/usePlayerThemed';
 export * from './turns/SubmitTurn';
 export * from './withSuspense';
+export * from './hooks/useMediaQuery';
 
 export * from '@a-type/react-space';

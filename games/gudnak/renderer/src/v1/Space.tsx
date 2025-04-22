@@ -6,7 +6,7 @@ import {
   Target,
   Coordinate,
 } from '@long-game/game-gudnak-definition/v1';
-import { Card } from './Card';
+import { Card, CARD_SIZE } from './Card';
 import { isCard, isCoordinate, Selection } from './useSelect';
 import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
@@ -53,9 +53,10 @@ export function Space({
     <div className={clsx(className, 'w-full h-full')} style={style}>
       <Box
         className={clsx(
-          'w-full h-full border-primary',
-          selected && 'bg-primary-light',
-          targeted && 'bg-primary-wash',
+          'aspect-square',
+          ownerId ? 'border-primary' : 'border-gray-400',
+          selected && 'bg-primary-light opacity-50',
+          targeted && 'bg-primary-wash opacity-50',
         )}
         onClick={() => {
           onClick?.();
@@ -63,8 +64,6 @@ export function Space({
         border
         p="md"
         style={{
-          minWidth: 200,
-          minHeight: 200,
           borderStyle: isGate ? 'dashed' : 'solid',
         }}
       >
