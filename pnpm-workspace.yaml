@@ -8,7 +8,7 @@ packages:
   - 'services/*'
 
 catalog:
-  '@a-type/ui': 2.0.5
+  '@a-type/ui': 2.0.6
   'react': 19.0.0
   'react-dom': 19.0.0
   '@types/react': ^19.0.8

@@ -11,6 +11,7 @@ import {
   ServerPlayerStatusChangeMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
+  ServerTurnPlayedMessage,
 } from '@long-game/common';
 import {
   GameDefinition,
@@ -366,6 +367,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.ctx.socket.subscribe('statusChange', this.onStatusChange);
     this.ctx.socket.subscribe('gameChange', this.onGameChange);
     this.ctx.socket.subscribe('membersChange', this.onMembersChange);
+    this.ctx.socket.subscribe('turnPlayed', this.onTurnPlayed);
   };
 
   private onChat = (msg: ServerChatMessage) => {
@@ -415,6 +417,23 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     // prefetch postgame when status is completed
     if (msg.status.status === 'completed') {
       this.loadPostgame();
+    }
+  };
+
+  @action private onTurnPlayed = (msg: ServerTurnPlayedMessage) => {
+    console.log('turn played', msg);
+    // update the round with the new turn data
+    const round = this.rounds[msg.roundIndex];
+    if (round) {
+      // replace the turn data for the player
+      const playerId = msg.turn.playerId;
+      const turnData = msg.turn.data;
+      const playerIndex = round.turns.findIndex((t) => t.playerId === playerId);
+      if (playerIndex === -1) {
+        round.turns.push({ playerId, data: turnData as any });
+      } else {
+        round.turns[playerIndex] = { playerId, data: turnData as any };
+      }
     }
   };
 
@@ -534,6 +553,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       viewingTurn: toJS(this.viewingTurn),
       globalState: toJS(this.postgameGlobalState),
       turns: await getDevModeTurns(this.gameSessionId),
+      viewingRound: toJS(this.viewingRound),
+      rounds: toJS(this.rounds),
     };
     // remove functions
     for (const key in debugValue) {

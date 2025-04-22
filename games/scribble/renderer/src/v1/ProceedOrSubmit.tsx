@@ -1,5 +1,6 @@
 import { Box, Button, Icon } from '@a-type/ui';
 import { useDebounced } from '@long-game/game-client';
+import { SubmitTurn } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { gameplayState } from './gameplayState';
 
@@ -33,6 +34,19 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
       !actionableError,
     );
 
+    if (showSubmit) {
+      return (
+        <SubmitTurn>
+          {actionableError
+            ? "Can't submit"
+            : submitted
+            ? 'Ready for next!'
+            : 'Finish turn'}
+          <Icon name={actionableError ? 'warning' : 'check'} />
+        </SubmitTurn>
+      );
+    }
+
     return (
       <Box d="col" items="center" gap>
         {debouncedError && (
@@ -42,37 +56,14 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
           </Box>
         )}
         <Button
-          color={submitted ? 'ghost' : 'primary'}
+          color="primary"
           onClick={() => {
-            if (willSubmit) {
-              submitTurn();
-            } else {
-              gameplayState.viewingIndex = index === 0 ? 1 : 0;
-            }
+            gameplayState.viewingIndex = index === 0 ? 1 : 0;
           }}
-          disabled={
-            submitted ||
-            !canSubmitTurn ||
-            !!actionableError ||
-            !tasksCompleted[index]
-          }
+          disabled={!tasksCompleted[index]}
         >
-          {actionableError
-            ? "Can't submit"
-            : submitted
-            ? 'Ready for next!'
-            : willSubmit
-            ? 'Finish turn'
-            : 'Next'}
-          <Icon
-            name={
-              actionableError
-                ? 'warning'
-                : submitted || willSubmit
-                ? 'check'
-                : 'arrowRight'
-            }
-          />
+          Next
+          <Icon name="arrowRight" />
         </Button>
       </Box>
     );

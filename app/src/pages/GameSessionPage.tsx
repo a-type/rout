@@ -2,8 +2,9 @@ import { GameControls } from '@/components/games/GameControls';
 import { GameJoinPreview } from '@/components/games/GameJoinPreview';
 import { GameLayout } from '@/components/games/GameLayout';
 import { GameSetup } from '@/components/games/GameSetup.js';
+import { ScrollTicker } from '@/components/general/ScrollTicker';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, ErrorBoundary, Spinner } from '@a-type/ui';
+import { Box, ErrorBoundary, Icon, Spinner } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
@@ -44,6 +45,14 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
+      {gameSuite.gameStatus.status === 'completed' && (
+        <Box surface="primary" className="rounded-none flex-shrink-0 py-xs">
+          <ScrollTicker>
+            <span>Game Over!</span>
+            <Icon name="flag" />
+          </ScrollTicker>
+        </Box>
+      )}
       <GameLayout className={className} style={style}>
         <GameLayout.Main>
           <Suspense

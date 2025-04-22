@@ -2,7 +2,7 @@ import { withClassName } from '@a-type/ui';
 
 export const GameLayoutRoot = withClassName(
   'div',
-  'grid w-full h-full bg-white',
+  'grid w-full h-full bg-white min-h-0',
   'grid-rows-[1fr_auto] grid-cols-[1fr] grid-areas-[main]-[bottom]',
   "lg:grid-cols-[minmax(300px,500px)_1fr] lg:grid-rows-[auto_1fr] lg:[grid-template-areas:'sidebarsecondary_main'_'sidebar_main']",
 );

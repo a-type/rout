@@ -36,7 +36,7 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
     const current = task.tasksToRate[index];
 
     return (
-      <Box d="col" gap items="center" full className="flex-1">
+      <Box d="col" gap="lg" items="center" full className="flex-1">
         <RatingView
           key={index}
           assignment={current}
@@ -122,6 +122,13 @@ const RatingView = hooks.withGame<{
           </div>
         )}
       </div>
+      <Box className="text-lg text-center">
+        React to this{' '}
+        {assignment.completion.kind === 'description'
+          ? 'description'
+          : 'drawing'}
+        :
+      </Box>
       <RatingPicker value={rating} onChange={rate} />
     </Box>
   );
@@ -135,11 +142,11 @@ function RatingPromptDisplay({
   if (item.kind === 'description') {
     return (
       <Box d="col" gap items="center">
-        <Box gap>
+        <Box gap items="center">
           <PlayerAvatar playerId={item.playerId} />
           <PlayerName playerId={item.playerId} />
         </Box>
-        <Box className="text-3xl">"{item.description}"</Box>
+        <Box className="text-3xl text-center italic">"{item.description}"</Box>
       </Box>
     );
   } else {
