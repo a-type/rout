@@ -17,10 +17,10 @@ export function Hand({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
-  const cardSize = isLarge ? 200 : 150;
+  const cardSize = isLarge ? 200 : 120;
 
   const cardWidth = cardSize; // Adjust based on your card width
-  const overlapOffset = cardSize * 0.75; // Amount of overlap between cards
+  const overlapOffset = cardSize * 0.6; // Amount of overlap between cards
 
   return (
     <Box className="relative flex flex-row py-2" style={{ height: cardSize }}>

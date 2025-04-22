@@ -55,14 +55,14 @@ export function Space({
         className={clsx(
           'aspect-square',
           ownerId ? 'border-primary' : 'border-gray-400',
-          selected && 'bg-primary-light opacity-50',
-          targeted && 'bg-primary-wash opacity-50',
+          selected && 'bg-primary-light',
+          targeted && 'bg-red-500/50',
         )}
         onClick={() => {
           onClick?.();
         }}
         border
-        p="md"
+        p="xl"
         style={{
           borderStyle: isGate ? 'dashed' : 'solid',
         }}

@@ -1,4 +1,4 @@
-import { Box } from '@a-type/ui';
+import { Box, clsx } from '@a-type/ui';
 import type {
   Coordinate,
   Board,
@@ -9,7 +9,16 @@ import type {
 import { Space } from './Space';
 import { useGameSuite } from '@long-game/game-client';
 import { Selection } from './useSelect';
+import map from './images/map.png';
 import mapVert from './images/map-vert.png';
+import { useMediaQuery } from '@long-game/game-ui';
+
+function Map() {
+  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const src = isLarge ? map : mapVert;
+
+  return <img src={src} alt="Map" className="absolute w-full" />;
+}
 
 export function Board({
   state,
@@ -26,16 +35,40 @@ export function Board({
 }) {
   const { finalState } = useGameSuite();
   const { specialSpaces } = finalState as PlayerState;
+  const isLarge = useMediaQuery('(min-width: 1024px)');
+
   return (
-    <div className="relative w-full aspect-[16/25]">
-      <img src={mapVert} alt="Map" className="absolute w-full" />
-      <Box className="flex flex-col left-[7%] top-[22%] max-w-[calc(100vw-14%)] lg:max-w-[calc(100vw-14%-500px)]">
+    <div
+      className={clsx(
+        'relative w-full select-none',
+        isLarge ? 'aspect-[25/16]' : 'aspect-[16/25]',
+      )}
+    >
+      <Map />
+      <Box
+        className={clsx(
+          isLarge
+            ? 'flex flex-col left-[22%] top-[7%] max-w-[calc(100vw-44%-500px)]'
+            : 'flex flex-col left-[7%] top-[22%] max-w-[calc(100vw-14%)]',
+        )}
+      >
         {state.map((row, rowIndex) => (
-          <Box key={rowIndex} className="flex flex-row mb-[3%] gap-[3%]">
-            {row.map((space, columnIndex) => {
+          <Box
+            key={rowIndex}
+            className={clsx(
+              isLarge
+                ? 'flex flex-row mb-[3%] gap-[3%]'
+                : 'flex flex-row mb-[3%] gap-[3%]',
+            )}
+          >
+            {row.map((_, columnIndex) => {
+              const x = isLarge ? rowIndex : columnIndex;
+              const y = isLarge ? columnIndex : rowIndex;
+              const space = isLarge
+                ? state[columnIndex][rowIndex]
+                : state[rowIndex][columnIndex];
               const specialSpace = specialSpaces.find(
-                (s) =>
-                  s.coordinate.x === columnIndex && s.coordinate.y === rowIndex,
+                (s) => s.coordinate.x === x && s.coordinate.y === y,
               );
               const ownerId = specialSpace?.ownerId ?? null;
               const isGate = specialSpace?.type === 'gate';
@@ -43,13 +76,13 @@ export function Board({
                 <Space
                   key={columnIndex}
                   stack={space}
-                  coordinate={{ x: columnIndex, y: rowIndex }}
+                  coordinate={{ x, y }}
                   selection={selection}
                   targets={targets}
                   ownerId={ownerId}
                   isGate={isGate}
                   onClick={() => {
-                    onClick?.({ x: columnIndex, y: rowIndex });
+                    onClick?.({ x, y });
                   }}
                   onClickCard={onClickCard}
                 />
