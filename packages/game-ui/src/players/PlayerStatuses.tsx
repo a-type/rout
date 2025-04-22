@@ -1,6 +1,7 @@
-import { Avatar, AvatarList, AvatarListItemRoot, clsx } from '@a-type/ui';
-import { colors } from '@long-game/common';
-import { withGame } from '@long-game/game-client';
+import { Avatar, AvatarList, AvatarListItemRoot, clsx, Icon } from '@a-type/ui';
+import { GameSessionPlayerStatus } from '@long-game/common';
+import { PlayerInfo, withGame } from '@long-game/game-client';
+import { usePlayerThemed } from './usePlayerThemed';
 
 export interface PlayerStatusesProps {
   className?: string;
@@ -24,18 +25,10 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
       <AvatarList count={memberStatusList.length} className={className}>
         {memberStatusList.map(({ status, player, hasPlayed }, index) => (
           <AvatarListItemRoot index={index} key={player.id}>
-            <Avatar
-              name={player.displayName}
-              imageSrc={player.imageUrl}
-              style={{
-                background: colors[player.color].range[3],
-                borderWidth: 2,
-                borderStyle: 'solid',
-              }}
-              className={clsx(
-                'border border-solid border-2px',
-                hasPlayed ? 'border-accent' : 'border-gray-5',
-              )}
+            <PlayerStatusAvatar
+              player={player}
+              status={status}
+              hasPlayed={hasPlayed}
             />
           </AvatarListItemRoot>
         ))}
@@ -43,3 +36,32 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
     );
   },
 );
+
+function PlayerStatusAvatar({
+  player,
+  status,
+  hasPlayed,
+}: {
+  player: PlayerInfo;
+  status: GameSessionPlayerStatus;
+  hasPlayed: boolean;
+}) {
+  const { className, style } = usePlayerThemed(player.id);
+  return (
+    <div className={clsx('relative overflow-visible', className)} style={style}>
+      <Avatar
+        name={player.displayName}
+        imageSrc={player.imageUrl}
+        className={clsx(
+          'border border-solid border-2px',
+          status.online ? 'border-primary' : 'border-gray',
+        )}
+      />
+      {hasPlayed && (
+        <div className="absolute -top-1 -left-1 bg-primary-dark rounded-full w-16px h-16px flex items-center justify-center">
+          <Icon name="check" className="w-10px h-10px color-white" />
+        </div>
+      )}
+    </div>
+  );
+}

@@ -27,6 +27,7 @@ export interface ServerRoundChangeMessage extends BaseServerMessage {
 
 export interface ServerTurnPlayedMessage extends BaseServerMessage {
   type: 'turnPlayed';
+  roundIndex: number;
   /**
    * Note: turn data for the current round is not public, which is
    * basically how this message will be used. But 'data' is possibly

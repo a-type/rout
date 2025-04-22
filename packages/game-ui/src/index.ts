@@ -6,6 +6,7 @@ export * from './chat/SpatialChat';
 export * from './decoration/GameIllustration1';
 export * from './decoration/Topography';
 export * from './history/RoundHistoryControl';
+export * from './hooks/useMediaQuery';
 export * from './log/GameLog';
 export * from './players/PlayerAvatar';
 export * from './players/PlayerName';

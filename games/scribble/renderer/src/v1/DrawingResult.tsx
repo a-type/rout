@@ -16,7 +16,9 @@ export const DrawingResult = hooks.withGame<DrawingResultProps>(
   function DrawingResult({ gameSuite, item, prompt }) {
     return (
       <Box d="col" gap items="center">
-        <H2 className="text-3xl">{prompt?.description ?? 'Free draw'}</H2>
+        <H2 className="text-3xl text-center">
+          {prompt?.description ?? 'Free draw'}
+        </H2>
         {prompt && (
           <Box gap items="center">
             Prompt by <PlayerAvatar playerId={prompt.playerId} />

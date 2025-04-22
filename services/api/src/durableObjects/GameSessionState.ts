@@ -771,6 +771,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
 
     this.#sendSocketMessage({
       type: 'turnPlayed',
+      roundIndex: currentRoundIndex,
       turn: {
         playerId,
         // turn data for current round is not public.
