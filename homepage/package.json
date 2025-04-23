@@ -21,10 +21,10 @@
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/three": "catalog:",
     "@unocss/transformer-variant-group": "catalog:",
     "@vitejs/plugin-react-swc": "catalog:",
     "unocss": "catalog:",
-    "vite": "catalog:",
-    "@types/three": "catalog:"
+    "vite": "catalog:"
   }
 }

@@ -8,12 +8,19 @@
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./css.css": {
+      "default": "./dist/uno.css"
     }
   },
   "type": "module",
   "scripts": {
-    "dev": "tsc -w",
-    "build": "tsc"
+    "dev": "pnpm run --filter @long-game/visual-components --parallel \"/^dev:.*/\"",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:uno": "scripts uno ./dist -w",
+    "build": "pnpm build:ts && pnpm build:uno",
+    "build:ts": "tsc",
+    "build:uno": "scripts uno ./dist"
   },
   "peerDependencies": {
     "@a-type/ui": "catalog:",
@@ -29,6 +36,7 @@
   "devDependencies": {
     "@types/three": "catalog:",
     "typescript": "5.5.4",
-    "@types/react": "catalog:"
+    "@types/react": "catalog:",
+    "@long-game/scripts": "workspace:*"
   }
 }

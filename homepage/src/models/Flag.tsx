@@ -17,7 +17,7 @@ export function Flag(props: ThreeElements['group']) {
     '/models/flag.glb',
   ) as unknown as GLTFResult;
   return (
-    <group {...props} dispose={null}>
+    <group {...props} dispose={null} scale={[0.75, 0.75, 0.75]}>
       <mesh geometry={nodes.flag_1.geometry} material={materials.colormap} />
     </group>
   );

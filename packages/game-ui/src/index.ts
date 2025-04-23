@@ -16,3 +16,5 @@ export * from './withSuspense';
 
 export * from '@a-type/react-space';
 export * from '@long-game/visual-components';
+
+import '@long-game/visual-components/css.css';

@@ -1,14 +1,16 @@
 import { clsx } from '@a-type/ui';
 import {
   Bounds,
+  Center,
   ContactShadows,
   Environment,
   Float,
-  OrbitControls,
+  Outlines,
   Text3D,
+  useBounds,
 } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Group } from 'three';
 import { Coin } from './models/Coin';
 import { Flag } from './models/Flag';
@@ -21,12 +23,16 @@ export interface SceneProps {
 export function Scene({ className }: SceneProps) {
   return (
     <Canvas
-      className={clsx('pointer-events-none', className)}
+      className={clsx(className)}
       shadows
       camera={{ position: [0, 1.5, 4] }}
     >
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[-10, 0, -5]} intensity={1} color="#ffffff" />
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[-10, 0, -5]}
+        intensity={10}
+        color="#ffffff"
+      />
       <directionalLight
         position={[-1, -2, -5]}
         intensity={0.2}
@@ -40,7 +46,7 @@ export function Scene({ className }: SceneProps) {
         color="#ffffff"
       />
 
-      <Bounds fit clip observe margin={1.5}>
+      <Bounds fit clip margin={1}>
         <Stuff />
       </Bounds>
 
@@ -53,7 +59,7 @@ export function Scene({ className }: SceneProps) {
       />
       <Environment preset="city" />
 
-      <OrbitControls makeDefault />
+      {/* <OrbitControls makeDefault /> */}
     </Canvas>
   );
 }
@@ -65,24 +71,49 @@ function Stuff() {
       groupRef.current.rotation.y = state.clock.getElapsedTime() / 20;
     }
   });
+
+  const textProps = {
+    font: '/fonts/Knewave_Regular.json',
+    bevelEnabled: true,
+    bevelSegments: 1,
+    bevelThickness: 0.1,
+    curveSegments: 4,
+  };
+
+  const objectScale = 4;
+
+  const bounds = useBounds();
+  useEffect(() => {
+    groupRef.current?.updateWorldMatrix(true, false);
+    const timeout = setTimeout(() => {
+      bounds.refresh();
+    }, 100);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [bounds]);
+
   return (
     <>
-      <axesHelper />
-      <group scale={[3, 3, 3]} ref={groupRef}>
+      <group
+        scale={[objectScale, objectScale, objectScale]}
+        rotation={[0, Math.PI / 2, 0]}
+        ref={groupRef}
+      >
         <Float
-          position={[1, 0.3, -0.25]}
+          position={[1, 0.3, -0.75]}
           rotation={[Math.PI / 3.5, 0, 0]}
           rotationIntensity={4}
-          floatIntensity={3}
+          floatIntensity={6}
           speed={0.5}
         >
           <Sword />
         </Float>
         <Float
-          position={[0, 0.1, 0.25]}
+          position={[0, 0.1, 1]}
           rotation={[Math.PI / 3.5, 0, 0]}
           rotationIntensity={4}
-          floatIntensity={3}
+          floatIntensity={6}
           speed={0.5}
         >
           <Coin />
@@ -91,7 +122,7 @@ function Stuff() {
           position={[-1, 0, -0.25]}
           rotation={[0, 0, 0]}
           rotationIntensity={4}
-          floatIntensity={3}
+          floatIntensity={6}
           speed={0.5}
         >
           <Flag />
@@ -101,23 +132,41 @@ function Stuff() {
         <Float
           rotationIntensity={0.5}
           rotation={[-Math.PI / 32, Math.PI / 4, Math.PI / 16]}
-          position={[-3, 1.75, 0.5]}
+          position={[-1.8, 1.75, 0.5]}
         >
-          <Text3D font="/fonts/Knewave_Regular.json">Never</Text3D>
+          <Center>
+            <Text3D {...textProps}>
+              Never
+              <meshToonMaterial color="#ffffff" />
+              <Outlines thickness={3} color="black" />
+            </Text3D>
+          </Center>
         </Float>
         <Float
           rotationIntensity={0.5}
-          position={[0.5, 1.5, 0.5]}
+          position={[2.1, 1.5, 0.5]}
           rotation={[0, -Math.PI / 8, Math.PI / 32]}
         >
-          <Text3D font="/fonts/Knewave_Regular.json">Lose</Text3D>
+          <Center>
+            <Text3D {...textProps}>
+              Lose
+              <meshToonMaterial color="#ffffff" />
+              <Outlines thickness={3} color="black" />
+            </Text3D>
+          </Center>
         </Float>
         <Float
           rotationIntensity={0.5}
-          position={[-1, -0.5, 0.5]}
+          position={[0, -0.5, 0.5]}
           rotation={[0, Math.PI / 16, Math.PI / 16]}
         >
-          <Text3D font="/fonts/Knewave_Regular.json">Touch</Text3D>
+          <Center>
+            <Text3D {...textProps}>
+              Touch
+              <meshToonMaterial color="#ffffff" />
+              <Outlines thickness={3} color="black" />
+            </Text3D>
+          </Center>
         </Float>
       </group>
     </>
