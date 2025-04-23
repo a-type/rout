@@ -1,0 +1,34 @@
+{
+  "name": "@long-game/visual-components",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/index.js",
+      "workerd": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "@a-type/ui": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "dependencies": {
+    "@react-three/drei": "catalog:",
+    "@react-three/fiber": "catalog:",
+    "three": "catalog:",
+    "@long-game/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/three": "catalog:",
+    "typescript": "5.5.4",
+    "@types/react": "catalog:"
+  }
+}
