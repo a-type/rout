@@ -1,10 +1,16 @@
-import { Box, Button, Input } from '@a-type/ui';
+import { Box, Button, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
+import { useEffect } from 'react';
 
 const hooks = typedHooks<typeof gameDefinition>();
 
 export const Client = hooks.withGame(function Client({ gameSuite }) {
+  useEffect(
+    () => gameSuite.subscribe('turnValidationFailed', toast.error),
+    [gameSuite],
+  );
+
   if (gameSuite.gameStatus.status === 'completed') {
     return (
       <Box full layout="center center">
