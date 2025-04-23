@@ -35,6 +35,8 @@ jobs:
         run: |
           pnpm migrations:apply:remote
         working-directory: ./services/db
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deploy DB
         uses: cloudflare/wrangler-action@v3
