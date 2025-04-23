@@ -31,6 +31,11 @@ jobs:
           -H "Authorization: Bearer ${{secrets.CLOUDFLARE_API_TOKEN}}" \
           -H "Content-Type:application/json"
 
+      - name: Migrate the database
+        run: |
+          pnpm migrations:apply:remote
+        working-directory: ./services/db
+
       - name: Deploy DB
         uses: cloudflare/wrangler-action@v3
         with:
