@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card, toast } from '@a-type/ui';
+import { Box, Button, Card, cardGridColumns, toast } from '@a-type/ui';
 import { useEffect } from 'react';
 import { CreateGame } from '../games/CreateGame';
 import { GameSummaryCard } from './GameSummaryCard';
@@ -44,7 +44,7 @@ export function MembershipsList({
           </Box>
         </Box>
       )}
-      <Card.Grid>
+      <Card.Grid columns={cardGridColumns.small}>
         {sessions?.map((session) => (
           <GameSummaryCard key={session.id} session={session} />
         ))}
