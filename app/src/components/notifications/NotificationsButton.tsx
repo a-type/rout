@@ -57,7 +57,7 @@ export function NotificationsButton({
           </Button>
         )}
       </PopoverImpl.Trigger>
-      <PopoverImpl.Content className="min-h-500px sm:w-400px">
+      <PopoverImpl.Content className="min-h-500px sm:w-400px sm:p-md">
         {!isMobile && <PopoverArrow />}
         <Box gap items="center" justify="between" className="mb-md">
           {isMobile ? (

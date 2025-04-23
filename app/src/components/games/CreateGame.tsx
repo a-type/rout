@@ -1,14 +1,15 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Button, Icon } from '@a-type/ui';
+import { Button, ButtonProps, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { useNavigate } from '@verdant-web/react-router';
+import { MouseEvent } from 'react';
 
-export function CreateGame() {
+export function CreateGame({ children, onClick, ...rest }: ButtonProps) {
   const mutation = sdkHooks.usePrepareGameSession();
 
   const navigate = useNavigate();
 
-  const create = async () => {
+  const create = async (ev: MouseEvent<HTMLButtonElement>) => {
     const result = await mutation.mutateAsync({ gameId: 'number-guess' });
     const gameSessionId = result?.sessionId;
     if (!gameSessionId) {
@@ -18,11 +19,16 @@ export function CreateGame() {
       );
     }
     navigate(`/session/${gameSessionId}`);
+    onClick?.(ev);
   };
 
   return (
-    <Button color="primary" onClick={create}>
-      <Icon name="plus" /> New Game
+    <Button color="primary" onClick={create} {...rest}>
+      {children ?? (
+        <>
+          <Icon name="plus" /> New Game
+        </>
+      )}
     </Button>
   );
 }

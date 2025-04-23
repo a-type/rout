@@ -1,27 +1,61 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Card } from '@a-type/ui';
+import { Box, Button, Card, cardGridColumns, toast } from '@a-type/ui';
 import { useEffect } from 'react';
+import { CreateGame } from '../games/CreateGame';
 import { GameSummaryCard } from './GameSummaryCard';
 
-export function MembershipsList() {
+export function MembershipsList({
+  statusFilter,
+  invitationStatus,
+}: {
+  statusFilter?: ('active' | 'completed' | 'pending')[];
+  invitationStatus?: 'pending' | 'accepted' | 'declined';
+}) {
   const {
-    data: { sessions, errors },
-  } = sdkHooks.useGetGameSessions();
+    data: { results: sessions, errors },
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = sdkHooks.useGetGameSessions({ status: statusFilter, invitationStatus });
 
   useEffect(() => {
     if (errors?.length) {
       errors.forEach(console.error);
+      toast.error(
+        'An error occurred while loading your games. Please try again later.',
+        {
+          id: 'games-list-error',
+        },
+      );
     }
   }, [errors]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="font-300 text-md uppercase my-0 mx-4">Games</h2>
-      <Card.Grid>
+    <Box d="col" gap full="width">
+      {!sessions.length && (
+        <Box full="width" layout="center center" p className="min-h-8">
+          <Box gap className="text-gray-dark" items="center">
+            Nothing here.
+            {(!statusFilter || statusFilter.includes('active')) && (
+              <CreateGame color="unstyled" className="italic">
+                Start a new game?
+              </CreateGame>
+            )}
+          </Box>
+        </Box>
+      )}
+      <Card.Grid columns={cardGridColumns.small}>
         {sessions?.map((session) => (
           <GameSummaryCard key={session.id} session={session} />
         ))}
       </Card.Grid>
-    </div>
+      {hasNextPage && (
+        <Box full="width" d="row" layout="center center">
+          <Button color="ghost" onClick={() => fetchNextPage()}>
+            {isFetchingNextPage ? 'Loading...' : 'Load more'}
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 }

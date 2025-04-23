@@ -22,3 +22,15 @@ export const UserAvatar = withSuspense(function UserAvatar({
   );
 },
 <Avatar />);
+
+export const MyAvatar = withSuspense(function MyAvatar(props: AvatarProps) {
+  const { data: user } = sdkHooks.useGetMe();
+
+  return (
+    <Avatar
+      {...props}
+      imageSrc={user?.imageUrl ?? undefined}
+      name={user?.displayName}
+    />
+  );
+}, <Avatar />);

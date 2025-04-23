@@ -1,5 +1,6 @@
 import { NavBar } from '@a-type/ui';
 import { Link, useMatchingRoutes } from '@verdant-web/react-router';
+import { Wordmark } from '../brand/Wordmark';
 import { NotificationsButton } from '../notifications/NotificationsButton';
 
 export interface MainNavProps {}
@@ -8,15 +9,13 @@ export function MainNav({}: MainNavProps) {
   const routes = useMatchingRoutes();
   const isHome = routes.some((route) => route.path === '/');
   const isFriends = routes.some((route) => route.path === '/friends');
-  const isSettings = routes.some((route) => route.path === '/settings');
+  const isHistory = routes.some((route) => route.path === '/history');
   return (
     <NavBar className="bg-overlay md:(mt-8 rounded-md)">
-      {/* <span className="hidden sm-block font-[Knewave] font-300 text-center w-full p-2 text-xl">
-        rout!
-      </span> */}
+      <Wordmark className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl" />
       <NavBar.Item asChild active={isHome}>
         <Link to="/">
-          <NavBar.ItemIcon name="home" />
+          <NavBar.ItemIcon name="gamePiece" />
           <NavBar.ItemText>Games</NavBar.ItemText>
         </Link>
       </NavBar.Item>
@@ -26,17 +25,17 @@ export function MainNav({}: MainNavProps) {
           <NavBar.ItemText>Friends</NavBar.ItemText>
         </Link>
       </NavBar.Item>
-      <NavBar.Item asChild active={isSettings}>
-        <Link to="/settings">
-          <NavBar.ItemIcon name="gear" />
-          <NavBar.ItemText>Settings</NavBar.ItemText>
+      <NavBar.Item asChild active={isHistory}>
+        <Link to="/history">
+          <NavBar.ItemIcon name="calendar" />
+          <NavBar.ItemText>History</NavBar.ItemText>
         </Link>
       </NavBar.Item>
       <NotificationsButton>
         {({ hasUnread }) => (
           <NavBar.Item>
             <NavBar.ItemIcon name="bell" />
-            <NavBar.ItemText>Notifications</NavBar.ItemText>
+            <NavBar.ItemText>Notifs</NavBar.ItemText>
             {hasUnread && <NavBar.ItemPip />}
           </NavBar.Item>
         )}
