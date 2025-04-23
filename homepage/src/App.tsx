@@ -16,9 +16,6 @@ const App = () => {
       >
         <Wordmark className="text-xl" />
         <Box gap>
-          <Button asChild color="ghost">
-            <a href="https://play.rout.games">Learn More</a>
-          </Button>
           <Button asChild color="primary">
             <a href="https://play.rout.games">Play Now</a>
           </Button>
@@ -26,7 +23,7 @@ const App = () => {
       </Box>
       <TopographyBackground colorMode="dark" />
       <Container items="center" className="text-center py-16">
-        <H2 className="text-4xl font-normal">
+        <H2 className="text-4xl font-medium">
           Play games
           <br />
           every day
