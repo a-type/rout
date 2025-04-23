@@ -14,6 +14,7 @@ import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { motion } from 'motion/react';
 import { cardImageLookup } from './cardImageLookup';
+import { useDraggable } from '@dnd-kit/core';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -55,7 +56,10 @@ function FighterCard({
     return (
       <Flipped flipId={instanceId}>
         {(flippedProps) => (
-          <Tooltip content={<img src={cardArt} width={CARD_SIZE * 2} />}>
+          <Tooltip
+            open={false}
+            content={<img src={cardArt} width={CARD_SIZE * 2} />}
+          >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Box
                 {...flippedProps}
@@ -78,6 +82,9 @@ function FighterCard({
                   )}
                   src={cardArt}
                   width="100%"
+                  onDragStart={(e) => {
+                    e.preventDefault();
+                  }}
                 />
               </Box>
             </motion.div>
@@ -207,6 +214,20 @@ export function Card({
   const { cardId, ownerId, fatigued, continuousEffects } = info;
   const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
 
+  const { setNodeRef, listeners, transform, attributes } = useDraggable({
+    id: rest.instanceId,
+    data: {
+      instanceId: rest.instanceId,
+      cardInfo: info,
+    },
+  });
+
+  const transformStyle = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
   const cardData = cardDefinitions[cardId];
   if (!cardData) {
     throw new Error(`Card ${cardId} not found`);
@@ -214,7 +235,13 @@ export function Card({
 
   if (cardData.kind === 'fighter') {
     return (
-      <div className={className} style={style}>
+      <div
+        className={clsx(className, 'z-40 touch-manipulation')}
+        style={{ ...style, ...transformStyle }}
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+      >
         {stack &&
           stack.length > 1 &&
           stack
@@ -248,7 +275,13 @@ export function Card({
     );
   }
   return (
-    <div className={className} style={style}>
+    <div
+      className={clsx(className, 'z-50')}
+      style={{ ...style, ...transformStyle }}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+    >
       <TacticCard cardData={cardData} cardId={cardId} {...rest} />
     </div>
   );

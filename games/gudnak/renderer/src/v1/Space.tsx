@@ -1,15 +1,16 @@
 import { Box, clsx } from '@a-type/ui';
 import {
-  type PlayerState,
   type CardStack,
   type Card as CardType,
   Target,
   Coordinate,
+  cardDefinitions,
 } from '@long-game/game-gudnak-definition/v1';
-import { Card, CARD_SIZE } from './Card';
+import { Card } from './Card';
 import { isCard, isCoordinate, Selection } from './useSelect';
 import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
+import { useDroppable } from '@dnd-kit/core';
 
 export function Space({
   stack,
@@ -30,6 +31,16 @@ export function Space({
   onClick?: () => void;
   onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: `space-${coordinate.x}-${coordinate.y}`,
+    data: {
+      coordinate,
+    },
+  });
+
+  const draggedKind = active?.data.current?.cardInfo
+    ? cardDefinitions[(active?.data.current?.cardInfo as CardType).cardId].kind
+    : null;
   const selected =
     isCoordinate(selection) &&
     selection.x === coordinate.x &&
@@ -50,11 +61,16 @@ export function Space({
     }
   });
   return (
-    <div className={clsx(className, 'w-full h-full')} style={style}>
+    <div
+      ref={setNodeRef}
+      className={clsx(className, 'w-full h-full')}
+      style={style}
+    >
       <Box
         className={clsx(
           'aspect-square',
           ownerId ? 'border-primary' : 'border-gray-400',
+          draggedKind === 'fighter' && isOver && 'bg-primary',
           selected && 'bg-primary-light',
           targeted && 'bg-red-500/50',
         )}
