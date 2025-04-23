@@ -1,6 +1,6 @@
 import { NavBar } from '@a-type/ui';
+import { Wordmark } from '@long-game/game-ui';
 import { Link, useMatchingRoutes } from '@verdant-web/react-router';
-import { Wordmark } from '../brand/Wordmark';
 import { NotificationsButton } from '../notifications/NotificationsButton';
 
 export interface MainNavProps {}

@@ -1,0 +1,30 @@
+{
+  "name": "@long-game/homepage",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@a-type/ui": "catalog:",
+    "@long-game/visual-components": "workspace:*",
+    "@react-three/drei": "catalog:",
+    "@react-three/fiber": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "three": "catalog:",
+    "three-stdlib": "^2.35.15"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/three": "catalog:",
+    "@unocss/transformer-variant-group": "catalog:",
+    "@vitejs/plugin-react-swc": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:"
+  }
+}

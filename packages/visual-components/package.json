@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/game-ui",
+  "name": "@long-game/visual-components",
   "version": "0.0.1",
   "private": true,
   "exports": {
@@ -15,12 +15,12 @@
   },
   "type": "module",
   "scripts": {
+    "dev": "pnpm run --filter @long-game/visual-components --parallel \"/^dev:.*/\"",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:uno": "scripts uno ./dist -w",
     "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",
-    "build:uno": "scripts uno ./dist",
-    "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
-    "dev:ts": "tsc -w --preserveWatchOutput",
-    "dev:uno": "scripts uno ./dist -w"
+    "build:uno": "scripts uno ./dist"
   },
   "peerDependencies": {
     "@a-type/ui": "catalog:",
@@ -28,21 +28,15 @@
     "react-dom": "catalog:"
   },
   "dependencies": {
-    "@a-type/react-space": "catalog:",
-    "@long-game/common": "workspace:*",
-    "@long-game/game-client": "workspace:*",
-    "@long-game/game-definition": "workspace:*",
-    "@long-game/visual-components": "workspace:*",
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
-    "@types/three": "catalog:",
-    "@verdant-web/react-router": "catalog:",
     "three": "catalog:",
-    "valtio": "catalog:"
+    "@long-game/common": "workspace:*"
   },
   "devDependencies": {
+    "@types/three": "catalog:",
+    "typescript": "5.5.4",
     "@types/react": "catalog:",
-    "typescript": "catalog:",
     "@long-game/scripts": "workspace:*"
   }
 }

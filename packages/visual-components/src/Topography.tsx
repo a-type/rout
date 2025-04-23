@@ -8,7 +8,7 @@ import {
   useSize,
   withClassName,
 } from '@a-type/ui';
-import { PlayerColorPalette } from '@long-game/common';
+import { PlayerColorPalette } from '@long-game/common/colors';
 import { shaderMaterial } from '@react-three/drei';
 import {
   Canvas,
@@ -24,11 +24,11 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { Color, ShaderMaterial } from 'three';
-import { proxy } from 'valtio';
 
 export interface TopographyProps {
   speed?: number;
   className?: string;
+  colorMode?: 'light' | 'dark';
 }
 
 function resolveColor(color: number): Color {
@@ -170,24 +170,28 @@ const TopographyContext = createContext<{ palette: PlayerColorPalette | null }>(
 );
 export const TopographyProvider = TopographyContext.Provider;
 
-export function Topography({ className, ...rest }: TopographyProps) {
+export function Topography({
+  className,
+  colorMode: overrideColorMode,
+  ...rest
+}: TopographyProps) {
   const ctx = useContext(TopographyContext);
   const palette = ctx.palette;
-  const [state] = useState(() => proxy({ scale: 1 }));
+  const [state] = useState(() => ({ scale: 1 }));
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
     state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
   });
 
-  const mode = useSyncExternalStore(subscribeToColorModeChange, () =>
+  const detectedMode = useSyncExternalStore(subscribeToColorModeChange, () =>
     getResolvedColorMode(),
   );
+  const mode = overrideColorMode ?? detectedMode;
   const fromPalette = palette
     ? paletteColors(palette, mode)
     : {
         background: DEFAULT_COLORS[mode].background,
         gradient: DEFAULT_COLORS[mode].gradient,
       };
-  console.log(mode, fromPalette);
   const background = resolveColor(fromPalette.background);
   const gradient = fromPalette.gradient.map(resolveColor) as [Color, Color];
 
