@@ -1,3 +1,4 @@
+import { EventSubscriber } from '@a-type/utils';
 import {
   GameRoundSummary,
   GameSessionChatMessage,
@@ -38,6 +39,14 @@ export type PlayerInfo = {
   color: PlayerColorName;
 };
 
+type GameSessionSuiteEvents = {
+  turnPlayed: () => void;
+  turnPrepared: () => void;
+  turnValidationFailed: (error: string) => void;
+  error: (error: LongGameError) => void;
+  roundChanged: () => void;
+};
+
 export class GameSessionSuite<TGame extends GameDefinition> {
   #instanceId = Math.random().toString(36).slice(2);
   @observable accessor localTurnData!: GetTurnData<TGame> | null;
@@ -66,6 +75,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   playerId: PrefixedId<'u'>;
   startedAt!: Date;
   timezone!: string;
+  #events = new EventSubscriber<GameSessionSuiteEvents>();
 
   // non-reactive
   #chatNextToken: string | null = null;
@@ -129,6 +139,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     );
     this.ctx.socket.disconnect();
   };
+
+  get subscribe() {
+    return this.#events.subscribe;
+  }
 
   @computed get viewingRound() {
     return this.rounds[this.viewingRoundIndex];
@@ -275,6 +289,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     } else {
       this.localTurnData = turn;
     }
+    this.#events.emit('turnPrepared');
   };
 
   @action submitTurn = async (override?: GetTurnData<TGame>) => {
@@ -287,6 +302,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
     const error = this.turnError;
     if (error) {
+      this.#events.emit('turnValidationFailed', error);
       return error;
     }
     const submittingToRound = this.latestRoundIndex;
@@ -295,6 +311,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       turnData: localTurnData,
     });
     if (response.type === 'error') {
+      this.#events.emit(
+        'error',
+        new LongGameError(LongGameError.Code.Unknown, response.message),
+      );
       return response.message;
     } else {
       // locally update the submitted round with our turn and
@@ -303,6 +323,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         this.rounds[submittingToRound].yourTurnData = localTurnData;
         this.localTurnData = null;
       });
+      this.#events.emit('turnPlayed');
     }
   };
 
@@ -410,6 +431,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     if (this.viewingRoundIndex === msg.completedRound.roundIndex) {
       this.viewingRoundIndex = msg.newRound.roundIndex;
     }
+
+    this.#events.emit('roundChanged');
   };
 
   @action private onStatusChange = (msg: ServerStatusChangeMessage) => {
