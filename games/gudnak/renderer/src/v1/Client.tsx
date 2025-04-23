@@ -1,7 +1,8 @@
 import { Box, Button, toast } from '@a-type/ui';
-import type {
-  Coordinate,
-  CoordinateTarget,
+import {
+  cardDefinitions,
+  type Coordinate,
+  type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { Board } from './Board';
 import { hooks } from './gameClient';
@@ -81,8 +82,22 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           onDragEnd={(e) => {
             const coord = e.over?.data.current?.coordinate as Coordinate;
             const cardInstanceId = e.active.data.current?.instanceId;
-            if (!coord || !cardInstanceId) {
+            const card = finalState.cardState[cardInstanceId as string];
+            const kind = cardDefinitions[card.cardId]?.kind;
+            if (!kind) {
+              console.error(
+                'No kind',
+                cardInstanceId,
+                finalState.cardState[cardInstanceId as string],
+              );
+              return;
+            }
+            if ((kind === 'fighter' && !coord) || !cardInstanceId) {
               console.error('No coord or cardInstanceId');
+              return;
+            }
+            if (kind === 'tactic') {
+              action.playCard(card);
               return;
             }
             action.deployOrPlayCardImmediate(cardInstanceId, coord);

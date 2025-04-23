@@ -12,6 +12,7 @@ import { Selection } from './useSelect';
 import map from './images/map.png';
 import mapVert from './images/map-vert.png';
 import { useMediaQuery } from '@long-game/game-ui';
+import { useDroppable } from '@dnd-kit/core';
 
 function Map() {
   const isLarge = useMediaQuery('(min-width: 1024px)');
@@ -33,12 +34,19 @@ export function Board({
   onClick?: (coord: Coordinate) => void;
   onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
+  const { setNodeRef } = useDroppable({
+    id: 'board',
+    data: {
+      coordinate: null,
+    },
+  });
   const { finalState } = useGameSuite();
   const { specialSpaces } = finalState as PlayerState;
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
   return (
     <div
+      ref={setNodeRef}
       className={clsx(
         'relative w-full select-none',
         isLarge ? 'aspect-[25/16]' : 'aspect-[16/25]',

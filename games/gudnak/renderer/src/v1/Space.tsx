@@ -4,6 +4,7 @@ import {
   type Card as CardType,
   Target,
   Coordinate,
+  cardDefinitions,
 } from '@long-game/game-gudnak-definition/v1';
 import { Card } from './Card';
 import { isCard, isCoordinate, Selection } from './useSelect';
@@ -30,12 +31,16 @@ export function Space({
   onClick?: () => void;
   onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
-  const { isOver, setNodeRef } = useDroppable({
+  const { isOver, setNodeRef, active } = useDroppable({
     id: `space-${coordinate.x}-${coordinate.y}`,
     data: {
       coordinate,
     },
   });
+
+  const draggedKind = active?.data.current?.cardInfo
+    ? cardDefinitions[(active?.data.current?.cardInfo as CardType).cardId].kind
+    : null;
   const selected =
     isCoordinate(selection) &&
     selection.x === coordinate.x &&
@@ -65,7 +70,7 @@ export function Space({
         className={clsx(
           'aspect-square',
           ownerId ? 'border-primary' : 'border-gray-400',
-          isOver && 'bg-primary',
+          draggedKind === 'fighter' && isOver && 'bg-primary',
           selected && 'bg-primary-light',
           targeted && 'bg-red-500/50',
         )}

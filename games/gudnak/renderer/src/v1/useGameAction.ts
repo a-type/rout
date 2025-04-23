@@ -14,7 +14,8 @@ import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
 
 export function useGameAction() {
-  const { submitTurn, finalState, localTurnData } = hooks.useGameSuite();
+  const { submitTurn, finalState, localTurnData, turnError } =
+    hooks.useGameSuite();
   const targeting = useTargeting();
   const selection = useSelect();
 
@@ -54,6 +55,7 @@ export function useGameAction() {
       ]);
 
       targeting.onTargetsComplete((targets) => {
+        selection.clear();
         const coordinate = targets[0] as CoordinateTarget;
         submitTurn({
           action: {
@@ -80,6 +82,7 @@ export function useGameAction() {
     ]);
 
     targeting.onTargetsComplete((targets) => {
+      selection.clear();
       const coordinate = targets[0] as CoordinateTarget;
       submitTurn({
         action: {
@@ -153,6 +156,7 @@ export function useGameAction() {
       const targetInputs = abilityDef.input.targets;
       targeting.begin(targetInputs);
       targeting.onTargetsComplete((targets) => {
+        selection.clear();
         submitTurn({
           action: {
             type: 'useAbility',
@@ -176,22 +180,25 @@ export function useGameAction() {
     }
   };
 
-  const targets: Target[] = targeting.active
-    ? targeting.chosen
-    : localTurnData?.action.type === 'useAbility'
-    ? localTurnData.action.targets
-    : localTurnData?.action.type === 'tactic'
-    ? localTurnData.action.input.targets
-    : localTurnData?.action.type === 'deploy' ||
-      localTurnData?.action.type == 'move'
-    ? [
-        {
-          kind: 'coordinate',
-          x: localTurnData.action.target.x,
-          y: localTurnData.action.target.y,
-        },
-      ]
-    : [];
+  const validTurn = !turnError;
+
+  const targets: Target[] =
+    targeting.active || !validTurn
+      ? targeting.chosen
+      : localTurnData?.action.type === 'useAbility'
+      ? localTurnData.action.targets
+      : localTurnData?.action.type === 'tactic'
+      ? localTurnData.action.input.targets
+      : localTurnData?.action.type === 'deploy' ||
+        localTurnData?.action.type == 'move'
+      ? [
+          {
+            kind: 'coordinate',
+            x: localTurnData.action.target.x,
+            y: localTurnData.action.target.y,
+          },
+        ]
+      : [];
 
   return {
     playCard,

@@ -218,8 +218,10 @@ export function Card({
     id: rest.instanceId,
     data: {
       instanceId: rest.instanceId,
+      cardInfo: info,
     },
   });
+
   const transformStyle = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -234,7 +236,7 @@ export function Card({
   if (cardData.kind === 'fighter') {
     return (
       <div
-        className={className}
+        className={clsx(className, 'z-40')}
         style={{ ...style, ...transformStyle }}
         ref={setNodeRef}
         {...listeners}
@@ -273,7 +275,13 @@ export function Card({
     );
   }
   return (
-    <div className={className} style={style}>
+    <div
+      className={clsx(className, 'z-50')}
+      style={{ ...style, ...transformStyle }}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+    >
       <TacticCard cardData={cardData} cardId={cardId} {...rest} />
     </div>
   );

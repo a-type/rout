@@ -23,7 +23,10 @@ export function Hand({
   const overlapOffset = cardSize * 0.6; // Amount of overlap between cards
 
   return (
-    <Box className="relative flex flex-row py-2" style={{ height: cardSize }}>
+    <Box
+      className="relative flex flex-row py-2 z-50"
+      style={{ height: cardSize }}
+    >
       <AnimatePresence>
         {cards.map((card, index) => {
           const isHovered = hoveredIndex === index;
