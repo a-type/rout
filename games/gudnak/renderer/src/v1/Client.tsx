@@ -9,7 +9,12 @@ import { useGameAction } from './useGameAction';
 import { Flipper } from 'react-flip-toolkit';
 import { useEffect } from 'react';
 import { Hand } from './Hand';
-import { DndContext } from '@dnd-kit/core';
+import {
+  DndContext,
+  useSensor,
+  MouseSensor,
+  PointerSensor,
+} from '@dnd-kit/core';
 
 export function Client() {
   return (
@@ -44,6 +49,18 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     }
   }, [turnError]);
 
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const sensors = [mouseSensor, pointerSensor];
+
   if (gameStatus.status === 'completed') {
     return (
       <Box className="w-full h-full flex flex-col p-3 gap-2">
@@ -60,6 +77,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     <Box className="w-full h-full flex flex-col gap-2">
       <Flipper flipKey={JSON.stringify(finalState.board)}>
         <DndContext
+          sensors={sensors}
           onDragEnd={(e) => {
             const coord = e.over?.data.current?.coordinate as Coordinate;
             const cardInstanceId = e.active.data.current?.instanceId;
@@ -67,7 +85,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               console.error('No coord or cardInstanceId');
               return;
             }
-            action.deployCardImmediate(cardInstanceId, coord);
+            action.deployOrPlayCardImmediate(cardInstanceId, coord);
           }}
         >
           <div className="p-3">

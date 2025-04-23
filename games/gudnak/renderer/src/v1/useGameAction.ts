@@ -92,7 +92,10 @@ export function useGameAction() {
     });
   };
 
-  const deployCardImmediate = (cardInstanceId: string, target: Coordinate) => {
+  const deployOrPlayCardImmediate = (
+    cardInstanceId: string,
+    target: Coordinate,
+  ) => {
     const card = finalState.cardState[cardInstanceId];
     const cardDef = cardDefinitions[card.cardId as ValidCardId];
     if (cardDef.kind !== 'fighter') {
@@ -192,7 +195,7 @@ export function useGameAction() {
 
   return {
     playCard,
-    deployCardImmediate,
+    deployOrPlayCardImmediate,
     moveCard,
     activateAbility,
     targeting,

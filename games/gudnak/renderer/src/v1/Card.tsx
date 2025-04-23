@@ -220,7 +220,7 @@ export function Card({
       instanceId: rest.instanceId,
     },
   });
-  const style2 = transform
+  const transformStyle = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
@@ -235,7 +235,7 @@ export function Card({
     return (
       <div
         className={className}
-        style={{ ...style, ...style2 }}
+        style={{ ...style, ...transformStyle }}
         ref={setNodeRef}
         {...listeners}
         {...attributes}
