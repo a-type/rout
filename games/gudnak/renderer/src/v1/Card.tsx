@@ -236,7 +236,7 @@ export function Card({
   if (cardData.kind === 'fighter') {
     return (
       <div
-        className={clsx(className, 'z-40')}
+        className={clsx(className, 'z-40 touch-manipulation')}
         style={{ ...style, ...transformStyle }}
         ref={setNodeRef}
         {...listeners}

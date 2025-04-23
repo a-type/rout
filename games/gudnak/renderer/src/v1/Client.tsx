@@ -14,7 +14,8 @@ import {
   DndContext,
   useSensor,
   MouseSensor,
-  PointerSensor,
+  TouchSensor,
+  useSensors,
 } from '@dnd-kit/core';
 
 export function Client() {
@@ -56,12 +57,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
       distance: 10,
     },
   });
-  const pointerSensor = useSensor(PointerSensor, {
+  const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
       distance: 10,
     },
   });
-  const sensors = [mouseSensor, pointerSensor];
+  // const sensors = useSensors(mouseSensor, pointerSensor, touchSensor);
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   if (gameStatus.status === 'completed') {
     return (
