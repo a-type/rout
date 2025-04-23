@@ -8,6 +8,7 @@ import {
   Coordinate,
   Target,
 } from '@long-game/game-gudnak-definition/v1';
+import { boardHelpers } from '@long-game/game-gudnak-definition';
 import { hooks } from './gameClient';
 import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
@@ -91,6 +92,44 @@ export function useGameAction() {
     });
   };
 
+  const deployCardImmediate = (cardInstanceId: string, target: Coordinate) => {
+    const card = finalState.cardState[cardInstanceId];
+    const cardDef = cardDefinitions[card.cardId as ValidCardId];
+    if (cardDef.kind !== 'fighter') {
+      console.error(`Card ${card.cardId} is not a fighter`);
+      return;
+    }
+    const fromHand = finalState.hand.some(
+      (h) => h.instanceId === cardInstanceId,
+    );
+    if (fromHand) {
+      submitTurn({
+        action: {
+          type: 'deploy',
+          card,
+          target,
+        },
+      });
+    } else {
+      const source = boardHelpers.findCoordFromCard(
+        finalState.board,
+        cardInstanceId,
+      );
+      if (!source) {
+        console.error(`Card ${card.cardId} not found on board`);
+        return;
+      }
+      submitTurn({
+        action: {
+          type: 'move',
+          cardInstanceId: cardInstanceId,
+          source,
+          target,
+        },
+      });
+    }
+  };
+
   const activateAbility = (card: CardType, source: Coordinate) => {
     const cardDef = cardDefinitions[card.cardId as ValidCardId];
     if (cardDef.kind !== 'fighter' || cardDef.abilities.length === 0) {
@@ -153,6 +192,7 @@ export function useGameAction() {
 
   return {
     playCard,
+    deployCardImmediate,
     moveCard,
     activateAbility,
     targeting,
