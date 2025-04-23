@@ -41,15 +41,18 @@ export function Space({
   const draggedKind = active?.data.current?.cardInfo
     ? cardDefinitions[(active?.data.current?.cardInfo as CardType).cardId].kind
     : null;
+
   const selected =
     isCoordinate(selection) &&
     selection.x === coordinate.x &&
     selection.y === coordinate.y;
+
   const targeted = targets.some((t) => {
     if (t.kind === 'coordinate') {
       return t.x === coordinate.x && t.y === coordinate.y;
     }
   });
+
   const { finalState } = hooks.useGameSuite();
   const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
   const { cardState } = finalState;

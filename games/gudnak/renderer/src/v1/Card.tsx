@@ -14,16 +14,8 @@ import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { motion } from 'motion/react';
 import { cardImageLookup } from './cardImageLookup';
-import { useDraggable } from '@dnd-kit/core';
-
-const traitToEmoji: Record<string, string> = {
-  soldier: '🪖',
-  hunter: '🪃',
-  brute: '💪',
-  token: '📦',
-  hero: '⭐',
-  demon: '👹',
-};
+import { useDndContext, useDraggable } from '@dnd-kit/core';
+import { Draggable } from './Draggable';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -35,169 +27,71 @@ type BaseCardProps = {
 
 export const CARD_SIZE = 200;
 
-function FighterCard({
-  cardData,
+export type DragData = {
+  instanceId: string;
+  cardInfo: CardType;
+};
+
+function RenderCard({
   onClick,
   selected,
   fatigued,
-  continuousEffects,
   instanceId,
   cardId,
   targeted,
+  overSpace,
 }: BaseCardProps & {
-  cardData: FighterCard;
+  cardData: FighterCard | TacticCard;
   cardId: string;
   continuousEffects?: ContinuousEffect[];
   cardStack?: CardStack;
+  overSpace?: boolean;
 }) {
-  const textColor = fatigued ? 'gray' : 'white';
   const cardArt = cardImageLookup[cardId];
-  if (cardArt) {
-    return (
-      <Flipped flipId={instanceId}>
-        {(flippedProps) => (
-          <Tooltip
-            open={false}
-            content={<img src={cardArt} width={CARD_SIZE * 2} />}
+  return (
+    <Flipped flipId={instanceId}>
+      {(flippedProps) => (
+        <Tooltip
+          open={false}
+          content={<img src={cardArt} width={CARD_SIZE * 2} />}
+        >
+          <motion.div
+            whileHover={overSpace ? {} : { scale: 1.05 }}
+            whileTap={overSpace ? {} : { scale: 0.95 }}
+            animate={{
+              scale: overSpace ? 0.7 : 1,
+            }}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Box
-                {...flippedProps}
+            <Box
+              {...flippedProps}
+              className={clsx(
+                'w-full h-full border-primary rounded-lg bg-cover',
+                selected && 'bg-primary-light',
+                targeted && 'bg-primary-wash',
+                fatigued && 'bg-gray-300',
+              )}
+              border
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+            >
+              <img
                 className={clsx(
-                  'w-full h-full border-primary rounded-lg bg-cover',
-                  selected && 'bg-primary-light',
-                  targeted && 'bg-primary-wash',
-                  fatigued && 'bg-gray-300',
+                  (selected || targeted) && 'mix-blend-screen',
+                  fatigued && 'grayscale-50 mix-blend-multiply',
                 )}
-                border
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick?.();
+                src={cardArt}
+                width="100%"
+                onDragStart={(e) => {
+                  e.preventDefault();
                 }}
-              >
-                <img
-                  className={clsx(
-                    (selected || targeted) && 'mix-blend-screen',
-                    fatigued && 'grayscale-50 mix-blend-multiply',
-                  )}
-                  src={cardArt}
-                  width="100%"
-                  onDragStart={(e) => {
-                    e.preventDefault();
-                  }}
-                />
-              </Box>
-            </motion.div>
-          </Tooltip>
-        )}
-      </Flipped>
-    );
-  }
-
-  return (
-    <Box
-      className="w-full h-full border-primary"
-      border
-      p="md"
-      style={{
-        width: CARD_SIZE,
-        height: CARD_SIZE,
-        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-        color: textColor,
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    >
-      <Box className="flex flex-col">
-        <Box className="flex flex-row gap-2">
-          <Box className="flex flex-col">
-            <div>{cardData.power}</div>
-            {cardData.traits.map((trait) => (
-              <div key={trait} className="text-xs">
-                {traitToEmoji[trait]}
-              </div>
-            ))}
-          </Box>
-          <div>{cardData.name}</div>
-        </Box>
-        <hr className="w-full" />
-        {cardData.abilities.map((ability, index) => (
-          <div key={index} className="text-xs">
-            <span className="font-bold">{ability.name}:&nbsp;</span>
-            <span>{ability.description}</span>
-          </div>
-        ))}
-        {continuousEffects?.map((effect, index) => (
-          <div key={index} className="text-xs">
-            <span>{effect.description}</span>
-          </div>
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
-function TacticCard({
-  cardData,
-  cardId,
-  instanceId,
-  onClick,
-  selected,
-}: BaseCardProps & { cardData: TacticCard; cardId: string }) {
-  const cardArt = cardImageLookup[cardId];
-  if (cardArt) {
-    return (
-      <Flipped flipId={instanceId}>
-        {(flippedProps) => (
-          <Tooltip content={<img src={cardArt} width={CARD_SIZE * 2} />}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Box
-                {...flippedProps}
-                className={clsx(
-                  'w-full h-full border-primary rounded-lg bg-cover',
-                  selected && 'bg-primary-light',
-                )}
-                border
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick?.();
-                }}
-              >
-                <img className="mix-blend-screen" src={cardArt} width="100%" />
-              </Box>
-            </motion.div>
-          </Tooltip>
-        )}
-      </Flipped>
-    );
-  }
-
-  return (
-    <Box
-      className="w-full h-full border-primary"
-      border
-      p="md"
-      style={{
-        width: CARD_SIZE,
-        height: CARD_SIZE,
-        background: selected ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    >
-      <Box className="flex flex-col w-full">
-        <Box className="flex flex-row gap-2">
-          <div>{cardData.cost}</div>
-          <div>{cardData.name}</div>
-        </Box>
-        <hr className="w-full" />
-        <div className="text-xs">{cardData.ability}</div>
-      </Box>
-    </Box>
+              />
+            </Box>
+          </motion.div>
+        </Tooltip>
+      )}
+    </Flipped>
   );
 }
 
@@ -214,19 +108,10 @@ export function Card({
   const { cardId, ownerId, fatigued, continuousEffects } = info;
   const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
 
-  const { setNodeRef, listeners, transform, attributes } = useDraggable({
-    id: rest.instanceId,
-    data: {
-      instanceId: rest.instanceId,
-      cardInfo: info,
-    },
-  });
+  const { over, active } = useDndContext();
 
-  const transformStyle = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
+  const overSpace =
+    !!over?.data.current?.coordinate && active?.id === rest.instanceId;
 
   const cardData = cardDefinitions[cardId];
   if (!cardData) {
@@ -235,12 +120,13 @@ export function Card({
 
   if (cardData.kind === 'fighter') {
     return (
-      <div
+      <Draggable
         className={clsx(className, 'z-40 touch-manipulation')}
-        style={{ ...style, ...transformStyle }}
-        ref={setNodeRef}
-        {...listeners}
-        {...attributes}
+        style={style}
+        data={{
+          instanceId: rest.instanceId,
+          cardInfo: info,
+        }}
       >
         {stack &&
           stack.length > 1 &&
@@ -255,7 +141,7 @@ export function Card({
                   left: `${(stack.length - idx - 1) * 30 + 5}px`,
                 }}
               >
-                <FighterCard
+                <RenderCard
                   cardId={cardState[c].cardId}
                   cardData={cardDefinitions[cardState[c].cardId] as FighterCard}
                   fatigued={fatigued}
@@ -264,25 +150,27 @@ export function Card({
                 />
               </div>
             ))}
-        <FighterCard
+        <RenderCard
           cardId={cardId}
           cardData={cardData}
           fatigued={fatigued}
           continuousEffects={continuousEffects}
+          overSpace={overSpace}
           {...rest}
         />
-      </div>
+      </Draggable>
     );
   }
   return (
-    <div
-      className={clsx(className, 'z-50')}
-      style={{ ...style, ...transformStyle }}
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
+    <Draggable
+      className={clsx(className, 'z-40 touch-manipulation')}
+      style={style}
+      data={{
+        instanceId: rest.instanceId,
+        cardInfo: info,
+      }}
     >
-      <TacticCard cardData={cardData} cardId={cardId} {...rest} />
-    </div>
+      <RenderCard cardData={cardData} cardId={cardId} {...rest} />
+    </Draggable>
   );
 }
