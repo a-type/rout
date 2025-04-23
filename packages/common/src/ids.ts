@@ -12,6 +12,7 @@ export const resourceIdTypes = {
   gsl: 'GameSessionInvitationLink',
   t: 'Turn',
   vc: 'VerificationCode',
+  no: 'Notification',
 } as const;
 export type ResourceNameMap = typeof resourceIdTypes;
 export type ResourceIdPrefix = keyof typeof resourceIdTypes;

@@ -1,4 +1,5 @@
 import { PrefixedId } from '@long-game/common';
+import { AnyNotification } from '@long-game/notifications';
 import { ColumnType, Insertable, Selectable, Updateable } from 'kysely';
 
 // date serialization: Dates go in, strings come out.
@@ -14,6 +15,11 @@ type DateColumnGenerated = ColumnType<
   Date | null | undefined
 >;
 
+export type NotificationSettings = Record<
+  AnyNotification['type'],
+  { push: boolean; email: boolean }
+>;
+
 export interface Database {
   User: UserTable;
   Account: AccountTable;
@@ -23,6 +29,7 @@ export interface Database {
   Friendship: FriendshipTable;
   FriendshipInvitation: FriendshipInvitationTable;
   PushSubscription: PushSubscriptionTable;
+  Notification: NotificationTable;
 }
 
 export interface UserTable {
@@ -37,7 +44,11 @@ export interface UserTable {
   password: string | null;
   stripeCustomerId: string | null;
   acceptedTosAt: DateColumnOptional;
-  sendEmailUpdates: ColumnType<boolean, boolean | undefined, boolean>;
+  notificationSettings: ColumnType<
+    NotificationSettings,
+    NotificationSettings | null,
+    NotificationSettings | null
+  >;
 }
 
 export type User = Selectable<UserTable>;
@@ -146,3 +157,15 @@ export interface PushSubscriptionTable {
 export type PushSubscription = Selectable<PushSubscriptionTable>;
 export type NewPushSubscription = Insertable<PushSubscriptionTable>;
 export type PushSubscriptionUpdate = Updateable<PushSubscriptionTable>;
+
+export interface NotificationTable {
+  id: PrefixedId<'no'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  userId: PrefixedId<'u'>;
+  data: AnyNotification;
+  readAt: DateColumnOptional;
+}
+export type Notification = Selectable<NotificationTable>;
+export type NewNotification = Insertable<NotificationTable>;
+export type NotificationUpdate = Updateable<NotificationTable>;

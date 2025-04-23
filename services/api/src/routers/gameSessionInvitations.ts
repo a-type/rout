@@ -1,11 +1,11 @@
 import { zValidator } from '@hono/zod-validator';
-import { isPrefixedId, PrefixedId, wrapRpcData } from '@long-game/common';
+import { id, isPrefixedId, PrefixedId, wrapRpcData } from '@long-game/common';
 import { UserStore } from '@long-game/service-db';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { userStoreMiddleware } from '../middleware';
-import { sendGameInvitationEmail } from '../services/email';
+import { notifyUser } from '../services/notification';
 
 export const gameSessionInvitationsRouter = new Hono()
   .use(userStoreMiddleware)
@@ -80,13 +80,18 @@ export const gameSessionInvitationsRouter = new Hono()
         .get('userStore')
         .createGameSessionInvitation(gameSessionId, userId);
       const currentUser = await ctx.get('userStore').getMe();
-      // send an email to the user
-      await sendGameInvitationEmail(ctx, {
-        to: invitation.email,
-        gameSessionId,
-        inviterName: currentUser.displayName,
-        userName: invitation.displayName,
-      });
+      // notify the user
+      await notifyUser(
+        userId,
+        {
+          type: 'game-invite',
+          id: id('no'),
+          gameSessionId,
+          inviterId: currentUser.id,
+          inviterName: currentUser.displayName,
+        },
+        ctx.env,
+      );
       return ctx.json({ success: true });
     },
   );

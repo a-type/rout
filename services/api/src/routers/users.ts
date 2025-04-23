@@ -52,6 +52,38 @@ export const usersRouter = new Hono<Env>()
       return ctx.json(wrapRpcData(updated));
     },
   )
+  .get('/me/notificationSettings', userStoreMiddleware, async (ctx) => {
+    const userStore = ctx.get('userStore');
+    const settings = await userStore.getNotificationSettings();
+    return ctx.json(wrapRpcData(settings));
+  })
+  .put(
+    '/me/notificationSettings',
+    userStoreMiddleware,
+    zValidator(
+      'json',
+      z.object({
+        'turn-ready': z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+        'game-invite': z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+        'friend-invite': z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+      }),
+    ),
+    async (ctx) => {
+      const body = ctx.req.valid('json');
+      const userStore = ctx.get('userStore');
+      const updated = await userStore.updateNotificationSettings(body);
+      return ctx.json(wrapRpcData(updated));
+    },
+  )
   .get(
     '/:id',
     userStoreMiddleware,

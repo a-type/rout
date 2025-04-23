@@ -10,6 +10,7 @@ import {
   DB,
   jsonObjectFrom,
   NewPushSubscription,
+  NotificationSettings,
   sql,
 } from '../kysely/index.js';
 
@@ -120,7 +121,20 @@ export class UserStore extends RpcTarget {
         displayName,
         color,
         imageUrl,
-        sendEmailUpdates,
+        notificationSettings: {
+          'turn-ready': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
+          'friend-invite': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
+          'game-invite': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
+        },
       })
       .where('id', '=', this.#userId)
       .returningAll()
@@ -145,8 +159,8 @@ export class UserStore extends RpcTarget {
       .selectFrom('Friendship')
       .where((eb) =>
         eb.or([
-          eb('userId', '=', this.#userId),
-          eb('friendId', '=', this.#userId),
+          eb('Friendship.userId', '=', this.#userId),
+          eb('Friendship.friendId', '=', this.#userId),
         ]),
       )
       .select([
@@ -191,9 +205,9 @@ export class UserStore extends RpcTarget {
     const builder = this.#db
       .selectFrom('FriendshipInvitation')
       .select([
-        'id',
-        'status',
-        'email',
+        'FriendshipInvitation.id',
+        'FriendshipInvitation.status',
+        'FriendshipInvitation.email',
         direction === 'incoming'
           ? (eb) =>
               jsonObjectFrom(
@@ -209,16 +223,18 @@ export class UserStore extends RpcTarget {
               ).as('otherUser')
           : sql<null>`NULL`.as('otherUser'),
       ])
-      .where('status', '=', 'pending');
+      .where('FriendshipInvitation.status', '=', 'pending');
     if (direction === 'outgoing') {
-      return builder.where('inviterId', '=', this.#userId).execute();
+      return builder
+        .where('FriendshipInvitation.inviterId', '=', this.#userId)
+        .execute();
     } else {
       const { email } = await this.#db
         .selectFrom('User')
-        .where('id', '=', this.#userId)
-        .select('email')
+        .where('User.id', '=', this.#userId)
+        .select('User.email')
         .executeTakeFirstOrThrow();
-      return builder.where('email', '=', email).execute();
+      return builder.where('FriendshipInvitation.email', '=', email).execute();
     }
   }
 
@@ -746,5 +762,102 @@ export class UserStore extends RpcTarget {
       .where('userId', '=', this.#userId)
       .selectAll()
       .execute();
+  }
+
+  async getNotificationSettings() {
+    const user = await this.#db
+      .selectFrom('User')
+      .where('User.id', '=', this.#userId)
+      .select(['User.notificationSettings'])
+      .executeTakeFirstOrThrow();
+
+    return user.notificationSettings as NotificationSettings;
+  }
+
+  async updateNotificationSettings(settings: NotificationSettings) {
+    const user = await this.#db
+      .updateTable('User')
+      .set({
+        notificationSettings: settings,
+      })
+      .where('User.id', '=', this.#userId)
+      .returning('User.notificationSettings')
+      .executeTakeFirstOrThrow(
+        () => new LongGameError(LongGameError.Code.NotFound),
+      );
+    return user.notificationSettings as NotificationSettings;
+  }
+
+  async getNotifications({
+    first = 10,
+    after,
+  }: {
+    first?: number;
+    after?: string;
+  } = {}) {
+    let builder = this.#db
+      .selectFrom('Notification')
+      .where('Notification.userId', '=', this.#userId)
+      .orderBy('Notification.createdAt', 'desc')
+      .selectAll('Notification');
+
+    if (after) {
+      const cursor = this.#decodeCursor(after);
+      builder = builder.where('Notification.createdAt', '<', cursor);
+    }
+
+    if (first) {
+      builder = builder.limit(first + 1);
+    }
+
+    const results = await builder.execute();
+    const hasNextPage = Boolean(first && results.length > first);
+    if (hasNextPage) {
+      // toss out sentinel value
+      results.pop();
+    }
+
+    const endCursor = results[results.length - 1]?.createdAt ?? null;
+    return {
+      results,
+      pageInfo: {
+        hasNextPage,
+        endCursor: endCursor ? this.#encodeCursor(endCursor) : null,
+      },
+    };
+  }
+
+  async markNotificationAsRead(notificationId: PrefixedId<'no'>, read = true) {
+    const notification = await this.#db
+      .updateTable('Notification')
+      .set({
+        readAt: read ? new Date() : null,
+      })
+      .where('Notification.id', '=', notificationId)
+      .where('Notification.userId', '=', this.#userId)
+      .returningAll()
+      .executeTakeFirstOrThrow(
+        () =>
+          new LongGameError(
+            LongGameError.Code.NotFound,
+            'Notification not found',
+          ),
+      );
+
+    return notification;
+  }
+
+  async deleteNotification(notificationId: PrefixedId<'no'>) {
+    await this.#db
+      .deleteFrom('Notification')
+      .where('Notification.id', '=', notificationId)
+      .where('Notification.userId', '=', this.#userId)
+      .executeTakeFirstOrThrow(
+        () =>
+          new LongGameError(
+            LongGameError.Code.NotFound,
+            'Notification not found',
+          ),
+      );
   }
 }

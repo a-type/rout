@@ -1,4 +1,4 @@
-import { isTurnReadyPushNotification } from '@long-game/common';
+import { getNotificationConfig } from '@long-game/notifications';
 
 export function attachToPwaEvents() {
   if (typeof window === 'undefined') return;
@@ -10,11 +10,14 @@ export function attachToPwaEvents() {
     if (event.data && event.data.type === 'pwa-notification-click') {
       const data = event.data.data;
       if (data) {
-        if (isTurnReadyPushNotification(data)) {
-          console.info('Turn ready push notification clicked', data);
-          // open the game session
-          window.history.pushState({}, '', `/session/${data.gameSessionId}`);
+        const config = getNotificationConfig(data);
+        if (!config) {
+          console.error('Notification click without config', data);
+          return;
         }
+        console.info('Turn ready push notification clicked', data);
+        // open the game session
+        window.history.pushState({}, '', config.link(data));
       }
     }
   });

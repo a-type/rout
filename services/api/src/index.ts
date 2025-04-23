@@ -7,6 +7,7 @@ import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
 import { gameSessionInvitationsRouter } from './routers/gameSessionInvitations';
 import { gameSessionsRouter } from './routers/gameSessions';
+import { notificationsRouter } from './routers/notifications';
 import { publicRouter } from './routers/public';
 import { pushRouter } from './routers/push';
 import { socketRouter } from './routers/socket';
@@ -25,6 +26,7 @@ const app = new Hono()
   .route('/gameSessionInvitations', gameSessionInvitationsRouter)
   .route('/friendships', friendshipsRouter)
   .route('/push', pushRouter)
+  .route('/notifications', notificationsRouter)
   .route('/public', publicRouter);
 
 export default app;

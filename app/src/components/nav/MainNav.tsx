@@ -1,5 +1,6 @@
 import { NavBar } from '@a-type/ui';
 import { Link, useMatchingRoutes } from '@verdant-web/react-router';
+import { NotificationsButton } from '../notifications/NotificationsButton';
 
 export interface MainNavProps {}
 
@@ -31,6 +32,15 @@ export function MainNav({}: MainNavProps) {
           <NavBar.ItemText>Settings</NavBar.ItemText>
         </Link>
       </NavBar.Item>
+      <NotificationsButton>
+        {({ hasUnread }) => (
+          <NavBar.Item>
+            <NavBar.ItemIcon name="bell" />
+            <NavBar.ItemText>Notifications</NavBar.ItemText>
+            {hasUnread && <NavBar.ItemPip />}
+          </NavBar.Item>
+        )}
+      </NotificationsButton>
     </NavBar>
   );
 }

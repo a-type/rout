@@ -35,8 +35,9 @@ export const RoundHistoryControl = withGame(
             loadRound(roundIndex - 1);
           }}
           disabled={roundIndex === 0}
+          className="p-sm"
         >
-          <Icon name="previous" />
+          <Icon name="previous" size={10} />
         </Button>
 
         <Select
@@ -46,7 +47,7 @@ export const RoundHistoryControl = withGame(
             loadRound(asInt);
           }}
         >
-          <Select.Trigger />
+          <Select.Trigger size="small" className="px-md" />
           <Select.Content>
             {/* Note: specifically skipping latest index, which === current */}
             {Array.from({ length: latestRoundIndex + 1 }).map((_, i) => (
@@ -64,9 +65,10 @@ export const RoundHistoryControl = withGame(
             }
             loadRound(roundIndex + 1);
           }}
+          className="p-sm"
           disabled={isCurrent}
         >
-          <Icon name="next" />
+          <Icon name="next" size={10} />
         </Button>
         <Button
           size="icon-small"
@@ -74,9 +76,9 @@ export const RoundHistoryControl = withGame(
             loadRound(latestRoundIndex);
           }}
           disabled={isCurrent}
-          className={isCurrent ? 'hidden' : ''}
+          className={isCurrent ? 'hidden' : 'p-sm'}
         >
-          <Icon name="skipEnd" />
+          <Icon name="skipEnd" size={10} />
         </Button>
       </Box>
     );

@@ -5,7 +5,6 @@ import {
   ClientRequestChatMessage,
   ClientSendChatMessage,
   ClientSubmitTurnMessage,
-  createTurnReadyPushNotification,
   GameRound,
   GameRoundSummary,
   GameSessionChatMessage,
@@ -27,7 +26,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { Hono } from 'hono/quick';
 import { z } from 'zod';
 import { verifySocketToken } from '../auth/socketTokens';
-import { sendPushToAllUserDevices } from '../services/push';
+import { notifyUser } from '../services/notification';
 
 /**
  * The basic initial data required to set up a game.
@@ -701,13 +700,14 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Session data not initialized',
       );
     }
-    await sendPushToAllUserDevices(
+    await notifyUser(
       playerId,
-      createTurnReadyPushNotification(
-        this.#sessionData.id,
-        this.#sessionData.gameId,
-        this.#sessionData.gameVersion,
-      ),
+      {
+        type: 'turn-ready',
+        gameId: this.#sessionData.gameId,
+        gameSessionId: this.#sessionData.id,
+        id: id('no'),
+      },
       this.env,
     );
   }

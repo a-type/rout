@@ -43,7 +43,7 @@ function PlayerStatusAvatar({
   hasPlayed,
 }: {
   player: PlayerInfo;
-  status: GameSessionPlayerStatus;
+  status?: GameSessionPlayerStatus;
   hasPlayed: boolean;
 }) {
   const { className, style } = usePlayerThemed(player.id);
@@ -54,7 +54,7 @@ function PlayerStatusAvatar({
         imageSrc={player.imageUrl}
         className={clsx(
           'border border-solid border-2px',
-          status.online ? 'border-primary' : 'border-gray',
+          status?.online ? 'border-primary' : 'border-gray',
         )}
       />
       {hasPlayed && (

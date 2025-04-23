@@ -4,7 +4,7 @@ import { APP_NAME, PrefixedId } from '@long-game/common';
 import { Context } from 'hono';
 import { Env } from '../config/ctx.js';
 
-export const email = new Email<Context>({
+export const email = new Email<{ env: ApiBindings }>({
   provider: new SesEmailProvider({
     async getConnectionInfo(baseCtx) {
       const ctx = baseCtx as Context<Env>;

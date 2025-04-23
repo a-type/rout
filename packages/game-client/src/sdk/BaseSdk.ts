@@ -2,6 +2,7 @@ import { LongGameError } from '@long-game/common';
 import { hcWithType as apiHc } from '@long-game/service-api';
 import {
   UseMutationOptions,
+  UseSuspenseInfiniteQueryOptions,
   UseSuspenseQueryOptions,
 } from '@tanstack/react-query';
 import { fetch } from '../fetch.js';
@@ -12,6 +13,29 @@ export type EraseEmptyArg<T> = T extends undefined ? [] : [T];
 export type QueryFactory<Output, Input> = {
   (...args: EraseEmptyArg<Input>): UseSuspenseQueryOptions<Output>;
   __isQuery: true;
+};
+export type QueryFactoryInfinite<Output, Input> = {
+  (...args: EraseEmptyArg<Input>): UseSuspenseInfiniteQueryOptions<
+    Output,
+    Error,
+    Output,
+    Output,
+    any,
+    string | undefined
+  >;
+  __isInfiniteQuery: true;
+};
+
+export const isQueryFactory = (
+  factory: any,
+): factory is QueryFactory<any, any> => {
+  return (factory as any).__isQuery === true;
+};
+
+export const isInfiniteQueryFactory = (
+  factory: any,
+): factory is QueryFactoryInfinite<any, any> => {
+  return (factory as any).__isInfiniteQuery === true;
 };
 
 export class BaseSdk extends EventTarget {
@@ -84,6 +108,82 @@ export class BaseSdk extends EventTarget {
       };
     };
     factory.__isQuery = true as const;
+    return factory;
+  };
+  protected sdkInfiniteQuery = <
+    TReq,
+    TRes extends {
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
+    },
+    Output extends {
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
+    } = TRes,
+    Input = void,
+  >(
+    key: string,
+    fn: (req: TReq, cursor: string | undefined) => Promise<TypedResponse<TRes>>,
+    {
+      transformInput,
+      transformOutput,
+      enabled,
+    }: {
+      transformInput?: (input: Input) => TReq;
+      transformOutput?: (output: TRes) => Output;
+      enabled?: (input: Input) => boolean;
+    } = {},
+  ): QueryFactoryInfinite<Output, Input> => {
+    const factory = (...args: EraseEmptyArg<Input>) => {
+      const input = args[0] as Input;
+      const queryFn = async ({
+        pageParam,
+      }: {
+        pageParam: string | undefined;
+      }) => {
+        try {
+          const res = await fn(
+            transformInput ? transformInput(input) : (undefined as any),
+            pageParam,
+          );
+          LongGameError.throwIfError(res);
+          const body = (await res.json()) as TRes;
+          const result = transformOutput
+            ? transformOutput(body)
+            : (body as any as Output);
+
+          return result;
+        } catch (e) {
+          console.error(e);
+          this.dispatchEvent(new ErrorEvent('error', { error: e }));
+          if (LongGameError.isInstance(e)) {
+            throw e;
+          }
+          throw new LongGameError(
+            LongGameError.Code.Unknown,
+            'An error occurred. Please try again later.',
+          );
+        }
+      };
+      return {
+        queryFn,
+        queryKey: [key, input],
+        enabled: enabled ? enabled(input) : true,
+        getNextPageParam: (lastPage) => {
+          if (lastPage.pageInfo) {
+            return lastPage.pageInfo.endCursor;
+          }
+          return undefined;
+        },
+        initialPageParam: undefined,
+      } as UseSuspenseInfiniteQueryOptions<
+        Output,
+        Error,
+        Output,
+        Output,
+        any,
+        string | undefined
+      >;
+    };
+    factory.__isInfiniteQuery = true as const;
     return factory;
   };
 
@@ -191,6 +291,8 @@ export class BaseSdk extends EventTarget {
 export type InferReturnData<T> = T extends (
   ...args: any
 ) => UseSuspenseQueryOptions<infer U>
+  ? U
+  : T extends QueryFactoryInfinite<infer U, any>
   ? U
   : T extends () => UseMutationOptions<infer U>
   ? U

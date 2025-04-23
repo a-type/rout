@@ -14,12 +14,14 @@
     "@long-game/game-renderer": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "@long-game/games": "workspace:*",
+    "@long-game/notifications": "workspace:*",
     "@tanstack/react-query": "5.62.15",
     "@verdant-web/react-router": "catalog:",
     "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "valtio": "catalog:"
+    "valtio": "catalog:",
+    "change-case": "^5.4.4"
   },
   "devDependencies": {
     "@types/react": "catalog:",

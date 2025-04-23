@@ -12,11 +12,13 @@ const InvitePage = () => {
   return (
     <PageRoot>
       <PageContent>
-        {me ? (
-          <LoggedInInvite me={me} invite={invite} />
-        ) : (
-          <LoggedOutInvite invite={invite} />
-        )}
+        <Box layout="center center" full>
+          {me ? (
+            <LoggedInInvite me={me} invite={invite} />
+          ) : (
+            <LoggedOutInvite invite={invite} />
+          )}
+        </Box>
       </PageContent>
     </PageRoot>
   );
@@ -36,9 +38,9 @@ function LoggedInInvite({
 
   return (
     <Box direction="col">
-      <H1>Become friends with {invite.displayName}</H1>
+      <H1>Become friends with {invite.inviterDisplayName}</H1>
       <P>
-        {invite.displayName} has invited you to be friends on {APP_NAME}!
+        {invite.inviterDisplayName} has invited you to be friends on {APP_NAME}!
       </P>
       <Box>
         <Button
@@ -70,7 +72,7 @@ function LoggedOutInvite({
   return (
     <Box direction="col">
       <H1>
-        Join {invite.displayName} on {APP_NAME}
+        Join {invite.inviterDisplayName} on {APP_NAME}
       </H1>
       <P>
         Let the games begin! Create an account to start your ritual of play

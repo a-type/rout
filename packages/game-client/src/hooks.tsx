@@ -3,17 +3,27 @@ import {
   useMutation,
   UseMutationOptions,
   UseMutationResult,
+  UseSuspenseInfiniteQueryResult,
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 import { createContext, ReactNode, useContext } from 'react';
-import { BaseSdk, EraseEmptyArg, QueryFactory } from './sdk/BaseSdk';
+import {
+  BaseSdk,
+  EraseEmptyArg,
+  isInfiniteQueryFactory,
+  isQueryFactory,
+  QueryFactory,
+  QueryFactoryInfinite,
+} from './sdk/BaseSdk';
 
 type SdkHooks<Sdk extends BaseSdk> = {
   [K in keyof Sdk as `use${Capitalize<
     string & K
   >}`]: Sdk[K] extends QueryFactory<infer O, infer I>
     ? (...args: EraseEmptyArg<I>) => UseSuspenseQueryResult<O>
+    : Sdk[K] extends QueryFactoryInfinite<infer O, infer I>
+    ? (...args: EraseEmptyArg<I>) => UseSuspenseInfiniteQueryResult<O>
     : Sdk[K] extends UseMutationOptions<infer O, infer E, infer V>
     ? () => UseMutationResult<O, E, V>
     : never;
@@ -34,10 +44,17 @@ function makeHookProxy<Sdk extends BaseSdk>(): any {
         if (correctedMethodName.startsWith('get')) {
           return (args: any) => {
             const sdk = useSdk() as Sdk;
-            const method = sdk[
-              correctedMethodName as keyof Sdk
-            ] as QueryFactory<any, any>;
-            return useSuspenseQuery(method(args));
+            const method = sdk[correctedMethodName as keyof Sdk] as
+              | QueryFactory<any, any>
+              | QueryFactoryInfinite<any, any>;
+            if (isQueryFactory(method)) {
+              return useSuspenseQuery(method(args));
+            } else if (isInfiniteQueryFactory(method)) {
+              return useSuspenseQuery(method(args));
+            }
+            throw new Error(
+              `Method ${correctedMethodName} starts with 'get' but is not a query or infinite query`,
+            );
           };
         } else {
           return () => {

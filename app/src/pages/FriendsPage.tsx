@@ -9,9 +9,13 @@ export interface FriendsPageProps {}
 export function FriendsPage({}: FriendsPageProps) {
   return (
     <PageRoot>
-      <PageContent>
-        <SendInvite />
+      <PageContent
+        innerProps={{
+          className: 'gap-lg',
+        }}
+      >
         <FriendInvites />
+        <SendInvite />
         <FriendsList />
       </PageContent>
       <PageNav>

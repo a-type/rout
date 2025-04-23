@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   assertPrefixedId,
+  id,
   isPrefixedId,
   LongGameError,
   PrefixedId,
@@ -11,6 +12,7 @@ import { z } from 'zod';
 import { Env } from '../config/ctx';
 import { userStoreMiddleware } from '../middleware';
 import { sendFriendshipInviteEmail } from '../services/email';
+import { notifyUser } from '../services/notification';
 
 export const friendshipsRouter = new Hono<Env>()
   .get(
@@ -53,17 +55,10 @@ export const friendshipsRouter = new Hono<Env>()
         userId: z
           .custom<PrefixedId<'u'>>((v) => isPrefixedId(v, 'u'))
           .optional(),
-        landOnGameSessionId: z
-          .custom<PrefixedId<'gs'>>((v) => isPrefixedId(v, 'gs'))
-          .optional(),
       }),
     ),
     async (ctx) => {
-      const {
-        email: emailAddress,
-        userId,
-        landOnGameSessionId,
-      } = ctx.req.valid('json');
+      const { email: emailAddress, userId } = ctx.req.valid('json');
       const userStore = ctx.get('userStore');
       const { invite, created } = await userStore.insertFriendshipInvite({
         email: emailAddress,
@@ -72,22 +67,32 @@ export const friendshipsRouter = new Hono<Env>()
 
       if (created) {
         const user = await userStore.getMe();
-        const inviteLink = new URL(`/invite/${invite.id}`, ctx.env.UI_ORIGIN);
-        if (landOnGameSessionId) {
-          inviteLink.searchParams.set(
-            'landOnGameSessionId',
-            landOnGameSessionId,
+
+        // if the invited user has an account, we use the notifications
+        // system. otherwise, we send an email that goes through the
+        // signup process.
+        const userForEmail = await ctx.env.ADMIN_STORE.getUserByEmail(
+          invite.email,
+        );
+
+        if (userForEmail) {
+          await notifyUser(
+            userForEmail.id,
+            {
+              id: id('no'),
+              type: 'friend-invite',
+              invitationId: invite.id,
+              inviterName: user.displayName,
+            },
+            ctx.env,
           );
-        }
-        try {
+        } else {
+          const inviteLink = new URL(`/invite/${invite.id}`, ctx.env.UI_ORIGIN);
           await sendFriendshipInviteEmail(ctx, {
             to: invite.email,
             inviterName: user.displayName,
             inviteLink: inviteLink.toString(),
           });
-        } catch (err) {
-          console.error('Failed to send email', err);
-          // continue anyway, invite will still be in their UI
         }
       }
       return ctx.json({ success: true });

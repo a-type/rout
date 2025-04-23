@@ -149,12 +149,18 @@ importers:
       '@long-game/games':
         specifier: workspace:*
         version: link:../packages/games
+      '@long-game/notifications':
+        specifier: workspace:*
+        version: link:../packages/notifications
       '@tanstack/react-query':
         specifier: 5.62.15
         version: 5.62.15(react@19.0.0)
       '@verdant-web/react-router':
         specifier: 'catalog:'
         version: 0.7.1(react@19.0.0)
+      change-case:
+        specifier: ^5.4.4
+        version: 5.4.4
       hono:
         specifier: 'catalog:'
         version: 4.6.19
@@ -654,6 +660,19 @@ importers:
         specifier: 'catalog:'
         version: 5.7.3
 
+  packages/notifications:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../common
+      '@long-game/games':
+        specifier: workspace:*
+        version: link:../games
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+
   packages/scripts:
     dependencies:
       '@types/node':
@@ -713,6 +732,9 @@ importers:
       '@long-game/games':
         specifier: workspace:*
         version: link:../../packages/games
+      '@long-game/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@long-game/service-db':
         specifier: workspace:*
         version: link:../db
@@ -759,6 +781,9 @@ importers:
       '@long-game/games':
         specifier: workspace:*
         version: link:../../packages/games
+      '@long-game/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       hono:
         specifier: 'catalog:'
         version: 4.6.19
@@ -3755,6 +3780,9 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
+
+  change-case@5.4.4:
+    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -9567,6 +9595,8 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+
+  change-case@5.4.4: {}
 
   check-error@2.1.1: {}
 

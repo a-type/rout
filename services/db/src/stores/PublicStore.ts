@@ -19,7 +19,7 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
     return this.#db
       .selectFrom('FriendshipInvitation')
       .innerJoin('User', 'FriendshipInvitation.inviterId', 'User.id')
-      .where('id', '=', inviteId)
+      .where('FriendshipInvitation.id', '=', inviteId)
       .select([
         'FriendshipInvitation.id',
         'FriendshipInvitation.status',
@@ -34,8 +34,8 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
   async getGameSessionIdFromInvitationCode(code: string) {
     const result = await this.#db
       .selectFrom('GameSessionInvitationLink')
-      .where('code', '=', code)
-      .select(['gameSessionId'])
+      .where('GameSessionInvitationLink.code', '=', code)
+      .select(['GameSessionInvitationLink.gameSessionId'])
       .executeTakeFirst();
     return result?.gameSessionId;
   }

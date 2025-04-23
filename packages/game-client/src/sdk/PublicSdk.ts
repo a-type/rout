@@ -208,6 +208,48 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+
+  getNotifications = this.sdkInfiniteQuery('getNotifications', (_, cursor) =>
+    this.apiRpc.notifications.$get({
+      query: {
+        after: cursor,
+      },
+    }),
+  );
+  markNotificationAsRead = this.sdkMutation(
+    this.apiRpc.notifications[':id'].$put,
+    {
+      transformInput: (input: { id: string; read: boolean }) => ({
+        param: { id: input.id },
+        json: { read: input.read },
+      }),
+      invalidate: [['getNotifications']],
+    },
+  );
+  deleteNotification = this.sdkMutation(
+    this.apiRpc.notifications[':id'].$delete,
+    {
+      transformInput: (input: { id: string }) => ({
+        param: { id: input.id },
+      }),
+      invalidate: [['getNotifications']],
+    },
+  );
+  getNotificationSettings = this.sdkQuery(
+    'getNotificationSettings',
+    this.apiRpc.users.me.notificationSettings.$get,
+  );
+  updateNotificationSettings = this.sdkMutation(
+    this.apiRpc.users.me.notificationSettings.$put,
+    {
+      transformInput: (input: {
+        [key: string]: { email: boolean; push: boolean };
+      }) => ({
+        json: input as any,
+      }),
+      invalidate: [['getNotificationSettings']],
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
@@ -230,3 +272,6 @@ export type GameSessionPregame = InferReturnData<
 export type GameSessionSummary = InferReturnData<
   PublicSdk['getGameSessionSummary']
 >;
+export type Notification = InferReturnData<
+  PublicSdk['getNotifications']
+>['results'][number];

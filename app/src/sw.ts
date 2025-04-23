@@ -1,8 +1,7 @@
 /// <reference lib="webworker" />
 /* eslint-disable no-restricted-globals */
 
-import { isTurnReadyPushNotification } from '@long-game/common/sw';
-import games from '@long-game/games';
+import { getNotificationConfig } from '@long-game/notifications';
 import { ExpirationPlugin } from 'workbox-expiration';
 import {
   cleanupOutdatedCaches,
@@ -40,20 +39,24 @@ registerRoute(
 self.addEventListener('push', (event) => {
   if (event.data) {
     const pushData = event.data.json();
-    if (isTurnReadyPushNotification(pushData)) {
-      console.info('Turn ready push notification received', pushData);
-      const game = games[pushData.gameId];
-      const gameName = game?.title ?? 'Rout';
-      self.registration.showNotification(`Your turn!`, {
-        body: `Ready to make your move in ${gameName}? Tap to play!`,
-        data: pushData,
-        tag: `turn-${pushData.gameSessionId}`,
-        icon: '/icons/android/android-launchericon-192-192.png',
-        // TODO: monochrome badge
-      });
-    } else {
-      console.error('Unrecognized push data', pushData);
+    if (!pushData.type) {
+      console.error('Push notification without type', pushData);
+      return;
     }
+    const config = getNotificationConfig(pushData);
+    if (!config) {
+      console.error('Push notification without config', pushData);
+      return;
+    }
+
+    console.info(config.type, 'push notification received', pushData);
+    self.registration.showNotification(config.title(pushData, 'push'), {
+      body: config.text(pushData, 'push'),
+      data: pushData,
+      tag: `turn-${pushData.gameSessionId}`,
+      icon: '/icons/android/android-launchericon-192-192.png',
+      // TODO: monochrome badge
+    });
   }
 });
 

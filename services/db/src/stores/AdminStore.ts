@@ -1,8 +1,9 @@
 import { AuthAccount, AuthUser, AuthVerificationCode } from '@a-type/auth';
 import { comparePassword, hashPassword } from '@a-type/kysely';
 import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
+import { AnyNotification } from '@long-game/notifications';
 import { WorkerEntrypoint } from 'cloudflare:workers';
-import { DB, createDb } from '../kysely/index.js';
+import { DB, NotificationSettings, createDb } from '../kysely/index.js';
 
 export class AdminStore extends WorkerEntrypoint<DbBindings> {
   #db: DB;
@@ -38,6 +39,15 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       ...dbAccount,
       expiresAt: dbAccount.accessTokenExpiresAt ?? null,
     };
+  }
+
+  async getUser(id: PrefixedId<'u'>) {
+    assertPrefixedId(id, 'u');
+    return this.#db
+      .selectFrom('User')
+      .where('id', '=', id)
+      .selectAll()
+      .executeTakeFirst();
   }
 
   async getUserByEmail(email: string) {
@@ -165,4 +175,64 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .where('id', '=', id)
       .execute();
   }
+
+  async getUserNotificationSettings(id: PrefixedId<'u'>) {
+    const user = await this.#db
+      .selectFrom('User')
+      .where('id', '=', id)
+      .select('notificationSettings')
+      .executeTakeFirst();
+
+    return deepMerge<NotificationSettings>(user?.notificationSettings ?? {}, {
+      'turn-ready': {
+        push: false,
+        email: false,
+      },
+      'friend-invite': {
+        push: false,
+        email: false,
+      },
+      'game-invite': {
+        push: false,
+        email: false,
+      },
+    });
+  }
+
+  async insertNotification(
+    userId: PrefixedId<'u'>,
+    notification: AnyNotification,
+  ) {
+    await this.#db
+      .insertInto('Notification')
+      .values({
+        id: notification.id,
+        userId,
+        data: notification,
+      })
+      .execute();
+  }
+
+  async markNotificationAsRead(notificationId: PrefixedId<'no'>) {
+    assertPrefixedId(notificationId, 'no');
+
+    await this.#db
+      .updateTable('Notification')
+      .set({
+        readAt: new Date(),
+      })
+      .where('id', '=', notificationId)
+      .execute();
+  }
+}
+
+function deepMerge<T>(target: any, source: any): T {
+  for (const key in source) {
+    if (source[key] && typeof source[key] === 'object') {
+      target[key] = deepMerge(target[key] || {}, source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
 }

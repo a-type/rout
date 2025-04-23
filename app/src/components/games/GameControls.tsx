@@ -1,10 +1,10 @@
-import { PushSubscriptionToggle } from '@/components/push/PushSubscriptionToggle';
 import { Box } from '@a-type/ui';
 import {
   BasicGameLog,
   PlayerStatuses,
   RoundHistoryControl,
 } from '@long-game/game-ui';
+import { NotificationsButton } from '../notifications/NotificationsButton';
 import { GameLayout } from './GameLayout';
 import { NavigationControls } from './NavigationControls';
 
@@ -22,7 +22,7 @@ export function GameControls({ pregame }: GameControlsProps) {
         <Box gap items="center">
           <NavigationControls />
           <PlayerStatuses className="flex-shrink-1" />
-          <PushSubscriptionToggle showWhenEnabled />
+          <NotificationsButton />
         </Box>
         {!pregame && <RoundHistoryControl />}
       </GameLayout.SecondaryControls>

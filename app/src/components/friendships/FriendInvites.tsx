@@ -1,13 +1,11 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, Box, Button, H1 } from '@a-type/ui';
+import { Avatar, Box, Button, H2 } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
 
 export function FriendInvites() {
   return (
     <Box d="col" gap>
-      <H1>Incoming Invites</H1>
       <IncomingInvites />
-      <H1>Sent Invites</H1>
       <OutgoingInvites />
     </Box>
   );
@@ -18,12 +16,19 @@ function IncomingInvites() {
     direction: 'incoming',
   });
 
+  if (!invites?.length) {
+    return null;
+  }
+
   return (
-    <Box d="col" surface p gap>
-      {invites.map((invite) => (
-        <IncomingInvite key={invite.id} invite={invite} />
-      ))}
-    </Box>
+    <>
+      <H2>Incoming Invites</H2>
+      <Box d="col" surface p gap>
+        {invites.map((invite) => (
+          <IncomingInvite key={invite.id} invite={invite} />
+        ))}
+      </Box>
+    </>
   );
 }
 
@@ -71,12 +76,19 @@ function OutgoingInvites() {
     direction: 'outgoing',
   });
 
+  if (!invites?.length) {
+    return null;
+  }
+
   return (
-    <Box d="col" surface p gap>
-      {invites.map((invite) => (
-        <OutgoingInvite key={invite.id} invite={invite} />
-      ))}
-    </Box>
+    <>
+      <H2>Sent Invites</H2>
+      <Box d="col" surface p gap>
+        {invites.map((invite) => (
+          <OutgoingInvite key={invite.id} invite={invite} />
+        ))}
+      </Box>
+    </>
   );
 }
 
