@@ -64,15 +64,25 @@ export class PublicSdk extends BaseSdk {
   );
   getGameSessions = this.sdkInfiniteQuery(
     'getGameSessions',
-    ({ status }, cursor) =>
+    ({ status, invitationStatus }, cursor) =>
       this.apiRpc.gameSessions.$get({
-        query: { after: cursor, status },
+        query: { after: cursor, status, invitationStatus },
       }),
     {
       transformInput: (input: {
         status?: ('active' | 'completed' | 'pending')[];
+        invitationStatus?: 'pending' | 'accepted' | 'declined';
       }) => input,
-      getKey: (input) => (input.status ? input.status.sort() : ['all']),
+      getKey: (input) => {
+        const key: string[] = [];
+        if (input.invitationStatus) {
+          key.push(input.invitationStatus);
+        }
+        if (input.status) {
+          key.push(...input.status.sort());
+        }
+        return key;
+      },
     },
   );
   getGameSessionInvitations = this.sdkQuery(

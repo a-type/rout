@@ -33,7 +33,15 @@ export function HomePage({}: HomePageProps) {
         </Box>
         <Box d="col" gap>
           <H2 className="font-300 text-md uppercase my-0 mx-4">Games</H2>
-          <MembershipsList statusFilter={['active']} />
+          <MembershipsList
+            invitationStatus="accepted"
+            statusFilter={['active']}
+          />
+          <H2 className="font-300 text-md uppercase my-0 mx-4">Invitations</H2>
+          <MembershipsList
+            invitationStatus="pending"
+            statusFilter={['pending']}
+          />
         </Box>
         <PageNowPlaying unstyled className="items-center justify-center">
           <CreateGame />
