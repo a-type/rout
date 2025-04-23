@@ -1,7 +1,7 @@
 import { Box, Tooltip } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
+import { TopographyButton } from '@long-game/visual-components';
 import { ReactNode } from 'react';
-import { TopographyButton } from '../decoration/Topography';
 import { PlayerStatuses } from '../players/PlayerStatuses';
 
 export interface SubmitTurnProps {

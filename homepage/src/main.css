@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Knewave';
+  src: url('/fonts/Knewave-Regular.ttf');
+}
+
+#root {
+  min-height: 0;
+}
+
+.font-fancy {
+  font-family: 'Knewave', system-ui;
+  font-weight: 400;
+}

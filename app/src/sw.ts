@@ -36,6 +36,31 @@ registerRoute(
   }),
 );
 
+// This allows the web app to trigger skipWaiting via
+// registration.waiting.postMessage({type: 'SKIP_WAITING'})
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Skip waiting');
+    self.skipWaiting();
+  }
+});
+
+async function isClientFocused() {
+  const windowClients = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  });
+  let clientIsFocused = false;
+  for (let i = 0; i < windowClients.length; i++) {
+    const windowClient = windowClients[i];
+    if (windowClient.focused) {
+      clientIsFocused = true;
+      break;
+    }
+  }
+  return clientIsFocused;
+}
+
 self.addEventListener('push', (event) => {
   if (event.data) {
     const pushData = event.data.json();
@@ -52,23 +77,20 @@ self.addEventListener('push', (event) => {
     // check if client is active and viewing the page already before showing a toast
     event.waitUntil(
       (async function () {
-        const allClients = await self.clients.matchAll({
-          includeUncontrolled: true,
-          type: 'window',
-        });
-        const client = allClients.find((c) => 'focus' in c);
-        if (client) {
-          client.focus();
-        } else {
-          console.info(config.type, 'push notification received', pushData);
-          self.registration.showNotification(config.title(pushData, 'push'), {
-            body: config.text(pushData, 'push'),
-            data: pushData,
-            tag: `turn-${pushData.gameSessionId}`,
-            icon: '/icons/android/android-launchericon-192-192.png',
-            // TODO: monochrome badge
-          });
+        const clientIsFocused = await isClientFocused();
+        if (clientIsFocused) {
+          console.log('Skipping push notification since app is open');
+          return;
         }
+
+        console.info(config.type, 'push notification received', pushData);
+        self.registration.showNotification(config.title(pushData, 'push'), {
+          body: config.text(pushData, 'push'),
+          data: pushData,
+          tag: `turn-${pushData.gameSessionId}`,
+          icon: '/icons/android/android-launchericon-192-192.png',
+          // TODO: monochrome badge
+        });
       })(),
     );
   }
