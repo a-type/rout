@@ -33,6 +33,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     latestRoundIndex,
     gameStatus,
     getPlayer,
+    currentTurn,
   } = gameSuite;
   // console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
@@ -48,7 +49,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     if (turnError) {
       toast.error(turnError);
     }
-  }, [turnError]);
+  }, [turnError, currentTurn]);
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
