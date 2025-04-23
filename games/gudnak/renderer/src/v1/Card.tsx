@@ -13,6 +13,7 @@ import { Flipped } from 'react-flip-toolkit';
 import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { motion } from 'motion/react';
+import { cardImageLookup } from './cardImageLookup';
 
 const traitToEmoji: Record<string, string> = {
   soldier: '🪖',
@@ -31,7 +32,7 @@ type BaseCardProps = {
   onClick?: () => void;
 };
 
-const CARD_SIZE = 200;
+export const CARD_SIZE = 200;
 
 function FighterCard({
   cardData,
@@ -40,20 +41,21 @@ function FighterCard({
   fatigued,
   continuousEffects,
   instanceId,
+  cardId,
   targeted,
 }: BaseCardProps & {
   cardData: FighterCard;
+  cardId: string;
   continuousEffects?: ContinuousEffect[];
   cardStack?: CardStack;
 }) {
   const textColor = fatigued ? 'gray' : 'white';
-  if (cardData.artUrl) {
+  const cardArt = cardImageLookup[cardId];
+  if (cardArt) {
     return (
       <Flipped flipId={instanceId}>
         {(flippedProps) => (
-          <Tooltip
-            content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
-          >
+          <Tooltip content={<img src={cardArt} width={CARD_SIZE * 2} />}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Box
                 {...flippedProps}
@@ -64,10 +66,6 @@ function FighterCard({
                   fatigued && 'bg-gray-300',
                 )}
                 border
-                style={{
-                  width: CARD_SIZE,
-                  height: CARD_SIZE,
-                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onClick?.();
@@ -78,8 +76,8 @@ function FighterCard({
                     (selected || targeted) && 'mix-blend-screen',
                     fatigued && 'grayscale-50 mix-blend-multiply',
                   )}
-                  src={cardData.artUrl}
-                  width={CARD_SIZE - 4}
+                  src={cardArt}
+                  width="100%"
                 />
               </Box>
             </motion.div>
@@ -136,17 +134,17 @@ function FighterCard({
 
 function TacticCard({
   cardData,
+  cardId,
   instanceId,
   onClick,
   selected,
-}: BaseCardProps & { cardData: TacticCard }) {
-  if (cardData.artUrl) {
+}: BaseCardProps & { cardData: TacticCard; cardId: string }) {
+  const cardArt = cardImageLookup[cardId];
+  if (cardArt) {
     return (
       <Flipped flipId={instanceId}>
         {(flippedProps) => (
-          <Tooltip
-            content={<img src={cardData.artUrl} width={CARD_SIZE * 2} />}
-          >
+          <Tooltip content={<img src={cardArt} width={CARD_SIZE * 2} />}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Box
                 {...flippedProps}
@@ -155,20 +153,12 @@ function TacticCard({
                   selected && 'bg-primary-light',
                 )}
                 border
-                style={{
-                  width: CARD_SIZE,
-                  height: CARD_SIZE,
-                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onClick?.();
                 }}
               >
-                <img
-                  className="mix-blend-screen"
-                  src={cardData.artUrl}
-                  width={CARD_SIZE - 4}
-                />
+                <img className="mix-blend-screen" src={cardArt} width="100%" />
               </Box>
             </motion.div>
           </Tooltip>
@@ -239,6 +229,7 @@ export function Card({
                 }}
               >
                 <FighterCard
+                  cardId={cardState[c].cardId}
                   cardData={cardDefinitions[cardState[c].cardId] as FighterCard}
                   fatigued={fatigued}
                   continuousEffects={continuousEffects}
@@ -247,6 +238,7 @@ export function Card({
               </div>
             ))}
         <FighterCard
+          cardId={cardId}
           cardData={cardData}
           fatigued={fatigued}
           continuousEffects={continuousEffects}
@@ -257,7 +249,7 @@ export function Card({
   }
   return (
     <div className={className} style={style}>
-      <TacticCard cardData={cardData} {...rest} />
+      <TacticCard cardData={cardData} cardId={cardId} {...rest} />
     </div>
   );
 }

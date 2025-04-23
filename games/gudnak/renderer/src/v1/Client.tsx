@@ -57,55 +57,58 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }
 
   return (
-    <Box className="w-full h-full flex flex-col p-3 gap-2">
+    <Box className="w-full h-full flex flex-col gap-2">
       <Flipper flipKey={JSON.stringify(finalState.board)}>
-        <Hand
-          cards={hand}
-          selectedId={action.selection.card?.instanceId ?? null}
-          onClickCard={(card) => {
-            if (!active) {
-              return;
-            }
-            action.playCard(card);
-          }}
-        />
-        <Box className="flex flex-row gap-2 items-center mt-5 mb-3">
-          {active ? (
-            <>
-              <span className="font-bold">It's your turn!</span>
-              <Button
-                disabled={actions <= 0}
-                onClick={() => {
-                  submitTurn({ action: { type: 'draw' } });
-                }}
-              >
-                Draw
-              </Button>
-              <Button
-                disabled={actions > 0}
-                onClick={() => {
-                  submitTurn({ action: { type: 'endTurn' } });
-                }}
-              >
-                End turn
-              </Button>
-            </>
-          ) : (
-            <span>Waiting on opponent...</span>
-          )}
-          <span>Actions: {actions}</span>
-          <span>Deck count: {deckCount}</span>
-          {freeActions.length > 0 && (
-            <span>
-              Free {freeActions[0].type} action (x {freeActions[0].count ?? 1})
-            </span>
-          )}
-          {action.targeting.next ? (
-            <span>{action.targeting.next.description}</span>
-          ) : null}
-          {/* <span>{turnError}</span> */}
-          {/* <span>{JSON.stringify(localTurnData)}</span> */}
-        </Box>
+        <div className="p-3">
+          <Hand
+            cards={hand}
+            selectedId={action.selection.card?.instanceId ?? null}
+            onClickCard={(card) => {
+              if (!active) {
+                return;
+              }
+              action.playCard(card);
+            }}
+          />
+          <Box className="flex flex-row gap-2 items-center mt-5 mb-3">
+            {active ? (
+              <>
+                <span className="font-bold">It's your turn!</span>
+                <Button
+                  disabled={actions <= 0}
+                  onClick={() => {
+                    submitTurn({ action: { type: 'draw' } });
+                  }}
+                >
+                  Draw
+                </Button>
+                <Button
+                  disabled={actions > 0}
+                  onClick={() => {
+                    submitTurn({ action: { type: 'endTurn' } });
+                  }}
+                >
+                  End turn
+                </Button>
+              </>
+            ) : (
+              <span>Waiting on opponent...</span>
+            )}
+            <span>Actions: {actions}</span>
+            <span>Deck count: {deckCount}</span>
+            {freeActions.length > 0 && (
+              <span>
+                Free {freeActions[0].type} action (x {freeActions[0].count ?? 1}
+                )
+              </span>
+            )}
+            {action.targeting.next ? (
+              <span>{action.targeting.next.description}</span>
+            ) : null}
+            {/* <span>{turnError}</span> */}
+            {/* <span>{JSON.stringify(localTurnData)}</span> */}
+          </Box>
+        </div>
         <Board
           selection={action.selection.item}
           targets={action.targets}
