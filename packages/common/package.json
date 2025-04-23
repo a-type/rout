@@ -9,13 +9,6 @@
       "production": "./dist/esm/index.js",
       "types": "./dist/typings/index.d.ts",
       "default": "./dist/esm/index.js"
-    },
-    "./sw": {
-      "development": "./src/sw.ts",
-      "workerd": "./src/sw.ts",
-      "production": "./dist/esm/sw.js",
-      "types": "./dist/typings/sw.d.ts",
-      "default": "./dist/esm/sw.js"
     }
   },
   "type": "module",

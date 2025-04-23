@@ -219,7 +219,7 @@ export class PublicSdk extends BaseSdk {
   markNotificationAsRead = this.sdkMutation(
     this.apiRpc.notifications[':id'].$put,
     {
-      transformInput: (input: { id: string; read: boolean }) => ({
+      transformInput: (input: { id: PrefixedId<'no'>; read: boolean }) => ({
         param: { id: input.id },
         json: { read: input.read },
       }),
@@ -229,7 +229,7 @@ export class PublicSdk extends BaseSdk {
   deleteNotification = this.sdkMutation(
     this.apiRpc.notifications[':id'].$delete,
     {
-      transformInput: (input: { id: string }) => ({
+      transformInput: (input: { id: PrefixedId<'no'> }) => ({
         param: { id: input.id },
       }),
       invalidate: [['getNotifications']],
