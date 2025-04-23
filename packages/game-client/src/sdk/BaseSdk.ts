@@ -54,10 +54,12 @@ export class BaseSdk extends EventTarget {
     {
       transformInput,
       transformOutput,
+      getKey,
       enabled,
     }: {
       transformInput?: (input: Input) => TReq;
       transformOutput?: (output: TRes) => Output;
+      getKey?: (input: Input) => any[];
       enabled?: (input: Input) => boolean;
     } = {},
   ): QueryFactory<Output, Input> => {
@@ -87,9 +89,10 @@ export class BaseSdk extends EventTarget {
           );
         }
       };
+      const subkey = getKey ? getKey(input) : [input];
       return {
         queryFn,
-        queryKey: [key, input],
+        queryKey: [key, ...subkey],
         enabled: enabled ? enabled(input) : true,
       } as UseSuspenseQueryOptions<Output>;
     };
@@ -125,10 +128,12 @@ export class BaseSdk extends EventTarget {
     {
       transformInput,
       transformOutput,
+      getKey,
       enabled,
     }: {
       transformInput?: (input: Input) => TReq;
       transformOutput?: (output: TRes) => Output;
+      getKey?: (input: Input) => any[];
       enabled?: (input: Input) => boolean;
     } = {},
   ): QueryFactoryInfinite<Output, Input> => {
@@ -163,9 +168,10 @@ export class BaseSdk extends EventTarget {
           );
         }
       };
+      const subkey = getKey ? getKey(input) : [input];
       return {
         queryFn,
-        queryKey: [key, input],
+        queryKey: [key, ...subkey],
         enabled: enabled ? enabled(input) : true,
         getNextPageParam: (lastPage) => {
           if (lastPage.pageInfo) {

@@ -1,27 +1,46 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Card } from '@a-type/ui';
+import { Box, Button, Card, toast } from '@a-type/ui';
 import { useEffect } from 'react';
 import { GameSummaryCard } from './GameSummaryCard';
 
-export function MembershipsList() {
+export function MembershipsList({
+  statusFilter,
+}: {
+  statusFilter?: ('active' | 'completed' | 'pending')[];
+}) {
   const {
-    data: { sessions, errors },
-  } = sdkHooks.useGetGameSessions();
+    data: { results: sessions, errors },
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = sdkHooks.useGetGameSessions({ status: statusFilter });
 
   useEffect(() => {
     if (errors?.length) {
       errors.forEach(console.error);
+      toast.error(
+        'An error occurred while loading your games. Please try again later.',
+        {
+          id: 'games-list-error',
+        },
+      );
     }
   }, [errors]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="font-300 text-md uppercase my-0 mx-4">Games</h2>
+    <Box d="col" gap full="width">
       <Card.Grid>
         {sessions?.map((session) => (
           <GameSummaryCard key={session.id} session={session} />
         ))}
       </Card.Grid>
-    </div>
+      {hasNextPage && (
+        <Box full="width" d="row" layout="center center">
+          <Button color="ghost" onClick={() => fetchNextPage()}>
+            {isFetchingNextPage ? 'Loading...' : 'Load more'}
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 }

@@ -20,7 +20,22 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
     zValidator(
       'query',
       z.object({
-        status: z.enum(['active', 'completed', 'pending']).optional(),
+        invitationStatus: z
+          .enum(['pending', 'accepted', 'declined', 'expired'])
+          .optional(),
+        status: z
+          .preprocess((val) => {
+            if (Array.isArray(val)) {
+              return val;
+            }
+            if (typeof val === 'string') {
+              return [val];
+            }
+            return undefined;
+          }, z.enum(['active', 'completed', 'pending']).array())
+          .optional(),
+        first: z.coerce.number().int().positive().optional(),
+        after: z.string().optional(),
       }),
     ),
     async (ctx) => {
@@ -40,7 +55,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       }
 
       return ctx.json({
-        sessions: filteredSessions,
+        results: filteredSessions,
         pageInfo,
         errors: errors.map((e) => e?.message),
       });
@@ -103,7 +118,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
 async function mapAndFilterGameSessions(
   filter: {
     invitationStatus?: 'pending' | 'accepted' | 'declined' | 'expired';
-    status?: 'active' | 'completed' | 'pending';
+    status?: ('active' | 'completed' | 'pending')[];
     first?: number;
     after?: string;
   },
@@ -116,7 +131,7 @@ async function mapAndFilterGameSessions(
 }> {
   const { results: invitations, pageInfo } = await userStore.getGameSessions({
     status: filter.invitationStatus,
-    first: filter.first,
+    first: filter.first ?? 10,
     after: filter.after,
   });
 
@@ -138,17 +153,12 @@ async function mapAndFilterGameSessions(
   let filteredSessions = sessionStates;
   if (statusFilter) {
     filteredSessions = sessionStates.filter((s) => {
-      switch (statusFilter) {
-        case 'active':
-          return s.status.status === 'active';
-        case 'completed':
-          return s.status.status === 'completed';
-        case 'pending':
-          return s.status.status === 'pending';
-      }
+      return statusFilter.includes(s.status.status);
     });
   }
 
+  // now we've filtered the original result set further, we may need to fetch
+  // more pages to get the desired number of sessions
   if (filter.first) {
     if (
       filteredSessions.length < filter.first &&

@@ -62,9 +62,18 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
-  getGameSessions = this.sdkQuery(
+  getGameSessions = this.sdkInfiniteQuery(
     'getGameSessions',
-    this.apiRpc.gameSessions.$get,
+    ({ status }, cursor) =>
+      this.apiRpc.gameSessions.$get({
+        query: { after: cursor, status },
+      }),
+    {
+      transformInput: (input: {
+        status?: ('active' | 'completed' | 'pending')[];
+      }) => input,
+      getKey: (input) => (input.status ? input.status.sort() : ['all']),
+    },
   );
   getGameSessionInvitations = this.sdkQuery(
     'getGameSessionInvitations',
@@ -259,7 +268,7 @@ export type FriendshipInvitation = InferReturnData<
 export type Self = InferReturnData<PublicSdk['getMe']>;
 export type GameSession = InferReturnData<
   PublicSdk['getGameSessions']
->['sessions'][number];
+>['results'][number];
 export type GameSessionInvitation = InferReturnData<
   PublicSdk['getGameSessionInvitations']
 >[number];

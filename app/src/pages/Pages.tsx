@@ -36,6 +36,10 @@ const routes = makeRoutes([
     component: lazy(() => import('./FriendsPage.jsx')),
   },
   {
+    path: '/history',
+    component: lazy(() => import('./HistoryPage.jsx')),
+  },
+  {
     path: '/session/:sessionId',
     component: GameSessionPage,
   },
