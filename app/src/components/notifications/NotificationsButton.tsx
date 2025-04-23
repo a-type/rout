@@ -17,6 +17,7 @@ import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings';
+import { useAutoReadNotifications } from './useAutoReadNotifications';
 
 export interface NotificationsButtonProps
   extends Omit<ButtonProps, 'children'> {
@@ -38,6 +39,8 @@ export function NotificationsButton({
     sdkHooks.useGetNotifications();
   const { results: notifications } = data || { results: [] };
   const hasUnread = notifications?.some((n) => !n.readAt);
+
+  useAutoReadNotifications(notifications);
 
   return (
     <PopoverImpl open={open} onOpenChange={setOpen}>

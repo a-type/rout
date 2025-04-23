@@ -49,14 +49,28 @@ self.addEventListener('push', (event) => {
       return;
     }
 
-    console.info(config.type, 'push notification received', pushData);
-    self.registration.showNotification(config.title(pushData, 'push'), {
-      body: config.text(pushData, 'push'),
-      data: pushData,
-      tag: `turn-${pushData.gameSessionId}`,
-      icon: '/icons/android/android-launchericon-192-192.png',
-      // TODO: monochrome badge
-    });
+    // check if client is active and viewing the page already before showing a toast
+    event.waitUntil(
+      (async function () {
+        const allClients = await self.clients.matchAll({
+          includeUncontrolled: true,
+          type: 'window',
+        });
+        const client = allClients.find((c) => 'focus' in c);
+        if (client) {
+          client.focus();
+        } else {
+          console.info(config.type, 'push notification received', pushData);
+          self.registration.showNotification(config.title(pushData, 'push'), {
+            body: config.text(pushData, 'push'),
+            data: pushData,
+            tag: `turn-${pushData.gameSessionId}`,
+            icon: '/icons/android/android-launchericon-192-192.png',
+            // TODO: monochrome badge
+          });
+        }
+      })(),
+    );
   }
 });
 
