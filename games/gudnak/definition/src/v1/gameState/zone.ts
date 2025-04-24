@@ -69,7 +69,10 @@ export function addToDiscard(gameState: GlobalState, card: Card) {
       ...gameState.playerState,
       [card.ownerId]: {
         ...gameState.playerState[card.ownerId],
-        discard: [...gameState.playerState[card.ownerId].discard, card],
+        discard: [
+          ...gameState.playerState[card.ownerId].discard,
+          card.instanceId,
+        ],
       },
     },
   };

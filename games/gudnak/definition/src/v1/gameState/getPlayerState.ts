@@ -13,7 +13,11 @@ export function getPlayerState({
   const { playerState, currentPlayer, actions, board, freeActions } =
     globalState;
   const { hand, deck, discard, side } = playerState[playerId];
-  const visibleCardIds = [...hand, ...discard, ...getCardIdsFromBoard(board)];
+  const visibleCardIds = [
+    ...hand,
+    ...members.flatMap((m) => playerState[m.id].discard),
+    ...getCardIdsFromBoard(board),
+  ];
   return {
     board,
     cardState: visibleCardIds.reduce((acc, id) => {

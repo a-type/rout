@@ -14,6 +14,7 @@ import {
 import { getStack, getTopCard, removeTopCard } from './board';
 import { resolveCombat } from './combat';
 import { applyFatigue } from './card';
+import { addToDiscard } from './zone';
 
 export function deploy(
   globalState: GlobalState,
@@ -88,14 +89,18 @@ export function move(
     winner = resolveCombat(gameState, card, targetTopCard);
     if (winner && winner === card) {
       nextBoard = removeTopCard(nextBoard, target);
+      gameState = addToDiscard(gameState, targetTopCard);
       if (getStack(nextBoard, target).length === 0) {
         performMove = true;
       }
     } else if (winner && winner === targetTopCard) {
       nextBoard = removeTopCard(nextBoard, source);
+      gameState = addToDiscard(gameState, card);
     } else {
       nextBoard = removeTopCard(nextBoard, source);
+      gameState = addToDiscard(gameState, card);
       nextBoard = removeTopCard(nextBoard, target);
+      gameState = addToDiscard(gameState, targetTopCard);
     }
   }
   if (performMove) {

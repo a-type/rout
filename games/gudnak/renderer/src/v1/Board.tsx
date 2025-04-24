@@ -1,10 +1,11 @@
 import { Box, clsx } from '@a-type/ui';
-import type {
-  Coordinate,
-  Board,
-  PlayerState,
-  Card as CardType,
-  Target,
+import {
+  type Coordinate,
+  type Board,
+  type PlayerState,
+  type Card as CardType,
+  type Target,
+  cardDefinitions,
 } from '@long-game/game-gudnak-definition/v1';
 import { Space } from './Space';
 import { Selection } from './useSelect';
@@ -81,6 +82,50 @@ function DeckZone({ deck, side }: { deck: string[]; side: 'top' | 'bottom' }) {
   );
 }
 
+function DiscardZone({
+  discard,
+  side,
+}: {
+  discard: string[];
+  side: 'top' | 'bottom';
+}) {
+  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const {
+    finalState: { cardState },
+  } = hooks.useGameSuite();
+  const topCardInstanceId = discard[discard.length - 1];
+  const topCard = cardState[topCardInstanceId];
+  const topCardDef = topCard?.cardId
+    ? cardDefinitions[topCard.cardId]
+    : cardDefinitions['solaran-cavalry'];
+
+  if (discard.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className={clsx(
+        'absolute aspect-[1/1] z-10',
+        isLarge ? 'max-w-[17%]' : 'max-w-[28%]',
+        side === 'top'
+          ? isLarge
+            ? 'left-[1%] bottom-[7%] rotate-90'
+            : 'left-[6%] top-[1%]'
+          : isLarge
+          ? 'right-[1%] top-[7%] -rotate-90'
+          : 'right-[6%] bottom-[1%]',
+      )}
+    >
+      <RenderCard
+        instanceId={discard?.[0] ?? 'no-card'}
+        cardData={topCardDef}
+        cardId={topCard.cardId}
+      />
+    </div>
+  );
+}
+
 export function Board({
   state,
   selection,
@@ -120,6 +165,8 @@ export function Board({
       <Map />
       <DeckZone deck={topPlayerState?.deck ?? []} side="top" />
       <DeckZone deck={bottomPlayerState?.deck ?? []} side="bottom" />
+      <DiscardZone discard={topPlayerState?.discard ?? []} side="top" />
+      <DiscardZone discard={bottomPlayerState?.discard ?? []} side="bottom" />
       <Box
         className={clsx(
           isLarge
