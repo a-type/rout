@@ -9,12 +9,15 @@ import {
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
+import { RoundRenderer } from '@long-game/game-renderer';
+import {
+  ChatForm,
+  ChatMessage,
+  PlayerAvatar,
+  useMediaQuery,
+} from '@long-game/game-ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
-import { ChatForm } from '../chat/ChatForm';
-import { ChatMessage } from '../chat/ChatMessage';
-import { useMediaQuery } from '../hooks/useMediaQuery';
-import { PlayerAvatar } from '../players/PlayerAvatar';
 
 const localState = proxy({
   focusChat: false,
@@ -94,7 +97,7 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
     );
   }
 
-  return <div>todo: round logs</div>;
+  return <RoundRenderer roundIndex={latestMessage.roundIndex} />;
 });
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
@@ -105,9 +108,15 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
       <GameLogList>
         {log.map((entry, i) =>
           entry.type === 'chat' ? (
-            <ChatMessage message={entry.chatMessage} key={i} />
+            <ChatMessage
+              message={entry.chatMessage}
+              key={entry.chatMessage.id}
+            />
           ) : (
-            <div>todo: round logs</div>
+            <RoundRenderer
+              roundIndex={entry.roundIndex}
+              key={`round-${entry.roundIndex}`}
+            />
           ),
         )}
       </GameLogList>
@@ -116,58 +125,59 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
   );
 });
 
-export const BasicGameLog = withGame<{ className?: string }>(
-  function BasicGameLog({ gameSuite, ...props }) {
-    const openNative = useSnapshot(localState).open;
-    const isLarge = useMediaQuery('(min-width: 1024px)');
-    const open = isLarge || openNative;
+export const GameLog = withGame<{ className?: string }>(function GameLog({
+  gameSuite,
+  ...props
+}) {
+  const openNative = useSnapshot(localState).open;
+  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const open = isLarge || openNative;
 
-    return (
-      <Box
-        direction="col"
-        gap="none"
-        p="none"
-        items="stretch"
-        className="h-full"
-        {...props}
-      >
-        <CollapsibleSimple open={!open} asChild className="flex flex-col">
+  return (
+    <Box
+      direction="col"
+      gap="none"
+      p="none"
+      items="stretch"
+      className="h-full"
+      {...props}
+    >
+      <CollapsibleSimple open={!open} asChild className="flex flex-col">
+        <Button
+          color="ghost"
+          size="small"
+          onClick={() => {
+            localState.open = true;
+            if (gameSuite.combinedLog.length === 0) {
+              setTimeout(() => {
+                localState.focusChat = true;
+              }, 50);
+            }
+          }}
+          className="w-full font-normal"
+        >
+          <GameLogCollapsed />
+        </Button>
+      </CollapsibleSimple>
+      <Collapsible open={open} className="relative w-full lg:h-full">
+        <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
           <Button
-            color="ghost"
-            size="small"
+            className="absolute -top-32px right-sm z-1 lg:hidden"
+            size="icon-small"
             onClick={() => {
-              localState.open = true;
-              if (gameSuite.combinedLog.length === 0) {
-                setTimeout(() => {
-                  localState.focusChat = true;
-                }, 50);
-              }
+              localState.open = false;
             }}
-            className="w-full font-normal"
           >
-            <GameLogCollapsed />
+            <Icon name="x" />
           </Button>
-        </CollapsibleSimple>
-        <Collapsible open={open} className="relative w-full lg:h-full">
-          <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
-            <Button
-              className="absolute -top-32px right-sm z-1 lg:hidden"
-              size="icon-small"
-              onClick={() => {
-                localState.open = false;
-              }}
-            >
-              <Icon name="x" />
-            </Button>
-            <Box p="sm" layout="stretch stretch" className="w-full lg:h-full">
-              <GameLogFull />
-            </Box>
-          </CollapsibleContent>
-        </Collapsible>
-      </Box>
-    );
-  },
-);
+          <Box p="sm" layout="stretch stretch" className="w-full lg:h-full">
+            <GameLogFull />
+          </Box>
+        </CollapsibleContent>
+      </Collapsible>
+    </Box>
+  );
+});
 
 function useStayScrolledToBottom() {
   const ref = useRef<HTMLDivElement>(null);

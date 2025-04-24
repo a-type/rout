@@ -36,7 +36,7 @@ export function NotificationsButton({
   const PopoverImpl = isMobile ? Dialog : Popover;
 
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    sdkHooks.useGetNotifications();
+    sdkHooks.useGetNotifications({ refetchOnWindowFocus: true });
   const { results: notifications } = data || { results: [] };
   const hasUnread = notifications?.some((n) => !n.readAt);
 

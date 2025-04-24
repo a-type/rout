@@ -1020,7 +1020,8 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     ws: WebSocket,
     info: SocketSessionInfo,
   ) => {
-    const { content, recipientIds, position, sceneId } = msg.message;
+    const { content, recipientIds, position, sceneId, roundIndex } =
+      msg.message;
     const message: GameSessionChatMessage = {
       id: id('cm'),
       createdAt: Date.now(),
@@ -1029,6 +1030,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       recipientIds,
       position,
       sceneId,
+      roundIndex,
     };
     this.addChatMessage(message);
   };

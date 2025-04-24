@@ -1,8 +1,9 @@
+import { DefaultRoundRenderer } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 import { Gameplay } from './Gameplay.js';
 import GameRecap from './GameRecap.js';
 
-const Client = hooks.withGame(function Client({ gameSuite }) {
+export const Client = hooks.withGame(function Client({ gameSuite }) {
   if (gameSuite.gameStatus.status === 'completed') {
     return <GameRecap />;
   }
@@ -10,4 +11,4 @@ const Client = hooks.withGame(function Client({ gameSuite }) {
   return <Gameplay />;
 });
 
-export default Client;
+export const Round = DefaultRoundRenderer;

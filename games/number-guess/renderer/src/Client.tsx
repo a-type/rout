@@ -1,5 +1,9 @@
 import { Box, Button, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
+import {
+  GameRoundRenderer,
+  GameRoundRendererProps,
+} from '@long-game/game-definition';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
 import { useEffect } from 'react';
 
@@ -27,7 +31,15 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
   );
 });
 
-export default Client;
+export const Round: GameRoundRenderer = hooks.withGame<
+  GameRoundRendererProps<typeof gameDefinition>
+>(function Round({ round }) {
+  return (
+    <Box p>
+      Round {round.roundIndex + 1} | You guessed: {round.yourTurnData?.guess}
+    </Box>
+  );
+});
 
 const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   const {

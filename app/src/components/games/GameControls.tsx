@@ -1,6 +1,5 @@
 import { Box } from '@a-type/ui';
 import {
-  BasicGameLog,
   GameDebugger,
   PlayerStatuses,
   RoundHistoryControl,
@@ -8,6 +7,7 @@ import {
 import { Suspense } from 'react';
 import { NotificationsButton } from '../notifications/NotificationsButton';
 import { GameLayout } from './GameLayout';
+import { GameLog } from './GameLog';
 import { NavigationControls } from './NavigationControls';
 
 export interface GameControlsProps {
@@ -18,7 +18,7 @@ export function GameControls({ pregame }: GameControlsProps) {
   return (
     <>
       <GameLayout.Controls>
-        <BasicGameLog className="flex-1" />
+        <GameLog className="flex-1" />
       </GameLayout.Controls>
       <GameLayout.SecondaryControls className="justify-between">
         <Box gap="xs" items="center">

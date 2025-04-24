@@ -19,10 +19,10 @@ export const RoundHistoryControl = withGame(
         suite.showRound(index);
         // preload adjacent rounds if any
         if (index > 0) {
-          suite.loadRound(index - 1).catch(() => {});
+          suite.loadRound(index - 1);
         }
         if (index < latestRoundIndex) {
-          suite.loadRound(index + 1).catch(() => {});
+          suite.loadRound(index + 1);
         }
       });
     };
