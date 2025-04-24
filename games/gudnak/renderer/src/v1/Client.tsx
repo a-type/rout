@@ -1,4 +1,4 @@
-import { Box, Button, toast } from '@a-type/ui';
+import { Box, Button, clsx, toast } from '@a-type/ui';
 import {
   cardDefinitions,
   type Coordinate,
@@ -16,7 +16,9 @@ import {
   MouseSensor,
   TouchSensor,
   useSensors,
+  DragOverlay,
 } from '@dnd-kit/core';
+import { Card } from './Card';
 
 export function Client() {
   return (
@@ -135,14 +137,14 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                       submitTurn({ action: { type: 'endTurn' } });
                     }}
                   >
-                    End turn
+                    End
                   </Button>
                 </>
               ) : (
                 <span>Waiting on opponent...</span>
               )}
               <span>Actions: {actions}</span>
-              <span>Deck count: {deckCount}</span>
+              <span>Deck: {deckCount}</span>
               {freeActions.length > 0 && (
                 <span>
                   Free {freeActions[0].type} action (x{' '}
