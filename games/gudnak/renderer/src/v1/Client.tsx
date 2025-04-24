@@ -38,7 +38,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     getPlayer,
     currentTurn,
   } = gameSuite;
-  // console.log(JSON.parse(JSON.stringify(finalState)));
+  console.log(JSON.parse(JSON.stringify(finalState)));
   const { hand, board, active, actions, deckCount, freeActions } = finalState;
   const action = useGameAction();
 

@@ -14,8 +14,9 @@ import { usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { motion } from 'motion/react';
 import { cardImageLookup } from './cardImageLookup';
-import { useDndContext, useDraggable } from '@dnd-kit/core';
+import { useDndContext } from '@dnd-kit/core';
 import { Draggable } from './Draggable';
+import cardBack from './images/cardback.png';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -32,7 +33,7 @@ export type DragData = {
   cardInfo: CardType;
 };
 
-function RenderCard({
+export function RenderCard({
   onClick,
   selected,
   fatigued,
@@ -40,12 +41,14 @@ function RenderCard({
   cardId,
   targeted,
   overSpace,
+  faceDown,
 }: BaseCardProps & {
   cardData: FighterCard | TacticCard;
   cardId: string;
   continuousEffects?: ContinuousEffect[];
   cardStack?: CardStack;
   overSpace?: boolean;
+  faceDown?: boolean;
 }) {
   const cardArt = cardImageLookup[cardId];
   return (
@@ -55,40 +58,56 @@ function RenderCard({
           open={false}
           content={<img src={cardArt} width={CARD_SIZE * 2} />}
         >
-          <motion.div
-            whileHover={overSpace ? {} : { scale: 1.05 }}
-            whileTap={overSpace ? {} : { scale: 0.95 }}
-            animate={{
-              scale: overSpace ? 0.7 : 1,
-            }}
-          >
-            <Box
-              {...flippedProps}
-              className={clsx(
-                'w-full h-full border-primary rounded-lg bg-cover',
-                selected && 'bg-primary-light',
-                targeted && 'bg-primary-wash',
-                fatigued && 'bg-gray-300',
-              )}
-              border
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
+          <div className="relative">
+            {faceDown && (
+              <motion.div
+                className="absolute w-full h-full"
+                animate={
+                  faceDown
+                    ? { rotateY: 0, zIndex: 99 }
+                    : { rotateY: -180, zIndex: 0 }
+                }
+              >
+                <img className="w-full" src={cardBack} />
+              </motion.div>
+            )}
+            <motion.div
+              whileTap={overSpace ? {} : { scale: 1.05 }}
+              whileHover={overSpace ? {} : { scale: 0.95 }}
+              animate={
+                faceDown
+                  ? { rotateY: -180, zIndex: 0 }
+                  : { rotateY: 0, zIndex: 99, scale: overSpace ? 0.75 : 1 }
+              }
             >
-              <img
+              <Box
+                {...flippedProps}
                 className={clsx(
-                  (selected || targeted) && 'mix-blend-screen',
-                  fatigued && 'grayscale-50 mix-blend-multiply',
+                  'w-full h-full border-primary rounded-lg bg-cover',
+                  selected && 'bg-primary-light',
+                  targeted && 'bg-primary-wash',
+                  fatigued && 'bg-gray-300',
                 )}
-                src={cardArt}
-                width="100%"
-                onDragStart={(e) => {
-                  e.preventDefault();
+                border
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick?.();
                 }}
-              />
-            </Box>
-          </motion.div>
+              >
+                <img
+                  className={clsx(
+                    'w-full',
+                    (selected || targeted) && 'mix-blend-screen',
+                    fatigued && 'grayscale-50 mix-blend-multiply',
+                  )}
+                  src={cardArt}
+                  onDragStart={(e) => {
+                    e.preventDefault();
+                  }}
+                />
+              </Box>
+            </motion.div>
+          </div>
         </Tooltip>
       )}
     </Flipped>
