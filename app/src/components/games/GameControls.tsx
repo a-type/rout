@@ -19,10 +19,10 @@ export function GameControls({ pregame }: GameControlsProps) {
         <BasicGameLog className="flex-1" />
       </GameLayout.Controls>
       <GameLayout.SecondaryControls className="justify-between">
-        <Box gap items="center">
+        <Box gap="xs" items="center">
           <NavigationControls />
-          <PlayerStatuses className="flex-shrink-1" />
           <NotificationsButton />
+          <PlayerStatuses className="flex-shrink-1" />
         </Box>
         {!pregame && <RoundHistoryControl />}
       </GameLayout.SecondaryControls>

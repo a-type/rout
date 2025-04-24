@@ -7,8 +7,10 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
   const player = playerId ? suite.getPlayer(playerId) : null;
   if (!player)
     return {
-      className: '',
-      style: {} as any,
+      className: 'theme',
+      style: {
+        '--dyn-saturation': 0,
+      } as any,
     };
 
   const palette = colors[player.color];

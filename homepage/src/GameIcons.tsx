@@ -31,7 +31,7 @@ export function GameIcons({}: GameIconsProps) {
 
   const offset = useRef(0);
   useAnimationFrame(() => {
-    offset.current -= 1;
+    offset.current -= 0.3;
     if (offset.current < -innerWidth.current / repeat) {
       offset.current += innerWidth.current / repeat;
     }
