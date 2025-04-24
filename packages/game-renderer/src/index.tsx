@@ -49,13 +49,17 @@ export function RoundRenderer({
 }
 
 function RoundRendererImpl({ roundIndex }: { roundIndex: number }) {
-  const { gameDefinition, gameId, getRound } = useGameSuite();
+  const { gameDefinition, gameId, getRound, latestRoundIndex } = useGameSuite();
   const round = getRound(roundIndex);
+  const finalPlayerState =
+    roundIndex === latestRoundIndex
+      ? round.initialPlayerState
+      : getRound(roundIndex + 1).initialPlayerState;
 
   const Round: any = getLazyRoundRenderer(gameId, gameDefinition.version);
   if (!Round) {
     return <div>Version not found</div>;
   }
 
-  return <Round round={round} />;
+  return <Round round={round} finalPlayerState={finalPlayerState} />;
 }

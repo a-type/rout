@@ -207,8 +207,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    */
   @computed get finalState(): GetPlayerState<TGame> {
     const { latestRoundIndex, viewingRoundIndex, currentTurn } = this;
-    const viewingRound = this.rounds[viewingRoundIndex];
-    const nextRound = this.rounds[viewingRoundIndex + 1];
+    const viewingRound = this.getRound(viewingRoundIndex);
 
     if (viewingRoundIndex === latestRoundIndex) {
       // for current round, apply prospective turn to initial state
@@ -223,6 +222,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         playerId: this.playerId,
       });
     }
+
+    const nextRound = this.getRound(viewingRoundIndex + 1);
 
     // since historical rounds need to be loaded, we may not have the next
     // round available, theoretically. Implementation should prevent this

@@ -33,10 +33,11 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
 
 export const Round: GameRoundRenderer = hooks.withGame<
   GameRoundRendererProps<typeof gameDefinition>
->(function Round({ round }) {
+>(function Round({ round, finalPlayerState }) {
   return (
     <Box p>
-      Round {round.roundIndex + 1} | You guessed: {round.yourTurnData?.guess}
+      Round {round.roundIndex + 1} | You guessed: {round.yourTurnData?.guess} (
+      {finalPlayerState.lastGuessResult})
     </Box>
   );
 });

@@ -24,4 +24,5 @@ export type GameRoundRendererProps<TGame extends GameDefinition> = {
     GetPublicTurnData<TGame>,
     GetPlayerState<TGame>
   >;
+  finalPlayerState: GetPlayerState<TGame>;
 };
