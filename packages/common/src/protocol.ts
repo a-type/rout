@@ -106,11 +106,17 @@ export interface ClientRequestChatMessage extends BaseClientMessage {
   nextToken: string | null;
 }
 
+// only works in dev mode
+export interface ClientResetGameMessage extends BaseClientMessage {
+  type: 'resetGame';
+}
+
 export type ClientMessage =
   | ClientPingMessage
   | ClientSendChatMessage
   | ClientSubmitTurnMessage
-  | ClientRequestChatMessage;
+  | ClientRequestChatMessage
+  | ClientResetGameMessage;
 type DistributiveOmit<T, K extends keyof any> = T extends any
   ? Omit<T, K>
   : never;

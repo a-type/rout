@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "typescript": "catalog:",
     "@long-game/scripts": "workspace:*"
   }

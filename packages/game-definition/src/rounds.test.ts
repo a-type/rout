@@ -38,6 +38,7 @@ describe('game round helpers', () => {
           // the period should snap to the prior midnight in the game's timezone
           startedAt: new Date('2024-01-13T20:00:00Z'),
           turns: [],
+          environment: 'production',
         }),
       ).toEqual(0);
     });
@@ -56,6 +57,7 @@ describe('game round helpers', () => {
           // the period should snap to the prior midnight in the game's timezone
           startedAt: new Date('2024-01-13T20:00:00Z'),
           turns: [],
+          environment: 'production',
         }),
       ).toEqual(1);
 
@@ -71,6 +73,7 @@ describe('game round helpers', () => {
           // try varying start time a bit
           startedAt: new Date('2024-01-13T16:00:00Z'),
           turns: [],
+          environment: 'production',
         }),
       ).toEqual(2);
     });
@@ -95,6 +98,7 @@ describe('game round helpers', () => {
           // the period should snap to the prior midnight in the game's timezone
           startedAt: new Date('2024-01-13T20:00:00Z'),
           turns: [],
+          environment: 'production',
         }),
       ).toEqual(0);
     });
@@ -136,6 +140,7 @@ describe('game round helpers', () => {
               playerId: 'u-1',
             },
           ],
+          environment: 'production',
         }),
       ).toEqual(1);
     });
