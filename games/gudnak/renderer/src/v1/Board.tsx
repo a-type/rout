@@ -22,23 +22,17 @@ function Map() {
   return <img src={src} alt="Map" className="absolute w-full" />;
 }
 
-function DeckZone({
-  count,
-  side,
-  show,
-}: {
-  count?: number;
-  side: 'top' | 'bottom';
-  show?: boolean;
-}) {
+function DeckZone({ deck, side }: { deck: string[]; side: 'top' | 'bottom' }) {
   const isLarge = useMediaQuery('(min-width: 1024px)');
-  if (!show) {
+
+  if (deck.length === 0) {
     return null;
   }
+
   return (
     <div
       className={clsx(
-        'absolute aspect-[1/1]',
+        'absolute aspect-[1/1] z-10',
         isLarge ? 'max-w[17%]' : 'max-w-[28%]',
         side === 'top'
           ? isLarge
@@ -50,7 +44,7 @@ function DeckZone({
       )}
     >
       <RenderCard
-        instanceId="deck"
+        instanceId={deck?.[0] ?? 'no-card'}
         cardData={{
           abilities: [],
           name: 'Deck',
@@ -63,7 +57,7 @@ function DeckZone({
         faceDown
       />
 
-      {count && (
+      {deck.length && (
         <div
           className={clsx(
             isLarge
@@ -80,7 +74,7 @@ function DeckZone({
               '2px 2px 10px rgba(0, 0, 0, .8),-2px -2px 10px rgba(0, 0, 0, .8),2px -2px 10px rgba(0, 0, 0, .8),-2px 2px 10px rgba(0, 0, 0, .8)',
           }}
         >
-          {count}
+          {deck.length}
         </div>
       )}
     </div>
@@ -107,7 +101,11 @@ export function Board({
     },
   });
   const { finalState } = hooks.useGameSuite();
-  const side = finalState.side;
+  const topPlayerState =
+    Object.values(finalState.playerState).find((s) => s.side === 'top') ?? null;
+  const bottomPlayerState =
+    Object.values(finalState.playerState).find((s) => s.side === 'bottom') ??
+    null;
   const { specialSpaces } = finalState as PlayerState;
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
@@ -120,16 +118,8 @@ export function Board({
       )}
     >
       <Map />
-      <DeckZone
-        show={side === 'bottom' || finalState.deckCount > 0}
-        count={side === 'top' ? finalState.deckCount : 0}
-        side="top"
-      />
-      <DeckZone
-        show={side === 'top' || finalState.deckCount > 0}
-        count={side === 'bottom' ? finalState.deckCount : 0}
-        side="bottom"
-      />
+      <DeckZone deck={topPlayerState?.deck ?? []} side="top" />
+      <DeckZone deck={bottomPlayerState?.deck ?? []} side="bottom" />
       <Box
         className={clsx(
           isLarge

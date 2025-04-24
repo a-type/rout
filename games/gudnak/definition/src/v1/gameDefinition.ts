@@ -73,7 +73,7 @@ export type FreeAction = {
   count?: number;
 };
 
-export type PlayerHiddenState = {
+export type PlayerSelfState = {
   deck: string[];
   hand: string[];
   discard: string[];
@@ -83,7 +83,7 @@ export type PlayerHiddenState = {
 export type GlobalState = {
   board: Board;
   cardState: Record<string, Card>;
-  playerState: Record<string, PlayerHiddenState>;
+  playerState: Record<string, PlayerSelfState>;
   playerOrder: string[];
   currentPlayer: string;
   actions: number;
@@ -98,6 +98,7 @@ export type PlayerState = {
   specialSpaces: Space[];
   hand: Card[];
   discard: Card[];
+  playerState: Record<string, PlayerSelfState>;
   deckCount: number;
   active: boolean;
   actions: number;

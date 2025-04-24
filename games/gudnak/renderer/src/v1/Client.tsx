@@ -1,4 +1,4 @@
-import { Box, Button, clsx, toast } from '@a-type/ui';
+import { Box, Button, toast } from '@a-type/ui';
 import {
   cardDefinitions,
   type Coordinate,
@@ -16,9 +16,7 @@ import {
   MouseSensor,
   TouchSensor,
   useSensors,
-  DragOverlay,
 } from '@dnd-kit/core';
-import { Card } from './Card';
 
 export function Client() {
   return (
@@ -80,8 +78,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }
 
   return (
-    <Box className="w-full h-full flex flex-col gap-2">
-      <Flipper flipKey={JSON.stringify(finalState.board)}>
+    <Box className="w-full h-full flex flex-col gap-2 overflow-hidden">
+      <Flipper
+        flipKey={
+          JSON.stringify(finalState.board) +
+          JSON.stringify(finalState.playerState)
+        }
+      >
         <DndContext
           sensors={sensors}
           onDragEnd={(e) => {
@@ -119,7 +122,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                 action.playCard(card);
               }}
             />
-            <Box className="flex flex-row gap-2 items-center mt-5 mb-3">
+            <Box className="flex flex-row gap-2 items-center mt-3">
               {active ? (
                 <>
                   <span className="font-bold">It's your turn!</span>
@@ -144,7 +147,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                 <span>Waiting on opponent...</span>
               )}
               <span>Actions: {actions}</span>
-              <span>Deck: {deckCount}</span>
+
               {freeActions.length > 0 && (
                 <span>
                   Free {freeActions[0].type} action (x{' '}
@@ -154,8 +157,6 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               {action.targeting.next ? (
                 <span>{action.targeting.next.description}</span>
               ) : null}
-              {/* <span>{turnError}</span> */}
-              {/* <span>{JSON.stringify(localTurnData)}</span> */}
             </Box>
           </div>
           <Board

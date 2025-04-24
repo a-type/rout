@@ -4,6 +4,7 @@ import type { Card as CardType } from '@long-game/game-gudnak-definition/v1';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
+import { useScreenSize } from './utils';
 
 export function Hand({
   cards,
@@ -19,8 +20,16 @@ export function Hand({
 
   const cardSize = isLarge ? 200 : 120;
 
+  const { width: availableWidth } = useScreenSize();
+  if (!availableWidth) {
+    return null;
+  }
+  const availableCardWidth = (cardSize * cards.length) / availableWidth;
+
   const cardWidth = cardSize; // Adjust based on your card width
-  const overlapOffset = cardSize * 0.6; // Amount of overlap between cards
+  // TODO: Adjust based on screen size
+  const overlapOffset =
+    Math.max(0.1, Math.min(0.7, 1 / availableCardWidth / 2)) * cardSize;
 
   return (
     <Box

@@ -3,7 +3,7 @@ import {
   Card,
   CardStack,
   GlobalState,
-  PlayerHiddenState,
+  PlayerSelfState,
   ValidCardId,
 } from '../gameDefinition';
 import { DeckDefinition } from '../definitions/decks';
@@ -39,7 +39,7 @@ export function generateInitialGameState({
         side: idx === 0 ? 'top' : 'bottom',
       };
       return acc;
-    }, {} as Record<string, PlayerHiddenState>),
+    }, {} as Record<string, PlayerSelfState>),
     winner: null,
     playerOrder,
     currentPlayer: playerOrder[0],

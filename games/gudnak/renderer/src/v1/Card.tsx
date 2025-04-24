@@ -72,12 +72,12 @@ export function RenderCard({
               </motion.div>
             )}
             <motion.div
-              whileTap={overSpace ? {} : { scale: 1.05 }}
-              whileHover={overSpace ? {} : { scale: 0.95 }}
+              whileTap={overSpace ? {} : { scale: 0.9 }}
+              whileHover={overSpace ? {} : { scale: 1.05 }}
               animate={
                 faceDown
                   ? { rotateY: -180, zIndex: 0 }
-                  : { rotateY: 0, zIndex: 99, scale: overSpace ? 0.75 : 1 }
+                  : { rotateY: 0, zIndex: 99, scale: overSpace ? 0.8 : 1 }
               }
             >
               <Box

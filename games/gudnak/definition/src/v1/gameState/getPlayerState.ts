@@ -1,4 +1,4 @@
-import type { Card, GlobalState } from '../gameDefinition';
+import type { Card, GlobalState, PlayerState } from '../gameDefinition';
 import { getCardIdsFromBoard, getSpecialSpaces } from './board';
 
 export function getPlayerState({
@@ -9,7 +9,7 @@ export function getPlayerState({
   globalState: GlobalState;
   playerId: string;
   members: { id: string }[];
-}) {
+}): PlayerState {
   const { playerState, currentPlayer, actions, board, freeActions } =
     globalState;
   const { hand, deck, discard, side } = playerState[playerId];
@@ -22,6 +22,7 @@ export function getPlayerState({
     }, {} as Record<string, Card>),
     hand: hand.map((instanceId) => globalState.cardState[instanceId]),
     discard: discard.map((instanceId) => globalState.cardState[instanceId]),
+    playerState,
     deckCount: deck.length,
     active: currentPlayer === playerId,
     actions,
