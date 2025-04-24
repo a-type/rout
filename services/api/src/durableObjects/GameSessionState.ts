@@ -396,6 +396,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       // providing a set index here prevents recursion (by default
       // getGlobalStateUnchecked uses this method, getCurrentRoundIndex)
       globalState: this.#getGlobalStateUnchecked(latestRoundFromTurns),
+      environment: this.env.DEV_MODE ? 'development' : 'production',
     });
   }
   /**

@@ -150,7 +150,23 @@ function syncRounds(): RoundIndexDecider<any, any> {
   };
 }
 
+function perEnvironment({
+  production,
+  development,
+}: {
+  production: RoundIndexDecider<any, any>;
+  development: RoundIndexDecider<any, any>;
+}): RoundIndexDecider<any, any> {
+  return (input) => {
+    if (input.environment === 'production') {
+      return production(input);
+    }
+    return development(input);
+  };
+}
+
 export const roundFormat = {
   periodic: periodicRounds,
   sync: syncRounds,
+  perEnvironment,
 };
