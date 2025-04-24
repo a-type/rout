@@ -996,6 +996,8 @@ export class GameSessionState extends DurableObject<ApiBindings> {
           break;
         case 'requestChat':
           await this.#onClientRequestChat(msg, ws, info);
+        case 'resetGame':
+          await this.#onResetGame(msg, ws, info);
           break;
       }
       // ack the message for the client
@@ -1053,6 +1055,30 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       type: 'chat',
       messages,
       nextToken,
+      responseTo: msg.messageId,
+    });
+  };
+
+  #onResetGame = async (
+    msg: ClientMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    if (!this.env.DEV_MODE) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot reset game in production',
+      );
+    }
+    this.#turns = [];
+    this.#notifications = {
+      roundIndex: 0,
+      playersNotified: {},
+    };
+    this.ctx.storage.put('turns', this.#turns);
+    this.ctx.storage.put('notifications', this.#notifications);
+    this.#sendSocketMessage({
+      type: 'gameChange',
       responseTo: msg.messageId,
     });
   };

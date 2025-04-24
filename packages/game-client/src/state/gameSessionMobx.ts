@@ -117,7 +117,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.setupLocalTurnStorage();
 
     if (init.status.status === 'completed') {
-      this.loadPostgame();
+      this.suspended = this.loadPostgame();
     }
   }
 
@@ -439,7 +439,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
     if (msg.status.status === 'completed') {
-      this.loadPostgame();
+      this.suspended = this.loadPostgame();
     }
   };
 
@@ -460,10 +460,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
-  @action private loadPostgame = async () => {
-    const promise = getPostgame(this.gameSessionId);
-    this.suspended = promise.then();
-    const postgame = await promise;
+  @action loadPostgame = async () => {
+    const postgame = await getPostgame(this.gameSessionId);
     this.postgameGlobalState = postgame.globalState;
   };
 
@@ -594,10 +592,16 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         members: debugValue.members,
         globalState: debugValue.globalState,
         turns: debugValue.turns,
+        environment: 'development',
       });
-    console.log(debugValue);
+    debugValue.resetGame = () => {
+      this.ctx.socket.send({
+        type: 'resetGame',
+      });
+    };
 
     (window as any).gameSuiteRaw = debugValue;
-    console.log('Assigned above to window.gameSuiteRaw for further use');
+
+    return debugValue;
   };
 }

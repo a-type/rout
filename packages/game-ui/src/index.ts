@@ -3,6 +3,7 @@ export * from './board/GamePiece';
 export * from './board/GamePlacement';
 export * from './chat/ChatForm';
 export * from './chat/SpatialChat';
+export * from './debugger/GameDebugger';
 export * from './decoration/GameIllustration1';
 export * from './history/RoundHistoryControl';
 export * from './hooks/useMediaQuery';
