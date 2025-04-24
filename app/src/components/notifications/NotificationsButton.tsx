@@ -48,11 +48,7 @@ export function NotificationsButton({
         {children ? (
           children({ hasUnread })
         ) : (
-          <Button
-            size="icon"
-            color={hasUnread ? 'contrast' : 'ghost'}
-            {...rest}
-          >
+          <Button size="icon" color={hasUnread ? 'accent' : 'ghost'} {...rest}>
             <Icon name="bell" />
           </Button>
         )}

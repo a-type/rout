@@ -6,9 +6,9 @@ export interface NavigationControlsProps {}
 export function NavigationControls({}: NavigationControlsProps) {
   return (
     <Box>
-      <Button size="icon" color="ghost" asChild aria-label="Go home">
+      <Button size="icon" color="contrast" asChild aria-label="Go home">
         <Link to="/">
-          <Icon name="home" />
+          <Icon name="arrowLeft" />
         </Link>
       </Button>
     </Box>
