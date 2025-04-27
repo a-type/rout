@@ -1,5 +1,7 @@
 import { MainNav } from '@/components/nav/MainNav';
 import { ColorModeToggle } from '@/components/settings/ColorModeToggle';
+import { GoldUpgrade } from '@/components/subscription/GoldUpgrade';
+import { ManageSubscription } from '@/components/subscription/ManageSubscription';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { API_ORIGIN } from '@/config';
 import {
@@ -29,6 +31,8 @@ export function SettingsPage({}: SettingsPageProps) {
           </Box>
           <Divider />
           <ColorModeToggle />
+          <GoldUpgrade />
+          <ManageSubscription />
           <Divider />
           <form action={`${API_ORIGIN}/auth/logout`} method="post">
             <Button color="destructive" type="submit">

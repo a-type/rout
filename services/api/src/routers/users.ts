@@ -18,7 +18,15 @@ export const usersRouter = new Hono<Env>()
     );
     try {
       const user = await userStore.getMe();
-      return ctx.json(wrapRpcData(user));
+      return ctx.json({
+        id: user.id,
+        displayName: user.displayName,
+        color: user.color,
+        imageUrl: user.imageUrl,
+        email: user.email,
+        isGoldMember: !!user.subscriptionEntitlements?.gold,
+        isCustomer: !!user.stripeCustomerId,
+      });
     } catch (e) {
       const err = LongGameError.fromInstanceOrRpc(e);
       if (err.code === LongGameError.Code.NotFound) {

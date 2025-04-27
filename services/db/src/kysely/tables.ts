@@ -30,6 +30,7 @@ export interface Database {
   FriendshipInvitation: FriendshipInvitationTable;
   PushSubscription: PushSubscriptionTable;
   Notification: NotificationTable;
+  UserGamePurchase: UserGamePurchaseTable;
 }
 
 export interface UserTable {
@@ -49,6 +50,7 @@ export interface UserTable {
     NotificationSettings | null,
     NotificationSettings | null
   >;
+  subscriptionEntitlements: Record<string, boolean>;
 }
 
 export type User = Selectable<UserTable>;
@@ -169,3 +171,14 @@ export interface NotificationTable {
 export type Notification = Selectable<NotificationTable>;
 export type NewNotification = Insertable<NotificationTable>;
 export type NotificationUpdate = Updateable<NotificationTable>;
+
+export interface UserGamePurchaseTable {
+  id: PrefixedId<'ugp'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  userId: PrefixedId<'u'>;
+  gameId: string;
+}
+export type UserGamePurchase = Selectable<UserGamePurchaseTable>;
+export type NewUserGamePurchase = Insertable<UserGamePurchaseTable>;
+export type UserGamePurchaseUpdate = Updateable<UserGamePurchaseTable>;

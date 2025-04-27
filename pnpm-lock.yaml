@@ -863,6 +863,9 @@ importers:
       jose:
         specifier: ^5.9.6
         version: 5.9.6
+      stripe:
+        specifier: ^18.0.0
+        version: 18.0.0
       zod:
         specifier: 'catalog:'
         version: 3.24.3
@@ -5595,6 +5598,10 @@ packages:
   strip-comments@2.0.1:
     resolution: {integrity: sha512-ZprKx+bBLXv067WTCALv8SSz5l2+XhpYCsVtSqlMnkAXMWDq+/ekVbl1ghqP9rUHTzv6sm/DwCOiYutU/yp1fw==}
     engines: {node: '>=10'}
+
+  stripe@18.0.0:
+    resolution: {integrity: sha512-3Fs33IzKUby//9kCkCa1uRpinAoTvj6rJgQ2jrBEysoxEvfsclvXdna1amyEYbA2EKkjynuB4+L/kleCCaWTpA==}
+    engines: {node: '>=12.*'}
 
   strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
@@ -11620,6 +11627,11 @@ snapshots:
       ansi-regex: 6.1.0
 
   strip-comments@2.0.1: {}
+
+  stripe@18.0.0:
+    dependencies:
+      '@types/node': 22.14.0
+      qs: 6.11.2
 
   strnum@1.0.5: {}
 

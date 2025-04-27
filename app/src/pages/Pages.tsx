@@ -48,6 +48,10 @@ const routes = makeRoutes([
     component: lazy(() => import('./GameInviteLinkPage.jsx')),
   },
   {
+    path: '/store',
+    component: lazy(() => import('./StorePage.jsx')),
+  },
+  {
     path: '/settings',
     component: lazy(() => import('./SettingsPage.jsx')),
   },

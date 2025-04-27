@@ -11,6 +11,7 @@ import { notificationsRouter } from './routers/notifications';
 import { publicRouter } from './routers/public';
 import { pushRouter } from './routers/push';
 import { socketRouter } from './routers/socket';
+import { stripeRouter } from './routers/stripe';
 import { usersRouter } from './routers/users';
 
 const app = new Hono()
@@ -27,7 +28,8 @@ const app = new Hono()
   .route('/friendships', friendshipsRouter)
   .route('/push', pushRouter)
   .route('/notifications', notificationsRouter)
-  .route('/public', publicRouter);
+  .route('/public', publicRouter)
+  .route('/stripe', stripeRouter);
 
 export default app;
 

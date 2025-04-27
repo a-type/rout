@@ -55,7 +55,15 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'color', 'imageUrl', 'displayName', 'email'])
+      .select([
+        'id',
+        'color',
+        'imageUrl',
+        'displayName',
+        'email',
+        'User.subscriptionEntitlements',
+        'User.stripeCustomerId',
+      ])
       .executeTakeFirst();
 
     if (!user) {

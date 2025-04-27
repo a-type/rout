@@ -9,7 +9,7 @@ export function MainNav({}: MainNavProps) {
   const routes = useMatchingRoutes();
   const isHome = routes.some((route) => route.path === '/');
   const isFriends = routes.some((route) => route.path === '/friends');
-  const isHistory = routes.some((route) => route.path === '/history');
+  const isStore = routes.some((route) => route.path === '/store');
   return (
     <NavBar className="bg-overlay md:(mt-8 rounded-md)">
       <Wordmark className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl" />
@@ -25,10 +25,10 @@ export function MainNav({}: MainNavProps) {
           <NavBar.ItemText>Friends</NavBar.ItemText>
         </Link>
       </NavBar.Item>
-      <NavBar.Item asChild active={isHistory}>
-        <Link to="/history">
-          <NavBar.ItemIcon name="calendar" />
-          <NavBar.ItemText>History</NavBar.ItemText>
+      <NavBar.Item asChild active={isStore}>
+        <Link to="/store">
+          <NavBar.ItemIcon name="cart" />
+          <NavBar.ItemText>Store</NavBar.ItemText>
         </Link>
       </NavBar.Item>
       <NotificationsButton>

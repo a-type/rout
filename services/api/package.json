@@ -18,21 +18,23 @@
     "types": "pnpm run --filter @long-game/service-api --parallel \"/^types:.*/\"",
     "types:api": "wrangler types --env-interface=ApiBindings --config wrangler.toml src/worker-types.d.ts",
     "test:run": "vitest",
+    "stripe": "stripe listen -f http://localhost:3101/stripe/webhook",
     "wrangler": "wrangler"
   },
   "dependencies": {
     "@a-type/auth": "catalog:",
     "@a-type/auth-email-ses": "^2.1.8",
     "@a-type/utils": "catalog:",
+    "@block65/webcrypto-web-push": "1.0.2",
     "@hono/zod-validator": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/games": "workspace:*",
-    "@long-game/service-db": "workspace:*",
     "@long-game/notifications": "workspace:*",
+    "@long-game/service-db": "workspace:*",
     "hono": "catalog:",
     "jose": "^5.9.6",
-    "@block65/webcrypto-web-push": "1.0.2",
+    "stripe": "^18.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {

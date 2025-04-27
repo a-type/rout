@@ -58,6 +58,14 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .executeTakeFirst();
   }
 
+  async getUserByCustomerId(stripeCustomerId: string) {
+    return this.#db
+      .selectFrom('User')
+      .where('stripeCustomerId', '=', stripeCustomerId)
+      .selectAll()
+      .executeTakeFirst();
+  }
+
   async insertAccount({
     expiresAt,
     userId,
@@ -92,6 +100,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
         id: id('u'),
         password,
         displayName: '',
+        subscriptionEntitlements: {},
         ...user,
       })
       .returning('id')
@@ -176,6 +185,17 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .execute();
   }
 
+  async assignUserCustomerId(userId: PrefixedId<'u'>, customerId: string) {
+    assertPrefixedId(userId, 'u');
+    await this.#db
+      .updateTable('User')
+      .set({
+        stripeCustomerId: customerId,
+      })
+      .where('id', '=', userId)
+      .execute();
+  }
+
   async getUserNotificationSettings(id: PrefixedId<'u'>) {
     const user = await this.#db
       .selectFrom('User')
@@ -222,6 +242,33 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
         readAt: new Date(),
       })
       .where('id', '=', notificationId)
+      .execute();
+  }
+
+  async applyUserGamePurchase(userId: PrefixedId<'u'>, gameId: string) {
+    assertPrefixedId(userId, 'u');
+    await this.#db
+      .insertInto('UserGamePurchase')
+      .values({
+        id: id('ugp'),
+        userId,
+        gameId,
+      })
+      .onConflict((oc) => oc.doNothing())
+      .execute();
+  }
+
+  async updateUserEntitlements(
+    userId: PrefixedId<'u'>,
+    entitlements: Record<string, boolean>,
+  ) {
+    assertPrefixedId(userId, 'u');
+    await this.#db
+      .updateTable('User')
+      .set({
+        subscriptionEntitlements: entitlements,
+      })
+      .where('id', '=', userId)
       .execute();
   }
 }
