@@ -205,4 +205,10 @@ export const gameSessionRouter = new Hono<Env>()
     );
     const link = new URL(`/gameInvite/${code}`, ctx.env.UI_ORIGIN);
     return ctx.json({ link: link.toString() });
+  })
+  .get('/availableGames', async (ctx) => {
+    const gameIds = await ctx
+      .get('userStore')
+      .getAvailableGamesForSession(ctx.get('gameSessionId'));
+    return ctx.json(wrapRpcData(gameIds));
   });

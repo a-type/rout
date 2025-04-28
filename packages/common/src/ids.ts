@@ -1,5 +1,6 @@
 import { createId } from '@paralleldrive/cuid2';
 import { z } from 'zod';
+import { LongGameError } from './error';
 
 export const resourceIdTypes = {
   u: 'User',
@@ -37,14 +38,17 @@ export function assertPrefixedId<
   Prefix extends ResourceIdPrefix = ResourceIdPrefix,
 >(id: string, prefix?: Prefix): asserts id is PrefixedId<Prefix> {
   if (!isPrefixedId(id, prefix)) {
-    throw new Error(`Invalid id: ${id}`);
+    throw new LongGameError(LongGameError.Code.BadRequest, `Invalid id: ${id}`);
   }
 }
 
 export function idToType(id: string): ResourceTypeName {
   const prefix = id.split('-')[0] as ResourceIdPrefix;
   if (!resourceIdTypes[prefix]) {
-    throw new Error(`Invalid id: ${id}`);
+    throw new LongGameError(
+      LongGameError.Code.InternalServerError,
+      `Invalid id: ${id}`,
+    );
   }
   return resourceIdTypes[prefix];
 }

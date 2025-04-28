@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "pnpm build:app && pnpm build:copy-game-files",
+    "build:app": "vite build",
+    "build:copy-game-files": "node scripts/copyGameIcons.mjs"
   },
   "dependencies": {
     "@a-type/auth-ui": "catalog:",

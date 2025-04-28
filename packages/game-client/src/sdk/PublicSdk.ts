@@ -209,6 +209,15 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
+  getAvailableGames = this.sdkQuery(
+    'getAvailableGames',
+    this.apiRpc.gameSessions[':id'].availableGames.$get,
+    {
+      transformInput: (input: { id: string }) => ({
+        param: { id: input.id },
+      }),
+    },
+  );
 
   createPushSubscription = this.sdkMutation(this.apiRpc.push.$post, {
     transformInput: (input: {

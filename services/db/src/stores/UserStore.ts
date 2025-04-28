@@ -868,4 +868,23 @@ export class UserStore extends RpcTarget {
           ),
       );
   }
+
+  /**
+   * Gets all game IDs owned by confirmed members of the game session.
+   * These represent the games that can be played in this session.
+   */
+  async getAvailableGamesForSession(gameSessionId: PrefixedId<'gs'>) {
+    const userGames = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameSessionInvitation',
+        'UserGamePurchase.userId',
+        'GameSessionInvitation.userId',
+      )
+      .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
+      .where('GameSessionInvitation.status', '=', 'accepted')
+      .select('UserGamePurchase.gameId')
+      .execute();
+    return Array.from(new Set(userGames.map((game) => game.gameId)));
+  }
 }

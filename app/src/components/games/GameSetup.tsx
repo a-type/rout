@@ -38,7 +38,6 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
     <Box p d="col" gap className="m-auto max-w-800px">
       <Box d="col" gap>
         <H1>Game Setup</H1>
-        <label htmlFor="game-picker">Game</label>
         <GamePicker
           id="game-picker"
           value={pregame.session.gameId}
@@ -49,6 +48,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
             });
           }}
           loading={updateGameMutation.isPending}
+          gameSessionId={gameSessionId}
         />
       </Box>
       <Divider />
