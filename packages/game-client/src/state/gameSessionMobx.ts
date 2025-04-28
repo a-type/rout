@@ -23,6 +23,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
+import { GameLogItem } from '../types.js';
 import {
   getDevModeTurns,
   getPlayers,
@@ -57,13 +58,20 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @observable accessor players!: Record<PrefixedId<'u'>, PlayerInfo>;
   @observable accessor chat: GameSessionChatMessage[] = [];
   @observable accessor gameStatus!: GameStatus;
+  /**
+   * Accessing rounds directly is not advisable, as they
+   * may be undefined if not loaded from the server, and this
+   * will not load them for you. Use getRound instead.
+   * @see getRound
+   * @see viewingRound
+   * @see latestRound
+   */
   @observable accessor rounds: GameRoundSummary<
     GetTurnData<TGame>,
     GetPublicTurnData<TGame>,
     GetPlayerState<TGame>
   >[] = [];
   @observable accessor viewingRoundIndex = 0;
-  @observable accessor suspended: Promise<void> | null = null;
   @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
 
   // static
@@ -102,12 +110,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       socket: GameSocket;
     },
   ) {
-    console.trace(
-      'GameSessionSuite constructor',
-      this.#instanceId,
-      'socket',
-      ctx.socket.id,
-    );
     this.playerId = init.playerId;
     this.gameSessionId = init.id;
 
@@ -117,7 +119,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.setupLocalTurnStorage();
 
     if (init.status.status === 'completed') {
-      this.suspended = this.loadPostgame();
+      this.loadPostgame();
     }
   }
 
@@ -140,19 +142,51 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.ctx.socket.disconnect();
   };
 
+  /**
+   * Subscribe to events from the game session. Normally
+   * you can use withGame and reference properties directly,
+   * which will automatically re-render your component. But
+   * you can use this as needed too.
+   */
   get subscribe() {
     return this.#events.subscribe;
   }
 
+  /**
+   * Which round is currently being viewed, according
+   * to the user's position in history. The user can
+   * use the UI to navigate forward and backward in
+   * round history, so this is not necessarily the
+   * latest round.
+   * @see latestRound
+   */
   @computed get viewingRound() {
+    if (!this.rounds[this.viewingRoundIndex]) {
+      this.loadRound(this.viewingRoundIndex);
+    }
     return this.rounds[this.viewingRoundIndex];
   }
 
+  /**
+   * The most recent round index of the game (i.e. the one
+   * being played, if the game is active). Remember
+   * round indexes are 0-based.
+   */
   @computed get latestRoundIndex() {
     return this.rounds.length - 1;
   }
 
+  /**
+   * A summary of the most recent (i.e. current) round.
+   * The turn data of this round may be incomplete:
+   * players may not have submitted their turns yet.
+   * Additionally, even public turn data from other players is not
+   * accessible (null) since the round is in progress.
+   */
   @computed get latestRound() {
+    if (!this.rounds[this.latestRoundIndex]) {
+      this.loadRound(this.latestRoundIndex);
+    }
     return this.rounds[this.latestRoundIndex];
   }
 
@@ -173,8 +207,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    */
   @computed get finalState(): GetPlayerState<TGame> {
     const { latestRoundIndex, viewingRoundIndex, currentTurn } = this;
-    const viewingRound = this.rounds[viewingRoundIndex];
-    const nextRound = this.rounds[viewingRoundIndex + 1];
+    const viewingRound = this.getRound(viewingRoundIndex);
 
     if (viewingRoundIndex === latestRoundIndex) {
       // for current round, apply prospective turn to initial state
@@ -189,6 +222,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         playerId: this.playerId,
       });
     }
+
+    const nextRound = this.getRound(viewingRoundIndex + 1);
 
     // since historical rounds need to be loaded, we may not have the next
     // round available, theoretically. Implementation should prevent this
@@ -259,13 +294,63 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @computed get combinedLog() {
     const chat = this.chat;
-    // todo: round history
-    // const rounds = this.rounds;
-    return chat.map((msg) => ({
-      type: 'chat' as const,
-      chatMessage: msg,
-      timestamp: msg.createdAt,
-    }));
+
+    // chat is grouped by round first, then ordered by timestamp.
+    // this may seem a little unintuitive, but the assigned round
+    // of a chat may be a future round compared to when the chat
+    // was created, and the chat will not be shown until that round
+    // is reached, so round index is the primary ordering.
+
+    // although the client may be viewing a different round, we
+    // always return all logs. The UI can decide how to display
+    // "future" logs when the user is viewing history.
+    const currentRoundIndex = this.latestRoundIndex;
+
+    // additionally, this grouping allows us to insert rounds into the log
+    // in the right spot, since we don't have timestamps for them by nature.
+    const chatsGroupedByRound = chat.reduce((acc, msg) => {
+      const roundIndex = msg.roundIndex;
+      if (!acc.has(roundIndex)) {
+        acc.set(roundIndex, []);
+      }
+      // we rely on chat already being sorted by timestamp
+      acc.get(roundIndex)!.push(msg);
+      return acc;
+    }, new Map<number, GameSessionChatMessage[]>());
+
+    const log = new Array<GameLogItem<TGame>>();
+
+    for (let roundIndex = 0; roundIndex <= currentRoundIndex; roundIndex++) {
+      const chatForRound = chatsGroupedByRound.get(roundIndex);
+      if (chatForRound) {
+        log.push(
+          ...chatForRound.map((msg) => ({
+            type: 'chat' as const,
+            chatMessage: msg,
+            timestamp: msg.createdAt,
+          })),
+        );
+      }
+      if (roundIndex < currentRoundIndex) {
+        log.push({
+          type: 'round' as const,
+          roundIndex,
+        });
+      }
+    }
+
+    // only add postgame if the game is completed
+    if (this.gameStatus.status === 'completed') {
+      log.push(
+        ...(chatsGroupedByRound.get(-1)?.map((msg) => ({
+          type: 'chat' as const,
+          chatMessage: msg,
+          timestamp: msg.createdAt,
+        })) ?? []),
+      );
+    }
+
+    return log;
   }
 
   getPlayer = (id: PrefixedId<'u'>) => {
@@ -277,6 +362,19 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         color: 'gray',
       }
     );
+  };
+
+  /**
+   * Get a summary of a specific round. If the round has not
+   * been loaded from the server, this will suspend your
+   * component.
+   */
+  getRound = (roundIndex: number) => {
+    if (!this.rounds[roundIndex]) {
+      // this will throw a promise if the round is not loaded
+      this.loadRound(roundIndex);
+    }
+    return this.rounds[roundIndex];
   };
 
   @action prepareTurn = (
@@ -335,15 +433,24 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     roundIndex?: number;
   }) => {
     const tempId = `cm-pending-${Math.random().toString().slice(2)}` as const;
+
+    const messageWithRound = {
+      ...message,
+      roundIndex:
+        message.roundIndex === undefined
+          ? this.latestRoundIndex
+          : message.roundIndex,
+    };
+
     this.addChat({
       id: tempId,
       createdAt: Date.now(),
       authorId: this.playerId,
-      ...message,
+      ...messageWithRound,
     });
     await this.ctx.socket.request({
       type: 'sendChat',
-      message,
+      message: messageWithRound,
     });
     this.removeChat(tempId);
   };
@@ -357,7 +464,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
-  @action loadRound = async (roundIndex: number) => {
+  private cachedLoadRoundPromises: Record<number, Promise<void>> = {};
+  @action loadRound = (roundIndex: number) => {
     if (roundIndex < 0 || roundIndex > this.latestRoundIndex) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -365,12 +473,25 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       );
     }
 
-    this.suspended = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
+    if (this.rounds[roundIndex]) {
+      // NOTE: important not to return the promise here, since
+      // this returned value is used to decide whether to suspend
+      // the client
+      return;
+    }
+
+    if (!!this.cachedLoadRoundPromises[roundIndex]) {
+      // already loading this round, just throw the promise
+      throw this.cachedLoadRoundPromises[roundIndex];
+    }
+
+    const promise = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
       action((res) => {
         this.rounds[roundIndex] = res;
       }),
     );
-    return this.suspended;
+    this.cachedLoadRoundPromises[roundIndex] = promise;
+    throw promise;
   };
 
   @action showRound = async (roundIndex: number) => {
@@ -439,7 +560,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
     if (msg.status.status === 'completed') {
-      this.suspended = this.loadPostgame();
+      this.loadPostgame();
     }
   };
 

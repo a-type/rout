@@ -9,7 +9,17 @@ import { fetch } from '../fetch.js';
 import { queryClient } from '../queryClient.jsx';
 
 type TypedResponse<T> = Response & { json: () => Promise<T> };
-export type EraseEmptyArg<T> = T extends undefined ? [] : [T];
+export type EraseEmptyArg<T> = T extends void
+  ? [QueryOptions] | []
+  : [T, QueryOptions] | [T];
+export type QueryOptions = Pick<
+  UseSuspenseQueryOptions,
+  | 'refetchInterval'
+  | 'refetchIntervalInBackground'
+  | 'refetchOnMount'
+  | 'refetchOnReconnect'
+  | 'refetchOnWindowFocus'
+>;
 export type QueryFactory<Output, Input> = {
   (...args: EraseEmptyArg<Input>): UseSuspenseQueryOptions<Output>;
   __isQuery: true;
@@ -64,7 +74,10 @@ export class BaseSdk extends EventTarget {
     } = {},
   ): QueryFactory<Output, Input> => {
     const factory = (...args: EraseEmptyArg<Input>) => {
-      const input = args[0] as Input;
+      const input = transformInput ? (args[0] as Input) : (undefined as Input);
+      const options = transformInput
+        ? (args[1] as QueryOptions | undefined)
+        : (args[0] as QueryOptions | undefined);
       const queryFn = async () => {
         try {
           const res = await fn(
@@ -94,6 +107,7 @@ export class BaseSdk extends EventTarget {
         queryFn,
         queryKey: [key, ...subkey],
         enabled: enabled ? enabled(input) : true,
+        ...options,
       } as UseSuspenseQueryOptions<Output>;
     };
     factory.__isQuery = true as const;
@@ -139,6 +153,7 @@ export class BaseSdk extends EventTarget {
   ): QueryFactoryInfinite<Output, Input> => {
     const factory = (...args: EraseEmptyArg<Input>) => {
       const input = args[0] as Input;
+      const options = args[1] as QueryOptions;
       const queryFn = async ({
         pageParam,
       }: {
@@ -173,6 +188,7 @@ export class BaseSdk extends EventTarget {
         queryFn,
         queryKey: [key, ...subkey],
         enabled: enabled ? enabled(input) : true,
+        ...options,
         getNextPageParam: (lastPage) => {
           if (lastPage.pageInfo) {
             return lastPage.pageInfo.endCursor;

@@ -8,7 +8,7 @@ import {
   H2,
   Icon,
   IconSpritesheet,
-  ScrollArea,
+  NumberStepper,
   Spinner,
   Tabs,
 } from '@a-type/ui';
@@ -110,6 +110,7 @@ const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
       unsubs.forEach((unsub) => unsub());
     };
   }, [gameSuite]);
+  const [roundIndex, setRoundIndex] = useState(gameSuite.latestRoundIndex);
 
   if (!debug) return <Spinner />;
 
@@ -123,53 +124,81 @@ const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
           Reset Game
         </ActionButton>
       </ActionBar>
-      {gameSuite.turnError && (
-        <Box surface="attention" d="col" p="sm">
-          <H2>Turn Validation Error</H2>
-          <pre>{JSON.stringify(gameSuite.turnError, null, 2)}</pre>
-        </Box>
-      )}
-      <Box
-        surface="wash"
-        d="col"
-        className="flex-basis-500px min-h-0 flex-grow-1 flex-shrink-1"
-      >
-        <H2>Global State</H2>
-        <ScrollArea className="min-h-0">
-          <pre>{JSON.stringify(debug.globalState, null, 2)}</pre>
-        </ScrollArea>
-      </Box>
-      <Box
-        surface="wash"
-        d="col"
-        className="flex-basis-500px min-h-0 flex-grow-1 flex-shrink-1"
-      >
-        <H2>Player State</H2>
-        <Tabs className="flex flex-col min-h-0 flex-1" defaultValue="final">
-          <Tabs.List>
-            <Tabs.Trigger value="initial">Initial</Tabs.Trigger>
-            <Tabs.Trigger value="final">Final</Tabs.Trigger>
-          </Tabs.List>
-          <ScrollArea className="min-h-0">
-            <Tabs.Content value="initial">
-              <pre>{JSON.stringify(debug.initialState, null, 2)}</pre>
-            </Tabs.Content>
-            <Tabs.Content value="final">
-              <pre>{JSON.stringify(debug.finalState, null, 2)}</pre>
-            </Tabs.Content>
-          </ScrollArea>
-        </Tabs>
-      </Box>
-      <Box
-        surface="wash"
-        d="col"
-        className="flex-basis-500px min-h-0 flex-grow-1 flex-shrink-1"
-      >
-        <H2>Current Turn</H2>
-        <ScrollArea className="min-h-0">
-          <pre>{JSON.stringify(debug.currentTurn, null, 2)}</pre>
-        </ScrollArea>
-      </Box>
+
+      <Tabs defaultValue="globalState">
+        <Tabs.List>
+          <Tabs.Trigger value="globalState">Global State</Tabs.Trigger>
+          <Tabs.Trigger value="playerState">Player State</Tabs.Trigger>
+          <Tabs.Trigger value="currentTurn">Current Turn</Tabs.Trigger>
+          <Tabs.Trigger value="rounds">Round History</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="globalState">
+          <Box d="col">
+            <H2>Global State</H2>
+            <pre className="text-xs">
+              {JSON.stringify(debug.globalState, null, 2)}
+            </pre>
+          </Box>
+        </Tabs.Content>
+        <Tabs.Content value="playerState">
+          <Box d="col">
+            <H2>Player State</H2>
+            <Tabs className="flex flex-col min-h-0 flex-1" defaultValue="final">
+              <Tabs.List>
+                <Tabs.Trigger value="initial">Initial</Tabs.Trigger>
+                <Tabs.Trigger value="final">Final</Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.Content value="initial">
+                <pre className="text-xs">
+                  {JSON.stringify(debug.initialState, null, 2)}
+                </pre>
+              </Tabs.Content>
+              <Tabs.Content value="final">
+                <pre className="text-xs">
+                  {JSON.stringify(debug.finalState, null, 2)}
+                </pre>
+              </Tabs.Content>
+            </Tabs>
+          </Box>
+        </Tabs.Content>
+        <Tabs.Content value="currentTurn">
+          <Box d="col">
+            <H2>Current Turn</H2>
+            {gameSuite.turnError && (
+              <Box surface="attention" d="col" p="sm">
+                <H2>Turn Validation Error</H2>
+                <pre className="text-xs">
+                  {JSON.stringify(gameSuite.turnError, null, 2)}
+                </pre>
+              </Box>
+            )}
+
+            <pre>{JSON.stringify(debug.currentTurn, null, 2)}</pre>
+          </Box>
+        </Tabs.Content>
+        <Tabs.Content value="rounds">
+          <Box d="col">
+            <H2>Round History</H2>
+            <NumberStepper
+              value={roundIndex}
+              onChange={setRoundIndex}
+              min={0}
+              max={gameSuite.latestRoundIndex}
+            />
+            <Suspense>
+              <RoundDebug roundIndex={roundIndex} />
+            </Suspense>
+          </Box>
+        </Tabs.Content>
+      </Tabs>
     </Box>
   );
+});
+
+const RoundDebug = withGame<{ roundIndex: number }>(function RoundDebug({
+  roundIndex,
+  gameSuite,
+}) {
+  const round = gameSuite.getRound(roundIndex);
+  return <pre className="text-xs">{JSON.stringify(round, null, 2)}</pre>;
 });

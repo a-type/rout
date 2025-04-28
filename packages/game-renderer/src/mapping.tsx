@@ -1,3 +1,4 @@
+import type { GameRendererModule } from '@long-game/game-definition';
 import { ComponentType, lazy, LazyExoticComponent } from 'react';
 
 // these are defined statically since I think dynamic imports need to be
@@ -21,10 +22,7 @@ const moduleMap = {
   },
 };
 
-const packageCache: Record<
-  string,
-  Promise<{ default: Record<string, ComponentType> }>
-> = {};
+const packageCache: Record<string, Promise<GameRendererModule>> = {};
 
 async function loadGameModule(gameId: string) {
   if (Object.keys(packageCache).includes(gameId)) {
@@ -39,38 +37,66 @@ async function loadGameModule(gameId: string) {
   return packageCache[gameId];
 }
 
-const versionCache = new Map<
+async function getGameVersionModule(
+  gameId: string,
+  version: string,
+): Promise<{
+  Client: ComponentType<any>;
+  Round: ComponentType<any>;
+}> {
+  const { default: versions } = await loadGameModule(gameId);
+  if (!versions) {
+    return {
+      Client: () => <>Game version {version} not found</>,
+      Round: () => <>Game version {version} not found</>,
+    };
+  }
+
+  return versions[version];
+}
+
+const roundCache = new Map<
   string,
   Map<string, LazyExoticComponent<ComponentType>>
 >();
-
-export function getLazyGameRenderer(gameId: string, version: string) {
-  let gameCache = versionCache.get(gameId);
+export function getLazyRoundRenderer(gameId: string, version: string) {
+  let gameCache = roundCache.get(gameId);
   if (!gameCache) {
     gameCache = new Map();
-    versionCache.set(gameId, gameCache);
+    roundCache.set(gameId, gameCache);
   }
 
   if (gameCache.has(version)) {
     return gameCache.get(version)!;
   }
 
-  console.debug('Lazy loading game renderer', gameId, version);
+  const value = lazy<ComponentType<any>>(async () => {
+    const { Round } = await getGameVersionModule(gameId, version);
+    return { default: Round };
+  });
+
+  gameCache.set(version, value);
+  return value;
+}
+
+const rendererCache = new Map<
+  string,
+  Map<string, LazyExoticComponent<ComponentType>>
+>();
+
+export function getLazyGameRenderer(gameId: string, version: string) {
+  let gameCache = rendererCache.get(gameId);
+  if (!gameCache) {
+    gameCache = new Map();
+    rendererCache.set(gameId, gameCache);
+  }
+
+  if (gameCache.has(version)) {
+    return gameCache.get(version)!;
+  }
+
   const value = lazy<ComponentType>(async () => {
-    const { default: versions } = await loadGameModule(gameId);
-    if (!versions) {
-      return {
-        default: () => <>Game version {version} not found</>,
-      };
-    }
-
-    const Client = (versions as Record<string, ComponentType>)[version];
-    if (!Client) {
-      return {
-        default: () => <>Game version {version} not found</>,
-      };
-    }
-
+    const { Client } = await getGameVersionModule(gameId, version);
     return { default: Client };
   });
 

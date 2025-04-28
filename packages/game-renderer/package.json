@@ -20,7 +20,9 @@
     "@long-game/game-territory-renderer": "workspace:*",
     "@long-game/game-gudnak-renderer": "workspace:*",
     "@long-game/game-scribble-renderer": "workspace:*",
-    "@long-game/game-client": "workspace:*"
+    "@long-game/game-client": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:"

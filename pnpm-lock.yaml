@@ -321,6 +321,9 @@ importers:
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
       '@long-game/game-number-guess-definition':
         specifier: workspace:*
         version: link:../definition
@@ -627,9 +630,15 @@ importers:
 
   packages/game-renderer:
     dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../common
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../game-definition
       '@long-game/game-gudnak-renderer':
         specifier: workspace:*
         version: link:../../games/gudnak/renderer

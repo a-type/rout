@@ -7,7 +7,6 @@ import {
   createContext,
   ReactNode,
   Suspense,
-  use,
   useContext,
   useEffect,
   useState,
@@ -27,12 +26,6 @@ export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
   const ObservedComp = observer(Component as any);
   return function WithGame(props: T) {
     const gameSuite = useGameSuite<G>();
-    // if the suite is loading some state, suspend, so that the wrapped component
-    // always has loaded data when rendered.
-    const loadingPromise = gameSuite.suspended;
-    if (loadingPromise) {
-      use(loadingPromise);
-    }
     return <ObservedComp {...props} gameSuite={gameSuite} />;
   };
 }

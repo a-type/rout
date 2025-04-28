@@ -1,4 +1,5 @@
 import { Box } from '@a-type/ui';
+import { DefaultRoundRenderer } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 
 // note: withGame can take a generic <Props> which adds more accepted
@@ -6,13 +7,15 @@ import { hooks } from './gameClient.js';
 // a fully reactive SDK which lets you read game state, members, chat,
 // etc, prepare and submit turns, as well as view historical states
 
-const Client = hooks.withGame(function Client({ gameSuite }) {
+export const Client = hooks.withGame(function Client({ gameSuite }) {
   if (gameSuite.gameStatus.status === 'completed') {
     return <GameRecap />;
   }
 
   return <Gameplay />;
 });
+
+export const Round = DefaultRoundRenderer;
 
 // perhaps you'll want to move these to other modules.
 
@@ -24,5 +27,3 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
 const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
   return <Box>Game over!</Box>;
 });
-
-export default Client;

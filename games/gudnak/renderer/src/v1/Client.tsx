@@ -1,22 +1,23 @@
 import { Box, Button, toast } from '@a-type/ui';
 import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
   cardDefinitions,
   type Coordinate,
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
+import { DefaultRoundRenderer } from '@long-game/game-ui';
+import { useEffect } from 'react';
+import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
 import { hooks } from './gameClient';
-import { useGameAction } from './useGameAction';
-import { Flipper } from 'react-flip-toolkit';
-import { useEffect } from 'react';
 import { Hand } from './Hand';
-import {
-  DndContext,
-  useSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { useGameAction } from './useGameAction';
 
 export function Client() {
   return (
@@ -25,6 +26,8 @@ export function Client() {
     </Box>
   );
 }
+
+export const Round = DefaultRoundRenderer;
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const {

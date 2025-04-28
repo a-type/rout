@@ -1,28 +1,13 @@
-import { GameRound } from '@long-game/common';
-import { BaseTurnData, Turn } from '@long-game/game-definition';
+import { GameSessionChatMessage } from '@long-game/common';
+import { GameDefinition } from '@long-game/game-definition';
 
-export type RawChatMessage = {
-  userId: string;
-  message: string;
-  createdAt: string;
-  id: string;
-};
-export type ChatMessage = RawChatMessage & {
-  user: {
-    id: string;
-    name: string;
-    imageUrl: string | null;
-  } | null;
-};
-
-export type GameLogItem<PublicTurnData extends BaseTurnData> =
+export type GameLogItem<TGame extends GameDefinition> =
   | {
       type: 'chat';
-      chatMessage: ChatMessage;
-      timestamp: string;
+      chatMessage: GameSessionChatMessage;
+      timestamp: number;
     }
   | {
       type: 'round';
-      round: GameRound<Turn<PublicTurnData>>;
-      timestamp: string;
+      roundIndex: number;
     };

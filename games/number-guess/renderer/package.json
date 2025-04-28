@@ -31,6 +31,7 @@
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/game-ui": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

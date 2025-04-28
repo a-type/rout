@@ -30,7 +30,7 @@ export type GameSessionChatMessage = {
    * A -1 value indicates the message should only be visible
    * after the game is over.
    */
-  roundIndex?: number;
+  roundIndex: number;
 };
 
 export type GameSessionChatInit = Omit<

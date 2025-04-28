@@ -1,7 +1,7 @@
 import { Box, ErrorBoundary, Spinner } from '@a-type/ui';
 import { useGameSuite } from '@long-game/game-client';
 import { ReactNode, Suspense } from 'react';
-import { getLazyGameRenderer } from './mapping';
+import { getLazyGameRenderer, getLazyRoundRenderer } from './mapping';
 
 export function GameRenderer({ fallback }: { fallback?: ReactNode }) {
   return (
@@ -30,4 +30,36 @@ function GameRendererImpl() {
   }
 
   return <Client />;
+}
+
+export function RoundRenderer({
+  fallback,
+  roundIndex,
+}: {
+  fallback?: ReactNode;
+  roundIndex: number;
+}) {
+  return (
+    <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <Suspense fallback={fallback || <Box p>Round {roundIndex + 1}</Box>}>
+        <RoundRendererImpl roundIndex={roundIndex} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function RoundRendererImpl({ roundIndex }: { roundIndex: number }) {
+  const { gameDefinition, gameId, getRound, latestRoundIndex } = useGameSuite();
+  const round = getRound(roundIndex);
+  const finalPlayerState =
+    roundIndex === latestRoundIndex
+      ? round.initialPlayerState
+      : getRound(roundIndex + 1).initialPlayerState;
+
+  const Round: any = getLazyRoundRenderer(gameId, gameDefinition.version);
+  if (!Round) {
+    return <div>Version not found</div>;
+  }
+
+  return <Round round={round} finalPlayerState={finalPlayerState} />;
 }
