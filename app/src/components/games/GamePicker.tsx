@@ -1,17 +1,9 @@
 import { sdkHooks } from '@/services/publicSdk';
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  clsx,
-  Icon,
-  ScrollArea,
-  Select,
-} from '@a-type/ui';
+import { Box, Button, Chip, clsx, Icon, Select } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
 import { useState } from 'react';
+import { GameCard } from '../library/GameCard';
 
 export interface GamePickerProps {
   value: string;
@@ -129,42 +121,16 @@ export function GamePicker({
       </Box>
       <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
         {filteredGames.map(([gameId, game]) => (
-          <Card key={gameId} className="aspect-1">
-            <Card.Image>
-              <img
-                src={`/game-icons/${gameId}.png`}
-                alt={`${game.title} icon`}
-                className="w-full h-full object-cover"
-              />
-            </Card.Image>
-            <Card.Main
-              onClick={
-                availableGames.includes(gameId)
-                  ? () => onChange(gameId)
-                  : undefined
-              }
-            >
-              <Card.Title className="flex-shrink-0">{game.title}</Card.Title>
-              <Card.Content className="flex-shrink-1 min-h-0">
-                <ScrollArea>{game.description}</ScrollArea>
-              </Card.Content>
-              <Card.Content
-                unstyled
-                className="text-xs flex flex-row gap-xs flex-wrap"
-              >
-                {game.tags.map((tag) => (
-                  <Chip color="primary">{tag}</Chip>
-                ))}
-              </Card.Content>
-            </Card.Main>
-            {!availableGames.includes(gameId) && (
-              <Card.Actions>
-                <Button color="accent" size="small">
-                  <Icon name="cart" /> Buy
-                </Button>
-              </Card.Actions>
-            )}
-          </Card>
+          <GameCard
+            gameId={gameId}
+            onClick={
+              availableGames.includes(gameId)
+                ? () => onChange(gameId)
+                : undefined
+            }
+            owned={availableGames.includes(gameId)}
+            key={gameId}
+          />
         ))}
       </Box>
       {!filteredGames.length && (

@@ -5,6 +5,7 @@ import { handleError } from './middleware';
 import { configuredCors } from './middleware/cors';
 import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
+import { gamesRouter } from './routers/games';
 import { gameSessionInvitationsRouter } from './routers/gameSessionInvitations';
 import { gameSessionsRouter } from './routers/gameSessions';
 import { notificationsRouter } from './routers/notifications';
@@ -29,7 +30,8 @@ const app = new Hono()
   .route('/push', pushRouter)
   .route('/notifications', notificationsRouter)
   .route('/public', publicRouter)
-  .route('/stripe', stripeRouter);
+  .route('/stripe', stripeRouter)
+  .route('/games', gamesRouter);
 
 export default app;
 

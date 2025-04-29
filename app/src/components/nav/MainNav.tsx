@@ -7,16 +7,16 @@ export interface MainNavProps {}
 
 export function MainNav({}: MainNavProps) {
   const routes = useMatchingRoutes();
-  const isHome = routes.some((route) => route.path === '/');
+  const isHome = routes.every((route) => route.path === '/');
   const isFriends = routes.some((route) => route.path === '/friends');
-  const isStore = routes.some((route) => route.path === '/store');
+  const isLibrary = routes.some((route) => route.path === '/library');
   return (
     <NavBar className="bg-overlay md:(mt-8 rounded-md)">
       <Wordmark className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl" />
       <NavBar.Item asChild active={isHome}>
         <Link to="/">
-          <NavBar.ItemIcon name="gamePiece" />
-          <NavBar.ItemText>Games</NavBar.ItemText>
+          <NavBar.ItemIcon name="home" />
+          <NavBar.ItemText>Home</NavBar.ItemText>
         </Link>
       </NavBar.Item>
       <NavBar.Item asChild active={isFriends}>
@@ -25,10 +25,10 @@ export function MainNav({}: MainNavProps) {
           <NavBar.ItemText>Friends</NavBar.ItemText>
         </Link>
       </NavBar.Item>
-      <NavBar.Item asChild active={isStore}>
-        <Link to="/store">
-          <NavBar.ItemIcon name="cart" />
-          <NavBar.ItemText>Store</NavBar.ItemText>
+      <NavBar.Item asChild active={isLibrary}>
+        <Link to="/library">
+          <NavBar.ItemIcon name="gamePiece" />
+          <NavBar.ItemText>Library</NavBar.ItemText>
         </Link>
       </NavBar.Item>
       <NotificationsButton>

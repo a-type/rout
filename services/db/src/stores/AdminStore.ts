@@ -1,6 +1,7 @@
 import { AuthAccount, AuthUser, AuthVerificationCode } from '@a-type/auth';
 import { comparePassword, hashPassword } from '@a-type/kysely';
 import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
+import { freeGames } from '@long-game/games';
 import { AnyNotification } from '@long-game/notifications';
 import { WorkerEntrypoint } from 'cloudflare:workers';
 import { DB, NotificationSettings, createDb } from '../kysely/index.js';
@@ -110,7 +111,29 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       throw new Error('Failed to insert user');
     }
 
+    // also insert free game purchases and add notifications for them
+    await this.applyFreeGames(userResult.id as PrefixedId<'u'>);
+
     return userResult;
+  }
+
+  async applyFreeGames(userId: PrefixedId<'u'>) {
+    for (const freeGameId of freeGames) {
+      await this.#db
+        .insertInto('UserGamePurchase')
+        .values({
+          id: id('ugp'),
+          userId: userId,
+          gameId: freeGameId,
+        })
+        .onConflict((oc) => oc.doNothing())
+        .execute();
+      await this.insertNotification(userId, {
+        type: 'new-game',
+        gameId: freeGameId,
+        id: id('no'),
+      });
+    }
   }
 
   async insertVerificationCode({

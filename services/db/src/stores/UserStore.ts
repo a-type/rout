@@ -142,6 +142,10 @@ export class UserStore extends RpcTarget {
             push: false,
             email: sendEmailUpdates ?? false,
           },
+          'new-game': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
         },
       })
       .where('id', '=', this.#userId)
@@ -886,5 +890,15 @@ export class UserStore extends RpcTarget {
       .select('UserGamePurchase.gameId')
       .execute();
     return Array.from(new Set(userGames.map((game) => game.gameId)));
+  }
+
+  async getOwnedGames() {
+    const games = await this.#db
+      .selectFrom('UserGamePurchase')
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['UserGamePurchase.gameId'])
+      .execute();
+
+    return games.map((game) => game.gameId);
   }
 }

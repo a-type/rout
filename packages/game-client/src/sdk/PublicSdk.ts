@@ -278,6 +278,11 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['getNotificationSettings']],
     },
   );
+
+  getOwnedGames = this.sdkQuery('getOwnedGames', this.apiRpc.games.owned.$get);
+  applyFreeGames = this.sdkMutation(this.apiRpc.games.applyFree.$post, {
+    invalidate: [['getOwnedGames']],
+  });
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
