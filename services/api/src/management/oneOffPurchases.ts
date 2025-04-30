@@ -1,4 +1,4 @@
-import { LongGameError } from '@long-game/common';
+import { isPrefixedId, LongGameError } from '@long-game/common';
 import { Context } from 'hono';
 import Stripe from 'stripe';
 import { CtxVars } from '../config/ctx';
@@ -43,14 +43,22 @@ export async function handleCheckoutSessionCompleted(
   }
 
   for (const product of gameProducts) {
-    const gameId = product.metadata.gameId;
-    if (!gameId) {
+    const gameProductId = product.metadata.gameProductId;
+    if (!gameProductId) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
-        `Game product ${product.id} does not have a gameId`,
+        `Game product ${product.id} does not have a gameProductId`,
       );
     }
-    await ctx.env.ADMIN_STORE.applyUserGamePurchase(user.id, gameId);
-    console.log(`Applied game purchase for user ${user.id} for game ${gameId}`);
+    if (!isPrefixedId(gameProductId, 'gp')) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Game product ${product.id} has an invalid gameProductId: ${gameProductId}`,
+      );
+    }
+    await ctx.env.ADMIN_STORE.purchaseGameProduct(user.id, gameProductId);
+    console.log(
+      `Applied game purchase for user ${user.id} for game ${gameProductId}`,
+    );
   }
 }

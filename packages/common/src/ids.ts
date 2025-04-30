@@ -15,6 +15,8 @@ export const resourceIdTypes = {
   vc: 'VerificationCode',
   no: 'Notification',
   ugp: 'UserGamePurchase',
+  gp: 'GameProduct',
+  gpi: 'GameProductItem',
 } as const;
 export type ResourceNameMap = typeof resourceIdTypes;
 export type ResourceIdPrefix = keyof typeof resourceIdTypes;

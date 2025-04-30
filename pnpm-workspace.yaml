@@ -9,7 +9,7 @@ packages:
   - 'homepage'
 
 catalog:
-  '@a-type/ui': 2.0.6
+  '@a-type/ui': 2.0.7
   'react': 19.1.0
   'react-dom': 19.1.0
   '@types/react': ^19.1.2

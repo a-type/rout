@@ -26,6 +26,7 @@ export const usersRouter = new Hono<Env>()
         email: user.email,
         isGoldMember: !!user.subscriptionEntitlements?.gold,
         isCustomer: !!user.stripeCustomerId,
+        isProductAdmin: !!user.isProductAdmin,
       });
     } catch (e) {
       const err = LongGameError.fromInstanceOrRpc(e);
@@ -80,6 +81,10 @@ export const usersRouter = new Hono<Env>()
           push: z.boolean(),
         }),
         'friend-invite': z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+        'new-game': z.object({
           email: z.boolean(),
           push: z.boolean(),
         }),

@@ -4,6 +4,7 @@ import { GoldUpgrade } from '@/components/subscription/GoldUpgrade';
 import { ManageSubscription } from '@/components/subscription/ManageSubscription';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { API_ORIGIN } from '@/config';
+import { sdkHooks } from '@/services/publicSdk';
 import {
   Box,
   Button,
@@ -14,10 +15,13 @@ import {
   PageNav,
   PageRoot,
 } from '@a-type/ui';
+import { Link } from '@verdant-web/react-router';
 
 export interface SettingsPageProps {}
 
 export function SettingsPage({}: SettingsPageProps) {
+  const { data: me } = sdkHooks.useGetMe();
+
   return (
     <PageRoot>
       <PageContent>
@@ -39,6 +43,11 @@ export function SettingsPage({}: SettingsPageProps) {
               Logout
             </Button>
           </form>
+          {me?.isProductAdmin && (
+            <Button asChild color="ghost">
+              <Link to="/admin">Admin</Link>
+            </Button>
+          )}
         </Box>
       </PageContent>
       <PageNav>

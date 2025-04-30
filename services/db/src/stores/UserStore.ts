@@ -28,7 +28,7 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'displayName as name'])
+      .select(['id', 'displayName as name', 'isProductAdmin'])
       .executeTakeFirst();
 
     if (!user) return null;
@@ -56,13 +56,14 @@ export class UserStore extends RpcTarget {
       .selectFrom('User')
       .where('id', '=', this.#userId)
       .select([
-        'id',
-        'color',
-        'imageUrl',
-        'displayName',
-        'email',
+        'User.id',
+        'User.color',
+        'User.imageUrl',
+        'User.displayName',
+        'User.email',
         'User.subscriptionEntitlements',
         'User.stripeCustomerId',
+        'User.isProductAdmin',
       ])
       .executeTakeFirst();
 
@@ -885,9 +886,14 @@ export class UserStore extends RpcTarget {
         'UserGamePurchase.userId',
         'GameSessionInvitation.userId',
       )
+      .innerJoin(
+        'GameProductItem',
+        'UserGamePurchase.gameProductId',
+        'GameProductItem.id',
+      )
       .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
       .where('GameSessionInvitation.status', '=', 'accepted')
-      .select('UserGamePurchase.gameId')
+      .select('GameProductItem.gameId')
       .execute();
     return Array.from(new Set(userGames.map((game) => game.gameId)));
   }
@@ -895,10 +901,35 @@ export class UserStore extends RpcTarget {
   async getOwnedGames() {
     const games = await this.#db
       .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .innerJoin(
+        'GameProductItem',
+        'GameProduct.id',
+        'GameProductItem.gameProductId',
+      )
       .where('UserGamePurchase.userId', '=', this.#userId)
-      .select(['UserGamePurchase.gameId'])
+      .select(['GameProductItem.gameId'])
       .execute();
 
     return games.map((game) => game.gameId);
+  }
+
+  async getOwnedGameProducts() {
+    const products = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['GameProduct.id'])
+      .execute();
+
+    return products.map((product) => product.id);
   }
 }

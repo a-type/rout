@@ -1,9 +1,13 @@
 import Stripe from 'stripe';
 
-export const getStripe = (env: ApiBindings) =>
-  new Stripe(env.STRIPE_SECRET_KEY, {
+let stripe: Stripe | undefined = undefined;
+export const getStripe = (env: ApiBindings) => {
+  if (stripe) return stripe;
+  stripe = new Stripe(env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-03-31.basil',
   });
+  return stripe!;
+};
 
 export function stripeDateToDate(
   stripeDate: number | undefined | null,

@@ -283,6 +283,82 @@ export class PublicSdk extends BaseSdk {
   applyFreeGames = this.sdkMutation(this.apiRpc.games.applyFree.$post, {
     invalidate: [['getOwnedGames']],
   });
+  getGameProducts = this.sdkQuery(
+    'gameProducts',
+    this.apiRpc.games.products.$get,
+    {
+      transformInput: (input: { tags?: string[] }) => ({
+        query: input,
+      }),
+    },
+  );
+  getGameProduct = this.sdkQuery(
+    'gameProduct',
+    this.apiRpc.games.products[':productId'].$get,
+    {
+      transformInput: (input: { id: PrefixedId<'gp'> }) => ({
+        param: { productId: input.id },
+      }),
+      enabled: (input) => !!input.id,
+    },
+  );
+
+  adminCreateGameProduct = this.sdkMutation(
+    this.apiRpc.admin.gameProducts.$post,
+    {
+      invalidate: [['gameProducts']],
+    },
+  );
+  adminUpdateGameProduct = this.sdkMutation(
+    this.apiRpc.admin.gameProducts[':productId'].$put,
+    {
+      transformInput: (input: {
+        id: PrefixedId<'gp'>;
+        name: string;
+        priceCents: number;
+        description?: string | null;
+      }) => ({
+        param: { productId: input.id },
+        json: {
+          name: input.name,
+          priceCents: input.priceCents,
+          description: input.description ?? undefined,
+        },
+      }),
+      invalidate: [['gameProducts']],
+    },
+  );
+  adminDeleteGameProduct = this.sdkMutation(
+    this.apiRpc.admin.gameProducts[':productId'].$delete,
+    {
+      transformInput: (input: { id: PrefixedId<'gp'> }) => ({
+        param: { productId: input.id },
+      }),
+      invalidate: [['gameProducts']],
+    },
+  );
+  adminAddGameProductItem = this.sdkMutation(
+    this.apiRpc.admin.gameProducts[':productId'].items.$put,
+    {
+      transformInput: (input: { id: PrefixedId<'gp'>; gameId: string }) => ({
+        param: { productId: input.id },
+        json: { gameId: input.gameId },
+      }),
+      invalidate: [['gameProducts']],
+    },
+  );
+  adminRemoveGameProductItem = this.sdkMutation(
+    this.apiRpc.admin.gameProducts[':productId'].items[':itemId'].$delete,
+    {
+      transformInput: (input: {
+        id: PrefixedId<'gp'>;
+        itemId: PrefixedId<'gpi'>;
+      }) => ({
+        param: { productId: input.id, itemId: input.itemId },
+        invalidate: [['gameProducts']],
+      }),
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
@@ -308,3 +384,4 @@ export type GameSessionSummary = InferReturnData<
 export type Notification = InferReturnData<
   PublicSdk['getNotifications']
 >['results'][number];
+export type GameProduct = InferReturnData<PublicSdk['getGameProducts']>[number];

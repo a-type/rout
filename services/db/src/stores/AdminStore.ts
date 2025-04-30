@@ -1,10 +1,14 @@
 import { AuthAccount, AuthUser, AuthVerificationCode } from '@a-type/auth';
 import { comparePassword, hashPassword } from '@a-type/kysely';
 import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
-import { freeGames } from '@long-game/games';
 import { AnyNotification } from '@long-game/notifications';
 import { WorkerEntrypoint } from 'cloudflare:workers';
-import { DB, NotificationSettings, createDb } from '../kysely/index.js';
+import {
+  DB,
+  GameProductUpdate,
+  NotificationSettings,
+  createDb,
+} from '../kysely/index.js';
 
 export class AdminStore extends WorkerEntrypoint<DbBindings> {
   #db: DB;
@@ -102,6 +106,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
         password,
         displayName: '',
         subscriptionEntitlements: {},
+        isProductAdmin: false,
         ...user,
       })
       .returning('id')
@@ -118,19 +123,45 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
   }
 
   async applyFreeGames(userId: PrefixedId<'u'>) {
-    for (const freeGameId of freeGames) {
-      await this.#db
-        .insertInto('UserGamePurchase')
-        .values({
-          id: id('ugp'),
-          userId: userId,
-          gameId: freeGameId,
-        })
-        .onConflict((oc) => oc.doNothing())
-        .execute();
+    // find all free game products
+    const freeGameProducts = await this.#db
+      .selectFrom('GameProduct')
+      .where('priceCents', '=', 0)
+      .select('GameProduct.id')
+      .execute();
+    for (const product of freeGameProducts) {
+      await this.purchaseGameProduct(userId, product.id);
+    }
+  }
+
+  async purchaseGameProduct(
+    userId: PrefixedId<'u'>,
+    gameProductId: PrefixedId<'gp'>,
+  ) {
+    await this.#db
+      .insertInto('UserGamePurchase')
+      .values({
+        id: id('ugp'),
+        userId: userId,
+        gameProductId,
+      })
+      .onConflict((oc) => oc.doNothing())
+      .execute();
+
+    const gameItems = await this.#db
+      .selectFrom('GameProductItem')
+      .where('gameProductId', '=', gameProductId)
+      .select('gameId')
+      .execute();
+
+    const deduplicatedGameItems = Array.from(
+      new Set(gameItems.map((item) => item.gameId)),
+    );
+
+    for (const gameId of deduplicatedGameItems) {
       await this.insertNotification(userId, {
         type: 'new-game',
-        gameId: freeGameId,
+        gameId,
         id: id('no'),
       });
     }
@@ -268,19 +299,6 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .execute();
   }
 
-  async applyUserGamePurchase(userId: PrefixedId<'u'>, gameId: string) {
-    assertPrefixedId(userId, 'u');
-    await this.#db
-      .insertInto('UserGamePurchase')
-      .values({
-        id: id('ugp'),
-        userId,
-        gameId,
-      })
-      .onConflict((oc) => oc.doNothing())
-      .execute();
-  }
-
   async updateUserEntitlements(
     userId: PrefixedId<'u'>,
     entitlements: Record<string, boolean>,
@@ -293,6 +311,90 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       })
       .where('id', '=', userId)
       .execute();
+  }
+
+  async createGameProduct() {
+    const gameProduct = await this.#db
+      .insertInto('GameProduct')
+      .values({
+        id: id('gp'),
+        name: 'New Product',
+        priceCents: 0,
+        description: '',
+        publishedAt: null,
+      })
+      .returning('id')
+      .executeTakeFirstOrThrow();
+
+    return gameProduct;
+  }
+
+  async updateGameProduct(
+    gameProductId: PrefixedId<'gp'>,
+    updates: GameProductUpdate,
+  ) {
+    const updated = await this.#db
+      .updateTable('GameProduct')
+      .set(updates)
+      .where('id', '=', gameProductId)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    return updated;
+  }
+
+  async addGameProductItem(gameProductId: PrefixedId<'gp'>, gameId: string) {
+    const gameProductItem = await this.#db
+      .insertInto('GameProductItem')
+      .values({
+        id: id('gpi'),
+        gameProductId,
+        gameId,
+      })
+      .returning('id')
+      .executeTakeFirstOrThrow();
+
+    return gameProductItem;
+  }
+
+  async removeGameProductItem(gameProductItemId: PrefixedId<'gpi'>) {
+    assertPrefixedId(gameProductItemId, 'gpi');
+    await this.#db
+      .deleteFrom('GameProductItem')
+      .where('id', '=', gameProductItemId)
+      .execute();
+  }
+
+  async unpublishGameProduct(gameProductId: PrefixedId<'gp'>) {
+    assertPrefixedId(gameProductId, 'gp');
+    await this.#db
+      .updateTable('GameProduct')
+      .set({
+        publishedAt: null,
+      })
+      .where('id', '=', gameProductId)
+      .execute();
+  }
+
+  async deleteGameProduct(gameProductId: PrefixedId<'gp'>) {
+    assertPrefixedId(gameProductId, 'gp');
+    await this.#db
+      .deleteFrom('GameProduct')
+      .where('id', '=', gameProductId)
+      .execute();
+  }
+
+  async isGameProductOwnedByUsers(
+    gameProductId: PrefixedId<'gp'>,
+  ): Promise<boolean> {
+    assertPrefixedId(gameProductId, 'gp');
+    const count = await this.#db
+      .selectFrom('UserGamePurchase')
+      .where('gameProductId', '=', gameProductId)
+      .select('UserGamePurchase.id')
+      .limit(1)
+      .executeTakeFirst();
+
+    return !!count;
   }
 }
 

@@ -12,7 +12,7 @@ export function MainNav({}: MainNavProps) {
   const isLibrary = routes.some((route) => route.path === '/library');
   return (
     <NavBar className="bg-overlay md:(mt-8 rounded-md)">
-      <Wordmark className="hidden sm-block font-[Knewave] text-center w-full p-2 text-xl" />
+      <Wordmark className="hidden md:block font-[Knewave] text-center w-full p-2 text-xl" />
       <NavBar.Item asChild active={isHome}>
         <Link to="/">
           <NavBar.ItemIcon name="home" />

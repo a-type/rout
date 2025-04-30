@@ -3,6 +3,7 @@ import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
 import { handleError } from './middleware';
 import { configuredCors } from './middleware/cors';
+import { adminRouter } from './routers/admin/adminRouter';
 import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
 import { gamesRouter } from './routers/games';
@@ -31,7 +32,8 @@ const app = new Hono()
   .route('/notifications', notificationsRouter)
   .route('/public', publicRouter)
   .route('/stripe', stripeRouter)
-  .route('/games', gamesRouter);
+  .route('/games', gamesRouter)
+  .route('/admin', adminRouter);
 
 export default app;
 

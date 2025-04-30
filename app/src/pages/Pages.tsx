@@ -66,6 +66,20 @@ const routes = makeRoutes([
     component: lazy(() => import('./SettingsPage.jsx')),
   },
   {
+    path: '/admin',
+    component: lazy(() => import('./admin/AdminPage.jsx')),
+    children: [
+      {
+        index: true,
+        component: () => <div>Admin Home</div>,
+      },
+      {
+        path: 'products',
+        component: lazy(() => import('./admin/AdminGameProductsPage.jsx')),
+      },
+    ],
+  },
+  {
     path: '*',
     component: () => <div>404</div>,
   },
