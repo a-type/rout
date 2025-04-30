@@ -12,19 +12,24 @@ import {
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { DefaultRoundRenderer } from '@long-game/game-ui';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
+import { useViewState, ViewStateProvider } from './useViewState';
+import { Card } from './Card';
+import { Backdrop } from './Backdrop';
 
 export function Client() {
   return (
-    <Box>
-      <GameState />
-    </Box>
+    <ViewStateProvider>
+      <Box>
+        <GameState />
+      </Box>
+    </ViewStateProvider>
   );
 }
 
@@ -69,6 +74,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   });
   // const sensors = useSensors(mouseSensor, pointerSensor, touchSensor);
   const sensors = useSensors(mouseSensor, touchSensor);
+
+  const { viewState, setViewState } = useViewState();
 
   if (gameStatus.status === 'completed') {
     return (
@@ -220,6 +227,24 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               }
             }}
           />
+          {viewState.kind === 'cardViewer' ? (
+            <Backdrop onClick={() => setViewState({ kind: 'game' })} />
+          ) : null}
+
+          {viewState.kind === 'cardViewer' ? (
+            <div
+              // show card over top of game board in the middle of the screen
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 max-w-25% overflow-hidden p-4 rounded-2xl shadow-2xl shadow-dark"
+              style={{ backgroundColor: 'black' }}
+            >
+              <Card
+                disableTooltip
+                noBorder
+                info={finalState.cardState[viewState.cardInstanceId]}
+                instanceId={viewState.cardInstanceId}
+              />
+            </div>
+          ) : null}
         </DndContext>
       </Flipper>
     </Box>

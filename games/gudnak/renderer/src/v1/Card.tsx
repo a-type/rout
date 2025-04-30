@@ -18,6 +18,8 @@ import { useDndContext } from '@dnd-kit/core';
 import { Draggable } from './Draggable';
 import cardBack from './images/cardback.png';
 import { useEffect, useState } from 'react';
+import { useDoubleClick } from './useDoubleClick';
+import { useViewState } from './useViewState';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -25,6 +27,8 @@ type BaseCardProps = {
   fatigued?: boolean;
   instanceId: string;
   onClick?: () => void;
+  disableTooltip?: boolean;
+  noBorder?: boolean;
 };
 
 export const CARD_SIZE = 200;
@@ -34,18 +38,23 @@ export type DragData = {
   cardInfo: CardType;
 };
 
-const useTriggerTooltip = () => {
+const useTriggerTooltip = ({ cardInstanceId }: { cardInstanceId: string }) => {
+  const { setViewState } = useViewState();
   // trigger tooltip when user hovers over the card on pc or taps on it on mobile
   const [hovered, setHovered] = useState(false);
   const [touched, setTouched] = useState(false);
   const [active, setActive] = useState(false);
   const { active: dragActive } = useDndContext();
 
+  const [onClickOrTap] = useDoubleClick(() => {
+    setViewState({ kind: 'cardViewer', cardInstanceId });
+  }, 400);
+
   useEffect(() => {
     if (hovered) {
       const timeout = setTimeout(() => {
         setActive(true);
-      }, 700);
+      }, 800);
       return () => {
         clearTimeout(timeout);
         setActive(false);
@@ -57,7 +66,7 @@ const useTriggerTooltip = () => {
     if (touched) {
       const timeout = setTimeout(() => {
         setActive(true);
-      }, 200);
+      }, 500);
       return () => {
         clearTimeout(timeout);
         setActive(false);
@@ -73,8 +82,12 @@ const useTriggerTooltip = () => {
     onMouseLeave: () => {
       setHovered(false);
     },
+    onClick: () => {
+      onClickOrTap();
+    },
     onTouchStart: () => {
       setTouched(true);
+      onClickOrTap();
     },
     onTouchEnd: () => {
       setTouched(false);
@@ -91,6 +104,8 @@ export function RenderCard({
   targeted,
   overSpace,
   faceDown,
+  disableTooltip,
+  noBorder,
 }: BaseCardProps & {
   cardData: FighterCard | TacticCard;
   cardId: string;
@@ -99,12 +114,16 @@ export function RenderCard({
   overSpace?: boolean;
   faceDown?: boolean;
 }) {
-  const { active: tooltipActive, ...triggers } = useTriggerTooltip();
+  const {
+    active: tooltipActive,
+    onClick: onTriggerClick,
+    ...triggers
+  } = useTriggerTooltip({ cardInstanceId: instanceId });
   const cardArt = cardImageLookup[cardId];
   return (
     <Flipped flipId={instanceId}>
       {(flippedProps) => (
-        <Popover open={tooltipActive}>
+        <Popover open={tooltipActive && !disableTooltip}>
           <Popover.Content padding="none">
             <img src={cardArt} className="lg:max-w-md  sm:max-w-xs" />
           </Popover.Content>
@@ -159,10 +178,11 @@ export function RenderCard({
                     targeted && 'bg-primary-wash',
                     fatigued && 'bg-gray-300',
                   )}
-                  border
+                  border={!noBorder}
                   onClick={(e) => {
                     e.stopPropagation();
                     onClick?.();
+                    onTriggerClick();
                   }}
                 >
                   <img
