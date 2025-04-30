@@ -9,7 +9,6 @@ import { generateInitialGameState } from './generate';
 import { GameRandom } from '@long-game/game-definition';
 import { addCardToStack } from './board';
 import { deckDefinitions } from '../definitions/decks';
-import { draw } from './zone';
 
 describe('gameState/validation', {}, () => {
   describe('validateDeploy', {}, () => {

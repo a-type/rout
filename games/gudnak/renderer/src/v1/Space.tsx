@@ -71,16 +71,15 @@ export function Space({
     >
       <Box
         className={clsx(
-          'aspect-square',
+          'aspect-square border-3 rounded-2xl',
           ownerId ? 'border-primary' : 'border-gray-400',
-          draggedKind === 'fighter' && isOver && 'bg-primary',
+          draggedKind === 'fighter' && isOver && 'bg-red-500/50',
           selected && 'bg-primary-light',
           targeted && 'bg-red-500/50',
         )}
         onClick={() => {
           onClick?.();
         }}
-        border
         p="xl"
         style={{
           borderStyle: isGate ? 'dashed' : 'solid',

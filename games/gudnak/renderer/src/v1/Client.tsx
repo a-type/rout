@@ -18,6 +18,7 @@ import { Board } from './Board';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
+import { useManageCardFlipState } from './useManageCardFlipState';
 
 export function Client() {
   return (
@@ -40,8 +41,9 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
     currentTurn,
   } = gameSuite;
   console.log(JSON.parse(JSON.stringify(finalState)));
-  const { hand, board, active, actions, deckCount, freeActions } = finalState;
+  const { hand, board, active, actions, freeActions } = finalState;
   const action = useGameAction();
+  useManageCardFlipState();
 
   useEffect(() => {
     if (latestRoundIndex > 0) {
@@ -83,6 +85,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   return (
     <Box className="w-full h-full flex flex-col gap-2 overflow-hidden">
       <Flipper
+        spring="veryGentle"
         flipKey={
           JSON.stringify(finalState.board) +
           JSON.stringify(finalState.playerState)

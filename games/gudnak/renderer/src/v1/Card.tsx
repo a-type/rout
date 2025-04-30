@@ -1,4 +1,4 @@
-import { Box, clsx, Tooltip } from '@a-type/ui';
+import { Box, clsx, Popover, Tooltip } from '@a-type/ui';
 import {
   cardDefinitions,
   type FighterCard,
@@ -17,6 +17,7 @@ import { cardImageLookup } from './cardImageLookup';
 import { useDndContext } from '@dnd-kit/core';
 import { Draggable } from './Draggable';
 import cardBack from './images/cardback.png';
+import { useEffect, useState } from 'react';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -31,6 +32,54 @@ export const CARD_SIZE = 200;
 export type DragData = {
   instanceId: string;
   cardInfo: CardType;
+};
+
+const useTriggerTooltip = () => {
+  // trigger tooltip when user hovers over the card on pc or taps on it on mobile
+  const [hovered, setHovered] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const [active, setActive] = useState(false);
+  const { active: dragActive } = useDndContext();
+
+  useEffect(() => {
+    if (hovered) {
+      const timeout = setTimeout(() => {
+        setActive(true);
+      }, 700);
+      return () => {
+        clearTimeout(timeout);
+        setActive(false);
+      };
+    }
+  }, [hovered]);
+
+  useEffect(() => {
+    if (touched) {
+      const timeout = setTimeout(() => {
+        setActive(true);
+      }, 200);
+      return () => {
+        clearTimeout(timeout);
+        setActive(false);
+      };
+    }
+  }, [touched]);
+
+  return {
+    active: active && !dragActive,
+    onMouseEnter: () => {
+      setHovered(true);
+    },
+    onMouseLeave: () => {
+      setHovered(false);
+    },
+    onTouchStart: () => {
+      setTouched(true);
+    },
+    onTouchEnd: () => {
+      setTouched(false);
+    },
+  };
 };
 
 export function RenderCard({
@@ -50,65 +99,88 @@ export function RenderCard({
   overSpace?: boolean;
   faceDown?: boolean;
 }) {
+  const { active: tooltipActive, ...triggers } = useTriggerTooltip();
   const cardArt = cardImageLookup[cardId];
   return (
     <Flipped flipId={instanceId}>
       {(flippedProps) => (
-        <Tooltip
-          open={false}
-          content={<img src={cardArt} width={CARD_SIZE * 2} />}
-        >
-          <div className="relative">
-            {faceDown && (
+        <Popover open={tooltipActive}>
+          <Popover.Content padding="none">
+            <img src={cardArt} className="lg:max-w-md  sm:max-w-xs" />
+          </Popover.Content>
+          <Popover.Anchor>
+            <motion.div
+              data-card-id={instanceId}
+              className="relative aspect-ratio-square"
+              {...triggers}
+              {...flippedProps}
+              whileHover="hover"
+              whileTap="tap"
+            >
               <motion.div
-                className="absolute w-full h-full"
-                animate={
-                  faceDown
-                    ? { rotateY: 0, zIndex: 99 }
-                    : { rotateY: -180, zIndex: 0 }
+                data-id="card-back"
+                className="absolute w-full h-full backface-hidden"
+                variants={
+                  overSpace
+                    ? {}
+                    : {
+                        hover: {
+                          scale: 1.05,
+                        },
+                        tap: {
+                          scale: 0.9,
+                        },
+                      }
                 }
               >
                 <img className="w-full" src={cardBack} />
               </motion.div>
-            )}
-            <motion.div
-              whileTap={overSpace ? {} : { scale: 0.9 }}
-              whileHover={overSpace ? {} : { scale: 1.05 }}
-              animate={
-                faceDown
-                  ? { rotateY: -180, zIndex: 0 }
-                  : { rotateY: 0, zIndex: 99, scale: overSpace ? 0.8 : 1 }
-              }
-            >
-              <Box
-                {...flippedProps}
-                className={clsx(
-                  'w-full h-full border-primary rounded-lg bg-cover',
-                  selected && 'bg-primary-light',
-                  targeted && 'bg-primary-wash',
-                  fatigued && 'bg-gray-300',
-                )}
-                border
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick?.();
-                }}
+              <motion.div
+                data-id="card-front"
+                className="backface-hidden"
+                initial={faceDown ? { rotateY: -180 } : { rotateY: 0 }}
+                variants={
+                  overSpace
+                    ? {}
+                    : {
+                        hover: {
+                          scale: 1.05,
+                        },
+                        tap: {
+                          scale: 0.9,
+                        },
+                      }
+                }
               >
-                <img
+                <Box
                   className={clsx(
-                    'w-full',
-                    (selected || targeted) && 'mix-blend-screen',
-                    fatigued && 'grayscale-50 mix-blend-multiply',
+                    'w-full h-full border-primary rounded-lg bg-cover',
+                    selected && 'bg-primary-light',
+                    targeted && 'bg-primary-wash',
+                    fatigued && 'bg-gray-300',
                   )}
-                  src={cardArt}
-                  onDragStart={(e) => {
-                    e.preventDefault();
+                  border
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
                   }}
-                />
-              </Box>
+                >
+                  <img
+                    className={clsx(
+                      'w-full',
+                      (selected || targeted) && 'mix-blend-screen',
+                      fatigued && 'grayscale-50 mix-blend-multiply',
+                    )}
+                    src={cardArt}
+                    onDragStart={(e) => {
+                      e.preventDefault();
+                    }}
+                  />
+                </Box>
+              </motion.div>
             </motion.div>
-          </div>
-        </Tooltip>
+          </Popover.Anchor>
+        </Popover>
       )}
     </Flipped>
   );

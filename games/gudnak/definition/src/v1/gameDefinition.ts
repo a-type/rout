@@ -155,15 +155,6 @@ export const gameDefinition: GameDefinition<
     }
     const matchingFreeAction = findMatchingFreeAction(action, freeActions);
 
-    if (actions <= 0 && !matchingFreeAction) {
-      return 'You have no actions left';
-    }
-    if (action.type === 'draw') {
-      if (deckCount === 0) {
-        return 'You have no cards left in your deck';
-      }
-      return;
-    }
     if (action.type === 'tactic') {
       const card = cardState[action.card.instanceId];
       const cardDef = cardDefinitions[card.cardId as ValidCardId];
@@ -197,6 +188,16 @@ export const gameDefinition: GameDefinition<
       }
       return;
     }
+    if (actions <= 0 && !matchingFreeAction) {
+      return 'You have no actions left';
+    }
+    if (action.type === 'draw') {
+      if (deckCount === 0) {
+        return 'You have no cards left in your deck';
+      }
+      return;
+    }
+
     if (action.type === 'deploy') {
       const deployErrors = validateDeploy(
         board,
