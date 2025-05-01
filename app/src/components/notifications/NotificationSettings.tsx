@@ -4,8 +4,9 @@ import {
   useIsSubscribedToPush,
   useSubscribeToPush,
 } from '@/services/push';
-import { Box, Button, H3, Switch } from '@a-type/ui';
+import { Box, Button, H3, Switch, Tooltip } from '@a-type/ui';
 import { Notification } from '@long-game/game-client';
+import { notificationTypes } from '@long-game/notifications';
 import { sentenceCase } from 'change-case';
 
 export interface NotificationSettingsProps {}
@@ -19,7 +20,11 @@ export function NotificationSettings({}: NotificationSettingsProps) {
       await updateNotificationSettings.mutateAsync({
         ...notificationSettings,
         [key]: {
-          ...notificationSettings[key],
+          push: false,
+          email: false,
+          ...(notificationSettings[key] as
+            | { email: boolean; push: boolean }
+            | undefined),
           [transport]: value,
         },
       });
@@ -49,19 +54,17 @@ export function NotificationSettings({}: NotificationSettingsProps) {
         </Box>
       )}
       <Box d="col" gap>
-        {Object.entries(notificationSettings)
-          .sort((a, b) => a[0].localeCompare(b[0]))
-          .map(([key, value]) => {
-            const updateOneSetting = updateOneSettingFactory(key as any);
-            return (
-              <NotificationSettingsRow
-                key={key}
-                label={key}
-                value={value}
-                update={updateOneSetting}
-              />
-            );
-          })}
+        {notificationTypes.map((key) => {
+          const updateOneSetting = updateOneSettingFactory(key as any);
+          return (
+            <NotificationSettingsRow
+              key={key}
+              label={key}
+              value={notificationSettings[key] ?? { push: false, email: false }}
+              update={updateOneSetting}
+            />
+          );
+        })}
       </Box>
     </Box>
   );
@@ -102,15 +105,26 @@ function NotificationSettingsRow({
       <Box>{sentenceCase(label)}</Box>
       <Box items="center" gap>
         <Box d="col" gap="sm" layout="center center">
-          <Switch
-            checked={value.push && subscribedToPush}
-            onCheckedChange={togglePush}
-            disabled={isSubscribingToPush || !canPush}
-          />
+          <Tooltip
+            disabled={!!canPush}
+            content="Push notifications are not supported on this device"
+            color="contrast"
+          >
+            <Switch
+              checked={value.push && subscribedToPush}
+              onCheckedChange={togglePush}
+              disabled={isSubscribingToPush || !canPush}
+              className={!canPush ? 'opacity-50' : 'cursor-pointer'}
+            />
+          </Tooltip>
           <span className="text-xs">Push</span>
         </Box>
         <Box d="col" gap="sm" layout="center center">
-          <Switch checked={value.email} onCheckedChange={toggleEmail} />
+          <Switch
+            checked={value.email}
+            onCheckedChange={toggleEmail}
+            className="cursor-pointer"
+          />
           <span className="text-xs">Email</span>
         </Box>
       </Box>
