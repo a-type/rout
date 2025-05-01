@@ -43,10 +43,19 @@ export function SettingsPage({}: SettingsPageProps) {
               Logout
             </Button>
           </form>
+          <Divider />
+          <Box d="col" gap>
+            <H2>Support</H2>
+            <a href="https://rout.games/privacy">Privacy Policy</a>
+            <a href="https://rout.games/tos">Terms of Service</a>
+          </Box>
           {me?.isProductAdmin && (
-            <Button asChild color="ghost">
-              <Link to="/admin">Admin</Link>
-            </Button>
+            <>
+              <Divider />
+              <Button asChild color="ghost">
+                <Link to="/admin">Admin</Link>
+              </Button>
+            </>
           )}
         </Box>
       </PageContent>

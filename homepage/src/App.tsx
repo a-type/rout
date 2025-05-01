@@ -1,11 +1,18 @@
 import { Box, Button, H2, P, withClassName, withProps } from '@a-type/ui';
-import { TopographyBackground, Wordmark } from '@long-game/visual-components';
+import {
+  ScrollTicker,
+  TopographyBackground,
+  Wordmark,
+} from '@long-game/visual-components';
+import { Footer } from './Footer';
 import { GameIcons } from './GameIcons';
-import { Scene } from './Scene';
 
 const App = () => {
   return (
     <Box d="col" layout="center start" className="bg-wash" gap="lg">
+      <ScrollTicker className="bg-white color-black w-full relative z-1 p-sm font-bold">
+        BETA
+      </ScrollTicker>
       <Box
         gap
         p
@@ -14,7 +21,7 @@ const App = () => {
         items="center"
         className="w-full max-w-600px z-1 px-lg"
       >
-        <Wordmark className="text-xl" />
+        <Wordmark className="text-2xl" />
         <Box gap>
           <Button asChild color="primary">
             <a href="https://play.rout.games">Play Now</a>
@@ -22,8 +29,9 @@ const App = () => {
         </Box>
       </Box>
       <TopographyBackground colorMode="dark" />
-      <Container items="center" className="text-center py-16">
-        <H2 className="text-4xl font-medium">
+      <GameIcons />
+      <Container items="center" className="text-center py-xl">
+        <H2 className="text-6xl font-medium font-heading">
           Play games
           <br />
           every day
@@ -42,15 +50,10 @@ const App = () => {
           <a href="https://play.rout.games">Play Now</a>
         </Button>
       </Container>
-      <GameIcons />
-
-      <Box
-        full="width"
-        layout="center center"
-        className="border-t-solid border-t-6px border-t-black w-full h-full max-h-800px"
-      >
-        <Scene />
-      </Box>
+      <Footer />
+      <ScrollTicker className="bg-accent color-accent-ink w-full relative z-1 p-sm font-bold">
+        NEVER LOSE TOUCH
+      </ScrollTicker>
     </Box>
   );
 };
