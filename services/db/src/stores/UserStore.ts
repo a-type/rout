@@ -438,10 +438,15 @@ export class UserStore extends RpcTarget {
     let builder = this.#db
       .selectFrom('GameSessionInvitation')
       .where('GameSessionInvitation.userId', '=', this.#userId)
-      .select([
+      .select(({ eb, ref }) => [
         'GameSessionInvitation.gameSessionId',
         'GameSessionInvitation.status',
         'GameSessionInvitation.createdAt',
+        eb(
+          'GameSessionInvitation.inviterId',
+          '=',
+          ref('GameSessionInvitation.userId'),
+        ).as('isFoundingMember'),
       ])
       .orderBy('GameSessionInvitation.createdAt', 'desc');
 

@@ -1,4 +1,5 @@
-import { AvatarList, Card } from '@a-type/ui';
+import { sdkHooks } from '@/services/publicSdk';
+import { AvatarList, Button, Card, DropdownMenu, Icon } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import games from '@long-game/games';
@@ -17,6 +18,7 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
   ...rest
 }: GameSummaryCardProps) {
   const game = games[summary.gameId];
+  const deleteSession = sdkHooks.useDeleteGameSession();
 
   if (!game) {
     return null;
@@ -41,6 +43,30 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
           </Card.Content>
         </Link>
       </Card.Main>
+      {summary.status.status === 'pending' && summary.canDelete && (
+        <Card.Footer>
+          <DropdownMenu>
+            <DropdownMenu.Trigger asChild>
+              <Button size="icon-small" color="ghost">
+                <Icon name="dots" />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item
+                onClick={() => {
+                  deleteSession.mutate({ id: summary.id });
+                }}
+                color="destructive"
+              >
+                Delete
+                <DropdownMenu.ItemRightSlot>
+                  <Icon name="trash" />
+                </DropdownMenu.ItemRightSlot>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+        </Card.Footer>
+      )}
     </Card>
   );
 },

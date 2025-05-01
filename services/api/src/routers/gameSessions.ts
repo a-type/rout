@@ -127,7 +127,15 @@ async function mapAndFilterGameSessions(
 ): Promise<{
   errors: Error[];
   pageInfo: { hasNextPage: boolean; endCursor: string | null };
-  results: Awaited<ReturnType<GameSessionState['getSummary']>>[];
+  results: (Awaited<ReturnType<GameSessionState['getSummary']>> & {
+    canDelete: boolean;
+    invitationStatus:
+      | 'pending'
+      | 'accepted'
+      | 'declined'
+      | 'expired'
+      | 'uninvited';
+  })[];
 }> {
   const { results: invitations, pageInfo } = await userStore.getGameSessions({
     status: filter.invitationStatus,
@@ -136,9 +144,14 @@ async function mapAndFilterGameSessions(
   });
 
   const sessionDOs = await Promise.allSettled(
-    invitations.map(async ({ gameSessionId }) => {
+    invitations.map(async ({ gameSessionId, isFoundingMember, status }) => {
       const state = await getGameSessionState(gameSessionId, env);
-      return wrapRpcData(await state.getSummary());
+      const summary = await state.getSummary();
+      return {
+        ...wrapRpcData(summary),
+        canDelete: !!isFoundingMember,
+        invitationStatus: status,
+      };
     }),
   );
 
