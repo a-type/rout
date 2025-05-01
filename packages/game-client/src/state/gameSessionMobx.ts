@@ -73,12 +73,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   >[] = [];
   @observable accessor viewingRoundIndex = 0;
   @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
+  @observable accessor gameId!: string;
+  @observable accessor gameVersion!: string;
 
   // static
-  gameId!: string;
-  gameVersion!: string;
   gameSessionId: PrefixedId<'gs'>;
-  gameDefinition!: TGame;
   members!: { id: PrefixedId<'u'> }[];
   playerId: PrefixedId<'u'>;
   startedAt!: Date;
@@ -150,6 +149,27 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    */
   get subscribe() {
     return this.#events.subscribe;
+  }
+
+  @computed get gameDefinition() {
+    const { gameId, gameVersion } = this;
+    const def = games[gameId].versions.find(
+      (v) => v.version === gameVersion,
+    ) as TGame;
+    if (!def) {
+      this.#events.emit(
+        'error',
+        new LongGameError(
+          LongGameError.Code.Unknown,
+          'Game definition not found',
+        ),
+      );
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Game definition not found',
+      );
+    }
+    return def;
   }
 
   /**
@@ -622,15 +642,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     startedAt: number;
     timezone: string;
   }) => {
-    this.gameDefinition = games[init.gameId].versions.find(
-      (v) => v.version === init.gameVersion,
-    ) as TGame;
-    if (!this.gameDefinition) {
-      throw new LongGameError(
-        LongGameError.Code.Unknown,
-        'Game definition not found',
-      );
-    }
     this.viewingRoundIndex = init.currentRound.roundIndex;
     this.localTurnData = null;
     this.rounds = new Array(init.currentRound.roundIndex).fill(null);

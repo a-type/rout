@@ -38,6 +38,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
     <Box p d="col" gap className="m-auto max-w-800px">
       <Box d="col" gap>
         <H1>Game Setup</H1>
+        <P>Pick a game to play:</P>
         <GamePicker
           id="game-picker"
           value={pregame.session.gameId}

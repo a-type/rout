@@ -889,7 +889,7 @@ export class UserStore extends RpcTarget {
       .innerJoin(
         'GameProductItem',
         'UserGamePurchase.gameProductId',
-        'GameProductItem.id',
+        'GameProductItem.gameProductId',
       )
       .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
       .where('GameSessionInvitation.status', '=', 'accepted')

@@ -1,3 +1,4 @@
+import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import {
   checkForUpdate,
   updateApp,
@@ -120,6 +121,7 @@ export const Pages = () => {
     >
       <Router routes={routes} onNavigate={handleNavigate}>
         <Outlet />
+        <QuickBuyPopup />
       </Router>
     </ErrorBoundary>
   );

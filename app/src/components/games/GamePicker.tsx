@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Chip, clsx, Icon, Select } from '@a-type/ui';
+import { Box, Button, Chip, clsx, Icon, ScrollArea, Select } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
 import { useState } from 'react';
@@ -76,8 +76,9 @@ export function GamePicker({
 
   return (
     <Box d="col" gap items="stretch" className={clsx(className)} {...rest}>
-      <Box items="center" gap className="flex-wrap">
-        <span>Filters:</span>
+      <Box items="center" gap className="flex-wrap" surface="wash" p>
+        <Icon name="filter" />
+        Filter
         <Chip asChild color={filters.owned ? 'primary' : 'neutral'}>
           <Button
             size="small"
@@ -119,39 +120,46 @@ export function GamePicker({
           </Select.Content>
         </Select>
       </Box>
-      <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
-        {filteredGames.map(([gameId, game]) => (
-          <GameCard
-            gameId={gameId}
-            onClick={
-              availableGames.includes(gameId)
-                ? () => onChange(gameId)
-                : undefined
-            }
-            owned={availableGames.includes(gameId)}
-            key={gameId}
-          />
-        ))}
-      </Box>
-      {!filteredGames.length && (
-        <Box full="width" layout="center center" className="color-gray-dark">
-          {filters.owned ? (
-            <Box d="col" items="center" gap>
-              No games owned by a player match these filters.
-              {filteredGamesIncludingUnowned.length ? (
-                <Button size="small" color="ghost" onClick={toggleOwnedFilter}>
-                  But there are {filteredGamesIncludingUnowned.length} matching
-                  games on the store <Icon name="arrowRight" />
-                </Button>
-              ) : (
-                ''
-              )}
-            </Box>
-          ) : (
-            <>No games match these filters.</>
-          )}
+      <ScrollArea className="max-h-800px">
+        <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md p-md">
+          {filteredGames.map(([gameId, game]) => (
+            <GameCard
+              gameId={gameId}
+              onClick={
+                availableGames.includes(gameId)
+                  ? () => onChange(gameId)
+                  : undefined
+              }
+              owned={availableGames.includes(gameId)}
+              key={gameId}
+              selected={gameId === value}
+            />
+          ))}
         </Box>
-      )}
+        {!filteredGames.length && (
+          <Box full="width" layout="center center" className="color-gray-dark">
+            {filters.owned ? (
+              <Box d="col" items="center" gap>
+                No games owned by a player match these filters.
+                {filteredGamesIncludingUnowned.length ? (
+                  <Button
+                    size="small"
+                    color="ghost"
+                    onClick={toggleOwnedFilter}
+                  >
+                    But there are {filteredGamesIncludingUnowned.length}{' '}
+                    matching games on the store <Icon name="arrowRight" />
+                  </Button>
+                ) : (
+                  ''
+                )}
+              </Box>
+            ) : (
+              <>No games match these filters.</>
+            )}
+          </Box>
+        )}
+      </ScrollArea>
     </Box>
   );
 }

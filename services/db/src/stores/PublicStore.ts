@@ -6,6 +6,7 @@ import { UserStore } from './UserStore.js';
 
 export interface GameProductsFilter {
   tags?: string[];
+  includingGame?: string;
 }
 
 export class PublicStore extends WorkerEntrypoint<DbBindings> {
@@ -46,7 +47,7 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
   }
 
   async getGameProducts(filter: GameProductsFilter) {
-    const query = await this.#db
+    let query = this.#db
       .selectFrom('GameProduct')
       .select([
         'GameProduct.id',
@@ -62,11 +63,21 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
             .select(['GameProductItem.id', 'GameProductItem.gameId'])
             .whereRef('GameProductItem.gameProductId', '=', 'GameProduct.id'),
         ).as('gameProductItems'),
-      ])
-      .execute();
+      ]);
 
+    if (filter?.includingGame) {
+      query = query
+        .innerJoin(
+          'GameProductItem',
+          'GameProductItem.gameProductId',
+          'GameProduct.id',
+        )
+        .where('GameProductItem.gameId', '=', filter.includingGame);
+    }
+
+    const results = await query.execute();
     const filteredProducts = filter
-      ? query.filter((product) => {
+      ? results.filter((product) => {
           if (!filter.tags) {
             return true;
           }
@@ -76,7 +87,7 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
             .flat();
           return filter.tags.every((tag) => productTags.includes(tag));
         })
-      : query;
+      : results;
     return filteredProducts;
   }
 

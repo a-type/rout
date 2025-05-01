@@ -1,17 +1,32 @@
-import { Button, Card, Chip, clsx, Icon, ScrollArea } from '@a-type/ui';
+import { Card, Chip, clsx } from '@a-type/ui';
 import games from '@long-game/games';
+import { OpenQuickBuyButton } from '../store/QuickBuyPopup';
 
 export interface GameCardProps {
   onClick?: (gameId: string) => void;
   className?: string;
   gameId: string;
   owned: boolean;
+  selected?: boolean;
 }
 
-export function GameCard({ gameId, onClick, className, owned }: GameCardProps) {
+export function GameCard({
+  gameId,
+  onClick,
+  className,
+  owned,
+  selected,
+}: GameCardProps) {
   const game = games[gameId];
   return (
-    <Card key={gameId} className={clsx('aspect-1', className)}>
+    <Card
+      key={gameId}
+      className={clsx(
+        'aspect-1',
+        selected && 'outline-6px outline-accent outline-solid',
+        className,
+      )}
+    >
       <Card.Image>
         <img
           src={`/game-data/${gameId}/icon.png`}
@@ -21,12 +36,9 @@ export function GameCard({ gameId, onClick, className, owned }: GameCardProps) {
       </Card.Image>
       <Card.Main onClick={onClick ? () => onClick(gameId) : undefined}>
         <Card.Title className="flex-shrink-0">{game.title}</Card.Title>
-        <Card.Content className="flex-shrink-1 min-h-0">
-          <ScrollArea>{game.description}</ScrollArea>
-        </Card.Content>
         <Card.Content
           unstyled
-          className="text-xs flex flex-row gap-xs flex-wrap"
+          className="text-xxs flex flex-row gap-xs flex-wrap"
         >
           {game.tags.map((tag) => (
             <Chip color="primary">{tag}</Chip>
@@ -35,9 +47,7 @@ export function GameCard({ gameId, onClick, className, owned }: GameCardProps) {
       </Card.Main>
       {!owned && (
         <Card.Actions>
-          <Button color="accent" size="small">
-            <Icon name="cart" /> Buy
-          </Button>
+          <OpenQuickBuyButton color="accent" size="small" gameId={gameId} />
         </Card.Actions>
       )}
     </Card>

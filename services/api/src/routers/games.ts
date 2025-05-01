@@ -39,11 +39,15 @@ export const gamesRouter = new Hono<Env>()
             return [v];
           }, z.string().array())
           .optional(),
+        includingGame: z.string().optional(),
       }),
     ),
     async (ctx) => {
-      const { tags } = ctx.req.valid('query');
-      const products = await ctx.env.PUBLIC_STORE.getGameProducts({ tags });
+      const { tags, includingGame } = ctx.req.valid('query');
+      const products = await ctx.env.PUBLIC_STORE.getGameProducts({
+        tags,
+        includingGame,
+      });
 
       // mark purchases for logged in users
       let purchasedProductIds: PrefixedId<'gp'>[] = [];

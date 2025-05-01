@@ -287,7 +287,7 @@ export class PublicSdk extends BaseSdk {
     'gameProducts',
     this.apiRpc.games.products.$get,
     {
-      transformInput: (input: { tags?: string[] }) => ({
+      transformInput: (input: { tags?: string[]; includingGame?: string }) => ({
         query: input,
       }),
     },
