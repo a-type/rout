@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { sessions } from '../auth/session';
 import { Env } from '../config/ctx';
+import { ENTITLEMENT_NAMES } from '../management/subscription';
 import { sessionMiddleware, userStoreMiddleware } from '../middleware';
 
 export const usersRouter = new Hono<Env>()
@@ -18,7 +19,19 @@ export const usersRouter = new Hono<Env>()
     );
     try {
       const user = await userStore.getMe();
-      return ctx.json(wrapRpcData(user));
+      return ctx.json({
+        id: user.id,
+        displayName: user.displayName,
+        color: user.color,
+        imageUrl: user.imageUrl,
+        email: user.email,
+        isGoldMember:
+          !!user.subscriptionEntitlements?.[
+            ENTITLEMENT_NAMES.EXTRA_GAME_SESSIONS
+          ],
+        isCustomer: !!user.stripeCustomerId,
+        isProductAdmin: !!user.isProductAdmin,
+      });
     } catch (e) {
       const err = LongGameError.fromInstanceOrRpc(e);
       if (err.code === LongGameError.Code.NotFound) {
@@ -72,6 +85,10 @@ export const usersRouter = new Hono<Env>()
           push: z.boolean(),
         }),
         'friend-invite': z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+        'new-game': z.object({
           email: z.boolean(),
           push: z.boolean(),
         }),

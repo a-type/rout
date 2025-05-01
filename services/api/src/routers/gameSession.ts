@@ -184,7 +184,7 @@ export const gameSessionRouter = new Hono<Env>()
     async (ctx) => {
       const { gameId } = ctx.req.valid('json');
       const state = ctx.get('gameSessionState');
-      state.updateGame(gameId, getLatestVersion(games[gameId]).version);
+      await state.updateGame(gameId, getLatestVersion(games[gameId]).version);
       const summary = await state.getSummary();
       return ctx.json({ session: summary });
     },
@@ -205,4 +205,10 @@ export const gameSessionRouter = new Hono<Env>()
     );
     const link = new URL(`/gameInvite/${code}`, ctx.env.UI_ORIGIN);
     return ctx.json({ link: link.toString() });
+  })
+  .get('/availableGames', async (ctx) => {
+    const gameIds = await ctx
+      .get('userStore')
+      .getAvailableGamesForSession(ctx.get('gameSessionId'));
+    return ctx.json(wrapRpcData(gameIds));
   });

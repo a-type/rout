@@ -42,6 +42,12 @@ export function HomePage({}: HomePageProps) {
             invitationStatus="pending"
             statusFilter={['pending']}
           />
+          <Button asChild color="ghost" className="mx-auto color-gray-dark">
+            <Link to="/history">
+              <Icon name="calendar" />
+              History
+            </Link>
+          </Button>
         </Box>
         <PageNowPlaying unstyled className="items-center justify-center">
           <CreateGame />

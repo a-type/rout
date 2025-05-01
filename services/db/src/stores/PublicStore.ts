@@ -1,7 +1,13 @@
 import { PrefixedId } from '@long-game/common';
+import games from '@long-game/games';
+import { DB, createDb, dateTime, jsonArrayFrom } from '@long-game/kysely';
 import { WorkerEntrypoint } from 'cloudflare:workers';
-import { DB, createDb } from '../kysely/index.js';
 import { UserStore } from './UserStore.js';
+
+export interface GameProductsFilter {
+  tags?: string[];
+  includingGame?: string;
+}
 
 export class PublicStore extends WorkerEntrypoint<DbBindings> {
   #db: DB;
@@ -40,9 +46,75 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
     return result?.gameSessionId;
   }
 
-  async testRpc() {
-    return {
-      foo: 'bar',
-    };
+  async getGameProducts(
+    filter: GameProductsFilter,
+    includeUnpublished = false,
+  ) {
+    let query = this.#db
+      .selectFrom('GameProduct')
+      .select([
+        'GameProduct.id',
+        'GameProduct.name',
+        'GameProduct.priceCents',
+        'GameProduct.publishedAt',
+        'GameProduct.description',
+      ])
+      .select((sb) => [
+        jsonArrayFrom(
+          sb
+            .selectFrom('GameProductItem')
+            .select(['GameProductItem.id', 'GameProductItem.gameId'])
+            .whereRef('GameProductItem.gameProductId', '=', 'GameProduct.id'),
+        ).as('gameProductItems'),
+      ]);
+
+    if (filter?.includingGame) {
+      query = query
+        .innerJoin(
+          'GameProductItem',
+          'GameProductItem.gameProductId',
+          'GameProduct.id',
+        )
+        .where('GameProductItem.gameId', '=', filter.includingGame);
+    }
+    if (!includeUnpublished) {
+      query = query
+        .where('GameProduct.publishedAt', 'is not', 'null')
+        .where('GameProduct.publishedAt', '<=', dateTime(new Date()));
+    }
+
+    console.log(query.compile().sql);
+
+    const results = await query.execute();
+    const filteredProducts = filter
+      ? results.filter((product) => {
+          if (!filter.tags) {
+            return true;
+          }
+          const productTags = product.gameProductItems
+            .map((item) => item.gameId)
+            .map((gameId) => games[gameId]?.tags ?? [])
+            .flat();
+          return filter.tags.every((tag) => productTags.includes(tag));
+        })
+      : results;
+    return filteredProducts;
+  }
+
+  async getGameProduct(productId: PrefixedId<'gp'>) {
+    const product = await this.#db
+      .selectFrom('GameProduct')
+      .select((sb) => [
+        jsonArrayFrom(
+          sb
+            .selectFrom('GameProductItem')
+            .select(['GameProductItem.id', 'GameProductItem.gameId'])
+            .whereRef('GameProductItem.gameProductId', '=', 'GameProduct.id'),
+        ).as('gameProductItems'),
+      ])
+      .where('GameProduct.id', '=', productId)
+      .selectAll('GameProduct')
+      .executeTakeFirst();
+    return product;
   }
 }

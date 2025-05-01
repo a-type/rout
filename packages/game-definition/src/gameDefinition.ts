@@ -173,22 +173,12 @@ export type RoundIndexDecider<
   checkAgainAt?: Date;
 };
 
-export interface GameModule {
-  versions: GameDefinition[];
-  id: string;
-  title: string;
-}
-
 export function validateGameDefinition(game: GameDefinition) {
   if (!game.getState && !game.applyRoundToGlobalState) {
     throw new Error(
       `Game ${game.version} must define either getState or applyRoundToGlobalState`,
     );
   }
-}
-
-export function getLatestVersion(game: GameModule): GameDefinition {
-  return game.versions[game.versions.length - 1];
 }
 
 export function getGameState(

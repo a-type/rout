@@ -14,6 +14,8 @@ interface ApiBindings {
   AWS_SECRET_ACCESS_KEY: string;
   VAPID_PUBLIC_KEY: string;
   VAPID_PRIVATE_KEY: string;
+  STRIPE_SECRET_KEY: string;
+  STRIPE_WEBHOOK_SECRET: string;
   GAME_SESSION_STATE: DurableObjectNamespace<
     import('./index').GameSessionState
   >;

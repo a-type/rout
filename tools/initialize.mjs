@@ -1,6 +1,6 @@
 import { intro, isCancel, outro, tasks, text } from '@clack/prompts';
 import { spawn } from 'node:child_process';
-import { readdirSync, existsSync, lstatSync } from 'node:fs';
+import { existsSync, lstatSync, readdirSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import webPush from 'web-push';
@@ -29,6 +29,7 @@ for (const key of [
   'GOOGLE_AUTH_CLIENT_SECRET',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
+  'STRIPE_SECRET_KEY',
 ]) {
   const value = await text({
     message: `Enter the value for ${key}`,

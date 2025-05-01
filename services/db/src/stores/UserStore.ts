@@ -5,14 +5,14 @@ import {
   PlayerColorName,
   PrefixedId,
 } from '@long-game/common';
-import { RpcTarget } from 'cloudflare:workers';
 import {
   DB,
   jsonObjectFrom,
   NewPushSubscription,
   NotificationSettings,
   sql,
-} from '../kysely/index.js';
+} from '@long-game/kysely';
+import { RpcTarget } from 'cloudflare:workers';
 
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;
@@ -28,7 +28,7 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'displayName as name'])
+      .select(['id', 'displayName as name', 'isProductAdmin'])
       .executeTakeFirst();
 
     if (!user) return null;
@@ -55,7 +55,16 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'color', 'imageUrl', 'displayName', 'email'])
+      .select([
+        'User.id',
+        'User.color',
+        'User.imageUrl',
+        'User.displayName',
+        'User.email',
+        'User.subscriptionEntitlements',
+        'User.stripeCustomerId',
+        'User.isProductAdmin',
+      ])
       .executeTakeFirst();
 
     if (!user) {
@@ -131,6 +140,10 @@ export class UserStore extends RpcTarget {
             email: sendEmailUpdates ?? false,
           },
           'game-invite': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
+          'new-game': {
             push: false,
             email: sendEmailUpdates ?? false,
           },
@@ -859,5 +872,64 @@ export class UserStore extends RpcTarget {
             'Notification not found',
           ),
       );
+  }
+
+  /**
+   * Gets all game IDs owned by confirmed members of the game session.
+   * These represent the games that can be played in this session.
+   */
+  async getAvailableGamesForSession(gameSessionId: PrefixedId<'gs'>) {
+    const userGames = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameSessionInvitation',
+        'UserGamePurchase.userId',
+        'GameSessionInvitation.userId',
+      )
+      .innerJoin(
+        'GameProductItem',
+        'UserGamePurchase.gameProductId',
+        'GameProductItem.gameProductId',
+      )
+      .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
+      .where('GameSessionInvitation.status', '=', 'accepted')
+      .select('GameProductItem.gameId')
+      .execute();
+    return Array.from(new Set(userGames.map((game) => game.gameId)));
+  }
+
+  async getOwnedGames() {
+    const games = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .innerJoin(
+        'GameProductItem',
+        'GameProduct.id',
+        'GameProductItem.gameProductId',
+      )
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['GameProductItem.gameId'])
+      .execute();
+
+    return games.map((game) => game.gameId);
+  }
+
+  async getOwnedGameProducts() {
+    const products = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['GameProduct.id'])
+      .execute();
+
+    return products.map((product) => product.id);
   }
 }

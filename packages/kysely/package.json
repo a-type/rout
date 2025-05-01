@@ -1,0 +1,30 @@
+{
+  "name": "@long-game/kysely",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
+      "production": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@long-game/common": "workspace:*",
+    "@long-game/notifications": "workspace:*",
+    "kysely": "catalog:",
+    "@a-type/kysely": "catalog:",
+    "kysely-d1": "catalog:",
+    "kysely-plugin-serialize": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

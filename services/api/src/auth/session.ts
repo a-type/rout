@@ -7,6 +7,7 @@ declare module '@a-type/auth' {
   interface Session {
     userId: string;
     name: string | null;
+    isProductAdmin?: boolean;
   }
 }
 
@@ -38,6 +39,7 @@ export const sessions = new SessionManager<Context>({
         return {
           userId,
           name: user.name,
+          isProductAdmin: user.isProductAdmin,
         };
       },
       secret: ctx.env.SESSION_SECRET,
@@ -53,6 +55,7 @@ export const sessions = new SessionManager<Context>({
   shortNames: {
     userId: 'sub',
     name: 'name',
+    isProductAdmin: 'pad',
   },
   adapter: {
     getRawRequest(ctx) {
