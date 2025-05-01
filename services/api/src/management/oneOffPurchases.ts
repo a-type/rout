@@ -2,6 +2,8 @@ import { isPrefixedId, LongGameError } from '@long-game/common';
 import { Context } from 'hono';
 import Stripe from 'stripe';
 import { CtxVars } from '../config/ctx';
+import { isStripeGameProductCheckoutMetadata } from './stripeMetadata';
+import { getUserWithFallbacks } from './users';
 
 type EnvWithStripe = {
   Variables: CtxVars & { stripe: Stripe };
@@ -15,12 +17,20 @@ export async function handleCheckoutSessionCompleted(
   const session = event.data.object as Stripe.Checkout.Session;
 
   // get the user by customer id
+  const userIdFromMetadata = session.metadata?.userId;
   const customerId = session.customer as string;
-  const user = await ctx.env.ADMIN_STORE.getUserByCustomerId(customerId);
+  const email = session.customer_email;
+  const user = await getUserWithFallbacks(
+    ctx.env,
+    userIdFromMetadata,
+    customerId,
+    email,
+  );
+
   if (!user) {
     throw new LongGameError(
       LongGameError.Code.NotFound,
-      `No user found for customer ID ${customerId}`,
+      `No user found for customer ID ${customerId} or email ${email}`,
     );
   }
 
@@ -33,8 +43,10 @@ export async function handleCheckoutSessionCompleted(
   const gameProducts = lineItems.data
     .map((item) => item.price?.product as Stripe.Product | undefined)
     .filter((p) => !!p)
+    .map((p) => p.metadata)
+    .filter((metadata) => !!metadata)
     .filter((product) => {
-      return product.metadata.type === 'game';
+      return isStripeGameProductCheckoutMetadata(product);
     });
 
   if (gameProducts.length === 0) {
@@ -43,17 +55,17 @@ export async function handleCheckoutSessionCompleted(
   }
 
   for (const product of gameProducts) {
-    const gameProductId = product.metadata.gameProductId;
+    const gameProductId = product.gameProductId;
     if (!gameProductId) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
-        `Game product ${product.id} does not have a gameProductId`,
+        `Game product from checkout ${session.id} does not have a gameProductId`,
       );
     }
     if (!isPrefixedId(gameProductId, 'gp')) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
-        `Game product ${product.id} has an invalid gameProductId: ${gameProductId}`,
+        `Game product from checkout ${session.id} has an invalid gameProductId: ${gameProductId}`,
       );
     }
     await ctx.env.ADMIN_STORE.purchaseGameProduct(user.id, gameProductId);

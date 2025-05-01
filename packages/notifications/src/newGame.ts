@@ -1,4 +1,5 @@
 import { PrefixedId } from '@long-game/common';
+import games from '@long-game/games';
 import { NotificationConfig } from './types';
 
 export interface NewGameNotification {
@@ -10,12 +11,12 @@ export interface NewGameNotification {
 export const newGameNotification: NotificationConfig<NewGameNotification> = {
   type: 'new-game',
   text(data: NewGameNotification, context: 'push' | 'email') {
-    return `A new game is available for you to play!${
+    return `You can now play ${games[data.gameId]?.title ?? 'a new game'}!${
       context === 'push' ? ' Tap to view your library.' : ''
     }`;
   },
-  title() {
-    return `New game available!`;
+  title(data) {
+    return `You got a new game!`;
   },
   link(data: NewGameNotification) {
     return `/library/${data.gameId}`;

@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { sessions } from '../auth/session';
 import { Env } from '../config/ctx';
+import { ENTITLEMENT_NAMES } from '../management/subscription';
 import { sessionMiddleware, userStoreMiddleware } from '../middleware';
 
 export const usersRouter = new Hono<Env>()
@@ -24,7 +25,10 @@ export const usersRouter = new Hono<Env>()
         color: user.color,
         imageUrl: user.imageUrl,
         email: user.email,
-        isGoldMember: !!user.subscriptionEntitlements?.gold,
+        isGoldMember:
+          !!user.subscriptionEntitlements?.[
+            ENTITLEMENT_NAMES.EXTRA_GAME_SESSIONS
+          ],
         isCustomer: !!user.stripeCustomerId,
         isProductAdmin: !!user.isProductAdmin,
       });

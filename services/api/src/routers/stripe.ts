@@ -1,10 +1,9 @@
-import { zValidator } from '@hono/zod-validator';
 import { assertPrefixedId, LongGameError } from '@long-game/common';
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import { z } from 'zod';
 import { sessions } from '../auth/session.js';
 import { CtxVars, Env } from '../config/ctx.js';
+import { handleCustomerCreated } from '../management/customers.js';
 import { handleCheckoutSessionCompleted } from '../management/oneOffPurchases.js';
 import {
   handleEntitlementsUpdated,
@@ -13,7 +12,6 @@ import {
   handleSubscriptionUpdated,
   handleTrialEnd,
 } from '../management/subscription.js';
-import { loggedInMiddleware } from '../middleware/session.js';
 import { getStripe } from '../services/stripe.js';
 
 export const stripeRouter = new Hono<Env>()
@@ -65,6 +63,9 @@ export const stripeRouter = new Hono<Env>()
         case 'entitlements.active_entitlement_summary.updated':
           await handleEntitlementsUpdated(event, ctx);
           break;
+        case 'customer.created':
+          await handleCustomerCreated(event, ctx);
+          break;
       }
 
       return new Response('OK');
@@ -77,138 +78,6 @@ export const stripeRouter = new Hono<Env>()
       );
     }
   })
-  .get('/products', async (ctx) => {
-    const stripe = ctx.get('stripe');
-    const products = await stripe.products.list({
-      active: true,
-      expand: ['data.default_price'],
-    });
-    return ctx.json(products.data || []);
-  })
-  .post('/cancel-subscription', loggedInMiddleware, async (ctx) => {
-    const session = await sessions.getSession(ctx);
-    if (!session) {
-      throw new LongGameError(
-        LongGameError.Code.Unauthorized,
-        'Unauthorized',
-        'No session found',
-      );
-    }
-
-    assertPrefixedId(session.userId, 'u');
-
-    const user = await ctx.env.ADMIN_STORE.getUser(session.userId);
-    if (!user) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'Invalid user. Please contact support.',
-      );
-    }
-
-    const customerId = user.stripeCustomerId;
-    if (!customerId) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'No stripe customer ID found for this user. Are you subscribed to a paid product?',
-      );
-    }
-
-    const stripe = ctx.get('stripe');
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: 'active',
-    });
-
-    await stripe.subscriptions.cancel(subscriptions.data[0].id, {
-      // TODO: collect feedback.
-    });
-
-    return ctx.json({ success: true });
-  })
-  .post(
-    '/checkout-session',
-    loggedInMiddleware,
-    zValidator(
-      'form',
-      z.object({
-        priceKey: z.string(),
-        returnTo: z.string().optional(),
-      }),
-    ),
-    async (ctx) => {
-      const userId = ctx.get('session').userId;
-      if (!userId) {
-        throw new LongGameError(
-          LongGameError.Code.BadRequest,
-          'No user ID found in session',
-        );
-      }
-
-      const body = ctx.req.valid('form');
-      const priceKey = body.priceKey;
-
-      assertPrefixedId(userId, 'u');
-
-      const prices = await ctx.get('stripe').prices.list({
-        lookup_keys: [priceKey],
-        expand: ['data.product'],
-      });
-
-      const price = prices.data[0];
-
-      if (!price) {
-        throw new LongGameError(
-          LongGameError.Code.BadRequest,
-          'Could not purchase subscription. Please contact support.',
-        );
-      }
-
-      const userInfo = await ctx.env.ADMIN_STORE.getUser(userId);
-      if (!userInfo) {
-        throw new LongGameError(
-          LongGameError.Code.InternalServerError,
-          'Could not purchase membership. Please contact support.',
-        );
-      }
-
-      const returnTo = body.returnTo || `${ctx.env.UI_ORIGIN}/settings`;
-      const checkout = await ctx.get('stripe').checkout.sessions.create({
-        mode: 'subscription',
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: price.id,
-            quantity: 1,
-          },
-        ],
-        success_url: returnTo,
-        cancel_url: returnTo,
-        customer_email: userInfo.email,
-        allow_promotion_codes: true,
-        billing_address_collection: 'auto',
-        subscription_data: {
-          metadata: {
-            userId,
-          },
-          trial_period_days: 14,
-        },
-      });
-
-      if (!checkout.url) {
-        throw new LongGameError(
-          LongGameError.Code.InternalServerError,
-          'Could not create checkout session',
-        );
-      }
-
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: checkout.url,
-        },
-      });
-    },
-  )
   .post('/portal-session', async (ctx) => {
     const session = await sessions.getSession(ctx);
     if (!session) {

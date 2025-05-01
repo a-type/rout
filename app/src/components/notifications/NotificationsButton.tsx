@@ -163,7 +163,12 @@ function NotificationItem({
           </div>
         </Box>
       </Button>
-      <Button color="ghostDestructive" size="icon" className="flex-shrink-0">
+      <Button
+        color="ghostDestructive"
+        size="icon"
+        className="flex-shrink-0"
+        onClick={() => deleteSelf.mutate({ id: notification.id })}
+      >
         <Icon name="x" />
       </Button>
       {!notification.readAt && (

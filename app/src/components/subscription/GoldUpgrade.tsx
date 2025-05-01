@@ -14,12 +14,10 @@ export function GoldUpgrade({ className, ...props }: GoldUpgradeProps) {
 
   return (
     <form
-      action={`${API_ORIGIN}/stripe/checkout-session`}
+      action={`${API_ORIGIN}/subscription/purchase`}
       method="post"
       className={className}
     >
-      <input type="hidden" name="priceKey" value="gold" />
-      <input type="hidden" name="returnTo" value="/settings" />
       <Button type="submit" color="accent" {...props}>
         Upgrade to Gold
       </Button>

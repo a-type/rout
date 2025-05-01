@@ -10,6 +10,7 @@ import {
   sendSubscriptionCanceledEmail,
 } from '../services/email.js';
 import { stripeDateToDate } from '../services/stripe.js';
+import { getUserWithFallbacks } from './users.js';
 
 type EnvWithStripe = {
   Variables: CtxVars & { stripe: Stripe };
@@ -31,11 +32,15 @@ export async function handleTrialEnd(
     return;
   }
 
-  await sendFreeTrialEndingEmail(ctx, {
-    to: user.email,
-    userName: user.displayName,
-    trialEndDate: stripeDateToDate(event.data.object.trial_end)!,
-  });
+  try {
+    await sendFreeTrialEndingEmail(ctx, {
+      to: user.email,
+      userName: user.displayName,
+      trialEndDate: stripeDateToDate(event.data.object.trial_end)!,
+    });
+  } catch (error) {
+    console.error('Failed to send free trial ending email', error);
+  }
 }
 
 export async function handleSubscriptionDeleted(
@@ -91,11 +96,15 @@ export async function handleSubscriptionCreated(
   );
 
   if (subscription.trial_end && subscription.status === 'trialing') {
-    await sendFreeTrialBeginningEmail(ctx, {
-      to: user.email,
-      userName: user.displayName,
-      trialEndDate: stripeDateToDate(subscription.trial_end)!,
-    });
+    try {
+      await sendFreeTrialBeginningEmail(ctx, {
+        to: user.email,
+        userName: user.displayName,
+        trialEndDate: stripeDateToDate(subscription.trial_end)!,
+      });
+    } catch (error) {
+      console.error('Failed to send free trial beginning email', error);
+    }
   }
 
   email
@@ -152,11 +161,15 @@ async function onSubscriptionEnded({
 }) {
   const endsAt = stripeDateToDate(subscription.cancel_at);
   // notify plan admins their subscription was cancelled
-  await sendSubscriptionCanceledEmail(ctx, {
-    to: userId,
-    userName: 'Alef User',
-    endsAt: endsAt!,
-  });
+  try {
+    await sendSubscriptionCanceledEmail(ctx, {
+      to: userId,
+      userName: 'Alef User',
+      endsAt: endsAt!,
+    });
+  } catch (error) {
+    console.error('Failed to send subscription cancelled email', error);
+  }
   email
     .sendCustomEmail(
       {
@@ -178,13 +191,23 @@ export async function handleEntitlementsUpdated(
 ) {
   // Entitlements tell us what features the associated org has access to based on subscription status.
   const customerId = ev.data.object.customer;
-  const user = await ctx.env.ADMIN_STORE.getUserByCustomerId(customerId);
+  const user = await getUserWithFallbacks(
+    ctx.env,
+    undefined,
+    customerId,
+    undefined,
+  );
   if (!user) {
     console.error(`No User found for customer ID ${customerId}`);
     return;
   }
   // update the user's entitlements in our db
   const entitlementMap = getEntitlementsAsMap(ev);
+  console.log(
+    `Entitlements updated for user ${user.id}: ${JSON.stringify(
+      entitlementMap,
+    )}`,
+  );
   await ctx.env.ADMIN_STORE.updateUserEntitlements(user.id, entitlementMap);
 }
 

@@ -14,6 +14,7 @@ import { publicRouter } from './routers/public';
 import { pushRouter } from './routers/push';
 import { socketRouter } from './routers/socket';
 import { stripeRouter } from './routers/stripe';
+import { subscriptionRouter } from './routers/subscription';
 import { usersRouter } from './routers/users';
 
 const app = new Hono()
@@ -33,6 +34,7 @@ const app = new Hono()
   .route('/public', publicRouter)
   .route('/stripe', stripeRouter)
   .route('/games', gamesRouter)
+  .route('/subscription', subscriptionRouter)
   .route('/admin', adminRouter);
 
 export default app;

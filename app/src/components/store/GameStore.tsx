@@ -9,7 +9,9 @@ import {
   Marquee,
 } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
+import { useSearchParams } from '@verdant-web/react-router';
 import { GameIcon } from '../games/GameIcon';
+import { BuyGameProduct } from './BuyGameProduct';
 
 export interface GameStoreProps {
   className?: string;
@@ -28,6 +30,20 @@ export function GameStore({ className }: GameStoreProps) {
 }
 
 function GameProductCard({ product }: { product: GameProduct }) {
+  const [search, setSearch] = useSearchParams();
+  const isOpen = search.get('productId') === product.id;
+  const open = () => {
+    setSearch((v) => {
+      v.set('productId', product.id);
+      return v;
+    });
+  };
+  const close = () => {
+    setSearch((v) => {
+      v.delete('productId');
+      return v;
+    });
+  };
   return (
     <Card>
       <Card.Image>
@@ -37,7 +53,16 @@ function GameProductCard({ product }: { product: GameProduct }) {
           ))}
         </Marquee>
       </Card.Image>
-      <Dialog>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(o) => {
+          if (o) {
+            open();
+          } else {
+            close();
+          }
+        }}
+      >
         <Dialog.Trigger asChild>
           <Card.Main className="aspect-1">
             <Card.Title>{product.name}</Card.Title>
@@ -62,13 +87,17 @@ function GameProductCard({ product }: { product: GameProduct }) {
           <Dialog.Description>{product.description}</Dialog.Description>
           <Dialog.Actions>
             <Dialog.Close className="mr-auto" />
-            <Button color="accent" disabled={product.isOwned}>
+            <BuyGameProduct
+              color="accent"
+              productId={product.id}
+              disabled={product.isOwned}
+            >
               {product.isOwned
                 ? 'Owned'
                 : product.priceCents === 0
                 ? 'Get'
                 : 'Buy'}
-            </Button>
+            </BuyGameProduct>
           </Dialog.Actions>
         </Dialog.Content>
       </Dialog>
