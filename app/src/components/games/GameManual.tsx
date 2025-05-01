@@ -1,15 +1,31 @@
-import { Box, clsx, H1, H2, H3, H4, P, withClassName } from '@a-type/ui';
+import {
+  Box,
+  clsx,
+  H1,
+  H2,
+  H3,
+  H4,
+  P,
+  Spinner,
+  withClassName,
+} from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { fetch } from '@long-game/game-client';
+import { withSuspense } from '@long-game/game-ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@verdant-web/react-router';
-import Markdown, { Components } from 'react-markdown';
+import { lazy } from 'react';
+import type { Components } from 'react-markdown';
+
+const LazyMarkdown = lazy(() => import('react-markdown'));
 
 export interface GameManualProps {
   gameId: string;
 }
 
-export function GameManual({ gameId }: GameManualProps) {
+export const GameManual = withSuspense(function GameManual({
+  gameId,
+}: GameManualProps) {
   const { data: markdown } = useSuspenseQuery({
     queryKey: ['gameManual', gameId],
     queryFn: async () => {
@@ -23,7 +39,7 @@ export function GameManual({ gameId }: GameManualProps) {
 
   return (
     <Box d="col" gap="lg">
-      <Markdown
+      <LazyMarkdown
         urlTransform={(url) => {
           const asUrl = new URL(url, window.location.href);
           asUrl.pathname = `/game-data/${gameId}${asUrl.pathname}`;
@@ -32,10 +48,11 @@ export function GameManual({ gameId }: GameManualProps) {
         components={markdownComponents}
       >
         {markdown}
-      </Markdown>
+      </LazyMarkdown>
     </Box>
   );
-}
+},
+<Spinner />);
 
 const markdownComponents: Components = {
   a: ({ node, ...props }) => {

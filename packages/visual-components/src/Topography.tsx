@@ -1,12 +1,8 @@
 import {
-  Button,
-  ButtonProps,
-  clsx,
   ErrorBoundary,
   getResolvedColorMode,
   subscribeToColorModeChange,
   useSize,
-  withClassName,
 } from '@a-type/ui';
 import { PlayerColorPalette } from '@long-game/common/colors';
 import { shaderMaterial } from '@react-three/drei';
@@ -139,7 +135,7 @@ extend({ TopographyMaterial });
 const DEFAULT_COLORS = {
   light: {
     background: 0xfffaff,
-    gradient: [0xffbfff, 0xefefff],
+    gradient: [0xffdfff, 0xfdfdff],
   },
   dark: {
     background: 0x29196e,
@@ -159,8 +155,8 @@ function paletteColors(palette: PlayerColorPalette, mode: 'light' | 'dark') {
   return {
     background: mode === 'light' ? colors[0] : colors[11],
     gradient: [
-      colors[Math.floor(colors.length * 0.2)],
-      colors[Math.floor(colors.length * 0.8)],
+      colors[Math.floor(colors.length * 0.1)],
+      colors[Math.floor(colors.length * 0.4)],
     ],
   };
 }
@@ -233,6 +229,8 @@ export function Topography({
   );
 }
 
+export default Topography;
+
 function TopographyMesh({
   background: uBGColor,
   gradient: [uStartColor, uEndColor],
@@ -280,29 +278,3 @@ function TopographyMesh({
     </mesh>
   );
 }
-
-export const TopographyBackground = withClassName(
-  Topography,
-  'absolute inset-0 z-0',
-);
-
-export const TopographyButton = ({
-  children,
-  className,
-  ...props
-}: ButtonProps) => {
-  return (
-    <Button
-      {...props}
-      color="primary"
-      className={clsx('relative z-10 overflow-hidden', className)}
-    >
-      {!props.disabled && (
-        <TopographyBackground className="[:hover>&]:[filter:brightness(1.25)]" />
-      )}
-      <div className="relative z-1 flex flex-row gap-2 items-center">
-        {children}
-      </div>
-    </Button>
-  );
-};

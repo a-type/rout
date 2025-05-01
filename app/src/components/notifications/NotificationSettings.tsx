@@ -5,6 +5,7 @@ import {
   useSubscribeToPush,
 } from '@/services/push';
 import { Box, Button, H3, Switch } from '@a-type/ui';
+import { Notification } from '@long-game/game-client';
 import { sentenceCase } from 'change-case';
 
 export interface NotificationSettingsProps {}
@@ -13,7 +14,7 @@ export function NotificationSettings({}: NotificationSettingsProps) {
   const { data: notificationSettings } = sdkHooks.useGetNotificationSettings();
   const updateNotificationSettings = sdkHooks.useUpdateNotificationSettings();
 
-  const updateOneSettingFactory = (key: string) => {
+  const updateOneSettingFactory = (key: Notification['data']['type']) => {
     return async (transport: 'email' | 'push', value: boolean) => {
       await updateNotificationSettings.mutateAsync({
         ...notificationSettings,
@@ -51,7 +52,7 @@ export function NotificationSettings({}: NotificationSettingsProps) {
         {Object.entries(notificationSettings)
           .sort((a, b) => a[0].localeCompare(b[0]))
           .map(([key, value]) => {
-            const updateOneSetting = updateOneSettingFactory(key);
+            const updateOneSetting = updateOneSettingFactory(key as any);
             return (
               <NotificationSettingsRow
                 key={key}
