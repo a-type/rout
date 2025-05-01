@@ -43,22 +43,25 @@ export const gamesRouter = new Hono<Env>()
       }),
     ),
     async (ctx) => {
+      const session = ctx.get('session');
+      console.log('session', session);
       const { tags, includingGame } = ctx.req.valid('query');
-      const products = await ctx.env.PUBLIC_STORE.getGameProducts({
-        tags,
-        includingGame,
-      });
+      const products = await ctx.env.PUBLIC_STORE.getGameProducts(
+        {
+          tags,
+          includingGame,
+        },
+        session?.isProductAdmin,
+      );
 
       // mark purchases for logged in users
       let purchasedProductIds: PrefixedId<'gp'>[] = [];
-      const session = ctx.get('session');
       if (session) {
         const userStore = await ctx.env.PUBLIC_STORE.getStoreForUser(
           session.userId,
         );
         purchasedProductIds = await userStore.getOwnedGameProducts();
       }
-      console.log(purchasedProductIds);
       return ctx.json(
         products.map((p) => ({
           ...p,

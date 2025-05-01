@@ -1,14 +1,16 @@
 import { AuthAccount, AuthUser, AuthVerificationCode } from '@a-type/auth';
-import { comparePassword, hashPassword } from '@a-type/kysely';
 import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
-import { AnyNotification } from '@long-game/notifications';
-import { WorkerEntrypoint } from 'cloudflare:workers';
 import {
   DB,
   GameProductUpdate,
+  NewGameProduct,
   NotificationSettings,
+  comparePassword,
   createDb,
-} from '../kysely/index.js';
+  hashPassword,
+} from '@long-game/kysely';
+import { AnyNotification } from '@long-game/notifications';
+import { WorkerEntrypoint } from 'cloudflare:workers';
 
 export class AdminStore extends WorkerEntrypoint<DbBindings> {
   #db: DB;
@@ -127,6 +129,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
     const freeGameProducts = await this.#db
       .selectFrom('GameProduct')
       .where('priceCents', '=', 0)
+      .where('publishedAt', 'is not', null)
       .select('GameProduct.id')
       .execute();
     for (const product of freeGameProducts) {
@@ -313,7 +316,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .execute();
   }
 
-  async createGameProduct() {
+  async createGameProduct(init?: Partial<NewGameProduct>) {
     const gameProduct = await this.#db
       .insertInto('GameProduct')
       .values({
@@ -322,6 +325,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
         priceCents: 0,
         description: '',
         publishedAt: null,
+        ...init,
       })
       .returning('id')
       .executeTakeFirstOrThrow();
@@ -395,6 +399,23 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .executeTakeFirst();
 
     return !!count;
+  }
+
+  /**
+   * Selects game products which only have 1 game
+   */
+  async getSingleGameProducts() {
+    return this.#db
+      .selectFrom('GameProduct')
+      .innerJoin(
+        'GameProductItem',
+        'GameProduct.id',
+        'GameProductItem.gameProductId',
+      )
+      .select(['GameProduct.id', 'GameProductItem.gameId'])
+      .groupBy('GameProduct.id')
+      .having((eb) => eb.fn.count('GameProductItem.id'), '=', 1)
+      .execute();
   }
 }
 

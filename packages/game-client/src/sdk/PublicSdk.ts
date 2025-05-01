@@ -314,15 +314,17 @@ export class PublicSdk extends BaseSdk {
     {
       transformInput: (input: {
         id: PrefixedId<'gp'>;
-        name: string;
-        priceCents: number;
+        name?: string;
+        priceCents?: number;
         description?: string | null;
+        publishedAt?: string | null;
       }) => ({
         param: { productId: input.id },
         json: {
           name: input.name,
           priceCents: input.priceCents,
           description: input.description ?? undefined,
+          publishedAt: input.publishedAt ?? undefined,
         },
       }),
       invalidate: [['gameProducts']],

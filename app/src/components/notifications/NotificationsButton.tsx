@@ -163,6 +163,17 @@ function NotificationItem({
           </div>
         </Box>
       </Button>
+      {!notification.readAt && (
+        <Button
+          color="ghost"
+          size="icon"
+          onClick={() => {
+            markRead.mutate({ id: notification.id, read: true });
+          }}
+        >
+          <Icon name="check" />
+        </Button>
+      )}
       <Button
         color="ghostDestructive"
         size="icon"

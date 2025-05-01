@@ -5,14 +5,14 @@ import {
   PlayerColorName,
   PrefixedId,
 } from '@long-game/common';
-import { RpcTarget } from 'cloudflare:workers';
 import {
   DB,
   jsonObjectFrom,
   NewPushSubscription,
   NotificationSettings,
   sql,
-} from '../kysely/index.js';
+} from '@long-game/kysely';
+import { RpcTarget } from 'cloudflare:workers';
 
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;

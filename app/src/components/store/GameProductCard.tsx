@@ -55,9 +55,20 @@ export function GameProductCard({
                 product.isOwned && 'bg-accent-wash color-accent-ink',
               )}
             >
-              {product.isOwned ? 'Owned' : `$${product.priceCents / 100}`}
+              {product.isOwned
+                ? 'Owned'
+                : product.priceCents === 0
+                ? 'Free'
+                : `$${product.priceCents / 100}`}
             </Card.Content>
             <Card.Content>{product.gameProductItems.length} games</Card.Content>
+            {!product.publishedAt && (
+              <Card.Content className="text-xs flex-row">
+                <Icon name="eyeClosed" />
+                Admins only
+              </Card.Content>
+            )}
+
             <Button asChild className="absolute bottom-sm right-sm">
               <div>
                 Details <Icon name="new_window" />

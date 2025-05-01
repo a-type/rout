@@ -47,6 +47,13 @@ function AdminEditProductContent({
   const addItem = sdkHooks.useAdminAddGameProductItem();
   const removeItem = sdkHooks.useAdminRemoveGameProductItem();
 
+  const publish = () => {
+    updateProduct.mutate({
+      id: productId!,
+      publishedAt: new Date().toISOString(),
+    });
+  };
+
   if (!initialProduct) {
     return null;
   }
@@ -134,6 +141,11 @@ function AdminEditProductContent({
             >
               Delete Product
             </Button>
+            {!initialProduct.publishedAt && (
+              <Button color="accent" onClick={publish}>
+                Publish
+              </Button>
+            )}
             <SubmitButton color="primary">Save</SubmitButton>
           </Dialog.Actions>
         </FormikForm>

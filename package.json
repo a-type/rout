@@ -5,7 +5,7 @@
   "main": "index.js",
   "packageManager": "pnpm@9.7.1",
   "scripts": {
-    "dev": "turbo run dev --concurrency 15",
+    "dev": "turbo run dev --concurrency 30",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",

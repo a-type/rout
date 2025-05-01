@@ -70,7 +70,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
         disabled={insufficientPlayers}
         className="items-center justify-center"
       >
-        {insufficientPlayers ? 'Need more players' : 'Start Game'}
+        {insufficientPlayers ? 'Need more players' : `Play ${game.title}`}
       </TopographyButton>
     </Box>
   );

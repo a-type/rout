@@ -1,7 +1,7 @@
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
+import { DB, createDb, dateTime, jsonArrayFrom } from '@long-game/kysely';
 import { WorkerEntrypoint } from 'cloudflare:workers';
-import { DB, createDb, jsonArrayFrom } from '../kysely/index.js';
 import { UserStore } from './UserStore.js';
 
 export interface GameProductsFilter {
@@ -46,7 +46,10 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
     return result?.gameSessionId;
   }
 
-  async getGameProducts(filter: GameProductsFilter) {
+  async getGameProducts(
+    filter: GameProductsFilter,
+    includeUnpublished = false,
+  ) {
     let query = this.#db
       .selectFrom('GameProduct')
       .select([
@@ -74,6 +77,13 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
         )
         .where('GameProductItem.gameId', '=', filter.includingGame);
     }
+    if (!includeUnpublished) {
+      query = query
+        .where('GameProduct.publishedAt', 'is not', 'null')
+        .where('GameProduct.publishedAt', '<=', dateTime(new Date()));
+    }
+
+    console.log(query.compile().sql);
 
     const results = await query.execute();
     const filteredProducts = filter

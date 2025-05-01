@@ -15,18 +15,21 @@ export const adminGameProductsRouter = new Hono<Env>()
     zValidator(
       'json',
       z.object({
-        name: z.string(),
-        priceCents: z.number().int().gte(0),
+        name: z.string().optional(),
+        priceCents: z.number().int().gte(0).optional(),
         description: z.string().optional(),
+        publishedAt: z.string().optional(),
       }),
     ),
     async (ctx) => {
       const { productId } = ctx.req.valid('param');
-      const { name, priceCents, description } = ctx.req.valid('json');
+      const { name, priceCents, description, publishedAt } =
+        ctx.req.valid('json');
       const product = await ctx.env.ADMIN_STORE.updateGameProduct(productId, {
         name,
         priceCents,
         description,
+        publishedAt: publishedAt ? new Date(publishedAt) : undefined,
       });
       return ctx.json(wrapRpcData(product));
     },
