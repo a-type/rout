@@ -35,7 +35,7 @@ export function HomePage({}: HomePageProps) {
           <H2 className="font-300 text-md uppercase my-0 mx-4">Games</H2>
           <MembershipsList
             invitationStatus="accepted"
-            statusFilter={['active']}
+            statusFilter={['active', 'pending']}
           />
           <H2 className="font-300 text-md uppercase my-0 mx-4">Invitations</H2>
           <MembershipsList
