@@ -12,6 +12,7 @@ import {
   NotificationSettings,
   sql,
 } from '@long-game/kysely';
+import { notificationTypes } from '@long-game/notifications';
 import { RpcTarget } from 'cloudflare:workers';
 
 export class UserStore extends RpcTarget {
@@ -564,6 +565,40 @@ export class UserStore extends RpcTarget {
     return invitation;
   }
 
+  /**
+   * Used to 'forget' a game session -- the session state is in Durable Objects,
+   * which must be cleared separately, but deleting invitations makes the
+   * session effectively inaccessible from the API.
+   */
+  async deleteAllGameSessionInvitations(gameSessionId: PrefixedId<'gs'>) {
+    // make sure user is the founding member
+    const ownMembership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!ownMembership) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only game session members can delete invitations',
+      );
+    }
+    if (ownMembership.inviterId !== ownMembership.userId) {
+      // this user is not the founding member - founding member is self-invited
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only the creator of the game session can delete it',
+      );
+    }
+
+    await this.#db
+      .deleteFrom('GameSessionInvitation')
+      .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
+      .execute();
+  }
+
   async createGameSessionInvitationLink(gameSessionId: PrefixedId<'gs'>) {
     const ownMembership = await this.#db
       .selectFrom('GameSessionInvitation')
@@ -777,21 +812,30 @@ export class UserStore extends RpcTarget {
       .execute();
   }
 
-  async getNotificationSettings() {
+  async getNotificationSettings(): Promise<NotificationSettings> {
     const user = await this.#db
       .selectFrom('User')
       .where('User.id', '=', this.#userId)
       .select(['User.notificationSettings'])
       .executeTakeFirstOrThrow();
 
-    return user.notificationSettings as NotificationSettings;
+    const defaults = notificationTypes.reduce((acc, key) => {
+      acc[key] = { email: false, push: false };
+      return acc;
+    }, {} as NotificationSettings);
+
+    return {
+      ...defaults,
+      ...user.notificationSettings,
+    } as NotificationSettings;
   }
 
-  async updateNotificationSettings(settings: NotificationSettings) {
+  async updateNotificationSettings(settings: Partial<NotificationSettings>) {
+    const current = await this.getNotificationSettings();
     const user = await this.#db
       .updateTable('User')
       .set({
-        notificationSettings: settings,
+        notificationSettings: { ...current, ...settings },
       })
       .where('User.id', '=', this.#userId)
       .returning('User.notificationSettings')

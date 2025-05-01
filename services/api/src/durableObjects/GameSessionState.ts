@@ -40,6 +40,7 @@ export type GameSessionBaseData = {
   timezone: string;
   members: GameSessionMember[];
   gameVersion: string;
+  deleted: boolean;
 };
 
 export type GameSessionTurn = Turn<{}>;
@@ -269,9 +270,26 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     this.#sessionData = {
       startedAt: null,
       endedAt: null,
+      deleted: false,
       ...data,
     };
     this.ctx.storage.put('sessionData', this.#sessionData);
+  }
+
+  delete() {
+    const status = this.getStatus().status;
+    if (status !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot delete a game session that is not pending',
+      );
+    }
+
+    if (this.#sessionData) {
+      this.#sessionData.deleted = true;
+    }
+    this.ctx.storage.deleteAll();
+    this.ctx.storage.deleteAlarm();
   }
 
   updateMembers(members: GameSessionMember[]) {
@@ -714,6 +732,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   }
 
   async alarm() {
+    if (this.#sessionData?.deleted) {
+      // don't bother
+      return;
+    }
     this.#sendOrScheduleNotifications();
   }
 

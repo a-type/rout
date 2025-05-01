@@ -211,4 +211,19 @@ export const gameSessionRouter = new Hono<Env>()
       .get('userStore')
       .getAvailableGamesForSession(ctx.get('gameSessionId'));
     return ctx.json(wrapRpcData(gameIds));
+  })
+  .delete('/', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    // only pending games can be deleted
+    if ((await state.getStatus().status) !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only pending games can be deleted.',
+      );
+    }
+    await state.delete();
+    // delete the invitations
+    const userStore = ctx.get('userStore');
+    await userStore.deleteAllGameSessionInvitations(ctx.get('gameSessionId'));
+    return ctx.json({ success: true });
   });
