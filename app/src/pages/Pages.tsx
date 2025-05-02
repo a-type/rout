@@ -1,3 +1,4 @@
+import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import {
   checkForUpdate,
   updateApp,
@@ -48,8 +49,36 @@ const routes = makeRoutes([
     component: lazy(() => import('./GameInviteLinkPage.jsx')),
   },
   {
+    path: '/library',
+    component: Outlet,
+    children: [
+      {
+        index: true,
+        component: lazy(() => import('./LibraryPage.js')),
+      },
+      {
+        path: ':gameId',
+        component: lazy(() => import('./GameDetailsPage.jsx')),
+      },
+    ],
+  },
+  {
     path: '/settings',
     component: lazy(() => import('./SettingsPage.jsx')),
+  },
+  {
+    path: '/admin',
+    component: lazy(() => import('./admin/AdminPage.jsx')),
+    children: [
+      {
+        index: true,
+        component: () => <div>Admin Home</div>,
+      },
+      {
+        path: 'products',
+        component: lazy(() => import('./admin/AdminGameProductsPage.jsx')),
+      },
+    ],
   },
   {
     path: '*',
@@ -92,6 +121,7 @@ export const Pages = () => {
     >
       <Router routes={routes} onNavigate={handleNavigate}>
         <Outlet />
+        <QuickBuyPopup />
       </Router>
     </ErrorBoundary>
   );

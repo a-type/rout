@@ -3,14 +3,18 @@ import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
 import { handleError } from './middleware';
 import { configuredCors } from './middleware/cors';
+import { adminRouter } from './routers/admin/adminRouter';
 import { authRouter } from './routers/auth';
 import { friendshipsRouter } from './routers/friendships';
+import { gamesRouter } from './routers/games';
 import { gameSessionInvitationsRouter } from './routers/gameSessionInvitations';
 import { gameSessionsRouter } from './routers/gameSessions';
 import { notificationsRouter } from './routers/notifications';
 import { publicRouter } from './routers/public';
 import { pushRouter } from './routers/push';
 import { socketRouter } from './routers/socket';
+import { stripeRouter } from './routers/stripe';
+import { subscriptionRouter } from './routers/subscription';
 import { usersRouter } from './routers/users';
 
 const app = new Hono()
@@ -27,7 +31,11 @@ const app = new Hono()
   .route('/friendships', friendshipsRouter)
   .route('/push', pushRouter)
   .route('/notifications', notificationsRouter)
-  .route('/public', publicRouter);
+  .route('/public', publicRouter)
+  .route('/stripe', stripeRouter)
+  .route('/games', gamesRouter)
+  .route('/subscription', subscriptionRouter)
+  .route('/admin', adminRouter);
 
 export default app;
 

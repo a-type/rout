@@ -1,0 +1,27 @@
+{
+  "name": "@long-game/job-bootstrap-products",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/worker/index.js",
+      "types": "./dist/typings/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "wrangler dev -c wrangler.toml --port 3113 --ip 127.0.0.1 --test-scheduled"
+  },
+  "dependencies": {
+    "@a-type/utils": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "@long-game/service-db": "workspace:*",
+    "hono": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "vitest": "catalog:"
+  }
+}

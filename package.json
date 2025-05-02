@@ -5,12 +5,13 @@
   "main": "index.js",
   "packageManager": "pnpm@9.7.1",
   "scripts": {
-    "dev": "turbo run dev --concurrency 15",
+    "dev": "turbo run dev --concurrency 30",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
     "gen": "node ./tools/generator/generate.mjs",
-    "wrangler": "wrangler"
+    "wrangler": "wrangler",
+    "become-admin": "node ./tools/becomeAdmin.mjs"
   },
   "keywords": [],
   "author": "",

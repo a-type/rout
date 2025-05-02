@@ -71,3 +71,90 @@ export function sendFriendshipInviteEmail(
     ctx,
   );
 }
+
+export function sendFreeTrialBeginningEmail(
+  ctx: Context,
+  data: {
+    to: string;
+    userName: string;
+    trialEndDate: Date;
+  },
+) {
+  return email.sendCustomEmail(
+    {
+      to: data.to,
+      subject: `Your free trial has started!`,
+      text: `Hi ${data.userName},\n\nYour free trial of ${APP_NAME} has started! You can manage your subscription at ${ctx.env.UI_ORIGIN}/settings.\n\nThanks,\nThe ${APP_NAME} Team`,
+      html: `<div>
+        <h1>Your free trial has started!</h1>
+        <p>Hi ${data.userName},</p>
+        <p>Your free trial of ${APP_NAME} has started! You can manage your subscription at <a href="${ctx.env.UI_ORIGIN}/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
+        <p>Thanks,</p>
+        <p>The ${APP_NAME} Team</p>
+      </div>`,
+    },
+    ctx,
+  );
+}
+
+export function sendFreeTrialEndingEmail(
+  ctx: Context,
+  data: {
+    to: string;
+    userName: string;
+    trialEndDate: Date;
+  },
+) {
+  return email.sendCustomEmail(
+    {
+      to: data.to,
+      subject: `Your free trial is ending soon!`,
+      text: `Hi ${
+        data.userName
+      },\n\nYour free trial of ${APP_NAME} is ending on ${data.trialEndDate.toDateString()}. You can manage your subscription at ${
+        ctx.env.UI_ORIGIN
+      }/settings.\n\nThanks,\nThe ${APP_NAME} Team`,
+      html: `<div>
+        <h1>Your free trial is ending soon!</h1>
+        <p>Hi ${data.userName},</p>
+        <p>Your free trial of ${APP_NAME} is ending on ${data.trialEndDate.toDateString()}. You can manage your subscription at <a href="${
+        ctx.env.UI_ORIGIN
+      }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
+        <p>Thanks,</p>
+        <p>The ${APP_NAME} Team</p>
+      </div>`,
+    },
+    ctx,
+  );
+}
+
+export function sendSubscriptionCanceledEmail(
+  ctx: Context,
+  data: {
+    to: string;
+    userName: string;
+    endsAt: Date;
+  },
+) {
+  return email.sendCustomEmail(
+    {
+      to: data.to,
+      subject: `Your subscription has been canceled`,
+      text: `Hi ${
+        data.userName
+      },\n\nYour subscription has been canceled. It will remain active until ${data.endsAt.toDateString()}. You can manage your subscription at ${
+        ctx.env.UI_ORIGIN
+      }/settings.\n\nThanks,\nThe ${APP_NAME} Team`,
+      html: `<div>
+        <h1>Your subscription has been canceled</h1>
+        <p>Hi ${data.userName},</p>
+        <p>Your subscription has been canceled. It will remain active until ${data.endsAt.toDateString()}. You can manage your subscription at <a href="${
+        ctx.env.UI_ORIGIN
+      }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
+        <p>Thanks,</p>
+        <p>The ${APP_NAME} Team</p>
+      </div>`,
+    },
+    ctx,
+  );
+}

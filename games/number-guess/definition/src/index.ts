@@ -5,6 +5,12 @@ export default {
   id: 'number-guess',
   title: 'Number Guess',
   versions: [v1],
+  creators: [
+    {
+      name: 'Grant Forrest',
+    },
+  ],
+  tags: ['solo', 'casual', 'testing'],
 } satisfies GameModule;
 
 export { v1 };

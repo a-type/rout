@@ -33,10 +33,7 @@
     "@long-game/games": "workspace:*",
     "hono": "catalog:",
     "zod": "catalog:",
-    "kysely": "0.27.6",
-    "@a-type/kysely": "1.1.1",
-    "kysely-d1": "0.3.0",
-    "kysely-plugin-serialize": "0.8.2",
+    "@long-game/kysely": "workspace:*",
     "@long-game/notifications": "workspace:*"
   },
   "devDependencies": {

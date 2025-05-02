@@ -3,11 +3,21 @@
   src: url('/fonts/Knewave-Regular.ttf');
 }
 
+@font-face {
+  font-family: 'Archivo Narrow';
+  src: url('/fonts/ArchivoNarrow-VariableFont_wght.ttf');
+}
+
 #root {
   min-height: 0;
 }
 
 .font-fancy {
   font-family: 'Knewave', system-ui;
+  font-weight: 400;
+}
+
+.font-heading {
+  font-family: 'Archivo Narrow', system-ui;
   font-weight: 400;
 }

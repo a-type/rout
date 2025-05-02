@@ -14,4 +14,4 @@ export default class extends WorkerEntrypoint<DbBindings> {
   }
 }
 
-export * from './kysely/tables.js';
+export * from '@long-game/kysely';

@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "pnpm build:app && pnpm build:copy-game-files",
+    "build:app": "vite build",
+    "build:copy-game-files": "node scripts/copyGameFiles.mjs"
   },
   "dependencies": {
     "@a-type/auth-ui": "catalog:",
@@ -15,13 +17,13 @@
     "@long-game/game-ui": "workspace:*",
     "@long-game/games": "workspace:*",
     "@long-game/notifications": "workspace:*",
-    "@tanstack/react-query": "5.62.15",
     "@verdant-web/react-router": "catalog:",
+    "change-case": "^5.4.4",
     "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "valtio": "catalog:",
-    "change-case": "^5.4.4"
+    "react-markdown": "^10.1.0",
+    "valtio": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

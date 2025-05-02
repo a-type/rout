@@ -1,5 +1,5 @@
 import { Kysely } from 'kysely';
-import { Database } from './tables.js'; // this is the Database interface we defined earlier
+import { Database } from './tables.js';
 export { sql } from 'kysely';
 export { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/sqlite';
 
@@ -37,5 +37,6 @@ export {
   comparePassword,
   dateTime,
   hashPassword,
+  sqliteNow,
 } from '@a-type/kysely';
 export type * from './tables.js';

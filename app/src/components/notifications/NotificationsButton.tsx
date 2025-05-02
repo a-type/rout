@@ -15,7 +15,7 @@ import { Notification } from '@long-game/game-client';
 import { useMediaQuery } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
-import { ReactNode, useState } from 'react';
+import { ReactNode, Suspense, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings';
 import { useAutoReadNotifications } from './useAutoReadNotifications';
 
@@ -72,7 +72,9 @@ export function NotificationsButton({
           </Button>
         </Box>
         {showSettings ? (
-          <NotificationSettings />
+          <Suspense>
+            <NotificationSettings />
+          </Suspense>
         ) : (
           <>
             {notifications?.length ? (
@@ -163,7 +165,23 @@ function NotificationItem({
           </div>
         </Box>
       </Button>
-      <Button color="ghostDestructive" size="icon" className="flex-shrink-0">
+      {!notification.readAt && (
+        <Button
+          color="ghost"
+          size="icon"
+          onClick={() => {
+            markRead.mutate({ id: notification.id, read: true });
+          }}
+        >
+          <Icon name="check" />
+        </Button>
+      )}
+      <Button
+        color="ghostDestructive"
+        size="icon"
+        className="flex-shrink-0"
+        onClick={() => deleteSelf.mutate({ id: notification.id })}
+      >
         <Icon name="x" />
       </Button>
       {!notification.readAt && (

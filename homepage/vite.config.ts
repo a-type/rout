@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react-swc';
+import { resolve } from 'path';
 import UnoCSS from 'unocss/vite';
 import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
@@ -30,5 +31,12 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        privacy: resolve(import.meta.dirname, 'privacy.html'),
+        tos: resolve(import.meta.dirname, 'tos.html'),
+      },
+    },
   },
 }));

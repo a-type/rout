@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import { NotificationsButton } from '../notifications/NotificationsButton';
 import { GameLayout } from './GameLayout';
 import { GameLog } from './GameLog';
+import { GameManualDialog } from './GameManualDialog';
 import { NavigationControls } from './NavigationControls';
 
 export interface GameControlsProps {
@@ -24,6 +25,7 @@ export function GameControls({ pregame }: GameControlsProps) {
         <Box gap="xs" items="center">
           <NavigationControls />
           <NotificationsButton />
+          <GameManualDialog />
           <Suspense>
             <GameDebugger size="icon-small" color="ghostAccent" />
           </Suspense>

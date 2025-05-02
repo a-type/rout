@@ -5,14 +5,15 @@ import {
   PlayerColorName,
   PrefixedId,
 } from '@long-game/common';
-import { RpcTarget } from 'cloudflare:workers';
 import {
   DB,
   jsonObjectFrom,
   NewPushSubscription,
   NotificationSettings,
   sql,
-} from '../kysely/index.js';
+} from '@long-game/kysely';
+import { notificationTypes } from '@long-game/notifications';
+import { RpcTarget } from 'cloudflare:workers';
 
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;
@@ -28,7 +29,7 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'displayName as name'])
+      .select(['id', 'displayName as name', 'isProductAdmin'])
       .executeTakeFirst();
 
     if (!user) return null;
@@ -55,7 +56,16 @@ export class UserStore extends RpcTarget {
     const user = await this.#db
       .selectFrom('User')
       .where('id', '=', this.#userId)
-      .select(['id', 'color', 'imageUrl', 'displayName', 'email'])
+      .select([
+        'User.id',
+        'User.color',
+        'User.imageUrl',
+        'User.displayName',
+        'User.email',
+        'User.subscriptionEntitlements',
+        'User.stripeCustomerId',
+        'User.isProductAdmin',
+      ])
       .executeTakeFirst();
 
     if (!user) {
@@ -131,6 +141,10 @@ export class UserStore extends RpcTarget {
             email: sendEmailUpdates ?? false,
           },
           'game-invite': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
+          'new-game': {
             push: false,
             email: sendEmailUpdates ?? false,
           },
@@ -424,10 +438,15 @@ export class UserStore extends RpcTarget {
     let builder = this.#db
       .selectFrom('GameSessionInvitation')
       .where('GameSessionInvitation.userId', '=', this.#userId)
-      .select([
+      .select(({ eb, ref }) => [
         'GameSessionInvitation.gameSessionId',
         'GameSessionInvitation.status',
         'GameSessionInvitation.createdAt',
+        eb(
+          'GameSessionInvitation.inviterId',
+          '=',
+          ref('GameSessionInvitation.userId'),
+        ).as('isFoundingMember'),
       ])
       .orderBy('GameSessionInvitation.createdAt', 'desc');
 
@@ -549,6 +568,40 @@ export class UserStore extends RpcTarget {
       .executeTakeFirstOrThrow();
 
     return invitation;
+  }
+
+  /**
+   * Used to 'forget' a game session -- the session state is in Durable Objects,
+   * which must be cleared separately, but deleting invitations makes the
+   * session effectively inaccessible from the API.
+   */
+  async deleteAllGameSessionInvitations(gameSessionId: PrefixedId<'gs'>) {
+    // make sure user is the founding member
+    const ownMembership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!ownMembership) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only game session members can delete invitations',
+      );
+    }
+    if (ownMembership.inviterId !== ownMembership.userId) {
+      // this user is not the founding member - founding member is self-invited
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only the creator of the game session can delete it',
+      );
+    }
+
+    await this.#db
+      .deleteFrom('GameSessionInvitation')
+      .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
+      .execute();
   }
 
   async createGameSessionInvitationLink(gameSessionId: PrefixedId<'gs'>) {
@@ -764,21 +817,30 @@ export class UserStore extends RpcTarget {
       .execute();
   }
 
-  async getNotificationSettings() {
+  async getNotificationSettings(): Promise<NotificationSettings> {
     const user = await this.#db
       .selectFrom('User')
       .where('User.id', '=', this.#userId)
       .select(['User.notificationSettings'])
       .executeTakeFirstOrThrow();
 
-    return user.notificationSettings as NotificationSettings;
+    const defaults = notificationTypes.reduce((acc, key) => {
+      acc[key] = { email: false, push: false };
+      return acc;
+    }, {} as NotificationSettings);
+
+    return {
+      ...defaults,
+      ...user.notificationSettings,
+    } as NotificationSettings;
   }
 
-  async updateNotificationSettings(settings: NotificationSettings) {
+  async updateNotificationSettings(settings: Partial<NotificationSettings>) {
+    const current = await this.getNotificationSettings();
     const user = await this.#db
       .updateTable('User')
       .set({
-        notificationSettings: settings,
+        notificationSettings: { ...current, ...settings },
       })
       .where('User.id', '=', this.#userId)
       .returning('User.notificationSettings')
@@ -859,5 +921,64 @@ export class UserStore extends RpcTarget {
             'Notification not found',
           ),
       );
+  }
+
+  /**
+   * Gets all game IDs owned by confirmed members of the game session.
+   * These represent the games that can be played in this session.
+   */
+  async getAvailableGamesForSession(gameSessionId: PrefixedId<'gs'>) {
+    const userGames = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameSessionInvitation',
+        'UserGamePurchase.userId',
+        'GameSessionInvitation.userId',
+      )
+      .innerJoin(
+        'GameProductItem',
+        'UserGamePurchase.gameProductId',
+        'GameProductItem.gameProductId',
+      )
+      .where('GameSessionInvitation.gameSessionId', '=', gameSessionId)
+      .where('GameSessionInvitation.status', '=', 'accepted')
+      .select('GameProductItem.gameId')
+      .execute();
+    return Array.from(new Set(userGames.map((game) => game.gameId)));
+  }
+
+  async getOwnedGames() {
+    const games = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .innerJoin(
+        'GameProductItem',
+        'GameProduct.id',
+        'GameProductItem.gameProductId',
+      )
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['GameProductItem.gameId'])
+      .execute();
+
+    return games.map((game) => game.gameId);
+  }
+
+  async getOwnedGameProducts() {
+    const products = await this.#db
+      .selectFrom('UserGamePurchase')
+      .innerJoin(
+        'GameProduct',
+        'UserGamePurchase.gameProductId',
+        'GameProduct.id',
+      )
+      .where('UserGamePurchase.userId', '=', this.#userId)
+      .select(['GameProduct.id'])
+      .execute();
+
+    return products.map((product) => product.id);
   }
 }

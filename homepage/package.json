@@ -11,6 +11,7 @@
   "dependencies": {
     "@a-type/ui": "catalog:",
     "@long-game/visual-components": "workspace:*",
+    "@long-game/games": "workspace:*",
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "react": "catalog:",

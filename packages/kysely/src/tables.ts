@@ -30,6 +30,9 @@ export interface Database {
   FriendshipInvitation: FriendshipInvitationTable;
   PushSubscription: PushSubscriptionTable;
   Notification: NotificationTable;
+  UserGamePurchase: UserGamePurchaseTable;
+  GameProduct: GameProductTable;
+  GameProductItem: GameProductItemTable;
 }
 
 export interface UserTable {
@@ -49,6 +52,8 @@ export interface UserTable {
     NotificationSettings | null,
     NotificationSettings | null
   >;
+  subscriptionEntitlements: Record<string, boolean>;
+  isProductAdmin: boolean;
 }
 
 export type User = Selectable<UserTable>;
@@ -169,3 +174,38 @@ export interface NotificationTable {
 export type Notification = Selectable<NotificationTable>;
 export type NewNotification = Insertable<NotificationTable>;
 export type NotificationUpdate = Updateable<NotificationTable>;
+
+export interface UserGamePurchaseTable {
+  id: PrefixedId<'ugp'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  userId: PrefixedId<'u'>;
+  gameProductId: PrefixedId<'gp'>;
+}
+export type UserGamePurchase = Selectable<UserGamePurchaseTable>;
+export type NewUserGamePurchase = Insertable<UserGamePurchaseTable>;
+export type UserGamePurchaseUpdate = Updateable<UserGamePurchaseTable>;
+
+export interface GameProductTable {
+  id: PrefixedId<'gp'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  priceCents: number;
+  publishedAt: DateColumnOptional;
+  name: string;
+  description: string | null;
+}
+export type GameProduct = Selectable<GameProductTable>;
+export type NewGameProduct = Insertable<GameProductTable>;
+export type GameProductUpdate = Updateable<GameProductTable>;
+
+export interface GameProductItemTable {
+  id: PrefixedId<'gpi'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  gameProductId: PrefixedId<'gp'>;
+  gameId: string;
+}
+export type GameProductItem = Selectable<GameProductItemTable>;
+export type NewGameProductItem = Insertable<GameProductItemTable>;
+export type GameProductItemUpdate = Updateable<GameProductItemTable>;
