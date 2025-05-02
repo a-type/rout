@@ -4,7 +4,7 @@ import {
   useIsSubscribedToPush,
   useSubscribeToPush,
 } from '@/services/push';
-import { Box, Button, H3, Switch, Tooltip } from '@a-type/ui';
+import { Box, Button, H3, Switch, toast, Tooltip } from '@a-type/ui';
 import { Notification } from '@long-game/game-client';
 import { notificationTypes } from '@long-game/notifications';
 import { sentenceCase } from 'change-case';
@@ -84,7 +84,7 @@ function NotificationSettingsRow({
   const [subscribeToPush, isSubscribingToPush] = useSubscribeToPush();
 
   const togglePush = async (checked: boolean) => {
-    if (!canPush) {
+    if (canPush) {
       const result = await subscribeToPush();
       if (!result) {
         alert(
@@ -94,6 +94,8 @@ function NotificationSettingsRow({
       } else {
         await update('push', checked);
       }
+    } else {
+      toast.error('Push notifications are not supported on this device');
     }
   };
   const toggleEmail = async () => {
