@@ -1,12 +1,13 @@
 import { Box, Button, Icon } from '@a-type/ui';
 import { useState } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
-import { updateApp, useIsUpdateAvailable } from './updateState.js';
+import { updateApp, useIsUpdateAvailable, usePollForUpdates } from './updateState.js';
 
 const TEST = false;
 
 export function UpdateBanner({}) {
   const updateAvailable = useIsUpdateAvailable();
+  usePollForUpdates(true, 60_000); // 1 minute
 
   const [loading, setLoading] = useState(false);
 

@@ -36,14 +36,19 @@ export function checkForUpdate() {
   check?.();
 }
 
+setTimeout(checkForUpdate, 200);
+
 export function useIsUpdateAvailable() {
   return useSnapshot(updateState).updateAvailable;
 }
 
-export function usePollForUpdates(interval: number = 30_000) {
+export function usePollForUpdates(immediate = true, interval: number = 30_000) {
   const updateAvailable = useSnapshot(updateState).updateAvailable;
 
   useEffect(() => {
+    if (immediate) {
+      checkForUpdate();
+    }
     const iv = setInterval(() => {
       checkForUpdate();
     }, interval);
