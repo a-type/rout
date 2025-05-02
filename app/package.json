@@ -17,7 +17,6 @@
     "@long-game/game-ui": "workspace:*",
     "@long-game/games": "workspace:*",
     "@long-game/notifications": "workspace:*",
-    "@tanstack/react-query": "5.62.15",
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
     "hono": "catalog:",

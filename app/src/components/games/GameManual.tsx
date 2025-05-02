@@ -10,9 +10,8 @@ import {
   withClassName,
 } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { fetch } from '@long-game/game-client';
+import { fetch, queryClient, useSuspenseQuery } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@verdant-web/react-router';
 import { lazy } from 'react';
 import type { Components } from 'react-markdown';
@@ -26,16 +25,19 @@ export interface GameManualProps {
 export const GameManual = withSuspense(function GameManual({
   gameId,
 }: GameManualProps) {
-  const { data: markdown } = useSuspenseQuery({
-    queryKey: ['gameManual', gameId],
-    queryFn: async () => {
-      const result = await fetch(`/game-data/${gameId}/rules.md`);
-      if (!result.ok) {
-        throw LongGameError.fromResponse(result);
-      }
-      return result.text();
+  const { data: markdown } = useSuspenseQuery(
+    {
+      queryKey: ['gameManual', gameId],
+      queryFn: async () => {
+        const result = await fetch(`/game-data/${gameId}/rules.md`);
+        if (!result.ok) {
+          throw LongGameError.fromResponse(result);
+        }
+        return result.text();
+      },
     },
-  });
+    queryClient,
+  );
 
   return (
     <Box d="col" gap="lg">

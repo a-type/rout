@@ -17,6 +17,8 @@ import {
   QueryFactoryInfinite,
 } from './sdk/BaseSdk';
 
+export { useMutation, useSuspenseQuery };
+
 type SdkHooks<Sdk extends BaseSdk> = {
   [K in keyof Sdk as `use${Capitalize<
     string & K
