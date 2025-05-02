@@ -140,7 +140,7 @@ describe('gameState/validation', {}, () => {
       expect(result).toBeNull();
     });
 
-    it('should return an error if the target is owned by same player', () => {
+    it('should return an error if the target is occupied', () => {
       let gameState = generateInitialGameState({
         members: [{ id: 'u-1' }, { id: 'u-2' }],
         random: new GameRandom('test'),
@@ -188,7 +188,7 @@ describe('gameState/validation', {}, () => {
         action.target,
       );
       expect(result).not.toBeNull();
-      expect(result).toContain(INVALID_MOVE_CODES.SAME_OWNER);
+      expect(result).toContain(INVALID_MOVE_CODES.SPACE_OCCUPIED);
     });
 
     it('should return error if move is not orthogonal', {}, () => {

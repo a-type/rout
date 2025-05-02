@@ -134,13 +134,14 @@ function performEndTurn(
   playerId: string,
 ): GlobalState {
   globalState = clearFreeActions(globalState);
+  globalState.playerState[playerId].hasTakenTurn = true;
   const playerIdx = globalState.playerOrder.indexOf(playerId);
   const nextPlayerIdx = (playerIdx + 1) % globalState.playerOrder.length;
   const nextPlayer = globalState.playerOrder[nextPlayerIdx];
   globalState = {
     ...globalState,
     currentPlayer: nextPlayer,
-    actions: 2,
+    actions: globalState.playerState[nextPlayer].hasTakenTurn ? 2 : 1,
   };
   // Remove fatigue from all cards in the board
   globalState = clearAllFatigue(globalState);

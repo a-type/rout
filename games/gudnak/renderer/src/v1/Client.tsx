@@ -181,7 +181,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                 return;
               }
               if (!action.targeting.next) {
-                action.moveCard(coord);
+                action.moveOrAttackCard(coord);
                 return;
               }
               if (action.targeting.next.type === 'coordinate') {

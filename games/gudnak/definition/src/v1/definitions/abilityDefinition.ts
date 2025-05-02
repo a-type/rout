@@ -16,6 +16,7 @@ import {
   InvalidMoveReason,
   InvalidDeployReason,
   INVALID_DEPLOY_CODES,
+  InvalidAttackReason,
 } from '../gameState/validation';
 import { removeFatigue } from '../gameState/card';
 
@@ -34,6 +35,14 @@ type FighterEffect = {
     target: { x: number; y: number };
     board: Board;
   }) => InvalidMoveReason[] | null;
+  modifyValidateAttack?: (props: {
+    invalidReasons: InvalidAttackReason[];
+    card: Card;
+    cardState: Record<string, Card>;
+    source: { x: number; y: number };
+    target: { x: number; y: number };
+    board: Board;
+  }) => InvalidAttackReason[] | null;
   modifyValidateDeploy?: (props: {
     invalidReasons: InvalidDeployReason[];
     card: Card;
@@ -228,6 +237,9 @@ export const abilityDefinitions = {
     type: 'active',
     description: 'Move this fighter to any unoccupied square.',
     effect: {
+      modifyValidateAttack: ({ invalidReasons }) => {
+        return invalidReasons;
+      },
       modifyValidateMove: ({ invalidReasons, target, board }) => {
         const isUnoccupied = getStack(board, target).length === 0;
         if (isUnoccupied) {

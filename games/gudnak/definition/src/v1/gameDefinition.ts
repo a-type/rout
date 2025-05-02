@@ -51,6 +51,12 @@ export type MoveAction = {
   source: Coordinate;
   target: Coordinate;
 };
+export type AttackAction = {
+  type: 'attack';
+  cardInstanceId: string;
+  source: Coordinate;
+  target: Coordinate;
+};
 export type UseAbilityAction = {
   type: 'useAbility';
   cardInstanceId: string;
@@ -63,6 +69,7 @@ export type Action =
   | DrawAction
   | DeployAction
   | MoveAction
+  | AttackAction
   | EndTurnAction
   | TacticAction
   | UseAbilityAction;
@@ -78,6 +85,8 @@ export type PlayerSelfState = {
   hand: string[];
   discard: string[];
   side: Side;
+  // Track each player's initial turn to know when they should only get one action.
+  hasTakenTurn: boolean;
 };
 
 export type GlobalState = {

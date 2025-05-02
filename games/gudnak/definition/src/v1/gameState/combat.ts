@@ -8,10 +8,7 @@ import {
   ValidCardId,
   FighterCard,
 } from '../definitions/cardDefinition';
-import {
-  abilityDefinitions,
-  type ValidAbilityId,
-} from '../definitions/abilityDefinition';
+import { abilityDefinitions } from '../definitions/abilityDefinition';
 
 export function determineCombatPower(
   gameState: GlobalState,

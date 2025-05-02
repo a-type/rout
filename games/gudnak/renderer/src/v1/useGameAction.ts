@@ -68,7 +68,7 @@ export function useGameAction() {
     }
   };
 
-  const moveCard = (source: Coordinate) => {
+  const moveOrAttackCard = (source: Coordinate) => {
     const stack = finalState.board[source.y][source.x];
     const cardInstanceId = stack[stack.length - 1];
     const card = finalState.cardState[cardInstanceId];
@@ -84,9 +84,11 @@ export function useGameAction() {
     targeting.onTargetsComplete((targets) => {
       selection.clear();
       const coordinate = targets[0] as CoordinateTarget;
+      const targetStack = finalState.board[coordinate.y][coordinate.x];
+      const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
-          type: 'move',
+          type: actionType,
           cardInstanceId: cardInstanceId,
           source,
           target: { x: coordinate.x, y: coordinate.y },
@@ -203,7 +205,7 @@ export function useGameAction() {
   return {
     playCard,
     deployOrPlayCardImmediate,
-    moveCard,
+    moveOrAttackCard,
     activateAbility,
     targeting,
     selection,
