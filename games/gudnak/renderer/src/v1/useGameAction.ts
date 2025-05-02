@@ -85,6 +85,7 @@ export function useGameAction() {
       selection.clear();
       const coordinate = targets[0] as CoordinateTarget;
       const targetStack = finalState.board[coordinate.y][coordinate.x];
+      console.log('targetStack', targetStack);
       const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
@@ -127,9 +128,11 @@ export function useGameAction() {
         console.error(`Card ${card.cardId} not found on board`);
         return;
       }
+      const targetStack = finalState.board[target.y][target.x];
+      const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
-          type: 'move',
+          type: actionType,
           cardInstanceId: cardInstanceId,
           source,
           target,

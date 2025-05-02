@@ -60,10 +60,8 @@ export function clearFreeActions(gameState: GlobalState) {
   };
 }
 
-// moves a card from source to target
-// moves the whole stack
-// if moving into another player, resolve combat instead
-export function move(
+// resolve combat moving into a new space
+export function attack(
   gameState: GlobalState,
   cardInstanceId: string,
   source: Coordinate,
@@ -83,7 +81,7 @@ export function move(
     ? gameState.cardState[targetTopCardId]
     : null;
   if (targetStack.length === 0 || !targetTopCard) {
-    performMove = true;
+    // TODO: Throw error?
   } else {
     // resolve combat
     winner = resolveCombat(gameState, card, targetTopCard);
@@ -108,6 +106,32 @@ export function move(
     nextBoard[sourceY][sourceX] = [];
     nextBoard[targetY][targetX] = sourceStack;
   }
+
+  gameState = {
+    ...gameState,
+    board: nextBoard,
+  };
+  gameState = applyFatigue(gameState, cardInstanceId);
+  return gameState;
+}
+
+// moves a card from source to target
+// moves the whole stack
+export function move(
+  gameState: GlobalState,
+  cardInstanceId: string,
+  source: Coordinate,
+  target: Coordinate,
+): GlobalState {
+  const { x: sourceX, y: sourceY } = source;
+  const { x: targetX, y: targetY } = target;
+  const { board } = gameState;
+  let nextBoard = [...board];
+  const sourceStack = getStack(board, source);
+  const targetStack = getStack(board, target);
+  // remove stack from source and add to target
+  nextBoard[sourceY][sourceX] = [];
+  nextBoard[targetY][targetX] = sourceStack;
 
   gameState = {
     ...gameState,

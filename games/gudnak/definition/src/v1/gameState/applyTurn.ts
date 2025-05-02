@@ -1,5 +1,6 @@
 import { Turn } from '@long-game/game-definition';
 import {
+  AttackAction,
   DeployAction,
   GlobalState,
   MoveAction,
@@ -9,6 +10,7 @@ import {
 } from '../gameDefinition';
 import { abilityDefinitions } from '../definitions/abilityDefinition';
 import {
+  attack,
   clearAllFatigue,
   clearFreeActions,
   deploy,
@@ -37,6 +39,10 @@ export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
     }
     case 'move': {
       globalState = performMove(globalState, action);
+      break;
+    }
+    case 'attack': {
+      globalState = performAttack(globalState, action);
       break;
     }
     case 'tactic': {
@@ -97,6 +103,29 @@ function performMove(
   );
 
   globalState = move(
+    globalState,
+    action.cardInstanceId,
+    action.source,
+    action.target,
+  );
+  if (matchingFreeAction) {
+    globalState = spendFreeAction(globalState, matchingFreeAction);
+  } else {
+    globalState = spendActions(globalState);
+    globalState = clearFreeActions(globalState);
+  }
+  return globalState;
+}
+function performAttack(
+  globalState: GlobalState,
+  action: AttackAction,
+): GlobalState {
+  const matchingFreeAction = findMatchingFreeAction(
+    action,
+    globalState.freeActions,
+  );
+
+  globalState = attack(
     globalState,
     action.cardInstanceId,
     action.source,
