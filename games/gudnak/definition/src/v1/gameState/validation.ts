@@ -105,6 +105,7 @@ export const INVALID_MOVE_CODES = {
   NOT_TOP_CARD: 'Invalid source (not top card)',
   NO_TARGET: 'Invalid target (no top card)',
   SPACE_OCCUPIED: 'Invalid target (space occupied)',
+  SAME_COORDINATE: 'Invalid target (same coordinate)',
   CANT_BE_ATTACKED: 'Invalid target (cannot be attacked)',
 } as const;
 
@@ -120,6 +121,9 @@ export function validateMove(
   target: Coordinate,
 ): InvalidMoveReason[] | null {
   const reasons = [] as InvalidMoveReason[];
+  if (source.x === target.x && source.y === target.y) {
+    return [INVALID_MOVE_CODES.SAME_COORDINATE];
+  }
   if (!card) {
     return [INVALID_MOVE_CODES.NO_CARD];
   }
@@ -192,6 +196,7 @@ export const INVALID_ATTACK_CODES = {
   NOT_TOP_CARD: 'Invalid source (not top card)',
   NO_TARGET: 'Invalid target (no top card)',
   SAME_OWNER: 'Invalid target (same owner)',
+  SAME_COORDINATE: 'Invalid target (same coordinate)',
   CANT_BE_ATTACKED: 'Invalid target (cannot be attacked)',
 } as const;
 type InvalidAttackCode = keyof typeof INVALID_ATTACK_CODES;
@@ -207,6 +212,9 @@ export function validateAttack(
   target: Coordinate,
 ): InvalidAttackReason[] | null {
   const reasons = [] as InvalidAttackReason[];
+  if (source.x === target.x && source.y === target.y) {
+    return [INVALID_ATTACK_CODES.SAME_COORDINATE];
+  }
   if (!card) {
     return [INVALID_ATTACK_CODES.NO_CARD];
   }

@@ -8,12 +8,10 @@ export function useDoubleClick(
 
   const handleClick = () => {
     if (ref.current) {
-      console.log('clear timeout');
       clearTimeout(ref.current);
       ref.current = null;
       callback();
     } else {
-      console.log('set timeout');
       ref.current = setTimeout(() => {
         ref.current = null;
       }, delay);

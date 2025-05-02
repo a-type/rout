@@ -12,6 +12,7 @@ import { boardHelpers } from '@long-game/game-gudnak-definition';
 import { hooks } from './gameClient';
 import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
+import { toast } from '@a-type/ui';
 
 export function useGameAction() {
   const { submitTurn, finalState, localTurnData, turnError } =
@@ -85,7 +86,9 @@ export function useGameAction() {
       selection.clear();
       const coordinate = targets[0] as CoordinateTarget;
       const targetStack = finalState.board[coordinate.y][coordinate.x];
-      console.log('targetStack', targetStack);
+      if (source.x === coordinate.x && source.y === coordinate.y) {
+        return;
+      }
       const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
@@ -126,6 +129,10 @@ export function useGameAction() {
       );
       if (!source) {
         console.error(`Card ${card.cardId} not found on board`);
+        return;
+      }
+      if (source.x === target.x && source.y === target.y) {
+        console.error(`Card ${card.cardId} is already at target`);
         return;
       }
       const targetStack = finalState.board[target.y][target.x];
