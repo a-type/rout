@@ -791,6 +791,13 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       this.#turns.push(newTurn);
     }
     this.ctx.storage.put('turns', this.#turns);
+    console.log(
+      `Added turn for`,
+      playerId,
+      '|',
+      this.#turns.length,
+      'turns received total',
+    );
 
     this.#sendSocketMessage({
       type: 'turnPlayed',
