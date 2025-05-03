@@ -32,10 +32,17 @@ export function HomePage({}: HomePageProps) {
           </Button>
         </Box>
         <Box d="col" gap>
-          <H2 className="font-300 text-md uppercase my-0 mx-4">Games</H2>
+          <H2 className="font-300 text-md uppercase my-0 mx-4">Live Games</H2>
           <MembershipsList
             invitationStatus="accepted"
-            statusFilter={['active', 'pending']}
+            statusFilter={['active']}
+          />
+          <H2 className="font-300 text-md uppercase my-0 mx-4">
+            Upcoming Games
+          </H2>
+          <MembershipsList
+            invitationStatus="accepted"
+            statusFilter={['pending']}
           />
           <H2 className="font-300 text-md uppercase my-0 mx-4">Invitations</H2>
           <MembershipsList
