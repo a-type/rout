@@ -963,6 +963,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     roundIndex: number,
     status: GameStatus,
   ) {
+    // players always see their own messages no matter what!
+    if (message.authorId === playerId) {
+      return true;
+    }
     if (message.roundIndex !== undefined) {
       if (message.roundIndex > roundIndex) {
         return false;

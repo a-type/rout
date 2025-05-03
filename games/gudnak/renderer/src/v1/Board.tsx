@@ -1,20 +1,20 @@
 import { Box, clsx } from '@a-type/ui';
+import { useDroppable } from '@dnd-kit/core';
 import {
-  type Coordinate,
   type Board,
-  type PlayerState,
   type Card as CardType,
+  type Coordinate,
+  type PlayerState,
   type Target,
 } from '@long-game/game-gudnak-definition/v1';
-import { Space } from './Space';
-import { Selection } from './useSelect';
-import map from './images/map.png';
-import mapVert from './images/map-vert.png';
 import { useMediaQuery } from '@long-game/game-ui';
-import { useDroppable } from '@dnd-kit/core';
-import { hooks } from './gameClient';
 import { DeckZone } from './DeckZone';
 import { DiscardZone } from './DiscardZone';
+import { hooks } from './gameClient';
+import mapVert from './images/map-vert.png';
+import map from './images/map.png';
+import { Space } from './Space';
+import { Selection } from './useSelect';
 
 function Map() {
   const isLarge = useMediaQuery('(min-width: 1024px)');
@@ -67,8 +67,8 @@ export function Board({
       <Box
         className={clsx(
           isLarge
-            ? 'flex flex-col left-[22%] top-[7%] max-w-[calc(100vw-44%-500px)]'
-            : 'flex flex-col left-[7%] top-[22%] max-w-[calc(100vw-14%)]',
+            ? 'flex flex-col aspect-1 h-90% left-1/2 top-1/2 -translate-1/2'
+            : 'flex flex-col aspect-1 w-90% left-1/2 top-1/2 -translate-1/2',
         )}
       >
         {state.map((row, rowIndex) => (

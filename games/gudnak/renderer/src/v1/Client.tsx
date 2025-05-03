@@ -12,16 +12,16 @@ import {
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { DefaultRoundRenderer } from '@long-game/game-ui';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
+import { Backdrop } from './Backdrop';
 import { Board } from './Board';
+import { Card } from './Card';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
 import { useViewState, ViewStateProvider } from './useViewState';
-import { Card } from './Card';
-import { Backdrop } from './Backdrop';
 
 export function Client() {
   return (
@@ -90,7 +90,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }
 
   return (
-    <Box className="w-full h-full flex flex-col gap-2 overflow-hidden">
+    <Box className="w-full h-full flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
       <Flipper
         spring="veryGentle"
         flipKey={
