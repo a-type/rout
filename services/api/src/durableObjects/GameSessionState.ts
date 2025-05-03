@@ -911,6 +911,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
   }
 
   addChatMessage(message: GameSessionChatMessage) {
+    console.log(`Chat message from ${message.authorId}`);
     this.#chat.push(message);
     this.#chat.sort((a, b) => a.createdAt - b.createdAt);
     this.ctx.storage.put('chat', this.#chat);
@@ -1162,7 +1163,6 @@ export class GameSessionState extends DurableObject<ApiBindings> {
           this.#messageBacklogs.set(socketId, backlog);
         }
         backlog.push(msg);
-        // console.log('backlogged message for socket', socketId, userId, backlog);
       } else if (status === 'closed') {
         this.#socketInfo.delete(ws);
         console.error(
