@@ -1,4 +1,5 @@
-import { Box, clsx, Popover, Tooltip } from '@a-type/ui';
+import { Box, clsx, Popover } from '@a-type/ui';
+import { useDndContext } from '@dnd-kit/core';
 import {
   cardDefinitions,
   type FighterCard,
@@ -9,15 +10,14 @@ import {
   ContinuousEffect,
   type Card as CardType,
 } from '@long-game/game-gudnak-definition/v1';
-import { Flipped } from 'react-flip-toolkit';
 import { usePlayerThemed } from '@long-game/game-ui';
-import { hooks } from './gameClient';
 import { motion } from 'motion/react';
-import { cardImageLookup } from './cardImageLookup';
-import { useDndContext } from '@dnd-kit/core';
-import { Draggable } from './Draggable';
-import cardBack from './images/cardback.png';
 import { useEffect, useState } from 'react';
+import { Flipped } from 'react-flip-toolkit';
+import { cardImageLookup } from './cardImageLookup';
+import { Draggable } from './Draggable';
+import { hooks } from './gameClient';
+import cardBack from './images/cardback.png';
 import { useDoubleClick } from './useDoubleClick';
 import { useViewState } from './useViewState';
 
@@ -124,7 +124,7 @@ export function RenderCard({
     <Flipped flipId={instanceId}>
       {(flippedProps) => (
         <Popover open={tooltipActive && !disableTooltip}>
-          <Popover.Content padding="none">
+          <Popover.Content padding="none" className="game-ui">
             <img src={cardArt} className="lg:max-w-md  sm:max-w-xs" />
           </Popover.Content>
           <Popover.Anchor>
