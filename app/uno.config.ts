@@ -23,6 +23,15 @@ export const presetOptions = {
 export default defineConfig({
   presets: [preset(presetOptions)],
   transformers: [variantGroup()],
+  content: {
+    pipeline: {
+      include: [
+        /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
+        // include .js files from workspace packages
+        /@long-game\/[^/]+\/dist\/.*\.js($|\?)/,
+      ],
+    },
+  },
   preflights: [
     {
       getCSS: () => `

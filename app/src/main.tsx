@@ -2,8 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.js';
 
-import '@a-type/ui/main.css';
-import '@long-game/game-ui/css.css';
+// import '@a-type/ui/main.css';
 import 'virtual:uno.css';
 import './main.css';
 import { attachToPwaEvents } from './pwaEvents.js';

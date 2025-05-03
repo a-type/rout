@@ -34,4 +34,9 @@ export default defineConfig({
   },
   transformers: [variantGroup()],
   details: true,
+  postprocess: (config) => {
+    // prepend "#game" to all selectors so they are only applied inside
+    // a particular element scope
+    config.selector = `.game-ui ${config.selector}`;
+  },
 });

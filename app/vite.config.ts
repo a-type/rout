@@ -32,7 +32,12 @@ export default defineConfig(({ mode }) => ({
     }),
   ],
   optimizeDeps: {
-    exclude: ['@a-type/ui', '@long-game/game-client', '@long-game/game-ui'],
+    exclude: [
+      '@a-type/ui',
+      '@long-game/game-client',
+      '@long-game/game-ui',
+      '@long-game/visual-components',
+    ],
     include: [
       'react/jsx-runtime',
       'react',
