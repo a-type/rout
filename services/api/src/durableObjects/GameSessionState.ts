@@ -415,7 +415,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       // WARNING: do not remove parameter.
       // providing a set index here prevents recursion (by default
       // getGlobalStateUnchecked uses this method, getCurrentRoundIndex)
-      globalState: this.#getGlobalStateUnchecked(latestRoundFromTurns),
+      globalState: await this.#getGlobalStateUnchecked(latestRoundFromTurns),
       environment: this.env.DEV_MODE ? 'development' : 'production',
     });
   }
@@ -496,7 +496,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Cannot access current or future round states. Play your turn to see what comes next!',
       );
     }
-    return this.getPlayerStateUnchecked(playerId, roundIndex);
+    return await this.getPlayerStateUnchecked(playerId, roundIndex);
   }
 
   // unvalidated versions
@@ -535,18 +535,23 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
     const resolvedUpTo = upTo ?? publicRoundIndex;
     const gameDefinition = await this.#getGameDefinition();
-    return (await this.getRounds({ upTo: resolvedUpTo })).map((round) => {
-      return {
-        ...round,
-        turns: round.turns.map((turn) => {
-          return gameDefinition.getPublicTurn({
-            turn,
-            globalState: this.#getGlobalStateUnchecked(round.roundIndex),
-            viewerId: playerId,
-          });
-        }),
-      };
-    });
+    return Promise.all(
+      (await this.getRounds({ upTo: resolvedUpTo })).map(async (round) => {
+        const globalState = await this.#getGlobalStateUnchecked(
+          round.roundIndex,
+        );
+        return {
+          ...round,
+          turns: round.turns.map((turn) => {
+            return gameDefinition.getPublicTurn({
+              turn,
+              globalState,
+              viewerId: playerId,
+            });
+          }),
+        };
+      }),
+    );
   }
 
   async getPublicRound(
@@ -616,7 +621,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
         'Game session has not ended yet',
       );
     }
-    return this.#getGlobalStateUnchecked();
+    return await this.#getGlobalStateUnchecked();
   }
 
   /**
