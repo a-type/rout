@@ -6,7 +6,6 @@ import {
   CollapsibleSimple,
   Icon,
   RelativeTime,
-  ScrollArea,
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
@@ -32,18 +31,8 @@ export const GameLogRoot = withClassName(
 
 const GameLogListRoot = withClassName(
   'div',
-  'flex flex-col gap-1 items-stretch overflow-y-auto flex-1 min-h-300px',
+  'flex flex-col gap-1 items-stretch flex-1 min-h-300px',
 );
-
-export function GameLogList(props: { children: React.ReactNode }) {
-  const { ref, onScroll } = useStayScrolledToBottom();
-
-  return (
-    <GameLogListRoot ref={ref} onScroll={onScroll}>
-      {props.children}
-    </GameLogListRoot>
-  );
-}
 
 export const GameLogItem = withClassName(
   'div',
@@ -103,11 +92,17 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
   const { combinedLog: log } = gameSuite;
+  const { ref, onScroll } = useStayScrolledToBottom();
 
   return (
     <GameLogRoot {...props}>
-      <ScrollArea className="flex flex-col min-h-0">
-        <GameLogList>
+      {/* TODO: ScrollArea -- but stick to bottom doesn't work here. */}
+      <div
+        className="flex flex-col min-h-0 overflow-y-auto"
+        ref={ref}
+        onScroll={onScroll}
+      >
+        <GameLogListRoot>
           {log.map((entry, i) =>
             entry.type === 'chat' ? (
               <ChatMessage
@@ -121,8 +116,8 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
               />
             ),
           )}
-        </GameLogList>
-      </ScrollArea>
+        </GameLogListRoot>
+      </div>
       <GameLogChatInput />
     </GameLogRoot>
   );
@@ -212,6 +207,11 @@ function useStayScrolledToBottom() {
 
   const onScroll = useCallback(() => {
     if (!ref.current) return;
+    console.log(
+      ref.current.scrollTop,
+      ref.current.clientHeight,
+      ref.current.scrollHeight,
+    );
     setIsScrolledToBottom(
       ref.current.scrollTop + ref.current.clientHeight >=
         ref.current.scrollHeight - 10,
