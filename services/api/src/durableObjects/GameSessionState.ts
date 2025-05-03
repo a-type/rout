@@ -920,7 +920,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     // otherwise we'd end the game as soon as one player played a turn
     // that met conditions. this way we wait for the round to complete.
     return gameDefinition.getStatus({
-      globalState: this.#getGlobalStateUnchecked(),
+      globalState: await this.#getGlobalStateUnchecked(),
       members: await this.#getOrderedMembers(),
       rounds: await this.getRounds({ upTo: publicRoundIndex }),
     });
