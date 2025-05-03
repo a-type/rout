@@ -6,6 +6,7 @@ import {
   CollapsibleSimple,
   Icon,
   RelativeTime,
+  ScrollArea,
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
@@ -26,12 +27,12 @@ const localState = proxy({
 
 export const GameLogRoot = withClassName(
   'div',
-  'flex flex-col gap-2 items-stretch w-full h-full',
+  'flex flex-col gap-2 items-stretch w-full h-full min-h-0',
 );
 
 const GameLogListRoot = withClassName(
   'div',
-  'flex flex-col gap-1 items-stretch overflow-y-auto flex-1',
+  'flex flex-col gap-1 items-stretch overflow-y-auto flex-1 min-h-300px',
 );
 
 export function GameLogList(props: { children: React.ReactNode }) {
@@ -105,21 +106,23 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
 
   return (
     <GameLogRoot {...props}>
-      <GameLogList>
-        {log.map((entry, i) =>
-          entry.type === 'chat' ? (
-            <ChatMessage
-              message={entry.chatMessage}
-              key={entry.chatMessage.id}
-            />
-          ) : (
-            <RoundRenderer
-              roundIndex={entry.roundIndex}
-              key={`round-${entry.roundIndex}`}
-            />
-          ),
-        )}
-      </GameLogList>
+      <ScrollArea className="flex flex-col min-h-0">
+        <GameLogList>
+          {log.map((entry, i) =>
+            entry.type === 'chat' ? (
+              <ChatMessage
+                message={entry.chatMessage}
+                key={entry.chatMessage.id}
+              />
+            ) : (
+              <RoundRenderer
+                roundIndex={entry.roundIndex}
+                key={`round-${entry.roundIndex}`}
+              />
+            ),
+          )}
+        </GameLogList>
+      </ScrollArea>
       <GameLogChatInput />
     </GameLogRoot>
   );
@@ -160,7 +163,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
         </Button>
       </CollapsibleSimple>
       <Collapsible open={open} className="relative w-full lg:h-full">
-        <CollapsibleContent className="lg:h-full [&[data-state='closed']]:opacity-0">
+        <CollapsibleContent className="flex flex-col max-h-80vh lg:h-full lg:max-h-none [&[data-state='closed']]:opacity-0">
           <Button
             className="absolute -top-32px right-sm z-1 lg:hidden"
             size="icon-small"
@@ -170,7 +173,12 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
           >
             <Icon name="x" />
           </Button>
-          <Box p="sm" layout="stretch stretch" className="w-full lg:h-full">
+          <Box
+            p="sm"
+            layout="stretch stretch"
+            className="w-full h-full min-h-0 lg:h-full"
+            d="col"
+          >
             <GameLogFull />
           </Box>
         </CollapsibleContent>
