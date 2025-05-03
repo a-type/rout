@@ -1067,7 +1067,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     ws: WebSocket,
     info: SocketSessionInfo,
   ) => {
-    console.log(`Received turn from ${info.userId}`, msg.turnData);
+    console.log(`Received turn from ${info.userId}`);
     this.addTurn(info.userId, msg.turnData);
   };
 
