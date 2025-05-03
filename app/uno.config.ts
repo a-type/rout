@@ -28,7 +28,7 @@ export default defineConfig({
       include: [
         /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
         // include .js files from workspace packages
-        /@long-game\/[^/]+\/dist\/.*\.js($|\?)/,
+        /\@long-game\/[^/]+\/dist\/.*\.js($|\?)/,
       ],
     },
   },

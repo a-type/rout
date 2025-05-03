@@ -91,6 +91,7 @@ export const gameDefinition: GameDefinition<
   getRoundIndex: roundFormat.perEnvironment({
     development: roundFormat.sync(),
     production: roundFormat.periodic('days', 1),
+    // development: roundFormat.periodic('days', 1),
   }),
   // run on both client and server
 

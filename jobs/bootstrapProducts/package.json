@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "dev": "wrangler dev -c wrangler.toml --port 3113 --ip 127.0.0.1 --test-scheduled"
+    "dev": "sleep 3 && wrangler dev -c wrangler.toml --port 3113 --ip 127.0.0.1 --test-scheduled"
   },
   "dependencies": {
     "@a-type/utils": "catalog:",
