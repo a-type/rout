@@ -29,6 +29,7 @@ type BaseCardProps = {
   onClick?: () => void;
   disableTooltip?: boolean;
   noBorder?: boolean;
+  disableDrag?: boolean;
 };
 
 export const CARD_SIZE = 200;
@@ -114,6 +115,7 @@ export function RenderCard({
   overSpace?: boolean;
   faceDown?: boolean;
 }) {
+  const { viewState } = useViewState();
   const {
     active: tooltipActive,
     onClick: onTriggerClick,
@@ -123,7 +125,11 @@ export function RenderCard({
   return (
     <Flipped flipId={instanceId}>
       {(flippedProps) => (
-        <Popover open={tooltipActive && !disableTooltip}>
+        <Popover
+          open={
+            tooltipActive && !disableTooltip && viewState.kind !== 'cardViewer'
+          }
+        >
           <Popover.Content padding="none">
             <img src={cardArt} className="lg:max-w-md  sm:max-w-xs" />
           </Popover.Content>
@@ -238,6 +244,7 @@ export function Card({
           instanceId: rest.instanceId,
           cardInfo: info,
         }}
+        disabled={rest.disableDrag}
       >
         {stack &&
           stack.length > 1 &&

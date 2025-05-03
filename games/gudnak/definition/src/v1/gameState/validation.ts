@@ -5,6 +5,7 @@ import type {
   Coordinate,
   Side,
   PlayerState,
+  DefendAction,
 } from '../gameDefinition';
 import {
   abilityDefinitions,
@@ -29,6 +30,7 @@ import {
 
 export const INVALID_DEPLOY_CODES = {
   NO_CARD: 'Invalid deploy (no card)',
+  NO_TARGET: 'Invalid deploy (no target)',
   INVALID_SPACE: 'Invalid deploy (not deployable space)',
   NOT_SAME_OWNER: 'Invalid deploy (not same owner)',
   NO_MATCHING_TAG: 'Invalid deploy (no matching tag)',
@@ -53,7 +55,14 @@ export function validateDeploy(
   ) {
     reasons.push(INVALID_DEPLOY_CODES.INVALID_SPACE);
   }
-  const topCardId = getTopCard(getStack(board, target));
+  if (!validCoordinate(board, target)) {
+    return [INVALID_DEPLOY_CODES.NO_TARGET];
+  }
+  const stack = getStack(board, target);
+  if (!stack) {
+    return [INVALID_DEPLOY_CODES.NO_TARGET];
+  }
+  const topCardId = getTopCard(stack);
   if (topCardId) {
     const topCard = cardState[topCardId];
     if (topCard.ownerId !== card.ownerId) {
@@ -413,4 +422,69 @@ export function validateTargets(
     return null;
   }
   return invalidTargets;
+}
+
+const INVALID_DEFEND_CODES = {
+  NO_CARD: 'Invalid defend (no card)',
+  NO_CARD_AT_GATE: 'Invalid defend (no card at gate)',
+  INCORRECT_NUMBER_OF_TARGETS: 'Invalid defend (incorrect number of targets)',
+  NOT_ENEMY_CARD: 'Invalid defend (not enemy card)',
+  NOT_IN_HAND: 'Invalid defend (targets not in hand)',
+  NOT_UNIQUE: 'Invalid defend (targets not unique)',
+};
+
+export type InvalidDefendCode = keyof typeof INVALID_DEFEND_CODES;
+export type InvalidDefendReason =
+  (typeof INVALID_DEFEND_CODES)[InvalidDefendCode];
+
+export function validateDefend(
+  playerState: PlayerState,
+  playerId: string,
+  action: DefendAction,
+): InvalidDefendReason[] | null {
+  const { cardState, board } = playerState;
+  const reasons = [] as InvalidDefendReason[];
+  const { targets } = action;
+  const space = getGatesCoord(playerState.side);
+  const stack = getStack(board, space);
+  if (stack.length === 0) {
+    return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
+  }
+  const topCardId = getTopCard(stack);
+  if (!topCardId) {
+    return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
+  }
+  const topCard = cardState[topCardId];
+  if (topCard.ownerId !== playerId) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_ENEMY_CARD);
+  }
+  const topCardDef = cardDefinitions[topCard.cardId as ValidCardId];
+  if (!topCardDef || topCardDef.kind !== 'fighter') {
+    return [INVALID_DEFEND_CODES.NO_CARD];
+  }
+  const power = topCardDef.power;
+  if (targets.length != power) {
+    reasons.push(INVALID_DEFEND_CODES.INCORRECT_NUMBER_OF_TARGETS);
+  }
+  // Ensure targets are from hand
+  if (
+    targets.some((t) =>
+      playerState.hand.every((c) => c.instanceId !== t.instanceId),
+    )
+  ) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_IN_HAND);
+  }
+  // Ensure targets are unique
+  if (
+    targets.some(
+      (t) => targets.filter((c) => c.instanceId === t.instanceId).length > 1,
+    )
+  ) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_UNIQUE);
+  }
+
+  if (reasons.length === 0) {
+    return null;
+  }
+  return reasons;
 }

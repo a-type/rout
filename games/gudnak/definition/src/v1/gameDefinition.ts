@@ -1,6 +1,7 @@
 import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import {
   abilityDefinitions,
+  CardTarget,
   ContinuousEffect,
   EffectInput,
   Target,
@@ -10,6 +11,7 @@ import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './definitions/decks';
 import { findMatchingFreeAction } from './gameState/freeAction';
 import {
+  validateDefend,
   validateDeploy,
   validateMove,
   validateTargets,
@@ -64,6 +66,10 @@ export type UseAbilityAction = {
   source: Coordinate;
   targets: Target[];
 };
+export type DefendAction = {
+  type: 'defend';
+  targets: CardTarget[];
+};
 export type EndTurnAction = { type: 'endTurn' };
 export type Action =
   | DrawAction
@@ -72,7 +78,8 @@ export type Action =
   | AttackAction
   | EndTurnAction
   | TacticAction
-  | UseAbilityAction;
+  | UseAbilityAction
+  | DefendAction;
 
 export type FreeAction = {
   type: 'deploy' | 'move';
@@ -125,7 +132,7 @@ function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
     // requires us to validate active player in turn validation
     const maxRoundIndex = turns.reduce((max, turn) => {
       return Math.max(max, turn.roundIndex);
-    }, 0);
+    }, -1);
 
     return {
       roundIndex: maxRoundIndex + 1,
@@ -197,6 +204,8 @@ export const gameDefinition: GameDefinition<
       }
       return;
     }
+
+    // Below items require an action
     if (actions <= 0 && !matchingFreeAction) {
       return 'You have no actions left';
     }
@@ -233,6 +242,13 @@ export const gameDefinition: GameDefinition<
       );
       if (moveErrors) {
         return moveErrors[0];
+      }
+    }
+
+    if (action.type === 'defend') {
+      const defendErrors = validateDefend(playerState, playerId, action);
+      if (defendErrors) {
+        return defendErrors[0];
       }
     }
 

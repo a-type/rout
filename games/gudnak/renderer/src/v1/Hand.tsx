@@ -1,6 +1,9 @@
 import { Box } from '@a-type/ui';
 import { Card } from './Card';
-import type { Card as CardType } from '@long-game/game-gudnak-definition/v1';
+import type {
+  Card as CardType,
+  Target,
+} from '@long-game/game-gudnak-definition/v1';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
@@ -9,9 +12,11 @@ import { useScreenSize } from './utils';
 export function Hand({
   cards,
   selectedId,
+  targets,
   onClickCard,
 }: {
   cards: CardType[];
+  targets: Target[];
   selectedId: string | null;
   onClickCard: (card: CardType) => void;
 }) {
@@ -72,6 +77,9 @@ export function Hand({
             >
               <Card
                 selected={selectedId === card.instanceId}
+                targeted={targets.some(
+                  (t) => t.kind === 'card' && t.instanceId === card.instanceId,
+                )}
                 instanceId={card.instanceId}
                 info={card}
                 onClick={() => {

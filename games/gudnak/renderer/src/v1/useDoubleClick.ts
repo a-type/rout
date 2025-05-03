@@ -4,7 +4,7 @@ export function useDoubleClick(
   callback: () => void,
   delay: number = 300,
 ): [() => void, () => void] {
-  const ref = useRef<NodeJS.Timeout | null>(null);
+  const ref = useRef<number | null>(null);
 
   const handleClick = () => {
     if (ref.current) {

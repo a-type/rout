@@ -128,8 +128,16 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             <Hand
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}
+              targets={action.targets}
               onClickCard={(card) => {
                 if (!active) {
+                  return;
+                }
+                if (action.targeting.active) {
+                  action.targeting.select({
+                    kind: 'card',
+                    instanceId: card.instanceId,
+                  });
                   return;
                 }
                 action.playCard(card);
@@ -146,6 +154,14 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                     }}
                   >
                     Draw
+                  </Button>
+                  <Button
+                    disabled={actions <= 0}
+                    onClick={() => {
+                      action.defend();
+                    }}
+                  >
+                    Defend
                   </Button>
                   <Button
                     disabled={actions > 0}
@@ -234,12 +250,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           {viewState.kind === 'cardViewer' ? (
             <div
               // show card over top of game board in the middle of the screen
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 max-w-25% overflow-hidden p-4 rounded-2xl shadow-2xl shadow-dark"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 w-70% sm:w-60% md:w-50% lg:max-w-40% overflow-hidden p-4 rounded-2xl shadow-2xl shadow-dark"
               style={{ backgroundColor: 'black' }}
             >
               <Card
                 disableTooltip
                 noBorder
+                disableDrag
                 info={finalState.cardState[viewState.cardInstanceId]}
                 instanceId={viewState.cardInstanceId}
               />

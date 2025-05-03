@@ -1,6 +1,6 @@
 import { GameRandom } from '@long-game/game-definition';
 import type { Card, GlobalState } from '../gameDefinition';
-import { E } from 'vitest/dist/chunks/reporters.0x019-V2.js';
+import { findCoordFromCard, removeTopCard } from './board';
 
 export function addToDeck(globalState: GlobalState, card: Card): GlobalState {
   const ownerId = card.ownerId;
@@ -73,6 +73,51 @@ export function addToDiscard(gameState: GlobalState, card: Card) {
           ...gameState.playerState[card.ownerId].discard,
           card.instanceId,
         ],
+      },
+    },
+  };
+}
+
+export function moveFromBoardToDiscard(
+  globalState: GlobalState,
+  card: Card,
+): GlobalState {
+  const { board } = globalState;
+  const coord = findCoordFromCard(board, card.instanceId);
+  if (!coord) {
+    return globalState;
+  }
+  const nextBoard = removeTopCard(board, coord);
+  globalState = addToDiscard(globalState, card);
+  return {
+    ...globalState,
+    board: nextBoard,
+    cardState: {
+      ...globalState.cardState,
+      [card.instanceId]: {
+        ...card,
+        fatigued: false,
+      },
+    },
+  };
+}
+
+export function discardFromHand(
+  globalState: GlobalState,
+  playerId: string,
+  cardInstanceId: string,
+): GlobalState {
+  const { hand, discard } = globalState.playerState[playerId];
+  const newHand = hand.filter((id) => id !== cardInstanceId);
+  const newDiscard = [...discard, cardInstanceId];
+  return {
+    ...globalState,
+    playerState: {
+      ...globalState.playerState,
+      [playerId]: {
+        ...globalState.playerState[playerId],
+        hand: newHand,
+        discard: newDiscard,
       },
     },
   };

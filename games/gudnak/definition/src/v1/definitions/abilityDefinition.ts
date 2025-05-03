@@ -89,15 +89,20 @@ export type EffectInput = {
   targets: Target[];
 };
 
-export type EffectTargetRestriction = {
-  kind: 'adjacent';
-  to: 'source' | 'previous-target';
-};
+export type EffectTargetRestriction =
+  | {
+      kind: 'adjacent';
+      to: 'source' | 'previous-target';
+    }
+  | {
+      kind: 'unique';
+    }
+  | { kind: 'in-hand' };
 
 export type EffectTargetDefinition = {
   description: string;
   type: 'coordinate' | 'card';
-  controller: 'player' | 'opponent' | 'any' | 'none' | 'not-friendly';
+  controller?: 'player' | 'opponent' | 'any' | 'none' | 'not-friendly';
   restrictions?: EffectTargetRestriction[];
 };
 

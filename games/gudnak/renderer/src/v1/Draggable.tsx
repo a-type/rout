@@ -12,15 +12,18 @@ export function Draggable({
   data,
   style,
   children,
+  disabled,
 }: {
   className?: string;
   data: DragData;
   style?: React.CSSProperties;
   children: React.ReactNode;
+  disabled?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const { setNodeRef, listeners, transform, attributes } = useDraggable({
     id: data.instanceId,
     data,
+    disabled,
   });
 
   const transformStyle = transform

@@ -1,6 +1,7 @@
 import { Turn } from '@long-game/game-definition';
 import {
   AttackAction,
+  DefendAction,
   DeployAction,
   GlobalState,
   MoveAction,
@@ -20,7 +21,7 @@ import {
 } from './gameStateHelpers';
 import { findMatchingFreeAction, spendFreeAction } from './freeAction';
 import { removeTurnBasedContinuousEffects } from './continuousEffects';
-import { draw, mill } from './zone';
+import { discardFromHand, draw, mill, moveFromBoardToDiscard } from './zone';
 import { getGatesCoord, getTopCard, getStack } from './board';
 import { applyFatigue } from './card';
 
@@ -45,6 +46,11 @@ export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
       globalState = performAttack(globalState, action);
       break;
     }
+    case 'defend': {
+      globalState = performDefend(globalState, playerId, action);
+      break;
+    }
+
     case 'tactic': {
       globalState = clearFreeActions(globalState);
       globalState = playTactic(globalState, action.card, action.input);
@@ -156,6 +162,32 @@ export function performUseAbility(
   globalState = spendActions(globalState);
   globalState = clearFreeActions(globalState);
   return globalState;
+}
+
+export function performDefend(
+  globalState: GlobalState,
+  playerId: string,
+  action: DefendAction,
+): GlobalState {
+  // send cards from hand to discard
+  let gameState = globalState;
+  action.targets.forEach((target) => {
+    gameState = discardFromHand(gameState, playerId, target.instanceId);
+  });
+  // send targeted card from gate to discard
+  const gatesCoord = getGatesCoord(globalState.playerState[playerId].side);
+  const gatesStack = getStack(globalState.board, gatesCoord);
+  const gatesCardId = getTopCard(gatesStack);
+  if (!gatesCardId) {
+    console.error('No card found in gates stack');
+    return gameState;
+  }
+  gameState = moveFromBoardToDiscard(
+    gameState,
+    gameState.cardState[gatesCardId],
+  );
+
+  return gameState;
 }
 
 function performEndTurn(

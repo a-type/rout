@@ -1,5 +1,11 @@
 import type { Card, GlobalState, PlayerState } from '../gameDefinition';
-import { getCardIdsFromBoard, getSpecialSpaces } from './board';
+import {
+  getCardIdsFromBoard,
+  getGatesCoord,
+  getSpecialSpaces,
+  getTopCard,
+} from './board';
+import { validateDefend } from './validation';
 
 export function getPlayerState({
   globalState,
@@ -18,6 +24,7 @@ export function getPlayerState({
     ...members.flatMap((m) => playerState[m.id].discard),
     ...getCardIdsFromBoard(board),
   ];
+
   return {
     board,
     cardState: visibleCardIds.reduce((acc, id) => {
