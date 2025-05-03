@@ -98,7 +98,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
     <GameLogRoot {...props}>
       {/* TODO: ScrollArea -- but stick to bottom doesn't work here. */}
       <div
-        className="flex flex-col min-h-0 overflow-y-auto"
+        className="flex flex-col min-h-0 overflow-y-auto flex-1"
         ref={ref}
         onScroll={onScroll}
       >
