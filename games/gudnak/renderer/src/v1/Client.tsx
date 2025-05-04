@@ -20,9 +20,7 @@ import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
-import { useViewState, ViewStateProvider } from './useViewState';
-import { Card } from './Card';
-import { Backdrop } from './Backdrop';
+import { ViewStateProvider } from './useViewState';
 import { CardViewer } from './CardViewer';
 
 export function Client() {
@@ -89,7 +87,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
 
   return (
     <Box
-      className="w-full h-full flex flex-col gap-2 overflow-hidden"
+      className="w-full h-full flex flex-col gap-2 overflow-y-hidden overflow-x-hidden"
       data-id="main-game-area"
     >
       <Flipper
@@ -127,8 +125,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           }}
         >
           {active ? (
-            <div className="p-2 lg:mt-8">
-              <Box className="flex flex-row gap-2 items-center mt-3">
+            <div className="px-4 py-2 absolute top-0 left-0 right-0 z-50 bg-dark-9/80 shadow-lg shadow-dark">
+              <Box className="flex flex-row gap-2 items-center">
                 <>
                   <span className="font-bold">Your turn!</span>
                   <Button
@@ -231,7 +229,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             }}
           />
 
-          <div className="absolute bottom-2 left-0 right-0 p-4">
+          <div className="absolute bottom-2 left-0 right-0 p-4 z-50">
             <Hand
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}

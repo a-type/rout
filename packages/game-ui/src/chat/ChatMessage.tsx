@@ -25,13 +25,11 @@ export const ChatMessage = withGame<ChatMessageProps>(function ChatMessage({
 
   return (
     <Box d="col" items="start" gap="sm" className={className} {...rest}>
-      <Box gap className="leading-relaxed">
-        <Box gap items="center" className="inline-flex font-bold">
-          <PlayerAvatar playerId={message.authorId} />
-          <span>
-            <PlayerName playerId={message.authorId} />:
-          </span>
-        </Box>
+      <Box gap className="leading-relaxed block text-wrap" full="width">
+        <PlayerAvatar playerId={message.authorId} className="absolute" />
+        <span className="font-bold" style={{ marginLeft: 32 }}>
+          <PlayerName playerId={message.authorId} />:{' '}
+        </span>
         <span className="whitespace-pre-wrap">{message.content}</span>
       </Box>
       <Box

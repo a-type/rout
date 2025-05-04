@@ -19,7 +19,7 @@ export function GameControls({ pregame }: GameControlsProps) {
   return (
     <>
       <GameLayout.Controls>
-        <GameLog className="flex-1" />
+        <GameLog className="flex-1 min-h-0" />
       </GameLayout.Controls>
       <GameLayout.SecondaryControls className="justify-between">
         <Box gap="xs" items="center">
