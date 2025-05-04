@@ -1,4 +1,5 @@
 import { clsx } from '@a-type/ui';
+import { isMobile } from 'react-device-detect';
 
 export function Backdrop({
   className,
@@ -16,7 +17,7 @@ export function Backdrop({
         'fixed top-0 left-0 w-full h-full opacity-40 z-999',
       )}
       style={{ backgroundColor: 'black', ...style }}
-      onClick={onClick}
+      {...(isMobile ? { onTouchStart: onClick } : { onClick })}
     />
   );
 }

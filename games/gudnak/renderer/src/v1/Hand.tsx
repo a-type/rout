@@ -8,6 +8,9 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
 import { clamp, useScreenSize } from './utils';
+import { useClickAway } from '@uidotdev/usehooks';
+import { isMobile } from 'react-device-detect';
+import { useDndContext } from '@dnd-kit/core';
 
 export function Hand({
   cards,
@@ -20,7 +23,12 @@ export function Hand({
   selectedId: string | null;
   onClickCard: (card: CardType) => void;
 }) {
+  const { active } = useDndContext();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [expandHand, setExpandHand] = useState(false);
+  const ref = useClickAway<HTMLDivElement>(() => {
+    setExpandHand(false);
+  });
   const isMedium = useMediaQuery('(min-width: 768px)');
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
@@ -44,8 +52,12 @@ export function Hand({
       style={{ height: cardSize }}
     >
       <motion.div
-        initial={{ y: isLarge ? 50 : isMedium ? 50 : 40, scale: 0.8 }}
-        whileHover={{ y: 0, scale: 1 }}
+        ref={ref}
+        initial={{ y: isLarge ? 100 : isMedium ? 50 : 40, scale: 0.8 }}
+        onTapStart={() => setExpandHand(true)}
+        onTapCancel={() => setExpandHand(false)}
+        animate={expandHand ? { y: 0, scale: 1 } : {}}
+        whileHover={isMobile ? undefined : { y: 0, scale: 1 }}
         transition={{
           type: 'spring',
           duration: 0.4,
@@ -85,8 +97,12 @@ export function Hand({
                   x: xOffset,
                   y: isHovered
                     ? -10
-                    : Math.abs(index + 0.5 - cards.length / 2) * 5,
-                  rotate: 2 * (index + 0.5 - cards.length / 2),
+                    : Math.abs(index + 0.5 - cards.length / 2) *
+                      (50 / cards.length),
+                  rotate:
+                    active && active.id === card.instanceId
+                      ? 0
+                      : (20 / cards.length) * (index + 0.5 - cards.length / 2),
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
@@ -94,8 +110,14 @@ export function Hand({
                   duration: 0.4,
                   bounce: 0.25,
                 }}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                onTapStart={isMobile ? () => setHoveredIndex(index) : undefined}
+                onTapCancel={isMobile ? () => setHoveredIndex(null) : undefined}
+                onMouseEnter={
+                  isMobile ? undefined : () => setHoveredIndex(index)
+                }
+                onMouseLeave={
+                  isMobile ? undefined : () => setHoveredIndex(null)
+                }
               >
                 <Card
                   selected={selectedId === card.instanceId}

@@ -6,6 +6,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import {
   cardDefinitions,
   type Coordinate,
@@ -22,6 +23,7 @@ import { useManageCardFlipState } from './useManageCardFlipState';
 import { useViewState, ViewStateProvider } from './useViewState';
 import { Card } from './Card';
 import { Backdrop } from './Backdrop';
+import { CardViewer } from './CardViewer';
 
 export function Client() {
   return (
@@ -55,7 +57,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }, [latestRoundIndex]);
 
   useEffect(() => {
-    if (turnError) {
+    // TODO: Prevent from showing same error multiple times
+    if (turnError && currentTurn) {
       toast.error(turnError);
     }
   }, [turnError, currentTurn]);
@@ -67,13 +70,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   });
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      distance: 10,
+      distance: 20,
     },
   });
-  // const sensors = useSensors(mouseSensor, pointerSensor, touchSensor);
   const sensors = useSensors(mouseSensor, touchSensor);
-
-  const { viewState, setViewState } = useViewState();
 
   if (gameStatus.status === 'completed') {
     return (
@@ -100,6 +100,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         }
       >
         <DndContext
+          modifiers={[restrictToWindowEdges]}
           sensors={sensors}
           onDragEnd={(e) => {
             const coord = e.over?.data.current?.coordinate as Coordinate;
@@ -125,9 +126,9 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             action.deployOrPlayCardImmediate(cardInstanceId, coord);
           }}
         >
-          <div className="p-2 lg:mt-8">
-            <Box className="flex flex-row gap-2 items-center mt-3">
-              {active ? (
+          {active ? (
+            <div className="p-2 lg:mt-8">
+              <Box className="flex flex-row gap-2 items-center mt-3">
                 <>
                   <span className="font-bold">Your turn!</span>
                   <Button
@@ -171,11 +172,9 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                     <span>{action.targeting.next.description}</span>
                   ) : null}
                 </>
-              ) : (
-                <span>Waiting on opponent...</span>
-              )}
-            </Box>
-          </div>
+              </Box>
+            </div>
+          ) : null}
           <Board
             selection={action.selection.item}
             targets={action.targets}
@@ -232,7 +231,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             }}
           />
 
-          <div className="absolute bottom-6 left-0 right-0 p-4">
+          <div className="absolute bottom-2 left-0 right-0 p-4">
             <Hand
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}
@@ -253,25 +252,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             />
           </div>
 
-          {viewState.kind === 'cardViewer' ? (
-            <Backdrop onClick={() => setViewState({ kind: 'game' })} />
-          ) : null}
-
-          {viewState.kind === 'cardViewer' ? (
-            <div
-              // show card over top of game board in the middle of the screen
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 w-70% sm:w-60% md:w-50% lg:max-w-40% overflow-hidden p-4 rounded-2xl shadow-2xl shadow-dark"
-              style={{ backgroundColor: 'black' }}
-            >
-              <Card
-                disableTooltip
-                noBorder
-                disableDrag
-                info={finalState.cardState[viewState.cardInstanceId]}
-                instanceId={viewState.cardInstanceId}
-              />
-            </div>
-          ) : null}
+          <CardViewer />
         </DndContext>
       </Flipper>
     </Box>

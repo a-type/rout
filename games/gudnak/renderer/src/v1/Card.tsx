@@ -20,6 +20,7 @@ import cardBack from './images/cardback.png';
 import { useEffect, useState } from 'react';
 import { useDoubleClick } from './useDoubleClick';
 import { useViewState } from './useViewState';
+import { isMobile } from 'react-device-detect';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -30,6 +31,8 @@ type BaseCardProps = {
   disableTooltip?: boolean;
   noBorder?: boolean;
   disableDrag?: boolean;
+  disableCardViewer?: boolean;
+  disableMotion?: boolean;
 };
 
 export const CARD_SIZE = 200;
@@ -39,19 +42,31 @@ export type DragData = {
   cardInfo: CardType;
 };
 
-const useTriggerTooltip = ({ cardInstanceId }: { cardInstanceId: string }) => {
+const useTriggerTooltip = ({
+  cardInstanceId,
+  disableCardViewer,
+}: {
+  cardInstanceId: string;
+  disableCardViewer?: boolean;
+}) => {
   const { setViewState } = useViewState();
   // trigger tooltip when user hovers over the card on pc or taps on it on mobile
   const [hovered, setHovered] = useState(false);
-  const [touched, setTouched] = useState(false);
+  // const [touched, setTouched] = useState(false);
   const [active, setActive] = useState(false);
   const { active: dragActive } = useDndContext();
 
   const [onClickOrTap] = useDoubleClick(() => {
+    if (disableCardViewer) {
+      return;
+    }
     setViewState({ kind: 'cardViewer', cardInstanceId });
   }, 400);
 
   useEffect(() => {
+    if (isMobile) {
+      return;
+    }
     if (hovered) {
       const timeout = setTimeout(() => {
         setActive(true);
@@ -61,38 +76,32 @@ const useTriggerTooltip = ({ cardInstanceId }: { cardInstanceId: string }) => {
         setActive(false);
       };
     }
-  }, [hovered]);
-
-  useEffect(() => {
-    if (touched) {
-      const timeout = setTimeout(() => {
-        setActive(true);
-      }, 500);
-      return () => {
-        clearTimeout(timeout);
-        setActive(false);
-      };
-    }
-  }, [touched]);
+  }, [hovered, isMobile]);
 
   return {
     active: active && !dragActive,
-    onMouseEnter: () => {
-      setHovered(true);
-    },
-    onMouseLeave: () => {
-      setHovered(false);
-    },
-    onClick: () => {
-      onClickOrTap();
-    },
-    onTouchStart: () => {
-      setTouched(true);
-      onClickOrTap();
-    },
-    onTouchEnd: () => {
-      setTouched(false);
-    },
+    ...(isMobile
+      ? {
+          onTouchStart: () => {
+            // setTouched(true);
+            onClickOrTap();
+          },
+          onTouchEnd: () => {
+            // setTouched(false);
+          },
+          onClick: () => {},
+        }
+      : {
+          onMouseEnter: () => {
+            setHovered(true);
+          },
+          onMouseLeave: () => {
+            setHovered(false);
+          },
+          onClick: () => {
+            onClickOrTap();
+          },
+        }),
   };
 };
 
@@ -107,6 +116,8 @@ export function RenderCard({
   faceDown,
   disableTooltip,
   noBorder,
+  disableCardViewer,
+  disableMotion,
 }: BaseCardProps & {
   cardData: FighterCard | TacticCard;
   cardId: string;
@@ -120,7 +131,7 @@ export function RenderCard({
     active: tooltipActive,
     onClick: onTriggerClick,
     ...triggers
-  } = useTriggerTooltip({ cardInstanceId: instanceId });
+  } = useTriggerTooltip({ cardInstanceId: instanceId, disableCardViewer });
   const cardArt = cardImageLookup[cardId];
   return (
     <Flipped flipId={instanceId}>
@@ -146,7 +157,7 @@ export function RenderCard({
                 data-id="card-back"
                 className="absolute w-full h-full backface-hidden"
                 variants={
-                  overSpace
+                  overSpace || disableMotion
                     ? {}
                     : {
                         hover: {
@@ -165,7 +176,7 @@ export function RenderCard({
                 className="backface-hidden"
                 initial={faceDown ? { rotateY: -180 } : { rotateY: 0 }}
                 variants={
-                  overSpace
+                  overSpace || disableMotion
                     ? {}
                     : {
                         hover: {
@@ -188,7 +199,7 @@ export function RenderCard({
                   onClick={(e) => {
                     e.stopPropagation();
                     onClick?.();
-                    onTriggerClick();
+                    onTriggerClick?.();
                   }}
                 >
                   <img
