@@ -7,6 +7,14 @@ import type {
   Space,
 } from '../gameDefinition';
 
+export function getTopCardInstanceIdAtCoordinate(
+  board: Board,
+  coord: Coordinate,
+): string | null {
+  const stack = getStack(board, coord);
+  return getTopCard(stack);
+}
+
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {
     return null;

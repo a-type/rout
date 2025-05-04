@@ -15,10 +15,11 @@ import { useDroppable } from '@dnd-kit/core';
 import { hooks } from './gameClient';
 import { DeckZone } from './DeckZone';
 import { DiscardZone } from './DiscardZone';
+import { useBoardOrientation } from './useBoardOrientation';
 
 function Map() {
-  const isLarge = useMediaQuery('(min-width: 1024px)');
-  const src = isLarge ? map : mapVert;
+  const orientation = useBoardOrientation();
+  const src = orientation === 'landscape' ? map : mapVert;
 
   return <img src={src} alt="Map" className="absolute w-full" />;
 }
@@ -49,14 +50,14 @@ export function Board({
     Object.values(finalState.playerState).find((s) => s.side === 'bottom') ??
     null;
   const { specialSpaces } = finalState as PlayerState;
-  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const orientation = useBoardOrientation();
 
   return (
     <div
       ref={setNodeRef}
       className={clsx(
         'relative w-full select-none',
-        isLarge ? 'aspect-[25/16]' : 'aspect-[16/25]',
+        orientation === 'landscape' ? 'aspect-[25/16]' : 'aspect-[16/25]',
       )}
     >
       <Map />
@@ -66,7 +67,7 @@ export function Board({
       <DiscardZone discard={bottomPlayerState?.discard ?? []} side="bottom" />
       <Box
         className={clsx(
-          isLarge
+          orientation === 'landscape'
             ? 'flex flex-col left-[22%] top-[7%] max-w-[calc(100vw-44%-500px)]'
             : 'flex flex-col left-[7%] top-[22%] max-w-[calc(100vw-14%)]',
         )}
@@ -75,17 +76,18 @@ export function Board({
           <Box
             key={rowIndex}
             className={clsx(
-              isLarge
+              orientation === 'landscape'
                 ? 'flex flex-row mb-[3%] gap-[3%]'
                 : 'flex flex-row mb-[3%] gap-[3%]',
             )}
           >
             {row.map((_, columnIndex) => {
-              const x = isLarge ? rowIndex : columnIndex;
-              const y = isLarge ? columnIndex : rowIndex;
-              const space = isLarge
-                ? state[columnIndex][rowIndex]
-                : state[rowIndex][columnIndex];
+              const x = orientation === 'landscape' ? rowIndex : columnIndex;
+              const y = orientation === 'landscape' ? columnIndex : rowIndex;
+              const space =
+                orientation === 'landscape'
+                  ? state[columnIndex][rowIndex]
+                  : state[rowIndex][columnIndex];
               const specialSpace = specialSpaces.find(
                 (s) => s.coordinate.x === x && s.coordinate.y === y,
               );

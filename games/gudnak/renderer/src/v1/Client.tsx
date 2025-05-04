@@ -12,7 +12,7 @@ import {
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { DefaultRoundRenderer } from '@long-game/game-ui';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
 import { hooks } from './gameClient';
@@ -26,9 +26,7 @@ import { Backdrop } from './Backdrop';
 export function Client() {
   return (
     <ViewStateProvider>
-      <Box>
-        <GameState />
-      </Box>
+      <GameState />
     </ViewStateProvider>
   );
 }
@@ -90,7 +88,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }
 
   return (
-    <Box className="w-full h-full flex flex-col gap-2 overflow-hidden">
+    <Box
+      className="w-full h-full flex flex-col gap-2 overflow-hidden"
+      data-id="main-game-area"
+    >
       <Flipper
         spring="veryGentle"
         flipKey={
@@ -124,30 +125,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             action.deployOrPlayCardImmediate(cardInstanceId, coord);
           }}
         >
-          <div className="p-3">
-            <Hand
-              cards={hand}
-              selectedId={action.selection.card?.instanceId ?? null}
-              targets={action.targets}
-              onClickCard={(card) => {
-                if (!active) {
-                  return;
-                }
-                if (action.targeting.active) {
-                  action.targeting.select({
-                    kind: 'card',
-                    instanceId: card.instanceId,
-                  });
-                  return;
-                }
-                action.playCard(card);
-              }}
-            />
+          <div className="p-2 lg:mt-8">
             <Box className="flex flex-row gap-2 items-center mt-3">
               {active ? (
                 <>
-                  <span className="font-bold">It's your turn!</span>
+                  <span className="font-bold">Your turn!</span>
                   <Button
+                    size="small"
                     disabled={actions <= 0}
                     onClick={() => {
                       submitTurn({ action: { type: 'draw' } });
@@ -156,6 +140,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                     Draw
                   </Button>
                   <Button
+                    size="small"
                     disabled={actions <= 0}
                     onClick={() => {
                       action.defend();
@@ -163,29 +148,32 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                   >
                     Defend
                   </Button>
-                  <Button
-                    disabled={actions > 0}
-                    onClick={() => {
-                      submitTurn({ action: { type: 'endTurn' } });
-                    }}
-                  >
-                    End
-                  </Button>
+                  {actions === 0 && (
+                    <Button
+                      size="small"
+                      disabled={actions > 0}
+                      onClick={() => {
+                        submitTurn({ action: { type: 'endTurn' } });
+                      }}
+                    >
+                      End
+                    </Button>
+                  )}
+                  <span>Actions: {actions}</span>
+
+                  {freeActions.length > 0 && (
+                    <span>
+                      Free {freeActions[0].type} action (x{' '}
+                      {freeActions[0].count ?? 1})
+                    </span>
+                  )}
+                  {action.targeting.next ? (
+                    <span>{action.targeting.next.description}</span>
+                  ) : null}
                 </>
               ) : (
                 <span>Waiting on opponent...</span>
               )}
-              <span>Actions: {actions}</span>
-
-              {freeActions.length > 0 && (
-                <span>
-                  Free {freeActions[0].type} action (x{' '}
-                  {freeActions[0].count ?? 1})
-                </span>
-              )}
-              {action.targeting.next ? (
-                <span>{action.targeting.next.description}</span>
-              ) : null}
             </Box>
           </div>
           <Board
@@ -243,6 +231,28 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               }
             }}
           />
+
+          <div className="absolute bottom-6 left-0 right-0 p-4">
+            <Hand
+              cards={hand}
+              selectedId={action.selection.card?.instanceId ?? null}
+              targets={action.targets}
+              onClickCard={(card) => {
+                if (!active) {
+                  return;
+                }
+                if (action.targeting.active) {
+                  action.targeting.select({
+                    kind: 'card',
+                    instanceId: card.instanceId,
+                  });
+                  return;
+                }
+                action.playCard(card);
+              }}
+            />
+          </div>
+
           {viewState.kind === 'cardViewer' ? (
             <Backdrop onClick={() => setViewState({ kind: 'game' })} />
           ) : null}

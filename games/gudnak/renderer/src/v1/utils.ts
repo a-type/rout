@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 
-export function useScreenSize() {
+export function useScreenSize(query: string = 'body') {
+  const el = document.querySelector(query) as HTMLElement;
   const [screenSize, setScreenSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: el?.clientWidth,
+    height: el?.clientHeight,
   });
 
   useEffect(() => {
     function handleResize() {
+      const el = document.querySelector(query) as HTMLElement;
       setScreenSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: el.clientWidth,
+        height: el.clientHeight,
       });
     }
 
@@ -23,4 +25,8 @@ export function useScreenSize() {
   }, []);
 
   return screenSize;
+}
+
+export function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
 }
