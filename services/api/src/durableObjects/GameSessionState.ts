@@ -376,10 +376,10 @@ export class GameSessionState extends DurableObject<ApiBindings> {
     }
 
     const gameDefinition = getLatestVersion(gameModule);
-    this.updateGame(sessionData.gameId, gameDefinition.version);
+    await this.updateGame(sessionData.gameId, gameDefinition.version);
 
     // start the game
-    this.#updateSessionData({ startedAt: new Date() });
+    await this.#updateSessionData({ startedAt: new Date() });
 
     // update any connected sockets of the new status
     this.#sendSocketMessage({
@@ -387,7 +387,7 @@ export class GameSessionState extends DurableObject<ApiBindings> {
       status: await this.getStatus(),
     });
 
-    this.#sendOrScheduleNotifications();
+    await this.#sendOrScheduleNotifications();
   }
 
   async getIsInitialized(): Promise<boolean> {

@@ -1,7 +1,7 @@
 // uno.config.ts
 import preset from '@a-type/ui/uno-preset';
 import variantGroup from '@unocss/transformer-variant-group';
-import { defineConfig } from 'unocss';
+import { defineConfig, extractorDefault } from 'unocss';
 
 export const presetOptions = {
   borderScale: 2,
@@ -28,8 +28,19 @@ export default defineConfig({
       include: [
         /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
         // include .js files from workspace packages
-        /\@long-game\/[^/]+\/dist\/.*\.js($|\?)/,
+        /packages\/(game-ui|visual-components)\/dist\/.*\.js($|\?)/,
+        /games\/[^/]+\/renderer\/dist\/.*\.js($|\?)/,
       ],
+    },
+  },
+  extractorDefault: {
+    name: 'default-extractor-plus-logs',
+    extract(ctx) {
+      // uncomment to log which files are being processed
+      // if (ctx.id && !ctx.id.includes('@a-type')) {
+      //   console.log(ctx.id);
+      // }
+      return extractorDefault.extract!(ctx);
     },
   },
   preflights: [

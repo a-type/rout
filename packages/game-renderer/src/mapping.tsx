@@ -32,7 +32,7 @@ async function loadGameModule(gameId: string) {
   if (!load) {
     throw new Error(`Game ${gameId} not found`);
   }
-  load.css();
+  // load.css();
   packageCache[gameId] = load.main();
   return packageCache[gameId];
 }
