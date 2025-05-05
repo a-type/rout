@@ -101,6 +101,9 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
           modifiers={[restrictToWindowEdges]}
           sensors={sensors}
           onDragEnd={(e) => {
+            if (e.over?.id === 'hand') {
+              return;
+            }
             const coord = e.over?.data.current?.coordinate as Coordinate;
             const cardInstanceId = e.active.data.current?.instanceId;
             const card = finalState.cardState[cardInstanceId as string];
@@ -234,19 +237,19 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}
               targets={action.targets}
-              // onClickCard={(card) => {
-              //   if (!active) {
-              //     return;
-              //   }
-              //   if (action.targeting.active) {
-              //     action.targeting.select({
-              //       kind: 'card',
-              //       instanceId: card.instanceId,
-              //     });
-              //     return;
-              //   }
-              //   action.playCard(card);
-              // }}
+              onClickCard={(card) => {
+                if (!active) {
+                  return;
+                }
+                if (action.targeting.active) {
+                  action.targeting.select({
+                    kind: 'card',
+                    instanceId: card.instanceId,
+                  });
+                  return;
+                }
+                //action.playCard(card);
+              }}
             />
           </div>
 

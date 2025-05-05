@@ -11,7 +11,6 @@ import { isCard, isCoordinate, Selection } from './useSelect';
 import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { useDroppable } from '@dnd-kit/core';
-import { isMobile } from 'react-device-detect';
 
 export function Space({
   stack,
@@ -86,7 +85,7 @@ export function Space({
         <div
           data-id="drop-zone"
           ref={setNodeRef}
-          className="absolute top-30% left-30% right-30% bottom-30%"
+          className="absolute top-20% left-20% right-20% bottom-20%"
         ></div>
         {topCard ? (
           <Card

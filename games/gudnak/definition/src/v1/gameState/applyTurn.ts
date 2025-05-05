@@ -187,6 +187,8 @@ export function performDefend(
     gameState.cardState[gatesCardId],
   );
 
+  gameState = spendActions(gameState);
+
   return gameState;
 }
 

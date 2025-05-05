@@ -455,7 +455,7 @@ export function validateDefend(
     return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
   }
   const topCard = cardState[topCardId];
-  if (topCard.ownerId !== playerId) {
+  if (topCard.ownerId === playerId) {
     reasons.push(INVALID_DEFEND_CODES.NOT_ENEMY_CARD);
   }
   const topCardDef = cardDefinitions[topCard.cardId as ValidCardId];
