@@ -16,7 +16,6 @@ export function MembershipsList({
     fetchNextPage,
     isFetchingNextPage,
   } = sdkHooks.useGetGameSessions({ status: statusFilter, invitationStatus });
-  console.log('sessions', sessions);
 
   return (
     <Box d="col" gap full="width">

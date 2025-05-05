@@ -46,6 +46,7 @@ type GameSessionSuiteEvents = {
   turnValidationFailed: (error: string) => void;
   error: (error: LongGameError) => void;
   roundChanged: () => void;
+  membersChanged: () => void;
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
@@ -684,7 +685,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       },
       {},
     );
-    this.fetchMembers();
+    this.fetchMembers().then(() => {
+      this.#events.emit('membersChanged');
+    });
   };
 
   debug = async () => {

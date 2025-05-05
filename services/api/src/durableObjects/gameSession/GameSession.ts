@@ -142,9 +142,9 @@ export class GameSession extends DurableObject<ApiBindings> {
       .selectAll()
       .orderBy('Turn.roundIndex asc')
       .orderBy('Turn.createdAt asc');
-    if (roundIndex) {
+    if (roundIndex !== undefined) {
       sql = sql.where('Turn.roundIndex', '=', roundIndex);
-    } else if (roundLte) {
+    } else if (roundLte !== undefined) {
       sql = sql.where('Turn.roundIndex', '<=', roundLte);
     }
     if (playerId) {
@@ -350,7 +350,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     )) as any;
   }
   async getPublicRound(playerId: PrefixedId<'u'>, roundIndex: number) {
-    const publicRoundIndex = await this.getPublicRoundIndex();
     const currentRoundIndex = await this.getCurrentRoundIndex();
     if (roundIndex > currentRoundIndex) {
       throw new LongGameError(
@@ -373,7 +372,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       turns: round.turns.map((turn) => {
         // do not show turn data for the current round, only show which players have
         // played a turn.
-        if (roundIndex > publicRoundIndex) {
+        if (roundIndex === currentRoundIndex && turn.playerId !== playerId) {
           return {
             playerId: turn.playerId,
             data: null,
@@ -445,6 +444,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       currentRoundIndex - 1,
     );
 
+    console.log(turn, playerState, currentRoundIndex);
     const validationError = gameDefinition.validateTurn({
       turn: {
         data: turn,
@@ -716,6 +716,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     upToAndIncluding: number;
   }): Promise<GameRound<GameSessionTurn>[]> {
     const turns = await this.#listTurns({ roundLte: upToAndIncluding });
+    console.log('turns at round', upToAndIncluding, turns.length);
     return turns.reduce<GameRound<GameSessionTurn>[]>(
       (acc, turn) => {
         const round = acc[turn.roundIndex] ?? {
@@ -799,6 +800,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const currentTime = new Date();
     const startedAt = new Date(sessionData.startedAt);
     const gameTimeZone = sessionData.timezone;
+    // TODO: we already have turns in scope, we could compute this without
+    // dipping back.
     const globalState = await this.#getGlobalStateUnchecked(
       latestRoundFromTurns,
     );

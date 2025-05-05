@@ -13,6 +13,7 @@ import {
   withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
+import { withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { useState } from 'react';
@@ -55,9 +56,9 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
       <Divider />
       <Box d="col">
         <H2>Who's in</H2>
-        <GameSetupMembers sessionId={gameSessionId} />
+        <GameSetupMembers />
         <H2>Invite friends</H2>
-        <GameSetupInviteFriends sessionId={gameSessionId} />
+        <GameSetupInviteFriends />
       </Box>
       <Divider />
 
@@ -83,20 +84,20 @@ type GameSetupInviteEntryData = {
   status: 'accepted' | 'pending' | 'declined' | 'expired' | 'uninvited';
 };
 
-function GameSetupInviteFriends({
-  sessionId,
-}: {
-  sessionId: PrefixedId<'gs'>;
+const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
+  gameSuite,
 }) {
+  const sessionId = gameSuite.gameSessionId;
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: sessionId,
   });
   const { data: friends } = sdkHooks.useGetFriendships();
+  const players = gameSuite.players;
   const friendsNotInvited = friends.filter(
     (friendship) =>
       !pregame.invitations.some(
         (invite) => invite.user?.id === friendship.id,
-      ) && !pregame.members.some((member) => member.id === friendship.id),
+      ) && !players[friendship.id],
   );
 
   const inviteMutation = sdkHooks.useSendGameSessionInvitation();
@@ -167,21 +168,19 @@ function GameSetupInviteFriends({
       </Box>
     </Box>
   );
-}
+});
 
-function GameSetupMembers({ sessionId }: { sessionId: PrefixedId<'gs'> }) {
-  const { data: pregame } = sdkHooks.useGetGameSessionPregame({
-    id: sessionId,
-  });
+const GameSetupMembers = withGame(function GameSetupMembers({ gameSuite }) {
+  const members = gameSuite.players;
 
   return (
     <PeopleGrid>
-      {pregame.members.map((member) => (
-        <GameSetupMemberItem key={member.id} member={member} />
+      {Object.entries(members).map(([id, member]) => (
+        <GameSetupMemberItem key={id} member={member} />
       ))}
     </PeopleGrid>
   );
-}
+});
 
 function GameSetupMemberItem({
   member,
