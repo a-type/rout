@@ -95,7 +95,7 @@ export const gameDefinition: GameDefinition<
 
     if (turnsThatGuessedRight.length > 0) {
       return {
-        status: 'completed',
+        status: 'complete',
         // exclude nulls - users which have left the game or
         // otherwise invalid moves...
         winnerIds: turnsThatGuessedRight

@@ -11,7 +11,7 @@ export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
       color={
         status === 'active'
           ? 'accent'
-          : status === 'completed'
+          : status === 'complete'
           ? 'primary'
           : 'neutral'
       }
@@ -20,14 +20,14 @@ export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
         name={
           status === 'active'
             ? 'gamePiece'
-            : status === 'completed'
+            : status === 'complete'
             ? 'flag'
             : 'clock'
         }
       />
       {status === 'active'
         ? 'Live'
-        : status === 'completed'
+        : status === 'complete'
         ? 'Finished'
         : 'Setup'}
     </Chip>

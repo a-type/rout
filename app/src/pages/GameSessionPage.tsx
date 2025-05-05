@@ -45,7 +45,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
-      {gameSuite.gameStatus.status === 'completed' && (
+      {gameSuite.gameStatus.status === 'complete' && (
         <Box surface="primary" className="rounded-none flex-shrink-0 py-xs">
           <ScrollTicker>
             <span>Game Over!</span>

@@ -1,3 +1,5 @@
+import { PrefixedId } from './ids';
+
 export interface GameSessionPlayerStatus {
   online: boolean;
 }
@@ -10,8 +12,8 @@ export type GameStatus =
       status: 'active';
     }
   | {
-      status: 'completed';
-      winnerIds: string[];
+      status: 'complete';
+      winnerIds: PrefixedId<'u'>[];
     };
 
 export type GameStatusValue = GameStatus['status'];

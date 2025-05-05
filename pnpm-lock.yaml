@@ -925,12 +925,18 @@ importers:
       '@long-game/service-db':
         specifier: workspace:*
         version: link:../db
+      durable-utils:
+        specifier: ^0.3.4
+        version: 0.3.4
       hono:
         specifier: 'catalog:'
         version: 4.7.7
       jose:
         specifier: ^5.9.6
         version: 5.9.6
+      kysely:
+        specifier: 'catalog:'
+        version: 0.27.6
       stripe:
         specifier: ^18.0.0
         version: 18.0.0
@@ -4388,6 +4394,9 @@ packages:
 
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
+
+  durable-utils@0.3.4:
+    resolution: {integrity: sha512-w/nsRi78nfFPkyaZFJ1NKyhhJWU3lkeea17CkK712q0NV23UnF7iDeH6TBSGlB5kv7zbT0JC6m/xc3lShatTCg==}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -10497,6 +10506,8 @@ snapshots:
   draco3d@1.5.7: {}
 
   duplexer@0.1.2: {}
+
+  durable-utils@0.3.4: {}
 
   eastasianwidth@0.2.0: {}
 

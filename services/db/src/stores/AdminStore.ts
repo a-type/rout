@@ -3,6 +3,7 @@ import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
 import {
   DB,
   GameProductUpdate,
+  GameSessionUpdate,
   NewGameProduct,
   NotificationSettings,
   comparePassword,
@@ -416,6 +417,61 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .groupBy('GameProduct.id')
       .having((eb) => eb.fn.count('GameProductItem.id'), '=', 1)
       .execute();
+  }
+
+  async listAllGameSessions({
+    first,
+    before,
+    status,
+  }: {
+    first?: number;
+    before?: string;
+    status?: 'pending' | 'active' | 'complete';
+  } = {}) {
+    let query = this.#db
+      .selectFrom('GameSession')
+      .selectAll()
+      .orderBy('GameSession.createdAt desc');
+    if (first) {
+      query = query.limit(first + 1);
+    }
+    if (before) {
+      query = query.where('GameSession.createdAt', '<', before);
+    }
+    if (status) {
+      query = query.where('GameSession.status', '=', status);
+    }
+    const results = await query.execute();
+    const hasNextPage = !!(first && results.length > first);
+    if (hasNextPage) {
+      results.pop();
+    }
+
+    const endCursor = results.length
+      ? results[results.length - 1].createdAt
+      : undefined;
+    return {
+      results,
+      pageInfo: {
+        endCursor,
+        hasNextPage,
+      },
+    };
+  }
+
+  async updateGameSession(
+    id: PrefixedId<'gs'>,
+    updates: Partial<GameSessionUpdate>,
+  ) {
+    await this.#db
+      .updateTable('GameSession')
+      .where('id', '=', id)
+      .set(updates)
+      .executeTakeFirstOrThrow();
+  }
+
+  async deleteGameSession(id: PrefixedId<'gs'>) {
+    await this.#db.deleteFrom('GameSession').where('id', '=', id).execute();
   }
 }
 

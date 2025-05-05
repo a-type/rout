@@ -1,16 +1,12 @@
 import { zValidator } from '@hono/zod-validator';
-import { id, LongGameError, wrapRpcData } from '@long-game/common';
+import { LongGameError } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { EnvWith } from '../config/ctx';
 import { userStoreMiddleware } from '../middleware';
-import { getGameSessionState } from '../services/gameSessions';
 
-import { UserStore } from '@long-game/service-db';
-import { RpcStub } from 'cloudflare:workers';
-import { GameSessionState } from '../durableObjects/GameSessionState';
 import { gameSessionRouter } from './gameSession';
 
 export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
@@ -32,32 +28,27 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
               return [val];
             }
             return undefined;
-          }, z.enum(['active', 'completed', 'pending']).array())
+          }, z.enum(['active', 'complete', 'pending']).array())
           .optional(),
         first: z.coerce.number().int().positive().optional(),
-        after: z.string().optional(),
+        before: z.string().optional(),
       }),
     ),
     async (ctx) => {
       const userStore = ctx.get('userStore');
-      const {
-        results: filteredSessions,
-        errors,
-        pageInfo,
-      } = await mapAndFilterGameSessions(
-        ctx.req.valid('query'),
-        userStore,
-        ctx.env,
-      );
-
-      for (const err of errors) {
-        console.error(err);
-      }
+      const { invitationStatus, status, first, before } =
+        ctx.req.valid('query');
+      const { results: filteredSessions, pageInfo } =
+        await userStore.getGameSessions({
+          status,
+          invitationStatus,
+          first,
+          before,
+        });
 
       return ctx.json({
         results: filteredSessions,
         pageInfo,
-        errors: errors.map((e) => e?.message),
       });
     },
   )
@@ -69,6 +60,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
         gameId: z.string(),
       }),
     ),
+    userStoreMiddleware,
     async (ctx) => {
       const { gameId } = ctx.req.valid('json');
       const game = games[gameId];
@@ -81,15 +73,15 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       }
       const gameDefinition = getLatestVersion(game);
 
-      const sessionId = id('gs');
-      const durableObjectId = ctx.env.GAME_SESSION_STATE.idFromName(sessionId);
-      const sessionState = await ctx.env.GAME_SESSION_STATE.get(
-        durableObjectId,
-      );
+      const userStore = ctx.get('userStore');
+      const gameSession = await userStore.createGameSession();
+
+      const durableObjectId = ctx.env.GAME_SESSION.idFromName(gameSession.id);
+      const sessionState = await ctx.env.GAME_SESSION.get(durableObjectId);
       const randomSeed = crypto.randomUUID();
       const userId = ctx.get('session').userId;
       await sessionState.initialize({
-        id: sessionId,
+        id: gameSession.id,
         randomSeed,
         gameId: game.id,
         gameVersion: gameDefinition.version,
@@ -102,95 +94,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
         timezone: 'America/New_York',
       });
 
-      // insert founding membership so the user can find this session
-      const userStore = await ctx.env.PUBLIC_STORE.getStoreForUser(userId);
-      await userStore.insertFoundingGameMembership(sessionId);
-
-      return ctx.json({ sessionId });
+      return ctx.json({ sessionId: gameSession.id });
     },
   )
   .route('/:id', gameSessionRouter);
-
-/**
- * Since sessions are filtered post-facto (because we have to dip in DOs to get the status),
- * we sometimes have to fetch an extra page or more to get the desired number of sessions.
- */
-async function mapAndFilterGameSessions(
-  filter: {
-    invitationStatus?: 'pending' | 'accepted' | 'declined' | 'expired';
-    status?: ('active' | 'completed' | 'pending')[];
-    first?: number;
-    after?: string;
-  },
-  userStore: RpcStub<UserStore>,
-  env: ApiBindings,
-): Promise<{
-  errors: Error[];
-  pageInfo: { hasNextPage: boolean; endCursor: string | null };
-  results: (Awaited<ReturnType<GameSessionState['getSummary']>> & {
-    canDelete: boolean;
-    invitationStatus:
-      | 'pending'
-      | 'accepted'
-      | 'declined'
-      | 'expired'
-      | 'uninvited';
-  })[];
-}> {
-  const { results: invitations, pageInfo } = await userStore.getGameSessions({
-    status: filter.invitationStatus,
-    first: filter.first ?? 10,
-    after: filter.after,
-  });
-
-  const sessionDOs = await Promise.allSettled(
-    invitations.map(async ({ gameSessionId, isFoundingMember, status }) => {
-      const state = await getGameSessionState(gameSessionId, env);
-      const summary = await state.getSummary();
-      return {
-        ...wrapRpcData(summary),
-        canDelete: !!isFoundingMember,
-        invitationStatus: status,
-      };
-    }),
-  );
-
-  const sessionStates = sessionDOs
-    .map((r) => (r.status === 'fulfilled' ? r.value : null))
-    .filter((s): s is NonNullable<typeof s> => s !== null);
-  const errors = sessionDOs
-    .map((r) => (r.status === 'rejected' ? r.reason : null))
-    .filter((e): e is Error => e !== null);
-
-  const statusFilter = filter.status;
-  let filteredSessions = sessionStates;
-  if (statusFilter) {
-    filteredSessions = sessionStates.filter((s) => {
-      return statusFilter.includes(s.status.status);
-    });
-  }
-
-  // now we've filtered the original result set further, we may need to fetch
-  // more pages to get the desired number of sessions
-  if (filter.first) {
-    if (
-      filteredSessions.length < filter.first &&
-      pageInfo.hasNextPage &&
-      pageInfo.endCursor
-    ) {
-      const nextPage = await mapAndFilterGameSessions(
-        { ...filter, first: filter.first, after: pageInfo.endCursor },
-        userStore,
-        env,
-      );
-      filteredSessions = filteredSessions.concat(nextPage.results);
-      errors.push(...nextPage.errors);
-    }
-  }
-
-  return {
-    results: filteredSessions,
-    errors,
-    pageInfo,
-  };
-}

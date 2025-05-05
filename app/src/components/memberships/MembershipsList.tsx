@@ -1,6 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card, cardGridColumns, toast } from '@a-type/ui';
-import { useEffect } from 'react';
+import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
 import { CreateGame } from '../games/CreateGame';
 import { GameSummaryCard } from './GameSummaryCard';
 
@@ -8,27 +7,16 @@ export function MembershipsList({
   statusFilter,
   invitationStatus,
 }: {
-  statusFilter?: ('active' | 'completed' | 'pending')[];
+  statusFilter?: ('active' | 'complete' | 'pending')[];
   invitationStatus?: 'pending' | 'accepted' | 'declined';
 }) {
   const {
-    data: { results: sessions, errors },
+    data: { results: sessions },
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
   } = sdkHooks.useGetGameSessions({ status: statusFilter, invitationStatus });
-
-  useEffect(() => {
-    if (errors?.length) {
-      errors.forEach(console.error);
-      toast.error(
-        'An error occurred while loading your games. Please try again later.',
-        {
-          id: 'games-list-error',
-        },
-      );
-    }
-  }, [errors]);
+  console.log('sessions', sessions);
 
   return (
     <Box d="col" gap full="width">

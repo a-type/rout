@@ -66,11 +66,11 @@ export class PublicSdk extends BaseSdk {
     'getGameSessions',
     ({ status, invitationStatus }, cursor) =>
       this.apiRpc.gameSessions.$get({
-        query: { after: cursor, status, invitationStatus },
+        query: { before: cursor, status, invitationStatus },
       }),
     {
       transformInput: (input: {
-        status?: ('active' | 'completed' | 'pending')[];
+        status?: ('active' | 'complete' | 'pending')[];
         invitationStatus?: 'pending' | 'accepted' | 'declined';
       }) => input,
       getKey: (input) => {

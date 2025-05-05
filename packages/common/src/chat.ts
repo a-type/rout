@@ -2,8 +2,8 @@ import { PrefixedId } from './ids';
 
 export type GameSessionChatMessage = {
   id: PrefixedId<'cm'>;
-  createdAt: number;
-  authorId: PrefixedId<'u'>;
+  createdAt: string;
+  authorId: PrefixedId<'u'> | SystemChatAuthorId;
   content: string;
   /**
    * Optionally, chats can be placed on a game scene
@@ -31,9 +31,17 @@ export type GameSessionChatMessage = {
    * after the game is over.
    */
   roundIndex: number;
+  /**
+   * Can be whatever you want. Each game can utilize this field
+   * as it sees fit.
+   */
+  metadata?: any;
 };
 
 export type GameSessionChatInit = Omit<
   GameSessionChatMessage,
   'id' | 'createdAt' | 'authorId'
 >;
+
+export const SYSTEM_CHAT_AUTHOR_ID = 'system' as const;
+export type SystemChatAuthorId = typeof SYSTEM_CHAT_AUTHOR_ID;

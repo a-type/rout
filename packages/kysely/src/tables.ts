@@ -26,6 +26,7 @@ export interface Database {
   VerificationCode: VerificationCodeTable;
   GameSessionInvitation: GameSessionInvitationTable;
   GameSessionInvitationLink: GameSessionInvitationLinkTable;
+  GameSession: GameSessionTable;
   Friendship: FriendshipTable;
   FriendshipInvitation: FriendshipInvitationTable;
   PushSubscription: PushSubscriptionTable;
@@ -209,3 +210,16 @@ export interface GameProductItemTable {
 export type GameProductItem = Selectable<GameProductItemTable>;
 export type NewGameProductItem = Insertable<GameProductItemTable>;
 export type GameProductItemUpdate = Updateable<GameProductItemTable>;
+
+export interface GameSessionTable {
+  id: PrefixedId<'gs'>;
+  createdAt: DateColumnGenerated;
+  updatedAt: DateColumnGenerated;
+  status: 'pending' | 'active' | 'complete';
+  gameId: string | null;
+  gameVersion: string | null;
+  winnerIdsJson: PrefixedId<'u'>[] | null;
+}
+export type GameSession = Selectable<GameSessionTable>;
+export type NewGameSession = Insertable<GameSessionTable>;
+export type GameSessionUpdate = Updateable<GameSessionTable>;

@@ -77,7 +77,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
 
   const { viewState, setViewState } = useViewState();
 
-  if (gameStatus.status === 'completed') {
+  if (gameStatus.status === 'complete') {
     return (
       <Box className="w-full h-full flex flex-col p-3 gap-2">
         <h3>Game Over</h3>
