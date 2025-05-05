@@ -38,10 +38,11 @@ export function Hand({
   if (!availableWidth) {
     return null;
   }
-  const availableCardWidth = (cardSize * cards.length) / (availableWidth / 1.5);
+  const availableCardWidth = (cardSize * cards.length) / (availableWidth / 2);
 
   const cardWidth = cardSize; // Adjust based on your card width
-  const overlapOffset = clamp(1 / availableCardWidth, 0.1, 0.7) * cardSize;
+  const overlapOffset =
+    clamp(1 / availableCardWidth, 0.1, 0.7) * cardSize * 0.1;
 
   const totalWidth = (cards.length - 1) * overlapOffset + cardWidth;
   const centerOffset = (availableWidth - totalWidth) / 2;
@@ -52,12 +53,16 @@ export function Hand({
       style={{ height: cardSize }}
     >
       <motion.div
+        className="w-full"
         ref={ref}
-        initial={{ y: isLarge ? 100 : isMedium ? 50 : 40, scale: 0.8 }}
+        initial={{
+          y: isLarge ? 100 : isMedium ? 50 : 40,
+          scale: 0.8,
+        }}
         onTapStart={() => setExpandHand(true)}
         onTapCancel={() => setExpandHand(false)}
         animate={expandHand ? { y: 0, scale: 1 } : {}}
-        whileHover={isMobile ? undefined : { y: 0, scale: 1 }}
+        whileHover={isMobile ? undefined : { y: 0, scale: 1, height: '200%' }}
         transition={{
           type: 'spring',
           duration: 0.4,
@@ -84,25 +89,37 @@ export function Hand({
               }
             })();
 
+            // adjust rotation before and after hovered card
+            const rotationOffset = (() => {
+              if (isHovered) {
+                return 0;
+              } else if (isBeforeHovered) {
+                return -5;
+              } else if (isAfterHovered) {
+                return 5;
+              } else {
+                return 0;
+              }
+            })();
+
             return (
               <motion.div
                 layout
                 key={card.instanceId}
                 className="absolute"
                 style={{
+                  transformOrigin: '50% 500%',
                   width: `${cardWidth}px`,
                   zIndex: isHovered ? 10 : index,
                 }}
                 animate={{
                   x: xOffset,
-                  y: isHovered
-                    ? -10
-                    : Math.abs(index + 0.5 - cards.length / 2) *
-                      (50 / cards.length),
+                  y: isHovered ? -20 : 0,
                   rotate:
                     active && active.id === card.instanceId
                       ? 0
-                      : (20 / cards.length) * (index + 0.5 - cards.length / 2),
+                      : rotationOffset +
+                        (30 / cards.length) * (index + 0.5 - cards.length / 2),
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
