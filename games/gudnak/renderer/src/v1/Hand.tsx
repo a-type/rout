@@ -32,7 +32,7 @@ export function Hand({
   const isMedium = useMediaQuery('(min-width: 768px)');
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
-  const cardSize = isLarge ? 200 : isMedium ? 180 : 120;
+  const cardSize = isLarge ? 200 : isMedium ? 200 : 120;
 
   const { width: availableWidth } = useScreenSize("[data-id='main-game-area']");
   if (!availableWidth) {
@@ -49,20 +49,28 @@ export function Hand({
 
   return (
     <Box
-      className="relative flex flex-row py-2 z-50 w-full"
-      style={{ height: cardSize }}
+      className="relative flex flex-row w-full"
+      style={{ height: cardSize * 0.5 }}
     >
       <motion.div
-        className="w-full"
+        className="w-full z-50"
         ref={ref}
         initial={{
-          y: isLarge ? 100 : isMedium ? 50 : 40,
+          y: 0,
           scale: 0.8,
         }}
         onTapStart={() => setExpandHand(true)}
         onTapCancel={() => setExpandHand(false)}
         animate={expandHand ? { y: 0, scale: 1 } : {}}
-        whileHover={isMobile ? undefined : { y: 0, scale: 1, height: '200%' }}
+        whileHover={
+          isMobile
+            ? undefined
+            : {
+                y: -(isLarge ? 100 : isMedium ? 75 : 50),
+                scale: 1,
+                height: '200%',
+              }
+        }
         transition={{
           type: 'spring',
           duration: 0.4,
@@ -76,6 +84,7 @@ export function Hand({
               hoveredIndex !== null && index < hoveredIndex;
             const isAfterHovered =
               hoveredIndex !== null && index > hoveredIndex;
+            const isBeingDragged = active && active.id === card.instanceId;
 
             const xOffset = (() => {
               if (isHovered) {
@@ -108,18 +117,17 @@ export function Hand({
                 key={card.instanceId}
                 className="absolute"
                 style={{
-                  transformOrigin: '50% 500%',
+                  transformOrigin: isBeingDragged ? '50% 50%' : '50% 500%',
                   width: `${cardWidth}px`,
                   zIndex: isHovered ? 10 : index,
                 }}
                 animate={{
                   x: xOffset,
                   y: isHovered ? -20 : 0,
-                  rotate:
-                    active && active.id === card.instanceId
-                      ? 0
-                      : rotationOffset +
-                        (30 / cards.length) * (index + 0.5 - cards.length / 2),
+                  rotate: isBeingDragged
+                    ? 0
+                    : rotationOffset +
+                      (30 / cards.length) * (index + 0.5 - cards.length / 2),
                 }}
                 exit={{ opacity: 0 }}
                 transition={{

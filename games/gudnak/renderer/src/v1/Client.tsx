@@ -229,7 +229,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             }}
           />
 
-          <div className="absolute bottom-2 left-0 right-0 p-4 z-50">
+          <div className="absolute bottom-0 left-0 right-0 p-4">
             <Hand
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}

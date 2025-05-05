@@ -21,7 +21,15 @@ function Map() {
   const orientation = useBoardOrientation();
   const src = orientation === 'landscape' ? map : mapVert;
 
-  return <img src={src} alt="Map" className="absolute w-full" />;
+  return (
+    <img
+      draggable="false"
+      src={src}
+      alt="Map"
+      className="absolute w-full select-none
+  "
+    />
+  );
 }
 
 export function Board({
