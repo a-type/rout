@@ -771,7 +771,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       globalState,
       playerId,
       members,
-      roundIndex: resolvedRoundIndex,
+      roundIndex: rounds.length,
       rounds,
       playerTurn,
     }) as unknown;
