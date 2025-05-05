@@ -6,6 +6,7 @@ import {
   CollapsibleSimple,
   Icon,
   RelativeTime,
+  ScrollArea,
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
@@ -92,15 +93,12 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
   const { combinedLog: log } = gameSuite;
-  const { ref, onScroll } = useStayScrolledToBottom();
 
   return (
     <GameLogRoot {...props}>
-      {/* TODO: ScrollArea -- but stick to bottom doesn't work here. */}
-      <div
+      <ScrollArea
         className="flex flex-col min-h-0 overflow-y-auto flex-1"
-        ref={ref}
-        onScroll={onScroll}
+        stickToBottom
       >
         <GameLogListRoot>
           {log.map((entry, i) =>
@@ -117,7 +115,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
             ),
           )}
         </GameLogListRoot>
-      </div>
+      </ScrollArea>
       <GameLogChatInput />
     </GameLogRoot>
   );

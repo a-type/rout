@@ -716,7 +716,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     upToAndIncluding: number;
   }): Promise<GameRound<GameSessionTurn>[]> {
     const turns = await this.#listTurns({ roundLte: upToAndIncluding });
-    console.log('turns at round', upToAndIncluding, turns.length);
     return turns.reduce<GameRound<GameSessionTurn>[]>(
       (acc, turn) => {
         const round = acc[turn.roundIndex] ?? {
