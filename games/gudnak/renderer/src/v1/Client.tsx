@@ -234,19 +234,19 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               cards={hand}
               selectedId={action.selection.card?.instanceId ?? null}
               targets={action.targets}
-              onClickCard={(card) => {
-                if (!active) {
-                  return;
-                }
-                if (action.targeting.active) {
-                  action.targeting.select({
-                    kind: 'card',
-                    instanceId: card.instanceId,
-                  });
-                  return;
-                }
-                action.playCard(card);
-              }}
+              // onClickCard={(card) => {
+              //   if (!active) {
+              //     return;
+              //   }
+              //   if (action.targeting.active) {
+              //     action.targeting.select({
+              //       kind: 'card',
+              //       instanceId: card.instanceId,
+              //     });
+              //     return;
+              //   }
+              //   action.playCard(card);
+              // }}
             />
           </div>
 

@@ -7,7 +7,7 @@ import type {
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
-import { clamp, useScreenSize } from './utils';
+import { rotatePointAroundAnotherPoint, useScreenSize } from './utils';
 import { useClickAway } from '@uidotdev/usehooks';
 import { isMobile } from 'react-device-detect';
 import { useDndContext } from '@dnd-kit/core';
@@ -21,7 +21,7 @@ export function Hand({
   cards: CardType[];
   targets: Target[];
   selectedId: string | null;
-  onClickCard: (card: CardType) => void;
+  onClickCard?: (card: CardType) => void;
 }) {
   const { active } = useDndContext();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -32,17 +32,17 @@ export function Hand({
   const isMedium = useMediaQuery('(min-width: 768px)');
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
+  const maxRotation = isLarge ? 30 : isMedium ? 25 : 20;
+
   const cardSize = isLarge ? 200 : isMedium ? 200 : 120;
 
   const { width: availableWidth } = useScreenSize("[data-id='main-game-area']");
   if (!availableWidth) {
     return null;
   }
-  const availableCardWidth = (cardSize * cards.length) / (availableWidth / 2);
 
   const cardWidth = cardSize; // Adjust based on your card width
-  const overlapOffset =
-    clamp(1 / availableCardWidth, 0.1, 0.7) * cardSize * 0.1;
+  const overlapOffset = cardSize * 0.05;
 
   const totalWidth = (cards.length - 1) * overlapOffset + cardWidth;
   const centerOffset = (availableWidth - totalWidth) / 2;
@@ -61,14 +61,14 @@ export function Hand({
         }}
         onTapStart={() => setExpandHand(true)}
         onTapCancel={() => setExpandHand(false)}
-        animate={expandHand ? { y: 0, scale: 1 } : {}}
+        animate={expandHand ? { y: -25, scale: 1 } : {}}
         whileHover={
           isMobile
             ? undefined
             : {
-                y: -(isLarge ? 100 : isMedium ? 75 : 50),
+                y: isLarge ? -100 : isMedium ? -75 : -50,
                 scale: 1,
-                height: '200%',
+                height: '300%',
               }
         }
         transition={{
@@ -87,7 +87,7 @@ export function Hand({
             const isBeingDragged = active && active.id === card.instanceId;
 
             const xOffset = (() => {
-              if (isHovered) {
+              if (isHovered || isBeingDragged) {
                 return index * overlapOffset + centerOffset;
               } else if (isBeforeHovered) {
                 return index * overlapOffset + centerOffset - overlapOffset / 2;
@@ -111,23 +111,29 @@ export function Hand({
               }
             })();
 
+            const rotation =
+              rotationOffset +
+              (maxRotation / cards.length) * (index + 0.5 - cards.length / 2);
+
+            const { x, y } = rotatePointAroundAnotherPoint(
+              { x: 0, y: 0 },
+              { x: 0, y: cardSize * 4 },
+              rotation,
+            );
+
             return (
               <motion.div
                 layout
                 key={card.instanceId}
                 className="absolute"
                 style={{
-                  transformOrigin: isBeingDragged ? '50% 50%' : '50% 500%',
                   width: `${cardWidth}px`,
                   zIndex: isHovered ? 10 : index,
                 }}
                 animate={{
-                  x: xOffset,
-                  y: isHovered ? -20 : 0,
-                  rotate: isBeingDragged
-                    ? 0
-                    : rotationOffset +
-                      (30 / cards.length) * (index + 0.5 - cards.length / 2),
+                  x: x + xOffset,
+                  y: y + (isHovered ? -20 : 0),
+                  rotate: isBeingDragged ? 0 : rotation,
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
@@ -153,7 +159,7 @@ export function Hand({
                   instanceId={card.instanceId}
                   info={card}
                   onClick={() => {
-                    onClickCard(card);
+                    onClickCard?.(card);
                   }}
                 />
               </motion.div>

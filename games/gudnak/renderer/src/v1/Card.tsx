@@ -298,6 +298,7 @@ export function Card({
         instanceId: rest.instanceId,
         cardInfo: info,
       }}
+      disabled={rest.disableDrag}
     >
       <RenderCard cardData={cardData} cardId={cardId} {...rest} />
     </Draggable>

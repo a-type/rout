@@ -100,6 +100,44 @@ describe('gameState/validation', {}, () => {
       expect(result).not.toBeNull();
       expect(result).toContain(INVALID_DEPLOY_CODES.NO_MATCHING_TAG);
     });
+
+    it('should return an error if the target is occupied by a card of a different player', () => {
+      let gameState = generateInitialGameState({
+        members: [{ id: 'u-1' }, { id: 'u-2' }],
+        random: new GameRandom('test'),
+        decklists: {
+          'u-1': { name: 'test', list: ['dawnbringer-brute-1'] },
+          'u-2': { name: 'test', list: ['dawnbringer-brute-1'] },
+        },
+      });
+      gameState.board = addCardToStack(
+        gameState.board,
+        { x: 0, y: 0 },
+        'card-1',
+      );
+      const instanceId = gameState.playerState['u-1'].hand[0];
+      gameState.cardState['card-1'] = {
+        cardId: 'dawnbringer-brute-1',
+        instanceId: 'card-1',
+        ownerId: 'u-2',
+        fatigued: false,
+        continuousEffects: [],
+      };
+      const action = {
+        type: 'deploy',
+        cardInstanceId: instanceId,
+        target: { x: 0, y: 0 },
+      };
+      const result = validateDeploy(
+        gameState.board,
+        gameState.cardState,
+        'top',
+        gameState.cardState[instanceId],
+        action.target,
+      );
+      expect(result).not.toBeNull();
+      expect(result).toContain(INVALID_DEPLOY_CODES.NOT_SAME_OWNER);
+    });
   });
 
   describe('validateMove', {}, () => {
