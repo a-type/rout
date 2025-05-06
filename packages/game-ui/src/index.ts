@@ -8,7 +8,6 @@ export * from './debugger/GameDebugger';
 export * from './decoration/GameIllustration1';
 export * from './history/RoundHistoryControl';
 export * from './hooks/useMediaQuery';
-export * from './log/DefaultRoundRenderer';
 export * from './players/PlayerAvatar';
 export * from './players/PlayerName';
 export * from './players/PlayerStatuses';
