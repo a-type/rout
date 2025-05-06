@@ -2,6 +2,7 @@ import { PrefixedId } from '@long-game/common';
 import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import {
   abilityDefinitions,
+  CardTarget,
   ContinuousEffect,
   EffectInput,
   Target,
@@ -15,6 +16,7 @@ import { checkFatigue } from './gameState/gameStateHelpers';
 import { generateInitialGameState } from './gameState/generate';
 import { getPlayerState } from './gameState/getPlayerState';
 import {
+  validateDefend,
   validateDeploy,
   validateMove,
   validateTargets,
@@ -52,6 +54,12 @@ export type MoveAction = {
   source: Coordinate;
   target: Coordinate;
 };
+export type AttackAction = {
+  type: 'attack';
+  cardInstanceId: string;
+  source: Coordinate;
+  target: Coordinate;
+};
 export type UseAbilityAction = {
   type: 'useAbility';
   cardInstanceId: string;
@@ -59,14 +67,20 @@ export type UseAbilityAction = {
   source: Coordinate;
   targets: Target[];
 };
+export type DefendAction = {
+  type: 'defend';
+  targets: CardTarget[];
+};
 export type EndTurnAction = { type: 'endTurn' };
 export type Action =
   | DrawAction
   | DeployAction
   | MoveAction
+  | AttackAction
   | EndTurnAction
   | TacticAction
-  | UseAbilityAction;
+  | UseAbilityAction
+  | DefendAction;
 
 export type FreeAction = {
   type: 'deploy' | 'move';
@@ -79,6 +93,8 @@ export type PlayerSelfState = {
   hand: string[];
   discard: string[];
   side: Side;
+  // Track each player's initial turn to know when they should only get one action.
+  hasTakenTurn: boolean;
 };
 
 export type GlobalState = {
@@ -117,7 +133,7 @@ function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
     // requires us to validate active player in turn validation
     const maxRoundIndex = turns.reduce((max, turn) => {
       return Math.max(max, turn.roundIndex);
-    }, 0);
+    }, -1);
 
     return {
       roundIndex: maxRoundIndex + 1,
@@ -189,6 +205,8 @@ export const gameDefinition: GameDefinition<
       }
       return;
     }
+
+    // Below items require an action
     if (actions <= 0 && !matchingFreeAction) {
       return 'You have no actions left';
     }
@@ -225,6 +243,13 @@ export const gameDefinition: GameDefinition<
       );
       if (moveErrors) {
         return moveErrors[0];
+      }
+    }
+
+    if (action.type === 'defend') {
+      const defendErrors = validateDefend(playerState, playerId, action);
+      if (defendErrors) {
+        return defendErrors[0];
       }
     }
 

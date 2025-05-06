@@ -1,5 +1,7 @@
 import { Turn } from '@long-game/game-definition';
 import {
+  AttackAction,
+  DefendAction,
   DeployAction,
   GlobalState,
   MoveAction,
@@ -9,16 +11,18 @@ import {
 } from '../gameDefinition';
 import { abilityDefinitions } from '../definitions/abilityDefinition';
 import {
+  attack,
   clearAllFatigue,
   clearFreeActions,
   deploy,
   move,
+  nextActivePlayer,
   playTactic,
   spendActions,
 } from './gameStateHelpers';
 import { findMatchingFreeAction, spendFreeAction } from './freeAction';
 import { removeTurnBasedContinuousEffects } from './continuousEffects';
-import { draw, mill } from './zone';
+import { discardFromHand, draw, mill, moveFromBoardToDiscard } from './zone';
 import { getGatesCoord, getTopCard, getStack } from './board';
 import { applyFatigue } from './card';
 
@@ -39,6 +43,15 @@ export function applyTurn(globalState: GlobalState, turn: Turn<TurnData>) {
       globalState = performMove(globalState, action);
       break;
     }
+    case 'attack': {
+      globalState = performAttack(globalState, action);
+      break;
+    }
+    case 'defend': {
+      globalState = performDefend(globalState, playerId, action);
+      break;
+    }
+
     case 'tactic': {
       globalState = clearFreeActions(globalState);
       globalState = playTactic(globalState, action.card, action.input);
@@ -110,6 +123,29 @@ function performMove(
   }
   return globalState;
 }
+function performAttack(
+  globalState: GlobalState,
+  action: AttackAction,
+): GlobalState {
+  const matchingFreeAction = findMatchingFreeAction(
+    action,
+    globalState.freeActions,
+  );
+
+  globalState = attack(
+    globalState,
+    action.cardInstanceId,
+    action.source,
+    action.target,
+  );
+  if (matchingFreeAction) {
+    globalState = spendFreeAction(globalState, matchingFreeAction);
+  } else {
+    globalState = spendActions(globalState);
+    globalState = clearFreeActions(globalState);
+  }
+  return globalState;
+}
 
 export function performUseAbility(
   globalState: GlobalState,
@@ -129,18 +165,45 @@ export function performUseAbility(
   return globalState;
 }
 
+export function performDefend(
+  globalState: GlobalState,
+  playerId: string,
+  action: DefendAction,
+): GlobalState {
+  // send cards from hand to discard
+  let gameState = globalState;
+  action.targets.forEach((target) => {
+    gameState = discardFromHand(gameState, playerId, target.instanceId);
+  });
+  // send targeted card from gate to discard
+  const gatesCoord = getGatesCoord(globalState.playerState[playerId].side);
+  const gatesStack = getStack(globalState.board, gatesCoord);
+  const gatesCardId = getTopCard(gatesStack);
+  if (!gatesCardId) {
+    console.error('No card found in gates stack');
+    return gameState;
+  }
+  gameState = moveFromBoardToDiscard(
+    gameState,
+    gameState.cardState[gatesCardId],
+  );
+
+  gameState = spendActions(gameState);
+
+  return gameState;
+}
+
 function performEndTurn(
   globalState: GlobalState,
   playerId: string,
 ): GlobalState {
   globalState = clearFreeActions(globalState);
-  const playerIdx = globalState.playerOrder.indexOf(playerId);
-  const nextPlayerIdx = (playerIdx + 1) % globalState.playerOrder.length;
-  const nextPlayer = globalState.playerOrder[nextPlayerIdx];
+  globalState.playerState[playerId].hasTakenTurn = true;
+  globalState = nextActivePlayer(globalState);
+  const nextPlayer = globalState.currentPlayer;
   globalState = {
     ...globalState,
-    currentPlayer: nextPlayer,
-    actions: 2,
+    actions: globalState.playerState[nextPlayer].hasTakenTurn ? 2 : 1,
   };
   // Remove fatigue from all cards in the board
   globalState = clearAllFatigue(globalState);

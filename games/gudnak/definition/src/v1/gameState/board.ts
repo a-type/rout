@@ -7,6 +7,14 @@ import type {
   Space,
 } from '../gameDefinition';
 
+export function getTopCardInstanceIdAtCoordinate(
+  board: Board,
+  coord: Coordinate,
+): string | null {
+  const stack = getStack(board, coord);
+  return getTopCard(stack);
+}
+
 export function getTopCard(stack: CardStack | null) {
   if (!stack || stack.length === 0) {
     return null;
@@ -158,4 +166,17 @@ export function getAllBoardCoordinates(board: Board): Coordinate[] {
     }
   }
   return coordinates;
+}
+
+export function moveStack(
+  board: Board,
+  source: Coordinate,
+  target: Coordinate,
+): Board {
+  const sourceStack = getStack(board, source);
+  const targetStack = getStack(board, target);
+  const newBoard = [...board];
+  newBoard[source.y][source.x] = [];
+  newBoard[target.y][target.x] = [...sourceStack];
+  return newBoard;
 }

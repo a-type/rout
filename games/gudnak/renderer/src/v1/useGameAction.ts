@@ -7,14 +7,16 @@ import {
   CoordinateTarget,
   Coordinate,
   Target,
+  CardTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { boardHelpers } from '@long-game/game-gudnak-definition';
 import { hooks } from './gameClient';
 import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
+import { toast } from '@a-type/ui';
 
 export function useGameAction() {
-  const { submitTurn, finalState, localTurnData, turnError } =
+  const { submitTurn, finalState, localTurnData, turnError, playerId } =
     hooks.useGameSuite();
   const targeting = useTargeting();
   const selection = useSelect();
@@ -68,7 +70,49 @@ export function useGameAction() {
     }
   };
 
-  const moveCard = (source: Coordinate) => {
+  const defend = () => {
+    const space = finalState.specialSpaces.find(
+      (s) => s.type === 'gate' && s.ownerId === playerId,
+    );
+    if (!space) {
+      toast.error('You do not own a gate');
+      return;
+    }
+    const coordinate = space.coordinate;
+    const stack = finalState.board[coordinate.y][coordinate.x];
+    const topCard = stack[stack.length - 1];
+    if (!topCard) {
+      toast.error('You do not have a card in your gate');
+      return;
+    }
+    const card = finalState.cardState[topCard];
+    const cardDef = cardDefinitions[card.cardId as ValidCardId];
+    if (cardDef.kind !== 'fighter') {
+      toast.error('You do not have a fighter in your gate');
+      return;
+    }
+    // TODO: Calculate true power from the game state
+    const power = cardDef.power;
+    selection.set(card);
+    targeting.begin(
+      Array.from({ length: power }, () => ({
+        type: 'card',
+        description: 'Choose a card to defend with',
+        restrictions: [{ kind: 'unique' }, { kind: 'in-hand' }],
+      })),
+    );
+    targeting.onTargetsComplete((targets) => {
+      selection.clear();
+      submitTurn({
+        action: {
+          type: 'defend',
+          targets: targets as CardTarget[],
+        },
+      });
+    });
+  };
+
+  const moveOrAttackCard = (source: Coordinate) => {
     const stack = finalState.board[source.y][source.x];
     const cardInstanceId = stack[stack.length - 1];
     const card = finalState.cardState[cardInstanceId];
@@ -84,9 +128,14 @@ export function useGameAction() {
     targeting.onTargetsComplete((targets) => {
       selection.clear();
       const coordinate = targets[0] as CoordinateTarget;
+      const targetStack = finalState.board[coordinate.y][coordinate.x];
+      if (source.x === coordinate.x && source.y === coordinate.y) {
+        return;
+      }
+      const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
-          type: 'move',
+          type: actionType,
           cardInstanceId: cardInstanceId,
           source,
           target: { x: coordinate.x, y: coordinate.y },
@@ -125,9 +174,15 @@ export function useGameAction() {
         console.error(`Card ${card.cardId} not found on board`);
         return;
       }
+      if (source.x === target.x && source.y === target.y) {
+        console.error(`Card ${card.cardId} is already at target`);
+        return;
+      }
+      const targetStack = finalState.board[target.y][target.x];
+      const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
         action: {
-          type: 'move',
+          type: actionType,
           cardInstanceId: cardInstanceId,
           source,
           target,
@@ -202,8 +257,9 @@ export function useGameAction() {
 
   return {
     playCard,
+    defend,
     deployOrPlayCardImmediate,
-    moveCard,
+    moveOrAttackCard,
     activateAbility,
     targeting,
     selection,

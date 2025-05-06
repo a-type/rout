@@ -5,6 +5,7 @@ import type {
   Coordinate,
   Side,
   PlayerState,
+  DefendAction,
 } from '../gameDefinition';
 import {
   abilityDefinitions,
@@ -29,6 +30,7 @@ import {
 
 export const INVALID_DEPLOY_CODES = {
   NO_CARD: 'Invalid deploy (no card)',
+  NO_TARGET: 'Invalid deploy (no target)',
   INVALID_SPACE: 'Invalid deploy (not deployable space)',
   NOT_SAME_OWNER: 'Invalid deploy (not same owner)',
   NO_MATCHING_TAG: 'Invalid deploy (no matching tag)',
@@ -53,7 +55,14 @@ export function validateDeploy(
   ) {
     reasons.push(INVALID_DEPLOY_CODES.INVALID_SPACE);
   }
-  const topCardId = getTopCard(getStack(board, target));
+  if (!validCoordinate(board, target)) {
+    return [INVALID_DEPLOY_CODES.NO_TARGET];
+  }
+  const stack = getStack(board, target);
+  if (!stack) {
+    return [INVALID_DEPLOY_CODES.NO_TARGET];
+  }
+  const topCardId = getTopCard(stack);
   if (topCardId) {
     const topCard = cardState[topCardId];
     if (topCard.ownerId !== card.ownerId) {
@@ -104,7 +113,8 @@ export const INVALID_MOVE_CODES = {
   NO_TOP_CARD: 'Invalid source (no top card)',
   NOT_TOP_CARD: 'Invalid source (not top card)',
   NO_TARGET: 'Invalid target (no top card)',
-  SAME_OWNER: 'Invalid target (same owner)',
+  SPACE_OCCUPIED: 'Invalid target (space occupied)',
+  SAME_COORDINATE: 'Invalid target (same coordinate)',
   CANT_BE_ATTACKED: 'Invalid target (cannot be attacked)',
 } as const;
 
@@ -120,6 +130,9 @@ export function validateMove(
   target: Coordinate,
 ): InvalidMoveReason[] | null {
   const reasons = [] as InvalidMoveReason[];
+  if (source.x === target.x && source.y === target.y) {
+    return [INVALID_MOVE_CODES.SAME_COORDINATE];
+  }
   if (!card) {
     return [INVALID_MOVE_CODES.NO_CARD];
   }
@@ -154,31 +167,7 @@ export function validateMove(
 
   const targetStack = getStack(board, target);
   if (targetStack.length > 0) {
-    const targetTopCardId = getTopCard(targetStack);
-    if (!targetTopCardId) {
-      return [INVALID_MOVE_CODES.NO_TARGET];
-    }
-    const targetTopCard = cardState[targetTopCardId];
-    if (!targetTopCard) {
-      return [INVALID_MOVE_CODES.NO_TARGET];
-    }
-
-    if (targetTopCard.ownerId === card.ownerId) {
-      reasons.push(INVALID_MOVE_CODES.SAME_OWNER);
-    }
-
-    if (
-      targetTopCard.continuousEffects.some((effect) => {
-        const effectDef =
-          continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
-        if ('validate' in effectDef && 'defend' in effectDef.validate) {
-          return !effectDef.validate.defend();
-        }
-        return true;
-      })
-    ) {
-      reasons.push(INVALID_MOVE_CODES.CANT_BE_ATTACKED);
-    }
+    return [INVALID_MOVE_CODES.SPACE_OCCUPIED];
   }
   if (checkFatigue(card)) {
     reasons.push(INVALID_MOVE_CODES.FATIGUED);
@@ -205,6 +194,122 @@ export function validateMove(
   return finalReasons;
 }
 
+export const INVALID_ATTACK_CODES = {
+  NO_CARD: 'Invalid card (no card)',
+  NOT_FIGHTER: 'Invalid card (not fighter)',
+  FATIGUED: 'Invalid card (fatigued)',
+  NOT_YOUR_CARD: 'Invalid card (not your card)',
+  NOT_ADJACENT: 'Invalid move (not adjacent)',
+  NO_STACK: 'Invalid source (no stack)',
+  NO_TOP_CARD: 'Invalid source (no top card)',
+  NOT_TOP_CARD: 'Invalid source (not top card)',
+  NO_TARGET: 'Invalid target (no top card)',
+  SAME_OWNER: 'Invalid target (same owner)',
+  SAME_COORDINATE: 'Invalid target (same coordinate)',
+  CANT_BE_ATTACKED: 'Invalid target (cannot be attacked)',
+} as const;
+type InvalidAttackCode = keyof typeof INVALID_ATTACK_CODES;
+export type InvalidAttackReason =
+  (typeof INVALID_ATTACK_CODES)[InvalidAttackCode];
+
+export function validateAttack(
+  board: Board,
+  playerId: string,
+  cardState: Record<string, Card>,
+  card: Card,
+  source: Coordinate,
+  target: Coordinate,
+): InvalidAttackReason[] | null {
+  const reasons = [] as InvalidAttackReason[];
+  if (source.x === target.x && source.y === target.y) {
+    return [INVALID_ATTACK_CODES.SAME_COORDINATE];
+  }
+  if (!card) {
+    return [INVALID_ATTACK_CODES.NO_CARD];
+  }
+  const cardDef = cardDefinitions[card.cardId as ValidCardId];
+  if (!cardDef) {
+    return [INVALID_ATTACK_CODES.NO_CARD];
+  }
+  if (cardDef.kind !== 'fighter') {
+    return [INVALID_ATTACK_CODES.NOT_FIGHTER];
+  }
+  const stack = getStack(board, source);
+  if (stack.length === 0) {
+    return [INVALID_ATTACK_CODES.NO_STACK];
+  }
+  const topCardId = getTopCard(stack);
+  if (!topCardId) {
+    return [INVALID_ATTACK_CODES.NO_TOP_CARD];
+  }
+  if (topCardId !== card.instanceId) {
+    return [INVALID_ATTACK_CODES.NOT_TOP_CARD];
+  }
+  if (card.ownerId !== playerId) {
+    return [INVALID_ATTACK_CODES.NOT_YOUR_CARD];
+  }
+  const { x: sourceX, y: sourceY } = source;
+  const { x: targetX, y: targetY } = target;
+  const dx = Math.abs(sourceX - targetX);
+  const dy = Math.abs(sourceY - targetY);
+  if (dx + dy !== 1) {
+    reasons.push(INVALID_ATTACK_CODES.NOT_ADJACENT);
+  }
+
+  const targetStack = getStack(board, target);
+  if (targetStack.length === 0) {
+    return [INVALID_ATTACK_CODES.NO_TARGET];
+  }
+  const targetTopCardId = getTopCard(targetStack);
+  if (!targetTopCardId) {
+    return [INVALID_ATTACK_CODES.NO_TARGET];
+  }
+  const targetTopCard = cardState[targetTopCardId];
+  if (!targetTopCard) {
+    return [INVALID_ATTACK_CODES.NO_TARGET];
+  }
+
+  if (targetTopCard.ownerId === card.ownerId) {
+    reasons.push(INVALID_ATTACK_CODES.SAME_OWNER);
+  }
+
+  if (
+    targetTopCard.continuousEffects.some((effect) => {
+      const effectDef =
+        continuousEffectDefinitions[effect.id as ValidContinuousEffectKey];
+      if ('validate' in effectDef && 'defend' in effectDef.validate) {
+        return !effectDef.validate.defend();
+      }
+      return true;
+    })
+  ) {
+    reasons.push(INVALID_ATTACK_CODES.CANT_BE_ATTACKED);
+  }
+  if (checkFatigue(card)) {
+    reasons.push(INVALID_ATTACK_CODES.FATIGUED);
+  }
+
+  const abilities = cardDef.abilities.map((a) => abilityDefinitions[a.id]);
+  const finalReasons = abilities.reduce((acc, ability) => {
+    if ('modifyValidateAttack' in ability.effect) {
+      return ability.effect.modifyValidateAttack({
+        invalidReasons: acc,
+        board,
+        cardState,
+        card,
+        source,
+        target,
+      });
+    }
+    return acc;
+  }, reasons);
+
+  if (finalReasons.length === 0) {
+    return null;
+  }
+  return finalReasons;
+}
+
 export const INVALID_TARGET_CODES = {
   NUMBER_OF_TARGETS: 'Invalid target (invalid number of targets)',
   COORDINATE: 'Invalid target (invalid coordinate)',
@@ -212,6 +317,7 @@ export const INVALID_TARGET_CODES = {
   MISSING_CARD: 'Invalid target (missing card)',
   CARD_PRESENT: 'Invalid target (card present)',
   RESTRICTION_ADJACENT: 'Invalid target (not adjacent)',
+  RESTRICTION_UNIQUE: 'Invalid target (not unique)',
 } as const;
 type InvalidTargetCode = keyof typeof INVALID_TARGET_CODES;
 export type InvalidTargetReason =
@@ -307,6 +413,21 @@ export function validateTargets(
             ) {
               reasons.push(INVALID_TARGET_CODES.RESTRICTION_ADJACENT);
             }
+          } else if (restriction.kind === 'unique') {
+            const passesRestriction = targets.some(
+              (t1) =>
+                targets.filter((t2) => {
+                  if (t1.kind === 'coordinate' && t2.kind === 'coordinate') {
+                    return t1.x === t2.x && t1.y === t2.y;
+                  } else if (t1.kind === 'card' && t2.kind === 'card') {
+                    return t1.instanceId === t2.instanceId;
+                  }
+                  return false;
+                }).length > 1,
+            );
+            if (!passesRestriction) {
+              reasons.push(INVALID_TARGET_CODES.RESTRICTION_UNIQUE);
+            }
           }
         }
       }
@@ -317,4 +438,69 @@ export function validateTargets(
     return null;
   }
   return invalidTargets;
+}
+
+const INVALID_DEFEND_CODES = {
+  NO_CARD: 'Invalid defend (no card)',
+  NO_CARD_AT_GATE: 'Invalid defend (no card at gate)',
+  INCORRECT_NUMBER_OF_TARGETS: 'Invalid defend (incorrect number of targets)',
+  NOT_ENEMY_CARD: 'Invalid defend (not enemy card)',
+  NOT_IN_HAND: 'Invalid defend (targets not in hand)',
+  NOT_UNIQUE: 'Invalid defend (targets not unique)',
+};
+
+export type InvalidDefendCode = keyof typeof INVALID_DEFEND_CODES;
+export type InvalidDefendReason =
+  (typeof INVALID_DEFEND_CODES)[InvalidDefendCode];
+
+export function validateDefend(
+  playerState: PlayerState,
+  playerId: string,
+  action: DefendAction,
+): InvalidDefendReason[] | null {
+  const { cardState, board } = playerState;
+  const reasons = [] as InvalidDefendReason[];
+  const { targets } = action;
+  const space = getGatesCoord(playerState.side);
+  const stack = getStack(board, space);
+  if (stack.length === 0) {
+    return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
+  }
+  const topCardId = getTopCard(stack);
+  if (!topCardId) {
+    return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
+  }
+  const topCard = cardState[topCardId];
+  if (topCard.ownerId === playerId) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_ENEMY_CARD);
+  }
+  const topCardDef = cardDefinitions[topCard.cardId as ValidCardId];
+  if (!topCardDef || topCardDef.kind !== 'fighter') {
+    return [INVALID_DEFEND_CODES.NO_CARD];
+  }
+  const power = topCardDef.power;
+  if (targets.length != power) {
+    reasons.push(INVALID_DEFEND_CODES.INCORRECT_NUMBER_OF_TARGETS);
+  }
+  // Ensure targets are from hand
+  if (
+    targets.some((t) =>
+      playerState.hand.every((c) => c.instanceId !== t.instanceId),
+    )
+  ) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_IN_HAND);
+  }
+  // Ensure targets are unique
+  if (
+    targets.some(
+      (t) => targets.filter((c) => c.instanceId === t.instanceId).length > 1,
+    )
+  ) {
+    reasons.push(INVALID_DEFEND_CODES.NOT_UNIQUE);
+  }
+
+  if (reasons.length === 0) {
+    return null;
+  }
+  return reasons;
 }

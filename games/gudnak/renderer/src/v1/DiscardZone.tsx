@@ -3,6 +3,7 @@ import { cardDefinitions } from '@long-game/game-gudnak-definition';
 import { useMediaQuery } from '@long-game/game-ui';
 import { RenderCard } from './Card';
 import { hooks } from './gameClient';
+import { useBoardOrientation } from './useBoardOrientation';
 
 export function DiscardZone({
   discard,
@@ -11,7 +12,7 @@ export function DiscardZone({
   discard: string[];
   side: 'top' | 'bottom';
 }) {
-  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const orientation = useBoardOrientation();
   const {
     finalState: { cardState },
   } = hooks.useGameSuite();
@@ -29,12 +30,12 @@ export function DiscardZone({
     <div
       className={clsx(
         'absolute aspect-[1/1] z-10',
-        isLarge ? 'max-w-[17%]' : 'max-w-[28%]',
+        orientation === 'landscape' ? 'max-w-[17%]' : 'max-w-[28%]',
         side === 'top'
-          ? isLarge
+          ? orientation === 'landscape'
             ? 'left-[1%] bottom-[7%] rotate-90'
             : 'left-[6%] top-[1%]'
-          : isLarge
+          : orientation === 'landscape'
           ? 'right-[1%] top-[7%] -rotate-90'
           : 'right-[6%] bottom-[1%]',
       )}

@@ -37,6 +37,7 @@ export function generateInitialGameState({
         hand: [],
         discard: [],
         side: idx === 0 ? 'top' : 'bottom',
+        hasTakenTurn: false,
       };
       return acc;
     }, {} as Record<string, PlayerSelfState>),

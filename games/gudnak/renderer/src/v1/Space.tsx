@@ -8,7 +8,7 @@ import {
 } from '@long-game/game-gudnak-definition/v1';
 import { Card } from './Card';
 import { isCard, isCoordinate, Selection } from './useSelect';
-import { usePlayerThemed } from '@long-game/game-ui';
+import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { useDroppable } from '@dnd-kit/core';
 
@@ -31,6 +31,7 @@ export function Space({
   onClick?: () => void;
   onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
+  const isLarge = useMediaQuery('(min-width: 1024px)');
   const { isOver, setNodeRef, active } = useDroppable({
     id: `space-${coordinate.x}-${coordinate.y}`,
     data: {
@@ -64,14 +65,10 @@ export function Space({
     }
   });
   return (
-    <div
-      ref={setNodeRef}
-      className={clsx(className, 'w-full h-full')}
-      style={style}
-    >
+    <div className={clsx(className, 'w-full h-full')} style={style}>
       <Box
         className={clsx(
-          'aspect-square border-3 rounded-2xl',
+          'aspect-square border-3 rounded-2xl relative',
           ownerId ? 'border-primary' : 'border-gray-400',
           draggedKind === 'fighter' && isOver && 'bg-red-500/50',
           selected && 'bg-primary-light',
@@ -80,11 +77,16 @@ export function Space({
         onClick={() => {
           onClick?.();
         }}
-        p="xl"
+        p={isLarge ? 'lg' : 'md'}
         style={{
           borderStyle: isGate ? 'dashed' : 'solid',
         }}
       >
+        <div
+          data-id="drop-zone"
+          ref={setNodeRef}
+          className="absolute top-20% left-20% right-20% bottom-20%"
+        ></div>
         {topCard ? (
           <Card
             stack={stack}

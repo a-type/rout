@@ -1,87 +1,176 @@
 import { Box } from '@a-type/ui';
 import { Card } from './Card';
-import type { Card as CardType } from '@long-game/game-gudnak-definition/v1';
+import type {
+  Card as CardType,
+  Target,
+} from '@long-game/game-gudnak-definition/v1';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
-import { useScreenSize } from './utils';
+import { rotatePointAroundAnotherPoint, useScreenSize } from './utils';
+import { useClickAway } from '@uidotdev/usehooks';
+import { isMobile } from 'react-device-detect';
+import { useDndContext, useDroppable } from '@dnd-kit/core';
 
 export function Hand({
   cards,
   selectedId,
+  targets,
   onClickCard,
 }: {
   cards: CardType[];
+  targets: Target[];
   selectedId: string | null;
-  onClickCard: (card: CardType) => void;
+  onClickCard?: (card: CardType) => void;
 }) {
+  const { setNodeRef, active } = useDroppable({
+    id: 'hand',
+  });
+  // const { active } = useDndContext();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [expandHand, setExpandHand] = useState(false);
+  const ref = useClickAway<HTMLDivElement>(() => {
+    setExpandHand(false);
+  });
+  const isMedium = useMediaQuery('(min-width: 768px)');
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
-  const cardSize = isLarge ? 200 : 120;
+  const maxRotation = isLarge ? 30 : isMedium ? 25 : 20;
 
-  const { width: availableWidth } = useScreenSize();
+  const cardSize = isLarge ? 200 : isMedium ? 200 : 120;
+
+  const { width: availableWidth } = useScreenSize("[data-id='main-game-area']");
   if (!availableWidth) {
     return null;
   }
-  const availableCardWidth = (cardSize * cards.length) / availableWidth;
 
   const cardWidth = cardSize; // Adjust based on your card width
-  // TODO: Adjust based on screen size
-  const overlapOffset =
-    Math.max(0.1, Math.min(0.7, 1 / availableCardWidth / 2)) * cardSize;
+  const overlapOffset = cardSize * 0.05;
+
+  const totalWidth = (cards.length - 1) * overlapOffset + cardWidth;
+  const centerOffset = (availableWidth - totalWidth) / 2;
 
   return (
     <Box
-      className="relative flex flex-row py-2 z-50"
-      style={{ height: cardSize }}
+      ref={setNodeRef}
+      className="relative flex flex-row w-full"
+      style={{ height: cardSize * 0.5 }}
     >
-      <AnimatePresence>
-        {cards.map((card, index) => {
-          const isHovered = hoveredIndex === index;
-          const isBeforeHovered = hoveredIndex !== null && index < hoveredIndex;
-          const isAfterHovered = hoveredIndex !== null && index > hoveredIndex;
+      <motion.div
+        className="w-full z-50"
+        ref={ref}
+        initial={{
+          y: 0,
+          scale: 0.8,
+        }}
+        onTapStart={() => setExpandHand(true)}
+        onTapCancel={() => setExpandHand(false)}
+        animate={expandHand ? { y: -25, scale: 1 } : {}}
+        whileHover={
+          isMobile
+            ? undefined
+            : {
+                y: isLarge ? -100 : isMedium ? -75 : -50,
+                scale: 1,
+                height: '300%',
+              }
+        }
+        transition={{
+          type: 'spring',
+          duration: 0.4,
+          bounce: 0.25,
+        }}
+      >
+        <AnimatePresence>
+          {cards.map((card, index) => {
+            const isHovered = hoveredIndex === index;
+            const isBeforeHovered =
+              hoveredIndex !== null && index < hoveredIndex;
+            const isAfterHovered =
+              hoveredIndex !== null && index > hoveredIndex;
+            const isBeingDragged = active && active.id === card.instanceId;
 
-          // Calculate dynamic position
-          const xOffset = isHovered
-            ? index * overlapOffset
-            : isBeforeHovered
-            ? index * overlapOffset
-            : isAfterHovered
-            ? index * overlapOffset + (cardWidth - overlapOffset)
-            : index * overlapOffset;
+            const xOffset = (() => {
+              if (isHovered || isBeingDragged) {
+                return index * overlapOffset + centerOffset;
+              } else if (isBeforeHovered) {
+                return index * overlapOffset + centerOffset - overlapOffset / 2;
+              } else if (isAfterHovered) {
+                return index * overlapOffset + centerOffset + overlapOffset / 2;
+              } else {
+                return index * overlapOffset + centerOffset;
+              }
+            })();
 
-          return (
-            <motion.div
-              layout
-              key={card.instanceId}
-              className="absolute"
-              style={{
-                width: `${cardWidth}px`,
-                zIndex: isHovered ? 10 : index,
-              }}
-              animate={{ x: xOffset }}
-              exit={{ opacity: 0 }}
-              transition={{
-                type: 'spring',
-                duration: 0.4,
-                bounce: 0.25,
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <Card
-                selected={selectedId === card.instanceId}
-                instanceId={card.instanceId}
-                info={card}
-                onClick={() => {
-                  onClickCard(card);
+            // adjust rotation before and after hovered card
+            const rotationOffset = (() => {
+              if (isHovered) {
+                return 0;
+              } else if (isBeforeHovered) {
+                return -5;
+              } else if (isAfterHovered) {
+                return 5;
+              } else {
+                return 0;
+              }
+            })();
+
+            const rotation =
+              rotationOffset +
+              (maxRotation / cards.length) * (index + 0.5 - cards.length / 2);
+
+            const { x, y } = rotatePointAroundAnotherPoint(
+              { x: 0, y: 0 },
+              { x: 0, y: cardSize * 4 },
+              rotation,
+            );
+
+            return (
+              <motion.div
+                layout
+                key={card.instanceId}
+                className="absolute"
+                style={{
+                  width: `${cardWidth}px`,
+                  zIndex: isHovered ? 10 : index,
                 }}
-              />
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+                animate={{
+                  x: x + xOffset,
+                  y: y + (isHovered ? -20 : 0),
+                  rotate: isBeingDragged ? 0 : rotation,
+                }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  type: 'spring',
+                  duration: 0.4,
+                  bounce: 0.25,
+                }}
+                onTapStart={isMobile ? () => setHoveredIndex(index) : undefined}
+                onTapCancel={isMobile ? () => setHoveredIndex(null) : undefined}
+                onMouseEnter={
+                  isMobile ? undefined : () => setHoveredIndex(index)
+                }
+                onMouseLeave={
+                  isMobile ? undefined : () => setHoveredIndex(null)
+                }
+              >
+                <Card
+                  selected={selectedId === card.instanceId}
+                  targeted={targets.some(
+                    (t) =>
+                      t.kind === 'card' && t.instanceId === card.instanceId,
+                  )}
+                  instanceId={card.instanceId}
+                  info={card}
+                  onClick={() => {
+                    onClickCard?.(card);
+                  }}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
     </Box>
   );
 }

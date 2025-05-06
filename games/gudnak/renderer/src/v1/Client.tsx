@@ -6,6 +6,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import {
   cardDefinitions,
   type Coordinate,
@@ -14,21 +15,18 @@ import {
 import { DefaultRoundRenderer } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
-import { Backdrop } from './Backdrop';
 import { Board } from './Board';
-import { Card } from './Card';
+import { CardViewer } from './CardViewer';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
-import { useViewState, ViewStateProvider } from './useViewState';
+import { ViewStateProvider } from './useViewState';
 
 export function Client() {
   return (
     <ViewStateProvider>
-      <Box>
-        <GameState />
-      </Box>
+      <GameState />
     </ViewStateProvider>
   );
 }
@@ -57,7 +55,8 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }, [latestRoundIndex]);
 
   useEffect(() => {
-    if (turnError) {
+    // TODO: Prevent from showing same error multiple times
+    if (turnError && currentTurn) {
       toast.error(turnError);
     }
   }, [turnError, currentTurn]);
@@ -69,13 +68,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   });
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      distance: 10,
+      distance: 20,
     },
   });
-  // const sensors = useSensors(mouseSensor, pointerSensor, touchSensor);
   const sensors = useSensors(mouseSensor, touchSensor);
-
-  const { viewState, setViewState } = useViewState();
 
   if (gameStatus.status === 'complete') {
     return (
@@ -90,7 +86,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   }
 
   return (
-    <Box className="w-full h-full flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
+    <Box
+      className="w-full h-full flex flex-col gap-2 overflow-y-hidden overflow-x-hidden"
+      data-id="main-game-area"
+    >
       <Flipper
         spring="veryGentle"
         flipKey={
@@ -99,8 +98,12 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
         }
       >
         <DndContext
+          modifiers={[restrictToWindowEdges]}
           sensors={sensors}
           onDragEnd={(e) => {
+            if (e.over?.id === 'hand') {
+              return;
+            }
             const coord = e.over?.data.current?.coordinate as Coordinate;
             const cardInstanceId = e.active.data.current?.instanceId;
             const card = finalState.cardState[cardInstanceId as string];
@@ -124,22 +127,13 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
             action.deployOrPlayCardImmediate(cardInstanceId, coord);
           }}
         >
-          <div className="p-3">
-            <Hand
-              cards={hand}
-              selectedId={action.selection.card?.instanceId ?? null}
-              onClickCard={(card) => {
-                if (!active) {
-                  return;
-                }
-                action.playCard(card);
-              }}
-            />
-            <Box className="flex flex-row gap-2 items-center mt-3">
-              {active ? (
+          {active ? (
+            <div className="px-4 py-2 absolute top-0 left-0 right-0 z-50 bg-dark-9/80 shadow-lg shadow-dark">
+              <Box className="flex flex-row gap-2 items-center">
                 <>
-                  <span className="font-bold">It's your turn!</span>
+                  <span className="font-bold">Your turn!</span>
                   <Button
+                    size="small"
                     disabled={actions <= 0}
                     onClick={() => {
                       submitTurn({ action: { type: 'draw' } });
@@ -148,30 +142,40 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                     Draw
                   </Button>
                   <Button
-                    disabled={actions > 0}
+                    size="small"
+                    disabled={actions <= 0}
                     onClick={() => {
-                      submitTurn({ action: { type: 'endTurn' } });
+                      action.defend();
                     }}
                   >
-                    End
+                    Defend
                   </Button>
-                </>
-              ) : (
-                <span>Waiting on opponent...</span>
-              )}
-              <span>Actions: {actions}</span>
+                  {actions === 0 && (
+                    <Button
+                      size="small"
+                      disabled={actions > 0}
+                      onClick={() => {
+                        submitTurn({ action: { type: 'endTurn' } });
+                      }}
+                    >
+                      End
+                    </Button>
+                  )}
+                  <span>Actions: {actions}</span>
 
-              {freeActions.length > 0 && (
-                <span>
-                  Free {freeActions[0].type} action (x{' '}
-                  {freeActions[0].count ?? 1})
-                </span>
-              )}
-              {action.targeting.next ? (
-                <span>{action.targeting.next.description}</span>
-              ) : null}
-            </Box>
-          </div>
+                  {freeActions.length > 0 && (
+                    <span>
+                      Free {freeActions[0].type} action (x{' '}
+                      {freeActions[0].count ?? 1})
+                    </span>
+                  )}
+                  {action.targeting.next ? (
+                    <span>{action.targeting.next.description}</span>
+                  ) : null}
+                </>
+              </Box>
+            </div>
+          ) : null}
           <Board
             selection={action.selection.item}
             targets={action.targets}
@@ -181,7 +185,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                 return;
               }
               if (!action.targeting.next) {
-                action.moveCard(coord);
+                action.moveOrAttackCard(coord);
                 return;
               }
               if (action.targeting.next.type === 'coordinate') {
@@ -227,24 +231,29 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
               }
             }}
           />
-          {viewState.kind === 'cardViewer' ? (
-            <Backdrop onClick={() => setViewState({ kind: 'game' })} />
-          ) : null}
 
-          {viewState.kind === 'cardViewer' ? (
-            <div
-              // show card over top of game board in the middle of the screen
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-999 max-w-25% overflow-hidden p-4 rounded-2xl shadow-2xl shadow-dark"
-              style={{ backgroundColor: 'black' }}
-            >
-              <Card
-                disableTooltip
-                noBorder
-                info={finalState.cardState[viewState.cardInstanceId]}
-                instanceId={viewState.cardInstanceId}
-              />
-            </div>
-          ) : null}
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <Hand
+              cards={hand}
+              selectedId={action.selection.card?.instanceId ?? null}
+              targets={action.targets}
+              onClickCard={(card) => {
+                if (!active) {
+                  return;
+                }
+                if (action.targeting.active) {
+                  action.targeting.select({
+                    kind: 'card',
+                    instanceId: card.instanceId,
+                  });
+                  return;
+                }
+                //action.playCard(card);
+              }}
+            />
+          </div>
+
+          <CardViewer />
         </DndContext>
       </Flipper>
     </Box>

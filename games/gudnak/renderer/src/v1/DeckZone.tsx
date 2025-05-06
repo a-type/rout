@@ -1,6 +1,7 @@
 import { clsx } from '@a-type/ui';
 import { useMediaQuery } from '@long-game/game-ui';
 import { RenderCard } from './Card';
+import { useBoardOrientation } from './useBoardOrientation';
 
 export function DeckZone({
   deck,
@@ -9,7 +10,7 @@ export function DeckZone({
   deck: string[];
   side: 'top' | 'bottom';
 }) {
-  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const orientation = useBoardOrientation();
 
   if (deck.length === 0) {
     return null;
@@ -19,12 +20,12 @@ export function DeckZone({
     <div
       className={clsx(
         'absolute aspect-[1/1] z-10',
-        isLarge ? 'max-w[17%]' : 'max-w-[28%]',
+        orientation === 'landscape' ? 'max-w[17%]' : 'max-w-[28%]',
         side === 'top'
-          ? isLarge
+          ? orientation === 'landscape'
             ? 'left-[1%] top-[37%] rotate-90'
             : 'left-[36%] top-[1%]'
-          : isLarge
+          : orientation === 'landscape'
           ? 'right-[1%] top-[37%] -rotate-90'
           : 'left-[36%] bottom-[1%]',
       )}
@@ -46,7 +47,7 @@ export function DeckZone({
       {deck.length && (
         <div
           className={clsx(
-            isLarge
+            orientation === 'landscape'
               ? side === 'top'
                 ? '-rotate-90'
                 : 'rotate-90'

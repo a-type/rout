@@ -11,7 +11,7 @@ import {
   EffectInput,
   ValidAbilityId,
 } from '../definitions/abilityDefinition';
-import { getStack, getTopCard, removeTopCard } from './board';
+import { getStack, getTopCard, moveStack, removeTopCard } from './board';
 import { resolveCombat } from './combat';
 import { applyFatigue } from './card';
 import { addToDiscard } from './zone';
@@ -60,39 +60,30 @@ export function clearFreeActions(gameState: GlobalState) {
   };
 }
 
-// moves a card from source to target
-// moves the whole stack
-// if moving into another player, resolve combat instead
-export function move(
+// resolve combat moving into a new space
+export function attack(
   gameState: GlobalState,
   cardInstanceId: string,
   source: Coordinate,
   target: Coordinate,
 ): GlobalState {
   const card = gameState.cardState[cardInstanceId];
-  let performMove = false;
   let winner: Card | null = null;
-  const { x: sourceX, y: sourceY } = source;
-  const { x: targetX, y: targetY } = target;
   const { board } = gameState;
   let nextBoard = [...board];
-  const sourceStack = getStack(board, source);
   const targetStack = getStack(board, target);
   const targetTopCardId = getTopCard(targetStack);
   const targetTopCard = targetTopCardId
     ? gameState.cardState[targetTopCardId]
     : null;
   if (targetStack.length === 0 || !targetTopCard) {
-    performMove = true;
+    // TODO: Throw error?
   } else {
     // resolve combat
     winner = resolveCombat(gameState, card, targetTopCard);
     if (winner && winner === card) {
       nextBoard = removeTopCard(nextBoard, target);
       gameState = addToDiscard(gameState, targetTopCard);
-      if (getStack(nextBoard, target).length === 0) {
-        performMove = true;
-      }
     } else if (winner && winner === targetTopCard) {
       nextBoard = removeTopCard(nextBoard, source);
       gameState = addToDiscard(gameState, card);
@@ -102,12 +93,32 @@ export function move(
       nextBoard = removeTopCard(nextBoard, target);
       gameState = addToDiscard(gameState, targetTopCard);
     }
+    if (
+      getStack(nextBoard, source).length > 0 &&
+      getStack(nextBoard, target).length === 0
+    ) {
+      nextBoard = moveStack(nextBoard, source, target);
+    }
   }
-  if (performMove) {
-    // remove stack from source and add to target
-    nextBoard[sourceY][sourceX] = [];
-    nextBoard[targetY][targetX] = sourceStack;
-  }
+
+  gameState = {
+    ...gameState,
+    board: nextBoard,
+  };
+  gameState = applyFatigue(gameState, cardInstanceId);
+  return gameState;
+}
+
+// moves a card from source to target
+// moves the whole stack
+export function move(
+  gameState: GlobalState,
+  cardInstanceId: string,
+  source: Coordinate,
+  target: Coordinate,
+): GlobalState {
+  const { board } = gameState;
+  const nextBoard = moveStack(board, source, target);
 
   gameState = {
     ...gameState,
@@ -181,5 +192,15 @@ export function clearAllFatigue(globalState: GlobalState): GlobalState {
         },
       ]),
     ),
+  };
+}
+
+export function nextActivePlayer(gameState: GlobalState): GlobalState {
+  const { playerOrder, currentPlayer } = gameState;
+  const currentIndex = playerOrder.indexOf(currentPlayer);
+  const nextIndex = (currentIndex + 1) % playerOrder.length;
+  return {
+    ...gameState,
+    currentPlayer: playerOrder[nextIndex],
   };
 }
