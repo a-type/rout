@@ -18,7 +18,7 @@ const update = registerSW({
     if (registration) {
       setInterval(() => {
         registration.update();
-        check = registration.update;
+        check = registration.update.bind(registration);
         // hourly
       }, 60 * 60 * 1000);
     }
