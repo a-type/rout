@@ -64,4 +64,9 @@ export const notificationsRouter = new Hono<Env>()
       await userStore.deleteNotification(ctx.req.valid('param').id);
       return ctx.json({ deleted: true });
     },
-  );
+  )
+  .post('/markAllRead', userStoreMiddleware, async (ctx) => {
+    const userStore = ctx.get('userStore');
+    await userStore.markAllNotificationsAsRead();
+    return ctx.json({ ok: true });
+  });

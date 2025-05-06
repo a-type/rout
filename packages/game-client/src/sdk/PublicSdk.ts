@@ -291,6 +291,13 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['getNotificationSettings']],
     },
   );
+  markAllNotificationsAsRead = this.sdkMutation(
+    this.apiRpc.notifications.markAllRead.$post,
+    {
+      transformInput: () => ({}),
+      invalidate: [['getNotifications']],
+    },
+  );
 
   getOwnedGames = this.sdkQuery('getOwnedGames', this.apiRpc.games.owned.$get);
   applyFreeGames = this.sdkMutation(this.apiRpc.games.applyFree.$post, {

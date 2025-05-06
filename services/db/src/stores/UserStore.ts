@@ -916,6 +916,17 @@ export class UserStore extends RpcTarget {
     return notification;
   }
 
+  async markAllNotificationsAsRead() {
+    await this.#db
+      .updateTable('Notification')
+      .set({
+        readAt: new Date(),
+      })
+      .where('Notification.userId', '=', this.#userId)
+      .where('Notification.readAt', 'is', null)
+      .execute();
+  }
+
   async deleteNotification(notificationId: PrefixedId<'no'>) {
     await this.#db
       .deleteFrom('Notification')

@@ -39,6 +39,7 @@ export function NotificationsButton({
     sdkHooks.useGetNotifications({ refetchOnWindowFocus: true });
   const { results: notifications } = data || { results: [] };
   const hasUnread = notifications?.some((n) => !n.readAt);
+  const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
 
   useAutoReadNotifications(notifications);
 
@@ -61,15 +62,27 @@ export function NotificationsButton({
           ) : (
             <H2>Notifications</H2>
           )}
-          <Button
-            color="ghost"
-            size="icon"
-            onClick={() => {
-              setShowSettings((prev) => !prev);
-            }}
-          >
-            <Icon name={showSettings ? 'x' : 'gear'} />
-          </Button>
+          <Box gap items="center">
+            {!showSettings && (
+              <Button
+                size="icon"
+                color="ghost"
+                onClick={() => markAllRead.mutate(undefined)}
+              >
+                <Icon name="check" className="relative -left-3px" />
+                <Icon name="check" className="absolute left-13px" />
+              </Button>
+            )}
+            <Button
+              color="ghost"
+              size="icon"
+              onClick={() => {
+                setShowSettings((prev) => !prev);
+              }}
+            >
+              <Icon name={showSettings ? 'x' : 'gear'} />
+            </Button>
+          </Box>
         </Box>
         {showSettings ? (
           <Suspense>
