@@ -9,6 +9,7 @@ import {
   PrefixedId,
   ServerChatMessage,
   ServerGameMembersChangeMessage,
+  ServerNextRoundScheduledMessage,
   ServerPlayerStatusChangeMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
@@ -76,6 +77,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
   @observable accessor gameId!: string;
   @observable accessor gameVersion!: string;
+  @observable accessor nextRoundCheckAt: Date | null = null;
 
   // static
   gameSessionId: PrefixedId<'gs'>;
@@ -425,24 +427,33 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       return error;
     }
     const submittingToRound = this.latestRoundIndex;
-    const response = await this.ctx.socket.request({
-      type: 'submitTurn',
-      turnData: localTurnData,
-    });
-    if (response.type === 'error') {
+    try {
+      const response = await this.ctx.socket.request({
+        type: 'submitTurn',
+        turnData: localTurnData,
+      });
+      if (response.type === 'error') {
+        this.#events.emit(
+          'error',
+          new LongGameError(LongGameError.Code.Unknown, response.message),
+        );
+        return response.message;
+      } else {
+        // locally update the submitted round with our turn and
+        // reset local turn data
+        runInAction(() => {
+          this.rounds[submittingToRound].yourTurnData = localTurnData;
+          this.localTurnData = null;
+        });
+        this.#events.emit('turnPlayed');
+      }
+    } catch (e) {
+      const msg = LongGameError.wrap(e as any).message;
       this.#events.emit(
         'error',
-        new LongGameError(LongGameError.Code.Unknown, response.message),
+        new LongGameError(LongGameError.Code.Unknown, msg),
       );
-      return response.message;
-    } else {
-      // locally update the submitted round with our turn and
-      // reset local turn data
-      runInAction(() => {
-        this.rounds[submittingToRound].yourTurnData = localTurnData;
-        this.localTurnData = null;
-      });
-      this.#events.emit('turnPlayed');
+      return 'Error submitting turn. Try again?';
     }
   };
 
@@ -531,6 +542,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.ctx.socket.subscribe('gameChange', this.onGameChange);
     this.ctx.socket.subscribe('membersChange', this.onMembersChange);
     this.ctx.socket.subscribe('turnPlayed', this.onTurnPlayed);
+    this.ctx.socket.subscribe('nextRoundScheduled', this.onNextRoundScheduled);
   };
 
   private onChat = (msg: ServerChatMessage) => {
@@ -604,6 +616,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
+  @action private onNextRoundScheduled = (
+    msg: ServerNextRoundScheduledMessage,
+  ) => {
+    console.log('next round scheduled', msg);
+    this.nextRoundCheckAt = new Date(msg.nextRoundCheckAt);
+  };
+
   @action loadPostgame = async () => {
     const postgame = await getPostgame(this.gameSessionId);
     this.postgameGlobalState = postgame.globalState;
@@ -644,6 +663,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     members: { id: PrefixedId<'u'> }[];
     startedAt: string | null;
     timezone: string;
+    nextRoundCheckAt?: string | null;
   }) => {
     this.viewingRoundIndex = init.currentRound.roundIndex;
     this.localTurnData = null;
@@ -668,6 +688,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       },
       {},
     );
+    this.nextRoundCheckAt = init.nextRoundCheckAt
+      ? new Date(init.nextRoundCheckAt)
+      : null;
     this.fetchMembers();
   };
 

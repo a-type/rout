@@ -513,6 +513,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async getSummary() {
     const sessionData = await this.#getSessionData();
+    const roundData = await this.#getCurrentRoundState();
     return {
       id: sessionData.id,
       status: await this.getStatus(),
@@ -522,6 +523,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
+      nextRoundCheckAt: roundData.checkAgainAt ?? null,
     };
   }
   async getDetails(userId: PrefixedId<'u'>): Promise<{
@@ -970,6 +972,10 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (roundState.checkAgainAt) {
       console.log(`Scheduling check again at ${roundState.checkAgainAt}`);
       this.ctx.storage.setAlarm(roundState.checkAgainAt);
+      this.#socketHandler.send({
+        type: 'nextRoundScheduled',
+        nextRoundCheckAt: roundState.checkAgainAt.toISOString(),
+      });
     }
   };
   #sendGameRoundChangeMessages = async (roundIndex: number) => {

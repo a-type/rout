@@ -89,8 +89,8 @@ export const gameDefinition: GameDefinition<
   minimumPlayers: 2,
   maximumPlayers: 10,
   getRoundIndex: roundFormat.perEnvironment({
-    development: roundFormat.sync(),
     production: roundFormat.periodic('days', 1),
+    development: roundFormat.sync(),
     // development: roundFormat.periodic('days', 1),
   }),
   // run on both client and server
