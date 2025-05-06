@@ -9,6 +9,7 @@ const AdminPage = () => {
         <H1>Admin</H1>
         <Box gap>
           <Link to="/admin/products">Products</Link>
+          <Link to="/admin/sessions">Sessions</Link>
         </Box>
         <Outlet />
       </PageContent>

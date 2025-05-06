@@ -449,7 +449,7 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
 
     const endCursor = results.length
       ? results[results.length - 1].createdAt
-      : undefined;
+      : null;
     return {
       results,
       pageInfo: {
