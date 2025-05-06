@@ -167,3 +167,16 @@ export function getAllBoardCoordinates(board: Board): Coordinate[] {
   }
   return coordinates;
 }
+
+export function moveStack(
+  board: Board,
+  source: Coordinate,
+  target: Coordinate,
+): Board {
+  const sourceStack = getStack(board, source);
+  const targetStack = getStack(board, target);
+  const newBoard = [...board];
+  newBoard[source.y][source.x] = [];
+  newBoard[target.y][target.x] = [...sourceStack];
+  return newBoard;
+}

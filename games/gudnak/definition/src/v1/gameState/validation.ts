@@ -317,6 +317,7 @@ export const INVALID_TARGET_CODES = {
   MISSING_CARD: 'Invalid target (missing card)',
   CARD_PRESENT: 'Invalid target (card present)',
   RESTRICTION_ADJACENT: 'Invalid target (not adjacent)',
+  RESTRICTION_UNIQUE: 'Invalid target (not unique)',
 } as const;
 type InvalidTargetCode = keyof typeof INVALID_TARGET_CODES;
 export type InvalidTargetReason =
@@ -411,6 +412,21 @@ export function validateTargets(
               )
             ) {
               reasons.push(INVALID_TARGET_CODES.RESTRICTION_ADJACENT);
+            }
+          } else if (restriction.kind === 'unique') {
+            const passesRestriction = targets.some(
+              (t1) =>
+                targets.filter((t2) => {
+                  if (t1.kind === 'coordinate' && t2.kind === 'coordinate') {
+                    return t1.x === t2.x && t1.y === t2.y;
+                  } else if (t1.kind === 'card' && t2.kind === 'card') {
+                    return t1.instanceId === t2.instanceId;
+                  }
+                  return false;
+                }).length > 1,
+            );
+            if (!passesRestriction) {
+              reasons.push(INVALID_TARGET_CODES.RESTRICTION_UNIQUE);
             }
           }
         }

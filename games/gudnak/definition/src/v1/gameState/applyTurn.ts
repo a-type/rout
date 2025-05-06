@@ -16,6 +16,7 @@ import {
   clearFreeActions,
   deploy,
   move,
+  nextActivePlayer,
   playTactic,
   spendActions,
 } from './gameStateHelpers';
@@ -198,12 +199,10 @@ function performEndTurn(
 ): GlobalState {
   globalState = clearFreeActions(globalState);
   globalState.playerState[playerId].hasTakenTurn = true;
-  const playerIdx = globalState.playerOrder.indexOf(playerId);
-  const nextPlayerIdx = (playerIdx + 1) % globalState.playerOrder.length;
-  const nextPlayer = globalState.playerOrder[nextPlayerIdx];
+  globalState = nextActivePlayer(globalState);
+  const nextPlayer = globalState.currentPlayer;
   globalState = {
     ...globalState,
-    currentPlayer: nextPlayer,
     actions: globalState.playerState[nextPlayer].hasTakenTurn ? 2 : 1,
   };
   // Remove fatigue from all cards in the board
