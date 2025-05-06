@@ -46,6 +46,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
         themeClass,
         className,
       )}
+      popIn={false}
     />
   );
 });

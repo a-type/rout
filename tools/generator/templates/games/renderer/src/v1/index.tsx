@@ -1,5 +1,5 @@
 import { Box } from '@a-type/ui';
-import { DefaultRoundRenderer } from '@long-game/game-ui';
+import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 
 // note: withGame can take a generic <Props> which adds more accepted
@@ -15,7 +15,7 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
   return <Gameplay />;
 });
 
-export const Round = DefaultRoundRenderer;
+export const ChatMessage = DefaultChatMessage;
 
 // perhaps you'll want to move these to other modules.
 

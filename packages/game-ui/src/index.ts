@@ -2,7 +2,7 @@ export * from './board/GameBoard';
 export * from './board/GamePiece';
 export * from './board/GamePlacement';
 export * from './chat/ChatForm';
-export * from './chat/ChatMessage';
+export * from './chat/DefaultChatMessage';
 export * from './chat/SpatialChat';
 export * from './debugger/GameDebugger';
 export * from './decoration/GameIllustration1';

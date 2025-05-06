@@ -6,6 +6,7 @@ import {
   id,
   LongGameError,
   PrefixedId,
+  SYSTEM_CHAT_AUTHOR_ID,
 } from '@long-game/common';
 import {
   BaseTurnData,
@@ -925,6 +926,7 @@ export class GameSession extends DurableObject<ApiBindings> {
         await this.env.ADMIN_STORE.updateGameSession(id, {
           winnerIdsJson: status.winnerIds,
         });
+        this.#sendGameRoundChangeMessages(roundState.roundIndex);
       } else {
         // notify players of round change
         const members = await this.getMembers();
@@ -946,6 +948,7 @@ export class GameSession extends DurableObject<ApiBindings> {
             },
           );
         }
+        this.#sendGameRoundChangeMessages(roundState.roundIndex);
       }
     }
     for (const playerId of roundState.pendingTurns) {
@@ -967,6 +970,39 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (roundState.checkAgainAt) {
       console.log(`Scheduling check again at ${roundState.checkAgainAt}`);
       this.ctx.storage.setAlarm(roundState.checkAgainAt);
+    }
+  };
+  #sendGameRoundChangeMessages = async (roundIndex: number) => {
+    // if game definition has a round change message, add it to chat
+    const gameDefinition = await this.getGameDefinition();
+    if (gameDefinition.getRoundChangeMessages) {
+      // FIXME: redundant global state calculation with rounds
+      const globalState = await this.#getGlobalStateUnchecked(roundIndex);
+      const rounds = await this.#getRoundsUnchecked({
+        upToAndIncluding: roundIndex,
+      });
+      const members = await this.getMembers();
+      const roundChangeMessages = gameDefinition.getRoundChangeMessages({
+        globalState,
+        roundIndex: roundIndex,
+        members,
+        rounds,
+        newRound: rounds[roundIndex],
+        completedRound: roundIndex > 0 ? rounds[roundIndex - 1] : null,
+      });
+      if (roundChangeMessages) {
+        await Promise.all(
+          roundChangeMessages.map((message) =>
+            this.addChatMessage({
+              ...message,
+              id: id('cm'),
+              createdAt: new Date().toISOString(),
+              authorId: SYSTEM_CHAT_AUTHOR_ID,
+              roundIndex: roundIndex,
+            }),
+          ),
+        );
+      }
     }
   };
 

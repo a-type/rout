@@ -463,12 +463,12 @@ export class GameSessionSuite<TGame extends GameDefinition> {
           : message.roundIndex,
     };
 
-    this.addChat({
-      id: tempId,
-      createdAt: new Date().toISOString(),
-      authorId: this.playerId,
-      ...messageWithRound,
-    });
+    // this.addChat({
+    //   id: tempId,
+    //   createdAt: new Date().toISOString(),
+    //   authorId: this.playerId,
+    //   ...messageWithRound,
+    // });
     await this.ctx.socket.request({
       type: 'sendChat',
       message: messageWithRound,

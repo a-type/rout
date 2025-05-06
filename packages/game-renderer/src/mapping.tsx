@@ -1,3 +1,4 @@
+import { withGame } from '@long-game/game-client';
 import type { GameRendererModule } from '@long-game/game-definition';
 import { ComponentType, lazy, LazyExoticComponent } from 'react';
 
@@ -42,28 +43,28 @@ async function getGameVersionModule(
   version: string,
 ): Promise<{
   Client: ComponentType<any>;
-  Round: ComponentType<any>;
+  ChatMessage: ComponentType<any>;
 }> {
   const { default: versions } = await loadGameModule(gameId);
   if (!versions) {
     return {
       Client: () => <>Game version {version} not found</>,
-      Round: () => <>Game version {version} not found</>,
+      ChatMessage: () => <>Game version {version} not found</>,
     };
   }
 
   return versions[version];
 }
 
-const roundCache = new Map<
+const chatCache = new Map<
   string,
   Map<string, LazyExoticComponent<ComponentType>>
 >();
-export function getLazyRoundRenderer(gameId: string, version: string) {
-  let gameCache = roundCache.get(gameId);
+export function getLazyChatRenderer(gameId: string, version: string) {
+  let gameCache = chatCache.get(gameId);
   if (!gameCache) {
     gameCache = new Map();
-    roundCache.set(gameId, gameCache);
+    chatCache.set(gameId, gameCache);
   }
 
   if (gameCache.has(version)) {
@@ -71,8 +72,8 @@ export function getLazyRoundRenderer(gameId: string, version: string) {
   }
 
   const value = lazy<ComponentType<any>>(async () => {
-    const { Round } = await getGameVersionModule(gameId, version);
-    return { default: Round };
+    const { ChatMessage } = await getGameVersionModule(gameId, version);
+    return { default: withGame(ChatMessage) };
   });
 
   gameCache.set(version, value);

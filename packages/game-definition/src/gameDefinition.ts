@@ -19,6 +19,11 @@ export interface Turn<TurnData extends BaseTurnData>
   roundIndex: number;
 }
 
+export type SystemChatMessage = Omit<
+  GameSessionChatMessage,
+  'authorId' | 'id' | 'createdAt' | 'roundIndex'
+>;
+
 export type GameDefinition<
   GlobalState = any,
   PlayerState = any,
@@ -145,12 +150,14 @@ export type GameDefinition<
    * custom metadata to use in a customized chat message render component as
    * part of your game UI.
    */
-  getRoundChangeMessage?: (data: {
+  getRoundChangeMessages?: (data: {
     globalState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
-    members: { id: string }[];
+    members: { id: PrefixedId<'u'> }[];
     roundIndex: number;
-  }) => GameSessionChatMessage | null;
+    newRound: GameRound<Turn<TurnData>>;
+    completedRound: GameRound<Turn<TurnData>> | null;
+  }) => SystemChatMessage[];
 };
 
 export type RoundIndexDecider<
