@@ -52,11 +52,13 @@ export function Board({
     },
   });
   const { finalState } = hooks.useGameSuite();
-  const topPlayerState =
-    Object.values(finalState.playerState).find((s) => s.side === 'top') ?? null;
-  const bottomPlayerState =
-    Object.values(finalState.playerState).find((s) => s.side === 'bottom') ??
-    null;
+  const [topPlayerId = '', topPlayerState] =
+    Object.entries(finalState.playerState).find(([, s]) => s.side === 'top') ??
+    [];
+  const [bottomPlayerId = '', bottomPlayerState] =
+    Object.entries(finalState.playerState).find(
+      ([, s]) => s.side === 'bottom',
+    ) ?? [];
   const { specialSpaces } = finalState as PlayerState;
   const orientation = useBoardOrientation();
 
@@ -71,8 +73,16 @@ export function Board({
       <Map />
       <DeckZone deck={topPlayerState?.deck ?? []} side="top" />
       <DeckZone deck={bottomPlayerState?.deck ?? []} side="bottom" />
-      <DiscardZone discard={topPlayerState?.discard ?? []} side="top" />
-      <DiscardZone discard={bottomPlayerState?.discard ?? []} side="bottom" />
+      <DiscardZone
+        playerId={topPlayerId}
+        discard={topPlayerState?.discard ?? []}
+        side="top"
+      />
+      <DiscardZone
+        playerId={bottomPlayerId}
+        discard={bottomPlayerState?.discard ?? []}
+        side="bottom"
+      />
       <Box
         className={clsx(
           // orientation === 'landscape'

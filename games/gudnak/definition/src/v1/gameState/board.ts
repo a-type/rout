@@ -174,7 +174,6 @@ export function moveStack(
   target: Coordinate,
 ): Board {
   const sourceStack = getStack(board, source);
-  const targetStack = getStack(board, target);
   const newBoard = [...board];
   newBoard[source.y][source.x] = [];
   newBoard[target.y][target.x] = [...sourceStack];

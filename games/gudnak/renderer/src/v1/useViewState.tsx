@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from 'react';
 
 type ViewState =
   | { kind: 'game' }
+  | { kind: 'discard'; playerId: string }
   | { kind: 'cardViewer'; cardInstanceId: string };
 
 const ViewStateContext = createContext<{

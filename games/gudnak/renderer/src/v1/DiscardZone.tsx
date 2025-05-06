@@ -1,17 +1,20 @@
 import { clsx } from '@a-type/ui';
 import { cardDefinitions } from '@long-game/game-gudnak-definition';
-import { useMediaQuery } from '@long-game/game-ui';
 import { RenderCard } from './Card';
 import { hooks } from './gameClient';
 import { useBoardOrientation } from './useBoardOrientation';
+import { useViewState } from './useViewState';
 
 export function DiscardZone({
+  playerId,
   discard,
   side,
 }: {
+  playerId: string;
   discard: string[];
   side: 'top' | 'bottom';
 }) {
+  const { setViewState } = useViewState();
   const orientation = useBoardOrientation();
   const {
     finalState: { cardState },
@@ -41,6 +44,9 @@ export function DiscardZone({
       )}
     >
       <RenderCard
+        onClick={() => {
+          setViewState({ kind: 'discard', playerId });
+        }}
         instanceId={discard?.[0] ?? 'no-card'}
         cardData={topCardDef}
         cardId={topCard.cardId}

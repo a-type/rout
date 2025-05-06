@@ -22,6 +22,7 @@ import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
 import { ViewStateProvider } from './useViewState';
+import { DiscardViewer } from './DiscardViewer';
 
 export function Client() {
   return (
@@ -248,11 +249,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                   });
                   return;
                 }
-                //action.playCard(card);
               }}
             />
           </div>
-
+          <DiscardViewer />
           <CardViewer />
         </DndContext>
       </Flipper>
