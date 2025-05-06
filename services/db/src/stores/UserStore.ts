@@ -388,22 +388,15 @@ export class UserStore extends RpcTarget {
 
   // game sessions and invites
 
-  async insertFoundingGameMembership(gameSessionId: PrefixedId<'gs'>) {
-    // authorization: this must be the first membership inserted
-    // for this game session; otherwise this functionality could be
-    // abused to join any game session
-    const existing = await this.#db
-      .selectFrom('GameSessionInvitation')
-      .where('gameSessionId', '=', gameSessionId)
-      .selectAll()
-      .execute();
-
-    if (existing.length > 0) {
-      throw new LongGameError(
-        LongGameError.Code.Forbidden,
-        'Game session already has members. Ask for an invite.',
-      );
-    }
+  async createGameSession() {
+    const gameSessionId = id('gs');
+    await this.#db
+      .insertInto('GameSession')
+      .values({
+        id: gameSessionId,
+        status: 'pending',
+      })
+      .executeTakeFirstOrThrow();
 
     const membership = await this.#db
       .insertInto('GameSessionInvitation')
@@ -419,7 +412,7 @@ export class UserStore extends RpcTarget {
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return membership;
+    return { id: gameSessionId };
   }
 
   // just base64 encoded. CF workers don't have Node stuff so
@@ -428,20 +421,31 @@ export class UserStore extends RpcTarget {
 
   async getGameSessions(
     filter: {
-      status?: 'pending' | 'accepted' | 'declined' | 'expired';
+      status?: ('pending' | 'active' | 'complete')[];
+      invitationStatus?: 'pending' | 'accepted' | 'declined' | 'expired';
       first?: number;
-      after?: string;
+      before?: string;
     } = {
       first: 10,
     },
   ) {
     let builder = this.#db
       .selectFrom('GameSessionInvitation')
+      .innerJoin(
+        'GameSession',
+        'GameSessionInvitation.gameSessionId',
+        'GameSession.id',
+      )
       .where('GameSessionInvitation.userId', '=', this.#userId)
       .select(({ eb, ref }) => [
-        'GameSessionInvitation.gameSessionId',
-        'GameSessionInvitation.status',
+        'GameSession.id',
+        'GameSessionInvitation.id as invitationId',
+        'GameSessionInvitation.status as invitationStatus',
+        'GameSession.status',
+        'GameSession.gameId',
+        'GameSession.winnerIdsJson as winnerIds',
         'GameSessionInvitation.createdAt',
+        'GameSessionInvitation.inviterId',
         eb(
           'GameSessionInvitation.inviterId',
           '=',
@@ -451,10 +455,13 @@ export class UserStore extends RpcTarget {
       .orderBy('GameSessionInvitation.createdAt', 'desc');
 
     if (filter.status) {
+      builder = builder.where('GameSession.status', 'in', filter.status);
+    }
+    if (filter.invitationStatus) {
       builder = builder.where(
         'GameSessionInvitation.status',
         '=',
-        filter.status,
+        filter.invitationStatus,
       );
     }
 
@@ -462,9 +469,9 @@ export class UserStore extends RpcTarget {
       builder = builder.limit(filter.first + 1);
     }
 
-    if (filter.after) {
-      const cursor = this.#decodeCursor(filter.after);
-      builder = builder.where('GameSessionInvitation.createdAt', '>', cursor);
+    if (filter.before) {
+      const cursor = this.#decodeCursor(filter.before);
+      builder = builder.where('GameSessionInvitation.createdAt', '<', cursor);
     }
 
     const results = await builder.execute();

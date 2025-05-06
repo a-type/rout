@@ -32,8 +32,10 @@
     "@long-game/games": "workspace:*",
     "@long-game/notifications": "workspace:*",
     "@long-game/service-db": "workspace:*",
+    "durable-utils": "^0.3.4",
     "hono": "catalog:",
     "jose": "^5.9.6",
+    "kysely": "catalog:",
     "stripe": "^18.0.0",
     "zod": "catalog:"
   },

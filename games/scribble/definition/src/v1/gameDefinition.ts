@@ -333,7 +333,7 @@ export const gameDefinition: GameDefinition<
   getStatus: ({ globalState, rounds }) => {
     if (rounds.length > RATING_ROUND) {
       return {
-        status: 'completed',
+        status: 'complete',
         winnerIds: [],
       };
     }

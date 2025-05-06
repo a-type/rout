@@ -1,4 +1,9 @@
-import { GameRound, GameStatus, PrefixedId } from '@long-game/common';
+import {
+  GameRound,
+  GameSessionChatMessage,
+  GameStatus,
+  PrefixedId,
+} from '@long-game/common';
 import { GameRandom } from './random.js';
 
 export type BaseTurnData = Record<string, unknown>;
@@ -133,6 +138,19 @@ export type GameDefinition<
    * - Rounds advance when all players submit turns
    */
   getRoundIndex: RoundIndexDecider<GlobalState, TurnData>;
+
+  /**
+   * Optionally customize the message sent to players when the round changes.
+   * You may want to use this to summarize what happened. You can also attach
+   * custom metadata to use in a customized chat message render component as
+   * part of your game UI.
+   */
+  getRoundChangeMessage?: (data: {
+    globalState: GlobalState;
+    rounds: GameRound<Turn<TurnData>>[];
+    members: { id: string }[];
+    roundIndex: number;
+  }) => GameSessionChatMessage | null;
 };
 
 export type RoundIndexDecider<
@@ -150,7 +168,8 @@ export type RoundIndexDecider<
   gameTimeZone: string;
   globalState: GlobalState;
   environment: 'production' | 'development';
-}) => {
+}) => RoundIndexResult;
+export interface RoundIndexResult {
   roundIndex: number;
   /**
    * Which players can and should submit a turn.
@@ -170,8 +189,8 @@ export type RoundIndexDecider<
    * scheduled round advancement which does not depend
    * on played turns.
    */
-  checkAgainAt?: Date;
-};
+  checkAgainAt?: Date | null;
+}
 
 export function validateGameDefinition(game: GameDefinition) {
   if (!game.getState && !game.applyRoundToGlobalState) {

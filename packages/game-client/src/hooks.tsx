@@ -43,7 +43,10 @@ function makeHookProxy<Sdk extends BaseSdk>(): any {
         const correctedMethodName =
           methodName.charAt(0).toLowerCase() + methodName.slice(1);
         // queries
-        if (correctedMethodName.startsWith('get')) {
+        if (
+          correctedMethodName.startsWith('get') ||
+          correctedMethodName.startsWith('adminGet')
+        ) {
           return (args: any) => {
             const sdk = useSdk() as Sdk;
             const method = sdk[correctedMethodName as keyof Sdk] as

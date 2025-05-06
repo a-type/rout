@@ -83,7 +83,7 @@ export function GameDebugger({ ...props }: GameDebuggerProps) {
   return (
     <>
       <Button size="icon" onClick={showDebugger} {...props}>
-        <Icon name="magic" />
+        <Icon name="bug" />
       </Button>
       <Suspense>
         {root && popout && createPortal(<DebuggerUi />, root)}

@@ -29,9 +29,14 @@ service = "prod-long-game-db-service"
 entrypoint = "AdminStore"
 
 [[durable_objects.bindings]]
-name = "GAME_SESSION_STATE"
-class_name = "GameSessionState"
+name = "GAME_SESSION"
+class_name = "GameSession"
 
 [[migrations]]
 tag = "v1"
 new_classes = ["GameSessionState"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["GameSession"]
+deleted_classes = ["GameSessionState"]

@@ -1,4 +1,9 @@
-import { assertPrefixedId, GameRound, PrefixedId } from '@long-game/common';
+import {
+  assertPrefixedId,
+  GameRound,
+  isPrefixedId,
+  PrefixedId,
+} from '@long-game/common';
 import { GameDefinition, roundFormat, Turn } from '@long-game/game-definition';
 import { getContiguousTerritories, type Territory } from './utils.js';
 export * from './utils.js';
@@ -123,15 +128,17 @@ export const gameDefinition: GameDefinition<
   getStatus: ({ globalState, rounds, members }) => {
     const playerPowers = countTotalPowerPerPlayer(globalState);
     const requiredPower = getRequiredPowerToWin(members.length);
-    const winners: string[] = [];
+    const winners: PrefixedId<'u'>[] = [];
     for (const playerId in playerPowers) {
       if (playerPowers[playerId] >= requiredPower) {
-        winners.push(playerId);
+        if (isPrefixedId(playerId, 'u')) {
+          winners.push(playerId);
+        }
       }
     }
     if (winners.length > 0) {
       return {
-        status: 'completed',
+        status: 'complete',
         winnerIds: winners,
       };
     }

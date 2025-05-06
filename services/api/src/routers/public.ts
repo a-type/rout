@@ -19,9 +19,8 @@ export const publicRouter = new Hono<Env>().get(
     if (!gameSessionId) {
       throw new LongGameError(LongGameError.Code.NotFound, 'Invite not found.');
     }
-    const durableObjectId =
-      ctx.env.GAME_SESSION_STATE.idFromName(gameSessionId);
-    const sessionState = await ctx.env.GAME_SESSION_STATE.get(durableObjectId);
+    const durableObjectId = ctx.env.GAME_SESSION.idFromName(gameSessionId);
+    const sessionState = await ctx.env.GAME_SESSION.get(durableObjectId);
     if (!sessionState.getIsInitialized()) {
       throw new LongGameError(
         LongGameError.Code.NotFound,

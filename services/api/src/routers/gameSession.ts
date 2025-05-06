@@ -14,12 +14,12 @@ import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import { getSocketToken } from '../auth/socketTokens';
 import { Env } from '../config/ctx';
-import { GameSessionState } from '../durableObjects/GameSessionState';
+import { GameSession } from '../durableObjects/gameSession/GameSession';
 import { SessionWithPrefixedIds } from '../middleware';
 
 const openGameSessionMiddleware = createMiddleware<{
   Variables: {
-    gameSessionState: DurableObjectStub<GameSessionState>;
+    gameSessionState: DurableObjectStub<GameSession>;
     session: SessionWithPrefixedIds;
     gameSessionId: PrefixedId<'gs'>;
     // an invitation existing is the authorization for
@@ -61,11 +61,12 @@ const openGameSessionMiddleware = createMiddleware<{
       'Your invitation to this game session was revoked. Please ask for another invite.',
     );
   }
-  const durableObjectId = ctx.env.GAME_SESSION_STATE.idFromName(id);
-  const sessionState = await ctx.env.GAME_SESSION_STATE.get(durableObjectId);
+  const durableObjectId = ctx.env.GAME_SESSION.idFromName(id);
+  const sessionState = await ctx.env.GAME_SESSION.get(durableObjectId);
   if (!sessionState.getIsInitialized()) {
-    throw new Error(
-      'Game session not initialized. POST to gameSessions/prepare on the public API.',
+    throw new LongGameError(
+      LongGameError.Code.InternalServerError,
+      "Game session not initialized. This is a bug, sorry. This game can't be played until support fixes it.",
     );
   }
   ctx.set('gameSessionState', sessionState as any);
@@ -99,7 +100,7 @@ export const gameSessionRouter = new Hono<Env>()
     const invitations = await userStore.getInvitationsToGameSession(
       ctx.get('gameSessionId'),
     );
-    return ctx.json(invitations);
+    return ctx.json(wrapRpcData(invitations));
   })
   .get('/status', async (ctx) => {
     const state = ctx.get('gameSessionState');

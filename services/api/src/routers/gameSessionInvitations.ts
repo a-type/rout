@@ -101,8 +101,8 @@ async function updateGameSessionMembers(
   userStore: RpcStub<UserStore>,
   gameSessionId: PrefixedId<'gs'>,
 ) {
-  const durableObjectId = env.GAME_SESSION_STATE.idFromName(gameSessionId);
-  const sessionState = await env.GAME_SESSION_STATE.get(durableObjectId);
+  const durableObjectId = env.GAME_SESSION.idFromName(gameSessionId);
+  const sessionState = await env.GAME_SESSION.get(durableObjectId);
   const members = await userStore.getGameSessionMembers(gameSessionId);
   await sessionState.updateMembers(members);
 }

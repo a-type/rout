@@ -8,7 +8,7 @@ import { hooks } from './gameClient.js';
 // etc, prepare and submit turns, as well as view historical states
 
 export const Client = hooks.withGame(function Client({ gameSuite }) {
-  if (gameSuite.gameStatus.status === 'completed') {
+  if (gameSuite.gameStatus.status === 'complete') {
     return <GameRecap />;
   }
 

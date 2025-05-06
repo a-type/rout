@@ -5,7 +5,7 @@ export type GameLogItem<TGame extends GameDefinition> =
   | {
       type: 'chat';
       chatMessage: GameSessionChatMessage;
-      timestamp: number;
+      timestamp: string;
     }
   | {
       type: 'round';

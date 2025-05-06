@@ -15,7 +15,7 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
     [gameSuite],
   );
 
-  if (gameSuite.gameStatus.status === 'completed') {
+  if (gameSuite.gameStatus.status === 'complete') {
     return (
       <Box full layout="center center">
         You win!

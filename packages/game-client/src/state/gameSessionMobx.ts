@@ -46,6 +46,7 @@ type GameSessionSuiteEvents = {
   turnValidationFailed: (error: string) => void;
   error: (error: LongGameError) => void;
   roundChanged: () => void;
+  membersChanged: () => void;
 };
 
 export class GameSessionSuite<TGame extends GameDefinition> {
@@ -80,7 +81,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   gameSessionId: PrefixedId<'gs'>;
   members!: { id: PrefixedId<'u'> }[];
   playerId: PrefixedId<'u'>;
-  startedAt!: Date;
+  startedAt: Date | null = null;
   timezone!: string;
   #events = new EventSubscriber<GameSessionSuiteEvents>();
 
@@ -102,7 +103,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       members: { id: PrefixedId<'u'> }[];
       status: GameStatus;
       playerId: PrefixedId<'u'>;
-      startedAt: number;
+      startedAt: string | null;
       timezone: string;
     },
     private ctx: {
@@ -117,7 +118,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.subscribeSocket();
     this.setupLocalTurnStorage();
 
-    if (init.status.status === 'completed') {
+    if (init.status.status === 'complete') {
       this.loadPostgame();
     }
   }
@@ -360,7 +361,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
 
     // only add postgame if the game is completed
-    if (this.gameStatus.status === 'completed') {
+    if (this.gameStatus.status === 'complete') {
       log.push(
         ...(chatsGroupedByRound.get(-1)?.map((msg) => ({
           type: 'chat' as const,
@@ -464,7 +465,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
     this.addChat({
       id: tempId,
-      createdAt: Date.now(),
+      createdAt: new Date().toISOString(),
       authorId: this.playerId,
       ...messageWithRound,
     });
@@ -541,7 +542,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @action private addChat = (msg: GameSessionChatMessage) => {
     this.chat.push(msg);
-    this.chat.sort((a, b) => a.createdAt - b.createdAt);
+    this.chat.sort((a, b) =>
+      new Date(a.createdAt) > new Date(b.createdAt) ? 1 : -1,
+    );
     this.chat = this.chat.filter((msg, i, arr) => {
       if (i === 0) {
         return true;
@@ -579,7 +582,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @action private onStatusChange = (msg: ServerStatusChangeMessage) => {
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
-    if (msg.status.status === 'completed') {
+    if (msg.status.status === 'complete') {
       this.loadPostgame();
     }
   };
@@ -639,7 +642,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     gameVersion: string;
     status: GameStatus;
     members: { id: PrefixedId<'u'> }[];
-    startedAt: number;
+    startedAt: string | null;
     timezone: string;
   }) => {
     this.viewingRoundIndex = init.currentRound.roundIndex;
@@ -651,7 +654,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.gameVersion = init.gameVersion;
     this.members = init.members;
     this.gameStatus = init.status;
-    this.startedAt = new Date(init.startedAt);
+    this.startedAt = init.startedAt ? new Date(init.startedAt) : null;
     this.timezone = init.timezone;
     this.players = init.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
       (acc, member) => {
@@ -682,7 +685,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       },
       {},
     );
-    this.fetchMembers();
+    this.fetchMembers().then(() => {
+      this.#events.emit('membersChanged');
+    });
   };
 
   debug = async () => {
@@ -719,7 +724,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     debugValue.getRoundIndex = () =>
       this.gameDefinition.getRoundIndex({
         currentTime: new Date(),
-        startedAt: this.startedAt,
+        startedAt: new Date(this.startedAt!),
         gameTimeZone: this.timezone,
         members: debugValue.members,
         globalState: debugValue.globalState,

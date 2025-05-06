@@ -20,8 +20,8 @@ export const socketRouter = new Hono<Env>().all(
     );
     assertPrefixedId(gameSessionId, 'gs');
 
-    const state = await ctx.env.GAME_SESSION_STATE.get(
-      await ctx.env.GAME_SESSION_STATE.idFromName(gameSessionId),
+    const state = await ctx.env.GAME_SESSION.get(
+      await ctx.env.GAME_SESSION.idFromName(gameSessionId),
     );
     return state.fetch(ctx.req.raw);
   },

@@ -66,11 +66,11 @@ export class PublicSdk extends BaseSdk {
     'getGameSessions',
     ({ status, invitationStatus }, cursor) =>
       this.apiRpc.gameSessions.$get({
-        query: { after: cursor, status, invitationStatus },
+        query: { before: cursor, status, invitationStatus },
       }),
     {
       transformInput: (input: {
-        status?: ('active' | 'completed' | 'pending')[];
+        status?: ('active' | 'complete' | 'pending')[];
         invitationStatus?: 'pending' | 'accepted' | 'declined';
       }) => input,
       getKey: (input) => {
@@ -374,6 +374,39 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+  adminGetAllGameSessions = this.sdkInfiniteQuery(
+    'adminGetAllGameSessions',
+    (input, cursor) =>
+      this.apiRpc.admin.gameSessions.$get({
+        query: {
+          ...input,
+          before: cursor,
+        },
+      }),
+    {
+      transformInput: (input: {
+        status?: 'active' | 'complete' | 'pending';
+      }) => ({
+        query: { status: input.status },
+      }),
+      getKey: (input) => {
+        const key: string[] = [];
+        if (input.status) {
+          key.push(input.status);
+        }
+        return key;
+      },
+    },
+  );
+  adminDeleteGameSession = this.sdkMutation(
+    this.apiRpc.admin.gameSessions[':sessionId'].$delete,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'> }) => ({
+        param: { sessionId: input.id },
+      }),
+      invalidate: [['adminGetAllGameSessions']],
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
@@ -400,3 +433,6 @@ export type Notification = InferReturnData<
   PublicSdk['getNotifications']
 >['results'][number];
 export type GameProduct = InferReturnData<PublicSdk['getGameProducts']>[number];
+export type AdminGameSessionSummary = InferReturnData<
+  PublicSdk['adminGetAllGameSessions']
+>['results'][number];

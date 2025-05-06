@@ -1,9 +1,11 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { AvatarList, Button, Card, DropdownMenu, Icon } from '@a-type/ui';
+import { PrefixedId } from '@long-game/common';
 import { GameSession } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
+import { Suspense } from 'react';
 import { UserAvatar } from '../users/UserAvatar';
 import { GameSessionStatusChip } from './GameSessionStatusChip';
 
@@ -17,33 +19,31 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
   className,
   ...rest
 }: GameSummaryCardProps) {
-  const game = games[summary.gameId];
+  const game = summary.gameId ? games[summary.gameId] : null;
   const deleteSession = sdkHooks.useDeleteGameSession();
-
-  if (!game) {
-    return null;
-  }
 
   return (
     <Card className={className} {...rest}>
       <Card.Main asChild>
         <Link to={`/session/${summary.id}`}>
-          <Card.Title>{game.title}</Card.Title>
+          <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
           <Card.Content>
-            <AvatarList count={summary.members.length}>
-              {summary.members.map((m, i) => (
-                <AvatarList.ItemRoot key={m.id} index={i}>
-                  <UserAvatar userId={m.id} />
-                </AvatarList.ItemRoot>
-              ))}
-            </AvatarList>
+            <Suspense
+              fallback={
+                <AvatarList count={1}>
+                  <AvatarList.Item index={0} />
+                </AvatarList>
+              }
+            >
+              <GameSummaryCardMembers sessionId={summary.id} />
+            </Suspense>
           </Card.Content>
           <Card.Content unstyled>
-            <GameSessionStatusChip status={summary.status.status} />
+            <GameSessionStatusChip status={summary.status} />
           </Card.Content>
         </Link>
       </Card.Main>
-      {summary.status.status === 'pending' && summary.canDelete && (
+      {summary.status === 'pending' && summary.canDelete && (
         <Card.Footer>
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
@@ -71,3 +71,22 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
   );
 },
 <Card />);
+
+const GameSummaryCardMembers = ({
+  sessionId,
+}: {
+  sessionId: PrefixedId<'gs'>;
+}) => {
+  const { data: members } = sdkHooks.useGetGameSessionMembers({
+    id: sessionId,
+  });
+  return (
+    <AvatarList count={members.length}>
+      {members.map((m, i) => (
+        <AvatarList.ItemRoot key={m.id} index={i}>
+          <UserAvatar userId={m.id} />
+        </AvatarList.ItemRoot>
+      ))}
+    </AvatarList>
+  );
+};

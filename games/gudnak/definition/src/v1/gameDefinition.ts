@@ -1,3 +1,4 @@
+import { PrefixedId } from '@long-game/common';
 import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
 import {
   abilityDefinitions,
@@ -9,17 +10,17 @@ import {
 } from './definitions/abilityDefinition';
 import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './definitions/decks';
+import { applyTurn } from './gameState/applyTurn';
 import { findMatchingFreeAction } from './gameState/freeAction';
+import { checkFatigue } from './gameState/gameStateHelpers';
+import { generateInitialGameState } from './gameState/generate';
+import { getPlayerState } from './gameState/getPlayerState';
 import {
   validateDefend,
   validateDeploy,
   validateMove,
   validateTargets,
 } from './gameState/validation';
-import { applyTurn } from './gameState/applyTurn';
-import { generateInitialGameState } from './gameState/generate';
-import { getPlayerState } from './gameState/getPlayerState';
-import { checkFatigue } from './gameState/gameStateHelpers';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -324,8 +325,8 @@ export const gameDefinition: GameDefinition<
   getStatus: ({ globalState }) => {
     if (globalState.winner) {
       return {
-        status: 'completed',
-        winnerIds: [globalState.winner],
+        status: 'complete',
+        winnerIds: [globalState.winner as PrefixedId<'u'>],
       };
     }
     return {

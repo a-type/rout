@@ -41,4 +41,4 @@ export default app;
 
 export type AppType = typeof app;
 
-export { GameSessionState } from './durableObjects/GameSessionState';
+export { GameSession } from './durableObjects/gameSession/GameSession';

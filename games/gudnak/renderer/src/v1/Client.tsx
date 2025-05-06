@@ -16,12 +16,12 @@ import { DefaultRoundRenderer } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
+import { CardViewer } from './CardViewer';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
 import { ViewStateProvider } from './useViewState';
-import { CardViewer } from './CardViewer';
 
 export function Client() {
   return (
@@ -73,7 +73,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   });
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  if (gameStatus.status === 'completed') {
+  if (gameStatus.status === 'complete') {
     return (
       <Box className="w-full h-full flex flex-col p-3 gap-2">
         <h3>Game Over</h3>
