@@ -652,7 +652,7 @@ export class GameSession extends DurableObject<ApiBindings> {
           await this.getPublicRoundIndex(),
         );
     }
-    const result = await this.#sql.run(sql);
+    const result = await this.#sql.run(sql, { debug: true });
     const messages = result.reverse().map((row) => {
       let recipientIds = row.recipientIdsList
         ? this.#decodeChatRecipientIds(row.recipientIdsList)
