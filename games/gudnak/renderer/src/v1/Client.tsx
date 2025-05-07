@@ -23,7 +23,7 @@ import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
 import { ViewStateProvider } from './useViewState';
 import { DiscardViewer } from './DiscardViewer';
-import { CustomChatMessage } from './ChatMessage';
+import { CustomChatMessage } from './chat/ChatMessage';
 
 export function Client() {
   return (
