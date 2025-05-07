@@ -3,9 +3,16 @@ import { idShapes } from './ids';
 
 export const gameSessionPlayerStatusShape = z.object({
   online: z.boolean(),
+  pendingTurn: z.boolean(),
 });
 export type GameSessionPlayerStatus = z.infer<
   typeof gameSessionPlayerStatusShape
+>;
+
+export const gameSessionPlayerStatusUpdateShape =
+  gameSessionPlayerStatusShape.partial();
+export type GameSessionPlayerStatusUpdate = z.infer<
+  typeof gameSessionPlayerStatusUpdateShape
 >;
 
 export const gameStatusShape = z.discriminatedUnion('status', [

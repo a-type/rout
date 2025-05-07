@@ -201,8 +201,42 @@ export class GameSessionSocketHandler {
         ws.send(JSON.stringify(msg));
       });
     }
-    const parsed = clientMessageShape.parse(message.toString());
-    this.#onClientMessage(parsed, ws, info);
+    try {
+      const asObject = JSON.parse(message.toString());
+      const parsed = clientMessageShape.safeParse(asObject);
+      if (!parsed.success) {
+        console.error(
+          'Invalid message',
+          parsed.error,
+          'at',
+          parsed.error.errors?.[0]?.path?.join('.'),
+          message.toString(),
+        );
+        ws.send(
+          JSON.stringify({
+            type: 'error',
+            message: 'Invalid message format',
+            responseTo: null,
+          }),
+        );
+        return;
+      } else {
+        this.#onClientMessage(parsed.data, ws, info);
+      }
+    } catch (err) {
+      console.error(
+        'Error parsing or handling message',
+        err,
+        message.toString(),
+      );
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Error handling message',
+          responseTo: null,
+        }),
+      );
+    }
   };
 
   #onClientMessage = async (
@@ -255,7 +289,7 @@ export class GameSessionSocketHandler {
     this.#onWebSocketCloseOrError(ws);
   }
 
-  #onWebSocketCloseOrError = (ws: WebSocket) => {
+  #onWebSocketCloseOrError = async (ws: WebSocket) => {
     const info = this.#socketInfo.get(ws);
     if (info) {
       // inform other clients that this user has left
@@ -285,7 +319,7 @@ export class GameSessionSocketHandler {
       recipientIds: msg.message.recipientIds,
       roundIndex: msg.message.roundIndex,
       metadata: msg.message.metadata,
-      reactions: msg.message.reactions,
+      reactions: {},
     });
   };
 

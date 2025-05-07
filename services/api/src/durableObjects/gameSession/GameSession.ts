@@ -409,13 +409,19 @@ export class GameSession extends DurableObject<ApiBindings> {
     Record<PrefixedId<'u'>, GameSessionPlayerStatus>
   > {
     const members = await this.getMembers();
+    const roundState = await this.#getCurrentRoundState();
     const statuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus> = {};
     for (const member of members) {
       statuses[member.id] = {
         online: this.#socketHandler.getIsPlayerOnline(member.id),
+        pendingTurn: roundState.pendingTurns.includes(member.id),
       };
     }
     return statuses;
+  }
+  async getPlayerIsPendingTurn(playerId: PrefixedId<'u'>) {
+    const roundState = await this.#getCurrentRoundState();
+    return roundState.pendingTurns.includes(playerId);
   }
   async getPlayerLatestPlayedRoundIndex(
     playerId: PrefixedId<'u'>,
@@ -450,7 +456,6 @@ export class GameSession extends DurableObject<ApiBindings> {
       currentRoundIndex - 1,
     );
 
-    console.log(turn, playerState, currentRoundIndex);
     const validationError = gameDefinition.validateTurn({
       turn: {
         data: turn,
@@ -955,6 +960,7 @@ export class GameSession extends DurableObject<ApiBindings> {
                 member.id,
                 roundState.roundIndex,
               ),
+              playerStatuses: await this.getPlayerStatuses(),
             },
             {
               to: [member.id],
@@ -1016,6 +1022,7 @@ export class GameSession extends DurableObject<ApiBindings> {
             createdAt: new Date().toISOString(),
             authorId: SYSTEM_CHAT_AUTHOR_ID,
             roundIndex: roundIndex,
+            reactions: {},
           });
         }
       }

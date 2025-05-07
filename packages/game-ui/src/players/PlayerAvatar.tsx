@@ -1,4 +1,4 @@
-import { Avatar, clsx } from '@a-type/ui';
+import { Avatar, clsx, Tooltip } from '@a-type/ui';
 import {
   isPrefixedId,
   PrefixedId,
@@ -6,6 +6,7 @@ import {
   SystemChatAuthorId,
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { PlayerInfo } from './PlayerInfo';
 import { usePlayerThemed } from './usePlayerThemed';
 
 export interface PlayerAvatarProps {
@@ -24,29 +25,47 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
     playerId && isPrefixedId(playerId) ? playerId : undefined;
   const player = onlyPlayerId ? gameSuite.getPlayer(onlyPlayerId) : null;
   const { className: themeClass, style } = usePlayerThemed(onlyPlayerId);
+  const status = onlyPlayerId
+    ? gameSuite.playerStatuses[onlyPlayerId] ?? null
+    : null;
 
   return (
-    <Avatar
-      name={
-        playerId === SYSTEM_CHAT_AUTHOR_ID
-          ? 'Game'
-          : player?.displayName ?? 'Anonymous'
+    <Tooltip
+      color="white"
+      content={
+        !playerId ? (
+          'Unknown player'
+        ) : isPrefixedId(playerId) ? (
+          <PlayerInfo playerId={playerId} />
+        ) : (
+          'The Rout app'
+        )
       }
-      imageSrc={
-        playerId === SYSTEM_CHAT_AUTHOR_ID ? '/icon.png' : player?.imageUrl
-      }
-      style={{
-        ...style,
-        width: size ?? 24,
-        height: size ?? 24,
-      }}
-      className={clsx(
-        'flex-shrink-0 aspect-1',
-        'border-solid border-2px border-primary',
-        themeClass,
-        className,
-      )}
-      popIn={false}
-    />
+      disabled={!playerId}
+    >
+      <Avatar
+        name={
+          playerId === SYSTEM_CHAT_AUTHOR_ID
+            ? 'Game'
+            : player?.displayName ?? 'Anonymous'
+        }
+        imageSrc={
+          playerId === SYSTEM_CHAT_AUTHOR_ID ? '/icon.png' : player?.imageUrl
+        }
+        style={{
+          ...style,
+          width: size ?? 24,
+          height: size ?? 24,
+        }}
+        className={clsx(
+          'flex-shrink-0 aspect-1',
+          'border-solid border-2px',
+          status?.online ? 'border-primary-dark' : 'border-gray',
+          themeClass,
+          className,
+        )}
+        popIn={false}
+      />
+    </Tooltip>
   );
 });

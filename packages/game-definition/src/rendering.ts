@@ -1,6 +1,5 @@
 import { GameSessionChatMessage } from '@long-game/common';
 import { ComponentType } from 'react';
-import { GameDefinition } from './gameDefinition';
 
 export type GameRendererVersionDefinition = {
   Client: ComponentType<any>;
@@ -16,11 +15,11 @@ export type GameRendererModule = {
   default: GameRendererModuleDefault;
 };
 
-export type GameChatMessageRenderer = ComponentType<
-  GameChatMessageRendererProps<any>
->;
-export type GameChatMessageRendererProps<TGame extends GameDefinition> = {
+export type GameChatMessageRenderer =
+  ComponentType<GameChatMessageRendererProps>;
+export type GameChatMessageRendererProps = {
   message: GameSessionChatMessage;
   previousMessage: GameSessionChatMessage | null;
   nextMessage: GameSessionChatMessage | null;
+  compact: boolean;
 };

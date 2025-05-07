@@ -1,6 +1,7 @@
 import {
   clientMessageShape,
   ClientMessageWithoutId,
+  genericId,
   LongGameError,
   PrefixedId,
   ServerMessage,
@@ -230,9 +231,11 @@ class ReconnectingWebsocket {
       console.log('Socket connected', this.#id);
       this.#status = 'open';
 
-      websocket.send(JSON.stringify({ type: 'ping' }));
+      websocket.send(JSON.stringify({ messageId: genericId(), type: 'ping' }));
       pingInterval = setInterval(() => {
-        websocket.send(JSON.stringify({ type: 'ping' }));
+        websocket.send(
+          JSON.stringify({ messageId: genericId(), type: 'ping' }),
+        );
       }, 10000);
 
       if (this.backlog.length) {

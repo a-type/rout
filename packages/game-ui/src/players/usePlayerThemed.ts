@@ -20,7 +20,7 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
     className: 'theme',
     style: {
       '--dyn-primary-source': palette.okHue,
-      '--dyn-primary-contrast': palette.okHue,
+      '--dyn-accent-source': 160,
     } as any,
   };
 }

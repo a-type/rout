@@ -1,6 +1,5 @@
 import { EventSubscriber } from '@a-type/utils';
 import {
-  asRequired,
   GameRoundSummary,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
@@ -581,13 +580,16 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @action private onPlayerStatusChange = (
     msg: ServerPlayerStatusChangeMessage,
   ) => {
-    this.playerStatuses[msg.playerId] = msg.playerStatus;
+    this.playerStatuses[msg.playerId] = {
+      ...this.playerStatuses[msg.playerId],
+      ...msg.playerStatus,
+    };
   };
 
   @action private onRoundChange = (msg: ServerRoundChangeMessage) => {
     // always best to update our data regardless; server knows best.
-    this.rounds[msg.completedRound.roundIndex] = asRequired(msg.completedRound);
-    this.rounds[msg.newRound.roundIndex] = asRequired(msg.newRound);
+    this.rounds[msg.completedRound.roundIndex] = msg.completedRound;
+    this.rounds[msg.newRound.roundIndex] = msg.newRound;
     // reset turn data for new round
     this.localTurnData = null;
 

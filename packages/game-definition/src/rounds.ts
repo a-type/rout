@@ -77,6 +77,26 @@ export function notPlayedThisRound({
     .map((m) => m.id);
 }
 
+export function latestTurnInRound({
+  turns,
+  roundIndex,
+}: {
+  turns: any[];
+  roundIndex: number;
+}): Date | undefined {
+  const thisRoundTurns = turns.filter((turn) => turn.roundIndex === roundIndex);
+  if (thisRoundTurns.length === 0) {
+    return undefined;
+  }
+  // find the latest turn in the last round
+  const latestTurn = thisRoundTurns.reduce<Date>((latest, turn) => {
+    return new Date(turn.createdAt) > latest
+      ? new Date(turn.createdAt)
+      : latest;
+  }, new Date(0));
+  return latestTurn;
+}
+
 function periodicRounds(
   periodType: PeriodType,
   periodValue: number = 1,
@@ -170,12 +190,14 @@ function syncRounds(
       if (advancementDelayMs) {
         // if the last round is full, we need to wait for the advancement delay
         // before we can advance to the next round
-        const lastTurn = lastRoundTurns[lastRoundTurns.length - 1];
-        const lastTurnTime = new Date(lastTurn.createdAt);
+        const lastTurnTime = latestTurnInRound({
+          turns,
+          roundIndex: maxRoundIndex,
+        });
         // need to wait to advance to the next round
         if (
-          currentTime.getTime() - lastTurnTime.getTime() <
-          advancementDelayMs
+          lastTurnTime !== undefined &&
+          currentTime.getTime() - lastTurnTime.getTime() < advancementDelayMs
         ) {
           return {
             roundIndex: maxRoundIndex,

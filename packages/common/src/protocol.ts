@@ -2,10 +2,14 @@ import { z } from 'zod';
 import { gameSessionChatInitShape, gameSessionChatMessageShape } from './chat';
 import { idShapes, PrefixedId } from './ids';
 import { gameRoundSummaryShape } from './rounds';
-import { gameSessionPlayerStatusShape, gameStatusShape } from './status';
+import {
+  gameSessionPlayerStatusShape,
+  gameSessionPlayerStatusUpdateShape,
+  gameStatusShape,
+} from './status';
 
 const baseServerMessageShape = z.object({
-  responseTo: z.string().optional(),
+  responseTo: z.string().optional().nullable(),
 });
 export type BaseServerMessage = z.infer<typeof baseServerMessageShape>;
 
@@ -13,7 +17,7 @@ export const serverPlayerStatusChangeMessageShape =
   baseServerMessageShape.extend({
     type: z.literal('playerStatusChange'),
     playerId: idShapes.User,
-    playerStatus: gameSessionPlayerStatusShape,
+    playerStatus: gameSessionPlayerStatusUpdateShape,
   });
 export type ServerPlayerStatusChangeMessage = z.infer<
   typeof serverPlayerStatusChangeMessageShape
@@ -30,6 +34,7 @@ export const serverRoundChangeMessageShape = baseServerMessageShape.extend({
   type: z.literal('roundChange'),
   newRound: gameRoundSummaryShape,
   completedRound: gameRoundSummaryShape,
+  playerStatuses: z.record(idShapes.User, gameSessionPlayerStatusShape),
 });
 export type ServerRoundChangeMessage = z.infer<
   typeof serverRoundChangeMessageShape
