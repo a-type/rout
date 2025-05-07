@@ -10,7 +10,7 @@ import {
   getStack,
   getTopCard,
   removeTopCard,
-  swapCardPositions,
+  swapStacks,
   validCoordinate,
 } from './board';
 import { CardStack } from '../gameDefinition';
@@ -232,7 +232,7 @@ describe('gameState/board', {}, () => {
       ];
       const coord1 = { x: 0, y: 0 };
       const coord2 = { x: 1, y: 1 };
-      const result = swapCardPositions(board, coord1, coord2);
+      const result = swapStacks(board, coord1, coord2);
       expect(result).toEqual([
         [['id4'], ['id2']],
         [['id3'], ['id1']],

@@ -1,5 +1,9 @@
 import { PrefixedId } from '@long-game/common';
-import { GameDefinition, RoundIndexDecider } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  RoundIndexDecider,
+  SystemChatMessage,
+} from '@long-game/game-definition';
 import {
   abilityDefinitions,
   CardTarget,
@@ -320,6 +324,75 @@ export const gameDefinition: GameDefinition<
 
   getPublicTurn: ({ turn }) => {
     return turn;
+  },
+
+  getRoundChangeMessages: ({ completedRound }) => {
+    const messages: SystemChatMessage[] = [];
+    const renderPlayer = (id: string) => `<player|${id}>`;
+    const renderCard = (id: string) => `<card|${id}>`;
+    const renderCoordinate = (coord: Coordinate) =>
+      `<coordinate|${coord.x},${coord.y}>`;
+    completedRound?.turns.forEach((turn) => {
+      const {
+        data: { action },
+        playerId,
+      } = turn;
+      if (action.type === 'attack') {
+        messages.push({
+          content: `${renderPlayer(playerId)} attacked with ${renderCard(
+            action.cardInstanceId,
+          )} from ${renderCoordinate(action.source)} to ${renderCoordinate(
+            action.target,
+          )}`,
+        });
+      }
+      if (action.type === 'move') {
+        messages.push({
+          content: `${renderPlayer(playerId)} moved ${renderCard(
+            action.cardInstanceId,
+          )} from ${renderCoordinate(action.source)} to ${renderCoordinate(
+            action.target,
+          )}`,
+        });
+      }
+      if (action.type === 'deploy') {
+        messages.push({
+          content: `${renderPlayer(playerId)} deployed ${renderCard(
+            action.card.instanceId,
+          )} to ${renderCoordinate(action.target)}`,
+        });
+      }
+      if (action.type === 'draw') {
+        messages.push({ content: `${renderPlayer(playerId)} drew a card` });
+      }
+      if (action.type === 'endTurn') {
+        messages.push({
+          content: `${renderPlayer(playerId)} ended their turn`,
+        });
+      }
+      if (action.type === 'tactic') {
+        messages.push({
+          content: `${renderPlayer(playerId)} played <card|${
+            action.card.instanceId
+          }>`,
+        });
+      }
+      if (action.type === 'useAbility') {
+        messages.push({
+          content: `${renderPlayer(playerId)} used ${renderCard(
+            action.cardInstanceId,
+          )} ability`,
+        });
+      }
+      if (action.type === 'defend') {
+        messages.push({
+          content: `${renderPlayer(playerId)} defended with ${action.targets
+            .map((t) => renderCard(t.instanceId))
+            .join(', ')}`,
+        });
+      }
+    });
+    return messages;
   },
 
   getStatus: ({ globalState }) => {

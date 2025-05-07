@@ -7,7 +7,7 @@ import type {
   Space,
 } from '../gameDefinition';
 
-export function getTopCardInstanceIdAtCoordinate(
+export function getTopCardAtCoordinate(
   board: Board,
   coord: Coordinate,
 ): string | null {
@@ -40,15 +40,28 @@ export function getStack(board: Board, coord: Coordinate): CardStack {
   return board[y][x];
 }
 
-export function removeTopCard(board: Board, coord: Coordinate) {
+export function setStack(
+  board: Board,
+  coord: Coordinate,
+  stack: CardStack,
+): Board {
   const { x, y } = coord;
+  // return null if out of bounds
+  if (!validCoordinate(board, coord)) {
+    throw new Error('Out of bounds');
+  }
+  const newBoard = [...board];
+  newBoard[y][x] = stack;
+  return newBoard;
+}
+
+export function removeTopCard(board: Board, coord: Coordinate) {
   const stack = getStack(board, coord);
   if (stack.length === 0) {
     return board;
   }
   const newStack = stack.slice(0, stack.length - 1);
-  const newBoard = [...board];
-  newBoard[y][x] = newStack;
+  const newBoard = setStack(board, coord, newStack);
   return newBoard;
 }
 
@@ -57,11 +70,9 @@ export function addCardToStack(
   coord: Coordinate,
   cardInstanceId: string,
 ): Board {
-  const { x, y } = coord;
   const stack = getStack(board, coord);
   const newStack = [...stack, cardInstanceId];
-  const newBoard = [...board];
-  newBoard[y][x] = newStack;
+  const newBoard = setStack(board, coord, newStack);
   return newBoard;
 }
 
@@ -125,21 +136,21 @@ export function getAdjacentCardInstanceIds(
 ): string[] {
   const adjacentCoords = getAdjacentCoordinates(board, coord);
   const adjacentCards = adjacentCoords
-    .map((c) => getTopCard(getStack(board, c)))
+    .map((c) => getTopCardAtCoordinate(board, c))
     .filter(Boolean);
   return adjacentCards as string[];
 }
 
-export function swapCardPositions(
+export function swapStacks(
   board: Board,
   source: Coordinate,
   target: Coordinate,
 ) {
   const sourceStack = getStack(board, source);
   const targetStack = getStack(board, target);
-  const newBoard = [...board];
-  newBoard[source.y][source.x] = targetStack;
-  newBoard[target.y][target.x] = sourceStack;
+  let newBoard = [...board];
+  newBoard = setStack(newBoard, source, targetStack);
+  newBoard = setStack(newBoard, target, sourceStack);
   return newBoard;
 }
 
@@ -174,9 +185,8 @@ export function moveStack(
   target: Coordinate,
 ): Board {
   const sourceStack = getStack(board, source);
-  const targetStack = getStack(board, target);
-  const newBoard = [...board];
-  newBoard[source.y][source.x] = [];
-  newBoard[target.y][target.x] = [...sourceStack];
+  let newBoard = [...board];
+  newBoard = setStack(newBoard, target, sourceStack);
+  newBoard = setStack(newBoard, source, []);
   return newBoard;
 }

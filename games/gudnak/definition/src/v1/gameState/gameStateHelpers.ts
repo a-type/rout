@@ -1,11 +1,5 @@
 import { cardDefinitions, ValidCardId } from '../definitions/cardDefinition';
-import type {
-  Board,
-  Card,
-  Coordinate,
-  Side,
-  GlobalState,
-} from '../gameDefinition';
+import type { Card, Coordinate, GlobalState } from '../gameDefinition';
 import {
   abilityDefinitions,
   EffectInput,

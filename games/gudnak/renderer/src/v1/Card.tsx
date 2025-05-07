@@ -226,15 +226,19 @@ export function RenderCard({
 export function Card({
   info,
   stack,
+  className,
   ...rest
 }: BaseCardProps & {
+  className?: string;
   stack?: CardStack;
   info: CardType;
 }) {
   const { finalState } = hooks.useGameSuite();
   const { cardState } = finalState;
   const { cardId, ownerId, fatigued, continuousEffects } = info;
-  const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
+  const { className: playerClassName, style } = usePlayerThemed(
+    ownerId as `u-${string}`,
+  );
 
   const { over, active } = useDndContext();
 
@@ -249,7 +253,7 @@ export function Card({
   if (cardData.kind === 'fighter') {
     return (
       <Draggable
-        className={clsx(className, 'z-40 touch-manipulation')}
+        className={clsx(className, playerClassName, 'z-40 touch-manipulation')}
         style={style}
         data={{
           instanceId: rest.instanceId,

@@ -1,23 +1,16 @@
 import type { GlobalState, ContinuousEffect } from '../gameDefinition';
+import { updateCardState } from './card';
 
 export function addContinuousEffectToCard(
   gameState: GlobalState,
   cardInstanceId: string,
   effect: ContinuousEffect,
 ): GlobalState {
-  return {
-    ...gameState,
-    cardState: {
-      ...gameState.cardState,
-      [cardInstanceId]: {
-        ...gameState.cardState[cardInstanceId],
-        continuousEffects: [
-          ...gameState.cardState[cardInstanceId].continuousEffects,
-          effect,
-        ],
-      },
-    },
-  };
+  const continuousEffects = [
+    ...gameState.cardState[cardInstanceId].continuousEffects,
+    effect,
+  ];
+  return updateCardState(gameState, cardInstanceId, { continuousEffects });
 }
 
 export function removeTurnBasedContinuousEffects(

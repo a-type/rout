@@ -22,6 +22,8 @@ import { Hand } from './Hand';
 import { useGameAction } from './useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
 import { ViewStateProvider } from './useViewState';
+import { DiscardViewer } from './DiscardViewer';
+import { CustomChatMessage } from './chat/ChatMessage';
 
 export function Client() {
   return (
@@ -31,7 +33,7 @@ export function Client() {
   );
 }
 
-export const ChatMessage = DefaultChatMessage;
+export const ChatMessage = CustomChatMessage;
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const {
@@ -248,11 +250,10 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                   });
                   return;
                 }
-                //action.playCard(card);
               }}
             />
           </div>
-
+          <DiscardViewer />
           <CardViewer />
         </DndContext>
       </Flipper>

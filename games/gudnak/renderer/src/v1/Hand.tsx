@@ -10,7 +10,7 @@ import { useMediaQuery } from '@long-game/game-ui';
 import { rotatePointAroundAnotherPoint, useScreenSize } from './utils';
 import { useClickAway } from '@uidotdev/usehooks';
 import { isMobile } from 'react-device-detect';
-import { useDndContext, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 
 export function Hand({
   cards,
@@ -26,7 +26,6 @@ export function Hand({
   const { setNodeRef, active } = useDroppable({
     id: 'hand',
   });
-  // const { active } = useDndContext();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [expandHand, setExpandHand] = useState(false);
   const ref = useClickAway<HTMLDivElement>(() => {
