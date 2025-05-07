@@ -59,43 +59,50 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
     );
 
     return (
-      <Box d="col" className={clsx(className)} gap="xs">
+      <Box
+        d="col"
+        className={clsx(
+          isSystem ? 'theme theme-salt' : themeClass,
+          isSelf ? 'ml-auto' : 'mr-auto',
+          isFuture && 'opacity-50',
+          className,
+        )}
+        gap="xs"
+        style={style ? { ...themeStyle, ...style } : themeStyle}
+        items={isSelf ? 'end' : 'start'}
+      >
+        {!isPreviousMessageSameAuthor && (
+          <Box
+            className={clsx(
+              'relative bottom-3px translate-y-1/2 rounded-full text-xs bg-primary-wash bg-lighten-1 color-black mt-md z-1',
+              isSelf ? 'ml-auto rounded-br-0' : 'mr-auto rounded-bl-0',
+            )}
+            gap="sm"
+            items="center"
+          >
+            <PlayerAvatar
+              playerId={message.authorId}
+              className="flex-shrink-0 w-16px h-16px"
+            />
+            <span className="font-bold block pr-md py-xs text-nowrap overflow-hidden">
+              <PlayerName playerId={message.authorId} />
+            </span>
+          </Box>
+        )}
         <Box
           d="col"
           surface
           items="start"
           gap="sm"
-          p="md"
           className={clsx(
-            isSelf ? 'ml-auto' : 'mr-auto',
-            isSystem ? 'theme theme-salt' : themeClass,
-            isFuture && 'opacity-50',
-            'bg-primary-wash color-primary-ink',
+            'bg-primary-wash bg-lighten-1 color-primary-ink',
             'shadow-sm',
             'transition-opacity',
-            !isPreviousMessageSameAuthor && 'mt-lg',
+            'px-md py-sm',
+            'w-full',
           )}
-          style={style ? { ...themeStyle, ...style } : themeStyle}
           {...rest}
         >
-          {!isPreviousMessageSameAuthor && (
-            <Box
-              gap
-              className={clsx(
-                'absolute top-0 -translate-y-1/2 rounded-full text-xs bg-inherit',
-                isSelf ? 'right-md' : 'left-md',
-              )}
-              items="center"
-            >
-              <PlayerAvatar
-                playerId={message.authorId}
-                className="flex-shrink-0 w-16px h-16px"
-              />
-              <span className="font-bold block pr-lg py-xs">
-                <PlayerName playerId={message.authorId} />:{' '}
-              </span>
-            </Box>
-          )}
           <Box
             className={clsx('leading-relaxed whitespace-pre-wrap')}
             full="width"
