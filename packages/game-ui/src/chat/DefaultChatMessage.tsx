@@ -22,7 +22,7 @@ export interface ChatMessageProps extends BoxProps {
   message: GameSessionChatMessage;
   previousMessage: GameSessionChatMessage | null;
   nextMessage: GameSessionChatMessage | null;
-  compact?: boolean;
+  compact: boolean;
 }
 
 export const DefaultChatMessage = withGame<ChatMessageProps>(

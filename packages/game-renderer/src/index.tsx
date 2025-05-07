@@ -38,7 +38,7 @@ export function ChatRenderer({
   ...rest
 }: {
   fallback?: ReactNode;
-} & GameChatMessageRendererProps<any>) {
+} & GameChatMessageRendererProps) {
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <Suspense fallback={fallback || null}>
@@ -48,7 +48,7 @@ export function ChatRenderer({
   );
 }
 
-function ChatRendererImpl(props: GameChatMessageRendererProps<any>) {
+function ChatRendererImpl(props: GameChatMessageRendererProps) {
   const { gameDefinition, gameId } = useGameSuite();
   const Chat: any = getLazyChatRenderer(gameId, gameDefinition.version);
   if (!Chat) {

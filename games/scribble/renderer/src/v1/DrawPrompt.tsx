@@ -31,7 +31,7 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
 
   return (
     <Box d="col" gap items="center">
-      <H2 className="text-3xl italic">"{prompt}"</H2>
+      <H2 className="text-3xl italic text-center">"{prompt}"</H2>
       {byPlayerId && (
         <Box gap items="center">
           Prompt by <PlayerAvatar playerId={byPlayerId} />
