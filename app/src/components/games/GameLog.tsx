@@ -124,6 +124,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
                   key={entry.chatMessage.id}
                   nextMessage={nextMessage}
                   previousMessage={previousMessage}
+                  compact={false}
                 />
               );
             } else {

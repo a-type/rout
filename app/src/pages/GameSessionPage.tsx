@@ -8,8 +8,10 @@ import { sdkHooks } from '@/services/publicSdk';
 import {
   Box,
   ErrorBoundary,
+  getResolvedColorMode,
   Icon,
   Spinner,
+  useColorMode,
   useTitleBarColor,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
@@ -51,7 +53,13 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const sessionId = gameSuite.gameSessionId;
   const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
   const backupColor = useDefaultBgColor();
-  useTitleBarColor(palette?.range[0] ?? backupColor);
+  useColorMode();
+  const titleColor = !palette
+    ? backupColor
+    : getResolvedColorMode() === 'dark'
+    ? palette.range[10]
+    : palette.range[1];
+  useTitleBarColor(titleColor);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
       {gameSuite.gameStatus.status === 'complete' && (
