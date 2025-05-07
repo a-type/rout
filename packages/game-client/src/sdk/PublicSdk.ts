@@ -414,6 +414,14 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['adminGetAllGameSessions']],
     },
   );
+  adminDumpGameSessionDb = this.sdkMutation(
+    this.apiRpc.admin.gameSessions[':sessionId'].db.$get,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'> }) => ({
+        param: { sessionId: input.id },
+      }),
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];

@@ -1019,4 +1019,20 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     this.#checkForRoundChange();
   }
+
+  // debug / admin
+  async dumpDb() {
+    const turns = await this.#sql.run(db.selectFrom('Turn').selectAll());
+    const chatMessages = await this.#sql.run(
+      db.selectFrom('ChatMessage').selectAll(),
+    );
+    const sessionData = await this.#getSessionData();
+    const roundState = await this.#getRoundState();
+    return {
+      turns,
+      chatMessages,
+      sessionData,
+      roundState,
+    };
+  }
 }
