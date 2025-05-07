@@ -36,6 +36,11 @@ export class PublicSdk extends BaseSdk {
         userId?: PrefixedId<'u'>;
         landOnGameSessionId?: PrefixedId<'gs'>;
       }) => ({ json: input }),
+      invalidate: [
+        ['getFriendshipInvites'],
+        ['getFriendships'],
+        ['getGameSessionPregame'],
+      ],
     },
   );
   respondToFriendshipInvite = this.sdkMutation(
