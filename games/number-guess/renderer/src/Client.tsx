@@ -1,7 +1,7 @@
-import { Box, Button, Input, toast } from '@a-type/ui';
+import { Box, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
-import { DefaultChatMessage } from '@long-game/game-ui';
+import { DefaultChatMessage, SubmitTurn } from '@long-game/game-ui';
 import { useEffect } from 'react';
 
 const hooks = typedHooks<typeof gameDefinition>();
@@ -31,17 +31,11 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
 export const ChatMessage = DefaultChatMessage;
 
 const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
-  const {
-    prepareTurn,
-    isViewingCurrentRound,
-    viewingTurn,
-    submitTurn,
-    canSubmitTurn,
-  } = gameSuite;
+  const { prepareTurn, isViewingCurrentRound, viewingTurn } = gameSuite;
   const guess = viewingTurn?.guess ?? 0;
 
   return (
-    <Box direction="col" p="lg">
+    <Box direction="col" p="lg" gap>
       <h1>Guess</h1>
       <Input
         type="number"
@@ -52,10 +46,9 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
           if (isNaN(num)) num = 0;
           prepareTurn({ guess: num });
         }}
+        autoFocus
       />
-      <Button onClick={() => submitTurn()} disabled={!canSubmitTurn}>
-        Submit
-      </Button>
+      <SubmitTurn />
     </Box>
   );
 });
