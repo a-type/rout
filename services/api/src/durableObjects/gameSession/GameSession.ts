@@ -1,4 +1,6 @@
 import {
+  chatPositionShape,
+  chatReactionsShape,
   GameRound,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
@@ -6,6 +8,8 @@ import {
   id,
   LongGameError,
   PrefixedId,
+  safeParse,
+  safeParseMaybe,
   SYSTEM_CHAT_AUTHOR_ID,
 } from '@long-game/common';
 import {
@@ -17,6 +21,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
+import { z } from 'zod';
 import { notifyUser } from '../../services/notification';
 import { GameSessionSocketHandler } from './GameSessionSocketHandler';
 import { db, SqlWrapper } from './sql';
@@ -591,6 +596,7 @@ export class GameSession extends DurableObject<ApiBindings> {
           ? this.#encodeChatRecipientIds(message.recipientIds)
           : null,
         sceneId: message.sceneId,
+        reactionsJSON: JSON.stringify(message.reactions),
       })
       .onConflict((oc) => oc.column('id').doNothing());
     await this.#sql.run(query);
@@ -664,9 +670,14 @@ export class GameSession extends DurableObject<ApiBindings> {
         ...row,
         sceneId: row.sceneId ?? undefined,
         createdAt: new Date(row.createdAt).toISOString(),
-        position: row.positionJSON ? JSON.parse(row.positionJSON) : undefined,
+        position: row.positionJSON
+          ? safeParseMaybe(row.positionJSON, chatPositionShape)
+          : undefined,
         recipientIds,
-        metadata: row.metadataJSON ? JSON.parse(row.metadataJSON) : undefined,
+        metadata: row.metadataJSON
+          ? safeParse(row.metadataJSON, z.any(), null)
+          : undefined,
+        reactions: safeParse(row.reactionsJSON, chatReactionsShape, {}),
       };
     });
     const nextPageToken =

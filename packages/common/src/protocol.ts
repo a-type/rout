@@ -1,88 +1,126 @@
-import { GameSessionChatInit, GameSessionChatMessage } from './chat';
-import { PrefixedId } from './ids';
-import { GameRoundSummary } from './rounds';
-import { GameSessionPlayerStatus, GameStatus } from './status';
+import { z } from 'zod';
+import { gameSessionChatInitShape, gameSessionChatMessageShape } from './chat';
+import { idShapes, PrefixedId } from './ids';
+import { gameRoundSummaryShape } from './rounds';
+import { gameSessionPlayerStatusShape, gameStatusShape } from './status';
 
-export interface BaseServerMessage {
-  responseTo?: string;
-}
+const baseServerMessageShape = z.object({
+  responseTo: z.string().optional(),
+});
+export type BaseServerMessage = z.infer<typeof baseServerMessageShape>;
 
-export interface ServerPlayerStatusChangeMessage extends BaseServerMessage {
-  type: 'playerStatusChange';
-  playerId: PrefixedId<'u'>;
-  playerStatus: GameSessionPlayerStatus;
-}
+export const serverPlayerStatusChangeMessageShape =
+  baseServerMessageShape.extend({
+    type: z.literal('playerStatusChange'),
+    playerId: idShapes.User,
+    playerStatus: gameSessionPlayerStatusShape,
+  });
+export type ServerPlayerStatusChangeMessage = z.infer<
+  typeof serverPlayerStatusChangeMessageShape
+>;
 
-export interface ServerChatMessage extends BaseServerMessage {
-  type: 'chat';
-  messages: GameSessionChatMessage[];
-  nextToken?: string | null;
-}
+export const serverChatMessageShape = baseServerMessageShape.extend({
+  type: z.literal('chat'),
+  messages: gameSessionChatMessageShape.array(),
+  nextToken: z.string().nullable().optional(),
+});
+export type ServerChatMessage = z.infer<typeof serverChatMessageShape>;
 
-export interface ServerRoundChangeMessage extends BaseServerMessage {
-  type: 'roundChange';
-  newRound: GameRoundSummary<any, any, any>;
-  completedRound: GameRoundSummary<any, any, any>;
-}
+export const serverRoundChangeMessageShape = baseServerMessageShape.extend({
+  type: z.literal('roundChange'),
+  newRound: gameRoundSummaryShape,
+  completedRound: gameRoundSummaryShape,
+});
+export type ServerRoundChangeMessage = z.infer<
+  typeof serverRoundChangeMessageShape
+>;
 
-export interface ServerTurnPlayedMessage extends BaseServerMessage {
-  type: 'turnPlayed';
-  roundIndex: number;
-  /**
-   * Note: turn data for the current round is not public, which is
-   * basically how this message will be used. But 'data' is possibly
-   * a placeholder for future use if real-time turn information is
-   * ever supported? idk.
-   */
-  turn: { playerId: string; data: unknown };
-}
+export const serverTurnPlayedMessageShape = baseServerMessageShape.extend({
+  type: z.literal('turnPlayed'),
+  roundIndex: z.number(),
+  turn: z.custom<{ playerId: PrefixedId<'u'>; data: any }>((v) => {
+    return z
+      .object({
+        playerId: idShapes.User,
+        /**
+         * Note: turn data for the current round is not public, which is
+         * basically how this message will be used. But 'data' is possibly
+         * a placeholder for future use if real-time turn information is
+         * ever supported? idk.
+         */
+        data: z.any(),
+      })
+      .parse(v);
+  }),
+});
+export type ServerTurnPlayedMessage = z.infer<
+  typeof serverTurnPlayedMessageShape
+>;
 
-export interface ServerStatusChangeMessage extends BaseServerMessage {
-  type: 'statusChange';
-  status: GameStatus;
-}
+export const serverStatusChangeMessageShape = baseServerMessageShape.extend({
+  type: z.literal('statusChange'),
+  status: gameStatusShape,
+});
+export type ServerStatusChangeMessage = z.infer<
+  typeof serverStatusChangeMessageShape
+>;
 
 /**
  * Sent during pregame if a different game is chosen. All game
  * state must be re-initialized. Use the HTTP API to fetch new
  * data.
  */
-export interface ServerGameChangeMessage extends BaseServerMessage {
-  type: 'gameChange';
-}
+export const serverGameChangeMessageShape = baseServerMessageShape.extend({
+  type: z.literal('gameChange'),
+});
+export type ServerGameChangeMessage = z.infer<
+  typeof serverGameChangeMessageShape
+>;
 
-export interface ServerGameMembersChangeMessage extends BaseServerMessage {
-  type: 'membersChange';
-  members: { id: PrefixedId<'u'> }[];
-}
+export const serverGameMembersChangeMessageShape =
+  baseServerMessageShape.extend({
+    type: z.literal('membersChange'),
+    members: z.array(z.object({ id: idShapes.User })),
+  });
+export type ServerGameMembersChangeMessage = z.infer<
+  typeof serverGameMembersChangeMessageShape
+>;
 
 // general-purpose ack for client messages
-export interface ServerAckMessage extends BaseServerMessage {
-  type: 'ack';
-}
+export const serverAckMessageShape = baseServerMessageShape.extend({
+  type: z.literal('ack'),
+});
+export type ServerAckMessage = z.infer<typeof serverAckMessageShape>;
 
-export interface ServerErrorMessage extends BaseServerMessage {
-  type: 'error';
-  message: string;
-}
+export const serverErrorMessageShape = baseServerMessageShape.extend({
+  type: z.literal('error'),
+  message: z.string(),
+  code: z.number().optional(),
+});
+export type ServerErrorMessage = z.infer<typeof serverErrorMessageShape>;
 
-export interface ServerNextRoundScheduledMessage extends BaseServerMessage {
-  type: 'nextRoundScheduled';
-  /** ISO date string */
-  nextRoundCheckAt: string;
-}
+export const serverNextRoundScheduledMessageShape =
+  baseServerMessageShape.extend({
+    type: z.literal('nextRoundScheduled'),
+    nextRoundCheckAt: z.string().describe('ISO date string'),
+  });
+export type ServerNextRoundScheduledMessage = z.infer<
+  typeof serverNextRoundScheduledMessageShape
+>;
 
-export type ServerMessage =
-  | ServerPlayerStatusChangeMessage
-  | ServerChatMessage
-  | ServerAckMessage
-  | ServerRoundChangeMessage
-  | ServerErrorMessage
-  | ServerStatusChangeMessage
-  | ServerTurnPlayedMessage
-  | ServerGameChangeMessage
-  | ServerGameMembersChangeMessage
-  | ServerNextRoundScheduledMessage;
+export const serverMessageShape = z.discriminatedUnion('type', [
+  serverPlayerStatusChangeMessageShape,
+  serverChatMessageShape,
+  serverAckMessageShape,
+  serverRoundChangeMessageShape,
+  serverErrorMessageShape,
+  serverStatusChangeMessageShape,
+  serverTurnPlayedMessageShape,
+  serverGameChangeMessageShape,
+  serverGameMembersChangeMessageShape,
+  serverNextRoundScheduledMessageShape,
+]);
+export type ServerMessage = z.infer<typeof serverMessageShape>;
 
 export type ServerMessageType = ServerMessage['type'];
 export type ServerMessageByType<T extends ServerMessageType> = Extract<
@@ -90,40 +128,55 @@ export type ServerMessageByType<T extends ServerMessageType> = Extract<
   { type: T }
 >;
 
-export interface BaseClientMessage {
-  messageId: string;
-}
+const baseClientMessageShape = z.object({
+  messageId: z.string(),
+});
+export type BaseClientMessage = z.infer<typeof baseClientMessageShape>;
 
-export interface ClientPingMessage extends BaseClientMessage {
-  type: 'ping';
-}
+export const clientPingMessageShape = baseClientMessageShape.extend({
+  type: z.literal('ping'),
+});
+export type ClientPingMessage = z.infer<typeof clientPingMessageShape>;
 
-export interface ClientSendChatMessage extends BaseClientMessage {
-  type: 'sendChat';
-  message: GameSessionChatInit;
-}
+export const clientSendChatMessageShape = baseClientMessageShape.extend({
+  type: z.literal('sendChat'),
+  message: gameSessionChatInitShape,
+});
+export type ClientSendChatMessage = z.infer<typeof clientSendChatMessageShape>;
 
-export interface ClientSubmitTurnMessage extends BaseClientMessage {
-  type: 'submitTurn';
-  turnData: { [K: string]: unknown };
-}
+export const clientSubmitTurnMessageShape = baseClientMessageShape.extend({
+  type: z.literal('submitTurn'),
+  turnData: z.record(z.unknown()),
+});
+export type ClientSubmitTurnMessage = z.infer<
+  typeof clientSubmitTurnMessageShape
+>;
 
-export interface ClientRequestChatMessage extends BaseClientMessage {
-  type: 'requestChat';
-  nextToken: string | null;
-}
+export const clientRequestChatMessageShape = baseClientMessageShape.extend({
+  type: z.literal('requestChat'),
+  nextToken: z.string().nullable(),
+});
+export type ClientRequestChatMessage = z.infer<
+  typeof clientRequestChatMessageShape
+>;
 
 // only works in dev mode
-export interface ClientResetGameMessage extends BaseClientMessage {
-  type: 'resetGame';
-}
+export const clientResetGameMessageShape = baseClientMessageShape.extend({
+  type: z.literal('resetGame'),
+});
+export type ClientResetGameMessage = z.infer<
+  typeof clientResetGameMessageShape
+>;
 
-export type ClientMessage =
-  | ClientPingMessage
-  | ClientSendChatMessage
-  | ClientSubmitTurnMessage
-  | ClientRequestChatMessage
-  | ClientResetGameMessage;
+export const clientMessageShape = z.discriminatedUnion('type', [
+  clientPingMessageShape,
+  clientSendChatMessageShape,
+  clientSubmitTurnMessageShape,
+  clientRequestChatMessageShape,
+  clientResetGameMessageShape,
+]);
+
+export type ClientMessage = z.infer<typeof clientMessageShape>;
 type DistributiveOmit<T, K extends keyof any> = T extends any
   ? Omit<T, K>
   : never;

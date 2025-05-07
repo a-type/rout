@@ -10,6 +10,7 @@ import {
   ServerChatMessage,
   ServerMessage,
   assertPrefixedId,
+  clientMessageShape,
   id,
 } from '@long-game/common';
 import { Hono } from 'hono';
@@ -200,7 +201,7 @@ export class GameSessionSocketHandler {
         ws.send(JSON.stringify(msg));
       });
     }
-    const parsed = JSON.parse(message.toString()) as ClientMessage;
+    const parsed = clientMessageShape.parse(message.toString());
     this.#onClientMessage(parsed, ws, info);
   };
 
@@ -284,6 +285,7 @@ export class GameSessionSocketHandler {
       recipientIds: msg.message.recipientIds,
       roundIndex: msg.message.roundIndex,
       metadata: msg.message.metadata,
+      reactions: msg.message.reactions,
     });
   };
 

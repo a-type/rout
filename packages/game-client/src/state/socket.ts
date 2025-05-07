@@ -1,9 +1,11 @@
 import {
+  clientMessageShape,
   ClientMessageWithoutId,
   LongGameError,
   PrefixedId,
   ServerMessage,
   ServerMessageByType,
+  serverMessageShape,
   ServerMessageType,
 } from '@long-game/common';
 import { apiRpc } from './api';
@@ -26,6 +28,11 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
 
   function send<T extends ClientMessageWithoutId>(message: T) {
     (message as any).messageId = Math.random().toString().slice(2);
+    const result = clientMessageShape.safeParse(message);
+    if (!result.success) {
+      console.error('Outgoing message validation failed', result.error);
+      throw new Error('Invalid message');
+    }
     websocket.send(JSON.stringify(message));
   }
 
@@ -39,9 +46,23 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     (message as any).messageId = messageId;
     const response = new Promise<ServerMessage>((resolve, reject) => {
       const unsub = websocket.onMessage(function handler(message) {
-        if (message.responseTo === messageId) {
-          unsub();
-          resolve(message);
+        try {
+          const parsed = serverMessageShape.parse(message);
+          if (parsed.responseTo === messageId) {
+            unsub();
+            if (parsed.type === 'error') {
+              reject(
+                new LongGameError(
+                  parsed.code ?? LongGameError.Code.Unknown,
+                  parsed.message,
+                ),
+              );
+            } else {
+              resolve(parsed);
+            }
+          }
+        } catch (e) {
+          console.error('Incoming message validation failed', e);
         }
       });
       unsubs.push(unsub);
@@ -58,8 +79,13 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     handler: (message: ServerMessageByType<T>) => void,
   ) {
     const unsub = websocket.onMessage((message) => {
-      if (message.type === type) {
-        handler(message as ServerMessageByType<T>);
+      const parsed = serverMessageShape.safeParse(message);
+      if (!parsed.success) {
+        console.error('Incoming message validation failed', parsed.error);
+        return;
+      }
+      if (parsed.data.type === type) {
+        handler(parsed.data as ServerMessageByType<T>);
       }
     });
     unsubs.push(unsub);
