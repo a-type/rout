@@ -3,8 +3,15 @@ import { GameJoinPreview } from '@/components/games/GameJoinPreview';
 import { GameLayout } from '@/components/games/GameLayout';
 import { GameSetup } from '@/components/games/GameSetup.js';
 import { ScrollTicker } from '@/components/general/ScrollTicker';
+import { useDefaultBgColor } from '@/hooks/useThemedTitleBar';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, ErrorBoundary, Icon, Spinner } from '@a-type/ui';
+import {
+  Box,
+  ErrorBoundary,
+  Icon,
+  Spinner,
+  useTitleBarColor,
+} from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
@@ -43,6 +50,8 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
 }) {
   const sessionId = gameSuite.gameSessionId;
   const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
+  const backupColor = useDefaultBgColor();
+  useTitleBarColor(palette?.range[0] ?? backupColor);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
       {gameSuite.gameStatus.status === 'complete' && (

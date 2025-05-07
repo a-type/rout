@@ -3,6 +3,7 @@ import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
 import { MainNav } from '@/components/nav/MainNav';
 import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
 import { MyAvatar } from '@/components/users/UserAvatar';
+import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import {
   Box,
   Button,
@@ -19,6 +20,7 @@ import { Link } from '@verdant-web/react-router';
 export interface HomePageProps {}
 
 export function HomePage({}: HomePageProps) {
+  useThemedTitleBar();
   return (
     <PageRoot>
       <TopographyBackground />

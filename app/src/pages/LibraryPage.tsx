@@ -1,9 +1,11 @@
 import { OwnedGameList } from '@/components/library/OwnedGameList';
 import { MainNav } from '@/components/nav/MainNav';
 import { GameStore } from '@/components/store/GameStore';
+import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import { Box, H2, PageContent, PageNav, PageRoot } from '@a-type/ui';
 
 const LibraryPage = () => {
+  useThemedTitleBar();
   return (
     <PageRoot>
       <PageContent>
