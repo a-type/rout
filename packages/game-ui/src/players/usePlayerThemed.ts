@@ -10,6 +10,7 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
       className: 'theme',
       style: {
         '--dyn-saturation': 0,
+        '--dyn-primary-source': 0,
       } as any,
     };
 
@@ -21,6 +22,9 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
     style: {
       '--dyn-primary-source': palette.okHue,
       '--dyn-accent-source': 160,
+      '--dyn-primary-sat-mult': palette.okSaturation,
+      '--dyn-primary-hue-rotate': palette.okRotate,
+      '--dyn-accent-hue-rotate': -2,
     } as any,
   };
 }
