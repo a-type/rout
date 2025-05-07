@@ -1,11 +1,5 @@
 import type { Card, GlobalState, PlayerState } from '../gameDefinition';
-import {
-  getCardIdsFromBoard,
-  getGatesCoord,
-  getSpecialSpaces,
-  getTopCard,
-} from './board';
-import { validateDefend } from './validation';
+import { getCardIdsFromBoard, getSpecialSpaces } from './board';
 
 export function getPlayerState({
   globalState,

@@ -6,7 +6,7 @@ import { addContinuousEffectToCard } from '../gameState/continuousEffects';
 import {
   getAdjacentCardInstanceIds,
   getStack,
-  swapCardPositions,
+  swapStacks,
   getAllBoardCoordinates,
   getTopCard,
 } from '../gameState/board';
@@ -297,7 +297,7 @@ export const abilityDefinitions = {
         }
         return {
           ...globalState,
-          board: swapCardPositions(globalState.board, sourceCoord, targetCoord),
+          board: swapStacks(globalState.board, sourceCoord, targetCoord),
         };
       },
     },

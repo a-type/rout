@@ -29,9 +29,10 @@ export function matchingTag(a: ValidCardId, b: ValidCardId): boolean {
   return aDef.traits.some((trait) => (bDef.traits as Trait[]).includes(trait));
 }
 
-export function applyFatigue(
+export function updateCardState(
   gameState: GlobalState,
   cardInstanceId: string,
+  newState: Partial<Card>,
 ): GlobalState {
   return {
     ...gameState,
@@ -39,24 +40,22 @@ export function applyFatigue(
       ...gameState.cardState,
       [cardInstanceId]: {
         ...gameState.cardState[cardInstanceId],
-        fatigued: true,
+        ...newState,
       },
     },
   };
+}
+
+export function applyFatigue(
+  gameState: GlobalState,
+  cardInstanceId: string,
+): GlobalState {
+  return updateCardState(gameState, cardInstanceId, { fatigued: true });
 }
 
 export function removeFatigue(
   gameState: GlobalState,
   cardInstanceId: string,
 ): GlobalState {
-  return {
-    ...gameState,
-    cardState: {
-      ...gameState.cardState,
-      [cardInstanceId]: {
-        ...gameState.cardState[cardInstanceId],
-        fatigued: false,
-      },
-    },
-  };
+  return updateCardState(gameState, cardInstanceId, { fatigued: false });
 }

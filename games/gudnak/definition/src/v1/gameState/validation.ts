@@ -26,6 +26,7 @@ import {
   getTopCard,
   validCoordinate,
   getAdjacentCoordinates,
+  getTopCardAtCoordinate,
 } from './board';
 
 export const INVALID_DEPLOY_CODES = {
@@ -143,11 +144,7 @@ export function validateMove(
   if (cardDef.kind !== 'fighter') {
     return [INVALID_MOVE_CODES.NOT_FIGHTER];
   }
-  const stack = getStack(board, source);
-  if (stack.length === 0) {
-    return [INVALID_MOVE_CODES.NO_STACK];
-  }
-  const topCardId = getTopCard(stack);
+  const topCardId = getTopCardAtCoordinate(board, source);
   if (!topCardId) {
     return [INVALID_MOVE_CODES.NO_TOP_CARD];
   }
@@ -234,11 +231,7 @@ export function validateAttack(
   if (cardDef.kind !== 'fighter') {
     return [INVALID_ATTACK_CODES.NOT_FIGHTER];
   }
-  const stack = getStack(board, source);
-  if (stack.length === 0) {
-    return [INVALID_ATTACK_CODES.NO_STACK];
-  }
-  const topCardId = getTopCard(stack);
+  const topCardId = getTopCardAtCoordinate(board, source);
   if (!topCardId) {
     return [INVALID_ATTACK_CODES.NO_TOP_CARD];
   }
@@ -342,21 +335,18 @@ export function validateTargets(
       if (!validCoordinate(board, coord)) {
         reasons.push(INVALID_TARGET_CODES.COORDINATE);
       }
+      const topCardId = getTopCardAtCoordinate(board, coord);
       switch (targetDef.controller) {
         case 'any': {
           break;
         }
         case 'none': {
-          const stack = getStack(board, coord);
-          const topCardId = getTopCard(stack);
           if (topCardId) {
             reasons.push(INVALID_TARGET_CODES.CARD_PRESENT);
           }
           break;
         }
         case 'player': {
-          const stack = getStack(board, coord);
-          const topCardId = getTopCard(stack);
           if (topCardId) {
             const topCard = cardState[topCardId];
             if (topCard.ownerId !== playerId) {
@@ -368,8 +358,6 @@ export function validateTargets(
           break;
         }
         case 'opponent': {
-          const stack = getStack(board, coord);
-          const topCardId = getTopCard(stack);
           if (topCardId) {
             const topCard = cardState[topCardId];
             if (topCard.ownerId === playerId) {
@@ -381,8 +369,6 @@ export function validateTargets(
           break;
         }
         case 'not-friendly': {
-          const stack = getStack(board, coord);
-          const topCardId = getTopCard(stack);
           if (topCardId) {
             const topCard = cardState[topCardId];
             if (topCard.ownerId === playerId) {
@@ -462,11 +448,7 @@ export function validateDefend(
   const reasons = [] as InvalidDefendReason[];
   const { targets } = action;
   const space = getGatesCoord(playerState.side);
-  const stack = getStack(board, space);
-  if (stack.length === 0) {
-    return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
-  }
-  const topCardId = getTopCard(stack);
+  const topCardId = getTopCardAtCoordinate(board, space);
   if (!topCardId) {
     return [INVALID_DEFEND_CODES.NO_CARD_AT_GATE];
   }
