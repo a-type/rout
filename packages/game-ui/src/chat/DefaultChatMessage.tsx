@@ -74,8 +74,8 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
         {!isPreviousMessageSameAuthor && (
           <Box
             className={clsx(
-              'relative bottom-3px translate-y-1/2 rounded-full text-xs bg-primary-wash bg-lighten-1 color-black mt-md z-1',
-              isSelf ? 'ml-auto rounded-br-0' : 'mr-auto rounded-bl-0',
+              'relative bottom-3px translate-y-1/2 rounded-t-12px text-xs bg-primary-wash bg-lighten-1 color-black mt-md z-1',
+              isSelf ? 'ml-auto' : 'mr-auto',
             )}
             gap="sm"
             items="center"
@@ -133,7 +133,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
               <Popover.Trigger asChild>
                 <Button
                   size="icon-small"
-                  className="px-xs py-xs my-auto bg-accent-wash"
+                  className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
                   color="ghost"
                 >
                   <Icon name="lock" />

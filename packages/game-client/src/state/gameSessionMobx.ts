@@ -347,11 +347,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       const chatForRound = chatsGroupedByRound.get(roundIndex);
       if (chatForRound) {
         log.push(
-          ...chatForRound.map((msg) => ({
-            type: 'chat' as const,
-            chatMessage: msg,
-            timestamp: msg.createdAt,
-          })),
+          ...chatForRound
+            .map((msg) => ({
+              type: 'chat' as const,
+              chatMessage: msg,
+              timestamp: msg.createdAt,
+            }))
+            .sort((a, b) =>
+              new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1,
+            ),
         );
       }
       if (roundIndex < currentRoundIndex) {
@@ -365,11 +369,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     // only add postgame if the game is completed
     if (this.gameStatus.status === 'complete') {
       log.push(
-        ...(chatsGroupedByRound.get(-1)?.map((msg) => ({
-          type: 'chat' as const,
-          chatMessage: msg,
-          timestamp: msg.createdAt,
-        })) ?? []),
+        ...(
+          chatsGroupedByRound.get(-1)?.map((msg) => ({
+            type: 'chat' as const,
+            chatMessage: msg,
+            timestamp: msg.createdAt,
+          })) ?? []
+        ).sort((a, b) =>
+          new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1,
+        ),
       );
     }
 

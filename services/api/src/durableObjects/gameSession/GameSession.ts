@@ -997,17 +997,16 @@ export class GameSession extends DurableObject<ApiBindings> {
         completedRound: roundIndex > 0 ? rounds[roundIndex - 1] : null,
       });
       if (roundChangeMessages) {
-        await Promise.all(
-          roundChangeMessages.map((message) =>
-            this.addChatMessage({
-              ...message,
-              id: id('cm'),
-              createdAt: new Date().toISOString(),
-              authorId: SYSTEM_CHAT_AUTHOR_ID,
-              roundIndex: roundIndex,
-            }),
-          ),
-        );
+        // not Promise.all because we want to keep intended ordering
+        for (const message of roundChangeMessages) {
+          await this.addChatMessage({
+            ...message,
+            id: id('cm'),
+            createdAt: new Date().toISOString(),
+            authorId: SYSTEM_CHAT_AUTHOR_ID,
+            roundIndex: roundIndex,
+          });
+        }
       }
     }
   };

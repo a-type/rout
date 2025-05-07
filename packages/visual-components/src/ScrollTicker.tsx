@@ -1,11 +1,5 @@
 import { Box, clsx, useAnimationFrame } from '@a-type/ui';
-import {
-  Fragment,
-  ReactNode,
-  useMemo,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
+import { ReactNode, useMemo, useRef, useSyncExternalStore } from 'react';
 
 function useMediaQuery(query: string): boolean {
   const mediaQueryList = useMemo(() => window.matchMedia(query), [query]);
@@ -82,7 +76,9 @@ export function ScrollTicker({
         ref={ref}
       >
         {new Array(repeat).fill(null).map((_, i) => (
-          <Fragment key={i}>{normalizedChildren}</Fragment>
+          <div aria-hidden={i > 0} key={i}>
+            {normalizedChildren}
+          </div>
         ))}
       </Box>
     </div>
