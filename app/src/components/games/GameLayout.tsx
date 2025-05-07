@@ -17,7 +17,7 @@ export const GameLayoutMain = withClassName(
 export const GameLayoutControls = withClassName(
   'div',
   'flex flex-col [grid-area:bottom] z-100 layer-responsive:bg-white layer-responsive:shadow-[0_0_16px_12px_var(--color-white)]',
-  'lg:[grid-area:sidebar] lg:z-0 lg:bg-wash lg:relative lg:p-2 lg:shadow-none lg:overflow-hidden lg:min-h-0',
+  'lg:[grid-area:sidebar] lg:z-0 lg:bg-wash lg:relative lg:shadow-none lg:overflow-hidden lg:min-h-0',
 );
 
 export const GameLayoutSecondaryControls = withClassName(

@@ -17,11 +17,15 @@ export const PlayerName = withGame<PlayerNameProps>(function PlayerName({
     playerId && playerId !== SYSTEM_CHAT_AUTHOR_ID
       ? gameSuite.getPlayer(playerId)
       : null;
-  return (
-    <>
-      {playerId === SYSTEM_CHAT_AUTHOR_ID
-        ? 'Game'
-        : player?.displayName ?? 'Anonymous'}
-    </>
-  );
+  const isMe = playerId === gameSuite.playerId;
+
+  if (isMe) {
+    return <>You</>;
+  }
+
+  if (playerId === SYSTEM_CHAT_AUTHOR_ID) {
+    return <>Game</>;
+  }
+
+  return <>{player?.displayName ?? 'Anonymous'}</>;
 });

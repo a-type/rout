@@ -1,7 +1,8 @@
 import { Box, ErrorBoundary, Spinner } from '@a-type/ui';
 import { useGameSuite } from '@long-game/game-client';
+import { GameChatMessageRendererProps } from '@long-game/game-definition';
 import { ReactNode, Suspense } from 'react';
-import { getLazyGameRenderer, getLazyRoundRenderer } from './mapping';
+import { getLazyChatRenderer, getLazyGameRenderer } from './mapping';
 
 export function GameRenderer({ fallback }: { fallback?: ReactNode }) {
   return (
@@ -32,34 +33,27 @@ function GameRendererImpl() {
   return <Client />;
 }
 
-export function RoundRenderer({
+export function ChatRenderer({
   fallback,
-  roundIndex,
+  ...rest
 }: {
   fallback?: ReactNode;
-  roundIndex: number;
-}) {
+} & GameChatMessageRendererProps<any>) {
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
-      <Suspense fallback={fallback || <Box p>Round {roundIndex + 1}</Box>}>
-        <RoundRendererImpl roundIndex={roundIndex} />
+      <Suspense fallback={fallback || null}>
+        <ChatRendererImpl {...rest} />
       </Suspense>
     </ErrorBoundary>
   );
 }
 
-function RoundRendererImpl({ roundIndex }: { roundIndex: number }) {
-  const { gameDefinition, gameId, getRound, latestRoundIndex } = useGameSuite();
-  const round = getRound(roundIndex);
-  const finalPlayerState =
-    roundIndex === latestRoundIndex
-      ? round.initialPlayerState
-      : getRound(roundIndex + 1).initialPlayerState;
-
-  const Round: any = getLazyRoundRenderer(gameId, gameDefinition.version);
-  if (!Round) {
+function ChatRendererImpl(props: GameChatMessageRendererProps<any>) {
+  const { gameDefinition, gameId } = useGameSuite();
+  const Chat: any = getLazyChatRenderer(gameId, gameDefinition.version);
+  if (!Chat) {
     return <div>Version not found</div>;
   }
 
-  return <Round round={round} finalPlayerState={finalPlayerState} />;
+  return <Chat {...props} />;
 }

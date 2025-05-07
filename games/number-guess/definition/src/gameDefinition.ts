@@ -1,4 +1,8 @@
-import { GameDefinition, roundFormat } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  roundFormat,
+  SystemChatMessage,
+} from '@long-game/game-definition';
 
 export type GlobalState = {
   secretNumber: number;
@@ -110,4 +114,35 @@ export const gameDefinition: GameDefinition<
   },
 
   getRoundIndex: roundFormat.sync(),
+
+  getRoundChangeMessages(data) {
+    const messages: SystemChatMessage[] = [
+      {
+        content: `Round ${data.roundIndex + 1} has started!`,
+      },
+    ];
+    if (data.completedRound) {
+      data.members.forEach((member) => {
+        const memberTurn = data.completedRound!.turns.find(
+          (t) => t.playerId === member.id,
+        );
+        if (!memberTurn) {
+          return;
+        }
+        messages.push({
+          recipientIds: [member.id],
+          content: `Your guess was ${
+            memberTurn?.data.guess ?? '(nothing)'
+          }. That was ${
+            memberTurn?.data.guess === data.globalState.secretNumber
+              ? 'correct'
+              : memberTurn?.data.guess < data.globalState.secretNumber
+              ? 'too low'
+              : 'too high'
+          }`,
+        });
+      });
+    }
+    return messages;
+  },
 };

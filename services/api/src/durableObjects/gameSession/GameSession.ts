@@ -6,6 +6,7 @@ import {
   id,
   LongGameError,
   PrefixedId,
+  SYSTEM_CHAT_AUTHOR_ID,
 } from '@long-game/common';
 import {
   BaseTurnData,
@@ -512,6 +513,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async getSummary() {
     const sessionData = await this.#getSessionData();
+    const roundData = await this.#getCurrentRoundState();
     return {
       id: sessionData.id,
       status: await this.getStatus(),
@@ -521,6 +523,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
+      nextRoundCheckAt: roundData.checkAgainAt ?? null,
     };
   }
   async getDetails(userId: PrefixedId<'u'>): Promise<{
@@ -646,7 +649,7 @@ export class GameSession extends DurableObject<ApiBindings> {
         .where(
           'ChatMessage.roundIndex',
           '<=',
-          await this.getPublicRoundIndex(),
+          await this.getCurrentRoundIndex(),
         );
     }
     const result = await this.#sql.run(sql);
@@ -925,6 +928,7 @@ export class GameSession extends DurableObject<ApiBindings> {
         await this.env.ADMIN_STORE.updateGameSession(id, {
           winnerIdsJson: status.winnerIds,
         });
+        this.#sendGameRoundChangeMessages(roundState.roundIndex);
       } else {
         // notify players of round change
         const members = await this.getMembers();
@@ -946,6 +950,7 @@ export class GameSession extends DurableObject<ApiBindings> {
             },
           );
         }
+        this.#sendGameRoundChangeMessages(roundState.roundIndex);
       }
     }
     for (const playerId of roundState.pendingTurns) {
@@ -967,6 +972,42 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (roundState.checkAgainAt) {
       console.log(`Scheduling check again at ${roundState.checkAgainAt}`);
       this.ctx.storage.setAlarm(roundState.checkAgainAt);
+      this.#socketHandler.send({
+        type: 'nextRoundScheduled',
+        nextRoundCheckAt: roundState.checkAgainAt.toISOString(),
+      });
+    }
+  };
+  #sendGameRoundChangeMessages = async (roundIndex: number) => {
+    // if game definition has a round change message, add it to chat
+    const gameDefinition = await this.getGameDefinition();
+    if (gameDefinition.getRoundChangeMessages) {
+      // FIXME: redundant global state calculation with rounds
+      const globalState = await this.#getGlobalStateUnchecked(roundIndex);
+      const rounds = await this.#getRoundsUnchecked({
+        upToAndIncluding: roundIndex,
+      });
+      const members = await this.getMembers();
+      const roundChangeMessages = gameDefinition.getRoundChangeMessages({
+        globalState,
+        roundIndex: roundIndex,
+        members,
+        rounds,
+        newRound: rounds[roundIndex],
+        completedRound: roundIndex > 0 ? rounds[roundIndex - 1] : null,
+      });
+      if (roundChangeMessages) {
+        // not Promise.all because we want to keep intended ordering
+        for (const message of roundChangeMessages) {
+          await this.addChatMessage({
+            ...message,
+            id: id('cm'),
+            createdAt: new Date().toISOString(),
+            authorId: SYSTEM_CHAT_AUTHOR_ID,
+            roundIndex: roundIndex,
+          });
+        }
+      }
     }
   };
 
@@ -975,5 +1016,21 @@ export class GameSession extends DurableObject<ApiBindings> {
       return;
     }
     this.#checkForRoundChange();
+  }
+
+  // debug / admin
+  async dumpDb() {
+    const turns = await this.#sql.run(db.selectFrom('Turn').selectAll());
+    const chatMessages = await this.#sql.run(
+      db.selectFrom('ChatMessage').selectAll(),
+    );
+    const sessionData = await this.#getSessionData();
+    const roundState = await this.#getRoundState();
+    return {
+      turns,
+      chatMessages,
+      sessionData,
+      roundState,
+    };
   }
 }

@@ -35,16 +35,7 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
     );
 
     if (showSubmit) {
-      return (
-        <SubmitTurn>
-          {actionableError
-            ? "Can't submit"
-            : submitted
-            ? 'Ready for next!'
-            : 'Finish turn'}
-          <Icon name={actionableError ? 'warning' : 'check'} />
-        </SubmitTurn>
-      );
+      return <SubmitTurn />;
     }
 
     return (

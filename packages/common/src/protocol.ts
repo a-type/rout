@@ -66,6 +66,12 @@ export interface ServerErrorMessage extends BaseServerMessage {
   message: string;
 }
 
+export interface ServerNextRoundScheduledMessage extends BaseServerMessage {
+  type: 'nextRoundScheduled';
+  /** ISO date string */
+  nextRoundCheckAt: string;
+}
+
 export type ServerMessage =
   | ServerPlayerStatusChangeMessage
   | ServerChatMessage
@@ -75,7 +81,8 @@ export type ServerMessage =
   | ServerStatusChangeMessage
   | ServerTurnPlayedMessage
   | ServerGameChangeMessage
-  | ServerGameMembersChangeMessage;
+  | ServerGameMembersChangeMessage
+  | ServerNextRoundScheduledMessage;
 
 export type ServerMessageType = ServerMessage['type'];
 export type ServerMessageByType<T extends ServerMessageType> = Extract<

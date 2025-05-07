@@ -44,7 +44,6 @@ export const gamesRouter = new Hono<Env>()
     ),
     async (ctx) => {
       const session = ctx.get('session');
-      console.log('session', session);
       const { tags, includingGame } = ctx.req.valid('query');
       const products = await ctx.env.PUBLIC_STORE.getGameProducts(
         {

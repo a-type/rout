@@ -2,22 +2,15 @@ import {
   Box,
   Button,
   Collapsible,
-  CollapsibleContent,
-  CollapsibleSimple,
   Icon,
   RelativeTime,
   ScrollArea,
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
-import { RoundRenderer } from '@long-game/game-renderer';
-import {
-  ChatForm,
-  ChatMessage,
-  PlayerAvatar,
-  useMediaQuery,
-} from '@long-game/game-ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChatRenderer } from '@long-game/game-renderer';
+import { ChatForm, PlayerAvatar, useMediaQuery } from '@long-game/game-ui';
+import { useEffect, useRef } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
 
 const localState = proxy({
@@ -67,7 +60,7 @@ export function GameLogChatInput() {
 
 const GameLogCollapsed = withGame(({ gameSuite }) => {
   const log = gameSuite.combinedLog;
-  const latestMessage = log[log.length - 1];
+  const latestMessage = log.filter((m) => m.type === 'chat').pop();
   const selfId = gameSuite.playerId;
 
   if (!latestMessage) {
@@ -88,8 +81,18 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
     );
   }
 
-  return <RoundRenderer roundIndex={latestMessage.roundIndex} />;
+  return null;
 });
+
+function RoundBoundary({ roundIndex }: { roundIndex: number }) {
+  return (
+    <div className="w-full items-center flex flex-row text-xxs color-gray-dark">
+      <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
+      <div className="px-md py-xs">Round {roundIndex + 1}</div>
+      <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
+    </div>
+  );
+}
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
   const { combinedLog: log } = gameSuite;
@@ -97,23 +100,35 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
   return (
     <GameLogRoot {...props}>
       <ScrollArea
-        className="flex flex-col min-h-0 overflow-y-auto flex-1"
+        className="flex flex-col min-h-0 overflow-y-auto flex-1 px-sm"
         stickToBottom
       >
         <GameLogListRoot>
-          {log.map((entry, i) =>
-            entry.type === 'chat' ? (
-              <ChatMessage
-                message={entry.chatMessage}
-                key={entry.chatMessage.id}
-              />
-            ) : (
-              <RoundRenderer
-                roundIndex={entry.roundIndex}
-                key={`round-${entry.roundIndex}`}
-              />
-            ),
-          )}
+          {log.map((entry, i) => {
+            if (entry.type === 'chat') {
+              const next = log[i + 1];
+              const previous = log[i - 1];
+              const nextMessage =
+                next?.type === 'chat' ? next.chatMessage : null;
+              const previousMessage =
+                previous?.type === 'chat' ? previous.chatMessage : null;
+              return (
+                <ChatRenderer
+                  message={entry.chatMessage}
+                  key={entry.chatMessage.id}
+                  nextMessage={nextMessage}
+                  previousMessage={previousMessage}
+                />
+              );
+            } else {
+              return (
+                <RoundBoundary
+                  roundIndex={entry.roundIndex}
+                  key={`round-${entry.roundIndex}`}
+                />
+              );
+            }
+          })}
         </GameLogListRoot>
       </ScrollArea>
       <GameLogChatInput />
@@ -125,99 +140,55 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
   gameSuite,
   ...props
 }) {
-  const openNative = useSnapshot(localState).open;
+  const open = useSnapshot(localState).open;
   const isLarge = useMediaQuery('(min-width: 1024px)');
-  const open = isLarge || openNative;
+
+  if (isLarge) {
+    return (
+      <Box d="col" gap="none" p="xs" items="stretch" {...props}>
+        <GameLogFull />
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      direction="col"
-      gap="none"
-      p="none"
-      items="stretch"
-      className="h-full"
-      {...props}
-    >
-      <CollapsibleSimple open={!open} asChild className="flex flex-col">
-        <Button
-          color="ghost"
-          size="small"
-          onClick={() => {
-            localState.open = true;
-            if (gameSuite.combinedLog.length === 0) {
-              setTimeout(() => {
-                localState.focusChat = true;
-              }, 50);
-            }
-          }}
-          className="w-full font-normal"
-        >
-          <GameLogCollapsed />
-        </Button>
-      </CollapsibleSimple>
-      <Collapsible open={open} className="relative w-full lg:h-full">
-        <CollapsibleContent className="flex flex-col max-h-80vh lg:h-full lg:max-h-none [&[data-state='closed']]:opacity-0">
-          <Button
-            className="absolute -top-32px right-sm z-1 lg:hidden"
-            size="icon-small"
-            onClick={() => {
-              localState.open = false;
-            }}
-          >
-            <Icon name="x" />
-          </Button>
+    <Box direction="col" gap="none" p="none" items="stretch" {...props}>
+      <Collapsible open={open} onOpenChange={(o) => (localState.open = o)}>
+        <Collapsible.Trigger asChild>
+          {open ? (
+            <Button size="small" className="mx-auto">
+              <Icon name="x" />
+              Close
+            </Button>
+          ) : (
+            <Button
+              color="ghost"
+              size="small"
+              onClick={() => {
+                localState.open = true;
+                if (gameSuite.combinedLog.length === 0) {
+                  setTimeout(() => {
+                    localState.focusChat = true;
+                  }, 50);
+                }
+              }}
+              className="w-full font-normal"
+            >
+              <GameLogCollapsed />
+            </Button>
+          )}
+        </Collapsible.Trigger>
+        <Collapsible.Content className="overflow-hidden">
           <Box
             p="sm"
             layout="stretch stretch"
-            className="w-full h-full min-h-0 lg:h-full"
+            className="w-full h-70vh"
             d="col"
           >
             <GameLogFull />
           </Box>
-        </CollapsibleContent>
+        </Collapsible.Content>
       </Collapsible>
     </Box>
   );
 });
-
-function useStayScrolledToBottom() {
-  const ref = useRef<HTMLDivElement>(null);
-  // if the div was already scrolled to the bottom,
-  // keep it at the bottom when new messages come in
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    if (isScrolledToBottom) {
-      ref.current.scrollTop = ref.current.scrollHeight;
-    }
-    const observer = new MutationObserver(() => {
-      if (!ref.current) return;
-      if (isScrolledToBottom) {
-        ref.current.scrollTop = ref.current.scrollHeight;
-      }
-    });
-    observer.observe(ref.current, { childList: true });
-    return () => {
-      observer.disconnect();
-    };
-  }, [isScrolledToBottom, ref]);
-
-  const onScroll = useCallback(() => {
-    if (!ref.current) return;
-    console.log(
-      ref.current.scrollTop,
-      ref.current.clientHeight,
-      ref.current.scrollHeight,
-    );
-    setIsScrolledToBottom(
-      ref.current.scrollTop + ref.current.clientHeight >=
-        ref.current.scrollHeight - 10,
-    );
-  }, []);
-
-  return {
-    ref,
-    onScroll,
-  };
-}

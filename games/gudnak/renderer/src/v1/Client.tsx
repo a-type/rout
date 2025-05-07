@@ -12,7 +12,7 @@ import {
   type Coordinate,
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
-import { DefaultRoundRenderer } from '@long-game/game-ui';
+import { DefaultChatMessage } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
@@ -32,7 +32,7 @@ export function Client() {
   );
 }
 
-export const Round = DefaultRoundRenderer;
+export const ChatMessage = DefaultChatMessage;
 
 const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
   const {

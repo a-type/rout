@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { idShapes } from '@long-game/common';
+import { idShapes, wrapRpcData } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { Env } from '../../config/ctx';
@@ -35,5 +35,16 @@ export const adminGameSessionsRouter = new Hono<Env>()
       await gameSession.delete();
       await ctx.env.ADMIN_STORE.deleteGameSession(sessionId);
       return ctx.json({ ok: true });
+    },
+  )
+  .get(
+    '/:sessionId/db',
+    zValidator('param', z.object({ sessionId: idShapes.GameSession })),
+    async (ctx) => {
+      const sessionId = ctx.req.valid('param').sessionId;
+      const doId = ctx.env.GAME_SESSION.idFromName(sessionId);
+      const gameSession = ctx.env.GAME_SESSION.get(doId);
+      const data = await gameSession.dumpDb();
+      return ctx.json(wrapRpcData(data));
     },
   );
