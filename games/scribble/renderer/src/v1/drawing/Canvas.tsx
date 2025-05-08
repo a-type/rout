@@ -18,8 +18,8 @@ export interface CanvasProps {
 function getStrokeOptions(size: number) {
   return {
     size,
-    smoothing: 0.0,
-    streamline: 0.8,
+    smoothing: 0.1,
+    streamline: 0.4,
   } satisfies StrokeOptions;
 }
 
