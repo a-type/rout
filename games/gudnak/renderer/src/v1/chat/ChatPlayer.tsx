@@ -5,7 +5,7 @@ export function ChatPlayer({ playerId }: { playerId: `u-${string}` }) {
   const { className, style } = usePlayerThemed(playerId);
   return (
     <div className={clsx(className)} style={style}>
-      <span className="color-primary-ink">
+      <span className="color-primary">
         <PlayerName playerId={playerId} />
       </span>
     </div>
