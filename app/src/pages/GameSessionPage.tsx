@@ -82,9 +82,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
             {gameSuite.gameStatus.status === 'pending' ? (
               <GameSetup gameSessionId={sessionId} />
             ) : (
-              <Box full className="game-ui">
-                <GameRenderer />
-              </Box>
+              <GameRenderer />
             )}
           </Suspense>
         </GameLayout.Main>

@@ -5,6 +5,7 @@ import {
   CompiledQuery,
   DummyDriver,
   Kysely,
+  Selectable,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
@@ -22,6 +23,7 @@ interface TurnTable {
   roundIndex: number;
   playerId: PrefixedId<'u'>;
 }
+export type Turn = Selectable<TurnTable>;
 
 interface ChatMessageTable {
   id: PrefixedId<'cm'>;
@@ -35,6 +37,7 @@ interface ChatMessageTable {
   metadataJSON: string | null;
   reactionsJSON: string;
 }
+export type ChatMessage = Selectable<ChatMessageTable>;
 
 const migrations: SQLMigrations.SQLSchemaMigration[] = [
   {

@@ -5,6 +5,7 @@ import {
   ClientResetGameMessage,
   ClientSendChatMessage,
   ClientSubmitTurnMessage,
+  ClientToggleChatReactionMessage,
   LongGameError,
   PrefixedId,
   ServerChatMessage,
@@ -258,6 +259,9 @@ export class GameSessionSocketHandler {
         case 'resetGame':
           await this.#onClientResetGame(msg, ws, info);
           break;
+        case 'toggleChatReaction':
+          await this.#onClientToggleChatReaction(msg, ws, info);
+          break;
       }
       // ack the message for the client
       ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
@@ -359,5 +363,18 @@ export class GameSessionSocketHandler {
     info: SocketSessionInfo,
   ) => {
     await this.gameSession.resetGame();
+  };
+
+  #onClientToggleChatReaction = async (
+    msg: ClientToggleChatReactionMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    await this.gameSession.toggleChatReaction(
+      info.userId,
+      msg.chatMessageId,
+      msg.reaction,
+      msg.isOn,
+    );
   };
 }

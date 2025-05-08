@@ -178,7 +178,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
                 }
           }
           className={clsx(
-            'touch-none aspect-1 w-100% max-w-60vh bg-white rounded-lg border-default',
+            'touch-none aspect-1 w-100% max-w-50vh bg-white rounded-lg border-default',
             'theme',
           )}
         >

@@ -22,7 +22,7 @@ export function GameControls({ pregame }: GameControlsProps) {
         <GameLog className="flex-1 min-h-0" />
       </GameLayout.Controls>
       <GameLayout.SecondaryControls className="justify-between">
-        <Box gap="xs" items="center">
+        <Box gap="xs" items="center" full="width">
           <NavigationControls />
           <NotificationsButton />
           <GameManualDialog />

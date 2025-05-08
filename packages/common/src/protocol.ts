@@ -173,12 +173,24 @@ export type ClientResetGameMessage = z.infer<
   typeof clientResetGameMessageShape
 >;
 
+export const clientToggleChatReactionMessageShape =
+  baseClientMessageShape.extend({
+    type: z.literal('toggleChatReaction'),
+    chatMessageId: idShapes.ChatMessage,
+    reaction: z.string(),
+    isOn: z.boolean(),
+  });
+export type ClientToggleChatReactionMessage = z.infer<
+  typeof clientToggleChatReactionMessageShape
+>;
+
 export const clientMessageShape = z.discriminatedUnion('type', [
   clientPingMessageShape,
   clientSendChatMessageShape,
   clientSubmitTurnMessageShape,
   clientRequestChatMessageShape,
   clientResetGameMessageShape,
+  clientToggleChatReactionMessageShape,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageShape>;

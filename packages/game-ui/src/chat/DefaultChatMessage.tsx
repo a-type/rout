@@ -16,6 +16,7 @@ import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 import { PlayerName } from '../players/PlayerName';
 import { usePlayerThemed } from '../players/usePlayerThemed';
+import { ChatReactions } from './ChatReactions';
 import { spatialChatState } from './spatialChatState';
 
 export interface ChatMessageProps extends BoxProps {
@@ -103,7 +104,6 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
             'shadow-sm',
             'transition-opacity',
             'px-md py-sm',
-            'w-full',
             !isPreviousMessageSameAuthor &&
               (isSelf ? 'rounded-tr-0' : 'rounded-tl-0'),
             isSelf ? 'rounded-br-0' : 'rounded-bl-0',
@@ -119,51 +119,63 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
         </Box>
         {!compact && (
           <Box
-            className="text-xs text-gray-dark italic px-sm"
-            items="center"
+            className="text-xs text-gray-dark px-sm"
             full="width"
             gap
-            justify={isSelf ? 'end' : 'start'}
+            justify="between"
+            d={isSelf ? 'row-reverse' : 'row'}
           >
-            {isDm && (
-              <Popover>
-                <Popover.Content className="p-sm flex flex-row gap-sm items-center min-w-0">
-                  <Popover.Arrow />
-                  <span>DM:</span>
-                  <AvatarList count={message.recipientIds!.length}>
-                    {message.recipientIds!.map((id, index) => (
-                      <AvatarList.ItemRoot key={id} index={index}>
-                        <PlayerAvatar playerId={id} />
-                      </AvatarList.ItemRoot>
-                    ))}
-                  </AvatarList>
-                </Popover.Content>
-                <Popover.Trigger asChild>
-                  <Button
-                    size="icon-small"
-                    className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
-                    color="ghost"
-                  >
-                    <Icon name="lock" />
-                  </Button>
-                </Popover.Trigger>
-              </Popover>
-            )}
-            {(!isNextMessageSameAuthor || nextMessageIsLongFromNow) && (
-              <RelativeTime
-                abbreviate
-                value={new Date(message.createdAt).getTime()}
+            <Box d="row" gap>
+              {isDm && (
+                <Popover>
+                  <Popover.Content className="p-sm flex flex-row gap-sm items-center min-w-0">
+                    <Popover.Arrow />
+                    <span>DM:</span>
+                    <AvatarList count={message.recipientIds!.length}>
+                      {message.recipientIds!.map((id, index) => (
+                        <AvatarList.ItemRoot key={id} index={index}>
+                          <PlayerAvatar playerId={id} />
+                        </AvatarList.ItemRoot>
+                      ))}
+                    </AvatarList>
+                  </Popover.Content>
+                  <Popover.Trigger asChild>
+                    <Button
+                      size="icon-small"
+                      className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
+                      color="ghost"
+                    >
+                      <Icon name="lock" />
+                    </Button>
+                  </Popover.Trigger>
+                </Popover>
+              )}
+              {(!isNextMessageSameAuthor || nextMessageIsLongFromNow) && (
+                <span className="italic text-nowrap">
+                  <RelativeTime
+                    abbreviate
+                    value={new Date(message.createdAt).getTime()}
+                  />
+                </span>
+              )}
+              {message.sceneId && (
+                <Button
+                  size="icon-small"
+                  color="ghost"
+                  className="p-0 ml-auto"
+                  onClick={revealSpatialChat}
+                >
+                  <Icon name="location" />
+                </Button>
+              )}
+            </Box>
+            {!compact && (
+              <ChatReactions
+                message={message}
+                className={clsx(
+                  'relative -top-4px z-10 bg-wash [font-style:normal]',
+                )}
               />
-            )}
-            {message.sceneId && (
-              <Button
-                size="icon-small"
-                color="ghost"
-                className="p-0 ml-auto"
-                onClick={revealSpatialChat}
-              >
-                <Icon name="location" />{' '}
-              </Button>
             )}
           </Box>
         )}

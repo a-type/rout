@@ -504,6 +504,26 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
+  @action toggleChatReaction = async (
+    messageId: PrefixedId<'cm'>,
+    reaction: string,
+  ) => {
+    const chatMessage = this.chat.find((msg) => msg.id === messageId);
+    if (!chatMessage) {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        `Chat message ${messageId} not found`,
+      );
+    }
+    const isOn = chatMessage.reactions[reaction]?.includes(this.playerId);
+    await this.ctx.socket.request({
+      type: 'toggleChatReaction',
+      chatMessageId: messageId,
+      isOn: !isOn,
+      reaction,
+    });
+  };
+
   private cachedLoadRoundPromises: Record<number, Promise<void>> = {};
   @action loadRound = (roundIndex: number) => {
     if (roundIndex < 0 || roundIndex > this.latestRoundIndex) {
@@ -561,16 +581,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   };
 
   @action private addChat = (msg: GameSessionChatMessage) => {
+    this.chat = this.chat.filter((c) => c.id !== msg.id);
     this.chat.push(msg);
     this.chat.sort((a, b) =>
       new Date(a.createdAt) > new Date(b.createdAt) ? 1 : -1,
     );
-    this.chat = this.chat.filter((msg, i, arr) => {
-      if (i === 0) {
-        return true;
-      }
-      return msg.id !== arr[i - 1].id;
-    });
   };
 
   @action private removeChat = (id: string) => {
