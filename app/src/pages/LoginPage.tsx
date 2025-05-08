@@ -1,4 +1,5 @@
 import { API_ORIGIN } from '@/config.js';
+import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import {
   EmailSigninForm,
   EmailSignupForm,
@@ -14,6 +15,7 @@ export function LoginPage({}: LoginPageProps) {
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo') ?? undefined;
   const tab = searchParams.get('tab') ?? 'login';
+  useThemedTitleBar();
 
   return (
     <Box className="w-full h-full" layout="center center">

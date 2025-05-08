@@ -109,7 +109,11 @@ export const friendshipsRouter = new Hono<Env>()
       const { response } = ctx.req.valid('json');
       const id = ctx.req.param('id');
       assertPrefixedId<'fi'>(id, 'fi');
-      await ctx.get('userStore').respondToFriendshipInvite(id, response);
+      if (response === 'retracted') {
+        await ctx.get('userStore').retractFriendshipInvite(id);
+      } else {
+        await ctx.get('userStore').respondToFriendshipInvite(id, response);
+      }
       return ctx.json({ success: true });
     },
   )

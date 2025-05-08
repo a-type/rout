@@ -5,11 +5,13 @@ import {
   ClientResetGameMessage,
   ClientSendChatMessage,
   ClientSubmitTurnMessage,
+  ClientToggleChatReactionMessage,
   LongGameError,
   PrefixedId,
   ServerChatMessage,
   ServerMessage,
   assertPrefixedId,
+  clientMessageShape,
   id,
 } from '@long-game/common';
 import { Hono } from 'hono';
@@ -200,8 +202,42 @@ export class GameSessionSocketHandler {
         ws.send(JSON.stringify(msg));
       });
     }
-    const parsed = JSON.parse(message.toString()) as ClientMessage;
-    this.#onClientMessage(parsed, ws, info);
+    try {
+      const asObject = JSON.parse(message.toString());
+      const parsed = clientMessageShape.safeParse(asObject);
+      if (!parsed.success) {
+        console.error(
+          'Invalid message',
+          parsed.error,
+          'at',
+          parsed.error.errors?.[0]?.path?.join('.'),
+          message.toString(),
+        );
+        ws.send(
+          JSON.stringify({
+            type: 'error',
+            message: 'Invalid message format',
+            responseTo: null,
+          }),
+        );
+        return;
+      } else {
+        this.#onClientMessage(parsed.data, ws, info);
+      }
+    } catch (err) {
+      console.error(
+        'Error parsing or handling message',
+        err,
+        message.toString(),
+      );
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Error handling message',
+          responseTo: null,
+        }),
+      );
+    }
   };
 
   #onClientMessage = async (
@@ -222,6 +258,9 @@ export class GameSessionSocketHandler {
           break;
         case 'resetGame':
           await this.#onClientResetGame(msg, ws, info);
+          break;
+        case 'toggleChatReaction':
+          await this.#onClientToggleChatReaction(msg, ws, info);
           break;
       }
       // ack the message for the client
@@ -254,7 +293,7 @@ export class GameSessionSocketHandler {
     this.#onWebSocketCloseOrError(ws);
   }
 
-  #onWebSocketCloseOrError = (ws: WebSocket) => {
+  #onWebSocketCloseOrError = async (ws: WebSocket) => {
     const info = this.#socketInfo.get(ws);
     if (info) {
       // inform other clients that this user has left
@@ -284,6 +323,7 @@ export class GameSessionSocketHandler {
       recipientIds: msg.message.recipientIds,
       roundIndex: msg.message.roundIndex,
       metadata: msg.message.metadata,
+      reactions: {},
     });
   };
 
@@ -323,5 +363,18 @@ export class GameSessionSocketHandler {
     info: SocketSessionInfo,
   ) => {
     await this.gameSession.resetGame();
+  };
+
+  #onClientToggleChatReaction = async (
+    msg: ClientToggleChatReactionMessage,
+    ws: WebSocket,
+    info: SocketSessionInfo,
+  ) => {
+    await this.gameSession.toggleChatReaction(
+      info.userId,
+      msg.chatMessageId,
+      msg.reaction,
+      msg.isOn,
+    );
   };
 }

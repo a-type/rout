@@ -4,6 +4,7 @@ import { GoldUpgrade } from '@/components/subscription/GoldUpgrade';
 import { ManageSubscription } from '@/components/subscription/ManageSubscription';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { API_ORIGIN } from '@/config';
+import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import { sdkHooks } from '@/services/publicSdk';
 import {
   Box,
@@ -20,6 +21,7 @@ import { Link } from '@verdant-web/react-router';
 export interface SettingsPageProps {}
 
 export function SettingsPage({}: SettingsPageProps) {
+  useThemedTitleBar();
   const { data: me } = sdkHooks.useGetMe();
 
   return (

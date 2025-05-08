@@ -77,11 +77,39 @@ export function notPlayedThisRound({
     .map((m) => m.id);
 }
 
+export function latestTurnInRound({
+  turns,
+  roundIndex,
+}: {
+  turns: any[];
+  roundIndex: number;
+}): Date | undefined {
+  const thisRoundTurns = turns.filter((turn) => turn.roundIndex === roundIndex);
+  if (thisRoundTurns.length === 0) {
+    return undefined;
+  }
+  // find the latest turn in the last round
+  const latestTurn = thisRoundTurns.reduce<Date>((latest, turn) => {
+    return new Date(turn.createdAt) > latest
+      ? new Date(turn.createdAt)
+      : latest;
+  }, new Date(0));
+  return latestTurn;
+}
+
 function periodicRounds(
   periodType: PeriodType,
   periodValue: number = 1,
+  {
+    requireAllPlayersToPlay,
+    advancementDelayMs = 10_000,
+  }: {
+    requireAllPlayersToPlay: boolean;
+    advancementDelayMs?: number;
+  } = { requireAllPlayersToPlay: true },
 ): RoundIndexDecider<any, any> {
-  return ({ startedAt, currentTime, gameTimeZone, members }) => {
+  return (data) => {
+    const { startedAt, currentTime, gameTimeZone, members, turns } = data;
     // round down start time according to period and timezone's 00:00 time.
     // for example, if the period is 1 day and the timezone is PST, then
     // the start time will be rounded down to the nearest midnight PST.
@@ -105,21 +133,50 @@ function periodicRounds(
       roundIndex++;
     }
 
+    if (requireAllPlayersToPlay && roundIndex > 0) {
+      // if all players are required to play, we must check that this condition is met for
+      // the round before advancing. once a round is 'tardy,' we block advancement until all turns
+      // are in, but then unblock and allow free advancement to 'catch up' to the current round period.
+      // What this means in practice is that if the round is incomplete, we switch to sync mode.
+
+      const lastRoundTurnsCount = turns.filter(
+        (turn) => turn.roundIndex === roundIndex - 1,
+      ).length;
+      if (lastRoundTurnsCount < members.length) {
+        return syncRounds({
+          advancementDelayMs,
+        })(data);
+      }
+    }
+
+    const thisRoundTurnsCount = turns.filter(
+      (turn) => turn.roundIndex === roundIndex,
+    ).length;
+    // do not schedule another check unless we could actually advance (all players played)
+    const checkAgainAt =
+      requireAllPlayersToPlay && thisRoundTurnsCount < members.length
+        ? undefined
+        : checkAgainAtPeriodEnd({
+            periodType,
+            periodValue,
+            currentTime,
+            gameTimeZone,
+          });
+
     return {
       roundIndex,
-      pendingTurns: members.map((member) => member.id),
-      checkAgainAt: checkAgainAtPeriodEnd({
-        periodType,
-        periodValue,
-        currentTime,
-        gameTimeZone,
-      }),
+      pendingTurns: notPlayedThisRound({ turns, roundIndex, members }),
+      checkAgainAt,
     };
   };
 }
 
-function syncRounds(): RoundIndexDecider<any, any> {
-  return ({ turns, members }) => {
+function syncRounds(
+  { advancementDelayMs }: { advancementDelayMs?: number } = {
+    advancementDelayMs: 10_000,
+  },
+): RoundIndexDecider<any, any> {
+  return ({ turns, members, currentTime }) => {
     // rounds advance when all members have played a turn
     const maxRoundIndex = turns.reduce((max, turn) => {
       return Math.max(max, turn.roundIndex);
@@ -130,6 +187,28 @@ function syncRounds(): RoundIndexDecider<any, any> {
       (turn) => turn.roundIndex === maxRoundIndex,
     );
     if (lastRoundTurns.length === members.length) {
+      if (advancementDelayMs) {
+        // if the last round is full, we need to wait for the advancement delay
+        // before we can advance to the next round
+        const lastTurnTime = latestTurnInRound({
+          turns,
+          roundIndex: maxRoundIndex,
+        });
+        // need to wait to advance to the next round
+        if (
+          lastTurnTime !== undefined &&
+          currentTime.getTime() - lastTurnTime.getTime() < advancementDelayMs
+        ) {
+          return {
+            roundIndex: maxRoundIndex,
+            pendingTurns: [],
+            checkAgainAt: add(lastTurnTime, {
+              seconds: advancementDelayMs / 1000,
+            }),
+          };
+        }
+      }
+
       return {
         roundIndex: maxRoundIndex + 1,
         pendingTurns: notPlayedThisRound({

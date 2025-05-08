@@ -1,6 +1,5 @@
 import {
   blue,
-  bronze,
   crimson,
   gray,
   indigo,
@@ -38,7 +37,9 @@ export const colors = {
     ],
     default: red.red9,
     defaultText: 'white',
-    okHue: 22.9,
+    okHue: 23.9,
+    okRotate: 1,
+    okSaturation: 1,
   },
   crimson: {
     range: [
@@ -58,6 +59,8 @@ export const colors = {
     default: crimson.crimson9,
     defaultText: 'white',
     okHue: 1.3,
+    okRotate: -2,
+    okSaturation: 1,
   },
   plum: {
     range: [
@@ -77,6 +80,8 @@ export const colors = {
     default: plum.plum9,
     defaultText: 'white',
     okHue: 322.09,
+    okRotate: 0,
+    okSaturation: 1,
   },
   violet: {
     range: [
@@ -96,6 +101,8 @@ export const colors = {
     default: violet.violet9,
     defaultText: 'white',
     okHue: 288.1,
+    okRotate: 0,
+    okSaturation: 1,
   },
   indigo: {
     range: [
@@ -115,6 +122,8 @@ export const colors = {
     default: indigo.indigo9,
     defaultText: 'white',
     okHue: 267.08,
+    okRotate: 0,
+    okSaturation: 1,
   },
   blue: {
     range: [
@@ -134,6 +143,8 @@ export const colors = {
     default: blue.blue9,
     defaultText: 'white',
     okHue: 251.81,
+    okRotate: 0,
+    okSaturation: 1,
   },
   teal: {
     range: [
@@ -153,6 +164,8 @@ export const colors = {
     default: teal.teal9,
     defaultText: 'white',
     okHue: 182.01,
+    okRotate: 4,
+    okSaturation: 1,
   },
   lime: {
     range: [
@@ -172,25 +185,8 @@ export const colors = {
     default: lime.lime9,
     defaultText: 'white',
     okHue: 126.09,
-  },
-  bronze: {
-    range: [
-      bronze.bronze1,
-      bronze.bronze2,
-      bronze.bronze3,
-      bronze.bronze4,
-      bronze.bronze5,
-      bronze.bronze6,
-      bronze.bronze7,
-      bronze.bronze8,
-      bronze.bronze9,
-      bronze.bronze10,
-      bronze.bronze11,
-      bronze.bronze12,
-    ],
-    default: bronze.bronze9,
-    defaultText: 'white',
-    okHue: 44.29,
+    okRotate: 0,
+    okSaturation: 1,
   },
   orange: {
     range: [
@@ -210,6 +206,8 @@ export const colors = {
     default: orange.orange9,
     defaultText: 'white',
     okHue: 44.8,
+    okRotate: 0,
+    okSaturation: 1,
   },
   yellow: {
     range: [
@@ -229,6 +227,8 @@ export const colors = {
     default: yellow.yellow9,
     defaultText: 'black',
     okHue: 102.14,
+    okRotate: 6,
+    okSaturation: 1,
   },
   mint: {
     range: [
@@ -248,6 +248,8 @@ export const colors = {
     default: mint.mint9,
     defaultText: 'black',
     okHue: 177.97,
+    okRotate: 0,
+    okSaturation: 1,
   },
   gray: {
     range: [
@@ -266,7 +268,9 @@ export const colors = {
     ],
     default: gray.gray9,
     defaultText: 'black',
-    okHue: 0,
+    okHue: 220,
+    okRotate: 0,
+    okSaturation: 0.2,
   },
 };
 

@@ -1,6 +1,6 @@
 import {
   GameRound,
-  GameSessionChatMessage,
+  GameSessionChatInit,
   GameStatus,
   PrefixedId,
 } from '@long-game/common';
@@ -19,10 +19,7 @@ export interface Turn<TurnData extends BaseTurnData>
   roundIndex: number;
 }
 
-export type SystemChatMessage = Omit<
-  GameSessionChatMessage,
-  'authorId' | 'id' | 'createdAt' | 'roundIndex'
->;
+export type SystemChatMessage = Omit<GameSessionChatInit, 'roundIndex'>;
 
 export type GameDefinition<
   GlobalState = any,

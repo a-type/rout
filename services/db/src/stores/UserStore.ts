@@ -312,7 +312,7 @@ export class UserStore extends RpcTarget {
 
   async respondToFriendshipInvite(
     friendshipId: PrefixedId<'fi'>,
-    status: 'accepted' | 'declined' | 'retracted',
+    status: 'accepted' | 'declined',
   ) {
     const friendship = await this.#db
       .selectFrom('FriendshipInvitation')
@@ -347,21 +347,6 @@ export class UserStore extends RpcTarget {
       );
     }
 
-    if (status === 'retracted') {
-      // deletes the invite -- but only if it was created by the user
-      if (friendship.inviterId !== this.#userId) {
-        throw new LongGameError(
-          LongGameError.Code.Forbidden,
-          'You cannot retract this invite',
-        );
-      }
-      await this.#db
-        .deleteFrom('FriendshipInvitation')
-        .where('id', '=', friendshipId)
-        .executeTakeFirstOrThrow();
-      return;
-    }
-
     const updated = await this.#db
       .updateTable('FriendshipInvitation')
       .set({ status })
@@ -384,6 +369,14 @@ export class UserStore extends RpcTarget {
     }
 
     return updated;
+  }
+
+  async retractFriendshipInvite(friendshipId: PrefixedId<'fi'>) {
+    await this.#db
+      .deleteFrom('FriendshipInvitation')
+      .where('id', '=', friendshipId)
+      .where('inviterId', '=', this.#userId)
+      .executeTakeFirstOrThrow();
   }
 
   // game sessions and invites

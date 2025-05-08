@@ -32,11 +32,11 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     }
 
     return (
-      <Box layout="center center" className="px-sm py-lg lg:px-lg" full>
+      <Box layout="center center" className="px-sm py-lg lg:px-lg" full="width">
         <Tabs
           value={viewingIndex.toString()}
           onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
-          className="w-full h-full flex flex-col"
+          className="w-full h-auto flex flex-col"
         >
           <ItemTabs items={initialState.tasks} />
           {initialState.tasks.map((task, index) => (
@@ -62,12 +62,12 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
         lg: 'lg',
       }}
       layout="center center"
-      full
+      full="width"
     >
       <Tabs
         value={viewingIndex.toString()}
         onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
-        className="w-full h-full flex flex-col"
+        className="w-full flex flex-col"
       >
         <ItemTabs items={initialState.tasks} />
         {initialState.tasks.map((task, index) => (
@@ -108,7 +108,7 @@ function ItemTab({
 
 function ItemTabs({ items }: { items: (SequenceItem | Task)[] }) {
   return (
-    <Tabs.List className="sticky top-[0px] justify-center z-10">
+    <Tabs.List className="sticky top-[0px] bg-inherit justify-center z-10">
       {items.map((item, index) => (
         <ItemTab key={index} index={index} item={item} />
       ))}

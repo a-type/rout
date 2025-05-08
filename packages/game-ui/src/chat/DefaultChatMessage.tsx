@@ -16,12 +16,14 @@ import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 import { PlayerName } from '../players/PlayerName';
 import { usePlayerThemed } from '../players/usePlayerThemed';
+import { ChatReactions } from './ChatReactions';
 import { spatialChatState } from './spatialChatState';
 
 export interface ChatMessageProps extends BoxProps {
   message: GameSessionChatMessage;
   previousMessage: GameSessionChatMessage | null;
   nextMessage: GameSessionChatMessage | null;
+  compact: boolean;
 }
 
 export const DefaultChatMessage = withGame<ChatMessageProps>(
@@ -32,6 +34,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
     style,
     nextMessage,
     previousMessage,
+    compact,
     ...rest
   }) {
     const isPreviousMessageSameAuthor =
@@ -65,17 +68,19 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           isSystem ? 'theme theme-salt' : themeClass,
           isSelf ? 'ml-auto' : 'mr-auto',
           isFuture && 'opacity-50',
+          compact && 'w-full',
           className,
+          !compact && !isPreviousMessageSameAuthor && 'mt-md',
         )}
         gap="xs"
         style={style ? { ...themeStyle, ...style } : themeStyle}
-        items={isSelf ? 'end' : 'start'}
+        items={compact ? 'stretch' : isSelf ? 'end' : 'start'}
       >
         {!isPreviousMessageSameAuthor && (
           <Box
             className={clsx(
-              'relative bottom-3px translate-y-1/2 rounded-t-12px text-xs bg-primary-wash bg-lighten-1 color-black mt-md z-1',
-              isSelf ? 'ml-auto' : 'mr-auto',
+              'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-primary-wash bg-lighten-1 color-black z-1',
+              isSelf ? 'right-0' : 'left-0',
             )}
             gap="sm"
             items="center"
@@ -99,7 +104,9 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
             'shadow-sm',
             'transition-opacity',
             'px-md py-sm',
-            'w-full',
+            !isPreviousMessageSameAuthor &&
+              (isSelf ? 'rounded-tr-0' : 'rounded-tl-0'),
+            isSelf ? 'rounded-br-0' : 'rounded-bl-0',
           )}
           {...rest}
         >
@@ -110,54 +117,68 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
             {message.content}
           </Box>
         </Box>
-        <Box
-          className="text-xs text-gray-dark italic px-sm"
-          items="center"
-          full="width"
-          gap
-          justify={isSelf ? 'end' : 'start'}
-        >
-          {isDm && (
-            <Popover>
-              <Popover.Content className="p-sm flex flex-row gap-sm items-center min-w-0">
-                <Popover.Arrow />
-                <span>DM:</span>
-                <AvatarList count={message.recipientIds!.length}>
-                  {message.recipientIds!.map((id, index) => (
-                    <AvatarList.ItemRoot key={id} index={index}>
-                      <PlayerAvatar playerId={id} />
-                    </AvatarList.ItemRoot>
-                  ))}
-                </AvatarList>
-              </Popover.Content>
-              <Popover.Trigger asChild>
+        {!compact && (
+          <Box
+            className="text-xs text-gray-dark px-sm"
+            full="width"
+            gap
+            justify="between"
+            d={isSelf ? 'row-reverse' : 'row'}
+          >
+            <Box d="row" gap>
+              {isDm && (
+                <Popover>
+                  <Popover.Content className="p-sm flex flex-row gap-sm items-center min-w-0">
+                    <Popover.Arrow />
+                    <span>DM:</span>
+                    <AvatarList count={message.recipientIds!.length}>
+                      {message.recipientIds!.map((id, index) => (
+                        <AvatarList.ItemRoot key={id} index={index}>
+                          <PlayerAvatar playerId={id} />
+                        </AvatarList.ItemRoot>
+                      ))}
+                    </AvatarList>
+                  </Popover.Content>
+                  <Popover.Trigger asChild>
+                    <Button
+                      size="icon-small"
+                      className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
+                      color="ghost"
+                    >
+                      <Icon name="lock" />
+                    </Button>
+                  </Popover.Trigger>
+                </Popover>
+              )}
+              {(!isNextMessageSameAuthor || nextMessageIsLongFromNow) && (
+                <span className="italic text-nowrap">
+                  <RelativeTime
+                    abbreviate
+                    value={new Date(message.createdAt).getTime()}
+                  />
+                </span>
+              )}
+              {message.sceneId && (
                 <Button
                   size="icon-small"
-                  className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
                   color="ghost"
+                  className="p-0 ml-auto"
+                  onClick={revealSpatialChat}
                 >
-                  <Icon name="lock" />
+                  <Icon name="location" />
                 </Button>
-              </Popover.Trigger>
-            </Popover>
-          )}
-          {(!isNextMessageSameAuthor || nextMessageIsLongFromNow) && (
-            <RelativeTime
-              abbreviate
-              value={new Date(message.createdAt).getTime()}
-            />
-          )}
-          {message.sceneId && (
-            <Button
-              size="icon-small"
-              color="ghost"
-              className="p-0 ml-auto"
-              onClick={revealSpatialChat}
-            >
-              <Icon name="location" />{' '}
-            </Button>
-          )}
-        </Box>
+              )}
+            </Box>
+            {!compact && (
+              <ChatReactions
+                message={message}
+                className={clsx(
+                  'relative -top-4px z-10 bg-wash [font-style:normal]',
+                )}
+              />
+            )}
+          </Box>
+        )}
       </Box>
     );
   },

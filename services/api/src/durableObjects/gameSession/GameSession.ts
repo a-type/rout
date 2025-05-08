@@ -1,4 +1,6 @@
 import {
+  chatPositionShape,
+  chatReactionsShape,
   GameRound,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
@@ -6,6 +8,8 @@ import {
   id,
   LongGameError,
   PrefixedId,
+  safeParse,
+  safeParseMaybe,
   SYSTEM_CHAT_AUTHOR_ID,
 } from '@long-game/common';
 import {
@@ -17,9 +21,10 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
+import { z } from 'zod';
 import { notifyUser } from '../../services/notification';
 import { GameSessionSocketHandler } from './GameSessionSocketHandler';
-import { db, SqlWrapper } from './sql';
+import { ChatMessage, db, SqlWrapper } from './sql';
 
 export interface GameSessionBaseData {
   id: PrefixedId<'gs'>;
@@ -404,13 +409,19 @@ export class GameSession extends DurableObject<ApiBindings> {
     Record<PrefixedId<'u'>, GameSessionPlayerStatus>
   > {
     const members = await this.getMembers();
+    const roundState = await this.#getCurrentRoundState();
     const statuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus> = {};
     for (const member of members) {
       statuses[member.id] = {
         online: this.#socketHandler.getIsPlayerOnline(member.id),
+        pendingTurn: roundState.pendingTurns.includes(member.id),
       };
     }
     return statuses;
+  }
+  async getPlayerIsPendingTurn(playerId: PrefixedId<'u'>) {
+    const roundState = await this.#getCurrentRoundState();
+    return roundState.pendingTurns.includes(playerId);
   }
   async getPlayerLatestPlayedRoundIndex(
     playerId: PrefixedId<'u'>,
@@ -445,7 +456,6 @@ export class GameSession extends DurableObject<ApiBindings> {
       currentRoundIndex - 1,
     );
 
-    console.log(turn, playerState, currentRoundIndex);
     const validationError = gameDefinition.validateTurn({
       turn: {
         data: turn,
@@ -591,6 +601,7 @@ export class GameSession extends DurableObject<ApiBindings> {
           ? this.#encodeChatRecipientIds(message.recipientIds)
           : null,
         sceneId: message.sceneId,
+        reactionsJSON: JSON.stringify(message.reactions),
       })
       .onConflict((oc) => oc.column('id').doNothing());
     await this.#sql.run(query);
@@ -611,6 +622,27 @@ export class GameSession extends DurableObject<ApiBindings> {
   #decodeChatRecipientIds(token: string): PrefixedId<'u'>[] {
     return token.split(',').filter(Boolean) as PrefixedId<'u'>[];
   }
+  #hydrateChatMessage = (row: ChatMessage) => {
+    let recipientIds = row.recipientIdsList
+      ? this.#decodeChatRecipientIds(row.recipientIdsList)
+      : undefined;
+    if (recipientIds?.length === 0) {
+      recipientIds = undefined;
+    }
+    return {
+      ...row,
+      sceneId: row.sceneId ?? undefined,
+      createdAt: new Date(row.createdAt).toISOString(),
+      position: row.positionJSON
+        ? safeParseMaybe(row.positionJSON, chatPositionShape)
+        : undefined,
+      recipientIds,
+      metadata: row.metadataJSON
+        ? safeParse(row.metadataJSON, z.any(), null)
+        : undefined,
+      reactions: safeParse(row.reactionsJSON, chatReactionsShape, {}),
+    };
+  };
   async getChatForPlayer(
     playerId: PrefixedId<'u'>,
     pagination: {
@@ -654,20 +686,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     const result = await this.#sql.run(sql);
     const messages = result.reverse().map((row) => {
-      let recipientIds = row.recipientIdsList
-        ? this.#decodeChatRecipientIds(row.recipientIdsList)
-        : undefined;
-      if (recipientIds?.length === 0) {
-        recipientIds = undefined;
-      }
-      return {
-        ...row,
-        sceneId: row.sceneId ?? undefined,
-        createdAt: new Date(row.createdAt).toISOString(),
-        position: row.positionJSON ? JSON.parse(row.positionJSON) : undefined,
-        recipientIds,
-        metadata: row.metadataJSON ? JSON.parse(row.metadataJSON) : undefined,
-      };
+      return this.#hydrateChatMessage(row);
     });
     const nextPageToken =
       messages.length === limit + 1
@@ -680,6 +699,68 @@ export class GameSession extends DurableObject<ApiBindings> {
       messages,
       nextToken: nextPageToken,
     };
+  }
+  async toggleChatReaction(
+    playerId: PrefixedId<'u'>,
+    messageId: PrefixedId<'cm'>,
+    reaction: string,
+    on: boolean,
+  ) {
+    const message = (
+      await this.#sql.run(
+        db
+          .selectFrom('ChatMessage')
+          .select('reactionsJSON')
+          .where('id', '=', messageId),
+      )
+    )[0];
+    if (!message) {
+      throw new LongGameError(
+        LongGameError.Code.NotFound,
+        `Chat message ${messageId} not found`,
+      );
+    }
+    const parsedReactions = safeParse(
+      message.reactionsJSON,
+      chatReactionsShape,
+      {},
+    );
+    const currentValue = new Set(parsedReactions[reaction] ?? []);
+    if (on) {
+      currentValue.add(playerId);
+    } else {
+      currentValue.delete(playerId);
+    }
+    const newReactions = {
+      ...parsedReactions,
+      [reaction]: Array.from(currentValue),
+    };
+    console.log(
+      `Setting reaction ${reaction} for player ${playerId} on message ${messageId}`,
+      newReactions,
+    );
+    // be sure...
+    if (chatReactionsShape.safeParse(newReactions).success === false) {
+      console.error(`Unexpected reaction data: ${newReactions}`);
+      throw new LongGameError(
+        LongGameError.Code.InternalServerError,
+        'Unexpected error when applying reaction',
+      );
+    }
+    const updated = await this.#sql.run(
+      db
+        .updateTable('ChatMessage')
+        .set({
+          reactionsJSON: JSON.stringify(newReactions),
+        })
+        .where('id', '=', messageId)
+        .returningAll(),
+    );
+    // send the updated message to all players
+    await this.#socketHandler.send({
+      type: 'chat',
+      messages: updated.map(this.#hydrateChatMessage),
+    });
   }
 
   // private state
@@ -944,6 +1025,7 @@ export class GameSession extends DurableObject<ApiBindings> {
                 member.id,
                 roundState.roundIndex,
               ),
+              playerStatuses: await this.getPlayerStatuses(),
             },
             {
               to: [member.id],
@@ -1005,6 +1087,7 @@ export class GameSession extends DurableObject<ApiBindings> {
             createdAt: new Date().toISOString(),
             authorId: SYSTEM_CHAT_AUTHOR_ID,
             roundIndex: roundIndex,
+            reactions: {},
           });
         }
       }

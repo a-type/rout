@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { idShapes } from './ids';
+
 /**
  * Gets the start and end of the round for a given day.
  * Start is inclusive, end is exclusive.
@@ -39,6 +42,10 @@ export type GameRound<Turn> = {
   turns: Turn[];
   roundIndex: number;
 };
+export const gameRoundShape = z.object({
+  turns: z.array(z.any()),
+  roundIndex: z.number(),
+});
 
 export type GameRoundSummary<TurnData, PublicTurnData, PlayerState> = {
   /**
@@ -65,3 +72,19 @@ export type GameRoundSummary<TurnData, PublicTurnData, PlayerState> = {
    */
   roundIndex: number;
 };
+export const gameRoundSummaryShape = z.custom<GameRoundSummary<any, any, any>>(
+  (v) =>
+    z
+      .object({
+        turns: z.array(
+          z.object({
+            playerId: idShapes.User,
+            data: z.unknown().nullable(),
+          }),
+        ),
+        yourTurnData: z.unknown().nullable(),
+        initialPlayerState: z.unknown(),
+        roundIndex: z.number(),
+      })
+      .parse(v),
+);

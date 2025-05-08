@@ -48,7 +48,11 @@ export const SubmitTurn = withSuspense(
               (turnWasSubmitted && nextRoundCheckAt ? (
                 <>
                   <span>Next:</span>
-                  <RelativeTime value={nextRoundCheckAt.getTime()} abbreviate />
+                  <RelativeTime
+                    countdownSeconds
+                    value={nextRoundCheckAt.getTime()}
+                    abbreviate
+                  />
                 </>
               ) : turnError ? (
                 "Can't submit"

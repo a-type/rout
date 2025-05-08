@@ -3,8 +3,17 @@ import { GameJoinPreview } from '@/components/games/GameJoinPreview';
 import { GameLayout } from '@/components/games/GameLayout';
 import { GameSetup } from '@/components/games/GameSetup.js';
 import { ScrollTicker } from '@/components/general/ScrollTicker';
+import { useDefaultBgColor } from '@/hooks/useThemedTitleBar';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, ErrorBoundary, Icon, Spinner } from '@a-type/ui';
+import {
+  Box,
+  ErrorBoundary,
+  getResolvedColorMode,
+  Icon,
+  Spinner,
+  useColorMode,
+  useTitleBarColor,
+} from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
@@ -43,6 +52,14 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
 }) {
   const sessionId = gameSuite.gameSessionId;
   const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
+  const backupColor = useDefaultBgColor();
+  useColorMode();
+  const titleColor = !palette
+    ? backupColor
+    : getResolvedColorMode() === 'dark'
+    ? palette.range[10]
+    : palette.range[1];
+  useTitleBarColor(titleColor);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
       {gameSuite.gameStatus.status === 'complete' && (
@@ -65,9 +82,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
             {gameSuite.gameStatus.status === 'pending' ? (
               <GameSetup gameSessionId={sessionId} />
             ) : (
-              <Box full className="game-ui">
-                <GameRenderer />
-              </Box>
+              <GameRenderer />
             )}
           </Suspense>
         </GameLayout.Main>

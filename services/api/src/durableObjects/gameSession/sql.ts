@@ -5,6 +5,7 @@ import {
   CompiledQuery,
   DummyDriver,
   Kysely,
+  Selectable,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
@@ -22,6 +23,7 @@ interface TurnTable {
   roundIndex: number;
   playerId: PrefixedId<'u'>;
 }
+export type Turn = Selectable<TurnTable>;
 
 interface ChatMessageTable {
   id: PrefixedId<'cm'>;
@@ -33,7 +35,9 @@ interface ChatMessageTable {
   recipientIdsList: string | null;
   roundIndex: number;
   metadataJSON: string | null;
+  reactionsJSON: string;
 }
+export type ChatMessage = Selectable<ChatMessageTable>;
 
 const migrations: SQLMigrations.SQLSchemaMigration[] = [
   {
@@ -58,6 +62,23 @@ const migrations: SQLMigrations.SQLSchemaMigration[] = [
         roundIndex INTEGER NOT NULL,
         metadataJSON TEXT
       );
+    `,
+  },
+  {
+    idMonotonicInc: 2,
+    description: 'Add chat reactions',
+    sql: `
+      ALTER TABLE ChatMessage ADD COLUMN reactionsJSON TEXT NOT NULL DEFAULT '{}';
+    `,
+  },
+  {
+    idMonotonicInc: 3,
+    description: 'Add indexes',
+    sql: `
+      CREATE INDEX IF NOT EXISTS idx_turn_playerId ON Turn (playerId);
+      CREATE INDEX IF NOT EXISTS idx_turn_roundIndex ON Turn (roundIndex);
+      CREATE INDEX IF NOT EXISTS idx_chatMessage_createdAt ON ChatMessage (createdAt DESC);
+      CREATE INDEX IF NOT EXISTS idx_chatMessage_recipientIdsList ON ChatMessage (recipientIdsList);
     `,
   },
 ];

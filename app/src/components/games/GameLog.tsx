@@ -74,10 +74,16 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
 
   if (latestMessage.type === 'chat') {
     return (
-      <Box direction="row" gap="sm" p="none" items="center">
-        <PlayerAvatar playerId={latestMessage.chatMessage.authorId} />
-        <span>{latestMessage.chatMessage.content}</span>
-      </Box>
+      <div className="absolute top-full left-sm right-sm">
+        <div className="relative -top-32px w-full">
+          <ChatRenderer
+            message={latestMessage.chatMessage}
+            previousMessage={null}
+            nextMessage={null}
+            compact
+          />
+        </div>
+      </div>
     );
   }
 
@@ -118,6 +124,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
                   key={entry.chatMessage.id}
                   nextMessage={nextMessage}
                   previousMessage={previousMessage}
+                  compact={false}
                 />
               );
             } else {
@@ -172,7 +179,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
                   }, 50);
                 }
               }}
-              className="w-full font-normal"
+              className="w-full font-normal h-32px rounded-xs"
             >
               <GameLogCollapsed />
             </Button>

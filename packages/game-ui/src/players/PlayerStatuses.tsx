@@ -1,7 +1,7 @@
-import { Avatar, AvatarList, AvatarListItemRoot, clsx, Icon } from '@a-type/ui';
+import { AvatarList, AvatarListItemRoot, clsx, Icon } from '@a-type/ui';
 import { GameSessionPlayerStatus } from '@long-game/common';
 import { PlayerInfo, withGame } from '@long-game/game-client';
-import { usePlayerThemed } from './usePlayerThemed';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export interface PlayerStatusesProps {
   className?: string;
@@ -23,15 +23,29 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
 
     return (
       <AvatarList count={memberStatusList.length} className={className}>
-        {memberStatusList.map(({ status, player, hasPlayed }, index) => (
-          <AvatarListItemRoot index={index} key={player.id}>
-            <PlayerStatusAvatar
-              player={player}
-              status={status}
-              hasPlayed={hasPlayed}
-            />
-          </AvatarListItemRoot>
-        ))}
+        {memberStatusList
+          .sort((a, b) =>
+            a.status.pendingTurn && !b.status.pendingTurn
+              ? 1
+              : b.status.pendingTurn && !a.status.pendingTurn
+              ? -1
+              : 0,
+          )
+          .map(({ status, player, hasPlayed }, index) => (
+            <AvatarListItemRoot
+              index={index}
+              key={player.id}
+              className={clsx(
+                !hasPlayed && !status?.pendingTurn ? 'opacity-50' : '',
+              )}
+            >
+              <PlayerStatusAvatar
+                player={player}
+                status={status}
+                hasPlayed={hasPlayed}
+              />
+            </AvatarListItemRoot>
+          ))}
       </AvatarList>
     );
   },
@@ -46,22 +60,22 @@ function PlayerStatusAvatar({
   status?: GameSessionPlayerStatus;
   hasPlayed: boolean;
 }) {
-  const { className, style } = usePlayerThemed(player.id);
   return (
-    <div className={clsx('relative overflow-visible', className)} style={style}>
-      <Avatar
-        name={player.displayName}
-        imageSrc={player.imageUrl}
-        className={clsx(
-          'border border-solid border-2px',
-          status?.online ? 'border-primary' : 'border-gray',
-        )}
-      />
-      {hasPlayed && (
-        <div className="absolute -top-1 -left-1 bg-primary-dark rounded-full w-16px h-16px flex items-center justify-center">
-          <Icon name="check" className="w-10px h-10px color-white" />
+    <div className={clsx('relative overflow-visible')}>
+      <PlayerAvatar playerId={player.id} />
+      {hasPlayed || status?.pendingTurn ? (
+        <div
+          className={clsx(
+            'absolute -top-1 -right-2px rounded-full w-16px h-16px flex items-center justify-center',
+            hasPlayed ? 'bg-accent-dark' : 'bg-gray-dark',
+          )}
+        >
+          <Icon
+            name={hasPlayed ? 'check' : 'clock'}
+            className="w-10px h-10px color-white"
+          />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
