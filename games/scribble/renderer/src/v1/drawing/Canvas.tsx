@@ -37,7 +37,7 @@ function distance(a: number[], b: number[] | null) {
   );
 }
 
-const RESOLUTION = 1.5;
+const RESOLUTION = 1;
 
 export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   readonly,
