@@ -21,6 +21,7 @@ import cardBack from './images/cardback.png';
 import { useDoubleClick } from './useDoubleClick';
 import { useViewState } from './useViewState';
 import { isMobile } from 'react-device-detect';
+import { PrefixedId } from '@long-game/common';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -83,12 +84,9 @@ const useTriggerTooltip = ({
     ...(isMobile
       ? {
           onTouchStart: () => {
-            // setTouched(true);
             onClickOrTap();
           },
-          onTouchEnd: () => {
-            // setTouched(false);
-          },
+          onTouchEnd: () => {},
           onClick: () => {},
         }
       : {
@@ -237,7 +235,7 @@ export function Card({
   const { cardState } = finalState;
   const { cardId, ownerId, fatigued, continuousEffects } = info;
   const { className: playerClassName, style } = usePlayerThemed(
-    ownerId as `u-${string}`,
+    ownerId as PrefixedId<'u'>,
   );
 
   const { over, active } = useDndContext();

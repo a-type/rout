@@ -114,10 +114,14 @@ export function Hand({
               }
             })();
 
+            // each card takes up a fratction of the total rotation, with limits when you don't have many cards
+            // so it doesn't look too weird
+            const rotationFactor = Math.min(10, maxRotation / cards.length);
             const rotation =
               rotationOffset +
-              (maxRotation / cards.length) * (index + 0.5 - cards.length / 2);
+              rotationFactor * (index + 0.5 - cards.length / 2);
 
+            // using manual rotation to avoid transform origin issues with dndkit
             const { x, y } = rotatePointAroundAnotherPoint(
               { x: 0, y: 0 },
               { x: 0, y: cardSize * 4 },

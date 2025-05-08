@@ -1,13 +1,11 @@
 import React from 'react';
-import {
-  ChatMessageProps,
-  DefaultChatMessage,
-  PlayerName,
-} from '@long-game/game-ui';
+import { ChatMessageProps, DefaultChatMessage } from '@long-game/game-ui';
 import { ChatCard } from './ChatCard';
+import { ChatCoordinate } from './ChatCoordinate';
+import { ChatPlayer } from './ChatPlayer';
 
 export function CustomChatMessage({ message, ...rest }: ChatMessageProps) {
-  const content = message.content as string;
+  const content = message.metadata?.richContent ?? (message.content as string);
 
   // Function to parse and replace placeholders
   const parseContent = (text: string) => {
@@ -33,7 +31,7 @@ export function CustomChatMessage({ message, ...rest }: ChatMessageProps) {
         if (playerId) {
           parts.push(
             <div className="flex gap-1 color-primary" key={playerId}>
-              <PlayerName playerId={playerId} />
+              <ChatPlayer playerId={playerId} />
             </div>,
           );
         }
@@ -41,12 +39,7 @@ export function CustomChatMessage({ message, ...rest }: ChatMessageProps) {
         if (coordinate) {
           const coord = coordinate.split(',').map(Number);
           const [x, y] = coord;
-          const valid = x >= 0 && y >= 0;
-          parts.push(
-            <span className="text-yellow-500">
-              {valid ? `(${x}, ${y})` : 'Invalid Coordinate'}
-            </span>,
-          );
+          parts.push(<ChatCoordinate coordinate={{ x, y }} />);
         }
 
         lastIndex = offset + match.length;

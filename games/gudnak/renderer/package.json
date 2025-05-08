@@ -39,7 +39,8 @@
     "react": "catalog:",
     "react-device-detect": "^2.2.1",
     "react-dom": "catalog:",
-    "react-flip-toolkit": "^7.2.4"
+    "react-flip-toolkit": "^7.2.4",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@long-game/scripts": "workspace:*",

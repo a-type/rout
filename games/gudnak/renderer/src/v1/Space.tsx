@@ -11,6 +11,8 @@ import { isCard, isCoordinate, Selection } from './useSelect';
 import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { useDroppable } from '@dnd-kit/core';
+import { PrefixedId } from '@long-game/common';
+import { useHighlightSpace } from './useHighlightSpace';
 
 export function Space({
   stack,
@@ -31,6 +33,10 @@ export function Space({
   onClick?: () => void;
   onClickCard?: (card: CardType, coord: Coordinate) => void;
 }) {
+  const { highlightedCoordinate } = useHighlightSpace();
+  const isHighlighted =
+    highlightedCoordinate?.x === coordinate.x &&
+    highlightedCoordinate?.y === coordinate.y;
   const isLarge = useMediaQuery('(min-width: 1024px)');
   const { isOver, setNodeRef, active } = useDroppable({
     id: `space-${coordinate.x}-${coordinate.y}`,
@@ -54,8 +60,8 @@ export function Space({
     }
   });
 
-  const { finalState } = hooks.useGameSuite();
-  const { className, style } = usePlayerThemed(ownerId as `u-${string}`);
+  const { finalState, playerId } = hooks.useGameSuite();
+  const { className, style } = usePlayerThemed(ownerId as PrefixedId<'u'>);
   const { cardState } = finalState;
   const topCard = stack[stack.length - 1];
   const cardSelected = isCard(selection) && selection.instanceId === topCard;
@@ -64,20 +70,28 @@ export function Space({
       return t.instanceId === topCard;
     }
   });
+  const inDanger =
+    isGate &&
+    topCard &&
+    ownerId !== cardState[topCard].ownerId &&
+    playerId === ownerId;
+
   return (
     <div className={clsx(className, 'w-full h-full')} style={style}>
-      <Box
+      <div
         className={clsx(
-          'aspect-square border-3 rounded-2xl relative',
+          'aspect-square border-3 rounded-2xl relative transition-colors',
+          isLarge ? 'p-2' : 'p-1',
           ownerId ? 'border-primary' : 'border-gray-400',
           draggedKind === 'fighter' && isOver && 'bg-red-500/50',
           selected && 'bg-primary-light',
-          targeted && 'bg-red-500/50',
+          targeted && 'bg-purple-500/50',
+          isHighlighted && 'bg-blue-500/50',
+          inDanger && 'bg-red-500/50 outline outline-5 outline-red-500',
         )}
         onClick={() => {
           onClick?.();
         }}
-        p={isLarge ? 'lg' : 'md'}
         style={{
           borderStyle: isGate ? 'dashed' : 'solid',
         }}
@@ -99,7 +113,7 @@ export function Space({
             }}
           />
         ) : null}
-      </Box>
+      </div>
     </div>
   );
 }

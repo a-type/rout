@@ -12,7 +12,6 @@ import {
   type Coordinate,
   type CoordinateTarget,
 } from '@long-game/game-gudnak-definition/v1';
-import { DefaultChatMessage } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
 import { Board } from './Board';
@@ -24,6 +23,7 @@ import { useManageCardFlipState } from './useManageCardFlipState';
 import { ViewStateProvider } from './useViewState';
 import { DiscardViewer } from './DiscardViewer';
 import { CustomChatMessage } from './chat/ChatMessage';
+import { PrefixedId } from '@long-game/common';
 
 export function Client() {
   return (
@@ -80,7 +80,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
       <Box className="w-full h-full flex flex-col p-3 gap-2">
         <h3>Game Over</h3>
         <span>
-          {getPlayer(gameStatus.winnerIds[0] as `u-${string}`).displayName}{' '}
+          {getPlayer(gameStatus.winnerIds[0] as PrefixedId<'u'>).displayName}{' '}
           wins!
         </span>
       </Box>

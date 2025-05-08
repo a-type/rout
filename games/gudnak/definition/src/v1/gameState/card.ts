@@ -4,6 +4,7 @@ import {
   cardDefinitions,
   ValidCardId,
   GlobalState,
+  CardDefinition,
 } from '../gameDefinition';
 
 export function hasTrait(card: Card, trait: Trait): boolean {
@@ -58,4 +59,19 @@ export function removeFatigue(
   cardInstanceId: string,
 ): GlobalState {
   return updateCardState(gameState, cardInstanceId, { fatigued: false });
+}
+
+export function getCardDefinitionFromInstanceId(
+  gameState: GlobalState,
+  cardInstanceId: string,
+): CardDefinition {
+  const card = gameState.cardState[cardInstanceId];
+  if (!card) {
+    throw new Error(`Card ${cardInstanceId} not found`);
+  }
+  const cardDef = cardDefinitions[card.cardId as ValidCardId];
+  if (!cardDef) {
+    throw new Error(`Card definition ${card.cardId} not found`);
+  }
+  return cardDef;
 }

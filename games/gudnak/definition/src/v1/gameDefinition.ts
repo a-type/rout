@@ -25,6 +25,7 @@ import {
   validateMove,
   validateTargets,
 } from './gameState/validation';
+import { getCardDefinitionFromInstanceId } from './gameState/card';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';
@@ -141,7 +142,7 @@ function anyTurn(): RoundIndexDecider<GlobalState, TurnData> {
 
     return {
       roundIndex: maxRoundIndex + 1,
-      pendingTurns: [globalState.currentPlayer as `u-${string}`],
+      pendingTurns: [globalState.currentPlayer as PrefixedId<'u'>],
     };
   };
 }
@@ -326,69 +327,120 @@ export const gameDefinition: GameDefinition<
     return turn;
   },
 
-  getRoundChangeMessages: ({ completedRound }) => {
+  getRoundChangeMessages: ({ completedRound, globalState }) => {
     const messages: SystemChatMessage[] = [];
-    const renderPlayer = (id: string) => `<player|${id}>`;
-    const renderCard = (id: string) => `<card|${id}>`;
-    const renderCoordinate = (coord: Coordinate) =>
-      `<coordinate|${coord.x},${coord.y}>`;
+    type RenderPlayer = (id: string) => string;
+    type RenderCard = (id: string) => string;
+    type RenderCoordinate = (coord: Coordinate) => string;
+    type RenderFn = (props: {
+      renderPlayer: RenderPlayer;
+      renderCard: RenderCard;
+      renderCoordinate: RenderCoordinate;
+      renderTarget: (target: Target) => string;
+    }) => string;
+    const addMessage = (fn: RenderFn): void => {
+      const simpleMessage = fn({
+        renderPlayer: (id) => id,
+        renderCard: (id) =>
+          getCardDefinitionFromInstanceId(globalState, id)?.name,
+        renderCoordinate: (coord) => `(${coord.x},${coord.y})`,
+        renderTarget: (target) => {
+          if (target.kind === 'coordinate') {
+            return `(${target.x},${target.y})`;
+          }
+          return getCardDefinitionFromInstanceId(globalState, target.instanceId)
+            ?.name;
+        },
+      });
+      const richMessage = fn({
+        renderPlayer: (id) => `<player|${id}>`,
+        renderCard: (id) => `<card|${id}>`,
+        renderCoordinate: (coord) => `<coordinate|${coord.x},${coord.y}>`,
+        renderTarget: (target) => {
+          if (target.kind === 'coordinate') {
+            return `<coordinate|${target.x},${target.y}>`;
+          }
+          return `<card|${target.instanceId}>`;
+        },
+      });
+      messages.push({
+        content: simpleMessage,
+        metadata: {
+          richContent: richMessage,
+        },
+      });
+    };
     completedRound?.turns.forEach((turn) => {
       const {
         data: { action },
         playerId,
       } = turn;
       if (action.type === 'attack') {
-        messages.push({
-          content: `${renderPlayer(playerId)} attacked with ${renderCard(
+        addMessage(({ renderPlayer, renderCard, renderCoordinate }) => {
+          return `${renderPlayer(playerId)} attacked with ${renderCard(
             action.cardInstanceId,
           )} from ${renderCoordinate(action.source)} to ${renderCoordinate(
             action.target,
-          )}`,
+          )}`;
         });
       }
       if (action.type === 'move') {
-        messages.push({
-          content: `${renderPlayer(playerId)} moved ${renderCard(
+        addMessage(({ renderPlayer, renderCard, renderCoordinate }) => {
+          return `${renderPlayer(playerId)} moved ${renderCard(
             action.cardInstanceId,
           )} from ${renderCoordinate(action.source)} to ${renderCoordinate(
             action.target,
-          )}`,
+          )}`;
         });
       }
       if (action.type === 'deploy') {
-        messages.push({
-          content: `${renderPlayer(playerId)} deployed ${renderCard(
+        addMessage(({ renderPlayer, renderCard, renderCoordinate }) => {
+          return `${renderPlayer(playerId)} deployed ${renderCard(
             action.card.instanceId,
-          )} to ${renderCoordinate(action.target)}`,
+          )} to ${renderCoordinate(action.target)}`;
         });
       }
       if (action.type === 'draw') {
-        messages.push({ content: `${renderPlayer(playerId)} drew a card` });
+        addMessage(({ renderPlayer }) => {
+          return `${renderPlayer(playerId)} drew a card`;
+        });
       }
       if (action.type === 'endTurn') {
-        messages.push({
-          content: `${renderPlayer(playerId)} ended their turn`,
+        addMessage(({ renderPlayer }) => {
+          return `${renderPlayer(playerId)} ended their turn`;
         });
       }
       if (action.type === 'tactic') {
-        messages.push({
-          content: `${renderPlayer(playerId)} played <card|${
-            action.card.instanceId
-          }>`,
+        addMessage(({ renderPlayer, renderCard, renderTarget }) => {
+          let msg = `${renderPlayer(playerId)} played ${renderCard(
+            action.card.instanceId,
+          )}`;
+          if (action.input.targets.length > 0) {
+            msg += ` with targets ${action.input.targets
+              .map((t) => renderTarget(t))
+              .join(', ')}`;
+          }
+          return msg;
         });
       }
       if (action.type === 'useAbility') {
-        messages.push({
-          content: `${renderPlayer(playerId)} used ${renderCard(
+        addMessage(({ renderPlayer, renderCard, renderTarget }) => {
+          let msg = `${renderPlayer(playerId)} used ${renderCard(
             action.cardInstanceId,
-          )} ability`,
+          )}'s ability`;
+          if (action.targets.length > 0) {
+            msg += ` with targets ${action.targets
+              .map((t) => renderTarget(t))
+              .join(', ')}`;
+          }
+          return msg;
         });
       }
       if (action.type === 'defend') {
-        messages.push({
-          content: `${renderPlayer(playerId)} defended with ${action.targets
-            .map((t) => renderCard(t.instanceId))
-            .join(', ')}`,
+        addMessage(({ renderPlayer, renderTarget }) => {
+          return `${renderPlayer(playerId)} defended with ${action.targets
+            .map((t) => renderTarget(t))
+            .join(', ')}`;
         });
       }
     });
