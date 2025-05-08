@@ -1,6 +1,6 @@
-import { Backdrop } from './Backdrop';
-import { Card } from './Card';
-import { hooks } from './gameClient';
+import { Backdrop } from '../Backdrop';
+import { Card } from '../card/Card';
+import { hooks } from '../gameClient';
 import { useViewState } from './useViewState';
 
 export function CardViewer() {

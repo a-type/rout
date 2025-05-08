@@ -1,5 +1,5 @@
 import { Box } from '@a-type/ui';
-import { Card } from './Card';
+import { Card } from '../card/Card';
 import type {
   Card as CardType,
   Target,
@@ -7,7 +7,7 @@ import type {
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { useMediaQuery } from '@long-game/game-ui';
-import { rotatePointAroundAnotherPoint, useScreenSize } from './utils';
+import { rotatePointAroundAnotherPoint, useScreenSize } from '../utils/utils';
 import { useClickAway } from '@uidotdev/usehooks';
 import { isMobile } from 'react-device-detect';
 import { useDroppable } from '@dnd-kit/core';

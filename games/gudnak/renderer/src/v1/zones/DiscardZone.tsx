@@ -1,9 +1,9 @@
 import { clsx } from '@a-type/ui';
 import { cardDefinitions } from '@long-game/game-gudnak-definition';
-import { RenderCard } from './Card';
-import { hooks } from './gameClient';
-import { useBoardOrientation } from './useBoardOrientation';
-import { useViewState } from './useViewState';
+import { RenderCard } from '../card/Card';
+import { hooks } from '../gameClient';
+import { useBoardOrientation } from '../utils/useBoardOrientation';
+import { useViewState } from '../views/useViewState';
 
 export function DiscardZone({
   playerId,

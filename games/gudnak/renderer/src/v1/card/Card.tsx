@@ -15,11 +15,11 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Flipped } from 'react-flip-toolkit';
 import { cardImageLookup } from './cardImageLookup';
-import { Draggable } from './Draggable';
-import { hooks } from './gameClient';
-import cardBack from './images/cardback.png';
-import { useDoubleClick } from './useDoubleClick';
-import { useViewState } from './useViewState';
+import { Draggable } from '../Draggable';
+import { hooks } from '../gameClient';
+import cardBack from '../images/cardback.png';
+import { useDoubleClick } from '../utils/useDoubleClick';
+import { useViewState } from '../views/useViewState';
 import { isMobile } from 'react-device-detect';
 import { PrefixedId } from '@long-game/common';
 
@@ -248,50 +248,6 @@ export function Card({
     throw new Error(`Card ${cardId} not found`);
   }
 
-  if (cardData.kind === 'fighter') {
-    return (
-      <Draggable
-        className={clsx(className, playerClassName, 'z-40 touch-manipulation')}
-        style={style}
-        data={{
-          instanceId: rest.instanceId,
-          cardInfo: info,
-        }}
-        disabled={rest.disableDrag}
-      >
-        {stack &&
-          stack.length > 1 &&
-          stack
-            .slice(0, -1)
-            .reverse()
-            .map((c, idx) => (
-              <div
-                key={idx}
-                className="absolute"
-                style={{
-                  left: `${(stack.length - idx - 1) * 30 + 5}px`,
-                }}
-              >
-                <RenderCard
-                  cardId={cardState[c].cardId}
-                  cardData={cardDefinitions[cardState[c].cardId] as FighterCard}
-                  fatigued={fatigued}
-                  continuousEffects={continuousEffects}
-                  instanceId={c}
-                />
-              </div>
-            ))}
-        <RenderCard
-          cardId={cardId}
-          cardData={cardData}
-          fatigued={fatigued}
-          continuousEffects={continuousEffects}
-          overSpace={overSpace}
-          {...rest}
-        />
-      </Draggable>
-    );
-  }
   return (
     <Draggable
       className={clsx(className, 'z-40 touch-manipulation')}
@@ -302,7 +258,36 @@ export function Card({
       }}
       disabled={rest.disableDrag}
     >
-      <RenderCard cardData={cardData} cardId={cardId} {...rest} />
+      {stack &&
+        stack.length > 1 &&
+        stack
+          .slice(0, -1)
+          .reverse()
+          .map((c, idx) => (
+            <div
+              key={idx}
+              className="absolute"
+              style={{
+                left: `${(stack.length - idx - 1) * 30 + 5}px`,
+              }}
+            >
+              <RenderCard
+                cardId={cardState[c].cardId}
+                cardData={cardDefinitions[cardState[c].cardId] as FighterCard}
+                fatigued={fatigued}
+                continuousEffects={continuousEffects}
+                instanceId={c}
+              />
+            </div>
+          ))}
+      <RenderCard
+        cardData={cardData}
+        cardId={cardId}
+        fatigued={fatigued}
+        continuousEffects={continuousEffects}
+        overSpace={overSpace}
+        {...rest}
+      />
     </Draggable>
   );
 }

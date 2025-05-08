@@ -1,4 +1,4 @@
-import * as images from './images';
+import * as images from '../images';
 
 export const cardImageLookup: Record<string, string> = {
   'solaran-soldier-3': images.solaranSoldier3,

@@ -6,13 +6,13 @@ import {
   Coordinate,
   cardDefinitions,
 } from '@long-game/game-gudnak-definition/v1';
-import { Card } from './Card';
-import { isCard, isCoordinate, Selection } from './useSelect';
+import { Card } from '../card/Card';
+import { isCard, isCoordinate, Selection } from '../gameAction/useSelect';
 import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { useDroppable } from '@dnd-kit/core';
 import { PrefixedId } from '@long-game/common';
-import { useHighlightSpace } from './useHighlightSpace';
+import { useHighlightSpace } from '../useHighlightSpace';
 
 export function Space({
   stack,

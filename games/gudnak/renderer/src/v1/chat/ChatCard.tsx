@@ -1,7 +1,7 @@
 import { cardDefinitions } from '@long-game/game-gudnak-definition';
 import { hooks } from '../gameClient';
 import { ValidCardId } from '@long-game/game-gudnak-definition/v1';
-import { cardImageLookup } from '../cardImageLookup';
+import { cardImageLookup } from '../card/cardImageLookup';
 import { clsx, Tooltip } from '@a-type/ui';
 
 export function ChatCard({ instanceId }: { instanceId: string }) {

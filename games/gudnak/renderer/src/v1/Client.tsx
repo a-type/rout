@@ -14,14 +14,14 @@ import {
 } from '@long-game/game-gudnak-definition/v1';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
-import { Board } from './Board';
-import { CardViewer } from './CardViewer';
+import { Board } from './zones/Board';
+import { CardViewer } from './views/CardViewer';
 import { hooks } from './gameClient';
-import { Hand } from './Hand';
-import { useGameAction } from './useGameAction';
+import { Hand } from './zones/Hand';
+import { useGameAction } from './gameAction/useGameAction';
 import { useManageCardFlipState } from './useManageCardFlipState';
-import { ViewStateProvider } from './useViewState';
-import { DiscardViewer } from './DiscardViewer';
+import { ViewStateProvider } from './views/useViewState';
+import { DiscardViewer } from './views/DiscardViewer';
 import { CustomChatMessage } from './chat/ChatMessage';
 import { PrefixedId } from '@long-game/common';
 

@@ -1,7 +1,7 @@
 import { clsx } from '@a-type/ui';
 import { useMediaQuery } from '@long-game/game-ui';
-import { RenderCard } from './Card';
-import { useBoardOrientation } from './useBoardOrientation';
+import { RenderCard } from '../card/Card';
+import { useBoardOrientation } from '../utils/useBoardOrientation';
 
 export function DeckZone({
   deck,

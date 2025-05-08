@@ -10,7 +10,7 @@ import {
   CardTarget,
 } from '@long-game/game-gudnak-definition/v1';
 import { boardHelpers } from '@long-game/game-gudnak-definition';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
 import { toast } from '@a-type/ui';

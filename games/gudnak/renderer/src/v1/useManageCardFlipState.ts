@@ -1,7 +1,7 @@
 import { animate } from 'motion';
 import { useEffect } from 'react';
 import { hooks } from './gameClient';
-import { usePrevious } from './usePrevious';
+import { usePrevious } from './utils/usePrevious';
 
 /** Handles animation state for card flipping */
 export const useManageCardFlipState = () => {

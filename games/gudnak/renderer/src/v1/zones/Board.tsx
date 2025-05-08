@@ -7,15 +7,14 @@ import {
   type PlayerState,
   type Target,
 } from '@long-game/game-gudnak-definition/v1';
-import { useMediaQuery } from '@long-game/game-ui';
 import { DeckZone } from './DeckZone';
 import { DiscardZone } from './DiscardZone';
-import { useBoardOrientation } from './useBoardOrientation';
-import { hooks } from './gameClient';
-import mapVert from './images/map-vert.png';
-import map from './images/map.png';
+import { useBoardOrientation } from '../utils/useBoardOrientation';
+import { hooks } from '../gameClient';
+import mapVert from '../images/map-vert.png';
+import map from '../images/map.png';
 import { Space } from './Space';
-import { Selection } from './useSelect';
+import { Selection } from '../gameAction/useSelect';
 
 function Map() {
   const orientation = useBoardOrientation();
