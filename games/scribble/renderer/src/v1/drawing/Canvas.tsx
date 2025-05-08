@@ -1,8 +1,8 @@
 import { Box, Button, clsx } from '@a-type/ui';
 import { colors, PrefixedId } from '@long-game/common';
 import { Drawing } from '@long-game/game-scribble-definition/v1';
-import { getStroke } from 'perfect-freehand';
-import { PointerEvent, useState } from 'react';
+import { getStroke, StrokeOptions } from 'perfect-freehand';
+import { PointerEvent, useRef, useState } from 'react';
 import { hooks } from '../gameClient';
 import { PlayerAttribution } from '../PlayerAttribution';
 
@@ -18,8 +18,9 @@ export interface CanvasProps {
 function getStrokeOptions(size: number) {
   return {
     size,
-    smoothing: 0.01,
-  };
+    smoothing: 0.0,
+    streamline: 0.8,
+  } satisfies StrokeOptions;
 }
 
 function getSvgPoint(e: PointerEvent<SVGSVGElement>) {
@@ -28,6 +29,15 @@ function getSvgPoint(e: PointerEvent<SVGSVGElement>) {
   point.y = e.clientY;
   return point.matrixTransform(e.currentTarget.getScreenCTM()!.inverse());
 }
+
+function distance(a: number[], b: number[] | null) {
+  if (!b) return 0;
+  return Math.sqrt(
+    (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2,
+  );
+}
+
+const RESOLUTION = 1.5;
 
 export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   readonly,
@@ -41,6 +51,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
   const player = gameSuite.getPlayer(playerId);
 
   const [points, setPoints] = useState<number[][]>([]);
+  const lastPointRef = useRef<number[] | null>(null);
   const [color, setColor] = useState<'dark' | 'light' | 'contrast'>('contrast');
   const [size, setSize] = useState(2);
 
@@ -145,6 +156,11 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
                   e.currentTarget.setPointerCapture(e.pointerId);
                   const finalPoint = getSvgPoint(e);
                   setPoints([[finalPoint.x, finalPoint.y, e.pressure]]);
+                  lastPointRef.current = [
+                    finalPoint.x,
+                    finalPoint.y,
+                    e.pressure,
+                  ];
                 }
           }
           onPointerMove={
@@ -152,11 +168,12 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
               ? undefined
               : (e) => {
                   if (e.buttons !== 1) return;
-                  const finalPoint = getSvgPoint(e);
-                  setPoints([
-                    ...points,
-                    [finalPoint.x, finalPoint.y, e.pressure],
-                  ]);
+                  const svgPoint = getSvgPoint(e);
+                  const finalPoint = [svgPoint.x, svgPoint.y, e.pressure];
+                  if (distance(finalPoint, lastPointRef.current) > RESOLUTION) {
+                    lastPointRef.current = finalPoint;
+                    setPoints([...points, finalPoint]);
+                  }
                 }
           }
           onPointerUp={
@@ -175,6 +192,7 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
                     ],
                   });
                   setPoints([]);
+                  lastPointRef.current = null;
                 }
           }
           className={clsx(
