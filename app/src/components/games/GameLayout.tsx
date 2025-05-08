@@ -3,7 +3,7 @@ import { withClassName } from '@a-type/ui';
 export const GameLayoutRoot = withClassName(
   'div',
   'grid w-full h-full bg-white min-h-0 overflow-hidden',
-  'grid-rows-[1fr_auto] grid-cols-[1fr] grid-areas-[top]-[main]-[bottom]',
+  'grid-rows-[1fr_auto] grid-cols-[auto]-[1fr]-[auto] grid-areas-[top]-[main]-[bottom]',
   'lg:grid-cols-[1fr_3fr] lg:grid-rows-[auto_1fr] lg:(grid-areas-[sidebarsecondary_main]-[sidebar_main])',
 );
 
