@@ -80,7 +80,7 @@ export function Space({
     <div className={clsx(className, 'w-full h-full')} style={style}>
       <div
         className={clsx(
-          'aspect-square border-3 rounded-2xl relative transition-colors',
+          'aspect-square border-4 rounded-2xl relative transition-colors',
           isLarge ? 'p-2' : 'p-1',
           ownerId ? 'border-primary' : 'border-gray-400',
           draggedKind === 'fighter' && isOver && 'bg-red-500/50',

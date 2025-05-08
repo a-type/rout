@@ -39,7 +39,7 @@ export function CustomChatMessage({ message, ...rest }: ChatMessageProps) {
         if (coordinate) {
           const coord = coordinate.split(',').map(Number);
           const [x, y] = coord;
-          parts.push(<ChatCoordinate coordinate={{ x, y }} />);
+          parts.push(<ChatCoordinate coordinate={{ x, y }} key={offset} />);
         }
 
         lastIndex = offset + match.length;

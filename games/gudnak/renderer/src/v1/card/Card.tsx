@@ -135,9 +135,7 @@ export function RenderCard({
     <Flipped flipId={instanceId}>
       {(flippedProps) => (
         <Popover
-          open={
-            tooltipActive && !disableTooltip && viewState.kind !== 'cardViewer'
-          }
+          open={tooltipActive && !disableTooltip && viewState.kind === 'game'}
         >
           <Popover.Content padding="none" className="game-ui">
             <img src={cardArt} className="lg:max-w-md  sm:max-w-xs" />
@@ -188,12 +186,12 @@ export function RenderCard({
               >
                 <Box
                   className={clsx(
-                    'w-full h-full border-primary rounded-lg bg-cover',
+                    'w-full h-full outline outline-4 outline-primary rounded-lg bg-cover',
                     selected && 'bg-primary-light',
                     targeted && 'bg-primary-wash',
                     fatigued && 'bg-gray-300',
                   )}
-                  border={!noBorder}
+                  // border={!noBorder}
                   onClick={(e) => {
                     e.stopPropagation();
                     onClick?.();
@@ -250,7 +248,7 @@ export function Card({
 
   return (
     <Draggable
-      className={clsx(className, 'z-40 touch-manipulation')}
+      className={clsx(className, playerClassName, 'z-40 touch-manipulation')}
       style={style}
       data={{
         instanceId: rest.instanceId,

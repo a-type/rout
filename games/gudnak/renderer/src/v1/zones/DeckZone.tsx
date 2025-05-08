@@ -1,5 +1,4 @@
 import { clsx } from '@a-type/ui';
-import { useMediaQuery } from '@long-game/game-ui';
 import { RenderCard } from '../card/Card';
 import { useBoardOrientation } from '../utils/useBoardOrientation';
 
