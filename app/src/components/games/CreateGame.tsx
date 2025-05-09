@@ -3,9 +3,13 @@ import { Button, ButtonProps, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { useNavigate } from '@verdant-web/react-router';
 import { MouseEvent } from 'react';
+import { GameLimitUpsellWrapper } from '../subscription/GameLimitUpsellWrapper';
 
 export function CreateGame({ children, onClick, ...rest }: ButtonProps) {
   const mutation = sdkHooks.usePrepareGameSession();
+  const {
+    data: { count: remaining },
+  } = sdkHooks.useGetRemainingGameSessions();
 
   const navigate = useNavigate();
 
@@ -23,12 +27,18 @@ export function CreateGame({ children, onClick, ...rest }: ButtonProps) {
   };
 
   return (
-    <Button color="primary" onClick={create} {...rest}>
-      {children ?? (
-        <>
-          <Icon name="plus" /> New Game
-        </>
-      )}
-    </Button>
+    <GameLimitUpsellWrapper enabled={remaining === 0}>
+      <Button
+        color="primary"
+        onClick={remaining > 0 ? create : undefined}
+        {...rest}
+      >
+        {children ?? (
+          <>
+            <Icon name="plus" /> New Game
+          </>
+        )}
+      </Button>
+    </GameLimitUpsellWrapper>
   );
 }

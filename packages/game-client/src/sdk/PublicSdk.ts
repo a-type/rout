@@ -90,6 +90,10 @@ export class PublicSdk extends BaseSdk {
       },
     },
   );
+  getRemainingGameSessions = this.sdkQuery(
+    'getRemainingGameSessions',
+    this.apiRpc.gameSessions.remaining.$get,
+  );
   getGameSessionInvitations = this.sdkQuery(
     'getGameSessionInvitations',
     this.apiRpc.gameSessionInvitations.$get,

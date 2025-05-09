@@ -2,6 +2,7 @@ export * from './board.js';
 export * from './brand.js';
 export * from './chat.js';
 export * from './colors.js';
+export * from './entitlements.js';
 export * from './error.js';
 export * from './ids.js';
 export * from './objects.js';

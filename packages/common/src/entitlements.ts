@@ -1,0 +1,8 @@
+export const ENTITLEMENT_NAMES = {
+  EXTRA_GAME_SESSIONS: 'extra-game-sessions',
+};
+
+export const MAX_ACTIVE_GAMES_BY_ENTITLEMENT = {
+  FREE: 2,
+  [ENTITLEMENT_NAMES.EXTRA_GAME_SESSIONS]: 8,
+};

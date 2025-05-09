@@ -97,4 +97,9 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       return ctx.json({ sessionId: gameSession.id });
     },
   )
+  .get('/remaining', userStoreMiddleware, async (ctx) => {
+    return ctx.json({
+      count: await ctx.get('userStore').getRemainingGameSessions(),
+    });
+  })
   .route('/:id', gameSessionRouter);

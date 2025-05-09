@@ -1,11 +1,24 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { AvatarList, AvatarListItem, Box, Button, H1, toast } from '@a-type/ui';
+import {
+  AvatarList,
+  AvatarListItem,
+  Box,
+  Button,
+  H1,
+  P,
+  toast,
+} from '@a-type/ui';
+import {
+  ENTITLEMENT_NAMES,
+  MAX_ACTIVE_GAMES_BY_ENTITLEMENT,
+} from '@long-game/common';
 import {
   GameSessionInvitation,
   GameSessionPregame,
 } from '@long-game/game-client';
 import games from '@long-game/games';
-import { useNavigate } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@verdant-web/react-router';
+import { GoldUpgrade } from '../subscription/GoldUpgrade';
 
 export interface GameJoinPreviewProps {
   myInvite: GameSessionInvitation;
@@ -14,6 +27,9 @@ export interface GameJoinPreviewProps {
 
 export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
   const respondToInviteMutation = sdkHooks.useRespondToGameSessionInvitation();
+  const {
+    data: { count: remainingGames },
+  } = sdkHooks.useGetRemainingGameSessions();
 
   const game = games[pregame.session.gameId];
 
@@ -32,6 +48,35 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
   const navigate = useNavigate();
+
+  if (remainingGames === 0) {
+    return (
+      <Box direction="col" layout="center center" full gap>
+        <H1>Game limit reached</H1>
+        <P>
+          Sorry, looks like you've reached your active game limit. You can't
+          join a new game until you finish or leave another.
+        </P>
+        <MaybeSuggestGold />
+        <Button asChild>
+          <Link to="/">View active games</Link>
+        </Button>
+        <Button
+          color="ghostDestructive"
+          onClick={async () => {
+            await respondToInviteMutation.mutateAsync({
+              response: 'declined',
+              id: myInvite.id,
+            });
+            toast('Invite declined');
+            navigate('/');
+          }}
+        >
+          Decline invite
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box direction="col" layout="center center" full gap>
@@ -79,6 +124,23 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
           Join
         </Button>
       </Box>
+    </Box>
+  );
+}
+
+function MaybeSuggestGold() {
+  const { data: me } = sdkHooks.useGetMe();
+  if (me?.isGoldMember) {
+    return null;
+  }
+  return (
+    <Box d="col" gap layout="center center">
+      <P>
+        Or, you can upgrade to Gold for up to{' '}
+        {MAX_ACTIVE_GAMES_BY_ENTITLEMENT[ENTITLEMENT_NAMES.EXTRA_GAME_SESSIONS]}{' '}
+        simultaneous games.
+      </P>
+      <GoldUpgrade />
     </Box>
   );
 }

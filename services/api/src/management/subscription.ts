@@ -223,7 +223,3 @@ function getEntitlementsAsMap(
   }
   return map;
 }
-
-export const ENTITLEMENT_NAMES = {
-  EXTRA_GAME_SESSIONS: 'extra-game-sessions',
-};

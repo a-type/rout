@@ -2,6 +2,7 @@ import {
   genericId,
   id,
   LongGameError,
+  MAX_ACTIVE_GAMES_BY_ENTITLEMENT,
   PlayerColorName,
   PrefixedId,
 } from '@long-game/common';
@@ -382,6 +383,14 @@ export class UserStore extends RpcTarget {
   // game sessions and invites
 
   async createGameSession() {
+    const canJoin = await this.canJoinGame();
+    if (!canJoin) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'You have reached your active game limit',
+      );
+    }
+
     const gameSessionId = id('gs');
     await this.#db
       .insertInto('GameSession')
@@ -482,6 +491,23 @@ export class UserStore extends RpcTarget {
         endCursor: endCursor ? this.#encodeCursor(endCursor) : null,
       },
     };
+  }
+
+  async countActiveGameSessions() {
+    const res = await this.#db
+      .selectFrom('GameSession')
+      .innerJoin(
+        'GameSessionInvitation',
+        'GameSessionInvitation.gameSessionId',
+        'GameSession.id',
+      )
+      .where('GameSessionInvitation.userId', '=', this.#userId)
+      .where('GameSessionInvitation.status', '=', 'accepted')
+      .where('GameSession.status', '=', 'active')
+      .select(this.#db.fn.count<number>('GameSession.id').as('count'))
+      .executeTakeFirstOrThrow();
+
+    return res.count ?? 0;
   }
 
   /**
@@ -677,6 +703,19 @@ export class UserStore extends RpcTarget {
       );
     }
 
+    // check that game is still pending
+    const gameSession = await this.#db
+      .selectFrom('GameSession')
+      .where('id', '=', link.gameSessionId)
+      .select(['status'])
+      .executeTakeFirstOrThrow();
+    if (gameSession.status !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot join a game that is already in progress',
+      );
+    }
+
     const membership = await this.#db
       .insertInto('GameSessionInvitation')
       .values({
@@ -699,6 +738,16 @@ export class UserStore extends RpcTarget {
     inviteId: PrefixedId<'gsi'>,
     response: 'accepted' | 'declined',
   ) {
+    if (response === 'accepted') {
+      const canJoin = await this.canJoinGame();
+      if (!canJoin) {
+        throw new LongGameError(
+          LongGameError.Code.Forbidden,
+          'You have reached your active game limit',
+        );
+      }
+    }
+
     const membership = await this.#db
       .selectFrom('GameSessionInvitation')
       .where('id', '=', inviteId)
@@ -717,6 +766,19 @@ export class UserStore extends RpcTarget {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Invite is not pending',
+      );
+    }
+
+    // check that game is still pending
+    const gameSession = await this.#db
+      .selectFrom('GameSession')
+      .where('id', '=', membership.gameSessionId)
+      .select(['status'])
+      .executeTakeFirstOrThrow();
+    if (gameSession.status !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot join a game that is already in progress',
       );
     }
 
@@ -991,5 +1053,31 @@ export class UserStore extends RpcTarget {
       .execute();
 
     return products.map((product) => product.id);
+  }
+
+  async getEntitlements() {
+    const user = await this.#db
+      .selectFrom('User')
+      .where('User.id', '=', this.#userId)
+      .select(['User.subscriptionEntitlements'])
+      .executeTakeFirstOrThrow();
+
+    return user.subscriptionEntitlements;
+  }
+
+  async getRemainingGameSessions() {
+    const entitlements = await this.getEntitlements();
+    const activeGameCount = await this.countActiveGameSessions();
+    const entitlementsToMaxes = Object.entries(entitlements)
+      .filter(([_, active]) => active)
+      .map(([name]) => MAX_ACTIVE_GAMES_BY_ENTITLEMENT[name] ?? 0);
+    const maxActiveGames = Math.max(
+      MAX_ACTIVE_GAMES_BY_ENTITLEMENT.FREE,
+      ...entitlementsToMaxes,
+    );
+    return Math.max(0, maxActiveGames - activeGameCount);
+  }
+  async canJoinGame() {
+    return (await this.getRemainingGameSessions()) > 0;
   }
 }

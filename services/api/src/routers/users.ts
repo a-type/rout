@@ -1,10 +1,14 @@
 import { zValidator } from '@hono/zod-validator';
-import { isPrefixedId, LongGameError, wrapRpcData } from '@long-game/common';
+import {
+  ENTITLEMENT_NAMES,
+  isPrefixedId,
+  LongGameError,
+  wrapRpcData,
+} from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { sessions } from '../auth/session';
 import { Env } from '../config/ctx';
-import { ENTITLEMENT_NAMES } from '../management/subscription';
 import { sessionMiddleware, userStoreMiddleware } from '../middleware';
 
 export const usersRouter = new Hono<Env>()

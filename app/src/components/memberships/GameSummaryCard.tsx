@@ -27,7 +27,7 @@ export const GameSummaryCard = withSuspense(function GameSummaryCard({
       <Card.Main asChild>
         <Link to={`/session/${summary.id}`}>
           <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
-          <Card.Content>
+          <Card.Content unstyled>
             <Suspense
               fallback={
                 <AvatarList count={1}>
