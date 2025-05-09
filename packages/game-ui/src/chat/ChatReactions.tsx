@@ -24,7 +24,7 @@ export const ChatReactions = withGame<ChatReactionsProps>(
         <Popover>
           <Popover.Trigger asChild>
             <Button size="icon-small" color="ghost" className="p-xs">
-              <Icon name="placeholder" />
+              <Icon name="smile" />
             </Button>
           </Popover.Trigger>
           <Popover.Content className="p-xs">
