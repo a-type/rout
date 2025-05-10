@@ -18,10 +18,12 @@ export async function notifyUser(
   const { push: sendPush, email: sendEmail } =
     notificationSettings[notification.type];
   if (sendPush) {
+    console.debug(`Sending push notification to user: ${userId}`);
     await sendPushToAllUserDevices(userId, notification, bindings);
   }
 
   if (sendEmail) {
+    console.debug(`Sending email notification to user: ${userId}`);
     const config = getNotificationConfig(notification);
     const user = await db.getUser(userId);
     if (!user) {

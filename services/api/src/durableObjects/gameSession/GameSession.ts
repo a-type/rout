@@ -974,6 +974,7 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
     const sessionData = await this.#getSessionData();
+    console.info(`Notifying player ${playerId} of turn`);
     await notifyUser(
       playerId,
       {
