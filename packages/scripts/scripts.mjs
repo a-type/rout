@@ -33,6 +33,7 @@ const commands = {
 
       const cwd = process.cwd();
       const distPath = path.resolve(cwd, relPath);
+      await fs.mkdir(distPath, { recursive: true });
       // await recursivelyAddUnoPrefixes(path.resolve(cwd, relPath));
       await fs.writeFile(
         path.resolve(distPath, 'uno.css.d.ts'),

@@ -10,7 +10,7 @@ import {
   createDb,
   hashPassword,
 } from '@long-game/kysely';
-import { AnyNotification } from '@long-game/notifications';
+import { AnyNotification, notificationTypes } from '@long-game/notifications';
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
 export class AdminStore extends WorkerEntrypoint<DbBindings> {
@@ -261,20 +261,15 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .select('notificationSettings')
       .executeTakeFirst();
 
-    return deepMerge<NotificationSettings>(user?.notificationSettings ?? {}, {
-      'turn-ready': {
-        push: false,
-        email: false,
-      },
-      'friend-invite': {
-        push: false,
-        email: false,
-      },
-      'game-invite': {
-        push: false,
-        email: false,
-      },
-    });
+    const defaults = notificationTypes.reduce((acc, key) => {
+      acc[key] = { email: false, push: false };
+      return acc;
+    }, {} as NotificationSettings);
+
+    return {
+      ...defaults,
+      ...(user?.notificationSettings ?? {}),
+    } as NotificationSettings;
   }
 
   async insertNotification(
@@ -473,15 +468,4 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
   async deleteGameSession(id: PrefixedId<'gs'>) {
     await this.#db.deleteFrom('GameSession').where('id', '=', id).execute();
   }
-}
-
-function deepMerge<T>(target: any, source: any): T {
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object') {
-      target[key] = deepMerge(target[key] || {}, source[key]);
-    } else {
-      target[key] = source[key];
-    }
-  }
-  return target;
 }
