@@ -684,7 +684,8 @@ export class GameSession extends DurableObject<ApiBindings> {
           await this.getCurrentRoundIndex(),
         );
     }
-    const result = await this.#sql.run(sql);
+    const result = await this.#sql.run(sql, { debug: true });
+    console.log(JSON.stringify(result)); // TODO: REMOVE THIS
     const messages = result.reverse().map((row) => {
       return this.#hydrateChatMessage(row);
     });
