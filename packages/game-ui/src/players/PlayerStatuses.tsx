@@ -13,9 +13,16 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
 
     const memberStatusList = gameSuite.members.map((member) => {
       return {
-        player: gameSuite.players[member.id],
-        status: gameSuite.playerStatuses[member.id],
-        hasPlayed: viewingRound?.turns.some(
+        player: gameSuite.players[member.id] ?? {
+          id: member.id,
+          name: 'Loading...',
+          color: 'gray',
+        },
+        status: gameSuite.playerStatuses[member.id] ?? {
+          online: false,
+          pendingTurn: false,
+        },
+        hasPlayed: !!viewingRound?.turns.some(
           (turn) => turn.playerId === member.id,
         ),
       };

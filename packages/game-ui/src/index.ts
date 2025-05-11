@@ -12,6 +12,7 @@ export * from './players/PlayerAvatar';
 export * from './players/PlayerName';
 export * from './players/PlayerStatuses';
 export * from './players/usePlayerThemed';
+export * from './tokens/index';
 export * from './turns/SubmitTurn';
 export * from './withSuspense';
 

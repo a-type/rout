@@ -50,6 +50,10 @@ EMAIL_FROM=noreply@rout.games
 UI_ORIGIN=http://localhost:3100
 API_ORIGIN=http://localhost:3101
 
+# removes some prod constraints, like game session limits and
+# private game state
+DEV_MODE=true
+
 # push notification keys
 VAPID_PUBLIC_KEY=${vapidKeys.publicKey}
 VAPID_PRIVATE_KEY=${vapidKeys.privateKey}

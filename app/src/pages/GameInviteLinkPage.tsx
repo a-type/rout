@@ -43,7 +43,10 @@ const GameInviteLinkPage = () => {
               Before we get started, you need to log in or create a profile.
             </P>
             <Button color="primary" asChild>
-              <Link to={`/login?returnTo=${location.href}`} preserveQuery>
+              <Link
+                to={`/login?tab=signup&returnTo=${location.href}`}
+                preserveQuery
+              >
                 Get started
               </Link>
             </Button>

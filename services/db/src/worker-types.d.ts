@@ -10,6 +10,7 @@ interface DbBindings {
   GOOGLE_AUTH_CLIENT_SECRET: string;
   AWS_ACCESS_KEY_ID: string;
   AWS_SECRET_ACCESS_KEY: string;
+  DEV_MODE: boolean;
   D1: D1Database;
   ADMIN_STORE: Service<import('./index.js').AdminStore>;
 }

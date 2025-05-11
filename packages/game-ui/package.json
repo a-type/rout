@@ -38,7 +38,11 @@
     "@types/three": "catalog:",
     "@verdant-web/react-router": "catalog:",
     "three": "catalog:",
-    "valtio": "catalog:"
+    "valtio": "catalog:",
+    "react-flip-toolkit": "catalog:",
+    "@dnd-kit/core": "catalog:",
+    "motion": "catalog:",
+    "@use-gesture/react": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

@@ -34,11 +34,12 @@ export class GameRandom {
    * item is guaranteed to be in a new position.
    */
   shuffle<T>(items: T[]) {
-    for (let i = items.length - 1; i > 0; i--) {
+    const copy = [...items]; // just be safe.
+    for (let i = copy.length - 1; i > 0; i--) {
       const j = this.int(0, i + 1);
-      [items[i], items[j]] = [items[j], items[i]];
+      [copy[i], copy[j]] = [copy[j], copy[i]];
     }
-    return items;
+    return copy;
   }
 
   __advance = (count = 1) => {

@@ -68,7 +68,7 @@ export type GameDefinition<
    */
   getInitialGlobalState: (data: {
     random: GameRandom;
-    members: { id: string }[];
+    members: { id: PrefixedId<'u'> }[];
   }) => GlobalState;
   /**
    * This is the player's view of the game state. It should be deterministically
@@ -76,8 +76,8 @@ export type GameDefinition<
    */
   getPlayerState: (data: {
     globalState: GlobalState;
-    playerId: string;
-    members: { id: string }[];
+    playerId: PrefixedId<'u'>;
+    members: { id: PrefixedId<'u'> }[];
     /**
      * All rounds which have been played. These are all reflected
      * in globalState, but are available for reference. If a current
@@ -96,7 +96,7 @@ export type GameDefinition<
     globalState: GlobalState;
     round: GameRound<Turn<TurnData>>;
     random: GameRandom;
-    members: { id: string }[];
+    members: { id: PrefixedId<'u'> }[];
     initialState: GlobalState;
     /** Prior rounds */
     rounds: GameRound<Turn<TurnData>>[];
@@ -122,7 +122,7 @@ export type GameDefinition<
   getPublicTurn: (data: {
     turn: Turn<TurnData>;
     globalState: GlobalState;
-    viewerId: string;
+    viewerId: PrefixedId<'u'>;
   }) => Turn<PublicTurnData>;
   /**
    * globalState is the computed current state. moves are provided
@@ -132,7 +132,7 @@ export type GameDefinition<
   getStatus: (data: {
     globalState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
-    members: { id: string }[];
+    members: { id: PrefixedId<'u'> }[];
   }) => GameStatus;
   /**
    * Games can determine how rounds are advanced. There are a few approaches...
@@ -209,7 +209,7 @@ export function getGameState(
   data: {
     rounds: GameRound<any>[];
     randomSeed: string;
-    members: { id: string }[];
+    members: { id: PrefixedId<'u'> }[];
   },
 ) {
   const random = new GameRandom(data.randomSeed);

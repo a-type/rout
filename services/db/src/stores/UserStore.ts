@@ -19,11 +19,13 @@ import { RpcTarget } from 'cloudflare:workers';
 export class UserStore extends RpcTarget {
   #userId: PrefixedId<'u'>;
   #db: DB;
+  #env;
 
-  constructor(userId: PrefixedId<'u'>, db: DB) {
+  constructor(userId: PrefixedId<'u'>, db: DB, env: DbBindings) {
     super();
     this.#userId = userId;
     this.#db = db;
+    this.#env = env;
   }
 
   async getSession() {
@@ -1066,6 +1068,9 @@ export class UserStore extends RpcTarget {
   }
 
   async getRemainingGameSessions() {
+    if (this.#env.DEV_MODE) {
+      return 100;
+    }
     const entitlements = await this.getEntitlements();
     const activeGameCount = await this.countActiveGameSessions();
     const entitlementsToMaxes = Object.entries(entitlements)

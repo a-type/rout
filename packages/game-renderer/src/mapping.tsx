@@ -7,19 +7,43 @@ import { ComponentType, lazy, LazyExoticComponent } from 'react';
 const moduleMap = {
   ['number-guess']: {
     main: () => import('@long-game/game-number-guess-renderer'),
-    css: () => import('@long-game/game-number-guess-renderer/css.css'),
+    css: () =>
+      import('@long-game/game-number-guess-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for number-guess');
+        return { default: () => null };
+      }),
   },
   territory: {
     main: () => import('@long-game/game-territory-renderer'),
-    css: () => import('@long-game/game-territory-renderer/css.css'),
+    css: () =>
+      import('@long-game/game-territory-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for territory');
+        return { default: () => null };
+      }),
   },
   scribble: {
     main: () => import('@long-game/game-scribble-renderer'),
-    css: () => import('@long-game/game-scribble-renderer/css.css'),
+    css: () =>
+      import('@long-game/game-scribble-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for scribble');
+        return { default: () => null };
+      }),
   },
   gudnak: {
     main: () => import('@long-game/game-gudnak-renderer'),
-    css: () => import('@long-game/game-gudnak-renderer/css.css'),
+    css: () =>
+      import('@long-game/game-gudnak-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for gudnak');
+        return { default: () => null };
+      }),
+  },
+  hearts: {
+    main: () => import('@long-game/game-hearts-renderer'),
+    css: () =>
+      import('@long-game/game-hearts-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for hearts');
+        return { default: () => null };
+      }),
   },
 };
 

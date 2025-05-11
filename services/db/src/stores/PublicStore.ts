@@ -18,7 +18,7 @@ export class PublicStore extends WorkerEntrypoint<DbBindings> {
   }
 
   async getStoreForUser(userId: PrefixedId<'u'>) {
-    return new UserStore(userId, this.#db);
+    return new UserStore(userId, this.#db, this.env);
   }
 
   async getPublicFriendInvite(inviteId: PrefixedId<'fi'>) {

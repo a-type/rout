@@ -1,3 +1,4 @@
+import hearts from '@long-game/game-hearts-definition';
 import { GameModule } from '@long-game/game-definition';
 import gudnak from '@long-game/game-gudnak-definition';
 import numberGuess from '@long-game/game-number-guess-definition';
@@ -9,6 +10,7 @@ const games: Record<string, GameModule> = {
   [territory.id]: territory,
   [gudnak.id]: gudnak,
   [scribble.id]: scribble,
+  [hearts.id]: hearts,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 
