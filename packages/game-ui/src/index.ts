@@ -14,6 +14,7 @@ export * from './players/PlayerStatuses';
 export * from './players/usePlayerThemed';
 export * from './tokens/index';
 export * from './turns/SubmitTurn';
+export * from './turns/TurnError';
 export * from './withSuspense';
 
 export * from '@a-type/react-space';

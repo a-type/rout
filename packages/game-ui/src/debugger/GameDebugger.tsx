@@ -19,6 +19,8 @@ import {
 } from '@long-game/game-client';
 import { Suspense, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { PlayerAvatar } from '../players/PlayerAvatar';
+import { PlayerName } from '../players/PlayerName';
 
 export interface GameDebuggerProps extends ButtonProps {}
 
@@ -124,6 +126,18 @@ const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
           Reset Game
         </ActionButton>
       </ActionBar>
+
+      <Box gap wrap items="center">
+        {gameSuite.members.map((member) => (
+          <Box key={member.id} d="col" items="center">
+            <Suspense>
+              <PlayerAvatar playerId={member.id} size="60px" />
+              <PlayerName playerId={member.id} />
+              <div>{member.id}</div>
+            </Suspense>
+          </Box>
+        ))}
+      </Box>
 
       <Tabs defaultValue="globalState">
         <Tabs.List>

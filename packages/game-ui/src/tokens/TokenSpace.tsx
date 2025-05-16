@@ -18,7 +18,7 @@ export function TokenSpace({
   disabled,
   className,
 }: TokenSpaceProps) {
-  const { isOver } = useDroppable({
+  const { isOver, setNodeRef } = useDroppable({
     id,
     disabled,
     data: {
@@ -28,6 +28,7 @@ export function TokenSpace({
 
   useDndMonitor({
     onDragEnd(event) {
+      console.log(event);
       if (event.over?.id === id && isToken(event.active.data.current)) {
         const token = event.active.data.current;
         onDrop?.(token);
@@ -36,7 +37,12 @@ export function TokenSpace({
   });
 
   return (
-    <div id={id} className={clsx('relative', className)} data-over={isOver}>
+    <div
+      id={id}
+      className={clsx('relative', className)}
+      data-over={isOver}
+      ref={setNodeRef}
+    >
       {children}
     </div>
   );

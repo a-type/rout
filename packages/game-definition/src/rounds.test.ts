@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RoundIndexDecider } from './gameDefinition.js';
-import { getPeriodStart, roundFormat } from './rounds.js';
+import { getPeriodStart, roundFormat, RoundIndexDecider } from './rounds.js';
 
 describe('game round helpers', () => {
   describe('get period start', () => {
@@ -284,7 +283,7 @@ describe('game round helpers', () => {
     describe('with instant transition', () => {
       it('returns round 0 when no turns have been played', () => {
         expect(
-          roundFormat.sync({ advancementDelayMs: 0 })({
+          roundFormat.sync()({
             globalState: {},
             currentTime: new Date('2024-01-14T21:00:00Z'),
             gameTimeZone: 'America/New_York',
@@ -310,7 +309,7 @@ describe('game round helpers', () => {
 
       it('returns round 1 when all players made 1 turn, and some have 2', () => {
         expect(
-          roundFormat.sync({ advancementDelayMs: 0 })({
+          roundFormat.sync()({
             globalState: {},
             currentTime: new Date('2024-01-14T21:00:00Z'),
             gameTimeZone: 'America/New_York',
@@ -357,7 +356,7 @@ describe('game round helpers', () => {
   describe('with delayed transition', () => {
     it('returns round 0 when no turns have been played', () => {
       expect(
-        roundFormat.sync({ advancementDelayMs: 10000 })({
+        roundFormat.delayedAdvance(10_000)(roundFormat.sync())({
           globalState: {},
           currentTime: new Date('2024-01-14T21:00:00Z'),
           gameTimeZone: 'America/New_York',
@@ -383,7 +382,7 @@ describe('game round helpers', () => {
 
     it('returns round 1 when all players made 1 turn, and some have 2, and time is beyond advancement delay', () => {
       expect(
-        roundFormat.sync({ advancementDelayMs: 10000 })({
+        roundFormat.delayedAdvance(10_000)(roundFormat.sync())({
           globalState: {},
           currentTime: new Date('2024-01-14T21:00:00Z'),
           gameTimeZone: 'America/New_York',
@@ -428,7 +427,7 @@ describe('game round helpers', () => {
 
     it('returns round 0 with a check again when all players have made 1 turn but time has not advanced past delay', () => {
       expect(
-        roundFormat.sync({ advancementDelayMs: 10000 })({
+        roundFormat.delayedAdvance(10_000)(roundFormat.sync())({
           globalState: {},
           currentTime: new Date('2024-01-13T20:00:01Z'),
           gameTimeZone: 'America/New_York',

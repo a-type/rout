@@ -605,12 +605,15 @@ export class GameSession extends DurableObject<ApiBindings> {
       })
       .onConflict((oc) => oc.column('id').doNothing());
     await this.#sql.run(query);
-    this.#socketHandler.send({
-      type: 'chat',
-      messages: [message],
-    }, {
-      to: message.recipientIds,
-    });
+    this.#socketHandler.send(
+      {
+        type: 'chat',
+        messages: [message],
+      },
+      {
+        to: message.recipientIds,
+      },
+    );
   }
   #encodeChatPageToken(createdAt: string): string {
     return Buffer.from(createdAt).toString('base64');
@@ -996,6 +999,7 @@ export class GameSession extends DurableObject<ApiBindings> {
    */
   #checkForRoundChange = async () => {
     const roundState = await this.#getCurrentRoundState();
+    console.log(`Round state: ${JSON.stringify(roundState)}`);
     let notifications = await this.#getRoundState();
     if (roundState.roundIndex !== notifications.roundIndex) {
       // round index is out of date, reset

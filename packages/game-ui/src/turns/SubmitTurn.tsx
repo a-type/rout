@@ -45,7 +45,7 @@ export const SubmitTurn = withSuspense(
             onClick={() => submitTurn()}
           >
             {children ??
-              (turnWasSubmitted && nextRoundCheckAt ? (
+              (!canSubmitTurn && turnWasSubmitted && nextRoundCheckAt ? (
                 <>
                   <span>Next:</span>
                   <RelativeTime

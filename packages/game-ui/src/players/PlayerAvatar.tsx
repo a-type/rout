@@ -12,7 +12,7 @@ import { usePlayerThemed } from './usePlayerThemed';
 export interface PlayerAvatarProps {
   playerId?: PrefixedId<'u'> | SystemChatAuthorId;
   className?: string;
-  size?: number;
+  size?: number | string;
 }
 
 export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
@@ -55,7 +55,6 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
         style={{
           ...style,
           width: size ?? 24,
-          height: size ?? 24,
         }}
         className={clsx(
           'flex-shrink-0 aspect-1',

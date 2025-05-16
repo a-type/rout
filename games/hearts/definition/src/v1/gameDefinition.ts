@@ -1,9 +1,7 @@
 import { PrefixedId } from '@long-game/common';
-import {
-  GameDefinition,
-  GameRandom,
-  roundFormat,
-} from '@long-game/game-definition';
+import { GameDefinition, GameRandom } from '@long-game/game-definition';
+import { getDraftingRound, getRoundIndex } from './rounds';
+import { getCurrentPlayer, getDealStartCard, getTrickLeader } from './tricks';
 
 export type Card = `${CardRank}${CardSuit}`;
 export const suits = ['h', 'd', 's', 'c'] as const;
@@ -44,8 +42,21 @@ export function getCardRank(card: Card): number {
   return parseInt(rank, 10);
 }
 
+export function getCardDisplayRank(card: Card): string {
+  const rank = card.slice(0, -1);
+  return rank.toUpperCase();
+}
+
 export function getCardSuit(card: Card): 'h' | 'd' | 's' | 'c' {
   return card.slice(-1) as any;
+}
+
+export function getCardColor(card: Card): 'red' | 'black' {
+  const suit = getCardSuit(card);
+  if (suit === 'h' || suit === 'd') {
+    return 'red';
+  }
+  return 'black';
 }
 
 export function isScoringCard(card: Card): boolean {
@@ -104,21 +115,6 @@ function shuffleHands({
   );
 }
 
-function findInitialLeadingPlayer(hands: Record<PrefixedId<'u'>, Card[]>) {
-  // 5 player variant - 2 of clubs was removed from deck, use 3 instead
-  let soughtCard: Card = '2c';
-  if (Object.keys(hands).length === 5) {
-    soughtCard = '3c';
-  }
-  const playerId = Object.entries(hands).find(([_, hand]) =>
-    hand.includes(soughtCard),
-  )?.[0];
-  if (!playerId) {
-    throw new Error('No player has the 2 of clubs');
-  }
-  return playerId as PrefixedId<'u'>;
-}
-
 function makeEmptyScoredCards(ids: PrefixedId<'u'>[]) {
   return Object.fromEntries(ids.map((id) => [id, [] as Card[]]));
 }
@@ -142,7 +138,6 @@ export type GlobalState = {
   currentTrick: PlayedCard[];
   playerOrder: PrefixedId<'u'>[];
   scores: Record<PrefixedId<'u'>, number>;
-  leadPlayerId: PrefixedId<'u'>;
   lastCompletedTrick?: TakenTrick;
 };
 
@@ -152,15 +147,23 @@ export type PlayerState = Pick<
   | 'currentTrick'
   | 'lastCompletedTrick'
   | 'playerOrder'
-  | 'leadPlayerId'
   | 'scores'
 > & {
   hand: Card[];
+  leadPlayerId: PrefixedId<'u'>;
+  task: 'play' | 'draft' | null;
 };
 
-export type TurnData = {
-  card: Card;
-};
+export type PlayTurnData = { card: Card };
+export type PassTurnData = { pass: Card[] };
+export type TurnData = PlayTurnData | PassTurnData;
+
+export function isPlayTurn(data: TurnData): data is PlayTurnData {
+  return (data as PlayTurnData).card !== undefined;
+}
+export function isPassTurn(data: TurnData): data is PassTurnData {
+  return (data as PassTurnData).pass !== undefined;
+}
 
 export const gameDefinition: GameDefinition<
   GlobalState,
@@ -171,25 +174,64 @@ export const gameDefinition: GameDefinition<
   version: 'v1.0',
   minimumPlayers: 3,
   maximumPlayers: 5,
-  getRoundIndex: roundFormat.sync(),
+  getRoundIndex,
   // run on both client and server
 
   validateTurn: ({ playerState, turn, roundIndex, members }) => {
+    // drafting rounds -- turns are very different (it's a list of cards to pass
+    // to another player)
+    if (getDraftingRound(members.length, roundIndex) !== null) {
+      if (!isPassTurn(turn.data)) {
+        return 'You must pass cards to another player.';
+      }
+      // all passed cards must be in the player's hand
+      const passedCards = turn.data.pass;
+      if (passedCards.length !== 3) {
+        return `You must pass 3 cards.`;
+      }
+      if (passedCards.some((card) => !isCard(card))) {
+        return `You must pass valid cards.`;
+      }
+      if (passedCards.some((card) => !playerState.hand.includes(card))) {
+        return `You cannot pass cards that are not in your hand.`;
+      }
+      // all passed cards must be unique
+      const uniqueCards = new Set(passedCards);
+      if (uniqueCards.size !== passedCards.length) {
+        return `You cannot pass duplicate cards.`;
+      }
+
+      // that's all for drafting
+      return;
+    }
+
+    if (!isPlayTurn(turn.data)) {
+      return 'You must play a card.';
+    }
+
     // return error string if the moves are invalid
 
     // if this is the very first round:
     // the player with 2 of clubs must play the 2 of clubs
-    if (roundIndex === 0) {
-      if (playerState.hand.includes('2c')) {
-        if (turn.data.card !== '2c') {
-          return 'You must play the 2 of clubs to begin the game.';
+    if (
+      playerState.currentTrick.length === 0 &&
+      !playerState.lastCompletedTrick
+    ) {
+      const soughtCard = getDealStartCard(members.length);
+      const soughtCardRank = getCardDisplayRank(soughtCard);
+      const soughtCardSuit = getCardSuit(soughtCard);
+      if (playerState.hand.includes(soughtCard)) {
+        if (turn.data.card !== soughtCard) {
+          return `You must play the ${soughtCardRank} of ${soughtCardSuit} to begin the trick.`;
         }
       } else {
-        return `It's not your turn.`;
+        return `The player with the ${soughtCardRank} of ${soughtCardSuit} must begin the trick.`;
       }
     } else {
       // if this is not the first round, play proceeds in player order
       // starting from the player who won the last trick
+      // (note: can't use ./tricks#getCurrentPlayer here because
+      // player-available state doesn't have required information)
       const playerOrder = playerState.playerOrder;
       const leadPlayerId = playerState.leadPlayerId;
       const startPlayerIndex = playerOrder.indexOf(leadPlayerId);
@@ -259,13 +301,21 @@ export const gameDefinition: GameDefinition<
   // run on client
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+    const turn = prospectiveTurn.data;
+    if (isPassTurn(turn)) {
+      return {
+        ...playerState,
+        hand: playerState.hand.filter((card) => !turn.pass.includes(card)),
+      };
+    }
+
     return {
       ...playerState,
       currentTrick: [
         ...playerState.currentTrick,
         {
           playerId: prospectiveTurn.playerId,
-          card: prospectiveTurn.data.card,
+          card: turn.card,
         },
       ],
     };
@@ -290,8 +340,6 @@ export const gameDefinition: GameDefinition<
     const shuffledPlayers = random.shuffle(members.map((member) => member.id));
     const globalState: GlobalState = {
       hands,
-      // find player with 2 of clubs
-      leadPlayerId: findInitialLeadingPlayer(hands),
       currentTrick: [],
       playerOrder: shuffledPlayers,
       scoredCards: makeEmptyScoredCards(shuffledPlayers),
@@ -303,26 +351,81 @@ export const gameDefinition: GameDefinition<
     return globalState;
   },
 
-  getPlayerState: ({ globalState, playerId }) => {
+  getPlayerState: ({ globalState, roundIndex, playerId }) => {
+    // if this is not a drafting round and we're not the active player,
+    // return null for task.
+    const task =
+      getDraftingRound(globalState.playerOrder.length, roundIndex) !== null
+        ? 'draft'
+        : getCurrentPlayer(globalState) === playerId
+        ? 'play'
+        : null;
     return {
       playerOrder: globalState.playerOrder,
       currentTrick: globalState.currentTrick,
       hand: globalState.hands[playerId],
-      leadPlayerId: globalState.leadPlayerId,
+      leadPlayerId: getTrickLeader(globalState),
       scoredCards: globalState.scoredCards,
       scores: globalState.scores,
       lastCompletedTrick: globalState.lastCompletedTrick,
+      task,
     };
   },
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
-    // only 1 turn per round in this game.
+    if (round.turns.every((t) => isPassTurn(t.data))) {
+      // this is a drafting round. for each player, we pass
+      // the provided cards to the target player. target player
+      // changes based on which draft round this is.
+      const draftingRoundIndex = getDraftingRound(
+        members.length,
+        round.roundIndex,
+      );
+      if (draftingRoundIndex === null) {
+        // something is wrong...
+        throw new Error('Drafting round index is null');
+      }
+
+      const newHands = { ...globalState.hands };
+      // which player you pass to is based on the drafting round,
+      // player order, and your position in that order.
+      const playerOrderOffset = (1 + draftingRoundIndex) % (members.length - 1);
+      for (const turn of round.turns) {
+        if (!isPassTurn(turn.data)) {
+          throw new Error('Expected pass turn');
+        }
+        const playerId = turn.playerId;
+        const myIndex = globalState.playerOrder.indexOf(playerId);
+        const targetPlayerIndex =
+          (myIndex + playerOrderOffset) % members.length;
+        const targetPlayerId = globalState.playerOrder[targetPlayerIndex];
+        // remove passed cards from my hand
+        const passedCards = turn.data.pass;
+        const myHand = newHands[playerId];
+        // pass the cards to the target player
+        newHands[playerId] = myHand.filter(
+          (card) => !passedCards.includes(card),
+        );
+        const targetPlayerHand = newHands[targetPlayerId];
+        newHands[targetPlayerId] = [...targetPlayerHand, ...passedCards];
+      }
+      return {
+        ...globalState,
+        hands: newHands,
+      };
+    }
+
+    // rest of this is play rounds
+
+    // only 1 turn per round in play rounds
     const turn = round.turns[0]!;
+
+    const turnData = turn.data as PlayTurnData;
 
     // go ahead and remove the played card from the player's hand
     const playerId = turn.playerId;
     const playerHand = globalState.hands[playerId];
-    const cardPlayed = turn.data.card;
+    const cardPlayed = turnData.card;
     const newPlayerHand = playerHand.filter((card) => card !== cardPlayed);
     let newHands: Record<PrefixedId<'u'>, Card[]> = {
       ...globalState.hands,
@@ -332,7 +435,7 @@ export const gameDefinition: GameDefinition<
     const currentTrick = globalState.currentTrick;
     const currentTrickWithPlay = [
       ...currentTrick,
-      { playerId: turn.playerId, card: turn.data.card },
+      { playerId: turn.playerId, card: turnData.card },
     ];
 
     // is the trick complete?
@@ -376,7 +479,7 @@ export const gameDefinition: GameDefinition<
         return {
           currentTrick: [],
           hands: newHands,
-          leadPlayerId: findInitialLeadingPlayer(newHands),
+          leadPlayerId: getTrickLeader({ hands: newHands, currentTrick: [] }),
           playerOrder: globalState.playerOrder,
           scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
           scores,

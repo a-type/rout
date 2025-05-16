@@ -4,6 +4,7 @@ import {
   GameSessionChatMessage,
   GameSessionPlayerStatus,
   GameStatus,
+  isPrefixedId,
   LongGameError,
   PlayerColorName,
   PrefixedId,
@@ -411,7 +412,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @action prepareTurn = (
     turn:
       | GetTurnData<TGame>
-      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
+      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>)
+      | null,
   ) => {
     if (typeof turn === 'function') {
       this.localTurnData = (turn as any)(this.localTurnData ?? null);
@@ -612,6 +614,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     // the current round
     if (this.viewingRoundIndex === msg.completedRound.roundIndex) {
       this.viewingRoundIndex = msg.newRound.roundIndex;
+    }
+
+    // update player statuses
+    for (const [id, status] of Object.entries(msg.playerStatuses)) {
+      if (status && isPrefixedId(id, 'u')) {
+        this.playerStatuses[id] = status;
+      }
     }
 
     this.#events.emit('roundChanged');

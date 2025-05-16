@@ -4,7 +4,50 @@
 
 import { PrefixedId, withTimezone } from '@long-game/common';
 import add from 'date-fns/esm/add';
-import { RoundIndexDecider } from './gameDefinition.js';
+import { BaseTurnData, Turn } from './gameDefinition.js';
+
+export interface RoundIndexContext<
+  GlobalState = unknown,
+  TurnData extends BaseTurnData = BaseTurnData,
+> {
+  turns: Turn<TurnData>[];
+  /**
+   * Membership information is limited to things that might be
+   * useful for determining round index. Try to keep this light.
+   */
+  members: { id: PrefixedId<'u'> }[];
+  startedAt: Date;
+  currentTime: Date;
+  gameTimeZone: string;
+  globalState: GlobalState;
+  environment: 'production' | 'development';
+}
+
+export type RoundIndexDecider<GlobalState, TurnData extends BaseTurnData> = (
+  data: RoundIndexContext<GlobalState, TurnData>,
+) => RoundIndexResult;
+export interface RoundIndexResult {
+  roundIndex: number;
+  /**
+   * Which players can and should submit a turn.
+   * Note that for non-concurrent turn-based games,
+   * this should be the 'hotseat' player only. For
+   * concurrent turn-based games, this should
+   * be all players who have not yet submitted a turn,
+   * but not include players who have already submitted
+   * a turn. For free-play games, this should either
+   * be like concurrent, or just all players (doesn't matter
+   * much).
+   */
+  pendingTurns: PrefixedId<'u'>[];
+  /**
+   * When the system should check the round again,
+   * regardless of change to game state. Use for
+   * scheduled round advancement which does not depend
+   * on played turns.
+   */
+  checkAgainAt?: Date | null;
+}
 
 export type PeriodType = 'days' | 'hours' | 'minutes';
 
@@ -143,9 +186,7 @@ function periodicRounds(
         (turn) => turn.roundIndex === roundIndex - 1,
       ).length;
       if (lastRoundTurnsCount < members.length) {
-        return syncRounds({
-          advancementDelayMs,
-        })(data);
+        return delayedRounds(advancementDelayMs)(syncRounds())(data);
       }
     }
 
@@ -171,44 +212,22 @@ function periodicRounds(
   };
 }
 
-function syncRounds(
-  { advancementDelayMs }: { advancementDelayMs?: number } = {
-    advancementDelayMs: 10_000,
-  },
-): RoundIndexDecider<any, any> {
-  return ({ turns, members, currentTime }) => {
+export function maxRoundFromTurns(turns: Turn<any>[]) {
+  return turns.reduce((max, turn) => {
+    return Math.max(max, turn.roundIndex);
+  }, 0);
+}
+
+function syncRounds(): RoundIndexDecider<any, any> {
+  return ({ turns, members }) => {
     // rounds advance when all members have played a turn
-    const maxRoundIndex = turns.reduce((max, turn) => {
-      return Math.max(max, turn.roundIndex);
-    }, 0);
+    const maxRoundIndex = maxRoundFromTurns(turns);
 
     // are the number of turns in the last round equal to the number of members?
     const lastRoundTurns = turns.filter(
       (turn) => turn.roundIndex === maxRoundIndex,
     );
     if (lastRoundTurns.length === members.length) {
-      if (advancementDelayMs) {
-        // if the last round is full, we need to wait for the advancement delay
-        // before we can advance to the next round
-        const lastTurnTime = latestTurnInRound({
-          turns,
-          roundIndex: maxRoundIndex,
-        });
-        // need to wait to advance to the next round
-        if (
-          lastTurnTime !== undefined &&
-          currentTime.getTime() - lastTurnTime.getTime() < advancementDelayMs
-        ) {
-          return {
-            roundIndex: maxRoundIndex,
-            pendingTurns: [],
-            checkAgainAt: add(lastTurnTime, {
-              seconds: advancementDelayMs / 1000,
-            }),
-          };
-        }
-      }
-
       return {
         roundIndex: maxRoundIndex + 1,
         pendingTurns: notPlayedThisRound({
@@ -229,6 +248,8 @@ function syncRounds(
   };
 }
 
+// Utilities
+
 function perEnvironment({
   production,
   development,
@@ -244,8 +265,42 @@ function perEnvironment({
   };
 }
 
+function delayedRounds(advancementDelayMs: number = 10_000) {
+  return (roundDecider: RoundIndexDecider<any, any>) => {
+    if (advancementDelayMs <= 0) return roundDecider;
+    return (ctx: RoundIndexContext<any, any>) => {
+      // compute the naive round index. if the prior played round is within the
+      // delay envelope, return a check-again instead.
+      const maxRound = maxRoundFromTurns(ctx.turns);
+      const lastTurnTime = latestTurnInRound({
+        turns: ctx.turns,
+        roundIndex: maxRound,
+      });
+      const isLastTurnTimeWithinDelay =
+        lastTurnTime &&
+        lastTurnTime.getTime() + advancementDelayMs > ctx.currentTime.getTime();
+      const newState = roundDecider(ctx);
+
+      // round has advanced according to the underlying logic, but delay is not yet over
+      if (newState.roundIndex > maxRound && isLastTurnTimeWithinDelay) {
+        return {
+          roundIndex: maxRound,
+          pendingTurns: [],
+          checkAgainAt: add(lastTurnTime, {
+            seconds: advancementDelayMs / 1000,
+          }),
+        };
+      }
+
+      // not within delay - return the underlying answer
+      return newState;
+    };
+  };
+}
+
 export const roundFormat = {
   periodic: periodicRounds,
   sync: syncRounds,
   perEnvironment,
+  delayedAdvance: delayedRounds,
 };
