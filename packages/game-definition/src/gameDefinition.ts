@@ -22,6 +22,10 @@ export interface Turn<TurnData extends BaseTurnData>
 
 export type SystemChatMessage = Omit<GameSessionChatInit, 'roundIndex'>;
 
+export type GameMember = {
+  id: PrefixedId<'u'>;
+};
+
 export type GameDefinition<
   GlobalState = any,
   PlayerState = any,
@@ -41,7 +45,7 @@ export type GameDefinition<
     playerState: PlayerState;
     turn: LocalTurn<TurnData>;
     roundIndex: number;
-    members: { id: string }[];
+    members: GameMember[];
   }) => string | void;
   /**
    * Returns the player state as it would be if the player made the move.
@@ -69,7 +73,7 @@ export type GameDefinition<
    */
   getInitialGlobalState: (data: {
     random: GameRandom;
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
   }) => GlobalState;
   /**
    * This is the player's view of the game state. It should be deterministically
@@ -78,7 +82,7 @@ export type GameDefinition<
   getPlayerState: (data: {
     globalState: GlobalState;
     playerId: PrefixedId<'u'>;
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
     /**
      * All rounds which have been played. These are all reflected
      * in globalState, but are available for reference. If a current
@@ -97,7 +101,7 @@ export type GameDefinition<
     globalState: GlobalState;
     round: GameRound<Turn<TurnData>>;
     random: GameRandom;
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
     initialState: GlobalState;
     /** Prior rounds */
     rounds: GameRound<Turn<TurnData>>[];
@@ -133,7 +137,7 @@ export type GameDefinition<
   getStatus: (data: {
     globalState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
   }) => GameStatus;
   /**
    * Games can determine how rounds are advanced. There are a few approaches...
@@ -151,7 +155,7 @@ export type GameDefinition<
   getRoundChangeMessages?: (data: {
     globalState: GlobalState;
     rounds: GameRound<Turn<TurnData>>[];
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
     roundIndex: number;
     newRound: GameRound<Turn<TurnData>>;
     completedRound: GameRound<Turn<TurnData>> | null;
@@ -171,7 +175,7 @@ export function getGameState(
   data: {
     rounds: GameRound<any>[];
     randomSeed: string;
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
   },
 ) {
   const random = new GameRandom(data.randomSeed);

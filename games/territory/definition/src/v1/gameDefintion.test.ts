@@ -1,10 +1,10 @@
-import { GameRandom } from '@long-game/game-definition';
+import { GameMember, GameRandom } from '@long-game/game-definition';
 import { expect, it } from 'vitest';
 import { gameDefinition, GlobalState } from './gameDefinition.js';
 
 it('applies non-battle placements', () => {
   const random = new GameRandom('seed');
-  const members = [{ id: 'u-1' }, { id: 'u-2' }];
+  const members: GameMember[] = [{ id: 'u-1' }, { id: 'u-2' }];
   const newState = gameDefinition.getState!({
     initialState: gameDefinition.getInitialGlobalState({ members, random }),
     members,

@@ -97,7 +97,7 @@ function shuffleHands({
   const shuffledDeck = random.shuffle(deck);
   // 3 player variant - 1 card that's not the 2 of clubs randomly removed
   if (members.length === 3) {
-    if (shuffledDeck.at(-1) !== '2c') {
+    if (shuffledDeck[shuffledDeck.length - 1] !== '2c') {
       shuffledDeck.pop();
     } else {
       // arbitrary.
@@ -311,6 +311,7 @@ export const gameDefinition: GameDefinition<
 
     return {
       ...playerState,
+      hand: playerState.hand.filter((card) => card !== turn.card),
       currentTrick: [
         ...playerState.currentTrick,
         {

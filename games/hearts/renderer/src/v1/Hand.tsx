@@ -1,4 +1,3 @@
-import { Box } from '@a-type/ui';
 import { isPassTurn } from '@long-game/game-hearts-definition/v1';
 import { TokenSpace } from '@long-game/game-ui';
 import { Card } from './Card';
@@ -40,7 +39,6 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
         {hand.map((card) => (
           <Card key={card} id={card} disabled={disabled} />
         ))}
-        {disabled && <Box>It's not your turn</Box>}
       </TokenSpace>
     </CardGrid>
   );
