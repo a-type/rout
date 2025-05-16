@@ -1,4 +1,4 @@
-import { Box, withClassName, withProps } from '@a-type/ui';
+import { Box, Icon, IconName, withClassName, withProps } from '@a-type/ui';
 import {
   Card as CardVal,
   getCardColor,
@@ -11,13 +11,26 @@ export interface CardProps extends Omit<TokenProps, 'id'> {
   id: CardVal;
 }
 
+const suitToIcon: Record<string, IconName> = {
+  h: 'suitHeart',
+  d: 'suitDiamond',
+  c: 'suitClub',
+  s: 'suitSpade',
+};
+
 export function Card({ id, ...rest }: CardProps) {
   return (
     <CardRoot asChild data-color={getCardColor(id)}>
       <Token id={id} {...rest}>
         <Box className="flex flex-col items-center justify-center h-full m-auto text-xl">
           <Box className="font-bold">{getCardDisplayRank(id)}</Box>
-          <Box className="text-gray-dark">{getCardSuit(id)}</Box>
+          <Box>
+            <Icon
+              name={suitToIcon[getCardSuit(id)]}
+              size={80}
+              className="stroke-width-1px"
+            />
+          </Box>
         </Box>
       </Token>
     </CardRoot>
