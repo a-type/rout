@@ -327,7 +327,13 @@ export const gameDefinition: GameDefinition<
       currentTrick: globalState.currentTrick,
       hand: globalState.hands[playerId],
       leadPlayerId: getTrickLeader(globalState),
-      scoredCards: globalState.scoredCards,
+      // players can only see scored cards that have points associated
+      scoredCards: Object.fromEntries(
+        Object.entries(globalState.scoredCards).map(([id, cards]) => [
+          id,
+          cards.filter((card) => isScoringCard(card)),
+        ]),
+      ),
       scores: globalState.scores,
       lastCompletedTrick: globalState.lastCompletedTrick,
       task,
@@ -518,13 +524,10 @@ export const gameDefinition: GameDefinition<
         (round) =>
           isPlayTurn(round.data) && getCardSuit(round.data.card) === 'h',
       );
-      const heartPreviouslyPlayed = data.rounds
-        .slice(0, -1)
-        .flatMap((round) => round.turns)
-        .some(
-          (round) =>
-            isPlayTurn(round.data) && getCardSuit(round.data.card) === 'h',
-        );
+      // fixme: should only start from last deal
+      const heartPreviouslyPlayed = Object.values(data.globalState.scoredCards)
+        .flat()
+        .some((card) => getCardSuit(card) === 'h');
       const qsPlayedTurn = data.completedRound.turns.find(
         (round) => isPlayTurn(round.data) && round.data.card === 'qs',
       );
@@ -550,8 +553,10 @@ export const gameDefinition: GameDefinition<
 
     // for 3 / 5 player games, tell players which cards were removed on the
     // drafting round
-    const isDraftingRound =
-      getDraftingRound(data.members.length, data.roundIndex) !== null;
+    const isDraftingRound = getDraftingRound(
+      data.members.length,
+      data.roundIndex,
+    ).isNewDeal;
 
     // if this is a new deal, say so
     if (data.globalState.lastCompletedTrick === undefined && isDraftingRound) {
@@ -579,7 +584,7 @@ export const gameDefinition: GameDefinition<
         )
         .join(', ');
       messages.push({
-        content: `The following cards were removed from the deck for this deal: ${removedCardsString}`,
+        content: `The following cards were removed from the deck for ${data.members.length} players: ${removedCardsString}`,
         metadata: {
           type: 'removed-cards',
           removedCards,
