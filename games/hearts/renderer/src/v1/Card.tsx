@@ -20,15 +20,15 @@ const suitToIcon: Record<string, IconName> = {
 
 export function Card({ id, ...rest }: CardProps) {
   return (
-    <CardRoot asChild data-color={getCardColor(id)}>
-      <Token id={id} {...rest}>
+    <CardRoot asChild>
+      <Token id={id} {...rest} data-color={getCardColor(id)}>
         <Box className="flex flex-col items-center justify-center h-full m-auto text-xl">
           <Box className="font-bold">{getCardDisplayRank(id)}</Box>
           <Box>
             <Icon
               name={suitToIcon[getCardSuit(id)]}
               size={80}
-              className="stroke-width-1px"
+              className="stroke-width-1px [vector-effect:non-scaling-stroke]"
             />
           </Box>
         </Box>
@@ -50,7 +50,7 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
 }
 
 const CardRoot = withClassName(
-  withProps(Box, { surface: 'wash', border: true }),
+  withProps(Box, { surface: 'default', border: true }),
   'aspect-[3/4] flex-1 h-auto min-w-100px select-none',
   '[&:not([data-disabled=true])]:(hover:cursor-grab)',
   '[&[data-color=black]]:(color-black)',

@@ -11,7 +11,14 @@ export interface TokenProps<Data = unknown> {
   disabled?: boolean;
 }
 
-export function Token({ children, id, data, className, disabled }: TokenProps) {
+export function Token({
+  children,
+  id,
+  data,
+  className,
+  disabled,
+  ...rest
+}: TokenProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id,
@@ -32,6 +39,7 @@ export function Token({ children, id, data, className, disabled }: TokenProps) {
       className={clsx('[&[data-dragging=true]]:(z-10000)', className)}
       data-disabled={disabled}
       data-dragging={!!isDragging}
+      {...rest}
       {...listeners}
       {...attributes}
     >
