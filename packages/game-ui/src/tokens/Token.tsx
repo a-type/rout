@@ -1,6 +1,7 @@
 import { clsx } from '@a-type/ui';
 import { useDraggable } from '@dnd-kit/core';
-import { ReactNode } from 'react';
+import { CSSProperties, ReactNode, Ref } from 'react';
+import { useMergedRef } from '../hooks/useMergedRef';
 import { makeToken } from './types';
 
 export interface TokenProps<Data = unknown> {
@@ -9,6 +10,8 @@ export interface TokenProps<Data = unknown> {
   data?: Data;
   className?: string;
   disabled?: boolean;
+  ref?: Ref<HTMLDivElement>;
+  style?: CSSProperties;
 }
 
 export function Token({
@@ -17,6 +20,8 @@ export function Token({
   data,
   className,
   disabled,
+  ref,
+  style: userStyle,
   ...rest
 }: TokenProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -28,18 +33,21 @@ export function Token({
 
   const style = transform
     ? {
+        ...userStyle,
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
-    : undefined;
+    : userStyle;
+
+  const finalRef = useMergedRef<HTMLDivElement>(ref, setNodeRef);
 
   return (
     <div
-      ref={setNodeRef}
+      {...rest}
+      ref={finalRef}
       style={style}
       className={clsx('[&[data-dragging=true]]:(z-10000)', className)}
       data-disabled={disabled}
       data-dragging={!!isDragging}
-      {...rest}
       {...listeners}
       {...attributes}
     >

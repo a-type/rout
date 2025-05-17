@@ -1,27 +1,13 @@
 import { PrefixedId } from '@long-game/common';
-import { GameDefinition, GameRandom } from '@long-game/game-definition';
+import { GameDefinition, SystemChatMessage } from '@long-game/game-definition';
+import { shuffleHands } from './deck';
 import { getDraftingRound, getRoundIndex } from './rounds';
 import { getCurrentPlayer, getDealStartCard, getTrickLeader } from './tricks';
 
 export type Card = `${CardRank}${CardSuit}`;
 export const suits = ['h', 'd', 's', 'c'] as const;
 export type CardSuit = (typeof suits)[number];
-export const ranks = [
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  'j',
-  'k',
-  'q',
-  'a',
-] as const;
+export const ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'j', 'k', 'q', 'a'] as const;
 export type CardRank = (typeof ranks)[number];
 export const fullDeck: Card[] = ranks.flatMap((rank) =>
   suits.map((suit): Card => `${rank}${suit}`),
@@ -49,6 +35,15 @@ export function getCardDisplayRank(card: Card): string {
 
 export function getCardSuit(card: Card): 'h' | 'd' | 's' | 'c' {
   return card.slice(-1) as any;
+}
+
+export function getCardDisplaySuit(card: Card): string {
+  const suit = getCardSuit(card);
+  if (suit === 'h') return 'Hearts';
+  if (suit === 'd') return 'Diamonds';
+  if (suit === 's') return 'Spades';
+  if (suit === 'c') return 'Clubs';
+  throw new Error(`Invalid card suit: ${suit}`);
 }
 
 export function getCardColor(card: Card): 'red' | 'black' {
@@ -79,40 +74,6 @@ export function getScore(cards: Card[]): number {
     return -26;
   }
   return total;
-}
-
-function shuffleHands({
-  random,
-  members,
-}: {
-  random: GameRandom;
-  members: any[];
-}) {
-  const deck =
-    members.length === 4
-      ? fullDeck
-      : members.length === 5
-      ? fivePlayerDeck
-      : threePlayerDeck;
-  const shuffledDeck = random.shuffle(deck);
-  // 3 player variant - 1 card that's not the 2 of clubs randomly removed
-  if (members.length === 3) {
-    if (shuffledDeck[shuffledDeck.length - 1] !== '2c') {
-      shuffledDeck.pop();
-    } else {
-      // arbitrary.
-      shuffledDeck.splice(50, 1);
-    }
-  }
-  const handSize = Math.floor(shuffledDeck.length / members.length);
-  const hands = members.map((member, index) => ({
-    playerId: member.id,
-    hand: shuffledDeck.slice(index * handSize, (index + 1) * handSize),
-  }));
-  return hands.reduce(
-    (acc, { playerId, hand }) => ({ ...acc, [playerId]: hand }),
-    {} as Record<PrefixedId<'u'>, Card[]>,
-  );
 }
 
 function makeEmptyScoredCards(ids: PrefixedId<'u'>[]) {
@@ -180,7 +141,7 @@ export const gameDefinition: GameDefinition<
   validateTurn: ({ playerState, turn, roundIndex, members }) => {
     // drafting rounds -- turns are very different (it's a list of cards to pass
     // to another player)
-    if (getDraftingRound(members.length, roundIndex) !== null) {
+    if (getDraftingRound(members.length, roundIndex).passOffset) {
       if (!isPassTurn(turn.data)) {
         return 'You must pass cards to another player.';
       }
@@ -355,12 +316,12 @@ export const gameDefinition: GameDefinition<
   getPlayerState: ({ globalState, roundIndex, playerId }) => {
     // if this is not a drafting round and we're not the active player,
     // return null for task.
-    const task =
-      getDraftingRound(globalState.playerOrder.length, roundIndex) !== null
-        ? 'draft'
-        : getCurrentPlayer(globalState) === playerId
-        ? 'play'
-        : null;
+    const task = getDraftingRound(globalState.playerOrder.length, roundIndex)
+      .passOffset
+      ? 'draft'
+      : getCurrentPlayer(globalState) === playerId
+      ? 'play'
+      : null;
     return {
       playerOrder: globalState.playerOrder,
       currentTrick: globalState.currentTrick,
@@ -378,27 +339,23 @@ export const gameDefinition: GameDefinition<
       // this is a drafting round. for each player, we pass
       // the provided cards to the target player. target player
       // changes based on which draft round this is.
-      const draftingRoundIndex = getDraftingRound(
-        members.length,
-        round.roundIndex,
-      );
-      if (draftingRoundIndex === null) {
+      const draftInfo = getDraftingRound(members.length, round.roundIndex);
+      if (!draftInfo.passOffset) {
         // something is wrong...
-        throw new Error('Drafting round index is null');
+        throw new Error('Received pass turns for a non-pass round');
       }
 
       const newHands = { ...globalState.hands };
       // which player you pass to is based on the drafting round,
       // player order, and your position in that order.
-      const playerOrderOffset = (1 + draftingRoundIndex) % (members.length - 1);
       for (const turn of round.turns) {
         if (!isPassTurn(turn.data)) {
           throw new Error('Expected pass turn');
         }
         const playerId = turn.playerId;
         const myIndex = globalState.playerOrder.indexOf(playerId);
-        const targetPlayerIndex =
-          (myIndex + playerOrderOffset) % members.length;
+        const targetPlayerIndex: number =
+          (myIndex + draftInfo.passOffset) % members.length;
         const targetPlayerId = globalState.playerOrder[targetPlayerIndex];
         // remove passed cards from my hand
         const passedCards = turn.data.pass;
@@ -484,7 +441,7 @@ export const gameDefinition: GameDefinition<
           playerOrder: globalState.playerOrder,
           scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
           scores,
-          lastCompletedTrick: completedTrick,
+          lastCompletedTrick: undefined,
         };
       }
 
@@ -493,9 +450,7 @@ export const gameDefinition: GameDefinition<
         ...globalState.scoredCards,
         [winningPlayerId]: [
           ...globalState.scoredCards[winningPlayerId],
-          ...currentTrickWithPlay
-            .map(({ card }) => card)
-            .filter((c) => getCardSuit(c) === 'h' || c === 'qs'),
+          ...currentTrickWithPlay.map(({ card }) => card),
         ],
       };
 
@@ -553,5 +508,85 @@ export const gameDefinition: GameDefinition<
     return {
       status: 'active',
     };
+  },
+
+  getRoundChangeMessages(data) {
+    const messages: SystemChatMessage[] = [];
+    if (data.completedRound) {
+      // send a message for when hearts is broken
+      const heartPlayed = data.completedRound.turns.some(
+        (round) =>
+          isPlayTurn(round.data) && getCardSuit(round.data.card) === 'h',
+      );
+      const heartPreviouslyPlayed = data.rounds
+        .slice(0, -1)
+        .flatMap((round) => round.turns)
+        .some(
+          (round) =>
+            isPlayTurn(round.data) && getCardSuit(round.data.card) === 'h',
+        );
+      const qsPlayedTurn = data.completedRound.turns.find(
+        (round) => isPlayTurn(round.data) && round.data.card === 'qs',
+      );
+
+      if (!heartPreviouslyPlayed && heartPlayed) {
+        messages.push({
+          content: 'Hearts have been broken!',
+          metadata: {
+            type: 'hearts-broken',
+          },
+        });
+      }
+      if (qsPlayedTurn) {
+        messages.push({
+          content: 'The Queen of Spades has been played!',
+          metadata: {
+            type: 'qs-played',
+            playerId: qsPlayedTurn.playerId,
+          },
+        });
+      }
+    }
+
+    // for 3 / 5 player games, tell players which cards were removed on the
+    // drafting round
+    const isDraftingRound =
+      getDraftingRound(data.members.length, data.roundIndex) !== null;
+
+    // if this is a new deal, say so
+    if (data.globalState.lastCompletedTrick === undefined && isDraftingRound) {
+      messages.push({
+        content: 'A new deal has started!',
+        metadata: {
+          type: 'new-deal',
+        },
+      });
+    }
+
+    if (isDraftingRound && data.members.length !== 4) {
+      const allCards = new Set(fullDeck);
+      for (const hand of Object.values(data.globalState.hands)) {
+        for (const card of hand) {
+          allCards.delete(card);
+        }
+      }
+
+      const removedCards = Array.from(allCards);
+      const removedCardsString = removedCards
+        .map(
+          (card) =>
+            `${getCardDisplayRank(card)} of ${getCardDisplaySuit(card)}`,
+        )
+        .join(', ');
+      messages.push({
+        content: `The following cards were removed from the deck for this deal: ${removedCardsString}`,
+        metadata: {
+          type: 'removed-cards',
+          removedCards,
+        },
+      });
+    }
+
+    return messages;
   },
 };

@@ -1,4 +1,8 @@
-import { isPassTurn } from '@long-game/game-hearts-definition/v1';
+import {
+  getCardRank,
+  getCardSuit,
+  isPassTurn,
+} from '@long-game/game-hearts-definition/v1';
 import { TokenSpace } from '@long-game/game-ui';
 import { Card } from './Card';
 import { CardGrid } from './CardGrid';
@@ -36,9 +40,16 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           }
         }}
       >
-        {hand.map((card) => (
-          <Card key={card} id={card} disabled={disabled} />
-        ))}
+        {[...hand]
+          .sort((a, b) => {
+            if (getCardSuit(a) === getCardSuit(b)) {
+              return getCardRank(a) - getCardRank(b);
+            }
+            return getCardSuit(a).localeCompare(getCardSuit(b));
+          })
+          .map((card) => (
+            <Card key={card} id={card} disabled={disabled} />
+          ))}
       </TokenSpace>
     </CardGrid>
   );

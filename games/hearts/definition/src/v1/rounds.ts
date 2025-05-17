@@ -29,49 +29,61 @@ const handSize = {
 export function getDraftingRound(
   playerCount: number,
   roundIndex: number,
-): number | null {
+): {
+  /** Whether this round is a new deal of cards */
+  isNewDeal: boolean;
+  /** Offset from self in player list to pass to */
+  passOffset: number | null;
+} {
   if (playerCount !== 3 && playerCount !== 4 && playerCount !== 5) {
     throw new Error(
-      `Invalid playe  r count: ${playerCount}. Must be 3, 4, or 5.`,
+      `Invalid player count: ${playerCount}. Must be 3, 4, or 5.`,
     );
   }
   // each player plays every card in hand, plus N-1 drafting rounds
   const metaPatternCadence =
-    handSize[playerCount]! * playerCount + (playerCount - 1);
+    handSize[playerCount]! * playerCount * playerCount + (playerCount - 1);
   const metaPatternIndex = Math.floor(roundIndex / metaPatternCadence);
   const metaPatternOffset = roundIndex % metaPatternCadence;
-  const subPatternCadence = handSize[playerCount]! + 1;
-  const isDraftingRound =
-    metaPatternOffset < subPatternCadence * (playerCount - 1) &&
-    metaPatternOffset % subPatternCadence === 0;
+  const subPatternCadence = handSize[playerCount]! * playerCount + 1;
+  const subPatternIndex = Math.floor(metaPatternOffset / subPatternCadence);
+  const isNewDeal = metaPatternOffset % subPatternCadence === 0;
 
-  if (!isDraftingRound) {
-    return null;
+  if (!isNewDeal) {
+    return {
+      isNewDeal,
+      passOffset: null,
+    };
   }
 
-  return (
-    metaPatternIndex * (playerCount - 1) +
-    Math.floor(metaPatternOffset / subPatternCadence)
-  );
+  const passOffset = (1 + subPatternIndex) % playerCount;
+  if (passOffset === 0) {
+    return {
+      isNewDeal,
+      passOffset: null,
+    };
+  }
+
+  return {
+    isNewDeal,
+    passOffset,
+  };
 }
 
 // this computes the advancement of player turns per round
 // and accounts for the drafting round.
 export const getRoundIndex: RoundIndexDecider<any, any> =
   // apply a delay between turns, helps player experience.
-  roundFormat.delayedAdvance()((ctx) => {
+  roundFormat.delayedAdvance(2)((ctx) => {
     const currentRoundIndex = maxRoundFromTurns(ctx.turns);
-    const draftingRoundIndex = getDraftingRound(
-      ctx.members.length,
-      currentRoundIndex,
-    );
+    const draftInfo = getDraftingRound(ctx.members.length, currentRoundIndex);
     // we are drafting, all players must submit a draft selection
     const pendingTurns = notPlayedThisRound({
       turns: ctx.turns,
       roundIndex: currentRoundIndex,
       members: ctx.members,
     });
-    if (draftingRoundIndex !== null && pendingTurns.length > 0) {
+    if (draftInfo.passOffset && pendingTurns.length > 0) {
       return {
         roundIndex: currentRoundIndex,
         pendingTurns: pendingTurns,

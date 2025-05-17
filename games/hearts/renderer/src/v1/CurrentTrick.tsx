@@ -35,7 +35,12 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
           }}
         >
           {currentTrick.map((card) => (
-            <Card key={card.card} id={card.card} disabled />
+            <Card
+              key={card.card}
+              id={card.card}
+              playerId={card.playerId}
+              disabled
+            />
           ))}
           {new Array(gameSuite.members.length - currentTrick.length)
             .fill(null)
