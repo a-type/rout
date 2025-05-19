@@ -1,5 +1,5 @@
 import { Button, clsx } from '@a-type/ui';
-import type { Team, TeamId } from '../../../definition/src/v1/types';
+import type { Team, TeamId } from '../../../definition/src/v1/gameTypes';
 import { hooks } from './gameClient';
 import { Player } from './Player';
 import { useSearchParams } from '@verdant-web/react-router';

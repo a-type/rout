@@ -27,6 +27,8 @@ export type Position =
   | 'rf'
   | 'p';
 
+export type Base = 1 | 2 | 3;
+
 export type LeagueGame = {
   id: GameId;
   homeTeamId: TeamId;
@@ -53,4 +55,23 @@ export type GameResult = {
   score: {
     [teamId: string]: number;
   };
+};
+
+export type LeagueGameState = {
+  battingTeam: TeamId;
+  pitchingTeam: TeamId;
+  teamData: Record<
+    TeamId,
+    {
+      battingOrder: PlayerId[];
+      pitcher: PlayerId;
+      score: number;
+    }
+  >;
+  currentInning: number;
+  currentBatterIndex: Record<TeamId, number>;
+  bases: Record<Base, PlayerId | null>;
+  strikes: number;
+  balls: number;
+  outs: number;
 };

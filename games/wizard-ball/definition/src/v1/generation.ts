@@ -7,7 +7,7 @@ import {
   Position,
   Team,
   TeamId,
-} from './types';
+} from './gameTypes';
 import { femaleFirstNames, lastNames, maleFirstNames } from './names';
 import { teamAdjectives, teamNouns } from './teamNames';
 

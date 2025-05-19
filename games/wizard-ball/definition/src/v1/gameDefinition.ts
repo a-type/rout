@@ -1,5 +1,5 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { League } from './types';
+import { League } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 
