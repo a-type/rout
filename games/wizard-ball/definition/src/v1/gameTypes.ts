@@ -64,6 +64,11 @@ export type GameResult = {
       pitcher: PlayerId;
     }
   >;
+  inningData: Array<{
+    runs: number;
+    battingTeam: TeamId;
+    pitchingTeam: TeamId;
+  }>;
   score: {
     [teamId: string]: number;
   };
@@ -92,6 +97,11 @@ export type LeagueGameState = {
       score: number;
     }
   >;
+  inningData: Array<{
+    runs: number;
+    battingTeam: TeamId;
+    pitchingTeam: TeamId;
+  }>;
   currentInning: number;
   currentBatterIndex: Record<TeamId, number>;
   bases: Record<Base, PlayerId | null>;

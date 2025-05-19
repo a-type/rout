@@ -24,6 +24,26 @@ export function simulateRound(
   return results;
 }
 
+function checkGameOver(
+  gameState: LeagueGameState,
+  leagueGame: LeagueGame,
+): boolean {
+  const homeScore = gameState.teamData[leagueGame.homeTeamId].score;
+  const awayScore = gameState.teamData[leagueGame.awayTeamId].score;
+  const battingScore =
+    gameState.battingTeam === leagueGame.homeTeamId ? homeScore : awayScore;
+  const pitchingScore =
+    gameState.battingTeam === leagueGame.homeTeamId ? awayScore : homeScore;
+
+  if (gameState.currentInning > 30) {
+    return true;
+  }
+  if (gameState.currentInning >= 18 && battingScore > pitchingScore) {
+    return true;
+  }
+  return false;
+}
+
 function simulateGame(
   random: GameRandom,
   league: League,
@@ -40,13 +60,7 @@ function simulateGame(
     };
     gameState.currentBatterIndex[teamId] = 0;
   }
-  while (
-    // Limit the game to 100 innings
-    gameState.currentInning < 100 &&
-    (gameState.currentInning < 18 ||
-      gameState.teamData[game.homeTeamId].score ===
-        gameState.teamData[game.awayTeamId].score)
-  ) {
+  while (!checkGameOver(gameState, game)) {
     gameState = simulateInning(random, gameState);
   }
   const homeScore = gameState.teamData[game.homeTeamId].score;
@@ -61,6 +75,7 @@ function simulateGame(
   return {
     winner,
     id: game.id,
+    inningData: gameState.inningData,
     playerStats: gameState.playerStats,
     homeTeamId: game.homeTeamId,
     awayTeamId: game.awayTeamId,
@@ -106,6 +121,7 @@ function initialGameState(): LeagueGameState {
       2: null,
       3: null,
     },
+    inningData: [],
     currentBatterIndex: {},
     currentInning: 1,
     battingTeam: '',
@@ -333,7 +349,6 @@ function simulatePitch(
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1 });
       gameState = incrementBatterIndex(gameState, gameState.battingTeam);
       gameState = resetCount(gameState);
-
       break;
     case 'hit':
     case 'double':
@@ -380,9 +395,16 @@ function simulateInning(
   random: GameRandom,
   gameState: LeagueGameState,
 ): LeagueGameState {
+  const initialScore = gameState.teamData[gameState.battingTeam].score;
   while (gameState.outs < 3) {
     gameState = simulatePitch(random, gameState);
   }
+  const nextScore = gameState.teamData[gameState.battingTeam].score;
+  gameState.inningData.push({
+    runs: nextScore - initialScore,
+    battingTeam: gameState.battingTeam,
+    pitchingTeam: gameState.pitchingTeam,
+  });
   // Switch teams
   const temp = gameState.battingTeam;
   gameState.battingTeam = gameState.pitchingTeam;

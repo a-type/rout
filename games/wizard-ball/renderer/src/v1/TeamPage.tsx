@@ -18,10 +18,9 @@ export function TeamPage({ id }: { id: TeamId }) {
 
   return (
     <div className="flex flex-col p-2">
-      <h2>{team.name}</h2>
-      <span>
-        Record: {team.wins} - {team.losses}
-      </span>
+      <h2>
+        {team.name} ({team.wins} - {team.losses})
+      </h2>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h3 className="mt-4">Players</h3>

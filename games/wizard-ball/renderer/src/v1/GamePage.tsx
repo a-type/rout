@@ -7,6 +7,7 @@ export function GamePage({ id }: { id: string }) {
   const game = finalState.league.gameResults
     .flat()
     .find((game) => game.id === id);
+  console.log('state', JSON.parse(JSON.stringify(game)));
   if (!game) {
     return <div>Game not found</div>;
   }
@@ -14,7 +15,13 @@ export function GamePage({ id }: { id: string }) {
   const awayTeam = finalState.league.teamLookup[game.awayTeamId];
   const homeTeamScore = game.score[game.homeTeamId];
   const awayTeamScore = game.score[game.awayTeamId];
-  const playerStats = game.playerStats;
+  const inningData = game.inningData;
+  const awayInnings = inningData.filter(
+    (inning) => inning.battingTeam === game.awayTeamId,
+  );
+  const homeInnings = inningData.filter(
+    (inning) => inning.battingTeam === game.homeTeamId,
+  );
   const homeTeamPlayers = game.teamData[game.homeTeamId].battingOrder;
   const awayTeamPlayers = game.teamData[game.awayTeamId].battingOrder;
   return (
@@ -30,6 +37,33 @@ export function GamePage({ id }: { id: string }) {
           </>
         )}
       </h1>
+
+      {/* Display inning by inning data */}
+      {/* Should look like a table where the first column are the team names, and each column after is the number of runs scored */}
+      <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
+        <thead>
+          <tr>
+            <th className="text-left">Team</th>
+            {awayInnings.map((i, idx) => (
+              <th key={idx}>{idx + 1}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="text-left">{awayTeam.name}</td>
+            {awayInnings.map((i, idx) => (
+              <td key={idx}>{i.runs}</td>
+            ))}
+          </tr>
+          <tr>
+            <td className="text-left">{homeTeam.name}</td>
+            {homeInnings.map((i, idx) => (
+              <td key={idx}>{i.runs}</td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
 
       <h3>Player Stats</h3>
       <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
