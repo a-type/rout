@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "pnpm run --filter @long-game/service-api --parallel \"/^dev:.*/\"",
     "dev:client": "pnpm run build:api-client --watch --preserveWatchOutput",
-    "dev:public-api:run": "sleep 4 && wrangler dev -c wrangler.toml --port 3101 --ip 127.0.0.1",
+    "dev:public-api:run": "delay 4 && wrangler dev -c wrangler.toml --port 3101 --ip 127.0.0.1",
     "build": "pnpm run --filter @long-game/service-api --parallel \"/^build:.*/\"",
     "build:api-client": "tsc -p tsconfig.client.json",
     "build:api": "wrangler deploy --dry-run --outdir dist --config wrangler.toml",
@@ -42,6 +42,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.8.14",
     "@types/node": "^22.14.0",
+    "delay-cli": "catalog:",
     "vitest": "catalog:"
   }
 }

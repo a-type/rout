@@ -21,7 +21,8 @@
     "@long-game/game-territory-definition": "workspace:*",
     "@long-game/game-scribble-definition": "workspace:*",
     "@long-game/game-gudnak-definition": "workspace:*",
-    "@long-game/game-hearts-definition": "workspace:*"
+    "@long-game/game-hearts-definition": "workspace:*",
+    "@long-game/game-wizard-ball-definition": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

@@ -1,0 +1,34 @@
+{
+  "name": "@long-game/game-wizard-ball-definition",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/index.js",
+      "development": "./src/index.ts",
+      "workerd": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./v1": {
+      "production": "./dist/v1/index.js",
+      "development": "./src/v1/index.ts",
+      "workerd": "./src/v1/index.ts",
+      "import": "./dist/v1/index.js",
+      "types": "./dist/v1/index.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/common": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

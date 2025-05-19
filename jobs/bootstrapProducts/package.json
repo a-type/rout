@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "dev": "sleep 3 && wrangler dev -c wrangler.toml --port 3113 --ip 127.0.0.1 --test-scheduled"
+    "dev": "delay 3 && wrangler dev -c wrangler.toml --port 3113 --ip 127.0.0.1 --test-scheduled"
   },
   "dependencies": {
     "@a-type/utils": "catalog:",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "delay-cli": "catalog:",
     "vitest": "catalog:"
   }
 }
