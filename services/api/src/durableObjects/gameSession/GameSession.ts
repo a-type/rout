@@ -124,7 +124,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     return (
       (await this.ctx.storage.get('notifications')) || {
         playersNotified: {},
-        roundIndex: 0,
+        roundIndex: -1,
       }
     );
   }
@@ -572,9 +572,10 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     await this.#sql.run(db.deleteFrom('Turn'));
     await this.#setRoundState({
-      roundIndex: 0,
+      roundIndex: -1,
       playersNotified: {},
     });
+    await this.#checkForRoundChange();
     this.#socketHandler.send({
       type: 'gameChange',
     });

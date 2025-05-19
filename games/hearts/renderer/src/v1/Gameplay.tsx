@@ -14,10 +14,10 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   const isDraftRound = gameSuite.finalState.task === 'draft';
   return (
     <TokenRoot>
-      <Box full="width" d="col" gap p>
+      <Box full="width" d="col" gap p className="bg-wash">
         <PlayerScores />
         <TurnError surface="attention" p showReset />
-        <Box className="sticky top-sm z-1" p="sm" surface="primary">
+        <Box className="sticky top-sm z-1 max-h-50vh" p="sm" surface="primary">
           {isDraftRound ? <PassZone /> : <CurrentTrick />}
         </Box>
         <Hand disabled={gameSuite.finalState.task === null} />

@@ -1,5 +1,9 @@
-import { Box } from '@a-type/ui';
-import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
+import { Box, Tooltip } from '@a-type/ui';
+import { PrefixedId } from '@long-game/common';
+import { getScore } from '@long-game/game-hearts-definition/v1';
+import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
+import { Card } from './Card';
+import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
 
 export interface PlayerScoresProps {}
@@ -7,18 +11,64 @@ export interface PlayerScoresProps {}
 export const PlayerScores = hooks.withGame<PlayerScoresProps>(
   function PlayerScores({ gameSuite }) {
     return (
-      <Box gap>
+      <Box gap items="center" className="select-none">
         {gameSuite.members.map((member) => (
-          <Box key={member.id} gap surface="wash" className="flex items-center">
-            <Box>
-              <PlayerAvatar playerId={member.id} />
-              <PlayerName playerId={member.id} />
-            </Box>
-            <Box className="font-bold">
-              {gameSuite.finalState.scores[member.id]}
-            </Box>
-          </Box>
+          <PlayerScore playerId={member.id} key={member.id} />
         ))}
+      </Box>
+    );
+  },
+);
+
+const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
+  function PlayerScore({ gameSuite, playerId }) {
+    const { className, style } = usePlayerThemed(playerId);
+    return (
+      <Tooltip content={<PlayerScoredCards playerId={playerId} />}>
+        <Box
+          key={playerId}
+          gap
+          surface="primary"
+          items="center"
+          p="sm"
+          className={className}
+          style={style}
+        >
+          <PlayerAvatar playerId={playerId} />
+          <PlayerName playerId={playerId} />
+          <PlayerScoreDisplay playerId={playerId} />
+        </Box>
+      </Tooltip>
+    );
+  },
+);
+
+const PlayerScoredCards = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
+  function PlayerScoredCards({ gameSuite, playerId }) {
+    const scoredCards =
+      gameSuite.viewingRound.initialPlayerState.scoredCards[playerId] ?? [];
+    return (
+      <CardGrid className="max-w-70vw">
+        {scoredCards.map((card) => (
+          <Card id={card} key={card} className="w-40px" />
+        ))}
+      </CardGrid>
+    );
+  },
+);
+
+const PlayerScoreDisplay = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
+  function PlayerScoreDisplay({ gameSuite, playerId }) {
+    const playerBaseScore =
+      gameSuite.viewingRound.initialPlayerState.scores[playerId];
+    const playerRoundScore = getScore(
+      gameSuite.viewingRound.initialPlayerState.scoredCards[playerId] ?? [],
+    );
+    return (
+      <Box className="font-bold">
+        {playerBaseScore}
+        {` + `}
+        {playerRoundScore}
       </Box>
     );
   },

@@ -15,7 +15,11 @@ export const sessions = new SessionManager<Context>({
   getSessionConfig(baseCtx) {
     const ctx = baseCtx as Context<Env>;
     const apiDomain = new URL(ctx.env.API_ORIGIN).hostname;
-    const topLevelDomain = apiDomain.split('.').slice(-2).join('.');
+    let topLevelDomain = apiDomain.split('.').slice(-2).join('.');
+    if (!topLevelDomain.includes('localhost')) {
+      // if not local dev, increase cookie scope to subdomains
+      topLevelDomain = '.' + topLevelDomain;
+    }
     return {
       cookieName: 'lg-session',
       cookieOptions: {
