@@ -599,6 +599,9 @@ importers:
       '@long-game/game-wizard-ball-definition':
         specifier: workspace:*
         version: link:../definition
+      '@verdant-web/react-router':
+        specifier: 'catalog:'
+        version: 0.8.0(react@19.1.0)
       react:
         specifier: 'catalog:'
         version: 19.1.0
@@ -842,6 +845,9 @@ importers:
       '@long-game/game-territory-renderer':
         specifier: workspace:*
         version: link:../../games/territory/renderer
+      '@long-game/game-wizard-ball-renderer':
+        specifier: workspace:*
+        version: link:../../games/wizard-ball/renderer
       react:
         specifier: 'catalog:'
         version: 19.1.0

@@ -1,6 +1,7 @@
-import { Box } from '@a-type/ui';
+import { Box, Button } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
-import { hooks } from './gameClient.js';
+import { hooks } from './gameClient';
+import { PageContent } from './PageContent';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -20,8 +21,20 @@ export const ChatMessage = DefaultChatMessage;
 // perhaps you'll want to move these to other modules.
 
 const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
-  const { initialState } = gameSuite;
-  return <Box>{JSON.stringify(initialState)}</Box>;
+  return (
+    <Box className="flex flex-col">
+      <div className="flex">
+        <Button
+          onClick={() => {
+            gameSuite.submitTurn({});
+          }}
+        >
+          Next round
+        </Button>
+      </div>
+      <PageContent />
+    </Box>
+  );
 });
 
 const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {

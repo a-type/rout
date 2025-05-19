@@ -45,6 +45,14 @@ const moduleMap = {
         return { default: () => null };
       }),
   },
+  ['wizard-ball']: {
+    main: () => import('@long-game/game-wizard-ball-renderer'),
+    css: () =>
+      import('@long-game/game-wizard-ball-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for wizardBall');
+        return { default: () => null };
+      }),
+  },
 };
 
 const packageCache: Record<string, Promise<GameRendererModule>> = {};

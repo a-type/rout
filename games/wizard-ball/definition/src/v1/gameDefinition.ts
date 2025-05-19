@@ -1,11 +1,14 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
+import { League } from './types';
+import { generateLeague } from './generation';
+import { simulateRound } from './simGames';
 
 export type GlobalState = {
-  // TODO: internal state the server manages
+  league: League;
 };
 
 export type PlayerState = {
-  // TODO: public state available for players
+  league: League;
 };
 
 export type TurnData = {
@@ -33,28 +36,45 @@ export const gameDefinition: GameDefinition<
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
-    return {}
+    return playerState;
   },
 
   // run on server
 
-  getInitialGlobalState: ({ members }) => {
-    // TODO: return the initial global state. possibly randomizing initial conditions.
+  getInitialGlobalState: ({ members, random }) => {
+    const league = generateLeague(random);
     return {
-
-    }
+      league,
+      week: 0,
+    };
   },
 
   getPlayerState: ({ globalState, playerId }) => {
     // TODO: compute the player state from the global state
     return {
-
-    }
+      league: globalState.league,
+    };
   },
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
-    // TODO: how does the round affect the global state?
-    return globalState
+    const currentRound =
+      globalState.league.schedule[globalState.league.currentWeek];
+    const results = simulateRound(random, globalState.league, currentRound);
+    for (const result of results) {
+      const winner = globalState.league.teamLookup[result.winner];
+      const loser = globalState.league.teamLookup[result.loser];
+      winner.wins += 1;
+      loser.losses += 1;
+    }
+    const nextLeague: League = {
+      ...globalState.league,
+      gameResults: [...globalState.league.gameResults, results],
+      currentWeek: globalState.league.currentWeek + 1,
+    };
+    return {
+      ...globalState,
+      league: nextLeague,
+    };
   },
 
   getPublicTurn: ({ turn }) => {
@@ -64,9 +84,12 @@ export const gameDefinition: GameDefinition<
   },
 
   getStatus: ({ globalState, rounds }) => {
-    // TODO: when is the game over? who won?
     return {
-      status: "pending",
-    }
+      status:
+        globalState.league.currentWeek >= globalState.league.schedule.length
+          ? 'complete'
+          : 'active',
+      winnerIds: [],
+    };
   },
 };
