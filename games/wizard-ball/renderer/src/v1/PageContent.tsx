@@ -3,6 +3,7 @@ import { TeamPage } from './TeamPage';
 import { TeamStandings } from './TeamStandings';
 import { PlayerPage } from './PlayerPage';
 import { GamePage } from './GamePage';
+import { LeagueLeaders } from './LeagueLeaders';
 
 export function PageContent() {
   const [params] = useSearchParams();
@@ -19,5 +20,10 @@ export function PageContent() {
   if (teamId) {
     return <TeamPage id={teamId} />;
   }
-  return <TeamStandings />;
+  return (
+    <div>
+      <TeamStandings />
+      <LeagueLeaders />
+    </div>
+  );
 }
