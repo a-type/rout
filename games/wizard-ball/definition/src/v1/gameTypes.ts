@@ -57,6 +57,13 @@ export type GameResult = {
   playerStats: Record<PlayerId, PlayerStats>;
   homeTeamId: TeamId;
   awayTeamId: TeamId;
+  teamData: Record<
+    TeamId,
+    {
+      battingOrder: PlayerId[];
+      pitcher: PlayerId;
+    }
+  >;
   score: {
     [teamId: string]: number;
   };

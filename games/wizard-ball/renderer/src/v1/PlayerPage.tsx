@@ -1,8 +1,11 @@
 import { PlayerStats } from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
+import { useSearchParams } from '@verdant-web/react-router';
+import { clsx } from '@a-type/ui';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
+  const [, setSearchParams] = useSearchParams();
   const player = finalState.league.playerLookup[id];
   if (!player) {
     return <div>Player not found</div>;
@@ -65,59 +68,113 @@ export function PlayerPage({ id }: { id: string }) {
     );
   return (
     <div>
-      <h1>{playerName}</h1>
-      <h2>Team: {teamName}</h2>
-      <h2>Positions: {playerPositions}</h2>
-      <h2>Stats</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Game</th>
-            <th>AB</th>
-            <th>H</th>
-            <th>2B</th>
-            <th>3B</th>
-            <th>HR</th>
-            <th>RBI</th>
-            <th>R</th>
-            <th>W</th>
-            <th>SO</th>
-          </tr>
-        </thead>
-        <tbody>
-          {games.map((game, index) => {
-            const stats = game.playerStats[id];
-            return (
-              <tr key={index}>
-                <td>{renderGameName(game.id)}</td>
-                <td>{stats.atBats}</td>
-                <td>{stats.hits}</td>
-                <td>{stats.doubles}</td>
-                <td>{stats.triples}</td>
-                <td>{stats.homeRuns}</td>
-                <td>{stats.runsBattedIn}</td>
-                <td>{stats.runs}</td>
-                <td>{stats.walks}</td>
-                <td>{stats.strikeouts}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>Total</td>
-            <td>{totalPlayerStats.atBats}</td>
-            <td>{totalPlayerStats.hits}</td>
-            <td>{totalPlayerStats.doubles}</td>
-            <td>{totalPlayerStats.triples}</td>
-            <td>{totalPlayerStats.homeRuns}</td>
-            <td>{totalPlayerStats.runsBattedIn}</td>
-            <td>{totalPlayerStats.runs}</td>
-            <td>{totalPlayerStats.walks}</td>
-            <td>{totalPlayerStats.strikeouts}</td>
-          </tr>
-        </tfoot>
-      </table>
+      <h1 className="text-2xl font-bold mb-2">{playerName}</h1>
+      <h2 className="text-lg mb-1">Team: {teamName}</h2>
+      <h2 className="text-lg mb-4">Positions: {playerPositions}</h2>
+      <h2 className="text-xl font-semibold mb-2">Stats</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
+          <thead>
+            <tr className="font-medium">
+              <th className="px-3 py-2 border-b">Game</th>
+              <th className="px-3 py-2 border-b">AB</th>
+              <th className="px-3 py-2 border-b">H</th>
+              <th className="px-3 py-2 border-b">2B</th>
+              <th className="px-3 py-2 border-b">3B</th>
+              <th className="px-3 py-2 border-b">HR</th>
+              <th className="px-3 py-2 border-b">RBI</th>
+              <th className="px-3 py-2 border-b">R</th>
+              <th className="px-3 py-2 border-b">W</th>
+              <th className="px-3 py-2 border-b">SO</th>
+            </tr>
+          </thead>
+          <tbody>
+            {games.map((game, index) => {
+              const stats = game.playerStats[id];
+              return (
+                <tr
+                  key={index}
+                  className={clsx(
+                    index % 2 === 0 && 'bg-gray-500/30',
+                    'cursor-pointer hover:bg-gray-500/50',
+                  )}
+                  onClick={() => {
+                    setSearchParams((params) => {
+                      params.delete('teamId');
+                      params.delete('playerId');
+                      params.set('gameId', game.id);
+                      return params;
+                    });
+                  }}
+                >
+                  <td className="px-3 py-2 border-b">
+                    {renderGameName(game.id)}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.atBats}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.hits}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.doubles}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.triples}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.homeRuns}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.runsBattedIn}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.runs}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.walks}
+                  </td>
+                  <td className="px-3 py-2 border-b text-center">
+                    {stats.strikeouts}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr className="font-semibold">
+              <td className="px-3 py-2 border-t">Total</td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.atBats}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.hits}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.doubles}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.triples}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.homeRuns}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.runsBattedIn}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.runs}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.walks}
+              </td>
+              <td className="px-3 py-2 border-t text-center">
+                {totalPlayerStats.strikeouts}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
   );
 }

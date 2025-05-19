@@ -64,6 +64,7 @@ function simulateGame(
     playerStats: gameState.playerStats,
     homeTeamId: game.homeTeamId,
     awayTeamId: game.awayTeamId,
+    teamData: gameState.teamData,
     loser,
     score,
   };
@@ -345,7 +346,11 @@ function simulatePitch(
       } else if (outcome === 'triple') {
         gameState = addToPlayerStats(gameState, batterId, { triples: 1 });
       } else if (outcome === 'homeRun') {
-        gameState = addToPlayerStats(gameState, batterId, { homeRuns: 1 });
+        gameState = addToPlayerStats(gameState, batterId, {
+          homeRuns: 1,
+          runsBattedIn: 1,
+          runs: 1,
+        });
       }
       gameState = applyHit(gameState, outcome);
       break;

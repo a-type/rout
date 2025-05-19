@@ -39,6 +39,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
               setSearchParams((params) => {
                 params.delete('teamId');
                 params.delete('playerId');
+                params.delete('gameId');
                 return params;
               });
             }}

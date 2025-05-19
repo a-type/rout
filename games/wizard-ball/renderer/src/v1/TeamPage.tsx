@@ -71,9 +71,16 @@ export function TeamPage({ id }: { id: TeamId }) {
                 <div
                   key={index}
                   className={clsx(
-                    'text-sm',
+                    'text-sm cursor-pointer hover:bg-gray-700',
                     win ? 'text-green-500' : 'text-red-500',
                   )}
+                  onClick={() => {
+                    setSearchParams((params) => {
+                      params.delete('teamId');
+                      params.set('gameId', game.id);
+                      return params;
+                    });
+                  }}
                 >
                   {result}
                 </div>
