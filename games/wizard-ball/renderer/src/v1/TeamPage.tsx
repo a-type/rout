@@ -1,5 +1,5 @@
 import { Button, clsx } from '@a-type/ui';
-import type { Team, TeamId } from '../../../definition/src/v1/gameTypes';
+import type { Team, TeamId } from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
 import { Player } from './Player';
 import { useSearchParams } from '@verdant-web/react-router';
@@ -18,18 +18,6 @@ export function TeamPage({ id }: { id: TeamId }) {
 
   return (
     <div className="flex flex-col p-2">
-      <div>
-        <Button
-          onClick={() => {
-            setSearchParams((params) => {
-              params.delete('teamId');
-              return params;
-            });
-          }}
-        >
-          Back
-        </Button>
-      </div>
       <h2>{team.name}</h2>
       <span>
         Record: {team.wins} - {team.losses}
@@ -39,7 +27,18 @@ export function TeamPage({ id }: { id: TeamId }) {
           <h3 className="mt-4">Players</h3>
           <div className="flex flex-col">
             {team.playerIds.map((playerId) => (
-              <Player key={playerId} id={playerId} />
+              <Player
+                className="cursor-pointer hover:bg-gray-700"
+                key={playerId}
+                id={playerId}
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.set('playerId', playerId);
+                    return params;
+                  });
+                }}
+              />
             ))}
           </div>
         </div>

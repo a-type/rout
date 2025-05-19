@@ -13,6 +13,7 @@ export type Team = {
 export type Player = {
   name: string;
   id: PlayerId;
+  teamId: TeamId | null;
   positions: Position[];
 };
 
@@ -52,9 +53,25 @@ export type RoundResult = Array<GameResult>;
 export type GameResult = {
   winner: TeamId;
   loser: TeamId;
+  id: GameId;
+  playerStats: Record<PlayerId, PlayerStats>;
+  homeTeamId: TeamId;
+  awayTeamId: TeamId;
   score: {
     [teamId: string]: number;
   };
+};
+
+export type PlayerStats = {
+  atBats: number;
+  hits: number;
+  doubles: number;
+  triples: number;
+  homeRuns: number;
+  runsBattedIn: number;
+  runs: number;
+  walks: number;
+  strikeouts: number;
 };
 
 export type LeagueGameState = {
@@ -74,4 +91,5 @@ export type LeagueGameState = {
   strikes: number;
   balls: number;
   outs: number;
+  playerStats: Record<PlayerId, PlayerStats>;
 };

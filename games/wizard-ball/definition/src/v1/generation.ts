@@ -49,6 +49,7 @@ export function generateLeague(random: GameRandom): League {
     ];
     for (let i = 0; i < numPlayers; i++) {
       const player = generatePlayer(random, { position: forcedPositions[i] });
+      player.teamId = team.id;
       team.playerIds.push(player.id);
       league.playerLookup[player.id] = player;
     }
@@ -112,6 +113,7 @@ function generatePlayer(
   let player: Player = {
     name: generatePlayerName(random),
     id: random.id(),
+    teamId: null,
     positions: forcedPosition ? [forcedPosition] : [],
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];

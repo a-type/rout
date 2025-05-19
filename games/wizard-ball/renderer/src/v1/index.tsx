@@ -2,6 +2,7 @@ import { Box, Button } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { PageContent } from './PageContent';
+import { useSearchParams } from '@verdant-web/react-router';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -21,9 +22,10 @@ export const ChatMessage = DefaultChatMessage;
 // perhaps you'll want to move these to other modules.
 
 const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
-    <Box className="flex flex-col">
-      <div className="flex">
+    <Box className="flex flex-col p-4 gap-2">
+      <div className="flex gap-2">
         <Button
           onClick={() => {
             gameSuite.submitTurn({});
@@ -31,6 +33,19 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         >
           Next round
         </Button>
+        {[...searchParams.keys()].length > 0 && (
+          <Button
+            onClick={() => {
+              setSearchParams((params) => {
+                params.delete('teamId');
+                params.delete('playerId');
+                return params;
+              });
+            }}
+          >
+            Back
+          </Button>
+        )}
       </div>
       <PageContent />
     </Box>

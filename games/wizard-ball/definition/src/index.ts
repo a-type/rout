@@ -8,9 +8,11 @@ export default {
   tags: [],
   creators: [
     {
-      name: "Zack"
-    }
-  ]
+      name: 'Zack',
+    },
+  ],
 } satisfies GameModule;
 
 export { v1 };
+
+export * from './v1/gameTypes';
