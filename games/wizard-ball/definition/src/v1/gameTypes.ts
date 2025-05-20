@@ -1,3 +1,5 @@
+import { PrefixedId } from '@long-game/common';
+
 export type TeamId = string;
 export type PlayerId = string;
 export type GameId = string;
@@ -5,6 +7,7 @@ export type GameId = string;
 export type Team = {
   icon: string;
   name: string;
+  ownerId: PrefixedId<'u'> | null;
   id: TeamId;
   playerIds: PlayerId[];
   wins: number;

@@ -4,6 +4,7 @@ import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
 import { Attributes } from './Attributes';
+import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -13,7 +14,7 @@ const tabOptions = [
 
 export function TeamPage({ id }: { id: TeamId }) {
   const [view, setView] = useState<'summary' | 'players' | 'games'>('summary');
-  const { finalState } = hooks.useGameSuite();
+  const { finalState, players } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id] as Team;
   const [, setSearchParams] = useSearchParams();
   const schedule = finalState.league.schedule;
@@ -86,10 +87,26 @@ export function TeamPage({ id }: { id: TeamId }) {
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
       <div className="flex flex-col p-2">
-        <h2 className="flex items-center gap-2">
+        <h2
+          className="flex items-center gap-2"
+          style={{
+            color: team.ownerId ? players[team.ownerId].color : 'inherit',
+          }}
+        >
           <span style={{ fontSize: 64 }}>{team.icon}</span> {team.name} (
           {team.wins} - {team.losses})
         </h2>
+        <div className="flex items-center gap-3">
+          Owner:{' '}
+          {team.ownerId ? (
+            <span className="flex items-center gap-1">
+              <PlayerAvatar playerId={team.ownerId} />
+              <PlayerName playerId={team.ownerId} />
+            </span>
+          ) : (
+            <span className="flex items-center gap-1">🤖 CPU</span>
+          )}
+        </div>
         <Tabs.List className="gap-none">
           {tabOptions.map((option, idx, arr) => (
             <Tabs.Trigger

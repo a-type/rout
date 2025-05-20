@@ -3,7 +3,7 @@ import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 
 export function TeamStandings() {
-  const { finalState } = hooks.useGameSuite();
+  const { finalState, players } = hooks.useGameSuite();
   const teams = Object.values(finalState.league.teamLookup);
   const sortedTeams = teams.sort((a, b) => b.wins - a.wins);
   const [, setSearchParams] = useSearchParams();
@@ -34,7 +34,12 @@ export function TeamStandings() {
                 });
               }}
             >
-              <td className="text-left pl-2 flex items-center gap-2">
+              <td
+                className="text-left pl-2 flex items-center gap-2"
+                style={{
+                  color: team.ownerId ? players[team.ownerId].color : 'inherit',
+                }}
+              >
                 <span style={{ fontSize: 24 }}>{team.icon}</span>
                 {team.name}
               </td>

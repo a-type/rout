@@ -42,7 +42,10 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members, random }) => {
-    const league = generateLeague(random);
+    const league = generateLeague(
+      random,
+      members.map((m) => m.id),
+    );
     return {
       league,
       week: 0,

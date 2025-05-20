@@ -10,8 +10,12 @@ import {
 } from './gameTypes';
 import { femaleFirstNames, lastNames, maleFirstNames } from './names';
 import { teamAdjectives, teamNouns } from './teamNames';
+import { PrefixedId } from '@long-game/common';
 
-export function generateLeague(random: GameRandom): League {
+export function generateLeague(
+  random: GameRandom,
+  members: PrefixedId<'u'>[],
+): League {
   let league: League = {
     name: 'League name',
     teamIds: [],
@@ -31,6 +35,12 @@ export function generateLeague(random: GameRandom): League {
     league.teamIds.push(team.id);
     league.teamLookup[team.id] = team;
   });
+
+  // Assign owners to teams
+  for (let i = 0; i < members.length; i++) {
+    const team = teams[i % teams.length];
+    team.ownerId = members[i];
+  }
 
   // Generate and assign players to teams
   for (const team of teams) {
@@ -101,6 +111,7 @@ function generateTeam(random: GameRandom): Team {
   let team: Team = {
     name: 'Unnaemed Team',
     icon: '⚾',
+    ownerId: null,
     id: random.id(),
     playerIds: [],
     wins: 0,
