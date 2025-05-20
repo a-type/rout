@@ -31,7 +31,7 @@ export function generateLeague(random: GameRandom): League {
 
   // Generate and assign players to teams
   for (const team of teams) {
-    const numPlayers = 20;
+    const numPlayers = 9;
     const forcedPositions: Position[] = [
       'c',
       '1b',
@@ -115,14 +115,7 @@ function generatePlayer(
     id: random.id(),
     teamId: null,
     positions: forcedPosition ? [forcedPosition] : [],
-    attributes: {
-      strength: random.int(1, 21),
-      agility: random.int(1, 21),
-      constitution: random.int(1, 21),
-      intelligence: random.int(1, 21),
-      wisdom: random.int(1, 21),
-      charisma: random.int(1, 21),
-    },
+    attributes: generateAttributes(random),
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];
   if (player.positions.length === 0) {
@@ -137,6 +130,21 @@ function generatePlayer(
   }
 
   return player;
+}
+
+function generateAttributes(random: GameRandom): Player['attributes'] {
+  const pool = Array.from({ length: 8 }, (_, i) => i + 1)
+    .map(() => random.int(1, 21))
+    .sort((a, b) => a - b);
+  const results = random.shuffle(pool.slice(1, -1));
+  return {
+    strength: results[0],
+    agility: results[1],
+    constitution: results[2],
+    wisdom: results[3],
+    intelligence: results[4],
+    charisma: results[5],
+  };
 }
 
 function generateTeamName(random: GameRandom): string {

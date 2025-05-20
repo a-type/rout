@@ -3,19 +3,7 @@ import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
 import React from 'react';
-
-const attributeList: Array<{
-  value: keyof Player['attributes'];
-  label: string;
-  color: string;
-}> = [
-  { value: 'strength', label: 'Strength', color: '#3B82F6' }, // blue-500
-  { value: 'wisdom', label: 'Wisdom', color: '#10B981' }, // emerald-500
-  { value: 'agility', label: 'Agility', color: '#F59E42' }, // orange-400
-  { value: 'intelligence', label: 'Intelligence', color: '#6366F1' }, // indigo-500
-  { value: 'constitution', label: 'Constitution', color: '#EF4444' }, // red-500
-  { value: 'charisma', label: 'Charisma', color: '#F472B6' }, // pink-400
-];
+import { Attributes } from './Attributes';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -87,47 +75,11 @@ export function PlayerPage({ id }: { id: string }) {
       <div>
         <h1 className="text-2xl font-bold mb-2">{playerName}</h1>
         <h2 className="text-lg mb-1">Team: {teamName}</h2>
-        <h2 className="text-lg mb-4">Positions: {playerPositions}</h2>
+        <h2 className="text-lg mb-4">
+          Positions: {playerPositions.toUpperCase()}
+        </h2>
       </div>
-      <div className="flex flex-col gap-2">
-        <h2 className="mb-1">Attributes</h2>
-        <div className="flex gap-2 items-center">
-          <span className="font-semibold">Overall:</span>
-          <span>{overall}</span>
-          <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
-            <div
-              className="h-full"
-              style={{
-                backgroundColor: 'yellow',
-                width: `${(overall / 100) * 100}%`,
-                transition: 'width 0.3s',
-              }}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-12 gap-x-4 gap-y-2 items-center">
-          {attributeList.map(({ value, label, color }) => (
-            <React.Fragment key={value}>
-              <span className="font-semibold col-span-2">{label}:</span>
-              <span className="col-span-1 text-right">
-                {player.attributes[value]}
-              </span>
-              <div className="col-span-3 flex items-center">
-                <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
-                  <div
-                    className="h-full"
-                    style={{
-                      backgroundColor: color,
-                      width: `${(player.attributes[value] / 20) * 100}%`,
-                      transition: 'width 0.3s',
-                    }}
-                  />
-                </div>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
+      <Attributes attributes={{ ...player.attributes, overall }} />
       <div>
         <h2 className="text-xl font-semibold mb-2">Stats</h2>
         <div className="overflow-x-auto">
@@ -142,7 +94,7 @@ export function PlayerPage({ id }: { id: string }) {
                 <th className="px-3 py-2 border-b">HR</th>
                 <th className="px-3 py-2 border-b">RBI</th>
                 <th className="px-3 py-2 border-b">R</th>
-                <th className="px-3 py-2 border-b">W</th>
+                <th className="px-3 py-2 border-b">BB</th>
                 <th className="px-3 py-2 border-b">SO</th>
               </tr>
             </thead>

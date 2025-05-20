@@ -11,7 +11,7 @@ import { useState } from 'react';
 const options: Array<{ label: string; value: keyof PlayerStats }> = [
   { label: 'H', value: 'hits' },
   { label: 'R', value: 'runs' },
-  { label: 'W', value: 'walks' },
+  { label: 'BB', value: 'walks' },
   { label: 'SO', value: 'strikeouts' },
   { label: 'AB', value: 'atBats' },
   { label: '2B', value: 'doubles' },

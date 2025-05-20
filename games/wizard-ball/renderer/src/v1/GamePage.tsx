@@ -73,7 +73,7 @@ export function GamePage({ id }: { id: string }) {
               <th>Player</th>
               <th>H</th>
               <th>R</th>
-              <th>W</th>
+              <th>BB</th>
               <th>SO</th>
               <th>AB</th>
               <th>2B</th>
