@@ -115,6 +115,14 @@ function generatePlayer(
     id: random.id(),
     teamId: null,
     positions: forcedPosition ? [forcedPosition] : [],
+    attributes: {
+      strength: random.int(1, 21),
+      agility: random.int(1, 21),
+      constitution: random.int(1, 21),
+      intelligence: random.int(1, 21),
+      wisdom: random.int(1, 21),
+      charisma: random.int(1, 21),
+    },
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];
   if (player.positions.length === 0) {

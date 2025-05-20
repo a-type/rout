@@ -6,6 +6,7 @@ import type {
   LeagueGame,
   LeagueGameState,
   LeagueRound,
+  Player,
   PlayerId,
   PlayerStats,
   RoundResult,
@@ -61,7 +62,7 @@ function simulateGame(
     gameState.currentBatterIndex[teamId] = 0;
   }
   while (!checkGameOver(gameState, game)) {
-    gameState = simulateInning(random, gameState);
+    gameState = simulateInning(random, gameState, league);
   }
   const homeScore = gameState.teamData[game.homeTeamId].score;
   const awayScore = gameState.teamData[game.awayTeamId].score;
@@ -286,42 +287,131 @@ function applyHit(
   return gameState;
 }
 
+function runnersInScoringPosition(gameState: LeagueGameState): number {
+  let runners = 0;
+  if (gameState.bases[2] !== null) {
+    runners += 1;
+  }
+  if (gameState.bases[3] !== null) {
+    runners += 1;
+  }
+  return runners;
+}
+
+/** Return a number between 0 and 1 based on situation (increases for fuller counts, more runners in scoring position, late in the game, close score) */
+function determineClutchFactor(gameState: LeagueGameState): number {
+  // Count fullness: 0.0 (0-0) to 1.0 (3-2)
+  const countFullness = (gameState.balls + gameState.strikes) / 5;
+
+  // Runners in scoring position: 0 (none), 1 (one), 2 (both)
+  const runners = runnersInScoringPosition(gameState) / 2;
+
+  // Late in the game: 0 (early), 1 (half-inning 17+ which is 9th inning or later)
+  // currentInning is 0-based and each full inning is 2 half-innings
+  const fullInning = Math.floor(gameState.currentInning / 2) + 1;
+  const lateGame = Math.min(1, (fullInning - 7) / 2);
+
+  // Close score: 1 if tied, 0 if 5+ run difference
+  const teamIds = Object.keys(gameState.teamData);
+  if (teamIds.length < 2) return 0;
+  const [teamA, teamB] = teamIds;
+  const scoreDiff = Math.abs(
+    gameState.teamData[teamA].score - gameState.teamData[teamB].score,
+  );
+  const closeScore = Math.max(0, 1 - scoreDiff / 5);
+
+  // Weighted average (tweak weights as needed)
+  const clutch =
+    0.25 * countFullness + 0.25 * runners + 0.25 * lateGame + 0.25 * closeScore;
+
+  return Math.max(0, Math.min(1, clutch));
+}
+
+function determineSwing(
+  random: GameRandom,
+  isStrike: boolean,
+  batter: Player,
+): boolean {
+  let swingChance = isStrike ? 0.68 : 0.3;
+  const wisdomModifier =
+    1 + (isStrike ? 1 : -1) * (batter.attributes.wisdom - 10) * 0.01;
+  swingChance *= wisdomModifier;
+  return random.float(0, 1) < swingChance;
+}
+
+function determineContact(
+  random: GameRandom,
+  isStrike: boolean,
+  batter: Player,
+  gameState: LeagueGameState,
+): boolean {
+  let contactChance = isStrike ? 0.85 : 0.6;
+  const constitutionModifier = 1 + (batter.attributes.constitution - 10) * 0.01;
+
+  const countFactor = gameState.strikes;
+  const intelligenceModifier =
+    1 + (batter.attributes.intelligence - 10) * (countFactor * 0.01);
+  contactChance *= constitutionModifier + intelligenceModifier;
+  return random.float(0, 1) < contactChance;
+}
+
+type HitTable = Array<{ weight: number; value: PitchOutcome }>;
+
+function determineHitTable(
+  isStrike: boolean,
+  batter: Player,
+  gameState: LeagueGameState,
+): HitTable {
+  const strengthModifier = 1 + (batter.attributes.strength - 10) * 0.01;
+  const agilityModifier = 1 + (batter.attributes.agility - 10) * 0.01;
+  const charismaModifier =
+    1 +
+    (batter.attributes.charisma - 10) * 0.03 * determineClutchFactor(gameState);
+  const hitTable: HitTable = isStrike
+    ? [
+        { weight: 15 * (agilityModifier + charismaModifier), value: 'hit' },
+        { weight: 5 * (strengthModifier + charismaModifier), value: 'double' },
+        {
+          weight: 1 * (strengthModifier + agilityModifier + charismaModifier),
+          value: 'triple',
+        },
+        { weight: 4 * (strengthModifier + charismaModifier), value: 'homeRun' },
+        { weight: 15, value: 'foul' },
+        { weight: 60, value: 'out' },
+      ]
+    : [
+        { weight: 8 * agilityModifier, value: 'hit' },
+        { weight: 2 * strengthModifier, value: 'double' },
+        { weight: 0.2 * (strengthModifier + agilityModifier), value: 'triple' },
+        { weight: 1 * strengthModifier, value: 'homeRun' },
+        { weight: 15, value: 'foul' },
+        { weight: 74, value: 'out' },
+      ];
+  return hitTable;
+}
+
 function simulatePitch(
   random: GameRandom,
   gameState: LeagueGameState,
+  league: League,
 ): LeagueGameState {
   const batterId = getCurrentBatter(gameState);
+  const batter = league.playerLookup[batterId];
   // Determine whether the pitch is a ball or strike
   const isStrike = random.float(0, 1) < 0.63;
 
   // Determine the outcome of the pitch
   let outcome: PitchOutcome;
-  // If the pitch is a strike, check if the batter swung
-  const swingChance = isStrike ? 0.68 : 0.3;
-  const batterSwung = random.float(0, 1) < swingChance;
+  const batterSwung = determineSwing(random, isStrike, batter);
   if (!batterSwung) {
     outcome = isStrike ? 'strike' : 'ball';
   } else {
-    const contactChance = isStrike ? 0.85 : 0.6;
-    const contactMade = random.float(0, 1) < contactChance;
+    const contactMade = determineContact(random, isStrike, batter, gameState);
     if (contactMade) {
-      outcome = isStrike
-        ? randomTable(random, [
-            { weight: 15, value: 'hit' },
-            { weight: 5, value: 'double' },
-            { weight: 1, value: 'triple' },
-            { weight: 4, value: 'homeRun' },
-            { weight: 15, value: 'foul' },
-            { weight: 60, value: 'out' },
-          ])
-        : randomTable(random, [
-            { weight: 8, value: 'hit' },
-            { weight: 2, value: 'double' },
-            { weight: 0.2, value: 'triple' },
-            { weight: 1, value: 'homeRun' },
-            { weight: 15, value: 'foul' },
-            { weight: 74, value: 'out' },
-          ]);
+      outcome = randomTable(
+        random,
+        determineHitTable(isStrike, batter, gameState),
+      );
     } else {
       outcome = 'strike';
     }
@@ -396,10 +486,11 @@ function simulatePitch(
 function simulateInning(
   random: GameRandom,
   gameState: LeagueGameState,
+  league: League,
 ): LeagueGameState {
   const initialScore = gameState.teamData[gameState.battingTeam].score;
   while (gameState.outs < 3) {
-    gameState = simulatePitch(random, gameState);
+    gameState = simulatePitch(random, gameState, league);
   }
   const nextScore = gameState.teamData[gameState.battingTeam].score;
   gameState.inningData.push({

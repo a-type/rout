@@ -15,6 +15,14 @@ export type Player = {
   id: PlayerId;
   teamId: TeamId | null;
   positions: Position[];
+  attributes: {
+    strength: number;
+    agility: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
 };
 
 export type Position =
