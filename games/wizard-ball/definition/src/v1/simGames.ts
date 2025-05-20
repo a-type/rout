@@ -97,20 +97,21 @@ type PitchOutcome =
   | 'homeRun'
   | 'foul';
 
-function randomTable<T>(
+function randomTable<T extends string>(
   random: GameRandom,
-  table: Array<{ weight: number; value: T }>,
-) {
-  const totalWeight = table.reduce((sum, item) => sum + item.weight, 0);
+  table: Record<T, number>,
+): T {
+  const entries = Object.entries(table) as [T, number][];
+  const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
   const randomValue = random.int(0, totalWeight - 1);
   let cumulativeWeight = 0;
-  for (const item of table) {
-    cumulativeWeight += item.weight;
+  for (const [value, weight] of entries) {
+    cumulativeWeight += weight;
     if (randomValue < cumulativeWeight) {
-      return item.value;
+      return value;
     }
   }
-  return table[table.length - 1].value; // Fallback
+  return entries[entries.length - 1][0]; // Fallback
 }
 
 function initialGameState(): LeagueGameState {
@@ -377,7 +378,7 @@ function determineContact(
   return random.float(0, 1) < contactChance;
 }
 
-type HitTable = Array<{ weight: number; value: PitchOutcome }>;
+type HitTable = Record<Exclude<PitchOutcome, 'ball' | 'strike'>, number>;
 
 function determineHitTable(
   isStrike: boolean,
@@ -390,34 +391,31 @@ function determineHitTable(
   const strengthModifier = scaleAttributePercent(strength, 0.1);
   const agilityModifier = scaleAttributePercent(agility, 0.1);
   const charismaModifier = scaleAttributePercent(charisma, 0.25 * clutchFactor);
+
   const hitTable: HitTable = isStrike
-    ? [
-        { weight: 15 * (agilityModifier * charismaModifier), value: 'hit' },
-        { weight: 5 * (strengthModifier * charismaModifier), value: 'double' },
-        {
-          weight: 1 * (strengthModifier * agilityModifier * charismaModifier),
-          value: 'triple',
-        },
-        { weight: 4 * (strengthModifier * charismaModifier), value: 'homeRun' },
-        { weight: 15, value: 'foul' },
-        { weight: 60, value: 'out' },
-      ]
-    : [
-        { weight: 8 * agilityModifier, value: 'hit' },
-        { weight: 2 * strengthModifier, value: 'double' },
-        { weight: 0.2 * (strengthModifier * agilityModifier), value: 'triple' },
-        { weight: 1 * strengthModifier, value: 'homeRun' },
-        { weight: 15, value: 'foul' },
-        { weight: 74, value: 'out' },
-      ];
-  (pitchData.hitTableFactor ?? []).forEach((factor) => {
-    if (!factor) return;
-    const { weight, value } = factor;
-    const existingEntry = hitTable.find((entry) => entry.value === value);
-    if (existingEntry) {
-      existingEntry.weight *= weight;
+    ? {
+        hit: 15 * (agilityModifier * charismaModifier),
+        double: 5 * (strengthModifier * charismaModifier),
+        triple: 1 * (strengthModifier * agilityModifier * charismaModifier),
+        homeRun: 4 * (strengthModifier * charismaModifier),
+        foul: 15,
+        out: 60,
+      }
+    : {
+        hit: 8 * agilityModifier,
+        double: 2 * strengthModifier,
+        triple: 0.2 * (strengthModifier * agilityModifier),
+        homeRun: 1 * strengthModifier,
+        foul: 15,
+        out: 74,
+      };
+
+  Object.entries(pitchData.hitTableFactor ?? {}).forEach(([value, weight]) => {
+    const key = value as keyof HitTable;
+    if (hitTable[key] !== undefined) {
+      hitTable[key] *= weight;
     } else {
-      hitTable.push({ weight: weight, value: value });
+      hitTable[key] = weight;
     }
   });
   return hitTable;
@@ -429,7 +427,7 @@ type PitchData = {
   contactBallFactor: number;
   swingStrikeFactor: number;
   swingBallFactor: number;
-  hitTableFactor: Partial<HitTable>;
+  hitTableFactor: Partial<Record<PitchOutcome, number>>;
 };
 
 const pitchTypes = {
@@ -439,10 +437,10 @@ const pitchTypes = {
     contactBallFactor: 1,
     swingStrikeFactor: 1,
     swingBallFactor: 1,
-    hitTableFactor: [
-      { weight: 1.1, value: 'hit' },
-      { weight: 1.05, value: 'double' },
-    ],
+    hitTableFactor: {
+      hit: 1.1,
+      double: 1.05,
+    },
   },
   curveball: {
     strikeFactor: 0.6,
@@ -450,14 +448,14 @@ const pitchTypes = {
     contactBallFactor: 0.8,
     swingStrikeFactor: 0.9,
     swingBallFactor: 0.8,
-    hitTableFactor: [
-      { weight: 0.9, value: 'hit' },
-      { weight: 0.9, value: 'double' },
-      { weight: 0.8, value: 'triple' },
-      { weight: 0.9, value: 'homeRun' },
-      { weight: 1.05, value: 'foul' },
-      { weight: 1.1, value: 'out' },
-    ],
+    hitTableFactor: {
+      hit: 0.9,
+      double: 0.9,
+      triple: 0.8,
+      homeRun: 0.9,
+      foul: 1.05,
+      out: 1.1,
+    },
   },
   changeup: {
     strikeFactor: 0.58,
@@ -465,12 +463,12 @@ const pitchTypes = {
     contactBallFactor: 0.85,
     swingStrikeFactor: 1.05,
     swingBallFactor: 1.1,
-    hitTableFactor: [
-      { weight: 0.9, value: 'hit' },
-      { weight: 0.8, value: 'triple' },
-      { weight: 0.9, value: 'homeRun' },
-      { weight: 1.1, value: 'out' },
-    ],
+    hitTableFactor: {
+      hit: 0.9,
+      triple: 0.8,
+      homeRun: 0.9,
+      out: 1.1,
+    },
   },
   slider: {
     strikeFactor: 0.62,
@@ -478,13 +476,13 @@ const pitchTypes = {
     contactBallFactor: 0.75,
     swingStrikeFactor: 1.1,
     swingBallFactor: 1.2,
-    hitTableFactor: [
-      { weight: 0.9, value: 'hit' },
-      { weight: 0.8, value: 'triple' },
-      { weight: 0.9, value: 'homeRun' },
-      { weight: 1.05, value: 'foul' },
-      { weight: 1.1, value: 'out' },
-    ],
+    hitTableFactor: {
+      hit: 0.9,
+      triple: 0.8,
+      homeRun: 0.9,
+      foul: 1.05,
+      out: 1.1,
+    },
   },
 } satisfies Record<string, PitchData>;
 
