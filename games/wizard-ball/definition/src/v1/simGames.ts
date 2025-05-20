@@ -343,16 +343,19 @@ function determineSwing(
   random: GameRandom,
   isStrike: boolean,
   batter: Player,
+  game: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
+  const { wisdom, agility } = batter.attributes;
+  const countFactor = scaleAttributePercent(
+    wisdom + 5,
+    (game.strikes * 1.5 - game.balls) * 0.1,
+  );
   let swingChance = isStrike
     ? 0.68 * pitchData.swingStrikeFactor
-    : 0.3 * pitchData.swingBallFactor;
-  const wisdomModifier = scaleAttributePercent(
-    batter.attributes.wisdom,
-    isStrike ? 0.1 : -0.1,
-  );
-  swingChance *= wisdomModifier;
+    : 0.25 * pitchData.swingBallFactor;
+  const agilityModifier = scaleAttributePercent(agility, isStrike ? 0.1 : -0.1);
+  swingChance *= agilityModifier * countFactor;
   return random.float(0, 1) < swingChance;
 }
 
@@ -386,8 +389,9 @@ function determineHitTable(
   gameState: LeagueGameState,
   pitchData: PitchData,
 ): HitTable {
-  const { strength, agility, charisma } = batter.attributes;
+  const { strength, agility, charisma, constitution } = batter.attributes;
   const clutchFactor = determineClutchFactor(gameState);
+  const constitutionModifier = scaleAttributePercent(constitution, 0.1);
   const strengthModifier = scaleAttributePercent(strength, 0.1);
   const agilityModifier = scaleAttributePercent(agility, 0.1);
   const charismaModifier = scaleAttributePercent(charisma, 0.25 * clutchFactor);
@@ -397,17 +401,17 @@ function determineHitTable(
         hit: 15 * (agilityModifier * charismaModifier),
         double: 5 * (strengthModifier * charismaModifier),
         triple: 1 * (strengthModifier * agilityModifier * charismaModifier),
-        homeRun: 4 * (strengthModifier * charismaModifier),
+        homeRun: 4 * (scaleAttributePercent(strength, 0.2) * charismaModifier),
         foul: 15,
-        out: 60,
+        out: 60 * (2 - constitutionModifier),
       }
     : {
         hit: 8 * agilityModifier,
         double: 2 * strengthModifier,
         triple: 0.2 * (strengthModifier * agilityModifier),
-        homeRun: 1 * strengthModifier,
+        homeRun: 1 * scaleAttributePercent(strength, 0.2),
         foul: 15,
-        out: 74,
+        out: 75 * (2 - constitutionModifier),
       };
 
   Object.entries(pitchData.hitTableFactor ?? {}).forEach(([value, weight]) => {
@@ -430,9 +434,13 @@ type PitchData = {
   hitTableFactor: Partial<Record<PitchOutcome, number>>;
 };
 
+type ActualPitch = PitchData & {
+  quality: number;
+};
+
 const pitchTypes = {
   fastball: {
-    strikeFactor: 0.7,
+    strikeFactor: 1,
     contactStrikeFactor: 1,
     contactBallFactor: 1,
     swingStrikeFactor: 1,
@@ -443,7 +451,7 @@ const pitchTypes = {
     },
   },
   curveball: {
-    strikeFactor: 0.6,
+    strikeFactor: 0.85,
     contactStrikeFactor: 0.9,
     contactBallFactor: 0.8,
     swingStrikeFactor: 0.9,
@@ -458,7 +466,7 @@ const pitchTypes = {
     },
   },
   changeup: {
-    strikeFactor: 0.58,
+    strikeFactor: 0.83,
     contactStrikeFactor: 0.95,
     contactBallFactor: 0.85,
     swingStrikeFactor: 1.05,
@@ -471,7 +479,7 @@ const pitchTypes = {
     },
   },
   slider: {
-    strikeFactor: 0.62,
+    strikeFactor: 0.89,
     contactStrikeFactor: 0.9,
     contactBallFactor: 0.75,
     swingStrikeFactor: 1.1,
@@ -484,6 +492,21 @@ const pitchTypes = {
       out: 1.1,
     },
   },
+  sinker: {
+    strikeFactor: 0.98,
+    contactStrikeFactor: 1.05,
+    contactBallFactor: 1.05,
+    swingStrikeFactor: 0.95,
+    swingBallFactor: 1.0,
+    hitTableFactor: {
+      hit: 1.0,
+      double: 0.95,
+      triple: 0.8,
+      homeRun: 0.7,
+      foul: 1.0,
+      out: 1.15,
+    },
+  },
 } satisfies Record<string, PitchData>;
 
 type PitchKind = keyof typeof pitchTypes;
@@ -492,10 +515,10 @@ function determinePitchType(
   random: GameRandom,
   pitcher: Player,
   game: LeagueGameState,
-): PitchData {
+): ActualPitch {
   const clutchFactor = determineClutchFactor(game);
   const pitchType = random.item(Object.keys(pitchTypes) as PitchKind[]);
-  const pitchData = deepClone(pitchTypes[pitchType]);
+  const pitchData = deepClone(pitchTypes[pitchType]) as ActualPitch;
   const { strength, agility, constitution, wisdom, intelligence, charisma } =
     pitcher.attributes;
   const strengthFactor = scaleAttributePercent(strength, 0.1);
@@ -505,6 +528,25 @@ function determinePitchType(
   const intelligenceFactor = scaleAttributePercent(intelligence, 0.1);
   const charismaFactor = scaleAttributePercent(charisma, 0.25 * clutchFactor);
 
+  const baseQuality = scaleAttributePercent(random.float(1, 21), 0.1);
+  let quality = baseQuality;
+  switch (pitchType) {
+    case 'fastball':
+      quality *= strengthFactor;
+    case 'curveball':
+      quality *= agilityFactor;
+      break;
+    case 'changeup':
+      quality *= wisdomFactor;
+      break;
+    case 'slider':
+      quality *= intelligenceFactor;
+      break;
+    case 'sinker':
+      quality *= constitutionFactor;
+  }
+  pitchData.quality = quality;
+
   pitchData.strikeFactor *= agilityFactor * constitutionFactor;
   pitchData.swingStrikeFactor *=
     strengthFactor * agilityFactor * constitutionFactor;
@@ -513,7 +555,19 @@ function determinePitchType(
   pitchData.contactStrikeFactor *=
     (2 - strengthFactor) * (2 - agilityFactor) * constitutionFactor;
   pitchData.contactBallFactor *=
-    2 - wisdomFactor * intelligenceFactor * charismaFactor;
+    (2 - wisdomFactor) * (2 - intelligenceFactor) * (2 - charismaFactor);
+
+  pitchData.strikeFactor *= quality;
+  pitchData.swingStrikeFactor *= 2 - quality;
+  pitchData.swingBallFactor *= quality;
+  pitchData.contactStrikeFactor *= 2 - quality;
+  pitchData.contactBallFactor *= 2 - quality;
+  Object.keys(pitchData.hitTableFactor).forEach((key) => {
+    const value = pitchData.hitTableFactor[key as keyof HitTable] || 1;
+    pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
+  });
+
+  // console.log('pitch', { quality, baseQuality, pitchData });
 
   return pitchData;
 }
@@ -529,13 +583,20 @@ function simulatePitch(
   const pitcher = league.playerLookup[pitcherId];
 
   const pitchData = determinePitchType(random, pitcher, gameState);
+  const strikeChance = 0.7 * pitchData.strikeFactor;
 
   // Determine whether the pitch is a ball or strike
-  const isStrike = random.float(0, 1) < pitchData.strikeFactor;
+  const isStrike = random.float(0, 1) < strikeChance;
 
   // Determine the outcome of the pitch
   let outcome: PitchOutcome;
-  const batterSwung = determineSwing(random, isStrike, batter, pitchData);
+  const batterSwung = determineSwing(
+    random,
+    isStrike,
+    batter,
+    gameState,
+    pitchData,
+  );
   if (!batterSwung) {
     outcome = isStrike ? 'strike' : 'ball';
   } else {
@@ -564,7 +625,6 @@ function simulatePitch(
       if (gameState.balls >= 4) {
         gameState = applyWalk(gameState);
         gameState = addToPlayerStats(gameState, batterId, {
-          atBats: 1,
           walks: 1,
         });
         gameState = incrementBatterIndex(gameState, gameState.battingTeam);

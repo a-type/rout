@@ -7,8 +7,18 @@ import { clsx, Tabs } from '@a-type/ui';
 import { PlayerName } from './PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
+import { roundFloat } from './utils';
 
-const options: Array<{ label: string; value: keyof PlayerStats }> = [
+type CalculatedStats = {
+  battingAverage: string;
+  onBasePercentage: string;
+  sluggingPercentage: string;
+};
+
+const options: Array<{
+  label: string;
+  value: keyof (PlayerStats & CalculatedStats);
+}> = [
   { label: 'H', value: 'hits' },
   { label: 'R', value: 'runs' },
   { label: 'BB', value: 'walks' },
@@ -18,6 +28,9 @@ const options: Array<{ label: string; value: keyof PlayerStats }> = [
   { label: '3B', value: 'triples' },
   { label: 'HR', value: 'homeRuns' },
   { label: 'RBI', value: 'runsBattedIn' },
+  { label: 'BA', value: 'battingAverage' },
+  { label: 'OBP', value: 'onBasePercentage' },
+  { label: 'SLG', value: 'sluggingPercentage' },
 ];
 
 export function LeagueLeaders() {
@@ -42,8 +55,39 @@ export function LeagueLeaders() {
       }
     });
   });
+  const extraPlayerStats: Record<PlayerId, CalculatedStats> = {};
+  Object.entries(playerStats).forEach(([playerId, stats]) => {
+    const atBats = stats.atBats || 1;
+    const hits = stats.hits || 0;
+    const walks = stats.walks || 0;
+    const runs = stats.runs || 0;
+    const doubles = stats.doubles || 0;
+    const triples = stats.triples || 0;
+    const homeRuns = stats.homeRuns || 0;
+    const runsBattedIn = stats.runsBattedIn || 0;
+    const totalBases = hits + doubles + triples * 2 + homeRuns * 3;
+    const battingAverage = roundFloat(hits / atBats, 3).toFixed(3);
+    const onBasePercentage = roundFloat(
+      (hits + walks) / (atBats + walks),
+      3,
+    ).toFixed(3);
+    const sluggingPercentage = roundFloat(totalBases / atBats, 3).toFixed(3);
+    extraPlayerStats[playerId] = {
+      battingAverage,
+      onBasePercentage,
+      sluggingPercentage,
+    };
+  });
+  const mergedPlayerStats: Record<PlayerId, PlayerStats & CalculatedStats> = {};
+  Object.entries(playerStats).forEach(([playerId, stats]) => {
+    mergedPlayerStats[playerId] = {
+      ...stats,
+      ...extraPlayerStats[playerId],
+    };
+  });
+
   const findTop = (stat: keyof PlayerStats, count: number = 5) => {
-    return Object.entries(playerStats)
+    return Object.entries(mergedPlayerStats)
       .sort(([, a], [, b]) => b[stat] - a[stat])
       .slice(0, count)
       .map(([playerId, stats]) => ({
