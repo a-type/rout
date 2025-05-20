@@ -3,21 +3,21 @@ import type {
   PlayerStats,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
-import { Tabs } from '@a-type/ui';
+import { clsx, Tabs } from '@a-type/ui';
 import { PlayerName } from './PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
 
 const options: Array<{ label: string; value: keyof PlayerStats }> = [
-  { label: 'Hits', value: 'hits' },
-  { label: 'Runs', value: 'runs' },
-  { label: 'Walks', value: 'walks' },
-  { label: 'Strikeouts', value: 'strikeouts' },
-  { label: 'ABs', value: 'atBats' },
-  { label: 'Doubles', value: 'doubles' },
-  { label: 'Triples', value: 'triples' },
-  { label: 'HRs', value: 'homeRuns' },
-  { label: 'RBIs', value: 'runsBattedIn' },
+  { label: 'H', value: 'hits' },
+  { label: 'R', value: 'runs' },
+  { label: 'W', value: 'walks' },
+  { label: 'SO', value: 'strikeouts' },
+  { label: 'AB', value: 'atBats' },
+  { label: '2B', value: 'doubles' },
+  { label: '3B', value: 'triples' },
+  { label: 'HR', value: 'homeRuns' },
+  { label: 'RBI', value: 'runsBattedIn' },
 ];
 
 export function LeagueLeaders() {
@@ -57,38 +57,46 @@ export function LeagueLeaders() {
       value={tabValue}
       onValueChange={(v) => setTabValue(v as keyof PlayerStats)}
     >
-      <div className="flex flex-col p-2">
-        <Tabs.List className="mb-2">
-          {options.map((option) => (
+      <div className="flex flex-col p-1">
+        <Tabs.List className="gap-none">
+          {options.map((option, idx, arr) => (
             <Tabs.Trigger
               key={option.value}
               value={option.value as keyof PlayerStats}
-              className="text-sm"
+              className={clsx(
+                idx == 0 && 'rounded-l-lg',
+                idx == arr.length - 1 && 'rounded-r-lg',
+                'text-xs border-none rounded-none min-w-[1rem] bg-gray-700 hover:bg-gray-500 ring-0',
+              )}
             >
               {option.label}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
-        <h2 className="mb-1">Leaders</h2>
-        {findTop(tabValue).map((player) => (
-          <div
-            key={player.playerId}
-            className="flex flex-row gap-2 items-center cursor-pointer hover:bg-gray-500/50 p-1"
-            onClick={() => {
-              setSearchParams((params) => {
-                params.delete('teamId');
-                params.delete('gameId');
-                params.set('playerId', player.playerId);
-                return params;
-              });
-            }}
-          >
-            <span className="text-sm">
-              <PlayerName id={player.playerId} />
-            </span>
-            <span className="text-sm">{player[tabValue]}</span>
-          </div>
-        ))}
+        <h2 className="mb-1">League Leaders</h2>
+        <table className="table-auto  border border-gray-300 rounded-lg shadow-sm">
+          <tbody>
+            {findTop(tabValue).map((player) => (
+              <tr
+                key={player.playerId}
+                className="cursor-pointer hover:bg-gray-500/50 p-1"
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.delete('gameId');
+                    params.set('playerId', player.playerId);
+                    return params;
+                  });
+                }}
+              >
+                <td className="text-left p-1">
+                  <PlayerName id={player.playerId} />
+                </td>
+                <td className="text-right p-1">{player[tabValue]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </Tabs>
   );

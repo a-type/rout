@@ -35,7 +35,7 @@ function checkGameOver(
   const pitchingScore =
     gameState.battingTeam === leagueGame.homeTeamId ? awayScore : homeScore;
 
-  if (gameState.currentInning > 30) {
+  if (gameState.currentInning > 50) {
     return true;
   }
   if (gameState.currentInning >= 18 && battingScore > pitchingScore) {
@@ -368,14 +368,16 @@ function simulatePitch(
         });
       }
       gameState = applyHit(gameState, outcome);
+      gameState = incrementBatterIndex(gameState, gameState.battingTeam);
+      gameState = resetCount(gameState);
       break;
   }
 
   if (gameState.balls >= 4) {
     gameState = applyWalk(gameState);
-    gameState = resetCount(gameState);
     gameState = addToPlayerStats(gameState, batterId, { atBats: 1, walks: 1 });
     gameState = incrementBatterIndex(gameState, gameState.battingTeam);
+    gameState = resetCount(gameState);
   }
   if (gameState.strikes >= 3) {
     // Strikeout
