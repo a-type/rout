@@ -86,8 +86,9 @@ export function TeamPage({ id }: { id: TeamId }) {
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
       <div className="flex flex-col p-2">
-        <h2>
-          {team.name} ({team.wins} - {team.losses})
+        <h2 className="flex items-center gap-2">
+          <span style={{ fontSize: 64 }}>{team.icon}</span> {team.name} (
+          {team.wins} - {team.losses})
         </h2>
         <Tabs.List className="gap-none">
           {tabOptions.map((option, idx, arr) => (

@@ -3,6 +3,7 @@ export type PlayerId = string;
 export type GameId = string;
 
 export type Team = {
+  icon: string;
   name: string;
   id: TeamId;
   playerIds: PlayerId[];

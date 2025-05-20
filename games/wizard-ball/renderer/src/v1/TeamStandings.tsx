@@ -34,7 +34,10 @@ export function TeamStandings() {
                 });
               }}
             >
-              <td className="text-left p-1">{team.name}</td>
+              <td className="text-left pl-2 flex items-center gap-2">
+                <span style={{ fontSize: 24 }}>{team.icon}</span>
+                {team.name}
+              </td>
               <td className="text-center p-1">{team.wins}</td>
               <td className="text-center p-1">{team.losses}</td>
             </tr>

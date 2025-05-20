@@ -26,7 +26,8 @@ export function generateLeague(random: GameRandom): League {
   const teams = Array.from({ length: 10 }).map(() => generateTeam(random));
   const teamNames = generateTeamNames(random, teams.length);
   teams.forEach((team, index) => {
-    team.name = teamNames[index];
+    team.name = teamNames[index].name;
+    team.icon = teamNames[index].icon;
     league.teamIds.push(team.id);
     league.teamLookup[team.id] = team;
   });
@@ -99,6 +100,7 @@ export function generateLeague(random: GameRandom): League {
 function generateTeam(random: GameRandom): Team {
   let team: Team = {
     name: 'Unnaemed Team',
+    icon: '⚾',
     id: random.id(),
     playerIds: [],
     wins: 0,
@@ -149,14 +151,17 @@ function generateAttributes(random: GameRandom): Player['attributes'] {
   };
 }
 
-function generateTeamNames(random: GameRandom, count: number): string[] {
+function generateTeamNames(
+  random: GameRandom,
+  count: number,
+): { name: string; icon: string }[] {
   const adjectives = random.shuffle(teamAdjectives);
   const nouns = random.shuffle(teamNouns);
-  const names: string[] = [];
+  const names: { name: string; icon: string }[] = [];
   for (let i = 0; i < count; i++) {
     const adjective = adjectives[i % adjectives.length];
-    const noun = nouns[i % nouns.length];
-    names.push(`${adjective} ${noun}`);
+    const { text: noun, icon } = nouns[i % nouns.length];
+    names.push({ name: `${adjective} ${noun}`, icon });
   }
   return names;
 }
