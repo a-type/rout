@@ -13,11 +13,11 @@ const options: Array<{ label: string; value: keyof PlayerStats }> = [
   { label: 'Runs', value: 'runs' },
   { label: 'Walks', value: 'walks' },
   { label: 'Strikeouts', value: 'strikeouts' },
-  { label: 'At Bats', value: 'atBats' },
+  { label: 'ABs', value: 'atBats' },
   { label: 'Doubles', value: 'doubles' },
   { label: 'Triples', value: 'triples' },
-  { label: 'Home Runs', value: 'homeRuns' },
-  { label: 'Runs Batted In', value: 'runsBattedIn' },
+  { label: 'HRs', value: 'homeRuns' },
+  { label: 'RBIs', value: 'runsBattedIn' },
 ];
 
 export function LeagueLeaders() {
