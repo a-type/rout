@@ -508,13 +508,14 @@ function determinePitchType(
   const charismaFactor = scaleAttributePercent(charisma, 0.25 * clutchFactor);
 
   pitchData.strikeFactor *= agilityFactor * constitutionFactor;
-  pitchData.swingStrikeFactor *= (2 - strengthFactor) * (2 - agilityFactor);
+  pitchData.swingStrikeFactor *=
+    strengthFactor * agilityFactor * constitutionFactor;
   pitchData.swingBallFactor *=
     wisdomFactor * intelligenceFactor * charismaFactor;
   pitchData.contactStrikeFactor *=
-    (2 - strengthFactor) * (2 - agilityFactor) * (2 - constitutionFactor);
+    (2 - strengthFactor) * (2 - agilityFactor) * constitutionFactor;
   pitchData.contactBallFactor *=
-    (2 - wisdomFactor) * (2 - intelligenceFactor) * (2 - constitutionFactor);
+    2 - wisdomFactor * intelligenceFactor * charismaFactor;
 
   return pitchData;
 }
