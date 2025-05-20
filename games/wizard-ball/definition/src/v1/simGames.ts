@@ -331,8 +331,11 @@ function determineSwing(
   random: GameRandom,
   isStrike: boolean,
   batter: Player,
+  pitchData: PitchData,
 ): boolean {
-  let swingChance = isStrike ? 0.68 : 0.3;
+  let swingChance = isStrike
+    ? 0.68 * pitchData.swingStrikeFactor
+    : 0.3 * pitchData.swingBallFactor;
   const wisdomModifier =
     1 + (isStrike ? 1 : -1) * (batter.attributes.wisdom - 10) * 0.01;
   swingChance *= wisdomModifier;
@@ -344,8 +347,11 @@ function determineContact(
   isStrike: boolean,
   batter: Player,
   gameState: LeagueGameState,
+  pitchData: PitchData,
 ): boolean {
-  let contactChance = isStrike ? 0.85 : 0.6;
+  let contactChance = isStrike
+    ? 0.85 * pitchData.contactStrikeFactor
+    : 0.6 * pitchData.contactBallFactor;
   const constitutionModifier = 1 + (batter.attributes.constitution - 10) * 0.01;
 
   const countFactor = gameState.strikes;
@@ -361,6 +367,7 @@ function determineHitTable(
   isStrike: boolean,
   batter: Player,
   gameState: LeagueGameState,
+  pitchData: PitchData,
 ): HitTable {
   const strengthModifier = 1 + (batter.attributes.strength - 10) * 0.01;
   const agilityModifier = 1 + (batter.attributes.agility - 10) * 0.01;
@@ -387,7 +394,91 @@ function determineHitTable(
         { weight: 15, value: 'foul' },
         { weight: 74, value: 'out' },
       ];
+  (pitchData.hitTableFactor ?? []).forEach((factor) => {
+    if (!factor) return;
+    const { weight, value } = factor;
+    const existingEntry = hitTable.find((entry) => entry.value === value);
+    if (existingEntry) {
+      existingEntry.weight *= weight;
+    } else {
+      hitTable.push({ weight: weight, value: value });
+    }
+  });
   return hitTable;
+}
+
+type PitchData = {
+  strikeFactor: number;
+  contactStrikeFactor: number;
+  contactBallFactor: number;
+  swingStrikeFactor: number;
+  swingBallFactor: number;
+  hitTableFactor: Partial<HitTable>;
+};
+
+const pitchTypes = {
+  fastball: {
+    strikeFactor: 0.7,
+    contactStrikeFactor: 1,
+    contactBallFactor: 1,
+    swingStrikeFactor: 1,
+    swingBallFactor: 1,
+    hitTableFactor: [
+      { weight: 1.1, value: 'hit' },
+      { weight: 1.05, value: 'double' },
+    ],
+  },
+  curveball: {
+    strikeFactor: 0.6,
+    contactStrikeFactor: 0.9,
+    contactBallFactor: 0.8,
+    swingStrikeFactor: 0.9,
+    swingBallFactor: 0.8,
+    hitTableFactor: [
+      { weight: 0.9, value: 'hit' },
+      { weight: 0.9, value: 'double' },
+      { weight: 0.8, value: 'triple' },
+      { weight: 0.9, value: 'homeRun' },
+      { weight: 1.05, value: 'foul' },
+      { weight: 1.1, value: 'out' },
+    ],
+  },
+  changeup: {
+    strikeFactor: 0.58,
+    contactStrikeFactor: 0.95,
+    contactBallFactor: 0.85,
+    swingStrikeFactor: 1.05,
+    swingBallFactor: 1.1,
+    hitTableFactor: [
+      { weight: 0.9, value: 'hit' },
+      { weight: 0.8, value: 'triple' },
+      { weight: 0.9, value: 'homeRun' },
+      { weight: 1.1, value: 'out' },
+    ],
+  },
+  slider: {
+    strikeFactor: 0.62,
+    contactStrikeFactor: 0.9,
+    contactBallFactor: 0.75,
+    swingStrikeFactor: 1.1,
+    swingBallFactor: 1.2,
+    hitTableFactor: [
+      { weight: 0.9, value: 'hit' },
+      { weight: 0.8, value: 'triple' },
+      { weight: 0.9, value: 'homeRun' },
+      { weight: 1.05, value: 'foul' },
+      { weight: 1.1, value: 'out' },
+    ],
+  },
+} satisfies Record<string, PitchData>;
+
+type PitchKind = keyof typeof pitchTypes;
+
+function determinePitchType(random: GameRandom): PitchData {
+  const pitchType = random.item(Object.keys(pitchTypes) as PitchKind[]);
+  const pitchData = pitchTypes[pitchType];
+
+  return pitchData;
 }
 
 function simulatePitch(
@@ -397,20 +488,29 @@ function simulatePitch(
 ): LeagueGameState {
   const batterId = getCurrentBatter(gameState);
   const batter = league.playerLookup[batterId];
+
+  const pitchData = determinePitchType(random);
+
   // Determine whether the pitch is a ball or strike
-  const isStrike = random.float(0, 1) < 0.63;
+  const isStrike = random.float(0, 1) < pitchData.strikeFactor;
 
   // Determine the outcome of the pitch
   let outcome: PitchOutcome;
-  const batterSwung = determineSwing(random, isStrike, batter);
+  const batterSwung = determineSwing(random, isStrike, batter, pitchData);
   if (!batterSwung) {
     outcome = isStrike ? 'strike' : 'ball';
   } else {
-    const contactMade = determineContact(random, isStrike, batter, gameState);
+    const contactMade = determineContact(
+      random,
+      isStrike,
+      batter,
+      gameState,
+      pitchData,
+    );
     if (contactMade) {
       outcome = randomTable(
         random,
-        determineHitTable(isStrike, batter, gameState),
+        determineHitTable(isStrike, batter, gameState, pitchData),
       );
     } else {
       outcome = 'strike';
