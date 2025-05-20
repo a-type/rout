@@ -373,7 +373,9 @@ function determineHitTable(
   const agilityModifier = 1 + (batter.attributes.agility - 10) * 0.01;
   const charismaModifier =
     1 +
-    (batter.attributes.charisma - 10) * 0.03 * determineClutchFactor(gameState);
+    (batter.attributes.charisma - 10) *
+      0.025 *
+      determineClutchFactor(gameState);
   const hitTable: HitTable = isStrike
     ? [
         { weight: 15 * (agilityModifier + charismaModifier), value: 'hit' },
@@ -474,9 +476,23 @@ const pitchTypes = {
 
 type PitchKind = keyof typeof pitchTypes;
 
-function determinePitchType(random: GameRandom): PitchData {
+function determinePitchType(random: GameRandom, pitcher: Player): PitchData {
   const pitchType = random.item(Object.keys(pitchTypes) as PitchKind[]);
   const pitchData = pitchTypes[pitchType];
+  const { strength, agility, constitution, wisdom, intelligence, charisma } =
+    pitcher.attributes;
+  const strengthFactor = 1 + (strength - 10) * 0.01;
+  const agilityFactor = 1 + (agility - 10) * 0.01;
+  const constitutionFactor = 1 + (constitution - 10) * 0.01;
+  const wisdomFactor = 1 + (wisdom - 10) * 0.01;
+  const intelligenceFactor = 1 + (intelligence - 10) * 0.01;
+  const charismaFactor = 1 + (charisma - 10) * 0.01;
+
+  pitchData.strikeFactor *= agilityFactor + constitutionFactor;
+  pitchData.swingStrikeFactor *= 2 - strengthFactor + 2 - agilityFactor;
+  pitchData.swingBallFactor *= wisdomFactor + intelligenceFactor;
+  pitchData.contactStrikeFactor *= 2 - strengthFactor + 2 - agilityFactor;
+  pitchData.contactBallFactor *= wisdomFactor + intelligenceFactor;
 
   return pitchData;
 }
@@ -488,8 +504,10 @@ function simulatePitch(
 ): LeagueGameState {
   const batterId = getCurrentBatter(gameState);
   const batter = league.playerLookup[batterId];
+  const pitcherId = gameState.teamData[gameState.pitchingTeam].pitcher;
+  const pitcher = league.playerLookup[pitcherId];
 
-  const pitchData = determinePitchType(random);
+  const pitchData = determinePitchType(random, pitcher);
 
   // Determine whether the pitch is a ball or strike
   const isStrike = random.float(0, 1) < pitchData.strikeFactor;
