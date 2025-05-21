@@ -7,13 +7,7 @@ import { clsx, Tabs } from '@a-type/ui';
 import { PlayerName } from './PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
-import { roundFloat } from './utils';
-
-type CalculatedStats = {
-  battingAverage: string;
-  onBasePercentage: string;
-  sluggingPercentage: string;
-};
+import { AllStats, CalculatedStats, calculatePlayerStats } from './stats';
 
 const options: Array<{
   label: string;
@@ -31,82 +25,51 @@ const options: Array<{
   { label: 'BA', value: 'battingAverage' },
   { label: 'OBP', value: 'onBasePercentage' },
   { label: 'SLG', value: 'sluggingPercentage' },
+  { label: 'IP', value: 'inningsPitched' },
+  { label: 'ER', value: 'earnedRuns' },
+  { label: 'ERA', value: 'era' },
+  { label: 'K', value: 'ks' },
+  { label: 'BBA', value: 'pWalks' },
+  { label: 'HA', value: 'hitsAllowed' },
+  { label: 'HRA', value: 'homeRunsAllowed' },
+  { label: 'WHIP', value: 'whip' },
 ];
 
+const invertList = ['era', 'whip'];
+
 export function LeagueLeaders() {
-  const [tabValue, setTabValue] = useState<keyof PlayerStats>('hits');
+  const [tabValue, setTabValue] = useState<keyof AllStats>('hits');
   const { finalState } = hooks.useGameSuite();
   const [, setSearchParams] = useSearchParams();
-  const playerStats: Record<PlayerId, PlayerStats> = {};
-  finalState.league.gameResults.flat().forEach((game) => {
-    Object.entries(game.playerStats).forEach(([playerId, stats]) => {
-      if (!playerStats[playerId]) {
-        playerStats[playerId] = { ...stats };
-      } else {
-        playerStats[playerId].hits += stats.hits;
-        playerStats[playerId].runs += stats.runs;
-        playerStats[playerId].walks += stats.walks;
-        playerStats[playerId].strikeouts += stats.strikeouts;
-        playerStats[playerId].atBats += stats.atBats;
-        playerStats[playerId].doubles += stats.doubles;
-        playerStats[playerId].triples += stats.triples;
-        playerStats[playerId].homeRuns += stats.homeRuns;
-        playerStats[playerId].runsBattedIn += stats.runsBattedIn;
-      }
-    });
-  });
-  const extraPlayerStats: Record<PlayerId, CalculatedStats> = {};
-  Object.entries(playerStats).forEach(([playerId, stats]) => {
-    const atBats = stats.atBats || 1;
-    const hits = stats.hits || 0;
-    const walks = stats.walks || 0;
-    const runs = stats.runs || 0;
-    const doubles = stats.doubles || 0;
-    const triples = stats.triples || 0;
-    const homeRuns = stats.homeRuns || 0;
-    const runsBattedIn = stats.runsBattedIn || 0;
-    const totalBases = hits + doubles + triples * 2 + homeRuns * 3;
-    const battingAverage = roundFloat(hits / atBats, 3).toFixed(3);
-    const onBasePercentage = roundFloat(
-      (hits + walks) / (atBats + walks),
-      3,
-    ).toFixed(3);
-    const sluggingPercentage = roundFloat(totalBases / atBats, 3).toFixed(3);
-    extraPlayerStats[playerId] = {
-      battingAverage,
-      onBasePercentage,
-      sluggingPercentage,
-    };
-  });
-  const mergedPlayerStats: Record<PlayerId, PlayerStats & CalculatedStats> = {};
-  Object.entries(playerStats).forEach(([playerId, stats]) => {
-    mergedPlayerStats[playerId] = {
-      ...stats,
-      ...extraPlayerStats[playerId],
-    };
-  });
+  const playerStats = calculatePlayerStats(finalState.league);
 
-  const findTop = (stat: keyof PlayerStats, count: number = 5) => {
-    return Object.entries(mergedPlayerStats)
-      .sort(([, a], [, b]) => b[stat] - a[stat])
-      .slice(0, count)
-      .map(([playerId, stats]) => ({
-        playerId,
-        ...stats,
-      }));
+  const findTop = (stat: keyof AllStats, count: number = 5) => {
+    const isInverted = invertList.includes(stat);
+    let list = Object.entries(playerStats)
+      .filter(([, stats]) => {
+        return !isInverted || stats.outsPitched > 0;
+      })
+      .sort(([, a], [, b]) => Number(b[stat]) - Number(a[stat]));
+    if (isInverted) {
+      list = list.reverse();
+    }
+    return list.slice(0, count).map(([playerId, stats]) => ({
+      playerId,
+      ...stats,
+    }));
   };
 
   return (
     <Tabs
       value={tabValue}
-      onValueChange={(v) => setTabValue(v as keyof PlayerStats)}
+      onValueChange={(v) => setTabValue(v as keyof AllStats)}
     >
       <div className="flex flex-col p-1">
         <Tabs.List className="gap-none">
           {options.map((option, idx, arr) => (
             <Tabs.Trigger
               key={option.value}
-              value={option.value as keyof PlayerStats}
+              value={option.value as keyof AllStats}
               className={clsx(
                 idx == 0 && 'rounded-l-lg',
                 idx == arr.length - 1 && 'rounded-r-lg',

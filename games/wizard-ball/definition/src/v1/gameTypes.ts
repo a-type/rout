@@ -88,6 +88,7 @@ export type GameResult = {
 };
 
 export type PlayerStats = {
+  // batting stats
   atBats: number;
   hits: number;
   doubles: number;
@@ -97,6 +98,13 @@ export type PlayerStats = {
   runs: number;
   walks: number;
   strikeouts: number;
+  // pitching stats
+  outsPitched: number;
+  earnedRuns: number;
+  ks: number;
+  pWalks: number;
+  hitsAllowed: number;
+  homeRunsAllowed: number;
 };
 
 export type LeagueGameState = {

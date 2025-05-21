@@ -55,9 +55,13 @@ function simulateGame(
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
   for (const teamId of [game.homeTeamId, game.awayTeamId]) {
+    const pitcher =
+      league.teamLookup[teamId].playerIds.find(
+        (playerId) => league.playerLookup[playerId].positions[0] === 'p',
+      ) ?? league.teamLookup[teamId].playerIds[0];
     gameState.teamData[teamId] = {
       score: 0,
-      pitcher: league.teamLookup[teamId].playerIds[0],
+      pitcher,
       battingOrder: league.teamLookup[teamId].playerIds.slice(0, 9),
     };
     gameState.currentBatterIndex[teamId] = 0;
@@ -134,32 +138,6 @@ function initialGameState(): LeagueGameState {
   };
 }
 
-function updatePlayerStats(
-  gameState: LeagueGameState,
-  playerId: string,
-  stats: Partial<PlayerStats>,
-): LeagueGameState {
-  if (!gameState.playerStats[playerId]) {
-    gameState.playerStats[playerId] = {
-      atBats: 0,
-      hits: 0,
-      doubles: 0,
-      triples: 0,
-      homeRuns: 0,
-      runsBattedIn: 0,
-      runs: 0,
-      walks: 0,
-      strikeouts: 0,
-    };
-  }
-  const playerStats = gameState.playerStats[playerId];
-  gameState.playerStats[playerId] = {
-    ...playerStats,
-    ...stats,
-  };
-  return gameState;
-}
-
 function addToPlayerStats(
   gameState: LeagueGameState,
   playerId: string,
@@ -176,21 +154,19 @@ function addToPlayerStats(
       runs: 0,
       walks: 0,
       strikeouts: 0,
+      outsPitched: 0,
+      earnedRuns: 0,
+      ks: 0,
+      pWalks: 0,
+      hitsAllowed: 0,
+      homeRunsAllowed: 0,
     };
   }
   const playerStats = gameState.playerStats[playerId];
-  gameState.playerStats[playerId] = {
-    ...playerStats,
-    atBats: playerStats.atBats + (stats.atBats || 0),
-    hits: playerStats.hits + (stats.hits || 0),
-    doubles: playerStats.doubles + (stats.doubles || 0),
-    triples: playerStats.triples + (stats.triples || 0),
-    homeRuns: playerStats.homeRuns + (stats.homeRuns || 0),
-    runsBattedIn: playerStats.runsBattedIn + (stats.runsBattedIn || 0),
-    runs: playerStats.runs + (stats.runs || 0),
-    walks: playerStats.walks + (stats.walks || 0),
-    strikeouts: playerStats.strikeouts + (stats.strikeouts || 0),
-  };
+  for (const key of Object.keys(stats)) {
+    // @ts-expect-error: dynamic key assignment
+    playerStats[key] = (playerStats[key] || 0) + (stats[key] || 0);
+  }
   return gameState;
 }
 
@@ -211,6 +187,7 @@ function advanceRunnerForced(
   gameState: LeagueGameState,
   base: Base,
   sourcePlayerId: PlayerId,
+  pitchingPlayerId: PlayerId,
 ): LeagueGameState {
   if (base < 1 || base > 3) {
     throw new Error('Base must be between 1 and 3');
@@ -228,10 +205,18 @@ function advanceRunnerForced(
     gameState = addToPlayerStats(gameState, currentPlayerId, {
       runs: 1,
     });
+    gameState = addToPlayerStats(gameState, pitchingPlayerId, {
+      earnedRuns: 1,
+    });
     gameState.teamData[gameState.battingTeam].score += 1;
     return gameState;
   }
-  advanceRunnerForced(gameState, (base + 1) as Base, sourcePlayerId);
+  advanceRunnerForced(
+    gameState,
+    (base + 1) as Base,
+    sourcePlayerId,
+    pitchingPlayerId,
+  );
   gameState.bases[(base + 1) as Base] = gameState.bases[base];
   gameState.bases[base] = null;
 
@@ -254,9 +239,14 @@ function getCurrentBatter(gameState: LeagueGameState): string {
   ];
 }
 
+function getCurrentPitcher(gameState: LeagueGameState): string {
+  return gameState.teamData[gameState.pitchingTeam].pitcher;
+}
+
 function applyWalk(gameState: LeagueGameState): LeagueGameState {
   const currentBatter = getCurrentBatter(gameState);
-  gameState = advanceRunnerForced(gameState, 1, currentBatter);
+  const currentPitcher = getCurrentPitcher(gameState);
+  gameState = advanceRunnerForced(gameState, 1, currentBatter, currentPitcher);
   gameState.bases[1] = currentBatter;
   return gameState;
 }
@@ -267,26 +257,72 @@ function applyHit(
 ): LeagueGameState {
   const nextBases = { ...gameState.bases };
   const currentBatter = getCurrentBatter(gameState);
+  const currentPitcher = getCurrentPitcher(gameState);
   switch (hitType) {
     case 'hit':
-      gameState = advanceRunnerForced(gameState, 1, currentBatter);
+      gameState = advanceRunnerForced(
+        gameState,
+        1,
+        currentBatter,
+        currentPitcher,
+      );
       gameState.bases[1] = currentBatter;
       break;
     case 'double':
-      gameState = advanceRunnerForced(gameState, 1, currentBatter);
-      gameState = advanceRunnerForced(gameState, 2, currentBatter);
+      gameState = advanceRunnerForced(
+        gameState,
+        1,
+        currentBatter,
+        currentPitcher,
+      );
+      gameState = advanceRunnerForced(
+        gameState,
+        2,
+        currentBatter,
+        currentPitcher,
+      );
       nextBases[2] = currentBatter;
       break;
     case 'triple':
-      gameState = advanceRunnerForced(gameState, 1, currentBatter);
-      gameState = advanceRunnerForced(gameState, 2, currentBatter);
-      gameState = advanceRunnerForced(gameState, 3, currentBatter);
+      gameState = advanceRunnerForced(
+        gameState,
+        1,
+        currentBatter,
+        currentPitcher,
+      );
+      gameState = advanceRunnerForced(
+        gameState,
+        2,
+        currentBatter,
+        currentPitcher,
+      );
+      gameState = advanceRunnerForced(
+        gameState,
+        3,
+        currentBatter,
+        currentPitcher,
+      );
       nextBases[3] = currentBatter;
       break;
     case 'homeRun':
-      gameState = advanceRunnerForced(gameState, 1, currentBatter);
-      gameState = advanceRunnerForced(gameState, 2, currentBatter);
-      gameState = advanceRunnerForced(gameState, 3, currentBatter);
+      gameState = advanceRunnerForced(
+        gameState,
+        1,
+        currentBatter,
+        currentPitcher,
+      );
+      gameState = advanceRunnerForced(
+        gameState,
+        2,
+        currentBatter,
+        currentPitcher,
+      );
+      gameState = advanceRunnerForced(
+        gameState,
+        3,
+        currentBatter,
+        currentPitcher,
+      );
       gameState.teamData[gameState.battingTeam].score += 1;
       break;
     default:
@@ -567,8 +603,6 @@ function determinePitchType(
     pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
   });
 
-  // console.log('pitch', { quality, baseQuality, pitchData });
-
   return pitchData;
 }
 
@@ -579,7 +613,7 @@ function simulatePitch(
 ): LeagueGameState {
   const batterId = getCurrentBatter(gameState);
   const batter = league.playerLookup[batterId];
-  const pitcherId = gameState.teamData[gameState.pitchingTeam].pitcher;
+  const pitcherId = getCurrentPitcher(gameState);
   const pitcher = league.playerLookup[pitcherId];
 
   const pitchData = determinePitchType(random, pitcher, gameState);
@@ -627,6 +661,9 @@ function simulatePitch(
         gameState = addToPlayerStats(gameState, batterId, {
           walks: 1,
         });
+        gameState = addToPlayerStats(gameState, pitcherId, {
+          pWalks: 1,
+        });
         gameState = incrementBatterIndex(gameState, gameState.battingTeam);
         gameState = resetCount(gameState);
       }
@@ -639,6 +676,10 @@ function simulatePitch(
         gameState = addToPlayerStats(gameState, batterId, {
           atBats: 1,
           strikeouts: 1,
+        });
+        gameState = addToPlayerStats(gameState, pitcherId, {
+          ks: 1,
+          outsPitched: 1,
         });
         gameState = incrementBatterIndex(gameState, gameState.battingTeam);
         gameState = resetCount(gameState);
@@ -655,6 +696,9 @@ function simulatePitch(
       // Increment out count
       gameState.outs += 1;
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1 });
+      gameState = addToPlayerStats(gameState, pitcherId, {
+        outsPitched: 1,
+      });
       gameState = incrementBatterIndex(gameState, gameState.battingTeam);
       gameState = resetCount(gameState);
       break;
@@ -664,6 +708,9 @@ function simulatePitch(
     case 'homeRun':
       // Apply hit to the game state
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1, hits: 1 });
+      gameState = addToPlayerStats(gameState, pitcherId, {
+        hitsAllowed: 1,
+      });
       if (outcome === 'double') {
         gameState = addToPlayerStats(gameState, batterId, { doubles: 1 });
       } else if (outcome === 'triple') {
@@ -673,6 +720,10 @@ function simulatePitch(
           homeRuns: 1,
           runsBattedIn: 1,
           runs: 1,
+        });
+        gameState = addToPlayerStats(gameState, pitcherId, {
+          homeRunsAllowed: 1,
+          earnedRuns: 1,
         });
       }
       gameState = applyHit(gameState, outcome);
