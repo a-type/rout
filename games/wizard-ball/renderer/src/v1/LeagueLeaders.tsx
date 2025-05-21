@@ -33,9 +33,11 @@ const options: Array<{
   { label: 'HA', value: 'hitsAllowed' },
   { label: 'HRA', value: 'homeRunsAllowed' },
   { label: 'WHIP', value: 'whip' },
+  { label: 'K/9', value: 'kPerNine' },
+  { label: 'BB/9', value: 'bbPerNine' },
 ];
 
-const invertList = ['era', 'whip'];
+const invertList = ['era', 'whip', 'bbPerNine'];
 
 export function LeagueLeaders() {
   const [tabValue, setTabValue] = useState<keyof AllStats>('hits');
@@ -43,7 +45,7 @@ export function LeagueLeaders() {
   const [, setSearchParams] = useSearchParams();
   const playerStats = calculatePlayerStats(finalState.league);
 
-  const findTop = (stat: keyof AllStats, count: number = 5) => {
+  const findTop = (stat: keyof AllStats, count: number = 10) => {
     const isInverted = invertList.includes(stat);
     let list = Object.entries(playerStats)
       .filter(([, stats]) => {

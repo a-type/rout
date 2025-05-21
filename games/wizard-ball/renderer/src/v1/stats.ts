@@ -12,6 +12,8 @@ export type CalculatedStats = {
   inningsPitched: string;
   era: string;
   whip: string;
+  kPerNine: string;
+  bbPerNine: string;
 };
 
 export type AllStats = PlayerStats & CalculatedStats;
@@ -72,6 +74,14 @@ export function calculatePlayerStats(
         Math.floor(stats.outsPitched / 3) +
         (stats.outsPitched % 3) / 10
       ).toString(),
+      kPerNine: roundFloat(
+        ((stats.ks || 0) / ((stats.outsPitched || 1) / 3)) * 9,
+        2,
+      ).toFixed(2),
+      bbPerNine: roundFloat(
+        ((stats.pWalks || 0) / ((stats.outsPitched || 1) / 3)) * 9,
+        2,
+      ).toFixed(2),
       era: roundFloat(
         (stats.earnedRuns / ((stats.outsPitched || 1) / 3)) * 9,
         2,

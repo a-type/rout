@@ -223,6 +223,28 @@ function advanceRunnerForced(
   return gameState;
 }
 
+function advanceAllRunners(
+  gameState: LeagueGameState,
+  sourcePlayerId: PlayerId,
+  pitchingPlayerId: PlayerId,
+  count: number = 1,
+): LeagueGameState {
+  const currentBatter = getCurrentBatter(gameState);
+  const currentPitcher = getCurrentPitcher(gameState);
+  if (count > 1) {
+    gameState = advanceAllRunners(
+      gameState,
+      sourcePlayerId,
+      pitchingPlayerId,
+      count - 1,
+    );
+  }
+  gameState = advanceRunnerForced(gameState, 3, currentBatter, currentPitcher);
+  gameState = advanceRunnerForced(gameState, 2, currentBatter, currentPitcher);
+  gameState = advanceRunnerForced(gameState, 1, currentBatter, currentPitcher);
+  return gameState;
+}
+
 function incrementBatterIndex(
   gameState: LeagueGameState,
   teamId: string,
@@ -260,68 +282,38 @@ function applyHit(
   const currentPitcher = getCurrentPitcher(gameState);
   switch (hitType) {
     case 'hit':
-      gameState = advanceRunnerForced(
+      gameState = advanceAllRunners(
         gameState,
-        1,
         currentBatter,
         currentPitcher,
+        1,
       );
       gameState.bases[1] = currentBatter;
       break;
     case 'double':
-      gameState = advanceRunnerForced(
+      gameState = advanceAllRunners(
         gameState,
-        1,
         currentBatter,
         currentPitcher,
-      );
-      gameState = advanceRunnerForced(
-        gameState,
         2,
-        currentBatter,
-        currentPitcher,
       );
       nextBases[2] = currentBatter;
       break;
     case 'triple':
-      gameState = advanceRunnerForced(
+      gameState = advanceAllRunners(
         gameState,
-        1,
         currentBatter,
         currentPitcher,
-      );
-      gameState = advanceRunnerForced(
-        gameState,
-        2,
-        currentBatter,
-        currentPitcher,
-      );
-      gameState = advanceRunnerForced(
-        gameState,
         3,
-        currentBatter,
-        currentPitcher,
       );
       nextBases[3] = currentBatter;
       break;
     case 'homeRun':
-      gameState = advanceRunnerForced(
+      gameState = advanceAllRunners(
         gameState,
-        1,
         currentBatter,
         currentPitcher,
-      );
-      gameState = advanceRunnerForced(
-        gameState,
-        2,
-        currentBatter,
-        currentPitcher,
-      );
-      gameState = advanceRunnerForced(
-        gameState,
         3,
-        currentBatter,
-        currentPitcher,
       );
       gameState.teamData[gameState.battingTeam].score += 1;
       break;
