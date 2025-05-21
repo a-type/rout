@@ -2,25 +2,81 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { hooks } from '../gameClient';
 import {
   closestCenter,
   DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  UniqueIdentifier,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { useState } from 'react';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  restrictToVerticalAxis,
+  restrictToWindowEdges,
+} from '@dnd-kit/modifiers';
+import { forwardRef, useEffect, useState } from 'react';
+
+import { PropsWithChildren, HTMLAttributes } from 'react';
+
+const Item = forwardRef<
+  HTMLDivElement,
+  PropsWithChildren<HTMLAttributes<HTMLDivElement>>
+>(({ children, ...props }, ref) => {
+  return (
+    <div {...props} ref={ref}>
+      {children}
+    </div>
+  );
+});
+
+type SortableItemProps = HTMLAttributes<HTMLDivElement> & {
+  id: UniqueIdentifier;
+  children: React.ReactNode;
+};
+
+function SortableItem({ id, children, ...rest }: SortableItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <Item
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      {...rest}
+    >
+      {children}
+    </Item>
+  );
+}
 
 export function TeamLineup({ id }: { id: string }) {
-  const { finalState } = hooks.useGameSuite();
+  const { finalState, prepareTurn } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id];
   const lineup = team.battingOrder;
-  const [activeId, setActiveId] = useState(null);
-  const [items, setItems] = useState(lineup);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [items, setItems] = useState<string[]>(lineup);
+  useEffect(() => {
+    prepareTurn({
+      nextBattingOrder: items,
+    });
+  }, [items]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -28,17 +84,17 @@ export function TeamLineup({ id }: { id: string }) {
     }),
   );
 
-  function handleDragStart(event) {
+  function handleDragStart(event: DragStartEvent) {
     const { active } = event;
-    setActiveId(active.id);
+    setActiveId(active.id as string);
   }
-  function handleDragEnd(event) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -53,33 +109,31 @@ export function TeamLineup({ id }: { id: string }) {
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
     >
-      <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col">
-          <h2>Lineup</h2>
-          <table className="table-auto min-w-full border border-gray-300 rounded-lg shadow-sm">
-            <thead className="bg-gray-800 text-light">
-              <tr>
-                <th className="p-1">Position</th>
-                <th className="p-1">Player</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lineup.map((playerId) => {
-                const player = finalState.league.playerLookup[playerId];
-                return (
-                  <tr key={playerId} className="p-1">
-                    <td className="text-center p-1">{player.positions[0]}</td>
-                    <td className="text-left pl-2 flex items-center gap-2">
-                      {player.name}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </SortableContext>
+      <div className="flex flex-col">
+        <h2>Lineup</h2>
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          {items.map((playerId, idx) => {
+            const player = finalState.league.playerLookup[playerId];
+            return (
+              <div key={playerId} className="flex items-center gap-2">
+                <span>{idx + 1}</span>
+                <SortableItem
+                  id={playerId}
+                  className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                >
+                  <span className="uppercase">{player.positions[0]}</span>
+                  <span>{player.name}</span>
+                </SortableItem>
+              </div>
+            );
+          })}
+          <DragOverlay dropAnimation={null}>
+            {activeId ? <Item id={activeId} /> : null}
+          </DragOverlay>
+        </SortableContext>
+      </div>
     </DndContext>
   );
 }

@@ -1,5 +1,5 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { League } from './gameTypes';
+import { League, PlayerId } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 
@@ -12,7 +12,7 @@ export type PlayerState = {
 };
 
 export type TurnData = {
-  // TODO: what data can players submit in their moves?
+  nextBattingOrder?: PlayerId[];
 };
 
 export const gameDefinition: GameDefinition<
@@ -28,14 +28,51 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {
-    // TODO: return error string if the moves are invalid
+    // check that there are nine players, unique, and on your team
+    if (!!turn.data.nextBattingOrder) {
+      if (turn.data.nextBattingOrder.length !== 9) {
+        return 'You must select exactly 9 players for your batting order';
+      }
+
+      const playerIds = new Set(turn.data.nextBattingOrder);
+      if (playerIds.size !== turn.data.nextBattingOrder.length) {
+        return 'You must select unique players for your batting order';
+      }
+      const myTeam = Object.keys(playerState.league.teamLookup).find(
+        (teamId) =>
+          playerState.league.teamLookup[teamId].ownerId === turn.playerId,
+      );
+      if (!myTeam) {
+        return `Could not find team for player ${turn.playerId}`;
+      }
+      const validPlayers = playerState.league.teamLookup[myTeam].playerIds;
+      if (
+        !turn.data.nextBattingOrder.every((playerId) =>
+          validPlayers.includes(playerId),
+        )
+      ) {
+        return 'You can only select players on your team for your batting order';
+      }
+    }
+    return;
   },
 
   // run on client
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
-    // TODO: this is what the player sees as the game state
-    // with their pending local moves applied after selecting them
+    const teamId = Object.keys(playerState.league.teamLookup).find(
+      (teamId) =>
+        playerState.league.teamLookup[teamId].ownerId ===
+        prospectiveTurn.playerId,
+    );
+    if (!teamId) {
+      throw new Error(
+        `Could not find team for player ${prospectiveTurn.playerId}`,
+      );
+    }
+    playerState.league.teamLookup[teamId].battingOrder =
+      prospectiveTurn.data.nextBattingOrder ??
+      playerState.league.teamLookup[teamId].battingOrder;
     return playerState;
   },
 
@@ -62,6 +99,22 @@ export const gameDefinition: GameDefinition<
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
     const currentRound =
       globalState.league.schedule[globalState.league.currentWeek];
+    // update batting orders
+    round.turns.forEach((turn) => {
+      if (!turn.data.nextBattingOrder) {
+        return;
+      }
+      const teamId = Object.keys(globalState.league.teamLookup).find(
+        (teamId) =>
+          globalState.league.teamLookup[teamId].ownerId === turn.playerId,
+      );
+      if (!teamId) {
+        throw new Error(`Could not find team for player ${turn.playerId}`);
+      }
+      globalState.league.teamLookup[teamId].battingOrder =
+        turn.data.nextBattingOrder;
+    });
+
     const results = simulateRound(random, globalState.league, currentRound);
     for (const result of results) {
       const winner = globalState.league.teamLookup[result.winner];
