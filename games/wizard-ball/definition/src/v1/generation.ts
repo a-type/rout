@@ -8,9 +8,10 @@ import {
   Team,
   TeamId,
 } from './gameTypes';
-import { femaleFirstNames, lastNames, maleFirstNames } from './names';
+import { names } from './names';
 import { teamAdjectives, teamNouns } from './teamNames';
 import { PrefixedId } from '@long-game/common';
+import { speciesData, SpeciesType } from './speciesData';
 
 export function generateLeague(
   random: GameRandom,
@@ -127,12 +128,14 @@ function generatePlayer(
   options: { position?: Position } = {},
 ): Player {
   const { position: forcedPosition } = options;
+  const race = random.item(Object.keys(names) as SpeciesType[]);
   let player: Player = {
-    name: generatePlayerName(random),
+    name: generatePlayerName(random, race),
+    species: race,
     id: random.id(),
     teamId: null,
     positions: forcedPosition ? [forcedPosition] : [],
-    attributes: generateAttributes(random),
+    attributes: generateAttributes(random, race),
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];
   if (player.positions.length === 0) {
@@ -149,12 +152,15 @@ function generatePlayer(
   return player;
 }
 
-function generateAttributes(random: GameRandom): Player['attributes'] {
+function generateAttributes(
+  random: GameRandom,
+  race: SpeciesType,
+): Player['attributes'] {
   const pool = Array.from({ length: 8 }, (_, i) => i + 1)
     .map(() => random.int(1, 21))
     .sort((a, b) => a - b);
   const results = random.shuffle(pool.slice(1, -1));
-  return {
+  const attr = {
     strength: results[0],
     agility: results[1],
     constitution: results[2],
@@ -162,6 +168,10 @@ function generateAttributes(random: GameRandom): Player['attributes'] {
     intelligence: results[4],
     charisma: results[5],
   };
+  for (const [key, value] of Object.entries(speciesData[race])) {
+    attr[key as keyof typeof attr] += value;
+  }
+  return attr;
 }
 
 function generateTeamNames(
@@ -179,11 +189,10 @@ function generateTeamNames(
   return names;
 }
 
-function generatePlayerName(random: GameRandom): string {
+function generatePlayerName(random: GameRandom, race: SpeciesType): string {
+  const { maleFirst, femaleFirst, last } = names[race];
   const firstName =
-    random.int(0, 2) === 0
-      ? random.item(maleFirstNames)
-      : random.item(femaleFirstNames);
-  const lastName = random.item(lastNames);
+    random.int(0, 2) === 0 ? random.item(maleFirst) : random.item(femaleFirst);
+  const lastName = random.item(last);
   return `${firstName} ${lastName}`;
 }

@@ -1,4 +1,5 @@
 import { PrefixedId } from '@long-game/common';
+import { SpeciesType } from './speciesData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -15,19 +16,22 @@ export type Team = {
   losses: number;
 };
 
+export type PlayerAttributes = {
+  strength: number;
+  agility: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+};
+
 export type Player = {
   name: string;
   id: PlayerId;
   teamId: TeamId | null;
   positions: Position[];
-  attributes: {
-    strength: number;
-    agility: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
-  };
+  species: SpeciesType;
+  attributes: PlayerAttributes;
 };
 
 export type Position =

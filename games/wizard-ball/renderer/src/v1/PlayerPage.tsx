@@ -4,6 +4,7 @@ import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
 import React from 'react';
 import { Attributes } from './Attributes';
+import { speciesIcons } from '../../../definition/src/v1/speciesData';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -73,11 +74,15 @@ export function PlayerPage({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl font-bold mb-2">{playerName}</h1>
-        <h2 className="text-lg mb-1">Team: {teamName}</h2>
-        <h2 className="text-lg mb-4">
+        <h1 className="text-2xl font-bold mb-0">{playerName}</h1>
+        <div className="capitalize mb-4">
+          <span style={{ fontSize: 24 }}>{speciesIcons[player.species]}</span>
+          {player.species}
+        </div>
+        <div className="mb-1 text-md">Team: {teamName}</div>
+        <div className="mb-4 text-md">
           Positions: {playerPositions.toUpperCase()}
-        </h2>
+        </div>
       </div>
       <Attributes attributes={{ ...player.attributes, overall }} />
       <div>
