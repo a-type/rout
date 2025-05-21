@@ -40,12 +40,13 @@ const Item = forwardRef<
 
 type SortableItemProps = HTMLAttributes<HTMLDivElement> & {
   id: UniqueIdentifier;
+  disabled?: boolean;
   children: React.ReactNode;
 };
 
-function SortableItem({ id, children, ...rest }: SortableItemProps) {
+function SortableItem({ id, children, disabled, ...rest }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({ id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -66,7 +67,7 @@ function SortableItem({ id, children, ...rest }: SortableItemProps) {
 }
 
 export function TeamLineup({ id }: { id: string }) {
-  const { finalState, prepareTurn } = hooks.useGameSuite();
+  const { finalState, prepareTurn, playerId } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id];
   const lineup = team.battingOrder;
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -120,6 +121,7 @@ export function TeamLineup({ id }: { id: string }) {
               <div key={playerId} className="flex items-center gap-2">
                 <span>{idx + 1}</span>
                 <SortableItem
+                  disabled={playerId !== team.ownerId}
                   id={playerId}
                   className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
                 >

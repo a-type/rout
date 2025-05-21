@@ -12,6 +12,7 @@ import { names } from './names';
 import { teamAdjectives, teamNouns } from './teamNames';
 import { PrefixedId } from '@long-game/common';
 import { speciesData, SpeciesType } from './speciesData';
+import { classData, ClassType } from './classData';
 
 export function generateLeague(
   random: GameRandom,
@@ -129,13 +130,15 @@ function generatePlayer(
 ): Player {
   const { position: forcedPosition } = options;
   const race = random.item(Object.keys(names) as SpeciesType[]);
+  const classType = random.item(Object.keys(classData)) as ClassType;
   let player: Player = {
     name: generatePlayerName(random, race),
     species: race,
+    class: classType,
     id: random.id(),
     teamId: null,
     positions: forcedPosition ? [forcedPosition] : [],
-    attributes: generateAttributes(random, race),
+    attributes: generateAttributes(random, race, classType),
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];
   if (player.positions.length === 0) {
@@ -155,19 +158,30 @@ function generatePlayer(
 function generateAttributes(
   random: GameRandom,
   race: SpeciesType,
+  classType: ClassType,
 ): Player['attributes'] {
   const pool = Array.from({ length: 8 }, (_, i) => i + 1)
     .map(() => random.int(1, 21))
     .sort((a, b) => a - b);
-  const results = random.shuffle(pool.slice(1, -1));
-  const attr = {
-    strength: results[0],
-    agility: results[1],
-    constitution: results[2],
-    wisdom: results[3],
-    intelligence: results[4],
-    charisma: results[5],
-  };
+  const bestAttribute = classData[classType];
+  const results = pool.slice(1, -1);
+  const attributes = [
+    bestAttribute,
+    ...random
+      .shuffle([
+        'strength',
+        'agility',
+        'constitution',
+        'wisdom',
+        'intelligence',
+        'charisma',
+      ])
+      .filter((i) => i !== bestAttribute),
+  ];
+  const attr = attributes.reduce((acc, key) => {
+    acc[key as keyof typeof acc] = results.pop() ?? 0;
+    return acc;
+  }, {} as Player['attributes']);
   for (const [key, value] of Object.entries(speciesData[race])) {
     attr[key as keyof typeof attr] += value;
   }

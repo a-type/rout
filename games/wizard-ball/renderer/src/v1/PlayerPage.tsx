@@ -75,9 +75,10 @@ export function PlayerPage({ id }: { id: string }) {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-bold mb-0">{playerName}</h1>
-        <div className="capitalize mb-4">
+        <div className="flex flex-row gap-1 mb-4 items-center">
           <span style={{ fontSize: 24 }}>{speciesIcons[player.species]}</span>
-          {player.species}
+          <span className="capitalize">{player.species}</span>
+          <span className="capitalize">{player.class}</span>
         </div>
         <div className="mb-1 text-md">Team: {teamName}</div>
         <div className="mb-4 text-md">
