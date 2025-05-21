@@ -1,19 +1,23 @@
 import { clsx, Tabs } from '@a-type/ui';
 import type { Team, TeamId } from '@long-game/game-wizard-ball-definition';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
-import { Attributes } from './Attributes';
+import { Attributes } from '../Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
+import { TeamLineup } from './TeamLineup';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
+  { value: 'battingOrder', label: 'Batting Order' },
   { value: 'players', label: 'Players' },
   { value: 'games', label: 'Games' },
 ] as const satisfies Array<{ label: string; value: string }>;
 
+type TabValue = (typeof tabOptions)[number]['value'];
+
 export function TeamPage({ id }: { id: TeamId }) {
-  const [view, setView] = useState<'summary' | 'players' | 'games'>('summary');
+  const [view, setView] = useState<TabValue>('summary');
   const { finalState, players } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id] as Team;
   const [, setSearchParams] = useSearchParams();
@@ -87,26 +91,29 @@ export function TeamPage({ id }: { id: TeamId }) {
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
       <div className="flex flex-col p-2">
-        <h2
-          className="flex items-center gap-2"
-          style={{
-            color: team.ownerId ? players[team.ownerId].color : 'inherit',
-          }}
-        >
-          <span style={{ fontSize: 64 }}>{team.icon}</span> {team.name} (
-          {team.wins} - {team.losses})
-        </h2>
-        <div className="flex items-center gap-3">
-          Owner:{' '}
-          {team.ownerId ? (
-            <span className="flex items-center gap-1">
-              <PlayerAvatar playerId={team.ownerId} />
-              <PlayerName playerId={team.ownerId} />
-            </span>
-          ) : (
-            <span className="flex items-center gap-1">🤖 CPU</span>
-          )}
+        <div className="flex flex-row items-center gap-2 mb-2">
+          <h2
+            className="flex items-center gap-2 mb-0"
+            style={{
+              color: team.ownerId ? players[team.ownerId].color : 'inherit',
+            }}
+          >
+            <span style={{ fontSize: 64 }}>{team.icon}</span> {team.name} (
+            {team.wins} - {team.losses})
+          </h2>
+          <div className="flex items-center gap-3 ml-auto mr-8">
+            Owner:{' '}
+            {team.ownerId ? (
+              <span className="flex items-center gap-1">
+                <PlayerAvatar playerId={team.ownerId} />
+                <PlayerName playerId={team.ownerId} />
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">🤖 CPU</span>
+            )}
+          </div>
         </div>
+
         <Tabs.List className="gap-none">
           {tabOptions.map((option, idx, arr) => (
             <Tabs.Trigger
@@ -124,6 +131,9 @@ export function TeamPage({ id }: { id: TeamId }) {
         </Tabs.List>
         <Tabs.Content value="summary">
           <Attributes attributes={teamAttributes} />
+        </Tabs.Content>
+        <Tabs.Content value="battingOrder">
+          <TeamLineup id={id} />
         </Tabs.Content>
         <Tabs.Content value="players">
           <div>

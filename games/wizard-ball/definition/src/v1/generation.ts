@@ -64,6 +64,7 @@ export function generateLeague(
       const player = generatePlayer(random, { position: forcedPositions[i] });
       player.teamId = team.id;
       team.playerIds.push(player.id);
+      team.battingOrder.push(player.id);
       league.playerLookup[player.id] = player;
     }
   }
@@ -114,6 +115,7 @@ function generateTeam(random: GameRandom): Team {
     ownerId: null,
     id: random.id(),
     playerIds: [],
+    battingOrder: [],
     wins: 0,
     losses: 0,
   };

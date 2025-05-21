@@ -1,5 +1,5 @@
 import { useSearchParams } from '@verdant-web/react-router';
-import { TeamPage } from './TeamPage';
+import { TeamPage } from './teams/TeamPage';
 import { TeamStandings } from './TeamStandings';
 import { PlayerPage } from './PlayerPage';
 import { GamePage } from './GamePage';

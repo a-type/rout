@@ -10,6 +10,7 @@ export type Team = {
   ownerId: PrefixedId<'u'> | null;
   id: TeamId;
   playerIds: PlayerId[];
+  battingOrder: PlayerId[];
   wins: number;
   losses: number;
 };
