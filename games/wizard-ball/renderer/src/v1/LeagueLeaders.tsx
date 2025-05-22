@@ -22,6 +22,8 @@ const options: Array<{
   { label: '3B', value: 'triples' },
   { label: 'HR', value: 'homeRuns' },
   { label: 'RBI', value: 'runsBattedIn' },
+  { label: 'SB', value: 'stolenBases' },
+  { label: 'CS', value: 'caughtStealing' },
   { label: 'BA', value: 'battingAverage' },
   { label: 'OBP', value: 'onBasePercentage' },
   { label: 'SLG', value: 'sluggingPercentage' },

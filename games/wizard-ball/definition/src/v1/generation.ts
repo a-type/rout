@@ -13,6 +13,7 @@ import { teamAdjectives, teamNouns } from './teamNames';
 import { PrefixedId } from '@long-game/common';
 import { speciesData, SpeciesType } from './speciesData';
 import { classData, ClassType } from './classData';
+import { perks } from './perkData';
 
 export function generateLeague(
   random: GameRandom,
@@ -137,6 +138,7 @@ function generatePlayer(
     class: classType,
     id: random.id(),
     teamId: null,
+    perkIds: [random.item(Object.keys(perks))],
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, race, classType),
   };

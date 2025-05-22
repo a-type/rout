@@ -7,7 +7,7 @@ export function scaleAttribute(
 }
 
 export function scaleAttributePercent(attribute: number, max: number): number {
-  return 1 + scaleAttribute(attribute) * max;
+  return Math.pow(max + 1, scaleAttribute(attribute));
 }
 
 export function avg(...values: number[]): number {

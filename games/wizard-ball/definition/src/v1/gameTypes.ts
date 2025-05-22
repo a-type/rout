@@ -35,6 +35,7 @@ export type Player = {
   positions: Position[];
   species: SpeciesType;
   class: ClassType;
+  perkIds: string[];
   attributes: PlayerAttributes;
 };
 
@@ -106,6 +107,9 @@ export type PlayerStats = {
   runs: number;
   walks: number;
   strikeouts: number;
+  // baserunning stats
+  stolenBases: number;
+  caughtStealing: number;
   // pitching stats
   outsPitched: number;
   earnedRuns: number;

@@ -5,6 +5,7 @@ import { clsx } from '@a-type/ui';
 import React from 'react';
 import { Attributes } from './Attributes';
 import { speciesIcons } from '../../../definition/src/v1/speciesData';
+import { perks } from '../../../definition/src/v1/perkData';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -81,9 +82,27 @@ export function PlayerPage({ id }: { id: string }) {
           <span className="capitalize">{player.class}</span>
         </div>
         <div className="mb-1 text-md">Team: {teamName}</div>
-        <div className="mb-4 text-md">
+        <div className="mb-2 text-md">
           Positions: {playerPositions.toUpperCase()}
         </div>
+      </div>
+      <div>
+        <h2>Perks</h2>
+        {player.perkIds.map((perkId) => {
+          const perk = perks[perkId];
+          if (!perk) {
+            return null;
+          }
+          return (
+            <div
+              key={perkId}
+              className="inline-flex flex-col mb-2 border-1 border-gray-200 border-solid bg-gray-500/30 p-2 rounded"
+            >
+              <span className="font-semibold">{perk.name}</span>
+              <span>{perk.description}</span>
+            </div>
+          );
+        })}
       </div>
       <Attributes attributes={{ ...player.attributes, overall }} />
       <div>
