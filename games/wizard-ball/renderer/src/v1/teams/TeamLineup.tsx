@@ -26,6 +26,7 @@ import {
 import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
+import { Position } from '@long-game/game-wizard-ball-definition';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -72,18 +73,11 @@ export function TeamLineup({ id }: { id: string }) {
     prepareTurn,
     playerId: currentUserId,
   } = hooks.useGameSuite();
+  console.log('finalState', JSON.parse(JSON.stringify(finalState)));
   const team = finalState.league.teamLookup[id];
-  const lineup = team.playerIds.sort((a, b) => {
-    const aIndex = team.battingOrder.includes(a)
-      ? team.battingOrder.indexOf(a)
-      : team.playerIds.indexOf(a);
-    const bIndex = team.battingOrder.includes(b)
-      ? team.battingOrder.indexOf(b)
-      : team.playerIds.indexOf(b);
-    return aIndex - bIndex;
-  });
+  const lineup = team.battingOrder;
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [items, setItems] = useState<string[]>(lineup);
+  const [items, setItems] = useState<Position[]>(lineup);
   useEffect(() => {
     prepareTurn({
       nextBattingOrder: items,
@@ -106,8 +100,8 @@ export function TeamLineup({ id }: { id: string }) {
 
     if (over && active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
+        const oldIndex = items.indexOf(active.id as Position);
+        const newIndex = items.indexOf(over.id as Position);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -115,6 +109,7 @@ export function TeamLineup({ id }: { id: string }) {
 
     setActiveId(null);
   }
+  console.log('lineup', items);
 
   return (
     <DndContext
@@ -126,25 +121,22 @@ export function TeamLineup({ id }: { id: string }) {
     >
       <div className="flex flex-col">
         <h2>Lineup</h2>
-        <SortableContext
-          items={items.slice(0, 9)}
-          strategy={verticalListSortingStrategy}
-        >
-          {items.slice(0, 9).map((playerId, idx) => {
-            const player =
-              playerId === '<PITCHER>'
-                ? {
-                    id: '<PITCHER>',
-                    name: 'Pitcher',
-                    positions: ['p'],
-                  }
-                : finalState.league.playerLookup[playerId];
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          {items.map((position, idx) => {
+            const playerId =
+              position === 'p'
+                ? team.pitchingOrder[team.nextPitcherIndex]
+                : team.positionChart[position];
+            if (!playerId) {
+              return null;
+            }
+            const player = finalState.league.playerLookup[playerId];
             return (
               <div key={playerId} className="flex items-center gap-2">
                 <span>{idx + 1}</span>
                 <SortableItem
                   disabled={currentUserId !== team.ownerId}
-                  id={playerId}
+                  id={position}
                   className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
                 >
                   <span className="uppercase">{player.positions[0]}</span>

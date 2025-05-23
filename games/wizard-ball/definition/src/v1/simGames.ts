@@ -70,9 +70,15 @@ function simulateGame(
     gameState.teamData[teamId] = {
       score: 0,
       pitcher,
-      battingOrder: league.teamLookup[teamId].battingOrder.map((b) =>
-        b === '<PITCHER>' ? pitcher : b,
-      ),
+      battingOrder: team.battingOrder.map((pos) => {
+        if (pos === 'p') {
+          return pitcher;
+        }
+        if (!team.positionChart[pos]) {
+          throw new Error(`No player for position ${pos}`);
+        }
+        return team.positionChart[pos];
+      }),
     };
     gameState.currentBatterIndex[teamId] = 0;
   }

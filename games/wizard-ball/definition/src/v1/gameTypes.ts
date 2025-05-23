@@ -14,7 +14,7 @@ export type Team = {
   ownerId: PrefixedId<'u'> | null;
   id: TeamId;
   playerIds: PlayerId[];
-  battingOrder: (PlayerId | '<PITCHER>')[];
+  battingOrder: Position[];
   pitchingOrder: PlayerId[];
   positionChart: PositionChart;
   nextPitcherIndex: number;

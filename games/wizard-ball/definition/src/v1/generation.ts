@@ -61,14 +61,12 @@ export function generateLeague(
       'p',
       'p',
     ];
+    team.battingOrder = forcedPositions.slice(0, 9);
     for (let i = 0; i < numPlayers; i++) {
       const player = generatePlayer(random, { position: forcedPositions[i] });
       const position = player.positions[0];
       player.teamId = team.id;
       team.playerIds.push(player.id);
-      if (i < 9 && position !== 'p') {
-        team.battingOrder.push(player.id);
-      }
       if (position !== 'p' && team.positionChart[position] === null) {
         team.positionChart[position] = player.id;
       }
@@ -77,7 +75,6 @@ export function generateLeague(
       }
       league.playerLookup[player.id] = player;
     }
-    team.battingOrder.push('<PITCHER>');
   }
 
   // Generate schedule

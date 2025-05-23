@@ -12,7 +12,7 @@ export type PlayerState = {
 };
 
 export type TurnData = {
-  nextBattingOrder?: PlayerId[];
+  nextBattingOrder?: Position[];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
 };
