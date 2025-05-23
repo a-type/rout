@@ -1,5 +1,5 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { League, PlayerId } from './gameTypes';
+import { League, PlayerId, Position, PositionChart } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 
@@ -13,6 +13,8 @@ export type PlayerState = {
 
 export type TurnData = {
   nextBattingOrder?: PlayerId[];
+  nextPitchingOrder?: PlayerId[];
+  nextPositionChart?: PositionChart;
 };
 
 export const gameDefinition: GameDefinition<
@@ -70,9 +72,13 @@ export const gameDefinition: GameDefinition<
         `Could not find team for player ${prospectiveTurn.playerId}`,
       );
     }
-    playerState.league.teamLookup[teamId].battingOrder =
-      prospectiveTurn.data.nextBattingOrder ??
-      playerState.league.teamLookup[teamId].battingOrder;
+    const team = playerState.league.teamLookup[teamId];
+    team.battingOrder =
+      prospectiveTurn.data.nextBattingOrder ?? team.battingOrder;
+    team.positionChart =
+      prospectiveTurn.data.nextPositionChart ?? team.positionChart;
+    team.pitchingOrder =
+      prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder;
     return playerState;
   },
 

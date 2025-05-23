@@ -6,10 +6,12 @@ import { useState } from 'react';
 import { Attributes } from '../Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
+import { TeamChart } from './TeamChart';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
   { value: 'battingOrder', label: 'Batting Order' },
+  { value: 'depthChart', label: 'Depth Chart' },
   { value: 'players', label: 'Players' },
   { value: 'games', label: 'Games' },
 ] as const satisfies Array<{ label: string; value: string }>;
@@ -134,6 +136,9 @@ export function TeamPage({ id }: { id: TeamId }) {
         </Tabs.Content>
         <Tabs.Content value="battingOrder">
           <TeamLineup id={id} />
+        </Tabs.Content>
+        <Tabs.Content value="depthChart">
+          <TeamChart id={id} />
         </Tabs.Content>
         <Tabs.Content value="players">
           <div>

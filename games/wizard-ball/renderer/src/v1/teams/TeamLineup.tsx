@@ -1,9 +1,9 @@
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
+  arrayMove,
 } from '@dnd-kit/sortable';
 import { hooks } from '../gameClient';
 import {
@@ -73,7 +73,15 @@ export function TeamLineup({ id }: { id: string }) {
     playerId: currentUserId,
   } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id];
-  const lineup = team.battingOrder;
+  const lineup = team.playerIds.sort((a, b) => {
+    const aIndex = team.battingOrder.includes(a)
+      ? team.battingOrder.indexOf(a)
+      : team.playerIds.indexOf(a);
+    const bIndex = team.battingOrder.includes(b)
+      ? team.battingOrder.indexOf(b)
+      : team.playerIds.indexOf(b);
+    return aIndex - bIndex;
+  });
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<string[]>(lineup);
   useEffect(() => {
@@ -118,9 +126,19 @@ export function TeamLineup({ id }: { id: string }) {
     >
       <div className="flex flex-col">
         <h2>Lineup</h2>
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          {items.map((playerId, idx) => {
-            const player = finalState.league.playerLookup[playerId];
+        <SortableContext
+          items={items.slice(0, 9)}
+          strategy={verticalListSortingStrategy}
+        >
+          {items.slice(0, 9).map((playerId, idx) => {
+            const player =
+              playerId === '<PITCHER>'
+                ? {
+                    id: '<PITCHER>',
+                    name: 'Pitcher',
+                    positions: ['p'],
+                  }
+                : finalState.league.playerLookup[playerId];
             return (
               <div key={playerId} className="flex items-center gap-2">
                 <span>{idx + 1}</span>

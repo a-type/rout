@@ -1,6 +1,5 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
-  GameId,
   League,
   LeagueRound,
   Player,
@@ -47,7 +46,7 @@ export function generateLeague(
 
   // Generate and assign players to teams
   for (const team of teams) {
-    const numPlayers = 9;
+    const numPlayers = 16;
     const forcedPositions: Position[] = [
       'c',
       '1b',
@@ -61,15 +60,24 @@ export function generateLeague(
       'p',
       'p',
       'p',
-      'p',
     ];
     for (let i = 0; i < numPlayers; i++) {
       const player = generatePlayer(random, { position: forcedPositions[i] });
+      const position = player.positions[0];
       player.teamId = team.id;
       team.playerIds.push(player.id);
-      team.battingOrder.push(player.id);
+      if (i < 9 && position !== 'p') {
+        team.battingOrder.push(player.id);
+      }
+      if (position !== 'p' && team.positionChart[position] === null) {
+        team.positionChart[position] = player.id;
+      }
+      if (forcedPositions[i] === 'p') {
+        team.pitchingOrder.push(player.id);
+      }
       league.playerLookup[player.id] = player;
     }
+    team.battingOrder.push('<PITCHER>');
   }
 
   // Generate schedule
@@ -113,12 +121,24 @@ export function generateLeague(
 
 function generateTeam(random: GameRandom): Team {
   let team: Team = {
-    name: 'Unnaemed Team',
+    name: 'Unnamed Team',
     icon: '⚾',
     ownerId: null,
     id: random.id(),
     playerIds: [],
     battingOrder: [],
+    pitchingOrder: [],
+    positionChart: {
+      c: null,
+      '1b': null,
+      '2b': null,
+      '3b': null,
+      ss: null,
+      lf: null,
+      cf: null,
+      rf: null,
+    },
+    nextPitcherIndex: 0,
     wins: 0,
     losses: 0,
   };
@@ -142,11 +162,11 @@ function generatePlayer(
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, race, classType),
   };
-  const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf', 'p'];
+  const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
     player.positions.push(random.item(positions));
   }
-  const extraPositions = random.int(0, 2);
+  const extraPositions = forcedPosition === 'p' ? 0 : random.int(0, 2);
   for (let i = 0; i < extraPositions; i++) {
     const position = random.item(positions);
     if (!player.positions.includes(position)) {

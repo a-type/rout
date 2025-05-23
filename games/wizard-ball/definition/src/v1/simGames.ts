@@ -62,14 +62,17 @@ function simulateGame(
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
   for (const teamId of [game.homeTeamId, game.awayTeamId]) {
+    const team = league.teamLookup[teamId];
     const pitcher =
-      league.teamLookup[teamId].playerIds.find(
-        (playerId) => league.playerLookup[playerId].positions[0] === 'p',
-      ) ?? league.teamLookup[teamId].playerIds[0];
+      team.pitchingOrder[team.nextPitcherIndex % team.pitchingOrder.length];
+    team.nextPitcherIndex =
+      (team.nextPitcherIndex + 1) % team.pitchingOrder.length;
     gameState.teamData[teamId] = {
       score: 0,
       pitcher,
-      battingOrder: league.teamLookup[teamId].playerIds.slice(0, 9),
+      battingOrder: league.teamLookup[teamId].battingOrder.map((b) =>
+        b === '<PITCHER>' ? pitcher : b,
+      ),
     };
     gameState.currentBatterIndex[teamId] = 0;
   }

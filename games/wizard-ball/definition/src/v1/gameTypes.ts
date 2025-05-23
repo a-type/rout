@@ -6,13 +6,18 @@ export type TeamId = string;
 export type PlayerId = string;
 export type GameId = string;
 
+export type PositionChart = Record<Exclude<Position, 'p'>, PlayerId | null>;
+
 export type Team = {
   icon: string;
   name: string;
   ownerId: PrefixedId<'u'> | null;
   id: TeamId;
   playerIds: PlayerId[];
-  battingOrder: PlayerId[];
+  battingOrder: (PlayerId | '<PITCHER>')[];
+  pitchingOrder: PlayerId[];
+  positionChart: PositionChart;
+  nextPitcherIndex: number;
   wins: number;
   losses: number;
 };
