@@ -185,7 +185,10 @@ function generateAttributes(
     return acc;
   }, {} as Player['attributes']);
   for (const [key, value] of Object.entries(speciesData[race])) {
-    attr[key as keyof typeof attr] += value;
+    attr[key as keyof typeof attr] = Math.max(
+      1,
+      attr[key as keyof typeof attr] + value,
+    );
   }
   return attr;
 }

@@ -1,11 +1,12 @@
-import { Player, PlayerStats } from '@long-game/game-wizard-ball-definition';
+import {
+  PlayerStats,
+  speciesIcons,
+  perks,
+} from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
-import React from 'react';
 import { Attributes } from './Attributes';
-import { speciesIcons } from '../../../definition/src/v1/speciesData';
-import { perks } from '../../../definition/src/v1/perkData';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -89,7 +90,7 @@ export function PlayerPage({ id }: { id: string }) {
       <div>
         <h2>Perks</h2>
         {player.perkIds.map((perkId) => {
-          const perk = perks[perkId];
+          const perk = perks[perkId as keyof typeof perks];
           if (!perk) {
             return null;
           }

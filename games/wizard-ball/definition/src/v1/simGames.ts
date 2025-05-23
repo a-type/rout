@@ -11,7 +11,12 @@ import type {
   PlayerStats,
   RoundResult,
 } from './gameTypes';
-import { deepClone, scaleAttributePercent } from './utils';
+import {
+  deepClone,
+  scaleAttributePercent,
+  valueByWeights,
+  WeightedValue,
+} from './utils';
 import { PitchData, ActualPitch, pitchTypes, PitchKind } from './pitchData';
 import { Perk, perks } from './perkData';
 
@@ -402,12 +407,15 @@ function determineSwing(
   const { wisdom, agility } = batter.attributes;
   const countFactor = scaleAttributePercent(
     wisdom + 5,
-    (game.strikes * 1.5 - game.balls) * 0.1,
+    (game.strikes * 1.5 - game.balls) * 1.1,
   );
   let swingChance = isStrike
     ? 0.68 * pitchData.swingStrikeFactor
     : 0.25 * pitchData.swingBallFactor;
-  const agilityModifier = scaleAttributePercent(agility, isStrike ? 0.1 : -0.1);
+  const agilityModifier = scaleAttributePercent(
+    agility,
+    isStrike ? 1.1 : 1 / 1.1,
+  );
   swingChance *= agilityModifier * countFactor;
   return random.float(0, 1) < swingChance;
 }
@@ -423,12 +431,12 @@ function determineContact(
   let contactChance = isStrike
     ? 0.85 * pitchData.contactStrikeFactor
     : 0.6 * pitchData.contactBallFactor;
-  const constitutionModifier = scaleAttributePercent(constitution, 0.1);
+  const constitutionModifier = scaleAttributePercent(constitution, 1.1);
 
   const countFactor = gameState.strikes / 2;
   const intelligenceModifier = scaleAttributePercent(
     intelligence,
-    0.2 * countFactor,
+    1.2 * countFactor,
   );
   contactChance *= constitutionModifier * intelligenceModifier;
   return random.float(0, 1) < contactChance;
@@ -458,17 +466,20 @@ function determineHitTable(
   const pitcher = league.playerLookup[pitcherId];
   const { strength, agility, charisma, constitution } = batter.attributes;
   const clutchFactor = determineClutchFactor(gameState);
-  const constitutionModifier = scaleAttributePercent(constitution, 0.1);
-  const strengthModifier = scaleAttributePercent(strength, 0.1);
-  const agilityModifier = scaleAttributePercent(agility, 0.1);
-  const charismaModifier = scaleAttributePercent(charisma, 0.4 * clutchFactor);
+  const constitutionModifier = scaleAttributePercent(constitution, 1.1);
+  const strengthModifier = scaleAttributePercent(strength, 1.1);
+  const agilityModifier = scaleAttributePercent(agility, 1.1);
+  const charismaModifier = scaleAttributePercent(
+    charisma,
+    Math.pow(1.4, clutchFactor),
+  );
 
   let hitTable: HitTable = isStrike
     ? {
         hit: 15 * (agilityModifier * charismaModifier),
         double: 5 * (strengthModifier * charismaModifier),
         triple: 1 * (strengthModifier * agilityModifier * charismaModifier),
-        homeRun: 4 * (scaleAttributePercent(strength, 0.4) * charismaModifier),
+        homeRun: 4 * (scaleAttributePercent(strength, 1.4) * charismaModifier),
         foul: 15,
         out: 60 / constitutionModifier,
       }
@@ -476,7 +487,7 @@ function determineHitTable(
         hit: 8 * agilityModifier,
         double: 2 * strengthModifier,
         triple: 0.2 * (strengthModifier * agilityModifier),
-        homeRun: 1 * scaleAttributePercent(strength, 0.4),
+        homeRun: 1 * scaleAttributePercent(strength, 1.4),
         foul: 15,
         out: 75 / constitutionModifier,
       };
@@ -501,45 +512,83 @@ function determinePitchType(
   game: LeagueGameState,
 ): ActualPitch {
   const clutchFactor = determineClutchFactor(game);
-  const pitchType = random.item(Object.keys(pitchTypes) as PitchKind[]);
-  const pitchData = deepClone(pitchTypes[pitchType]) as ActualPitch;
+  const pitchKind = random.item(Object.keys(pitchTypes) as PitchKind[]);
+  const pitchData = deepClone(pitchTypes[pitchKind]) as ActualPitch;
+  pitchData.kind = pitchKind;
   const { strength, agility, constitution, wisdom, intelligence, charisma } =
     pitcher.attributes;
-  const strengthFactor = scaleAttributePercent(strength, 0.1);
-  const agilityFactor = scaleAttributePercent(agility, 0.1);
-  const constitutionFactor = scaleAttributePercent(constitution, 0.1);
-  const wisdomFactor = scaleAttributePercent(wisdom, 0.1);
-  const intelligenceFactor = scaleAttributePercent(intelligence, 0.1);
-  const charismaFactor = scaleAttributePercent(charisma, 0.4 * clutchFactor);
+  const strengthFactor = scaleAttributePercent(strength, 1.1);
+  const agilityFactor = scaleAttributePercent(agility, 1.1);
+  const constitutionFactor = scaleAttributePercent(constitution, 1.1);
+  const wisdomFactor = scaleAttributePercent(wisdom, 1.1);
+  const intelligenceFactor = scaleAttributePercent(intelligence, 1.1);
+  const charismaFactor = scaleAttributePercent(
+    charisma,
+    Math.pow(1.4, clutchFactor),
+  );
 
-  const baseQuality = scaleAttributePercent(random.float(1, 21), 0.1);
-  let quality = baseQuality;
-  switch (pitchType) {
+  const baseRoll = random.float(1, 21);
+  const statWeight = 4;
+
+  let weightedValues: WeightedValue[] = [
+    {
+      value: baseRoll,
+      weight: 1,
+    },
+  ];
+  switch (pitchKind) {
     case 'fastball':
-      quality *= strengthFactor;
+      weightedValues.push({
+        value: strength,
+        weight: statWeight,
+      });
     case 'curveball':
-      quality *= agilityFactor;
+      weightedValues.push({
+        value: agility,
+        weight: statWeight,
+      });
       break;
     case 'changeup':
-      quality *= wisdomFactor;
+      weightedValues.push({
+        value: wisdom,
+        weight: statWeight,
+      });
       break;
     case 'slider':
-      quality *= intelligenceFactor;
+      weightedValues.push({
+        value: intelligence,
+        weight: statWeight,
+      });
       break;
     case 'sinker':
-      quality *= constitutionFactor;
+      weightedValues.push({
+        value: constitution,
+        weight: statWeight,
+      });
+      break;
+    default:
+      throw new Error(`Unknown pitch kind: ${pitchKind}`);
   }
+
+  let quality = scaleAttributePercent(valueByWeights(weightedValues), 1.4);
+  quality *=
+    scaleAttributePercent(intelligence, 1.05) *
+    scaleAttributePercent(charisma, Math.pow(1.4, clutchFactor));
   pitchData.quality = quality;
 
+  // STR = strikeouts = more strikes, fewer swings at strikes
+  // AGI = finesse = less contact
+  // CON = higher counts, fewer swings in general
+  // WIS = poor decisions, swing more at balls and less at strikes
+  // INT = deception = higher pitch quality
+  // CHA = higher pitch quality in clutch situations
+
   pitchData.strikeFactor *= agilityFactor * constitutionFactor;
-  pitchData.swingStrikeFactor *=
-    strengthFactor * agilityFactor * constitutionFactor;
-  pitchData.swingBallFactor *=
-    wisdomFactor * intelligenceFactor * charismaFactor;
-  pitchData.contactStrikeFactor *=
-    1 / constitutionFactor / strengthFactor / agilityFactor;
-  pitchData.contactBallFactor *=
-    1 / wisdomFactor / intelligenceFactor / charismaFactor;
+
+  pitchData.swingStrikeFactor *= 1 / strengthFactor / constitutionFactor;
+  pitchData.swingBallFactor *= wisdomFactor / constitutionFactor;
+  pitchData.contactStrikeFactor *= 1 / agilityFactor / strengthFactor;
+  pitchData.contactBallFactor *= wisdomFactor / agilityFactor;
 
   pitchData.strikeFactor *= quality;
   pitchData.swingStrikeFactor *= 1 / quality;
@@ -550,6 +599,18 @@ function determinePitchType(
     const value = pitchData.hitTableFactor[key as keyof HitTable] || 1;
     pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
   });
+  // console.log({
+  //   pitchData,
+  //   baseQuality,
+  //   quality,
+  //   agilityFactor,
+  //   constitutionFactor,
+  //   strengthFactor,
+  //   wisdomFactor,
+  //   intelligenceFactor,
+  //   charismaFactor,
+  //   clutchFactor,
+  // });
 
   return pitchData;
 }
@@ -565,7 +626,7 @@ function attemptSteal(
     return gameState;
   }
   const player = league.playerLookup[playerId];
-  const agilityFactor = scaleAttributePercent(player.attributes.agility, 0.2);
+  const agilityFactor = scaleAttributePercent(player.attributes.agility, 1.2);
   const stealSuccessChance = (fromBase === 2 ? 0.8 : 0.75) * agilityFactor;
   if (random.float(0, 1) < stealSuccessChance) {
     gameState.bases[fromBase] = null;

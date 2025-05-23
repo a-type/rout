@@ -10,6 +10,7 @@ export type PitchData = {
 };
 export type ActualPitch = PitchData & {
   quality: number;
+  kind: PitchKind;
 };
 export const pitchTypes = {
   fastball: {

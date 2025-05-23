@@ -205,7 +205,7 @@ export const names: Record<
       'Oberon',
       'Birch',
       'Glim',
-      'Twilight',
+      'Nimbus',
     ],
     femaleFirst: [
       'Minerva',

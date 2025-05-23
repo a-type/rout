@@ -7,7 +7,7 @@ export function scaleAttribute(
 }
 
 export function scaleAttributePercent(attribute: number, max: number): number {
-  return Math.pow(max + 1, scaleAttribute(attribute));
+  return Math.pow(max, scaleAttribute(attribute));
 }
 
 export function avg(...values: number[]): number {
@@ -16,4 +16,19 @@ export function avg(...values: number[]): number {
 
 export function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
+}
+
+export type WeightedValue = {
+  value: number;
+  weight: number;
+};
+
+export function valueByWeights(
+  arr: { value: number; weight: number }[],
+): number {
+  const totalWeight = arr.reduce((acc, item) => acc + item.weight, 0);
+  return arr.reduce(
+    (acc, item) => acc + (item.value * item.weight) / totalWeight,
+    0,
+  );
 }

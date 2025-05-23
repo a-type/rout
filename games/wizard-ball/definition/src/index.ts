@@ -1,6 +1,9 @@
 import type { GameModule } from '@long-game/game-definition';
 import { gameDefinition as v1 } from './v1/gameDefinition';
 
+export { speciesIcons } from './v1/speciesData';
+export { perks } from './v1/perkData';
+
 export default {
   id: 'wizard-ball',
   title: 'wizard-ball',
