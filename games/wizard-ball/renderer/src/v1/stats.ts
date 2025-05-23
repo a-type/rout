@@ -18,6 +18,41 @@ export type CalculatedStats = {
 
 export type AllStats = PlayerStats & CalculatedStats;
 
+export type StatInfo = {
+  label: string;
+  value: keyof (PlayerStats & CalculatedStats);
+};
+
+export const battingStats = [
+  { label: 'AB', value: 'atBats' },
+  { label: 'R', value: 'runs' },
+  { label: 'H', value: 'hits' },
+  { label: '2B', value: 'doubles' },
+  { label: '3B', value: 'triples' },
+  { label: 'RBI', value: 'runsBattedIn' },
+  { label: 'HR', value: 'homeRuns' },
+  { label: 'BB', value: 'walks' },
+  { label: 'SO', value: 'strikeouts' },
+  { label: 'SB', value: 'stolenBases' },
+  { label: 'CS', value: 'caughtStealing' },
+  { label: 'AVG', value: 'battingAverage' },
+  { label: 'OBP', value: 'onBasePercentage' },
+  { label: 'SLG', value: 'sluggingPercentage' },
+] as const satisfies Array<StatInfo>;
+
+export const pitchingStats = [
+  { label: 'IP', value: 'inningsPitched' },
+  { label: 'H', value: 'hitsAllowed' },
+  { label: 'ER', value: 'earnedRuns' },
+  { label: 'BB', value: 'pWalks' },
+  { label: 'K', value: 'ks' },
+  { label: 'HR', value: 'homeRunsAllowed' },
+  { label: 'ERA', value: 'era' },
+  { label: 'WHIP', value: 'whip' },
+  { label: 'K/9', value: 'kPerNine' },
+  { label: 'BB/9', value: 'bbPerNine' },
+] as const satisfies Array<StatInfo>;
+
 export function calculatePlayerStats(
   league: League,
   filter: {

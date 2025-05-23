@@ -7,6 +7,7 @@ import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
 import { Attributes } from './Attributes';
+import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -45,34 +46,10 @@ export function PlayerPage({ id }: { id: string }) {
     return `${homeTeam.name} vs ${awayTeam.name}`;
   };
 
-  const totalPlayerStats = games
-    .map((game) => game.playerStats[id])
-    .reduce(
-      (acc, stats) => {
-        acc.hits += stats.hits;
-        acc.runs += stats.runs;
-        acc.walks += stats.walks;
-        acc.strikeouts += stats.strikeouts;
-        acc.atBats += stats.atBats;
-        acc.doubles += stats.doubles;
-        acc.triples += stats.triples;
-        acc.homeRuns += stats.homeRuns;
-        acc.runsBattedIn += stats.runsBattedIn;
+  const totalPlayerStats = calculatePlayerStats(finalState.league, {
+    playerIds: [id],
+  });
 
-        return acc;
-      },
-      {
-        hits: 0,
-        runs: 0,
-        walks: 0,
-        strikeouts: 0,
-        atBats: 0,
-        doubles: 0,
-        triples: 0,
-        homeRuns: 0,
-        runsBattedIn: 0,
-      } as PlayerStats,
-    );
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -107,26 +84,28 @@ export function PlayerPage({ id }: { id: string }) {
       </div>
       <Attributes attributes={{ ...player.attributes, overall }} />
       <div>
-        <h2 className="text-xl font-semibold mb-2">Stats</h2>
+        <h2 className="text-xl font-semibold mb-2">Batting Stats</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
             <thead>
               <tr className="font-medium">
                 <th className="px-3 py-2 border-b">Game</th>
-                <th className="px-3 py-2 border-b">AB</th>
-                <th className="px-3 py-2 border-b">H</th>
-                <th className="px-3 py-2 border-b">2B</th>
-                <th className="px-3 py-2 border-b">3B</th>
-                <th className="px-3 py-2 border-b">HR</th>
-                <th className="px-3 py-2 border-b">RBI</th>
-                <th className="px-3 py-2 border-b">R</th>
-                <th className="px-3 py-2 border-b">BB</th>
-                <th className="px-3 py-2 border-b">SO</th>
+                {battingStats.map((stat) => (
+                  <th
+                    key={stat.value}
+                    className="px-3 py-2 border-b text-center"
+                  >
+                    {stat.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {games.map((game, index) => {
-                const stats = game.playerStats[id];
+                const stats = calculatePlayerStats(finalState.league, {
+                  gameIds: [game.id],
+                  playerIds: [id],
+                })[id];
                 return (
                   <tr
                     key={index}
@@ -146,33 +125,14 @@ export function PlayerPage({ id }: { id: string }) {
                     <td className="px-3 py-2 border-b">
                       {renderGameName(game.id)}
                     </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.atBats}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.hits}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.doubles}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.triples}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.homeRuns}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.runsBattedIn}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.runs}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.walks}
-                    </td>
-                    <td className="px-3 py-2 border-b text-center">
-                      {stats.strikeouts}
-                    </td>
+                    {battingStats.map((stat) => (
+                      <td
+                        key={stat.value}
+                        className="px-3 py-2 border-b text-center"
+                      >
+                        {stats[stat.value]}
+                      </td>
+                    ))}
                   </tr>
                 );
               })}
@@ -180,37 +140,91 @@ export function PlayerPage({ id }: { id: string }) {
             <tfoot>
               <tr className="font-semibold">
                 <td className="px-3 py-2 border-t">Total</td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.atBats}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.hits}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.doubles}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.triples}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.homeRuns}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.runsBattedIn}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.runs}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.walks}
-                </td>
-                <td className="px-3 py-2 border-t text-center">
-                  {totalPlayerStats.strikeouts}
-                </td>
+                {battingStats.map((stat) => (
+                  <td
+                    key={stat.value}
+                    className="px-3 py-2 border-t text-center"
+                  >
+                    {totalPlayerStats[id][stat.value]}
+                  </td>
+                ))}
               </tr>
             </tfoot>
           </table>
         </div>
+        {player.positions.includes('p') && (
+          <>
+            <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+            <div className="flex flex-col gap-2">
+              <h2 className="text-xl font-semibold mb-2">Pitching Stats</h2>
+              <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
+                <thead>
+                  <tr className="font-medium">
+                    <th className="px-3 py-2 border-b">Game</th>
+                    {pitchingStats.map((stat) => (
+                      <th
+                        key={stat.value}
+                        className="px-3 py-2 border-b text-center"
+                      >
+                        {stat.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {games.map((game, index) => {
+                    const stats = calculatePlayerStats(finalState.league, {
+                      gameIds: [game.id],
+                      playerIds: [id],
+                    })[id];
+                    return (
+                      <tr
+                        key={index}
+                        className={clsx(
+                          index % 2 === 0 && 'bg-gray-500/30',
+                          'cursor-pointer hover:bg-gray-500/50',
+                        )}
+                        onClick={() => {
+                          setSearchParams((params) => {
+                            params.delete('teamId');
+                            params.delete('playerId');
+                            params.set('gameId', game.id);
+                            return params;
+                          });
+                        }}
+                      >
+                        <td className="px-3 py-2 border-b">
+                          {renderGameName(game.id)}
+                        </td>
+                        {pitchingStats.map((stat) => (
+                          <td
+                            key={stat.value}
+                            className="px-3 py-2 border-b text-center"
+                          >
+                            {stats[stat.value]}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="font-semibold">
+                    <td className="px-3 py-2 border-t">Total</td>
+                    {pitchingStats.map((stat) => (
+                      <td
+                        key={stat.value}
+                        className="px-3 py-2 border-t text-center"
+                      >
+                        {totalPlayerStats[id][stat.value]}
+                      </td>
+                    ))}
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

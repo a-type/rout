@@ -28,7 +28,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
       <div className="flex gap-2">
         <Button
           onClick={() => {
-            gameSuite.submitTurn({});
+            gameSuite.submitTurn();
           }}
         >
           Next round

@@ -96,6 +96,8 @@ export type GameResult = {
     battingTeam: TeamId;
     pitchingTeam: TeamId;
   }>;
+  awayPitcher: PlayerId;
+  homePitcher: PlayerId;
   score: {
     [teamId: string]: number;
   };

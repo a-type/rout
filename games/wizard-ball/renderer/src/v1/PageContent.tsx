@@ -23,7 +23,11 @@ export function PageContent() {
   return (
     <div>
       <TeamStandings />
-      <LeagueLeaders />
+      {/* Two column layout */}
+      <div className="flex flex-col md:flex-row gap-2">
+        <LeagueLeaders kind="batting" />
+        <LeagueLeaders kind="pitching" />
+      </div>
     </div>
   );
 }

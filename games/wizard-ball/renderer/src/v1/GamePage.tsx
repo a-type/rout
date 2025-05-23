@@ -1,5 +1,19 @@
 import { useSearchParams } from '@verdant-web/react-router';
 import { hooks } from './gameClient';
+import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
+
+type StatValue =
+  | (typeof battingStats)[number]['value']
+  | (typeof pitchingStats)[number]['value'];
+
+const excludeFromBoxScore: Array<StatValue> = ['kPerNine', 'bbPerNine'];
+
+const boxScoreBattingStats = battingStats.filter(
+  (stat) => !excludeFromBoxScore.includes(stat.value as StatValue),
+);
+const boxScorePitchingStats = pitchingStats.filter(
+  (stat) => !excludeFromBoxScore.includes(stat.value as StatValue),
+);
 
 export function GamePage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -7,7 +21,6 @@ export function GamePage({ id }: { id: string }) {
   const game = finalState.league.gameResults
     .flat()
     .find((game) => game.id === id);
-  console.log('state', JSON.parse(JSON.stringify(game)));
   if (!game) {
     return <div>Game not found</div>;
   }
@@ -24,6 +37,7 @@ export function GamePage({ id }: { id: string }) {
   );
   const homeTeamPlayers = game.teamData[game.homeTeamId].battingOrder;
   const awayTeamPlayers = game.teamData[game.awayTeamId].battingOrder;
+  const stats = calculatePlayerStats(finalState.league, { gameIds: [game.id] });
   return (
     <div className="flex flex-col gap-2">
       <h1 className="mb-0">
@@ -38,123 +52,211 @@ export function GamePage({ id }: { id: string }) {
         )}
       </h1>
 
-      {/* Display inning by inning data */}
-      {/* Should look like a table where the first column are the team names, and each column after is the number of runs scored */}
-      <table className="mb-2 min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
+      <table className="mb-2 text-center border-collapse">
         <thead>
           <tr>
-            <th className="text-left">Team</th>
+            <th />
+
             {awayInnings.map((i, idx) => (
-              <th key={idx}>{idx + 1}</th>
+              <th className="border-1 border-solid border-gray-300" key={idx}>
+                {idx + 1}
+              </th>
             ))}
+            <th className="border-1 border-solid border-gray-300">R</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="text-left">{awayTeam.name}</td>
+            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300">
+              {awayTeam.name}
+            </td>
             {awayInnings.map((i, idx) => (
-              <td key={idx}>{i.runs}</td>
+              <td
+                className="text-center border-1 border-solid border-gray-300"
+                key={idx}
+              >
+                {i.runs}
+              </td>
             ))}
+            <td className="text-center border-1 border-solid border-gray-300">
+              {awayTeamScore}
+            </td>
           </tr>
           <tr>
-            <td className="text-left">{homeTeam.name}</td>
+            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300">
+              {homeTeam.name}
+            </td>
             {homeInnings.map((i, idx) => (
-              <td key={idx}>{i.runs}</td>
+              <td
+                className="text-center border-1 border-solid border-gray-300"
+                key={idx}
+              >
+                {i.runs}
+              </td>
             ))}
+            <td className="text-center border-1 border-solid border-gray-300">
+              {homeTeamScore}
+            </td>
           </tr>
         </tbody>
       </table>
 
       <div>
-        <h3 className="mb-1">Player Stats</h3>
+        <h3 className="mb-1">Batting Stats</h3>
         <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
           <thead>
             <tr>
               <th>Player</th>
-              <th>H</th>
-              <th>R</th>
-              <th>BB</th>
-              <th>SO</th>
-              <th>AB</th>
-              <th>2B</th>
-              <th>3B</th>
-              <th>HR</th>
-              <th>RBI</th>
+              {boxScoreBattingStats.map((stat) => (
+                <th key={stat.value} className="p-1">
+                  {stat.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             <tr className="bg-gray-500/50">
-              <td colSpan={10} className="text-center">
+              <td
+                colSpan={boxScoreBattingStats.length + 1}
+                className="text-center"
+              >
                 <strong>{awayTeam.name}</strong>
               </td>
             </tr>
-            {awayTeamPlayers
-              .map(
-                (playerId) => [playerId, game.playerStats[playerId]] as const,
-              )
-              .map(([playerId, stats]) => (
-                <tr
-                  key={playerId}
-                  className="cursor-pointer hover:bg-gray-500/50"
-                  onClick={() => {
-                    setSearchParams((params) => {
-                      params.delete('teamId');
-                      params.delete('gameId');
-                      params.set('playerId', playerId);
-                      return params;
-                    });
-                  }}
-                >
-                  <td className="text-left">
-                    {finalState.league.playerLookup[playerId].name}
+            {awayTeamPlayers.map((playerId) => (
+              <tr
+                key={playerId}
+                className="cursor-pointer hover:bg-gray-500/50"
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.delete('gameId');
+                    params.set('playerId', playerId);
+                    return params;
+                  });
+                }}
+              >
+                <td className="text-left">
+                  {finalState.league.playerLookup[playerId].name}
+                </td>
+                {boxScoreBattingStats.map((stat) => (
+                  <td key={stat.value} className="p-1">
+                    {stats[playerId][stat.value]}
                   </td>
-                  <td>{stats.hits}</td>
-                  <td>{stats.runs}</td>
-                  <td>{stats.walks}</td>
-                  <td>{stats.strikeouts}</td>
-                  <td>{stats.atBats}</td>
-                  <td>{stats.doubles}</td>
-                  <td>{stats.triples}</td>
-                  <td>{stats.homeRuns}</td>
-                  <td>{stats.runsBattedIn}</td>
-                </tr>
-              ))}
+                ))}
+              </tr>
+            ))}
             <tr className="bg-gray-500/50">
-              <td colSpan={10} className="text-center">
+              <td
+                colSpan={boxScoreBattingStats.length + 1}
+                className="text-center"
+              >
                 <strong>{homeTeam.name}</strong>
               </td>
             </tr>
-            {homeTeamPlayers
-              .map(
-                (playerId) => [playerId, game.playerStats[playerId]] as const,
-              )
-              .map(([playerId, stats]) => (
-                <tr
-                  key={playerId}
-                  className="cursor-pointer hover:bg-gray-500/50"
-                  onClick={() => {
-                    setSearchParams((params) => {
-                      params.delete('teamId');
-                      params.delete('gameId');
-                      params.set('playerId', playerId);
-                      return params;
-                    });
-                  }}
-                >
-                  <td className="text-left">
-                    {finalState.league.playerLookup[playerId].name}
+            {homeTeamPlayers.map((playerId) => (
+              <tr
+                key={playerId}
+                className="cursor-pointer hover:bg-gray-500/50"
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.delete('gameId');
+                    params.set('playerId', playerId);
+                    return params;
+                  });
+                }}
+              >
+                <td className="text-left">
+                  {finalState.league.playerLookup[playerId].name}
+                </td>
+                {boxScoreBattingStats.map((stat) => (
+                  <td key={stat.value} className="p-1">
+                    {stats[playerId][stat.value]}
                   </td>
-                  <td>{stats.hits}</td>
-                  <td>{stats.runs}</td>
-                  <td>{stats.walks}</td>
-                  <td>{stats.strikeouts}</td>
-                  <td>{stats.atBats}</td>
-                  <td>{stats.doubles}</td>
-                  <td>{stats.triples}</td>
-                  <td>{stats.homeRuns}</td>
-                  <td>{stats.runsBattedIn}</td>
-                </tr>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+      <div>
+        <h3 className="mb-1">Pitching Stats</h3>
+        <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
+          <thead>
+            <tr>
+              <th>Player</th>
+              {boxScorePitchingStats.map((stat) => (
+                <th key={stat.value} className="p-1">
+                  {stat.label}
+                </th>
               ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bg-gray-500/50">
+              <td
+                colSpan={boxScorePitchingStats.length + 1}
+                className="text-center"
+              >
+                <strong>{awayTeam.name}</strong>
+              </td>
+            </tr>
+            {[game.awayPitcher].map((pitcherId) => (
+              <tr
+                key={pitcherId}
+                className="cursor-pointer hover:bg-gray-500/50"
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.delete('gameId');
+                    params.set('playerId', pitcherId);
+                    return params;
+                  });
+                }}
+              >
+                <td className="text-left">
+                  {finalState.league.playerLookup[pitcherId].name}
+                </td>
+                {boxScorePitchingStats.map((stat) => (
+                  <td key={stat.value} className="p-1">
+                    {stats[pitcherId][stat.value]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            <tr className="bg-gray-500/50">
+              <td
+                colSpan={boxScorePitchingStats.length + 1}
+                className="text-center"
+              >
+                <strong>{homeTeam.name}</strong>
+              </td>
+            </tr>
+            {[game.homePitcher].map((pitcherId) => (
+              <tr
+                key={pitcherId}
+                className="cursor-pointer hover:bg-gray-500/50"
+                onClick={() => {
+                  setSearchParams((params) => {
+                    params.delete('teamId');
+                    params.delete('gameId');
+                    params.set('playerId', pitcherId);
+                    return params;
+                  });
+                }}
+              >
+                <td className="text-left">
+                  {finalState.league.playerLookup[pitcherId].name}
+                </td>
+                {boxScorePitchingStats.map((stat) => (
+                  <td key={stat.value} className="p-1">
+                    {stats[pitcherId][stat.value]}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

@@ -102,14 +102,11 @@ export const gameDefinition: GameDefinition<
     };
   },
 
-  applyRoundToGlobalState: ({ globalState, round, random, members }) => {
+  applyRoundToGlobalState: ({ globalState, round, random }) => {
     const currentRound =
       globalState.league.schedule[globalState.league.currentWeek];
     // update batting orders
     round.turns.forEach((turn) => {
-      if (!turn.data.nextBattingOrder) {
-        return;
-      }
       const teamId = Object.keys(globalState.league.teamLookup).find(
         (teamId) =>
           globalState.league.teamLookup[teamId].ownerId === turn.playerId,
@@ -117,8 +114,10 @@ export const gameDefinition: GameDefinition<
       if (!teamId) {
         throw new Error(`Could not find team for player ${turn.playerId}`);
       }
-      globalState.league.teamLookup[teamId].battingOrder =
-        turn.data.nextBattingOrder;
+      const team = globalState.league.teamLookup[teamId];
+      team.battingOrder = turn.data.nextBattingOrder ?? team.battingOrder;
+      team.positionChart = turn.data.nextPositionChart ?? team.positionChart;
+      team.pitchingOrder = turn.data.nextPitchingOrder ?? team.pitchingOrder;
     });
 
     const results = simulateRound(random, globalState.league, currentRound);

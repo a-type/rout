@@ -7,42 +7,19 @@ import { clsx, Tabs } from '@a-type/ui';
 import { PlayerName } from './PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
-import { AllStats, CalculatedStats, calculatePlayerStats } from './stats';
-
-const options: Array<{
-  label: string;
-  value: keyof (PlayerStats & CalculatedStats);
-}> = [
-  { label: 'H', value: 'hits' },
-  { label: 'R', value: 'runs' },
-  { label: 'BB', value: 'walks' },
-  { label: 'SO', value: 'strikeouts' },
-  { label: 'AB', value: 'atBats' },
-  { label: '2B', value: 'doubles' },
-  { label: '3B', value: 'triples' },
-  { label: 'HR', value: 'homeRuns' },
-  { label: 'RBI', value: 'runsBattedIn' },
-  { label: 'SB', value: 'stolenBases' },
-  { label: 'CS', value: 'caughtStealing' },
-  { label: 'BA', value: 'battingAverage' },
-  { label: 'OBP', value: 'onBasePercentage' },
-  { label: 'SLG', value: 'sluggingPercentage' },
-  { label: 'IP', value: 'inningsPitched' },
-  { label: 'ER', value: 'earnedRuns' },
-  { label: 'ERA', value: 'era' },
-  { label: 'K', value: 'ks' },
-  { label: 'BBA', value: 'pWalks' },
-  { label: 'HA', value: 'hitsAllowed' },
-  { label: 'HRA', value: 'homeRunsAllowed' },
-  { label: 'WHIP', value: 'whip' },
-  { label: 'K/9', value: 'kPerNine' },
-  { label: 'BB/9', value: 'bbPerNine' },
-];
+import {
+  AllStats,
+  battingStats,
+  calculatePlayerStats,
+  pitchingStats,
+} from './stats';
 
 const invertList = ['era', 'whip', 'bbPerNine'];
 
-export function LeagueLeaders() {
-  const [tabValue, setTabValue] = useState<keyof AllStats>('hits');
+export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
+  const [tabValue, setTabValue] = useState<keyof AllStats>(
+    kind === 'batting' ? battingStats[0].value : pitchingStats[0].value,
+  );
   const { finalState } = hooks.useGameSuite();
   const [, setSearchParams] = useSearchParams();
   const playerStats = calculatePlayerStats(finalState.league);
@@ -70,22 +47,26 @@ export function LeagueLeaders() {
     >
       <div className="flex flex-col p-1">
         <Tabs.List className="gap-none">
-          {options.map((option, idx, arr) => (
-            <Tabs.Trigger
-              key={option.value}
-              value={option.value as keyof AllStats}
-              className={clsx(
-                idx == 0 && 'rounded-l-lg',
-                idx == arr.length - 1 && 'rounded-r-lg',
-                'text-xs border-none rounded-none min-w-[1rem] bg-gray-700 hover:bg-gray-500 ring-0',
-              )}
-            >
-              {option.label}
-            </Tabs.Trigger>
-          ))}
+          {(kind === 'batting' ? battingStats : pitchingStats).map(
+            (option, idx, arr) => (
+              <Tabs.Trigger
+                key={option.value}
+                value={option.value as keyof AllStats}
+                className={clsx(
+                  idx == 0 && 'rounded-l-lg',
+                  idx == arr.length - 1 && 'rounded-r-lg',
+                  'text-xs border-none rounded-none min-w-[1rem] bg-gray-700 hover:bg-gray-500 ring-0',
+                )}
+              >
+                {option.label}
+              </Tabs.Trigger>
+            ),
+          )}
         </Tabs.List>
-        <h2 className="mb-1">League Leaders</h2>
-        <table className="table-auto  border border-gray-300 rounded-lg shadow-sm">
+        <h2 className="mb-1">
+          {kind === 'batting' ? 'Batting' : 'Pitching'} Leaders
+        </h2>
+        <table className="table-auto border border-gray-300 rounded-lg shadow-sm">
           <tbody>
             {findTop(tabValue).map((player) => (
               <tr
