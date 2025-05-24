@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
+    "bench": "turbo run bench",
     "gen": "node ./tools/generator/generate.mjs",
     "wrangler": "wrangler",
     "become-admin": "node ./tools/becomeAdmin.mjs"

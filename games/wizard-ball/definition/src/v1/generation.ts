@@ -17,7 +17,15 @@ import { perks } from './perkData';
 export function generateLeague(
   random: GameRandom,
   members: PrefixedId<'u'>[],
+  options: {
+    numTeams?: number;
+    numPlayers?: number;
+    numRounds?: number;
+  } = {},
 ): League {
+  const playersPerTeam = options.numPlayers ?? 16;
+  const roundCount = options.numRounds ?? 20;
+  const teamCount = options.numTeams ?? 10;
   let league: League = {
     name: 'League name',
     teamIds: [],
@@ -29,7 +37,9 @@ export function generateLeague(
   };
 
   // Generate teams
-  const teams = Array.from({ length: 10 }).map(() => generateTeam(random));
+  const teams = Array.from({ length: teamCount }).map(() =>
+    generateTeam(random),
+  );
   const teamNames = generateTeamNames(random, teams.length);
   teams.forEach((team, index) => {
     team.name = teamNames[index].name;
@@ -46,7 +56,6 @@ export function generateLeague(
 
   // Generate and assign players to teams
   for (const team of teams) {
-    const numPlayers = 16;
     const forcedPositions: Position[] = [
       'c',
       '1b',
@@ -62,7 +71,7 @@ export function generateLeague(
       'p',
     ];
     team.battingOrder = forcedPositions.slice(0, 9);
-    for (let i = 0; i < numPlayers; i++) {
+    for (let i = 0; i < playersPerTeam; i++) {
       const player = generatePlayer(random, { position: forcedPositions[i] });
       const position = player.positions[0];
       player.teamId = team.id;
@@ -80,13 +89,12 @@ export function generateLeague(
   // Generate schedule
   // This is a simple round-robin schedule
   const numTeams = league.teamIds.length;
-  const rounds = 20;
   const teamIds = [...league.teamIds];
   if (numTeams % 2 !== 0) {
     teamIds.push('BYE' as TeamId); // Add a dummy team if odd number
   }
   const n = teamIds.length;
-  for (let round = 0; round < rounds; round++) {
+  for (let round = 0; round < roundCount; round++) {
     const roundGames: LeagueRound = [];
     for (let i = 0; i < n / 2; i++) {
       const home = teamIds[i];

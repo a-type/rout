@@ -21,7 +21,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "bench": "vitest bench"
   },
   "dependencies": {
     "@long-game/game-definition": "workspace:*",
