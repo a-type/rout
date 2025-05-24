@@ -19,7 +19,6 @@ export function PlayerPage({ id }: { id: string }) {
   const team = player.teamId
     ? finalState.league.teamLookup[player.teamId]
     : null;
-  const teamName = team ? team.name : 'Free Agent';
   const playerName = player.name;
   const playerPositions = player.positions.join(', ');
   const overall = Object.values(player.attributes).reduce((a, b) => a + b);
@@ -59,7 +58,25 @@ export function PlayerPage({ id }: { id: string }) {
           <span className="capitalize">{player.species}</span>
           <span className="capitalize">{player.class}</span>
         </div>
-        <div className="mb-1 text-md">Team: {teamName}</div>
+        <div className="mb-1 text-md">
+          Team:{' '}
+          {team ? (
+            <div
+              className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
+              onClick={() => {
+                setSearchParams((params) => {
+                  params.delete('playerId');
+                  params.set('teamId', team.id);
+                  return params;
+                });
+              }}
+            >
+              {team.icon} {team.name} ({team.wins} - {team.losses})
+            </div>
+          ) : (
+            'Free Agent'
+          )}
+        </div>
         <div className="mb-2 text-md">
           Positions: {playerPositions.toUpperCase()}
         </div>

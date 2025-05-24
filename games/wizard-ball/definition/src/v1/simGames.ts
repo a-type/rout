@@ -294,26 +294,51 @@ function getCurrentPitcher(gameState: LeagueGameState): string {
 }
 
 function getActivePlayerPerks(
-  player: Player,
+  playerId: string,
+  league: League,
   gameState: LeagueGameState,
   pitchData?: ActualPitch,
 ): Perk[] {
-  return player.perkIds
-    .map((id) => perks[id as keyof typeof perks])
-    .filter(Boolean)
-    .filter(
-      (p: Perk) =>
-        (p.kind === 'batting' && player.id === getCurrentBatter(gameState)) ||
-        (p.kind === 'pitching' && player.id === getCurrentPitcher(gameState)),
-    )
-    .filter(
-      (p: Perk) =>
-        !p.condition ||
-        p.condition({
-          pitchData,
-          gameState,
-        }),
-    );
+  const { battingTeam, pitchingTeam } = gameState;
+  const players = [
+    ...gameState.teamData[battingTeam].battingOrder,
+    ...gameState.teamData[pitchingTeam].battingOrder,
+  ].map((pid) => league.playerLookup[pid]);
+  return players.flatMap((player) =>
+    player.perkIds
+      .map((id) => perks[id as keyof typeof perks])
+      .filter(Boolean)
+      .filter(
+        (p: Perk) =>
+          !p.condition ||
+          p.condition({
+            pitchData,
+            gameState,
+            isMe: player.id === playerId,
+            isBatter: player.id === getCurrentBatter(gameState),
+            isPitcher: player.id === getCurrentPitcher(gameState),
+            isRunner:
+              gameState.bases[1] === player.id ||
+              gameState.bases[2] === player.id ||
+              gameState.bases[3] === player.id,
+          }),
+      ),
+  );
+}
+
+function getModifiedAttributes(
+  playerId: string,
+  league: League,
+  gameState: LeagueGameState,
+): Player['attributes'] {
+  const player = league.playerLookup[playerId];
+  const activePerks = getActivePlayerPerks(playerId, league, gameState);
+  return sumObjects(
+    player.attributes,
+    ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
+      Player['attributes']
+    >[]),
+  );
 }
 
 function applyWalk(gameState: LeagueGameState): LeagueGameState {
@@ -422,10 +447,11 @@ function determineSwing(
   random: GameRandom,
   isStrike: boolean,
   batter: Player,
+  league: League,
   game: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
-  const { wisdom, agility } = batter.attributes;
+  const { wisdom, agility } = getModifiedAttributes(batter.id, league, game);
   const countFactor = scaleAttributePercent(
     wisdom + 5,
     (game.strikes * 1.5 - game.balls) * 1.1,
@@ -445,10 +471,15 @@ function determineContact(
   random: GameRandom,
   isStrike: boolean,
   batter: Player,
+  league: League,
   gameState: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
-  const { intelligence, constitution } = batter.attributes;
+  const { intelligence, constitution } = getModifiedAttributes(
+    batter.id,
+    league,
+    gameState,
+  );
   let contactChance = isStrike
     ? 0.85 * pitchData.contactStrikeFactor
     : 0.6 * pitchData.contactBallFactor;
@@ -483,9 +514,11 @@ function determineHitTable(
   league: League,
   pitchData: PitchData,
 ): HitTable {
-  const pitcherId = getCurrentPitcher(gameState);
-  const pitcher = league.playerLookup[pitcherId];
-  const { strength, agility, charisma, constitution } = batter.attributes;
+  const { strength, agility, charisma, constitution } = getModifiedAttributes(
+    batter.id,
+    league,
+    gameState,
+  );
   const clutchFactor = determineClutchFactor(gameState);
   const constitutionModifier = scaleAttributePercent(constitution, 1.1);
   const strengthModifier = scaleAttributePercent(strength, 1.1);
@@ -515,10 +548,7 @@ function determineHitTable(
 
   hitTable = multiplyHitTables(hitTable, pitchData.hitTableFactor);
   // apply skill hit tables
-  const activePerks = [
-    ...getActivePlayerPerks(batter, gameState),
-    ...getActivePlayerPerks(pitcher, gameState),
-  ];
+  const activePerks = getActivePlayerPerks(batter.id, league, gameState);
   for (const perk of activePerks) {
     if (perk.hitTableFactor) {
       hitTable = multiplyHitTables(hitTable, perk.hitTableFactor);
@@ -532,22 +562,15 @@ function determinePitchType(
   batter: Player,
   pitcher: Player,
   game: LeagueGameState,
+  league: League,
 ): ActualPitch {
   const clutchFactor = determineClutchFactor(game);
   const pitchKind = random.item(Object.keys(pitchTypes) as PitchKind[]);
   const pitchData = deepClone(pitchTypes[pitchKind]) as ActualPitch;
   pitchData.kind = pitchKind;
-  const activePerks = [
-    ...getActivePlayerPerks(batter, game, pitchData),
-    ...getActivePlayerPerks(pitcher, game, pitchData),
-  ];
+  const activePerks = getActivePlayerPerks(pitcher.id, league, game, pitchData);
   const { strength, agility, constitution, wisdom, intelligence, charisma } =
-    sumObjects(
-      pitcher.attributes,
-      ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
-        Player['attributes']
-      >[]),
-    );
+    getModifiedAttributes(pitcher.id, league, game);
   const strengthFactor = scaleAttributePercent(strength, 1.1);
   const agilityFactor = scaleAttributePercent(agility, 1.1);
   const constitutionFactor = scaleAttributePercent(constitution, 1.1);
@@ -664,8 +687,8 @@ function attemptSteal(
   if (!playerId) {
     return gameState;
   }
-  const player = league.playerLookup[playerId];
-  const agilityFactor = scaleAttributePercent(player.attributes.agility, 1.2);
+  const { agility } = getModifiedAttributes(playerId, league, gameState);
+  const agilityFactor = scaleAttributePercent(agility, 1.2);
   const stealSuccessChance = (fromBase === 2 ? 0.8 : 0.75) * agilityFactor;
   if (random.float(0, 1) < stealSuccessChance) {
     gameState.bases[fromBase] = null;
@@ -698,20 +721,20 @@ function determineSteal(
   const playerOnSecond = gameState.bases[2];
   const playerOnThird = gameState.bases[3];
   if (playerOnFirst !== null && playerOnSecond === null) {
-    const agilityFactor = scaleAttributePercent(
-      league.playerLookup[playerOnFirst].attributes.agility,
-      20,
-    );
+    const { agility } = getModifiedAttributes(playerOnFirst, league, gameState);
+    const agilityFactor = scaleAttributePercent(agility, 20);
     const stealAttemptChance = 0.01 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 1, league);
     }
   }
   if (playerOnSecond !== null && playerOnThird === null) {
-    const agilityFactor = scaleAttributePercent(
-      league.playerLookup[playerOnSecond].attributes.agility,
-      20,
+    const { agility } = getModifiedAttributes(
+      playerOnSecond,
+      league,
+      gameState,
     );
+    const agilityFactor = scaleAttributePercent(agility, 20);
     const stealAttemptChance = 0.004 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 2, league);
@@ -731,7 +754,13 @@ function simulatePitch(
   const pitcherId = getCurrentPitcher(gameState);
   const pitcher = league.playerLookup[pitcherId];
 
-  const pitchData = determinePitchType(random, batter, pitcher, gameState);
+  const pitchData = determinePitchType(
+    random,
+    batter,
+    pitcher,
+    gameState,
+    league,
+  );
   const strikeChance = 0.7 * pitchData.strikeFactor;
 
   // Determine whether the pitch is a ball or strike
@@ -743,6 +772,7 @@ function simulatePitch(
     random,
     isStrike,
     batter,
+    league,
     gameState,
     pitchData,
   );
@@ -753,6 +783,7 @@ function simulatePitch(
       random,
       isStrike,
       batter,
+      league,
       gameState,
       pitchData,
     );

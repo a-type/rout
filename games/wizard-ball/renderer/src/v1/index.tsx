@@ -24,8 +24,8 @@ export const ChatMessage = DefaultChatMessage;
 const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
   const [searchParams, setSearchParams] = useSearchParams();
   return (
-    <Box className="flex flex-col p-4 gap-2">
-      <div className="flex gap-2">
+    <Box className="flex flex-col gap-2">
+      <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center">
         <Button
           onClick={() => {
             gameSuite.submitTurn();
@@ -49,7 +49,9 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         )}
         {gameSuite.turnError}
       </div>
-      <PageContent />
+      <div className="p-4 mt-16">
+        <PageContent />
+      </div>
     </Box>
   );
 });

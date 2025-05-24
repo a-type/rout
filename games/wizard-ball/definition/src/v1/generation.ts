@@ -147,25 +147,18 @@ function generatePlayer(
   options: { position?: Position } = {},
 ): Player {
   const { position: forcedPosition } = options;
-  const race = random.item(Object.keys(names) as SpeciesType[]);
+  const species = random.item(Object.keys(names) as SpeciesType[]);
   const classType = random.item(Object.keys(classData)) as ClassType;
+
   let player: Player = {
-    name: generatePlayerName(random, race),
-    species: race,
+    name: generatePlayerName(random, species),
+    species: species,
     class: classType,
     id: random.id(),
     teamId: null,
-    perkIds: [
-      random.item(
-        Object.keys(perks).filter((p) =>
-          forcedPosition === 'p'
-            ? perks[p as keyof typeof perks].kind === 'pitching'
-            : perks[p as keyof typeof perks].kind === 'batting',
-        ),
-      ),
-    ],
+    perkIds: [],
     positions: forcedPosition ? [forcedPosition] : [],
-    attributes: generateAttributes(random, race, classType),
+    attributes: generateAttributes(random, species, classType),
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
@@ -178,6 +171,17 @@ function generatePlayer(
       player.positions.push(position);
     }
   }
+
+  const perkOptions = Object.keys(perks).filter((p) => {
+    const perk = perks[p as keyof typeof perks];
+    return (
+      perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting') &&
+      (!perk.requirements ||
+        perk.requirements({ species, classType, positions }))
+    );
+  });
+
+  player.perkIds.push(random.item(perkOptions));
 
   return player;
 }
