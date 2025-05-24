@@ -21,6 +21,7 @@ export function generateLeague(
     numTeams?: number;
     numPlayers?: number;
     numRounds?: number;
+    skipPerks?: boolean;
   } = {},
 ): League {
   const playersPerTeam = options.numPlayers ?? 16;
@@ -72,7 +73,10 @@ export function generateLeague(
     ];
     team.battingOrder = forcedPositions.slice(0, 9);
     for (let i = 0; i < playersPerTeam; i++) {
-      const player = generatePlayer(random, { position: forcedPositions[i] });
+      const player = generatePlayer(random, {
+        position: forcedPositions[i],
+        skipPerks: options.skipPerks,
+      });
       const position = player.positions[0];
       player.teamId = team.id;
       team.playerIds.push(player.id);
@@ -152,7 +156,7 @@ function generateTeam(random: GameRandom): Team {
 
 function generatePlayer(
   random: GameRandom,
-  options: { position?: Position } = {},
+  options: { position?: Position; skipPerks?: boolean } = {},
 ): Player {
   const { position: forcedPosition } = options;
   const species = random.item(Object.keys(names) as SpeciesType[]);
@@ -180,17 +184,18 @@ function generatePlayer(
     }
   }
 
-  const perkOptions = Object.keys(perks).filter((p) => {
-    const perk = perks[p as keyof typeof perks];
-    return (
-      perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting') &&
-      (!perk.requirements ||
-        perk.requirements({ species, classType, positions }))
-    );
-  });
+  if (!options.skipPerks) {
+    const perkOptions = Object.keys(perks).filter((p) => {
+      const perk = perks[p as keyof typeof perks];
+      return (
+        perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting') &&
+        (!perk.requirements ||
+          perk.requirements({ species, classType, positions }))
+      );
+    });
 
-  player.perkIds.push(random.item(perkOptions));
-
+    player.perkIds.push(random.item(perkOptions));
+  }
   return player;
 }
 

@@ -10,8 +10,12 @@ export function scaleAttributePercent(attribute: number, max: number): number {
   return Math.pow(max, scaleAttribute(attribute));
 }
 
+export function sum(...values: number[]): number {
+  return values.reduce((a, b) => a + b, 0);
+}
+
 export function avg(...values: number[]): number {
-  return values.reduce((a, b) => a + b, 0) / values.length;
+  return sum(...values) / values.length;
 }
 
 export function deepClone<T>(obj: T): T {

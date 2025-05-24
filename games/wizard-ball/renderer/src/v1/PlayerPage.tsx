@@ -2,6 +2,7 @@ import {
   PlayerStats,
   speciesIcons,
   perks,
+  getPlayerOverall,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
@@ -21,7 +22,7 @@ export function PlayerPage({ id }: { id: string }) {
     : null;
   const playerName = player.name;
   const playerPositions = player.positions.join(', ');
-  const overall = Object.values(player.attributes).reduce((a, b) => a + b);
+  const overall = getPlayerOverall(player);
 
   const games = finalState.league.gameResults
     .flat()

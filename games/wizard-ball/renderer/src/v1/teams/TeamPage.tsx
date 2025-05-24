@@ -1,5 +1,9 @@
 import { clsx, Tabs } from '@a-type/ui';
-import type { Team, TeamId } from '@long-game/game-wizard-ball-definition';
+import {
+  getTeamAvgAttributes,
+  type Team,
+  type TeamId,
+} from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
@@ -60,35 +64,7 @@ export function TeamPage({ id }: { id: TeamId }) {
     );
   };
 
-  const teamAttributes = team.playerIds
-    .map((playerId) => {
-      const player = finalState.league.playerLookup[playerId];
-      const overall = Object.values(player.attributes).reduce((a, b) => a + b);
-      return { ...player.attributes, overall };
-    })
-    .map((attributes, idx, arr) => {
-      // divide attributes by number of players
-      return {
-        strength: attributes.strength / arr.length,
-        agility: attributes.agility / arr.length,
-        constitution: attributes.constitution / arr.length,
-        wisdom: attributes.wisdom / arr.length,
-        intelligence: attributes.intelligence / arr.length,
-        charisma: attributes.charisma / arr.length,
-        overall: attributes.overall / arr.length,
-      };
-    })
-    .reduce((a, b) => {
-      return {
-        strength: a.strength + b.strength,
-        agility: a.agility + b.agility,
-        constitution: a.constitution + b.constitution,
-        wisdom: a.wisdom + b.wisdom,
-        intelligence: a.intelligence + b.intelligence,
-        charisma: a.charisma + b.charisma,
-        overall: a.overall + b.overall,
-      };
-    });
+  const teamAttributes = getTeamAvgAttributes(finalState.league, team.id);
 
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
