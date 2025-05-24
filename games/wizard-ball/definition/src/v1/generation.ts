@@ -155,7 +155,15 @@ function generatePlayer(
     class: classType,
     id: random.id(),
     teamId: null,
-    perkIds: [random.item(Object.keys(perks))],
+    perkIds: [
+      random.item(
+        Object.keys(perks).filter((p) =>
+          forcedPosition === 'p'
+            ? perks[p as keyof typeof perks].kind === 'pitching'
+            : perks[p as keyof typeof perks].kind === 'batting',
+        ),
+      ),
+    ],
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, race, classType),
   };

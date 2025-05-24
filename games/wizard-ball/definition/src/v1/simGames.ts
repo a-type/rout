@@ -14,6 +14,7 @@ import type {
 import {
   deepClone,
   scaleAttributePercent,
+  sumObjects,
   valueByWeights,
   WeightedValue,
 } from './utils';
@@ -295,6 +296,7 @@ function getCurrentPitcher(gameState: LeagueGameState): string {
 function getActivePlayerPerks(
   player: Player,
   gameState: LeagueGameState,
+  pitchData?: ActualPitch,
 ): Perk[] {
   return player.perkIds
     .map((id) => perks[id as keyof typeof perks])
@@ -308,6 +310,7 @@ function getActivePlayerPerks(
       (p: Perk) =>
         !p.condition ||
         p.condition({
+          pitchData,
           gameState,
         }),
     );
@@ -526,6 +529,7 @@ function determineHitTable(
 
 function determinePitchType(
   random: GameRandom,
+  batter: Player,
   pitcher: Player,
   game: LeagueGameState,
 ): ActualPitch {
@@ -533,8 +537,17 @@ function determinePitchType(
   const pitchKind = random.item(Object.keys(pitchTypes) as PitchKind[]);
   const pitchData = deepClone(pitchTypes[pitchKind]) as ActualPitch;
   pitchData.kind = pitchKind;
+  const activePerks = [
+    ...getActivePlayerPerks(batter, game, pitchData),
+    ...getActivePlayerPerks(pitcher, game, pitchData),
+  ];
   const { strength, agility, constitution, wisdom, intelligence, charisma } =
-    pitcher.attributes;
+    sumObjects(
+      pitcher.attributes,
+      ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
+        Player['attributes']
+      >[]),
+    );
   const strengthFactor = scaleAttributePercent(strength, 1.1);
   const agilityFactor = scaleAttributePercent(agility, 1.1);
   const constitutionFactor = scaleAttributePercent(constitution, 1.1);
@@ -589,9 +602,17 @@ function determinePitchType(
   }
 
   let quality = scaleAttributePercent(valueByWeights(weightedValues), 1.4);
+  // apply skill quality
+
   quality *=
     scaleAttributePercent(intelligence, 1.05) *
     scaleAttributePercent(charisma, Math.pow(1.4, clutchFactor));
+  for (const perk of activePerks) {
+    if (perk.qualityFactor) {
+      quality *= perk.qualityFactor;
+    }
+  }
+
   pitchData.quality = quality;
 
   // STR = strikeouts = more strikes, fewer swings at strikes
@@ -710,7 +731,7 @@ function simulatePitch(
   const pitcherId = getCurrentPitcher(gameState);
   const pitcher = league.playerLookup[pitcherId];
 
-  const pitchData = determinePitchType(random, pitcher, gameState);
+  const pitchData = determinePitchType(random, batter, pitcher, gameState);
   const strikeChance = 0.7 * pitchData.strikeFactor;
 
   // Determine whether the pitch is a ball or strike

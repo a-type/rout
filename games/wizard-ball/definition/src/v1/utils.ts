@@ -18,6 +18,21 @@ export function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+export function sumObjects(
+  initial: Record<string, number>,
+  ...objects: Partial<Record<string, number>>[]
+): Record<string, number> {
+  return objects.reduce(
+    (acc: Record<string, number>, obj) => {
+      Object.entries(obj).forEach(([key, value]) => {
+        acc[key] = (acc[key] || 0) + (value || 0);
+      });
+      return acc;
+    },
+    { ...initial },
+  );
+}
+
 export type WeightedValue = {
   value: number;
   weight: number;
