@@ -13,6 +13,7 @@ import { PrefixedId } from '@long-game/common';
 import { speciesData, SpeciesType } from './speciesData';
 import { classData, ClassType } from './classData';
 import { perks } from './perkData';
+import { getPlayerOverall } from './attributes';
 
 export function generateLeague(
   random: GameRandom,
@@ -88,6 +89,43 @@ export function generateLeague(
       }
       league.playerLookup[player.id] = player;
     }
+
+    // ensure pc plays good players and hase a sane batting order
+    // for each bench player, swap them if they are better than the current player
+    team.playerIds
+      .map((playerId) => {
+        const player = league.playerLookup[playerId];
+        return player;
+      })
+      .filter(
+        (player) =>
+          player.positions.some((pos) => pos !== 'p') &&
+          !Object.values(team.positionChart).includes(player.id),
+      )
+      .forEach((player) => {
+        player.positions.forEach((pos) => {
+          if (pos !== 'p' && team.positionChart[pos] !== null) {
+            const currentPlayerId = team.positionChart[pos];
+            const currentPlayer = league.playerLookup[currentPlayerId];
+            if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
+              team.positionChart[pos] = player.id;
+            }
+          }
+        });
+      });
+
+    // sort batting order by overall
+    team.battingOrder.sort((a, b) => {
+      // sort pitcher last
+      if (a === 'p' && b !== 'p') return 1;
+      if (b === 'p' && a !== 'p') return -1;
+      const playerA = team.positionChart[a as keyof typeof team.positionChart];
+      const playerB = team.positionChart[b as keyof typeof team.positionChart];
+      if (!playerA || !playerB) return 0;
+      const overallA = getPlayerOverall(league.playerLookup[playerA]);
+      const overallB = getPlayerOverall(league.playerLookup[playerB]);
+      return overallB - overallA; // Sort in descending order
+    });
   }
 
   // Generate schedule

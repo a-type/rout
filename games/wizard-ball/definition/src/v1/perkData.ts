@@ -34,7 +34,17 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType }) => classType === 'rogue',
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      double: 1.2,
+      double: 1.5,
+    },
+  },
+  tripleDecker: {
+    name: 'Triple Decker',
+    description: 'Hits triples more often.',
+    kind: 'batting',
+    requirements: ({ classType }) => classType === 'rogue',
+    condition: ({ isBatter }) => isBatter,
+    hitTableFactor: {
+      triple: 1.4,
     },
   },
   bigShot: {
@@ -43,7 +53,7 @@ export const perks: Record<string, Perk> = {
     kind: 'batting',
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      homeRun: 1.2,
+      homeRun: 1.3,
     },
   },
   hardy: {
@@ -55,8 +65,8 @@ export const perks: Record<string, Perk> = {
       ['badger', 'turtle', 'beaver'].includes(species),
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      out: 0.9,
-      foul: 1.1,
+      out: 0.5,
+      foul: 1.5,
     },
   },
   cleanup: {
@@ -98,12 +108,21 @@ export const perks: Record<string, Perk> = {
       agility: 4,
     },
   },
+  distraction: {
+    name: 'Distraction',
+    description: 'Lowers pitch quality when on the base paths.',
+    kind: 'batting',
+    requirements: ({ classType, species }) =>
+      classType === 'rogue' || ['rabbit', 'fox'].includes(species),
+    condition: ({ isRunner }) => isRunner,
+    qualityFactor: 0.9,
+  },
   ace: {
     name: 'Ace',
     description: 'Improves pitch quality.',
     kind: 'pitching',
     condition: ({ isPitcher }) => isPitcher,
-    qualityFactor: 1.05,
+    qualityFactor: 1.1,
   },
   strikeoutMachine: {
     name: 'Strikeout Machine',
@@ -111,7 +130,7 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ gameState, isPitcher }) =>
       isPitcher && gameState.strikes === 2,
-    qualityFactor: 1.1,
+    qualityFactor: 1.2,
   },
   weakContact: {
     name: 'Weak Contact',
@@ -120,10 +139,10 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ isPitcher }) => isPitcher,
     hitTableFactor: {
-      hit: 1.3,
-      double: 0.9,
-      triple: 0.9,
-      homeRun: 0.9,
+      hit: 1.2,
+      double: 0.8,
+      triple: 0.8,
+      homeRun: 0.8,
     },
   },
   fastballer: {

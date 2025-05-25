@@ -453,15 +453,15 @@ function determineSwing(
 ): boolean {
   const { wisdom, agility } = getModifiedAttributes(batter.id, league, game);
   const countFactor = scaleAttributePercent(
-    wisdom + 5,
-    (game.strikes * 1.5 - game.balls) * 1.1,
+    10 + 0.2 * wisdom * (game.strikes * 1.5 - game.balls),
+    1.5,
   );
   let swingChance = isStrike
     ? 0.68 * pitchData.swingStrikeFactor
     : 0.25 * pitchData.swingBallFactor;
   const agilityModifier = scaleAttributePercent(
     agility,
-    isStrike ? 1.1 : 1 / 1.1,
+    isStrike ? 1.3 : 1 / 1.3,
   );
   swingChance *= agilityModifier * countFactor;
   return random.float(0, 1) < swingChance;
@@ -483,7 +483,7 @@ function determineContact(
   let contactChance = isStrike
     ? 0.85 * pitchData.contactStrikeFactor
     : 0.6 * pitchData.contactBallFactor;
-  const constitutionModifier = scaleAttributePercent(constitution, 1.1);
+  const constitutionModifier = scaleAttributePercent(constitution, 1.2);
 
   const countFactor = gameState.strikes / 2;
   const intelligenceModifier = scaleAttributePercent(
@@ -761,7 +761,29 @@ function simulatePitch(
     gameState,
     league,
   );
-  const strikeChance = 0.7 * pitchData.strikeFactor;
+  const baseStrikeChanceTable: Record<number, Record<number, number>> = {
+    0: {
+      0: 0.62,
+      1: 0.6,
+      2: 0.58,
+      3: 0.54,
+    },
+    1: {
+      0: 0.64,
+      1: 0.63,
+      2: 0.61,
+      3: 0.57,
+    },
+    2: {
+      0: 0.66,
+      1: 0.65,
+      2: 0.63,
+      3: 0.61,
+    },
+  };
+  const baseStrikeChance =
+    baseStrikeChanceTable[gameState.strikes]?.[gameState.balls] ?? 0.6;
+  const strikeChance = baseStrikeChance * pitchData.strikeFactor;
 
   // Determine whether the pitch is a ball or strike
   const isStrike = random.float(0, 1) < strikeChance;
