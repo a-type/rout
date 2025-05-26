@@ -51,3 +51,14 @@ export function valueByWeights(
     0,
   );
 }
+
+export function getInningInfo(inning: number): {
+  inning: number;
+  half: 'top' | 'bottom';
+} {
+  const half = inning % 2 === 1 ? 'top' : 'bottom';
+  return {
+    inning: Math.ceil(inning / 2),
+    half,
+  };
+}

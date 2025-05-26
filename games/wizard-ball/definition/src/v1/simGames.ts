@@ -1,6 +1,7 @@
 import { GameRandom } from '@long-game/game-definition';
 import type {
   Base,
+  GameLogEvent,
   GameResult,
   League,
   LeagueGame,
@@ -128,6 +129,7 @@ function simulateGame(
     homePitcher,
     loser,
     score,
+    gameLog: gameState.gameLog,
   };
 }
 
@@ -175,6 +177,7 @@ function initialGameState(): LeagueGameState {
     pitchingTeam: '',
     teamData: {},
     playerStats: {},
+    gameLog: [],
   };
 }
 
@@ -212,6 +215,15 @@ function addToPlayerStats(
     playerStats[key] = (playerStats[key] || 0) + (stats[key] || 0);
   }
   return gameState;
+}
+
+export function addToGameLog(
+  event: GameLogEvent,
+  gameState: LeagueGameState,
+): LeagueGameState {
+  // DISABLE GAME LOGS FOR NOW
+  return gameState;
+  return { ...gameState, gameLog: [...gameState.gameLog, event] };
 }
 
 function resetCount(gameState: LeagueGameState): LeagueGameState {
@@ -843,9 +855,23 @@ function simulatePitch(
         gameState = addToPlayerStats(gameState, pitcherId, {
           pWalks: 1,
         });
+        gameState = addToGameLog(
+          { kind: 'walk', batterId, pitcherId },
+          gameState,
+        );
         gameState = incrementBatterIndex(gameState, gameState.battingTeam);
         gameState = resetCount(gameState);
       } else {
+        gameState = addToGameLog(
+          {
+            kind: 'ball',
+            batterId,
+            pitcherId,
+            strikes: gameState.strikes,
+            balls: gameState.balls,
+          },
+          gameState,
+        );
         gameState = determineSteal(random, gameState, league);
       }
       break;
@@ -862,10 +888,24 @@ function simulatePitch(
           ks: 1,
           outsPitched: 1,
         });
+        gameState = addToGameLog(
+          { kind: 'strikeout', batterId, pitcherId },
+          gameState,
+        );
         gameState = incrementBatterIndex(gameState, gameState.battingTeam);
         gameState = resetCount(gameState);
         gameState.outs += 1;
       } else {
+        gameState = addToGameLog(
+          {
+            kind: 'strike',
+            batterId,
+            pitcherId,
+            strikes: gameState.strikes,
+            balls: gameState.balls,
+          },
+          gameState,
+        );
         gameState = determineSteal(random, gameState, league);
       }
       break;
@@ -874,6 +914,16 @@ function simulatePitch(
       if (gameState.strikes < 2) {
         gameState.strikes += 1;
       }
+      gameState = addToGameLog(
+        {
+          kind: 'foul',
+          batterId,
+          pitcherId,
+          strikes: gameState.strikes,
+          balls: gameState.balls,
+        },
+        gameState,
+      );
       break;
     case 'out':
       // Increment out count
@@ -882,6 +932,7 @@ function simulatePitch(
       gameState = addToPlayerStats(gameState, pitcherId, {
         outsPitched: 1,
       });
+      gameState = addToGameLog({ kind: 'out', batterId, pitcherId }, gameState);
       gameState = incrementBatterIndex(gameState, gameState.battingTeam);
       gameState = resetCount(gameState);
       break;
@@ -894,6 +945,10 @@ function simulatePitch(
       gameState = addToPlayerStats(gameState, pitcherId, {
         hitsAllowed: 1,
       });
+      gameState = addToGameLog(
+        { kind: outcome, batterId, pitcherId },
+        gameState,
+      );
       if (outcome === 'double') {
         gameState = addToPlayerStats(gameState, batterId, { doubles: 1 });
       } else if (outcome === 'triple') {
@@ -924,6 +979,21 @@ function simulateInning(
   league: League,
 ): LeagueGameState {
   const initialScore = gameState.teamData[gameState.battingTeam].score;
+  gameState = addToGameLog(
+    {
+      kind: 'inningStart',
+      battingTeam: gameState.battingTeam,
+      pitchingTeam: gameState.pitchingTeam,
+      inning: gameState.currentInning,
+      score: {
+        [gameState.battingTeam]:
+          gameState.teamData[gameState.battingTeam].score,
+        [gameState.pitchingTeam]:
+          gameState.teamData[gameState.pitchingTeam].score,
+      },
+    },
+    gameState,
+  );
   while (gameState.outs < 3) {
     gameState = simulatePitch(random, gameState, league);
   }

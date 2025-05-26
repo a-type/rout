@@ -1,6 +1,7 @@
 import { PrefixedId } from '@long-game/common';
 import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
+import { PitchOutcome } from './simGames';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -101,6 +102,7 @@ export type GameResult = {
   score: {
     [teamId: string]: number;
   };
+  gameLog: GameLog;
 };
 
 export type PlayerStats = {
@@ -151,4 +153,33 @@ export type LeagueGameState = {
   balls: number;
   outs: number;
   playerStats: Record<PlayerId, PlayerStats>;
+  gameLog: GameLog;
 };
+
+export type GameLogEvent =
+  | BattingGameLogEvent
+  | {
+      kind: 'inningStart';
+      inning: number;
+      battingTeam: TeamId;
+      pitchingTeam: TeamId;
+      score: Record<TeamId, number>;
+    }
+  | {
+      kind: 'strike' | 'ball' | 'foul';
+      batterId: PlayerId;
+      pitcherId: PlayerId;
+      strikes: number;
+      balls: number;
+    };
+
+export type BattingGameLogEvent = {
+  kind:
+    | Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'>
+    | 'walk'
+    | 'strikeout';
+  batterId: PlayerId;
+  pitcherId: PlayerId;
+};
+
+export type GameLog = Array<GameLogEvent>;

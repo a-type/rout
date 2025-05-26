@@ -31,3 +31,14 @@ export function attributeToColor(
   const text = `rgb(${r},${g},${b}, 1)`;
   return { bg, text };
 }
+
+export function nthToString(n: number): string {
+  const suffix = ['th', 'st', 'nd', 'rd'][
+    n % 100 >= 11 && n % 100 <= 13 ? 0 : n % 10 > 3 ? 0 : n % 10
+  ];
+  return `${n}${suffix}`;
+}
+
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
