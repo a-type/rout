@@ -92,27 +92,31 @@ export function generateLeague(
 
     // ensure pc plays good players and hase a sane batting order
     // for each bench player, swap them if they are better than the current player
-    team.playerIds
-      .map((playerId) => {
-        const player = league.playerLookup[playerId];
-        return player;
-      })
-      .filter(
-        (player) =>
-          player.positions.some((pos) => pos !== 'p') &&
-          !Object.values(team.positionChart).includes(player.id),
-      )
-      .forEach((player) => {
-        player.positions.forEach((pos) => {
-          if (pos !== 'p' && team.positionChart[pos] !== null) {
-            const currentPlayerId = team.positionChart[pos];
-            const currentPlayer = league.playerLookup[currentPlayerId];
-            if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
-              team.positionChart[pos] = player.id;
-            }
-          }
-        });
-      });
+
+    // TODO: Fix this!
+
+    // team.playerIds
+    //   .map((playerId) => {
+    //     const player = league.playerLookup[playerId];
+    //     return player;
+    //   })
+    //   .filter(
+    //     (player) =>
+    //       player.positions.some((pos) => pos !== 'p') &&
+    //       !Object.values(team.positionChart).includes(player.id),
+    //   )
+    //   .forEach((player) => {
+    //     for (const pos of player.positions) {
+    //       if (pos !== 'p' && team.positionChart[pos] !== null) {
+    //         const currentPlayerId = team.positionChart[pos];
+    //         const currentPlayer = league.playerLookup[currentPlayerId];
+    //         if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
+    //           team.positionChart[pos] = player.id;
+    //           return;
+    //         }
+    //       }
+    //     }
+    //   });
 
     // sort batting order by overall
     team.battingOrder.sort((a, b) => {
@@ -124,6 +128,15 @@ export function generateLeague(
       if (!playerA || !playerB) return 0;
       const overallA = getPlayerOverall(league.playerLookup[playerA]);
       const overallB = getPlayerOverall(league.playerLookup[playerB]);
+      return overallB - overallA; // Sort in descending order
+    });
+
+    // sort pitching order by overall
+    team.pitchingOrder.sort((a, b) => {
+      const playerA = league.playerLookup[a];
+      const playerB = league.playerLookup[b];
+      const overallA = getPlayerOverall(playerA);
+      const overallB = getPlayerOverall(playerB);
       return overallB - overallA; // Sort in descending order
     });
   }

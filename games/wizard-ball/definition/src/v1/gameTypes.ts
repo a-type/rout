@@ -118,6 +118,8 @@ export type PlayerStats = {
   stolenBases: number;
   caughtStealing: number;
   // pitching stats
+  wins: number;
+  losses: number;
   outsPitched: number;
   earnedRuns: number;
   ks: number;

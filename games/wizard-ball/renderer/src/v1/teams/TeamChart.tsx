@@ -23,6 +23,7 @@ import {
   PositionChart,
 } from '@long-game/game-wizard-ball-definition';
 import { clsx } from '@a-type/ui';
+import { PlayerAttributesSummary } from '../PlayerAttributesSummary';
 
 const positions = [
   'c',
@@ -210,21 +211,24 @@ export function TeamChart({ id }: { id: string }) {
               >
                 <span className="uppercase">{position}</span>
                 {player ? (
-                  <Draggable
-                    disabled={currentUserId !== team.ownerId}
-                    id={player.id}
-                    className={clsx(
-                      player.positions.includes(position)
-                        ? 'bg-gray-700'
-                        : 'bg-red-500',
-                      'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',
-                    )}
-                  >
-                    <span>{player.name}</span>
-                    <span className="uppercase">
-                      {player.positions.join('/')}
-                    </span>
-                  </Draggable>
+                  <>
+                    <Draggable
+                      disabled={currentUserId !== team.ownerId}
+                      id={player.id}
+                      className={clsx(
+                        player.positions.includes(position)
+                          ? 'bg-gray-700'
+                          : 'bg-red-500',
+                        'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',
+                      )}
+                    >
+                      <span>{player.name}</span>
+                      <span className="uppercase">
+                        {player.positions.join('/')}
+                      </span>
+                    </Draggable>
+                    <PlayerAttributesSummary overallOnly id={player.id} />
+                  </>
                 ) : (
                   <span className="text-gray-500 p-1">Empty</span>
                 )}
@@ -254,6 +258,7 @@ export function TeamChart({ id }: { id: string }) {
                     </span>
                     <span>{player.name}</span>
                   </Draggable>
+                  <PlayerAttributesSummary overallOnly id={playerId} />
                 </div>
               );
             })}
@@ -288,6 +293,7 @@ export function TeamChart({ id }: { id: string }) {
                     </span>
                     <span>{player.name}</span>
                   </Draggable>
+                  <PlayerAttributesSummary overallOnly id={playerId} />
                 </div>
               </Droppable>
             );

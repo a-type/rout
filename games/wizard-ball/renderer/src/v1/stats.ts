@@ -46,6 +46,8 @@ export const pitchingStats = [
   { label: 'ER', value: 'earnedRuns' },
   { label: 'BB', value: 'pWalks' },
   { label: 'K', value: 'ks' },
+  { label: 'W', value: 'wins' },
+  { label: 'L', value: 'losses' },
   { label: 'HR', value: 'homeRunsAllowed' },
   { label: 'ERA', value: 'era' },
   { label: 'WHIP', value: 'whip' },

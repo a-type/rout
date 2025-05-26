@@ -92,12 +92,26 @@ function simulateGame(
   }
   while (!checkGameOver(gameState, game)) {
     gameState = simulateInning(random, gameState, league);
+    if (checkGameOver(gameState, game)) {
+      break;
+    }
+    gameState = endOfInning(gameState);
   }
   const homeScore = gameState.teamData[game.homeTeamId].score;
   const awayScore = gameState.teamData[game.awayTeamId].score;
 
   const winner = homeScore > awayScore ? game.homeTeamId : game.awayTeamId;
   const loser = homeScore > awayScore ? game.awayTeamId : game.homeTeamId;
+  // Update W/L for pitchers
+  gameState = addToPlayerStats(gameState, homePitcher, {
+    wins: winner === game.homeTeamId ? 1 : 0,
+    losses: winner === game.homeTeamId ? 0 : 1,
+  });
+  gameState = addToPlayerStats(gameState, awayPitcher, {
+    wins: winner === game.awayTeamId ? 1 : 0,
+    losses: winner === game.awayTeamId ? 0 : 1,
+  });
+
   const score = {
     [game.homeTeamId]: homeScore,
     [game.awayTeamId]: awayScore,
@@ -188,6 +202,8 @@ function addToPlayerStats(
       homeRunsAllowed: 0,
       stolenBases: 0,
       caughtStealing: 0,
+      wins: 0,
+      losses: 0,
     };
   }
   const playerStats = gameState.playerStats[playerId];
@@ -452,18 +468,18 @@ function determineSwing(
   pitchData: PitchData,
 ): boolean {
   const { wisdom, agility } = getModifiedAttributes(batter.id, league, game);
-  const countFactor = scaleAttributePercent(
-    10 + 0.2 * wisdom * (game.strikes * 1.5 - game.balls),
-    1.5,
+  const count = 10 + 4 * (2 * game.strikes - game.balls);
+  const countWeight = 2 ** (wisdom / 5) - 1;
+  const swingModifier = scaleAttributePercent(
+    valueByWeights([
+      { value: count, weight: countWeight },
+      { value: isStrike ? agility : 20 - agility, weight: 3 },
+    ]),
+    2,
   );
   let swingChance = isStrike
-    ? 0.68 * pitchData.swingStrikeFactor
-    : 0.25 * pitchData.swingBallFactor;
-  const agilityModifier = scaleAttributePercent(
-    agility,
-    isStrike ? 1.3 : 1 / 1.3,
-  );
-  swingChance *= agilityModifier * countFactor;
+    ? 0.68 ** (1 / swingModifier)
+    : 0.25 ** (1 / swingModifier);
   return random.float(0, 1) < swingChance;
 }
 
@@ -475,22 +491,13 @@ function determineContact(
   gameState: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
-  const { intelligence, constitution } = getModifiedAttributes(
-    batter.id,
-    league,
-    gameState,
-  );
+  const { constitution } = getModifiedAttributes(batter.id, league, gameState);
   let contactChance = isStrike
     ? 0.85 * pitchData.contactStrikeFactor
     : 0.6 * pitchData.contactBallFactor;
-  const constitutionModifier = scaleAttributePercent(constitution, 1.2);
+  const constitutionModifier = scaleAttributePercent(constitution, 2);
 
-  const countFactor = gameState.strikes / 2;
-  const intelligenceModifier = scaleAttributePercent(
-    intelligence,
-    1.2 * countFactor,
-  );
-  contactChance *= constitutionModifier * intelligenceModifier;
+  contactChance **= 1 / constitutionModifier;
   return random.float(0, 1) < contactChance;
 }
 
@@ -581,7 +588,7 @@ function determinePitchType(
     Math.pow(1.4, clutchFactor),
   );
 
-  const baseRoll = random.float(1, 21);
+  const baseRoll = random.float(0, 20);
   const statWeight = 4;
 
   let weightedValues: WeightedValue[] = [
@@ -624,17 +631,19 @@ function determinePitchType(
       throw new Error(`Unknown pitch kind: ${pitchKind}`);
   }
 
-  let quality = scaleAttributePercent(valueByWeights(weightedValues), 1.4);
+  const qualitySum = valueByWeights(weightedValues);
+
+  let quality = scaleAttributePercent(qualitySum, 2.2);
   // apply skill quality
 
-  quality *=
-    scaleAttributePercent(intelligence, 1.05) *
-    scaleAttributePercent(charisma, Math.pow(1.4, clutchFactor));
-  for (const perk of activePerks) {
-    if (perk.qualityFactor) {
-      quality *= perk.qualityFactor;
-    }
-  }
+  // quality *=
+  //   scaleAttributePercent(intelligence, 1.05) *
+  //   scaleAttributePercent(charisma, Math.pow(1.4, clutchFactor));
+  // for (const perk of activePerks) {
+  //   if (perk.qualityFactor) {
+  //     quality *= perk.qualityFactor;
+  //   }
+  // }
 
   pitchData.quality = quality;
 
@@ -645,22 +654,24 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  pitchData.strikeFactor *= agilityFactor * constitutionFactor;
+  // pitchData.strikeFactor *= agilityFactor * constitutionFactor;
 
-  pitchData.swingStrikeFactor *= 1 / strengthFactor / constitutionFactor;
-  pitchData.swingBallFactor *= wisdomFactor / constitutionFactor;
-  pitchData.contactStrikeFactor *= 1 / agilityFactor / strengthFactor;
-  pitchData.contactBallFactor *= wisdomFactor / agilityFactor;
+  pitchData.swingStrikeFactor **= 1 / quality;
+  pitchData.swingBallFactor **= quality;
+  pitchData.contactStrikeFactor **= 1 / quality;
+  pitchData.contactBallFactor **= 1 / quality;
+  // pitchData.contactStrikeFactor *= 1 / agilityFactor / strengthFactor;
+  // pitchData.contactBallFactor *= wisdomFactor / agilityFactor;
 
-  pitchData.strikeFactor *= quality;
-  pitchData.swingStrikeFactor *= 1 / quality;
-  pitchData.swingBallFactor *= quality;
-  pitchData.contactStrikeFactor *= 1 / quality;
-  pitchData.contactBallFactor *= 1 / quality;
-  Object.keys(pitchData.hitTableFactor).forEach((key) => {
-    const value = pitchData.hitTableFactor[key as keyof HitTable] || 1;
-    pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
-  });
+  // pitchData.strikeFactor *= quality;
+  // pitchData.swingStrikeFactor *= 1 / quality;
+  // pitchData.swingBallFactor *= quality;
+  // pitchData.contactStrikeFactor *= 1 / quality;
+  // pitchData.contactBallFactor *= 1 / quality;
+  // Object.keys(pitchData.hitTableFactor).forEach((key) => {
+  //   const value = pitchData.hitTableFactor[key as keyof HitTable] || 1;
+  //   pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
+  // });
   // console.log({
   //   pitchData,
   //   baseQuality,
@@ -922,6 +933,11 @@ function simulateInning(
     battingTeam: gameState.battingTeam,
     pitchingTeam: gameState.pitchingTeam,
   });
+
+  return gameState;
+}
+
+function endOfInning(gameState: LeagueGameState): LeagueGameState {
   // Switch teams
   const temp = gameState.battingTeam;
   gameState.battingTeam = gameState.pitchingTeam;

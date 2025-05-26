@@ -13,6 +13,7 @@ import {
   calculatePlayerStats,
   pitchingStats,
 } from './stats';
+import { TeamIcon } from './TeamIcon';
 
 const invertList = ['era', 'whip', 'bbPerNine'];
 
@@ -28,7 +29,11 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
     const isInverted = invertList.includes(stat);
     let list = Object.entries(playerStats)
       .filter(([, stats]) => {
-        return !isInverted || stats.outsPitched > 0;
+        return (
+          (kind === 'pitching' && stats.outsPitched > 0) ||
+          (kind === 'batting' &&
+            stats.atBats > finalState.league.currentWeek * 3)
+        );
       })
       .sort(([, a], [, b]) => Number(b[stat]) - Number(a[stat]));
     if (isInverted) {
@@ -68,25 +73,30 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
         </h2>
         <table className="table-auto border border-gray-300 rounded-lg shadow-sm">
           <tbody>
-            {findTop(tabValue).map((player) => (
-              <tr
-                key={player.playerId}
-                className="cursor-pointer hover:bg-gray-500/50 p-1"
-                onClick={() => {
-                  setSearchParams((params) => {
-                    params.delete('teamId');
-                    params.delete('gameId');
-                    params.set('playerId', player.playerId);
-                    return params;
-                  });
-                }}
-              >
-                <td className="text-left p-1">
-                  <PlayerName id={player.playerId} />
-                </td>
-                <td className="text-right p-1">{player[tabValue]}</td>
-              </tr>
-            ))}
+            {findTop(tabValue).map((player) => {
+              const teamId =
+                finalState.league.playerLookup[player.playerId].teamId;
+              return (
+                <tr
+                  key={player.playerId}
+                  className="cursor-pointer hover:bg-gray-500/50 p-1"
+                  onClick={() => {
+                    setSearchParams((params) => {
+                      params.delete('teamId');
+                      params.delete('gameId');
+                      params.set('playerId', player.playerId);
+                      return params;
+                    });
+                  }}
+                >
+                  <td className="text-left p-1 flex items-center gap-2">
+                    {teamId && <TeamIcon size={12} id={teamId} />}
+                    <PlayerName id={player.playerId} />
+                  </td>
+                  <td className="text-right p-1">{player[tabValue]}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

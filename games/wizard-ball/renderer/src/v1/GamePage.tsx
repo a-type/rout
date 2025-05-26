@@ -94,6 +94,11 @@ export function GamePage({ id }: { id: string }) {
                 {i.runs}
               </td>
             ))}
+            {homeInnings.length < awayInnings.length && (
+              <td className="text-center border-1 border-solid border-gray-300">
+                X
+              </td>
+            )}
             <td className="text-center border-1 border-solid border-gray-300">
               {homeTeamScore}
             </td>

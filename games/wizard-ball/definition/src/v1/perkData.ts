@@ -34,7 +34,7 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType }) => classType === 'rogue',
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      double: 1.5,
+      double: 1.3,
     },
   },
   tripleDecker: {
@@ -44,7 +44,7 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType }) => classType === 'rogue',
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      triple: 1.4,
+      triple: 1.2,
     },
   },
   bigShot: {
@@ -53,7 +53,7 @@ export const perks: Record<string, Perk> = {
     kind: 'batting',
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      homeRun: 1.3,
+      homeRun: 1.1,
     },
   },
   hardy: {
@@ -65,8 +65,8 @@ export const perks: Record<string, Perk> = {
       ['badger', 'turtle', 'beaver'].includes(species),
     condition: ({ isBatter }) => isBatter,
     hitTableFactor: {
-      out: 0.5,
-      foul: 1.5,
+      out: 0.8,
+      foul: 1.2,
     },
   },
   cleanup: {
@@ -86,7 +86,7 @@ export const perks: Record<string, Perk> = {
   },
   rage: {
     name: 'Rage',
-    description: 'Increases chance to hit with 2 strikes.',
+    description: 'Increases chance to hit on contact with 2 strikes.',
     kind: 'batting',
     requirements: ({ classType }) => classType === 'barbarian',
     condition: ({ gameState, isBatter }) => isBatter && gameState.strikes === 2,

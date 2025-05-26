@@ -33,6 +33,13 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         >
           Next round
         </Button>
+        <Button
+          onClick={() => {
+            gameSuite.submitTurn({});
+          }}
+        >
+          Force round
+        </Button>
         {[...searchParams.keys()].length > 0 && (
           <Button
             onClick={() => {

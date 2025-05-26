@@ -11,6 +11,7 @@ import { Attributes } from '../Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';
+import { attributeToColor } from '../utils';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -36,24 +37,7 @@ export function TeamPage({ id }: { id: TeamId }) {
   );
 
   const renderColorCell = (value: number, max: number = 20) => {
-    // Clamp value between 1 and max
-    const v = Math.max(1, Math.min(value, max));
-    // Calculate percentage (0 = red, 0.5 = yellow, 1 = green)
-    const percent = (v - 1) / (max - 1);
-    // Interpolate color: red (255,0,0) -> yellow (255,255,0) -> green (0,200,0)
-    let r, g, b;
-    if (percent < 0.5) {
-      // red to yellow
-      r = 255;
-      g = Math.round(255 * (percent / 0.5));
-      b = 0;
-    } else {
-      // yellow to green
-      r = Math.round(255 * (1 - (percent - 0.5) / 0.5));
-      g = 200;
-      b = 0;
-    }
-    const bg = `rgb(${r},${g},${b}, .8)`;
+    const { bg } = attributeToColor(value, max);
     return (
       <td
         className="text-center"

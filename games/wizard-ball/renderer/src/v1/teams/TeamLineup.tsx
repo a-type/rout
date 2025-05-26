@@ -27,6 +27,7 @@ import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
 import { Position } from '@long-game/game-wizard-ball-definition';
+import { PlayerAttributesSummary } from '../PlayerAttributesSummary';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -109,7 +110,6 @@ export function TeamLineup({ id }: { id: string }) {
 
     setActiveId(null);
   }
-  console.log('lineup', items);
 
   return (
     <DndContext
@@ -142,6 +142,7 @@ export function TeamLineup({ id }: { id: string }) {
                   <span className="uppercase">{player.positions[0]}</span>
                   <span>{player.name}</span>
                 </SortableItem>
+                <PlayerAttributesSummary id={playerId} overallOnly />
               </div>
             );
           })}
