@@ -227,7 +227,8 @@ export function TeamChart({ id }: { id: string }) {
                         {player.positions.join('/')}
                       </span>
                     </Draggable>
-                    <PlayerAttributesSummary overallOnly id={player.id} />
+                    <PlayerAttributesSummary kind="overall" id={player.id} />
+                    <PlayerAttributesSummary kind="stamina" id={player.id} />
                   </>
                 ) : (
                   <span className="text-gray-500 p-1">Empty</span>
@@ -258,7 +259,8 @@ export function TeamChart({ id }: { id: string }) {
                     </span>
                     <span>{player.name}</span>
                   </Draggable>
-                  <PlayerAttributesSummary overallOnly id={playerId} />
+                  <PlayerAttributesSummary kind="overall" id={playerId} />
+                  <PlayerAttributesSummary kind="stamina" id={playerId} />
                 </div>
               );
             })}
@@ -293,7 +295,8 @@ export function TeamChart({ id }: { id: string }) {
                     </span>
                     <span>{player.name}</span>
                   </Draggable>
-                  <PlayerAttributesSummary overallOnly id={playerId} />
+                  <PlayerAttributesSummary kind="overall" id={playerId} />
+                  <PlayerAttributesSummary kind="stamina" id={playerId} />
                 </div>
               </Droppable>
             );

@@ -100,7 +100,10 @@ export function PlayerPage({ id }: { id: string }) {
           );
         })}
       </div>
-      <Attributes attributes={{ ...player.attributes, overall }} />
+      <Attributes
+        attributes={{ ...player.attributes, overall }}
+        stamina={player.stamina}
+      />
       <div>
         <h2 className="text-xl font-semibold mb-2">Batting Stats</h2>
         <div className="overflow-x-auto">

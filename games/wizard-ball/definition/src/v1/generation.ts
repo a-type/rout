@@ -222,6 +222,7 @@ function generatePlayer(
     perkIds: [],
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, species, classType),
+    stamina: 1,
   };
   const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {

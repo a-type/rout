@@ -142,7 +142,8 @@ export function TeamLineup({ id }: { id: string }) {
                   <span className="uppercase">{player.positions[0]}</span>
                   <span>{player.name}</span>
                 </SortableItem>
-                <PlayerAttributesSummary id={playerId} overallOnly />
+                <PlayerAttributesSummary kind="overall" id={playerId} />
+                <PlayerAttributesSummary kind="stamina" id={playerId} />
               </div>
             );
           })}

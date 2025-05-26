@@ -19,17 +19,17 @@ const attributes = [
 
 export function PlayerAttributesSummary({
   id,
-  overallOnly,
+  kind,
 }: {
   id: string;
-  overallOnly?: boolean;
+  kind: 'overall' | 'stamina' | 'all';
 }) {
   const { finalState } = hooks.useGameSuite();
   const player = finalState.league.playerLookup[id];
   const attr = player.attributes;
   const overall = getPlayerOverall(player);
 
-  if (overallOnly) {
+  if (kind === 'overall') {
     return (
       <div
         className="flex flex-row gap-2 items-center bg-gray-800 p-1 rounded"
@@ -37,6 +37,17 @@ export function PlayerAttributesSummary({
       >
         <span className="font-bold">OVR:</span>
         <span>{overall}</span>
+      </div>
+    );
+  }
+  if (kind === 'stamina') {
+    return (
+      <div
+        className="flex flex-row gap-2 items-center bg-gray-800 p-1 rounded"
+        style={{ color: attributeToColor(player.stamina * 20).text }}
+      >
+        <span className="font-bold">STA:</span>
+        <span>{(player.stamina * 100).toFixed(0)}%</span>
       </div>
     );
   }

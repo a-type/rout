@@ -360,12 +360,22 @@ function getModifiedAttributes(
   gameState: LeagueGameState,
 ): Player['attributes'] {
   const player = league.playerLookup[playerId];
+  const stamina = Math.min(1, Math.max(0, player.stamina));
+  const staminaFactor = (1 - stamina) * 10;
   const activePerks = getActivePlayerPerks(playerId, league, gameState);
   return sumObjects(
     player.attributes,
     ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
       Player['attributes']
     >[]),
+    {
+      strength: -staminaFactor,
+      agility: -staminaFactor,
+      constitution: -staminaFactor,
+      wisdom: -staminaFactor,
+      intelligence: -staminaFactor,
+      charisma: -staminaFactor,
+    },
   );
 }
 
@@ -776,6 +786,7 @@ function simulatePitch(
   const batter = league.playerLookup[batterId];
   const pitcherId = getCurrentPitcher(gameState);
   const pitcher = league.playerLookup[pitcherId];
+  let nextBatter = false;
 
   const pitchData = determinePitchType(
     random,
@@ -859,8 +870,7 @@ function simulatePitch(
           { kind: 'walk', batterId, pitcherId },
           gameState,
         );
-        gameState = incrementBatterIndex(gameState, gameState.battingTeam);
-        gameState = resetCount(gameState);
+        nextBatter = true;
       } else {
         gameState = addToGameLog(
           {
@@ -892,8 +902,7 @@ function simulatePitch(
           { kind: 'strikeout', batterId, pitcherId },
           gameState,
         );
-        gameState = incrementBatterIndex(gameState, gameState.battingTeam);
-        gameState = resetCount(gameState);
+        nextBatter = true;
         gameState.outs += 1;
       } else {
         gameState = addToGameLog(
@@ -933,8 +942,7 @@ function simulatePitch(
         outsPitched: 1,
       });
       gameState = addToGameLog({ kind: 'out', batterId, pitcherId }, gameState);
-      gameState = incrementBatterIndex(gameState, gameState.battingTeam);
-      gameState = resetCount(gameState);
+      nextBatter = true;
       break;
     case 'hit':
     case 'double':
@@ -965,9 +973,33 @@ function simulatePitch(
         });
       }
       gameState = applyHit(gameState, outcome);
-      gameState = incrementBatterIndex(gameState, gameState.battingTeam);
-      gameState = resetCount(gameState);
+      nextBatter = true;
       break;
+  }
+
+  // Adjust pitching stamina
+  const { constitution: pitcherCon } = getModifiedAttributes(
+    pitcherId,
+    league,
+    gameState,
+  );
+  const { constitution: batterCon } = getModifiedAttributes(
+    batter.id,
+    league,
+    gameState,
+  );
+  pitcher.stamina = Math.max(
+    -0.25,
+    pitcher.stamina + scaleAttributePercent(pitcherCon, 1.01) - 1.02,
+  );
+  batter.stamina = Math.max(
+    -0.25,
+    batter.stamina + scaleAttributePercent(batterCon, 1.01) - 1.02,
+  );
+
+  if (nextBatter) {
+    gameState = incrementBatterIndex(gameState, gameState.battingTeam);
+    gameState = resetCount(gameState);
   }
 
   return gameState;

@@ -121,6 +121,9 @@ export const gameDefinition: GameDefinition<
     });
 
     const results = simulateRound(random, globalState.league, currentRound);
+    Object.values(globalState.league.playerLookup).forEach((player) => {
+      player.stamina = Math.min(1, player.stamina + 0.25);
+    });
     for (const result of results) {
       const winner = globalState.league.teamLookup[result.winner];
       const loser = globalState.league.teamLookup[result.loser];

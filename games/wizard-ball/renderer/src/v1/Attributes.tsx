@@ -17,8 +17,10 @@ const attributeList: Array<{
 
 export function Attributes({
   attributes,
+  stamina,
 }: {
   attributes: Player['attributes'] & { overall: number };
+  stamina?: number;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -35,6 +37,21 @@ export function Attributes({
             }}
           />
         </div>
+        {stamina || stamina === 0 ? (
+          <>
+            <span className="font-semibold">Stamina:</span>
+            <span>{roundFloat(stamina * 100, 0)}%</span>
+            <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+              <div
+                className="h-full bg-lime-500"
+                style={{
+                  width: `${stamina * 100}%`,
+                  transition: 'width 0.3s',
+                }}
+              />
+            </div>
+          </>
+        ) : null}
       </div>
       <div className="grid grid-cols-12 gap-x-4 gap-y-2 items-center">
         {attributeList.map(({ value, label, color }) => (

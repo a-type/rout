@@ -43,6 +43,7 @@ export type Player = {
   class: ClassType;
   perkIds: string[];
   attributes: PlayerAttributes;
+  stamina: number;
 };
 
 export type Position =
