@@ -17,16 +17,19 @@ import type {
   RoundResult,
 } from './gameTypes';
 import {
-  avg,
   deepClone,
   multiplyObjects,
+  scaleAttribute,
   scaleAttributePercent,
   sumObjects,
   valueByWeights,
-  WeightedValue,
 } from './utils';
 import { PitchData, ActualPitch, pitchTypes, PitchKind } from './pitchData';
 import { Perk, perks } from './perkData';
+import {
+  getBattingCompositeRatings,
+  getPitchingCompositeRatings,
+} from './attributes';
 
 export function simulateRound(
   random: GameRandom,
@@ -365,11 +368,12 @@ function getModifiedAttributes(
   league: League,
   gameState: LeagueGameState,
 ): Player['attributes'] {
+  const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
   const stamina = Math.min(1, Math.max(0, player.stamina));
   const staminaFactor = (1 - stamina) * 10;
   const activePerks = getActivePlayerPerks(playerId, league, gameState);
-  return sumObjects(
+  const baseStats = sumObjects(
     player.attributes,
     ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
       Player['attributes']
@@ -383,6 +387,13 @@ function getModifiedAttributes(
       charisma: -staminaFactor,
     },
   );
+  return sumObjects(baseStats, {
+    strength: clutchFactor * scaleAttribute(baseStats.charisma, 5),
+    agility: clutchFactor * scaleAttribute(baseStats.charisma, 5),
+    constitution: clutchFactor * scaleAttribute(baseStats.charisma, 5),
+    wisdom: clutchFactor * scaleAttribute(baseStats.charisma, 5),
+    intelligence: clutchFactor * scaleAttribute(baseStats.charisma, 5),
+  });
 }
 
 function applyWalk(gameState: LeagueGameState): LeagueGameState {
@@ -484,13 +495,23 @@ function determineSwing(
   game: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
-  const { wisdom, agility } = getModifiedAttributes(batter.id, league, game);
+  const batterComposite = getBattingCompositeRatings(
+    getModifiedAttributes(batter.id, league, game),
+  );
   const count = 10 + 4 * (2 * game.strikes - game.balls);
-  const countWeight = 2 ** (wisdom / 5) - 1;
+  const countWeight = 2 ** (batterComposite.plateDiscipline / 5) - 1;
   const swingModifier = scaleAttributePercent(
     valueByWeights([
       { value: count, weight: countWeight },
-      { value: isStrike ? agility : 20 - agility, weight: 3 },
+
+      // TODO: Decide how to handle this (used to be agility)
+      // Maybe simplify a bit?
+      {
+        value: isStrike
+          ? batterComposite.plateDiscipline
+          : 20 - batterComposite.plateDiscipline,
+        weight: 3,
+      },
     ]),
     2,
   );
@@ -508,13 +529,14 @@ function determineContact(
   gameState: LeagueGameState,
   pitchData: PitchData,
 ): boolean {
-  const { constitution } = getModifiedAttributes(batter.id, league, gameState);
+  const batterComposite = getBattingCompositeRatings(
+    getModifiedAttributes(batter.id, league, gameState),
+  );
   let contactChance = isStrike
     ? 0.85 * pitchData.contactStrikeFactor
     : 0.6 * pitchData.contactBallFactor;
-  const constitutionModifier = scaleAttributePercent(constitution, 2);
 
-  contactChance **= 1 / constitutionModifier;
+  contactChance **= 1 / scaleAttributePercent(batterComposite.contact, 2);
   return random.float(0, 1) < contactChance;
 }
 
@@ -538,41 +560,41 @@ function determinePitchType(
   game: LeagueGameState,
   league: League,
 ): ActualPitch {
-  const clutchFactor = determineClutchFactor(game);
   const pitchKind = random.item(Object.keys(pitchTypes) as PitchKind[]);
   const pitchData = deepClone(pitchTypes[pitchKind]) as ActualPitch;
   pitchData.kind = pitchKind;
   const activePerks = getActivePlayerPerks(pitcher.id, league, game, pitchData);
-  const { strength, agility, constitution, wisdom, intelligence, charisma } =
-    getModifiedAttributes(pitcher.id, league, game);
-  const strengthFactor = scaleAttributePercent(strength, 1.1);
-  const agilityFactor = scaleAttributePercent(agility, 1.1);
-  const constitutionFactor = scaleAttributePercent(constitution, 1.1);
-  const wisdomFactor = scaleAttributePercent(wisdom, 1.1);
-  const intelligenceFactor = scaleAttributePercent(intelligence, 1.1);
-  const charismaFactor = (charisma - 10) * clutchFactor;
+  const batterComposite = getBattingCompositeRatings(
+    getModifiedAttributes(batter.id, league, game),
+  );
+  const pitcherComposite = getPitchingCompositeRatings(
+    getModifiedAttributes(pitcher.id, league, game),
+  );
 
   let attributeTotal = random.float(-5, 5);
-  attributeTotal += charismaFactor;
+  attributeTotal += 0.2 * (pitcherComposite.dueling - batterComposite.dueling);
+  attributeTotal += 0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
+  attributeTotal +=
+    (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;
 
-  switch (pitchKind) {
-    case 'fastball':
-      attributeTotal += strength;
-    case 'curveball':
-      attributeTotal += agility;
-      break;
-    case 'changeup':
-      attributeTotal += wisdom;
-      break;
-    case 'slider':
-      attributeTotal += intelligence;
-      break;
-    case 'sinker':
-      attributeTotal += constitution;
-      break;
-    default:
-      throw new Error(`Unknown pitch kind: ${pitchKind}`);
-  }
+  // switch (pitchKind) {
+  //   case 'fastball':
+  //     attributeTotal += strength;
+  //   case 'curveball':
+  //     attributeTotal += agility;
+  //     break;
+  //   case 'changeup':
+  //     attributeTotal += wisdom;
+  //     break;
+  //   case 'slider':
+  //     attributeTotal += intelligence;
+  //     break;
+  //   case 'sinker':
+  //     attributeTotal += constitution;
+  //     break;
+  //   default:
+  //     throw new Error(`Unknown pitch kind: ${pitchKind}`);
+  // }
   activePerks.forEach((perk) => {
     if (perk.qualityBonus) {
       attributeTotal += perk.qualityBonus;
@@ -580,16 +602,6 @@ function determinePitchType(
   });
 
   let quality = scaleAttributePercent(attributeTotal, 2.2);
-  // apply skill quality
-
-  // quality *=
-  //   scaleAttributePercent(intelligence, 1.05) *
-  //   scaleAttributePercent(charisma, Math.pow(1.4, clutchFactor));
-  // for (const perk of activePerks) {
-  //   if (perk.qualityFactor) {
-  //     quality *= perk.qualityFactor;
-  //   }
-  // }
 
   pitchData.quality = quality;
 
@@ -600,10 +612,9 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  pitchData.strikeFactor *= scaleAttributePercent(
-    avg(agility, constitution),
-    1.1,
-  );
+  // TODO: Figure out how to handle modifying strikes
+  pitchData.strikeFactor **=
+    1 / scaleAttributePercent(pitcherComposite.accuracy, 1.5);
 
   pitchData.swingStrikeFactor **= 1 / quality;
   pitchData.swingBallFactor **= quality;
@@ -624,23 +635,25 @@ function determinePitchType(
       (pitchData.hitModiferTable.type[key as HitType] ?? 1) ** quality;
   });
 
-  // console.log({
-  //   pitchData,
-  //   baseQuality,
-  //   quality,
-  //   agilityFactor,
-  //   constitutionFactor,
-  //   strengthFactor,
-  //   wisdomFactor,
-  //   intelligenceFactor,
-  //   charismaFactor,
-  //   clutchFactor,
-  // });
+  pitchData.swingBallFactor *= scaleAttributePercent(
+    pitcherComposite.deception,
+    1.5,
+  );
+  pitchData.hitModiferTable.type.grounder =
+    (pitchData.hitModiferTable.type.grounder ?? 1) *
+    scaleAttributePercent(pitcherComposite.hitAngle, 1.5);
+  pitchData.hitModiferTable.power.strong =
+    (pitchData.hitModiferTable.power.strong ?? 1) /
+    scaleAttributePercent(pitcherComposite.hitPower, 1.5);
+  pitchData.hitModiferTable.type.lineDrive =
+    (pitchData.hitModiferTable.type.lineDrive ?? 1) /
+    scaleAttributePercent(pitcherComposite.extraBases, 1.5);
 
   return pitchData;
 }
 
 function determineDefender(
+  random: GameRandom,
   hitArea: HitArea,
   hitType: HitType,
 ): Exclude<Position, 'p'> {
@@ -651,11 +664,11 @@ function determineDefender(
         case 'farLeft':
           return '3b';
         case 'left':
-          return 'ss';
+          return random.float() < 0.7 ? 'ss' : '3b';
         case 'center':
-          return 'ss';
+          return random.float() < 0.7 ? 'ss' : '2b';
         case 'right':
-          return '2b';
+          return random.float() < 0.7 ? '2b' : '1b';
         case 'farRight':
           return '1b';
       }
@@ -666,11 +679,13 @@ function determineDefender(
     case 'fly':
       switch (hitArea) {
         case 'farLeft':
-        case 'left':
           return 'lf';
+        case 'left':
+          return random.float() < 0.7 ? 'cf' : 'lf';
         case 'center':
           return 'cf';
         case 'right':
+          return random.float() < 0.7 ? 'cf' : 'rf';
         case 'farRight':
           return 'rf';
       }
@@ -715,6 +730,7 @@ function determineHitResult(
     }
   });
   const batterAttributes = getModifiedAttributes(batter, league, gameState);
+  const batterCompositeRatings = getBattingCompositeRatings(batterAttributes);
   const hitAreaTable: Record<HitArea, number> = {
     farLeft: 0.5,
     left: 1.5,
@@ -728,12 +744,13 @@ function determineHitResult(
       ? {
           weak: 1,
           normal: 3,
-          strong: 2 * scaleAttributePercent(batterAttributes.strength, 2),
+          strong: 2 * scaleAttributePercent(batterCompositeRatings.hitPower, 2),
         }
       : {
           weak: 2,
           normal: 1,
-          strong: 0.5 * scaleAttributePercent(batterAttributes.strength, 2),
+          strong:
+            0.5 * scaleAttributePercent(batterCompositeRatings.hitPower, 2),
         },
     pitchData.hitModiferTable.power,
   );
@@ -742,16 +759,16 @@ function determineHitResult(
     isStrike
       ? {
           grounder: 4,
-          fly: 2 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          fly: 2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
           lineDrive:
-            2.5 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+            2.5 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
           popUp: 1,
         }
       : {
           grounder: 1,
-          fly: 3 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          fly: 3 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
           lineDrive:
-            2 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+            2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
           popUp: 4,
         },
     pitchData.hitModiferTable.type,
@@ -759,18 +776,16 @@ function determineHitResult(
   const hitType = randomTable(random, hitTypeTable);
 
   // Determine defender based on hit direction and type
-  const defender = determineDefender(hitArea, hitType);
+  const defender = determineDefender(random, hitArea, hitType);
   const defendingPlayerId =
     league.teamLookup[gameState.pitchingTeam].positionChart[defender];
   if (!defendingPlayerId) {
     throw new Error(`No player found for defender position: ${defender}`);
   }
-  const { wisdom } = getModifiedAttributes(
-    defendingPlayerId,
-    league,
-    gameState,
+  const defenderComposite = getBattingCompositeRatings(
+    getModifiedAttributes(defendingPlayerId, league, gameState),
   );
-  const defenseModifer = scaleAttributePercent(wisdom, 1.5);
+  const defenseModifer = scaleAttributePercent(defenderComposite.fielding, 2);
   let baseHitTable: Partial<HitTable> = {};
   let outChance = 0.5;
   if (hitType === 'grounder') {
@@ -786,10 +801,12 @@ function determineHitResult(
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
-        double: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
+        double:
+          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
         hit: 3,
         out: 5,
-        triple: 0.1 * scaleAttributePercent(batterAttributes.agility, 2),
+        triple:
+          0.1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
       };
     }
   } else if (hitType === 'fly') {
@@ -801,18 +818,21 @@ function determineHitResult(
     } else if (hitPower === 'normal') {
       baseHitTable = {
         hit: 2,
-        double: 1 * scaleAttributePercent(batterAttributes.agility, 2),
+        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
         out: 15,
-        triple: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
-        homeRun: 0.1,
+        triple:
+          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        homeRun:
+          0.1 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
         hit: 0.5,
-        double: 1,
+        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
         out: 2,
-        triple: 0.4 * scaleAttributePercent(batterAttributes.agility, 2),
-        homeRun: 6,
+        triple:
+          0.4 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        homeRun: 6 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
       };
     }
   } else if (hitType === 'lineDrive') {
@@ -825,16 +845,19 @@ function determineHitResult(
       baseHitTable = {
         hit: 4,
         out: 1,
-        double: 0.5 * scaleAttributePercent(batterAttributes.agility, 2),
-        triple: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
+        double:
+          0.5 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        triple:
+          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
         hit: 8,
-        double: 2,
+        double: 2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
         out: 1,
-        triple: 1 * scaleAttributePercent(batterAttributes.agility, 2),
-        homeRun: 0.5,
+        triple: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        homeRun:
+          0.5 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
       };
     }
   } else if (hitType === 'popUp') {
@@ -881,9 +904,22 @@ function attemptSteal(
   if (!playerId) {
     return gameState;
   }
-  const { agility } = getModifiedAttributes(playerId, league, gameState);
-  const agilityFactor = scaleAttributePercent(agility, 1.2);
-  const stealSuccessChance = (fromBase === 2 ? 0.8 : 0.75) * agilityFactor;
+  const catcherId = league.teamLookup[gameState.pitchingTeam].positionChart.c;
+  if (!catcherId) {
+    throw new Error('No catcher found for steal attempt');
+  }
+  const defenderComposite = getBattingCompositeRatings(
+    getModifiedAttributes(catcherId, league, gameState),
+  );
+  const batterComposite = getBattingCompositeRatings(
+    getModifiedAttributes(playerId, league, gameState),
+  );
+  const agilityFactor = scaleAttributePercent(
+    batterComposite.stealing + (10 - defenderComposite.fielding) / 4,
+    2,
+  );
+  const stealSuccessChance =
+    (fromBase === 2 ? 0.8 : 0.75) ** (1 / agilityFactor);
   if (random.float(0, 1) < stealSuccessChance) {
     gameState.bases[fromBase] = null;
     if (fromBase === 3) {
@@ -911,24 +947,37 @@ function determineSteal(
   gameState: LeagueGameState,
   league: League,
 ): LeagueGameState {
+  const catcherId = league.teamLookup[gameState.pitchingTeam].positionChart.c;
+  if (!catcherId) {
+    throw new Error('No catcher found for steal attempt');
+  }
+  const catcherComposite = getBattingCompositeRatings(
+    getModifiedAttributes(catcherId, league, gameState),
+  );
   const playerOnFirst = gameState.bases[1];
   const playerOnSecond = gameState.bases[2];
   const playerOnThird = gameState.bases[3];
   if (playerOnFirst !== null && playerOnSecond === null) {
-    const { agility } = getModifiedAttributes(playerOnFirst, league, gameState);
-    const agilityFactor = scaleAttributePercent(agility, 20);
+    const runnerComposite = getBattingCompositeRatings(
+      getModifiedAttributes(playerOnFirst, league, gameState),
+    );
+    const agilityFactor = scaleAttributePercent(
+      runnerComposite.stealing + (10 - catcherComposite.fielding) / 4,
+      20,
+    );
     const stealAttemptChance = 0.01 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 1, league);
     }
   }
   if (playerOnSecond !== null && playerOnThird === null) {
-    const { agility } = getModifiedAttributes(
-      playerOnSecond,
-      league,
-      gameState,
+    const runnerComposite = getBattingCompositeRatings(
+      getModifiedAttributes(playerOnSecond, league, gameState),
     );
-    const agilityFactor = scaleAttributePercent(agility, 20);
+    const agilityFactor = scaleAttributePercent(
+      runnerComposite.stealing + (10 - catcherComposite.fielding) / 4,
+      20,
+    );
     const stealAttemptChance = 0.004 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 2, league);
@@ -1108,6 +1157,7 @@ function simulatePitch(
           gameState = advanceRunnerForced(gameState, 2, batterId, pitcherId);
         }
       }
+      // TODO: Handle sacrifice hits
       // Increment out count
       gameState.outs += 1;
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1 });
@@ -1178,23 +1228,23 @@ function simulatePitch(
   }
 
   // Adjust pitching stamina
-  const { constitution: pitcherCon } = getModifiedAttributes(
-    pitcherId,
-    league,
-    gameState,
+  const pitcherComposite = getPitchingCompositeRatings(
+    getModifiedAttributes(pitcherId, league, gameState),
   );
-  const { constitution: batterCon } = getModifiedAttributes(
-    batter.id,
-    league,
-    gameState,
+  const batterComposite = getBattingCompositeRatings(
+    getModifiedAttributes(batter.id, league, gameState),
   );
   pitcher.stamina = Math.max(
     -0.25,
-    pitcher.stamina + scaleAttributePercent(pitcherCon, 1.005) - 1.015,
+    pitcher.stamina +
+      scaleAttributePercent(pitcherComposite.durability, 1.005) -
+      1.015,
   );
   batter.stamina = Math.max(
     -0.25,
-    batter.stamina + scaleAttributePercent(batterCon, 1.005) - 1.015,
+    batter.stamina +
+      scaleAttributePercent(batterComposite.durability, 1.005) -
+      1.015,
   );
 
   if (nextBatter) {

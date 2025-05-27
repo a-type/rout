@@ -1,5 +1,11 @@
-import { League, Player, PlayerAttributes } from './gameTypes';
-import { sum, sumObjects } from './utils';
+import {
+  BattingCompositeRatings,
+  PitchingCompositeRatings,
+  League,
+  Player,
+  PlayerAttributes,
+} from './gameTypes';
+import { avg, sum, sumObjects } from './utils';
 
 export function getPlayerOverall(player: Player): number {
   const attributes = player.attributes;
@@ -32,4 +38,52 @@ export function getTeamAvgAttributes(
     {} as Record<string, number>,
   );
   return avgAttributes;
+}
+
+export function getBattingCompositeRatings(
+  attributes: PlayerAttributes,
+): BattingCompositeRatings {
+  const {
+    strength: str,
+    agility: agi,
+    constitution: con,
+    wisdom: wis,
+    intelligence: int,
+  } = attributes;
+  return {
+    extraBases: avg(str, agi),
+    hitAngle: avg(str, con),
+    hitPower: avg(str, wis),
+    homeRuns: avg(str, int),
+    contact: avg(agi, con),
+    stealing: avg(agi, wis),
+    fielding: avg(agi, int),
+    durability: avg(con, wis),
+    plateDiscipline: avg(con, int),
+    dueling: avg(wis, int),
+  };
+}
+
+export function getPitchingCompositeRatings(
+  attributes: PlayerAttributes,
+): PitchingCompositeRatings {
+  const {
+    strength: str,
+    agility: agi,
+    constitution: con,
+    wisdom: wis,
+    intelligence: int,
+  } = attributes;
+  return {
+    contact: avg(str, agi),
+    hitAngle: avg(str, con),
+    dependable: avg(str, wis),
+    strikeout: avg(str, int),
+    accuracy: avg(agi, con),
+    hitPower: avg(agi, wis),
+    extraBases: avg(agi, int),
+    durability: avg(con, wis),
+    deception: avg(con, int),
+    dueling: avg(wis, int),
+  };
 }

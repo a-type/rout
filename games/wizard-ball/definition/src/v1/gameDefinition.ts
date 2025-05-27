@@ -26,7 +26,12 @@ export const gameDefinition: GameDefinition<
   version: 'v1.0',
   minimumPlayers: 1,
   maximumPlayers: 10,
-  getRoundIndex: roundFormat.sync(),
+  getRoundIndex: roundFormat.perEnvironment({
+    production: roundFormat.periodic('days', 1, {
+      requireAllPlayersToPlay: false,
+    }),
+    development: roundFormat.sync(),
+  }),
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {

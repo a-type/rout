@@ -141,6 +141,25 @@ export const perks: Record<string, Perk> = {
     condition: ({ isPitcher }) => isPitcher,
     qualityBonus: 2,
   },
+  extraCurricular: {
+    name: 'Extra Curricular',
+    kind: 'batting',
+    description:
+      'Improves attributes when not batting, pitching, or base-running.',
+    requirements: ({ classType, species }) =>
+      classType === 'bard' || species === 'beaver',
+    condition: ({ isMe, isBatter, isPitcher, isRunner }) =>
+      isMe && !isBatter && !isPitcher && !isRunner,
+    attributeBonus: {
+      strength: 2,
+      agility: 2,
+      intelligence: 2,
+      wisdom: 2,
+      charisma: 2,
+      constitution: 2,
+    },
+  },
+
   strikeoutMachine: {
     name: 'Strikeout Machine',
     description: 'Increases quality on 2 strike counts.',

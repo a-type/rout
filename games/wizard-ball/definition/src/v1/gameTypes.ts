@@ -34,6 +34,34 @@ export type PlayerAttributes = {
 
 export type AttributeType = keyof PlayerAttributes;
 
+export type BattingCompositeRatings = {
+  extraBases: number;
+  hitAngle: number;
+  hitPower: number;
+  homeRuns: number;
+  contact: number;
+  stealing: number;
+  fielding: number;
+  durability: number;
+  plateDiscipline: number;
+  dueling: number;
+};
+
+export type PitchingCompositeRatings = {
+  contact: number;
+  hitAngle: number;
+  dependable: number;
+  strikeout: number;
+  accuracy: number;
+  hitPower: number;
+  extraBases: number;
+  durability: number;
+  deception: number;
+  dueling: number;
+};
+
+export type BattingCompositeType = keyof BattingCompositeRatings;
+
 export type Player = {
   name: string;
   id: PlayerId;

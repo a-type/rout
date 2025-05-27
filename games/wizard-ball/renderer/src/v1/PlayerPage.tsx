@@ -9,6 +9,7 @@ import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
 import { Attributes } from './Attributes';
 import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
+import { CompositeRatings } from './CompositeRatings';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -103,6 +104,10 @@ export function PlayerPage({ id }: { id: string }) {
       <Attributes
         attributes={{ ...player.attributes, overall }}
         stamina={player.stamina}
+      />
+      <CompositeRatings
+        kind={player.positions.includes('p') ? 'pitching' : 'batting'}
+        attributes={player.attributes}
       />
       <div>
         <h2 className="text-xl font-semibold mb-2">Batting Stats</h2>
