@@ -1,4 +1,4 @@
-import { PitchOutcome } from './simGames';
+import { HitPower, HitType } from './gameTypes';
 
 export type PitchData = {
   strikeFactor: number;
@@ -6,7 +6,10 @@ export type PitchData = {
   contactBallFactor: number;
   swingStrikeFactor: number;
   swingBallFactor: number;
-  hitTableFactor: Partial<Record<PitchOutcome, number>>;
+  hitModiferTable: {
+    power: Partial<Record<HitPower, number>>;
+    type: Partial<Record<HitType, number>>;
+  };
 };
 export type ActualPitch = PitchData & {
   quality: number;
@@ -19,9 +22,18 @@ export const pitchTypes = {
     contactBallFactor: 1,
     swingStrikeFactor: 1,
     swingBallFactor: 1,
-    hitTableFactor: {
-      hit: 1.1,
-      double: 1.05,
+    hitModiferTable: {
+      power: {
+        weak: 0.9,
+        normal: 1.0,
+        strong: 1.1,
+      },
+      type: {
+        grounder: 0.95,
+        lineDrive: 1.05,
+        fly: 1.05,
+        popUp: 0.95,
+      },
     },
   },
   curveball: {
@@ -30,13 +42,18 @@ export const pitchTypes = {
     contactBallFactor: 0.8,
     swingStrikeFactor: 0.9,
     swingBallFactor: 0.8,
-    hitTableFactor: {
-      hit: 0.9,
-      double: 0.9,
-      triple: 0.8,
-      homeRun: 0.9,
-      foul: 1.05,
-      out: 1.1,
+    hitModiferTable: {
+      power: {
+        weak: 1.08,
+        normal: 1.0,
+        strong: 0.92,
+      },
+      type: {
+        grounder: 1.05,
+        lineDrive: 0.95,
+        fly: 0.95,
+        popUp: 1.08,
+      },
     },
   },
   changeup: {
@@ -45,11 +62,18 @@ export const pitchTypes = {
     contactBallFactor: 0.85,
     swingStrikeFactor: 1.05,
     swingBallFactor: 1.1,
-    hitTableFactor: {
-      hit: 0.9,
-      triple: 0.8,
-      homeRun: 0.9,
-      out: 1.1,
+    hitModiferTable: {
+      power: {
+        weak: 1.05,
+        normal: 1.0,
+        strong: 0.95,
+      },
+      type: {
+        grounder: 1.08,
+        lineDrive: 0.97,
+        fly: 0.97,
+        popUp: 1.03,
+      },
     },
   },
   slider: {
@@ -58,12 +82,18 @@ export const pitchTypes = {
     contactBallFactor: 0.75,
     swingStrikeFactor: 1.1,
     swingBallFactor: 1.2,
-    hitTableFactor: {
-      hit: 0.9,
-      triple: 0.8,
-      homeRun: 0.9,
-      foul: 1.05,
-      out: 1.1,
+    hitModiferTable: {
+      power: {
+        weak: 1.07,
+        normal: 1.0,
+        strong: 0.93,
+      },
+      type: {
+        grounder: 1.07,
+        lineDrive: 0.97,
+        fly: 0.97,
+        popUp: 1.02,
+      },
     },
   },
   sinker: {
@@ -72,14 +102,50 @@ export const pitchTypes = {
     contactBallFactor: 1.05,
     swingStrikeFactor: 0.95,
     swingBallFactor: 1.0,
-    hitTableFactor: {
-      hit: 1.0,
-      double: 0.95,
-      triple: 0.8,
-      homeRun: 0.7,
-      foul: 1.0,
-      out: 1.15,
+    hitModiferTable: {
+      power: {
+        weak: 1.1,
+        normal: 1.0,
+        strong: 0.9,
+      },
+      type: {
+        grounder: 1.15,
+        lineDrive: 0.95,
+        fly: 0.9,
+        popUp: 1.0,
+      },
     },
   },
+  // twoSeamFastball: {
+  //   strikeFactor: 0.95,
+  //   contactStrikeFactor: 1.05,
+  //   contactBallFactor: 1.05,
+  //   swingStrikeFactor: 0.95,
+  //   swingBallFactor: 1.0,
+  //   hitModiferTable: {
+  //     power: {
+  //       weak: 1.0,
+  //       normal: 1.0,
+  //       strong: 0.95,
+  //     },
+  //     type: {
+  //       grounder: 1.1,
+  //       lineDrive: 0.95,
+  //       fly: 0.9,
+  //       popUp: 1.0,
+  //     },
+  //   },
+  // },
+  // cutter: {
+  //   strikeFactor: 0.97,
+  //   contactStrikeFactor: 1.02,
+  //   contactBallFactor: 1.02,
+  //   swingStrikeFactor: 0.98,
+  //   swingBallFactor: 1.0,
+  //   hitModiferTable: {
+  //     power: { weak: 1.05, normal: 1.0, strong: 0.95 },
+  //     type: { grounder: 1.08, lineDrive: 0.97, fly: 0.97, popUp: 1.02 },
+  //   },
+  // },
 } satisfies Record<string, PitchData>;
 export type PitchKind = keyof typeof pitchTypes;

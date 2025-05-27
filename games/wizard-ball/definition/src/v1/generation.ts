@@ -27,7 +27,7 @@ export function generateLeague(
 ): League {
   const playersPerTeam = options.numPlayers ?? 16;
   const roundCount = options.numRounds ?? 20;
-  const teamCount = options.numTeams ?? 10;
+  const teamCount = options.numTeams ?? 8;
   let league: League = {
     name: 'League name',
     teamIds: [],

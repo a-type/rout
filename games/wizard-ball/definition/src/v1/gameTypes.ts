@@ -159,6 +159,7 @@ export type LeagueGameState = {
 
 export type GameLogEvent =
   | BattingGameLogEvent
+  | HitGameLogEvent
   | {
       kind: 'inningStart';
       inning: number;
@@ -175,12 +176,24 @@ export type GameLogEvent =
     };
 
 export type BattingGameLogEvent = {
-  kind:
-    | Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'>
-    | 'walk'
-    | 'strikeout';
+  kind: 'walk' | 'strikeout';
   batterId: PlayerId;
   pitcherId: PlayerId;
 };
 
+export type HitGameLogEvent = {
+  kind: Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'>;
+  batterId: PlayerId;
+  pitcherId: PlayerId;
+  direction: HitArea;
+  power: HitPower;
+  type: HitType;
+  defender: Position | null;
+  defenderId: PlayerId | null;
+};
+
 export type GameLog = Array<GameLogEvent>;
+
+export type HitArea = 'farLeft' | 'left' | 'center' | 'right' | 'farRight';
+export type HitPower = 'weak' | 'normal' | 'strong';
+export type HitType = 'grounder' | 'fly' | 'lineDrive' | 'popUp';

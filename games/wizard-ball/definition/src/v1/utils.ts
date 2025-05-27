@@ -37,6 +37,18 @@ export function sumObjects<T extends Record<string, number>>(
   );
 }
 
+export function multiplyObjects<T extends Record<string, number>>(
+  hitTableA: T,
+  hitTableB: Partial<T>,
+): T {
+  const result: T = { ...hitTableA };
+  for (const [key, value] of Object.entries(hitTableB)) {
+    result[key as keyof T] = ((result[key as keyof T] as number) *
+      value) as T[keyof T];
+  }
+  return result;
+}
+
 export type WeightedValue = {
   value: number;
   weight: number;

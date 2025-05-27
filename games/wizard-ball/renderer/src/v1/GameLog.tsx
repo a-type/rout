@@ -3,7 +3,12 @@ import { hooks } from './gameClient';
 import { TeamName } from './TeamName';
 import { PlayerName } from './PlayerName';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
-import { capitalize, nthToString } from './utils';
+import {
+  capitalize,
+  hitDirectionToString,
+  hitTypeToString,
+  nthToString,
+} from './utils';
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
   switch (event.kind) {
@@ -16,21 +21,21 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
           <hr className="w-full h-1 border-none bg-gray-500" />
           <div className="flex flex-col items-start gap-1">
             <div className="whitespace-nowrap">
-              {capitalize(half)} of {nthToString(inning)},{' '}
-              <TeamName id={event.pitchingTeam} /> is pitching to{' '}
-              <TeamName id={event.battingTeam} />.
+              {capitalize(half)} of the {nthToString(inning)}, the{' '}
+              <TeamName bold id={event.pitchingTeam} /> are pitching to the{' '}
+              <TeamName bold id={event.battingTeam} />.
             </div>
             <div>
               The score is{' '}
               {pitchingScore > battingScore ? (
                 <>
-                  <TeamName id={event.pitchingTeam} /> {pitchingScore},{' '}
-                  <TeamName id={event.battingTeam} /> {battingScore}
+                  <TeamName bold id={event.pitchingTeam} /> {pitchingScore},{' '}
+                  <TeamName bold id={event.battingTeam} /> {battingScore}
                 </>
               ) : (
                 <>
-                  <TeamName id={event.battingTeam} /> {battingScore},{' '}
-                  <TeamName id={event.pitchingTeam} /> {pitchingScore}
+                  <TeamName bold id={event.battingTeam} /> {battingScore},{' '}
+                  <TeamName bold id={event.pitchingTeam} /> {pitchingScore}
                 </>
               )}
             </div>
@@ -42,77 +47,104 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'strike':
       return (
         <>
-          <PlayerName id={event.pitcherId} /> throws a strike to{' '}
-          <PlayerName id={event.batterId} /> ({event.balls}-{event.strikes}).
+          <PlayerName bold id={event.pitcherId} /> throws a strike to{' '}
+          <PlayerName bold id={event.batterId} /> ({event.balls}-{event.strikes}
+          ).
         </>
       );
 
     case 'ball':
       return (
         <>
-          <PlayerName id={event.pitcherId} /> throws a ball to{' '}
-          <PlayerName id={event.batterId} /> ({event.balls}-{event.strikes}).
+          <PlayerName bold id={event.pitcherId} /> throws a ball to{' '}
+          <PlayerName bold id={event.batterId} /> ({event.balls}-{event.strikes}
+          ).
         </>
       );
 
     case 'out':
       return (
         <>
-          <PlayerName id={event.batterId} /> made contact but is out!{' '}
-          <PlayerName id={event.pitcherId} /> gets the out.
+          <PlayerName bold id={event.batterId} /> made contact but is gotten out
+          {event.defenderId ? (
+            <>
+              {' '}
+              by <PlayerName bold id={event.defenderId} /> (
+              {event.defender?.toUpperCase()}) on a{' '}
+              {event.power === 'normal' ? '' : event.power}{' '}
+              {hitTypeToString(event.type)} to{' '}
+              {hitDirectionToString(event.direction)}
+            </>
+          ) : null}
+          !
         </>
       );
 
     case 'hit':
       return (
         <>
-          <PlayerName id={event.batterId} /> gets a hit!
-          <PlayerName id={event.pitcherId} /> gives up a hit.
+          <PlayerName bold id={event.batterId} /> gets a{' '}
+          {event.power === 'normal' ? '' : event.power}{' '}
+          {hitTypeToString(event.type)} hit to{' '}
+          {hitDirectionToString(event.direction)} (
+          {event.defender?.toUpperCase()})!{' '}
+          <PlayerName bold id={event.pitcherId} /> gives up a hit.
         </>
       );
 
     case 'homeRun':
       return (
         <>
-          <PlayerName id={event.batterId} /> hits a home run!{' '}
-          <PlayerName id={event.pitcherId} /> gives up a home run.
+          <PlayerName bold id={event.batterId} /> hits a{' '}
+          {hitTypeToString(event.type)} home run to{' '}
+          {hitDirectionToString(event.direction)} !{' '}
+          <PlayerName bold id={event.pitcherId} /> gives up a home run.
         </>
       );
 
     case 'triple':
       return (
         <>
-          <PlayerName id={event.batterId} /> hits a triple!{' '}
-          <PlayerName id={event.pitcherId} /> gives up a triple.
+          <PlayerName bold id={event.batterId} /> gets a{' '}
+          {event.power === 'normal' ? '' : event.power}{' '}
+          {hitTypeToString(event.type)} triple to{' '}
+          {hitDirectionToString(event.direction)} (
+          {event.defender?.toUpperCase()}) !{' '}
+          <PlayerName bold id={event.pitcherId} /> gives up a triple.
         </>
       );
 
     case 'double':
       return (
         <>
-          <PlayerName id={event.batterId} /> hits a double!{' '}
-          <PlayerName id={event.pitcherId} /> gives up a double.
+          <PlayerName bold id={event.batterId} /> gets a{' '}
+          {event.power === 'normal' ? '' : event.power}{' '}
+          {hitTypeToString(event.type)} double to{' '}
+          {hitDirectionToString(event.direction)} (
+          {event.defender?.toUpperCase()}) !{' '}
+          <PlayerName bold id={event.pitcherId} /> gives up a double.
         </>
       );
     case 'walk':
       return (
         <>
-          <PlayerName id={event.batterId} /> walks!{' '}
-          <PlayerName id={event.pitcherId} /> gives up a walk.
+          <PlayerName bold id={event.batterId} /> walks!{' '}
+          <PlayerName bold id={event.pitcherId} /> gives up a walk.
         </>
       );
     case 'strikeout':
       return (
         <>
-          <PlayerName id={event.batterId} /> strikes out!{' '}
-          <PlayerName id={event.pitcherId} /> gets the strikeout.
+          <PlayerName bold id={event.batterId} /> strikes out!{' '}
+          <PlayerName bold id={event.pitcherId} /> gets the strikeout.
         </>
       );
     case 'foul':
       return (
         <>
-          <PlayerName id={event.batterId} /> fouls off the pitch from{' '}
-          <PlayerName id={event.pitcherId} /> ({event.balls}-{event.strikes}).
+          <PlayerName bold id={event.batterId} /> fouls off the pitch from{' '}
+          <PlayerName bold id={event.pitcherId} /> ({event.balls}-
+          {event.strikes}).
         </>
       );
     default:

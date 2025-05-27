@@ -3,6 +3,9 @@ import type {
   Base,
   GameLogEvent,
   GameResult,
+  HitArea,
+  HitPower,
+  HitType,
   League,
   LeagueGame,
   LeagueGameState,
@@ -10,10 +13,13 @@ import type {
   Player,
   PlayerId,
   PlayerStats,
+  Position,
   RoundResult,
 } from './gameTypes';
 import {
+  avg,
   deepClone,
+  multiplyObjects,
   scaleAttributePercent,
   sumObjects,
   valueByWeights,
@@ -437,17 +443,6 @@ function applyHit(
   return gameState;
 }
 
-function runnersInScoringPosition(gameState: LeagueGameState): number {
-  let runners = 0;
-  if (gameState.bases[2] !== null) {
-    runners += 1;
-  }
-  if (gameState.bases[3] !== null) {
-    runners += 1;
-  }
-  return runners;
-}
-
 /** Return a number between 0 and 1 based on situation (increases for fuller counts, more runners in scoring position, late in the game, close score) */
 function determineClutchFactor(gameState: LeagueGameState): number {
   // Count fullness: 0.0 (0-0) to 1.0 (3-2)
@@ -536,56 +531,6 @@ function multiplyHitTables(
   return result;
 }
 
-function determineHitTable(
-  isStrike: boolean,
-  batter: Player,
-  gameState: LeagueGameState,
-  league: League,
-  pitchData: PitchData,
-): HitTable {
-  const { strength, agility, charisma, constitution } = getModifiedAttributes(
-    batter.id,
-    league,
-    gameState,
-  );
-  const clutchFactor = determineClutchFactor(gameState);
-  const constitutionModifier = scaleAttributePercent(constitution, 1.1);
-  const strengthModifier = scaleAttributePercent(strength, 1.1);
-  const agilityModifier = scaleAttributePercent(agility, 1.1);
-  const charismaModifier = scaleAttributePercent(
-    charisma,
-    Math.pow(1.4, clutchFactor),
-  );
-
-  let hitTable: HitTable = isStrike
-    ? {
-        hit: 15 * (agilityModifier * charismaModifier),
-        double: 5 * (strengthModifier * charismaModifier),
-        triple: 1 * (strengthModifier * agilityModifier * charismaModifier),
-        homeRun: 4 * (scaleAttributePercent(strength, 1.4) * charismaModifier),
-        foul: 15,
-        out: 60 / constitutionModifier,
-      }
-    : {
-        hit: 8 * agilityModifier,
-        double: 2 * strengthModifier,
-        triple: 0.2 * (strengthModifier * agilityModifier),
-        homeRun: 1 * scaleAttributePercent(strength, 1.4),
-        foul: 15,
-        out: 75 / constitutionModifier,
-      };
-
-  hitTable = multiplyHitTables(hitTable, pitchData.hitTableFactor);
-  // apply skill hit tables
-  const activePerks = getActivePlayerPerks(batter.id, league, gameState);
-  for (const perk of activePerks) {
-    if (perk.hitTableFactor) {
-      hitTable = multiplyHitTables(hitTable, perk.hitTableFactor);
-    }
-  }
-  return hitTable;
-}
-
 function determinePitchType(
   random: GameRandom,
   batter: Player,
@@ -605,57 +550,36 @@ function determinePitchType(
   const constitutionFactor = scaleAttributePercent(constitution, 1.1);
   const wisdomFactor = scaleAttributePercent(wisdom, 1.1);
   const intelligenceFactor = scaleAttributePercent(intelligence, 1.1);
-  const charismaFactor = scaleAttributePercent(
-    charisma,
-    Math.pow(1.4, clutchFactor),
-  );
+  const charismaFactor = (charisma - 10) * clutchFactor;
 
-  const baseRoll = random.float(0, 20);
-  const statWeight = 4;
+  let attributeTotal = random.float(-5, 5);
+  attributeTotal += charismaFactor;
 
-  let weightedValues: WeightedValue[] = [
-    {
-      value: baseRoll,
-      weight: 1,
-    },
-  ];
   switch (pitchKind) {
     case 'fastball':
-      weightedValues.push({
-        value: strength,
-        weight: statWeight,
-      });
+      attributeTotal += strength;
     case 'curveball':
-      weightedValues.push({
-        value: agility,
-        weight: statWeight,
-      });
+      attributeTotal += agility;
       break;
     case 'changeup':
-      weightedValues.push({
-        value: wisdom,
-        weight: statWeight,
-      });
+      attributeTotal += wisdom;
       break;
     case 'slider':
-      weightedValues.push({
-        value: intelligence,
-        weight: statWeight,
-      });
+      attributeTotal += intelligence;
       break;
     case 'sinker':
-      weightedValues.push({
-        value: constitution,
-        weight: statWeight,
-      });
+      attributeTotal += constitution;
       break;
     default:
       throw new Error(`Unknown pitch kind: ${pitchKind}`);
   }
+  activePerks.forEach((perk) => {
+    if (perk.qualityBonus) {
+      attributeTotal += perk.qualityBonus;
+    }
+  });
 
-  const qualitySum = valueByWeights(weightedValues);
-
-  let quality = scaleAttributePercent(qualitySum, 2.2);
+  let quality = scaleAttributePercent(attributeTotal, 2.2);
   // apply skill quality
 
   // quality *=
@@ -676,24 +600,30 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  // pitchData.strikeFactor *= agilityFactor * constitutionFactor;
+  pitchData.strikeFactor *= scaleAttributePercent(
+    avg(agility, constitution),
+    1.1,
+  );
 
   pitchData.swingStrikeFactor **= 1 / quality;
   pitchData.swingBallFactor **= quality;
   pitchData.contactStrikeFactor **= 1 / quality;
   pitchData.contactBallFactor **= 1 / quality;
-  // pitchData.contactStrikeFactor *= 1 / agilityFactor / strengthFactor;
-  // pitchData.contactBallFactor *= wisdomFactor / agilityFactor;
+  Object.keys(pitchData.hitModiferTable.power).forEach((key) => {
+    if (!key || !pitchData.hitModiferTable.power[key as HitPower]) {
+      return;
+    }
+    pitchData.hitModiferTable.power[key as HitPower] =
+      (pitchData.hitModiferTable.power[key as HitPower] ?? 1) ** quality;
+  });
+  Object.keys(pitchData.hitModiferTable.type).forEach((key) => {
+    if (!key || !pitchData.hitModiferTable.type[key as HitType]) {
+      return;
+    }
+    pitchData.hitModiferTable.type[key as HitType] =
+      (pitchData.hitModiferTable.type[key as HitType] ?? 1) ** quality;
+  });
 
-  // pitchData.strikeFactor *= quality;
-  // pitchData.swingStrikeFactor *= 1 / quality;
-  // pitchData.swingBallFactor *= quality;
-  // pitchData.contactStrikeFactor *= 1 / quality;
-  // pitchData.contactBallFactor *= 1 / quality;
-  // Object.keys(pitchData.hitTableFactor).forEach((key) => {
-  //   const value = pitchData.hitTableFactor[key as keyof HitTable] || 1;
-  //   pitchData.hitTableFactor[key as keyof HitTable] = value ** quality;
-  // });
   // console.log({
   //   pitchData,
   //   baseQuality,
@@ -708,6 +638,237 @@ function determinePitchType(
   // });
 
   return pitchData;
+}
+
+function determineDefender(
+  hitArea: HitArea,
+  hitType: HitType,
+): Exclude<Position, 'p'> {
+  switch (hitType) {
+    case 'grounder':
+    case 'lineDrive':
+      switch (hitArea) {
+        case 'farLeft':
+          return '3b';
+        case 'left':
+          return 'ss';
+        case 'center':
+          return 'ss';
+        case 'right':
+          return '2b';
+        case 'farRight':
+          return '1b';
+      }
+
+    case 'popUp':
+      return 'c';
+
+    case 'fly':
+      switch (hitArea) {
+        case 'farLeft':
+        case 'left':
+          return 'lf';
+        case 'center':
+          return 'cf';
+        case 'right':
+        case 'farRight':
+          return 'rf';
+      }
+  }
+}
+
+type HitResult = {
+  hitArea: HitArea;
+  hitPower: HitPower;
+  hitType: HitType;
+  defender: Exclude<Position, 'p'> | null;
+  defenderId: PlayerId | null;
+  outcome: PitchOutcome;
+};
+
+function determineHitResult(
+  random: GameRandom,
+  pitchData: ActualPitch,
+  isStrike: boolean,
+  gameState: LeagueGameState,
+  league: League,
+): HitResult {
+  const batter = getCurrentBatter(gameState);
+  const activePerks = getActivePlayerPerks(
+    batter,
+    league,
+    gameState,
+    pitchData,
+  );
+  activePerks.forEach((perk) => {
+    if (perk.hitModiferTable?.power)
+      pitchData.hitModiferTable.power = multiplyObjects(
+        pitchData.hitModiferTable.power,
+        perk.hitModiferTable.power,
+      );
+
+    if (perk.hitModiferTable?.type) {
+      pitchData.hitModiferTable.type = multiplyObjects(
+        pitchData.hitModiferTable.type,
+        perk.hitModiferTable.type,
+      );
+    }
+  });
+  const batterAttributes = getModifiedAttributes(batter, league, gameState);
+  const hitAreaTable: Record<HitArea, number> = {
+    farLeft: 0.5,
+    left: 1.5,
+    center: 2,
+    right: 1.5,
+    farRight: 0.5,
+  };
+  const hitArea = randomTable(random, hitAreaTable);
+  const hitPowerTable: Record<HitPower, number> = multiplyObjects(
+    isStrike
+      ? {
+          weak: 1,
+          normal: 3,
+          strong: 2 * scaleAttributePercent(batterAttributes.strength, 2),
+        }
+      : {
+          weak: 2,
+          normal: 1,
+          strong: 0.5 * scaleAttributePercent(batterAttributes.strength, 2),
+        },
+    pitchData.hitModiferTable.power,
+  );
+  const hitPower = randomTable(random, hitPowerTable);
+  const hitTypeTable: Record<HitType, number> = multiplyObjects(
+    isStrike
+      ? {
+          grounder: 4,
+          fly: 2 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          lineDrive:
+            2.5 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          popUp: 1,
+        }
+      : {
+          grounder: 1,
+          fly: 3 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          lineDrive:
+            2 * scaleAttributePercent(batterAttributes.constitution, 1.5),
+          popUp: 4,
+        },
+    pitchData.hitModiferTable.type,
+  );
+  const hitType = randomTable(random, hitTypeTable);
+
+  // Determine defender based on hit direction and type
+  const defender = determineDefender(hitArea, hitType);
+  const defendingPlayerId =
+    league.teamLookup[gameState.pitchingTeam].positionChart[defender];
+  if (!defendingPlayerId) {
+    throw new Error(`No player found for defender position: ${defender}`);
+  }
+  const { wisdom } = getModifiedAttributes(
+    defendingPlayerId,
+    league,
+    gameState,
+  );
+  const defenseModifer = scaleAttributePercent(wisdom, 1.5);
+  let baseHitTable: Partial<HitTable> = {};
+  let outChance = 0.5;
+  if (hitType === 'grounder') {
+    if (hitPower === 'weak') {
+      baseHitTable = {
+        hit: 1,
+        out: 9,
+      };
+    } else if (hitPower === 'normal') {
+      baseHitTable = {
+        hit: 1,
+        out: 3,
+      };
+    } else if (hitPower === 'strong') {
+      baseHitTable = {
+        double: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
+        hit: 3,
+        out: 5,
+        triple: 0.1 * scaleAttributePercent(batterAttributes.agility, 2),
+      };
+    }
+  } else if (hitType === 'fly') {
+    if (hitPower === 'weak') {
+      baseHitTable = {
+        hit: 1,
+        out: 20,
+      };
+    } else if (hitPower === 'normal') {
+      baseHitTable = {
+        hit: 2,
+        double: 1 * scaleAttributePercent(batterAttributes.agility, 2),
+        out: 15,
+        triple: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
+        homeRun: 0.1,
+      };
+    } else if (hitPower === 'strong') {
+      baseHitTable = {
+        hit: 0.5,
+        double: 1,
+        out: 2,
+        triple: 0.4 * scaleAttributePercent(batterAttributes.agility, 2),
+        homeRun: 6,
+      };
+    }
+  } else if (hitType === 'lineDrive') {
+    if (hitPower === 'weak') {
+      baseHitTable = {
+        hit: 2,
+        out: 1,
+      };
+    } else if (hitPower === 'normal') {
+      baseHitTable = {
+        hit: 4,
+        out: 1,
+        double: 0.5 * scaleAttributePercent(batterAttributes.agility, 2),
+        triple: 0.2 * scaleAttributePercent(batterAttributes.agility, 2),
+      };
+    } else if (hitPower === 'strong') {
+      baseHitTable = {
+        hit: 8,
+        double: 2,
+        out: 1,
+        triple: 1 * scaleAttributePercent(batterAttributes.agility, 2),
+        homeRun: 0.5,
+      };
+    }
+  } else if (hitType === 'popUp') {
+    baseHitTable = {
+      hit: 1,
+      out: 99,
+    };
+  }
+
+  let hitTable: HitTable = {
+    hit: 0,
+    out: 0,
+    double: 0,
+    triple: 0,
+    homeRun: 0,
+    foul: 0,
+    ...baseHitTable,
+  };
+  hitTable = multiplyHitTables(hitTable, { out: defenseModifer });
+  for (const perk of activePerks) {
+    if (perk.hitTableFactor) {
+      hitTable = multiplyHitTables(hitTable, perk.hitTableFactor);
+    }
+  }
+
+  const result = randomTable(random, hitTable) as PitchOutcome;
+  return {
+    hitArea,
+    hitPower,
+    hitType,
+    defender,
+    defenderId: defendingPlayerId,
+    outcome: result,
+  };
 }
 
 function attemptSteal(
@@ -824,6 +985,7 @@ function simulatePitch(
 
   // Determine the outcome of the pitch
   let outcome: PitchOutcome;
+  let hitResult: HitResult | null = null;
   const batterSwung = determineSwing(
     random,
     isStrike,
@@ -844,10 +1006,14 @@ function simulatePitch(
       pitchData,
     );
     if (contactMade) {
-      outcome = randomTable(
+      hitResult = determineHitResult(
         random,
-        determineHitTable(isStrike, batter, gameState, league, pitchData),
+        pitchData,
+        isStrike,
+        gameState,
+        league,
       );
+      outcome = hitResult.outcome;
     } else {
       outcome = 'strike';
     }
@@ -935,13 +1101,35 @@ function simulatePitch(
       );
       break;
     case 'out':
+      // Check for sacrifice fly
+      if (hitResult?.hitType === 'fly' && hitResult?.hitPower !== 'weak') {
+        gameState = advanceRunnerForced(gameState, 3, batterId, pitcherId);
+        if (hitResult.hitPower === 'strong') {
+          gameState = advanceRunnerForced(gameState, 2, batterId, pitcherId);
+        }
+      }
       // Increment out count
       gameState.outs += 1;
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1 });
       gameState = addToPlayerStats(gameState, pitcherId, {
         outsPitched: 1,
       });
-      gameState = addToGameLog({ kind: 'out', batterId, pitcherId }, gameState);
+      if (!hitResult) {
+        throw new Error('Hit result is undefined');
+      }
+      gameState = addToGameLog(
+        {
+          kind: 'out',
+          batterId,
+          pitcherId,
+          type: hitResult.hitType,
+          direction: hitResult.hitArea,
+          power: hitResult.hitPower,
+          defender: hitResult.defender,
+          defenderId: hitResult.defenderId,
+        },
+        gameState,
+      );
       nextBatter = true;
       break;
     case 'hit':
@@ -953,8 +1141,20 @@ function simulatePitch(
       gameState = addToPlayerStats(gameState, pitcherId, {
         hitsAllowed: 1,
       });
+      if (!hitResult) {
+        throw new Error('Hit result is undefined');
+      }
       gameState = addToGameLog(
-        { kind: outcome, batterId, pitcherId },
+        {
+          kind: outcome,
+          batterId,
+          pitcherId,
+          type: hitResult.hitType,
+          direction: hitResult.hitArea,
+          power: hitResult.hitPower,
+          defender: hitResult.defender,
+          defenderId: hitResult.defenderId,
+        },
         gameState,
       );
       if (outcome === 'double') {
@@ -990,11 +1190,11 @@ function simulatePitch(
   );
   pitcher.stamina = Math.max(
     -0.25,
-    pitcher.stamina + scaleAttributePercent(pitcherCon, 1.01) - 1.02,
+    pitcher.stamina + scaleAttributePercent(pitcherCon, 1.005) - 1.015,
   );
   batter.stamina = Math.max(
     -0.25,
-    batter.stamina + scaleAttributePercent(batterCon, 1.01) - 1.02,
+    batter.stamina + scaleAttributePercent(batterCon, 1.005) - 1.015,
   );
 
   if (nextBatter) {

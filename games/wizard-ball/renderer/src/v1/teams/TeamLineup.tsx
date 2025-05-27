@@ -74,7 +74,6 @@ export function TeamLineup({ id }: { id: string }) {
     prepareTurn,
     playerId: currentUserId,
   } = hooks.useGameSuite();
-  console.log('finalState', JSON.parse(JSON.stringify(finalState)));
   const team = finalState.league.teamLookup[id];
   const lineup = team.battingOrder;
   const [activeId, setActiveId] = useState<string | null>(null);

@@ -1,3 +1,5 @@
+import { HitArea, HitType } from '@long-game/game-wizard-ball-definition';
+
 export function roundFloat(value: number, decimalPlaces: number = 2): number {
   const factor = Math.pow(10, decimalPlaces);
   return Math.round(value * factor) / factor;
@@ -41,4 +43,34 @@ export function nthToString(n: number): string {
 
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function hitDirectionToString(hitArea: HitArea): string {
+  switch (hitArea) {
+    case 'left':
+      return 'left center';
+    case 'center':
+      return 'center';
+    case 'right':
+      return 'right center';
+    case 'farLeft':
+      return 'left';
+    default:
+      return 'Unknown Hit Direction';
+  }
+}
+
+export function hitTypeToString(hitType: HitType): string {
+  switch (hitType) {
+    case 'fly':
+      return 'fly ball';
+    case 'grounder':
+      return 'ground ball';
+    case 'lineDrive':
+      return 'line drive';
+    case 'popUp':
+      return 'pop up';
+    default:
+      return 'Unknown Hit Type';
+  }
 }

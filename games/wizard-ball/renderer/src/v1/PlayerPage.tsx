@@ -166,7 +166,7 @@ export function PlayerPage({ id }: { id: string }) {
                     key={stat.value}
                     className="px-3 py-2 border-t text-center"
                   >
-                    {totalPlayerStats[id][stat.value]}
+                    {totalPlayerStats[id]?.[stat.value]}
                   </td>
                 ))}
               </tr>
