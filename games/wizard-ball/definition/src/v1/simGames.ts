@@ -375,9 +375,9 @@ function getModifiedAttributes(
   const activePerks = getActivePlayerPerks(playerId, league, gameState);
   const baseStats = sumObjects(
     player.attributes,
-    ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
-      Player['attributes']
-    >[]),
+    ...(activePerks
+      .map((p) => p.effect().attributeBonus)
+      .filter(Boolean) as Partial<Player['attributes']>[]),
     {
       strength: -staminaFactor,
       agility: -staminaFactor,
@@ -596,8 +596,9 @@ function determinePitchType(
   //     throw new Error(`Unknown pitch kind: ${pitchKind}`);
   // }
   activePerks.forEach((perk) => {
-    if (perk.qualityBonus) {
-      attributeTotal += perk.qualityBonus;
+    const qb = perk.effect().qualityBonus;
+    if (qb) {
+      attributeTotal += qb;
     }
   });
 
@@ -716,16 +717,17 @@ function determineHitResult(
     pitchData,
   );
   activePerks.forEach((perk) => {
-    if (perk.hitModiferTable?.power)
+    const h = perk.effect().hitModiferTable;
+    if (h?.power)
       pitchData.hitModiferTable.power = multiplyObjects(
         pitchData.hitModiferTable.power,
-        perk.hitModiferTable.power,
+        h.power,
       );
 
-    if (perk.hitModiferTable?.type) {
+    if (h?.type) {
       pitchData.hitModiferTable.type = multiplyObjects(
         pitchData.hitModiferTable.type,
-        perk.hitModiferTable.type,
+        h.type,
       );
     }
   });
@@ -878,8 +880,9 @@ function determineHitResult(
   };
   hitTable = multiplyHitTables(hitTable, { out: defenseModifer });
   for (const perk of activePerks) {
-    if (perk.hitTableFactor) {
-      hitTable = multiplyHitTables(hitTable, perk.hitTableFactor);
+    const h = perk.effect().hitTableFactor;
+    if (h) {
+      hitTable = multiplyHitTables(hitTable, h);
     }
   }
 

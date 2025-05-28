@@ -14,6 +14,7 @@ import { speciesData, SpeciesType } from './speciesData';
 import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getPlayerOverall } from './attributes';
+import { itemData } from './itemData';
 
 export function generateLeague(
   random: GameRandom,
@@ -33,6 +34,7 @@ export function generateLeague(
     teamIds: [],
     playerLookup: {},
     teamLookup: {},
+    itemLookup: {},
     schedule: [],
     gameResults: [],
     currentWeek: 0,
@@ -139,6 +141,27 @@ export function generateLeague(
       const overallB = getPlayerOverall(playerB);
       return overallB - overallA; // Sort in descending order
     });
+
+    // Generate a few items for each team
+    for (let i = 0; i < 5; i++) {
+      const { instanceId, ...item } = generateItem(random);
+      league.itemLookup[instanceId] = { ...item, teamId: team.id };
+      for (const player of random.shuffle(team.playerIds)) {
+        const playerObj = league.playerLookup[player];
+        const i = itemData[item.itemDef];
+        if (
+          !i.requirements ||
+          i.requirements?.({
+            species: playerObj.species,
+            classType: playerObj.class,
+            positions: playerObj.positions,
+          })
+        ) {
+          playerObj.itemIds.push(instanceId);
+          break;
+        }
+      }
+    }
   }
 
   // Generate schedule
@@ -220,6 +243,7 @@ function generatePlayer(
     id: random.id(),
     teamId: null,
     perkIds: [],
+    itemIds: [],
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
@@ -308,4 +332,16 @@ function generatePlayerName(random: GameRandom, race: SpeciesType): string {
     random.int(0, 2) === 0 ? random.item(maleFirst) : random.item(femaleFirst);
   const lastName = random.item(last);
   return `${firstName} ${lastName}`;
+}
+
+function generateItem(random: GameRandom): {
+  power: number;
+  itemDef: string;
+  instanceId: string;
+} {
+  return {
+    power: random.int(1, 3),
+    itemDef: random.item(Object.keys(itemData)),
+    instanceId: random.id(),
+  };
 }

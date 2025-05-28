@@ -10,6 +10,7 @@ import { clsx } from '@a-type/ui';
 import { Attributes } from './Attributes';
 import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
 import { CompositeRatings } from './CompositeRatings';
+import { ItemChip } from './ItemChip';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -84,22 +85,32 @@ export function PlayerPage({ id }: { id: string }) {
         </div>
       </div>
       <div>
-        <h2>Perks</h2>
-        {player.perkIds.map((perkId) => {
-          const perk = perks[perkId as keyof typeof perks];
-          if (!perk) {
-            return null;
-          }
-          return (
-            <div
-              key={perkId}
-              className="inline-flex flex-col mb-2 border-1 border-gray-200 border-solid bg-gray-500/30 p-2 rounded"
-            >
-              <span className="font-semibold">{perk.name}</span>
-              <span>{perk.description}</span>
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-1">
+            <h2>Perks</h2>
+            {player.perkIds.map((perkId) => {
+              const perk = perks[perkId as keyof typeof perks];
+              if (!perk) {
+                return null;
+              }
+              return (
+                <div
+                  key={perkId}
+                  className="inline-flex flex-col mb-2 border-1 border-gray-200 border-solid bg-gray-500/30 p-2 rounded"
+                >
+                  <span className="font-semibold">{perk.name}</span>
+                  <span>{perk.description}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="col-span-1">
+            <h2>Items</h2>
+            {player.itemIds.map((itemId) => (
+              <ItemChip key={itemId} id={itemId} />
+            ))}
+          </div>
+        </div>
       </div>
       <Attributes
         attributes={{ ...player.attributes, overall }}

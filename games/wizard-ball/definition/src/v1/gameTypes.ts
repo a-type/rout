@@ -2,6 +2,7 @@ import { PrefixedId } from '@long-game/common';
 import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
 import { PitchOutcome } from './simGames';
+import { ItemInfo } from './itemData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -70,6 +71,7 @@ export type Player = {
   species: SpeciesType;
   class: ClassType;
   perkIds: string[];
+  itemIds: string[];
   attributes: PlayerAttributes;
   stamina: number;
 };
@@ -100,6 +102,14 @@ export type League = {
   teamIds: TeamId[];
   playerLookup: Record<PlayerId, Player>;
   teamLookup: Record<TeamId, Team>;
+  itemLookup: Record<
+    string,
+    {
+      power: number;
+      itemDef: string;
+      teamId: TeamId | null;
+    }
+  >;
   schedule: Array<LeagueRound>;
   gameResults: Array<RoundResult>;
   currentWeek: number;

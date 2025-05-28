@@ -10,6 +10,17 @@ import { ActualPitch } from './pitchData';
 import { PitchOutcome } from './simGames';
 import { SpeciesType } from './speciesData';
 
+export type PerkEffect = {
+  attributeBonus?: Partial<Record<AttributeType, number>>;
+  hitTableFactor?: Partial<Record<PitchOutcome, number>>;
+  hitModiferTable?: Partial<{
+    power: Partial<Record<HitPower, number>>;
+    type: Partial<Record<HitType, number>>;
+  }>;
+  // Flat bonus to quality
+  qualityBonus?: number;
+};
+
 export type Perk = {
   name: string;
   description: string;
@@ -27,14 +38,7 @@ export type Perk = {
     isPitcher: boolean;
     isRunner: boolean;
   }) => boolean;
-  attributeBonus?: Partial<Record<AttributeType, number>>;
-  hitTableFactor?: Partial<Record<PitchOutcome, number>>;
-  hitModiferTable?: Partial<{
-    power: Partial<Record<HitPower, number>>;
-    type: Partial<Record<HitType, number>>;
-  }>;
-  // Flat bonus to quality
-  qualityBonus?: number;
+  effect: (props?: { power?: number }) => PerkEffect;
 };
 
 export const perks: Record<string, Perk> = {
@@ -44,9 +48,11 @@ export const perks: Record<string, Perk> = {
     kind: 'batting',
     requirements: ({ classType }) => classType === 'rogue',
     condition: ({ isBatter }) => isBatter,
-    hitTableFactor: {
-      double: 2,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        double: 2,
+      },
+    }),
   },
   tripleDecker: {
     name: 'Triple Decker',
@@ -54,9 +60,11 @@ export const perks: Record<string, Perk> = {
     kind: 'batting',
     requirements: ({ classType }) => classType === 'rogue',
     condition: ({ isBatter }) => isBatter,
-    hitTableFactor: {
-      triple: 2,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        triple: 2,
+      },
+    }),
   },
   bigShot: {
     name: 'Big Shot',
@@ -67,9 +75,11 @@ export const perks: Record<string, Perk> = {
       classType === 'barbarian' ||
       classType === 'fighter',
     condition: ({ isBatter }) => isBatter,
-    hitTableFactor: {
-      homeRun: 1.5,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        homeRun: 1.5,
+      },
+    }),
   },
   hardy: {
     name: 'Hardy',
@@ -79,10 +89,12 @@ export const perks: Record<string, Perk> = {
     requirements: ({ species }) =>
       ['badger', 'turtle', 'beaver'].includes(species),
     condition: ({ isBatter }) => isBatter,
-    hitTableFactor: {
-      out: 0.8,
-      foul: 1.2,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        out: 0.8,
+        foul: 1.2,
+      },
+    }),
   },
   cleanup: {
     name: 'Cleanup',
@@ -92,12 +104,14 @@ export const perks: Record<string, Perk> = {
       ['fox', 'turtle', 'badger'].includes(species),
     condition: ({ gameState, isPitcher }) =>
       isPitcher && (!!gameState.bases[2] || !!gameState.bases[3]),
-    hitTableFactor: {
-      hit: 1.5,
-      double: 1.5,
-      triple: 1.5,
-      homeRun: 1.5,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        hit: 1.5,
+        double: 1.5,
+        triple: 1.5,
+        homeRun: 1.5,
+      },
+    }),
   },
   rage: {
     name: 'Rage',
@@ -105,12 +119,14 @@ export const perks: Record<string, Perk> = {
     kind: 'batting',
     requirements: ({ classType }) => classType === 'barbarian',
     condition: ({ gameState, isBatter }) => isBatter && gameState.strikes === 2,
-    hitTableFactor: {
-      hit: 1.5,
-      double: 1.5,
-      triple: 1.5,
-      homeRun: 1.5,
-    },
+    effect: () => ({
+      hitTableFactor: {
+        hit: 1.5,
+        double: 1.5,
+        triple: 1.5,
+        homeRun: 1.5,
+      },
+    }),
   },
   stealer: {
     name: 'Stealer',
@@ -119,9 +135,11 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType, species }) =>
       classType === 'rogue' || ['rabbit', 'fox'].includes(species),
     condition: ({ isRunner, isMe }) => isRunner && isMe,
-    attributeBonus: {
-      agility: 4,
-    },
+    effect: () => ({
+      attributeBonus: {
+        agility: 4,
+      },
+    }),
   },
   distraction: {
     name: 'Distraction',
@@ -130,7 +148,9 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType, species }) =>
       classType === 'bard' || ['rabbit', 'fox'].includes(species),
     condition: ({ isRunner }) => isRunner,
-    qualityBonus: -2,
+    effect: () => ({
+      qualityBonus: -2,
+    }),
   },
   ace: {
     name: 'Ace',
@@ -139,7 +159,9 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType, species }) =>
       classType === 'wizard' || species === 'owl',
     condition: ({ isPitcher }) => isPitcher,
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
   extraCurricular: {
     name: 'Extra Curricular',
@@ -150,14 +172,16 @@ export const perks: Record<string, Perk> = {
       classType === 'bard' || species === 'beaver',
     condition: ({ isMe, isBatter, isPitcher, isRunner }) =>
       isMe && !isBatter && !isPitcher && !isRunner,
-    attributeBonus: {
-      strength: 2,
-      agility: 2,
-      intelligence: 2,
-      wisdom: 2,
-      charisma: 2,
-      constitution: 2,
-    },
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
+    }),
   },
 
   strikeoutMachine: {
@@ -166,7 +190,9 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ gameState, isPitcher }) =>
       isPitcher && gameState.strikes === 2,
-    qualityBonus: 3,
+    effect: () => ({
+      qualityBonus: 3,
+    }),
   },
   crusher: {
     name: 'Crusher',
@@ -175,11 +201,13 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType }) =>
       classType === 'barbarian' || classType === 'fighter',
     condition: ({ isBatter }) => isBatter,
-    hitModiferTable: {
-      power: {
-        strong: 1.4,
+    effect: () => ({
+      hitModiferTable: {
+        power: {
+          strong: 1.4,
+        },
       },
-    },
+    }),
   },
   weakContact: {
     name: 'Weak Contact',
@@ -188,11 +216,13 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType, species }) =>
       classType === 'cleric' || species === 'turtle',
     condition: ({ isPitcher }) => isPitcher,
-    hitModiferTable: {
-      power: {
-        weak: 1.5,
+    effect: () => ({
+      hitModiferTable: {
+        power: {
+          weak: 1.5,
+        },
       },
-    },
+    }),
   },
   grounderSpecialist: {
     name: 'Grounder Specialist',
@@ -201,11 +231,13 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType, species }) =>
       classType === 'wizard' || species === 'turtle',
     condition: ({ isPitcher }) => isPitcher,
-    hitModiferTable: {
-      type: {
-        grounder: 1.5,
+    effect: () => ({
+      hitModiferTable: {
+        type: {
+          grounder: 1.5,
+        },
       },
-    },
+    }),
   },
   fastballer: {
     name: 'Fastballer',
@@ -213,7 +245,9 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ pitchData, isPitcher }) =>
       isPitcher && pitchData?.kind === 'fastball',
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
   curveballer: {
     name: 'Curveballer',
@@ -221,7 +255,9 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ pitchData, isPitcher }) =>
       isPitcher && pitchData?.kind === 'curveball',
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
   changeupArtist: {
     name: 'Changeup Artist',
@@ -229,7 +265,9 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ pitchData, isPitcher }) =>
       isPitcher && pitchData?.kind === 'changeup',
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
   sliderArtist: {
     name: 'Slider Artist',
@@ -237,7 +275,9 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ pitchData, isPitcher }) =>
       isPitcher && pitchData?.kind === 'slider',
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
   sinkerArtist: {
     name: 'Sinker Artist',
@@ -245,6 +285,8 @@ export const perks: Record<string, Perk> = {
     kind: 'pitching',
     condition: ({ pitchData, isPitcher }) =>
       isPitcher && pitchData?.kind === 'sinker',
-    qualityBonus: 2,
+    effect: () => ({
+      qualityBonus: 2,
+    }),
   },
 } satisfies Record<string, Perk>;
