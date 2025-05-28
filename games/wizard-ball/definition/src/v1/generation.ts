@@ -3,6 +3,7 @@ import {
   League,
   LeagueRound,
   Player,
+  PlayerAttributes,
   Position,
   Team,
   TeamId,
@@ -60,6 +61,17 @@ export function generateLeague(
 
   // Generate and assign players to teams
   for (const team of teams) {
+    const attributes: Array<keyof PlayerAttributes> = [
+      'strength',
+      'agility',
+      'constitution',
+      'wisdom',
+      'intelligence',
+      'charisma',
+    ];
+    const plusAttributes = [random.item(attributes), random.item(attributes)];
+    const minusAttributes = [random.item(attributes), random.item(attributes)];
+
     const forcedPositions: Position[] = [
       'c',
       '1b',
@@ -79,6 +91,19 @@ export function generateLeague(
       const player = generatePlayer(random, {
         position: forcedPositions[i],
         skipPerks: options.skipPerks,
+      });
+      plusAttributes.forEach((plusAttribute) => {
+        player.attributes[plusAttribute] += 2;
+      });
+
+      minusAttributes.forEach((minusAttribute) => {
+        player.attributes[minusAttribute] -= 2;
+      });
+      attributes.forEach((attribute) => {
+        player.attributes[attribute] = Math.min(
+          20,
+          Math.max(1, player.attributes[attribute]),
+        );
       });
       const position = player.positions[0];
       player.teamId = team.id;

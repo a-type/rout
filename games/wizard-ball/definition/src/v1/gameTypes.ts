@@ -2,7 +2,6 @@ import { PrefixedId } from '@long-game/common';
 import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
 import { PitchOutcome } from './simGames';
-import { ItemInfo } from './itemData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -196,7 +195,6 @@ export type LeagueGameState = {
 };
 
 export type GameLogEvent =
-  | BattingGameLogEvent
   | HitGameLogEvent
   | {
       kind: 'inningStart';
@@ -206,18 +204,41 @@ export type GameLogEvent =
       score: Record<TeamId, number>;
     }
   | {
-      kind: 'strike' | 'ball' | 'foul';
+      kind: 'ball';
       batterId: PlayerId;
       pitcherId: PlayerId;
       strikes: number;
       balls: number;
+    }
+  | {
+      kind: 'foul';
+      batterId: PlayerId;
+      pitcherId: PlayerId;
+      strikes: number;
+      balls: number;
+      inStrikeZone: boolean;
+    }
+  | {
+      kind: 'strike';
+      batterId: PlayerId;
+      pitcherId: PlayerId;
+      strikes: number;
+      balls: number;
+      inStrikeZone: boolean;
+      swung: boolean;
+    }
+  | {
+      kind: 'strikeout';
+      batterId: PlayerId;
+      pitcherId: PlayerId;
+      inStrikeZone: boolean;
+      swung: boolean;
+    }
+  | {
+      kind: 'walk';
+      batterId: PlayerId;
+      pitcherId: PlayerId;
     };
-
-export type BattingGameLogEvent = {
-  kind: 'walk' | 'strikeout';
-  batterId: PlayerId;
-  pitcherId: PlayerId;
-};
 
 export type HitGameLogEvent = {
   kind: Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'>;
@@ -228,6 +249,7 @@ export type HitGameLogEvent = {
   type: HitType;
   defender: Position | null;
   defenderId: PlayerId | null;
+  inStrikeZone: boolean;
 };
 
 export type GameLog = Array<GameLogEvent>;

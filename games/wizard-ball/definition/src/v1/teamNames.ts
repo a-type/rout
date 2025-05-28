@@ -97,4 +97,7 @@ export const teamNouns: Array<{ text: string; icon: string }> = [
   { text: 'Voyagers', icon: '🚀' },
   { text: 'Scribes', icon: '✍️' },
   { text: 'Gems', icon: '💎' },
+  { text: 'Spirits', icon: '👻' },
+  { text: 'Spiderwebs', icon: '🕸️' },
+  { text: 'Wagonwheels', icon: '🛞' },
 ];

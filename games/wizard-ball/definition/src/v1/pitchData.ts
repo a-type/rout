@@ -14,9 +14,10 @@ export type PitchData = {
 export type ActualPitch = PitchData & {
   quality: number;
   kind: PitchKind;
+  isStrike: boolean;
 };
 export const pitchTypes = {
-  fastball: {
+  fastball: ({ quality }) => ({
     strikeFactor: 1,
     contactStrikeFactor: 1,
     contactBallFactor: 1,
@@ -35,8 +36,8 @@ export const pitchTypes = {
         popUp: 0.95,
       },
     },
-  },
-  curveball: {
+  }),
+  curveball: ({ quality }) => ({
     strikeFactor: 0.85,
     contactStrikeFactor: 0.9,
     contactBallFactor: 0.8,
@@ -55,8 +56,8 @@ export const pitchTypes = {
         popUp: 1.08,
       },
     },
-  },
-  changeup: {
+  }),
+  changeup: ({ quality }) => ({
     strikeFactor: 0.83,
     contactStrikeFactor: 0.95,
     contactBallFactor: 0.85,
@@ -75,8 +76,8 @@ export const pitchTypes = {
         popUp: 1.03,
       },
     },
-  },
-  slider: {
+  }),
+  slider: ({ quality }) => ({
     strikeFactor: 0.89,
     contactStrikeFactor: 0.9,
     contactBallFactor: 0.75,
@@ -95,8 +96,8 @@ export const pitchTypes = {
         popUp: 1.02,
       },
     },
-  },
-  sinker: {
+  }),
+  sinker: ({ quality }) => ({
     strikeFactor: 0.98,
     contactStrikeFactor: 1.05,
     contactBallFactor: 1.05,
@@ -115,7 +116,7 @@ export const pitchTypes = {
         popUp: 1.0,
       },
     },
-  },
+  }),
   // twoSeamFastball: {
   //   strikeFactor: 0.95,
   //   contactStrikeFactor: 1.05,
@@ -147,5 +148,5 @@ export const pitchTypes = {
   //     type: { grounder: 1.08, lineDrive: 0.97, fly: 0.97, popUp: 1.02 },
   //   },
   // },
-} satisfies Record<string, PitchData>;
+} satisfies Record<string, (props: { quality: number }) => PitchData>;
 export type PitchKind = keyof typeof pitchTypes;

@@ -6,7 +6,7 @@ import {
   LeagueGameState,
   Position,
 } from './gameTypes';
-import { ActualPitch } from './pitchData';
+import { PitchKind } from './pitchData';
 import { PitchOutcome } from './simGames';
 import { SpeciesType } from './speciesData';
 
@@ -32,7 +32,7 @@ export type Perk = {
   }) => boolean;
   condition?: (props: {
     gameState: LeagueGameState;
-    pitchData?: ActualPitch;
+    pitchKind?: PitchKind;
     isMe: boolean;
     isBatter: boolean;
     isPitcher: boolean;
@@ -243,8 +243,8 @@ export const perks: Record<string, Perk> = {
     name: 'Fastballer',
     description: 'Improves fastball performance.',
     kind: 'pitching',
-    condition: ({ pitchData, isPitcher }) =>
-      isPitcher && pitchData?.kind === 'fastball',
+    condition: ({ pitchKind, isPitcher }) =>
+      isPitcher && pitchKind === 'fastball',
     effect: () => ({
       qualityBonus: 2,
     }),
@@ -253,8 +253,8 @@ export const perks: Record<string, Perk> = {
     name: 'Curveballer',
     description: 'Improves curveball performance.',
     kind: 'pitching',
-    condition: ({ pitchData, isPitcher }) =>
-      isPitcher && pitchData?.kind === 'curveball',
+    condition: ({ pitchKind, isPitcher }) =>
+      isPitcher && pitchKind === 'curveball',
     effect: () => ({
       qualityBonus: 2,
     }),
@@ -263,8 +263,8 @@ export const perks: Record<string, Perk> = {
     name: 'Changeup Artist',
     description: 'Improves changeup performance.',
     kind: 'pitching',
-    condition: ({ pitchData, isPitcher }) =>
-      isPitcher && pitchData?.kind === 'changeup',
+    condition: ({ pitchKind, isPitcher }) =>
+      isPitcher && pitchKind === 'changeup',
     effect: () => ({
       qualityBonus: 2,
     }),
@@ -273,8 +273,8 @@ export const perks: Record<string, Perk> = {
     name: 'Slider Artist',
     description: 'Improves slider performance.',
     kind: 'pitching',
-    condition: ({ pitchData, isPitcher }) =>
-      isPitcher && pitchData?.kind === 'slider',
+    condition: ({ pitchKind, isPitcher }) =>
+      isPitcher && pitchKind === 'slider',
     effect: () => ({
       qualityBonus: 2,
     }),
@@ -283,8 +283,8 @@ export const perks: Record<string, Perk> = {
     name: 'Sinker Artist',
     description: 'Improves sinker performance.',
     kind: 'pitching',
-    condition: ({ pitchData, isPitcher }) =>
-      isPitcher && pitchData?.kind === 'sinker',
+    condition: ({ pitchKind, isPitcher }) =>
+      isPitcher && pitchKind === 'sinker',
     effect: () => ({
       qualityBonus: 2,
     }),

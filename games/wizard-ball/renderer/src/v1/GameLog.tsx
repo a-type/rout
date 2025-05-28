@@ -47,8 +47,10 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'strike':
       return (
         <>
-          <PlayerName bold id={event.pitcherId} /> throws a strike to{' '}
-          <PlayerName bold id={event.batterId} /> ({event.balls}-{event.strikes}
+          <PlayerName bold id={event.pitcherId} /> throws a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
+          <PlayerName bold id={event.batterId} /> {event.swung ? '(swung)' : ''}{' '}
+          ({event.balls}-{event.strikes}
           ).
         </>
       );
@@ -65,7 +67,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'out':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> made contact but is gotten out
+          <PlayerName bold id={event.batterId} /> made contact on a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} but is gotten out
           {event.defenderId ? (
             <>
               {' '}
@@ -85,7 +88,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         <>
           <PlayerName bold id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
-          {hitTypeToString(event.type)} hit to{' '}
+          {hitTypeToString(event.type)} hit on a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()})!{' '}
           <PlayerName bold id={event.pitcherId} /> gives up a hit.
@@ -96,7 +100,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
       return (
         <>
           <PlayerName bold id={event.batterId} /> hits a{' '}
-          {hitTypeToString(event.type)} home run to{' '}
+          {hitTypeToString(event.type)} home run on a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} !{' '}
           <PlayerName bold id={event.pitcherId} /> gives up a home run.
         </>
@@ -107,7 +112,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         <>
           <PlayerName bold id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
-          {hitTypeToString(event.type)} triple to{' '}
+          {hitTypeToString(event.type)} triple on a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()}) !{' '}
           <PlayerName bold id={event.pitcherId} /> gives up a triple.
@@ -119,7 +125,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         <>
           <PlayerName bold id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
-          {hitTypeToString(event.type)} double to{' '}
+          {hitTypeToString(event.type)} double on a{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()}) !{' '}
           <PlayerName bold id={event.pitcherId} /> gives up a double.
@@ -135,14 +142,20 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'strikeout':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> strikes out!{' '}
-          <PlayerName bold id={event.pitcherId} /> gets the strikeout.
+          <PlayerName bold id={event.batterId} /> strikes out{' '}
+          {event.swung
+            ? event.inStrikeZone
+              ? 'swinging'
+              : 'chasing'
+            : 'looking'}
+          ! <PlayerName bold id={event.pitcherId} /> gets the strikeout.
         </>
       );
     case 'foul':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> fouls off the pitch from{' '}
+          <PlayerName bold id={event.batterId} /> fouls off the{' '}
+          {event.inStrikeZone ? 'strike' : 'ball'} from{' '}
           <PlayerName bold id={event.pitcherId} /> ({event.balls}-
           {event.strikes}).
         </>
