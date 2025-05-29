@@ -1,12 +1,15 @@
 import { GameLogEvent, LeagueGameState } from './gameTypes';
 
 type LoggerMode = 'state' | 'console' | 'none';
+type LogLevel = 'info' | 'debug';
 
 class Logger {
   private _mode: LoggerMode;
+  private _level: LogLevel;
 
-  constructor(mode: LoggerMode = 'state', filename?: string) {
+  constructor(mode: LoggerMode = 'state', level: LogLevel = 'info') {
     this._mode = mode;
+    this._level = level;
   }
 
   public addToGameLog(
@@ -22,6 +25,18 @@ class Logger {
       case 'none':
       default:
         return gameState;
+    }
+  }
+
+  public debug(data: any): void {
+    if (this._mode === 'console') {
+      console.log(data);
+    }
+  }
+
+  public info(data: any): void {
+    if (this._mode === 'console' && this._level === 'info') {
+      console.log(data);
     }
   }
 }

@@ -1,7 +1,7 @@
 export function scaleAttribute(
   attribute: number,
   center: number = 10,
-  scale: number = 5,
+  scale: number = 7,
 ): number {
   return Math.tanh((attribute - center) / scale);
 }

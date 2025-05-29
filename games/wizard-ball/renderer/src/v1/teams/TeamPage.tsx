@@ -7,7 +7,7 @@ import {
 import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
-import { Attributes } from '../Attributes';
+import { Attributes } from '../ratings/Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';

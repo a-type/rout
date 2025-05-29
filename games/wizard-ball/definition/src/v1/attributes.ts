@@ -77,11 +77,11 @@ export function getPitchingCompositeRatings(
   return {
     contact: avg(str, agi),
     hitAngle: avg(str, con),
-    dependable: avg(str, wis),
+    velocity: avg(str, wis),
     strikeout: avg(str, int),
     accuracy: avg(agi, con),
     hitPower: avg(agi, wis),
-    extraBases: avg(agi, int),
+    movement: avg(agi, int),
     durability: avg(con, wis),
     deception: avg(con, int),
     dueling: avg(wis, int),

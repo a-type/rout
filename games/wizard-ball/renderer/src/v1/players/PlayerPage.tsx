@@ -4,13 +4,15 @@ import {
   perks,
   getPlayerOverall,
 } from '@long-game/game-wizard-ball-definition';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
-import { Attributes } from './Attributes';
-import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
-import { CompositeRatings } from './CompositeRatings';
-import { ItemChip } from './ItemChip';
+import { Attributes } from '../ratings/Attributes';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
+import { CompositeRatings } from '../ratings/CompositeRatings';
+import { ItemChip } from '../items/ItemChip';
+import { PerkCard } from '../perks/PerkCard';
+import { PerkChip } from '../perks/PerkChip';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -62,7 +64,6 @@ export function PlayerPage({ id }: { id: string }) {
           <span className="capitalize">{player.class}</span>
         </div>
         <div className="mb-1 text-md">
-          Team:{' '}
           {team ? (
             <div
               className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
@@ -93,22 +94,16 @@ export function PlayerPage({ id }: { id: string }) {
               if (!perk) {
                 return null;
               }
-              return (
-                <div
-                  key={perkId}
-                  className="inline-flex flex-col mb-2 border-1 border-gray-200 border-solid bg-gray-500/30 p-2 rounded"
-                >
-                  <span className="font-semibold">{perk.name}</span>
-                  <span>{perk.description}</span>
-                </div>
-              );
+              return <PerkChip key={perkId} id={perkId} />;
             })}
           </div>
           <div className="col-span-1">
             <h2>Items</h2>
-            {player.itemIds.map((itemId) => (
-              <ItemChip key={itemId} id={itemId} />
-            ))}
+            <div className="flex flex-col gap-2 items-start">
+              {player.itemIds.map((itemId) => (
+                <ItemChip key={itemId} id={itemId} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

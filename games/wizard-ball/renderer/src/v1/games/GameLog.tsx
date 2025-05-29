@@ -1,14 +1,14 @@
 import type { GameLogEvent } from '@long-game/game-wizard-ball-definition';
-import { hooks } from './gameClient';
-import { TeamName } from './TeamName';
-import { PlayerName } from './PlayerName';
+import { hooks } from '../gameClient';
+import { TeamName } from '../TeamName';
+import { PlayerName } from '../players/PlayerName';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
 import {
   capitalize,
   hitDirectionToString,
   hitTypeToString,
   nthToString,
-} from './utils';
+} from '../utils';
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
   switch (event.kind) {

@@ -4,7 +4,7 @@ import type {
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
 import { clsx, Tabs } from '@a-type/ui';
-import { PlayerName } from './PlayerName';
+import { PlayerName } from './players/PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
 import {
@@ -14,6 +14,7 @@ import {
   pitchingStats,
 } from './stats';
 import { TeamIcon } from './TeamIcon';
+import { PlayerChip } from './players/PlayerChip';
 
 const invertList = ['era', 'whip', 'bbPerNine'];
 
@@ -90,8 +91,7 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
                   }}
                 >
                   <td className="text-left p-1 flex items-center gap-2">
-                    {teamId && <TeamIcon size={12} id={teamId} />}
-                    <PlayerName id={player.playerId} />
+                    <PlayerChip id={player.playerId} noBackground />
                   </td>
                   <td className="text-right p-1">{player[tabValue]}</td>
                 </tr>

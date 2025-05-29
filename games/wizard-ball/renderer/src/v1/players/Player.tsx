@@ -1,5 +1,5 @@
 import { clsx } from '@a-type/ui';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 
 export function Player({
   id,

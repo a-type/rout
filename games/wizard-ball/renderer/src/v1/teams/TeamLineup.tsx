@@ -27,7 +27,9 @@ import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
 import { Position } from '@long-game/game-wizard-ball-definition';
-import { PlayerAttributesSummary } from '../PlayerAttributesSummary';
+import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
+import { Tooltip } from '@a-type/ui';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -118,7 +120,7 @@ export function TeamLineup({ id }: { id: string }) {
       onDragEnd={handleDragEnd}
       modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <h2>Lineup</h2>
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           {items.map((position, idx) => {
@@ -133,14 +135,19 @@ export function TeamLineup({ id }: { id: string }) {
             return (
               <div key={playerId} className="flex items-center gap-2">
                 <span>{idx + 1}</span>
-                <SortableItem
-                  disabled={currentUserId !== team.ownerId}
-                  id={position}
-                  className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                <Tooltip
+                  className="bg-gray-700 text-gray-100"
+                  content={<PlayerTooltipContent id={player.id} />}
                 >
-                  <span className="uppercase">{player.positions[0]}</span>
-                  <span>{player.name}</span>
-                </SortableItem>
+                  <SortableItem
+                    disabled={currentUserId !== team.ownerId}
+                    id={position}
+                    className="bg-gray-700 border p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                  >
+                    <span className="uppercase">{position}</span>
+                    <span>{player.name}</span>
+                  </SortableItem>
+                </Tooltip>
                 <PlayerAttributesSummary kind="overall" id={playerId} />
                 <PlayerAttributesSummary kind="stamina" id={playerId} />
               </div>

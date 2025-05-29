@@ -1,8 +1,8 @@
 import { useSearchParams } from '@verdant-web/react-router';
 import { TeamPage } from './teams/TeamPage';
 import { TeamStandings } from './TeamStandings';
-import { PlayerPage } from './PlayerPage';
-import { GamePage } from './GamePage';
+import { PlayerPage } from './players/PlayerPage';
+import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
 
 export function PageContent() {

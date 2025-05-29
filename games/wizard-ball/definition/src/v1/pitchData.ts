@@ -1,4 +1,5 @@
 import { HitPower, HitType } from './gameTypes';
+import { scaleAttributePercent } from './utils';
 
 export type PitchData = {
   strikeFactor: number;
@@ -17,7 +18,7 @@ export type ActualPitch = PitchData & {
   isStrike: boolean;
 };
 export const pitchTypes = {
-  fastball: ({ quality }) => ({
+  fastball: ({ quality, velocity, movement }) => ({
     strikeFactor: 1,
     contactStrikeFactor: 1,
     contactBallFactor: 1,
@@ -25,83 +26,83 @@ export const pitchTypes = {
     swingBallFactor: 1,
     hitModiferTable: {
       power: {
-        weak: 0.9,
+        weak: 0.8,
         normal: 1.0,
-        strong: 1.1,
+        strong: 1.2,
       },
       type: {
-        grounder: 0.95,
-        lineDrive: 1.05,
-        fly: 1.05,
-        popUp: 0.95,
+        grounder: 0.75,
+        lineDrive: 1.25,
+        fly: 1.25,
+        popUp: 1,
       },
     },
   }),
-  curveball: ({ quality }) => ({
-    strikeFactor: 0.85,
-    contactStrikeFactor: 0.9,
-    contactBallFactor: 0.8,
-    swingStrikeFactor: 0.9,
-    swingBallFactor: 0.8,
+  curveball: ({ quality, velocity, movement }) => ({
+    strikeFactor: 0.75,
+    contactStrikeFactor: 0.8,
+    contactBallFactor: 0.6,
+    swingStrikeFactor: 0.8,
+    swingBallFactor: 0.6,
     hitModiferTable: {
       power: {
-        weak: 1.08,
+        weak: 1.2,
         normal: 1.0,
-        strong: 0.92,
+        strong: 0.8,
       },
       type: {
-        grounder: 1.05,
-        lineDrive: 0.95,
-        fly: 0.95,
-        popUp: 1.08,
+        grounder: 1.25,
+        lineDrive: 0.75,
+        fly: 0.75,
+        popUp: 1,
       },
     },
   }),
-  changeup: ({ quality }) => ({
-    strikeFactor: 0.83,
-    contactStrikeFactor: 0.95,
-    contactBallFactor: 0.85,
-    swingStrikeFactor: 1.05,
-    swingBallFactor: 1.1,
-    hitModiferTable: {
-      power: {
-        weak: 1.05,
-        normal: 1.0,
-        strong: 0.95,
-      },
-      type: {
-        grounder: 1.08,
-        lineDrive: 0.97,
-        fly: 0.97,
-        popUp: 1.03,
-      },
-    },
-  }),
-  slider: ({ quality }) => ({
-    strikeFactor: 0.89,
+  changeup: ({ quality, velocity, movement }) => ({
+    strikeFactor: 0.8,
     contactStrikeFactor: 0.9,
-    contactBallFactor: 0.75,
+    contactBallFactor: 0.7,
     swingStrikeFactor: 1.1,
     swingBallFactor: 1.2,
     hitModiferTable: {
       power: {
-        weak: 1.07,
+        weak: 1.1,
         normal: 1.0,
-        strong: 0.93,
+        strong: 0.9,
       },
       type: {
-        grounder: 1.07,
-        lineDrive: 0.97,
-        fly: 0.97,
-        popUp: 1.02,
+        grounder: 1.2,
+        lineDrive: 0.85,
+        fly: 0.85,
+        popUp: 1,
       },
     },
   }),
-  sinker: ({ quality }) => ({
-    strikeFactor: 0.98,
-    contactStrikeFactor: 1.05,
-    contactBallFactor: 1.05,
-    swingStrikeFactor: 0.95,
+  slider: ({ quality, velocity, movement }) => ({
+    strikeFactor: 0.8,
+    contactStrikeFactor: 0.8,
+    contactBallFactor: 0.5,
+    swingStrikeFactor: 1.2,
+    swingBallFactor: 1.35,
+    hitModiferTable: {
+      power: {
+        weak: 1.1,
+        normal: 1.0,
+        strong: 0.9,
+      },
+      type: {
+        grounder: 1.25,
+        lineDrive: 0.75,
+        fly: 1,
+        popUp: 1,
+      },
+    },
+  }),
+  sinker: ({ quality, velocity, movement }) => ({
+    strikeFactor: 0.9,
+    contactStrikeFactor: 1.1,
+    contactBallFactor: 1.1,
+    swingStrikeFactor: 0.9,
     swingBallFactor: 1.0,
     hitModiferTable: {
       power: {
@@ -110,9 +111,9 @@ export const pitchTypes = {
         strong: 0.9,
       },
       type: {
-        grounder: 1.15,
-        lineDrive: 0.95,
-        fly: 0.9,
+        grounder: 1.35,
+        lineDrive: 1,
+        fly: 0.75,
         popUp: 1.0,
       },
     },
@@ -148,5 +149,8 @@ export const pitchTypes = {
   //     type: { grounder: 1.08, lineDrive: 0.97, fly: 0.97, popUp: 1.02 },
   //   },
   // },
-} satisfies Record<string, (props: { quality: number }) => PitchData>;
+} satisfies Record<
+  string,
+  (props: { quality: number; velocity: number; movement: number }) => PitchData
+>;
 export type PitchKind = keyof typeof pitchTypes;

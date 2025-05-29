@@ -30,8 +30,8 @@ import {
 } from './attributes';
 import Logger from './logger';
 
-// const logger = new Logger('none');
-const logger = new Logger('state');
+const logger = new Logger('none');
+// const logger = new Logger('console');
 
 export function simulateRound(
   random: GameRandom,
@@ -608,30 +608,31 @@ function determinePitchType(
   const pitcherAttributes = getModifiedAttributes(pitcher.id, league, game);
   const pitcherComposite = getPitchingCompositeRatings(pitcherAttributes);
 
-  let attributeTotal = random.float(-5, 5);
+  const randomMod = 3 * random.float(-1, 1);
+  let attributeTotal = 10 + randomMod;
   attributeTotal += 0.2 * (pitcherComposite.dueling - batterComposite.dueling);
   attributeTotal += 0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
-  attributeTotal +=
-    (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;
+  // attributeTotal +=
+  //   (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;
 
-  switch (pitchKind) {
-    case 'fastball':
-      attributeTotal += (pitcherAttributes.strength - 10) * 0.4;
-    case 'curveball':
-      attributeTotal += pitcherAttributes.agility * 0.4;
-      break;
-    case 'changeup':
-      attributeTotal += pitcherAttributes.wisdom * 0.4;
-      break;
-    case 'slider':
-      attributeTotal += pitcherAttributes.intelligence * 0.4;
-      break;
-    case 'sinker':
-      attributeTotal += pitcherAttributes.constitution * 0.4;
-      break;
-    default:
-      throw new Error(`Unknown pitch kind: ${pitchKind}`);
-  }
+  // switch (pitchKind) {
+  //   case 'fastball':
+  //     attributeTotal += (pitcherAttributes.strength - 10) * 0.4;
+  //   case 'curveball':
+  //     attributeTotal += (pitcherAttributes.agility - 10) * 0.4;
+  //     break;
+  //   case 'changeup':
+  //     attributeTotal += (pitcherAttributes.wisdom - 10) * 0.4;
+  //     break;
+  //   case 'slider':
+  //     attributeTotal += (pitcherAttributes.intelligence - 10) * 0.4;
+  //     break;
+  //   case 'sinker':
+  //     attributeTotal += (pitcherAttributes.constitution - 10) * 0.4;
+  //     break;
+  //   default:
+  //     throw new Error(`Unknown pitch kind: ${pitchKind}`);
+  // }
   activePerks.forEach((perk) => {
     const qb = perk.effect().qualityBonus;
     if (qb) {
@@ -639,8 +640,27 @@ function determinePitchType(
     }
   });
 
+  const qualityModifier = attributeTotal - 10;
+  // console.log({
+  //   qualityModifier,
+  //   attributeTotal,
+  //   randomMod,
+  //   perks: activePerks.map((p) => ({
+  //     name: p.name,
+  //     qb: p.effect().qualityBonus,
+  //   })),
+  //   dueling: 0.2 * (pitcherComposite.dueling - batterComposite.dueling),
+  //   strikeout: 0.2 * (pitcherComposite.strikeout - 10) * game.strikes,
+  // });
+  const modifiedMovement = pitcherComposite.movement + qualityModifier;
+  const modifiedVelocity = pitcherComposite.velocity + qualityModifier;
   let quality = scaleAttributePercent(attributeTotal, 2);
-  const basePitchData = pitchTypes[pitchKind]({ quality });
+  const basePitchData = pitchTypes[pitchKind]({
+    quality,
+    movement: modifiedMovement,
+    velocity: modifiedVelocity,
+  });
+
   const baseStrikeChanceTable: Record<number, Record<number, number>> = {
     0: {
       0: 0.62,
@@ -685,6 +705,8 @@ function determinePitchType(
     quality,
     isStrike,
   };
+  // console.log('base pitch data', pitchData);
+  logger.debug(JSON.stringify(pitchData));
 
   // STR = strikeouts = more strikes, fewer swings at strikes
   // AGI = finesse = less contact
@@ -693,10 +715,13 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  pitchData.swingStrikeFactor *= 1 / quality;
-  pitchData.swingBallFactor *= quality;
-  pitchData.contactStrikeFactor *= 1 / quality;
-  pitchData.contactBallFactor *= quality;
+  pitchData.swingStrikeFactor *=
+    1 / scaleAttributePercent(modifiedVelocity, 1.5);
+  pitchData.swingBallFactor *= scaleAttributePercent(modifiedMovement, 1.5);
+  pitchData.contactStrikeFactor *=
+    1 / scaleAttributePercent(modifiedVelocity, 1.5);
+  pitchData.contactBallFactor *=
+    1 / scaleAttributePercent(modifiedMovement, 1.5);
   Object.keys(pitchData.hitModiferTable.power).forEach((key) => {
     if (!key || !pitchData.hitModiferTable.power[key as HitPower]) {
       return;
@@ -722,9 +747,10 @@ function determinePitchType(
   pitchData.hitModiferTable.power.strong =
     (pitchData.hitModiferTable.power.strong ?? 1) /
     scaleAttributePercent(pitcherComposite.hitPower, 1.5);
-  pitchData.hitModiferTable.type.lineDrive =
-    (pitchData.hitModiferTable.type.lineDrive ?? 1) /
-    scaleAttributePercent(pitcherComposite.extraBases, 1.5);
+  // pitchData.hitModiferTable.type.lineDrive =
+  //   (pitchData.hitModiferTable.type.lineDrive ?? 1) /
+  //   scaleAttributePercent(pitcherComposite.extraBases, 1.5);
+  // console.log('modified pitch data', pitchData);
 
   return pitchData;
 }
@@ -810,11 +836,11 @@ function determineHitResult(
   const batterAttributes = getModifiedAttributes(batter, league, gameState);
   const batterCompositeRatings = getBattingCompositeRatings(batterAttributes);
   const hitAreaTable: Record<HitArea, number> = {
-    farLeft: 0.5,
-    left: 1.5,
-    center: 2,
-    right: 1.5,
-    farRight: 0.5,
+    farLeft: 1,
+    left: 2,
+    center: 4,
+    right: 2,
+    farRight: 1,
   };
   const hitArea = randomTable(random, hitAreaTable);
   const hitPowerTable: Record<HitPower, number> = multiplyObjects(
@@ -827,8 +853,7 @@ function determineHitResult(
       : {
           weak: 2,
           normal: 1,
-          strong:
-            0.5 * scaleAttributePercent(batterCompositeRatings.hitPower, 2),
+          strong: scaleAttributePercent(batterCompositeRatings.hitPower, 2),
         },
     pitchData.hitModiferTable.power,
   );
@@ -837,17 +862,17 @@ function determineHitResult(
     isStrike
       ? {
           grounder: 4,
-          fly: 2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
-          lineDrive:
-            2.5 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
-          popUp: 1,
-        }
-      : {
-          grounder: 1,
           fly: 3 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
           lineDrive:
             2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
-          popUp: 4,
+          popUp: 1,
+        }
+      : {
+          grounder: 6,
+          fly: 2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+          lineDrive:
+            1 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+          popUp: 2,
         },
     pitchData.hitModiferTable.type,
   );

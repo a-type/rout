@@ -1,5 +1,5 @@
 import { itemData } from '@long-game/game-wizard-ball-definition';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { Tooltip } from '@a-type/ui';
 
 export function ItemChip({ id }: { id: string }) {

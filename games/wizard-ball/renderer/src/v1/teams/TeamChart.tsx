@@ -1,7 +1,6 @@
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { hooks } from '../gameClient';
 import {
-  closestCenter,
   DndContext,
   DragEndEvent,
   KeyboardSensor,
@@ -11,10 +10,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  restrictToVerticalAxis,
-  restrictToWindowEdges,
-} from '@dnd-kit/modifiers';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useEffect, useState } from 'react';
 
 import { HTMLAttributes } from 'react';
@@ -22,8 +18,9 @@ import {
   Position,
   PositionChart,
 } from '@long-game/game-wizard-ball-definition';
-import { clsx } from '@a-type/ui';
-import { PlayerAttributesSummary } from '../PlayerAttributesSummary';
+import { clsx, Tooltip } from '@a-type/ui';
+import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 
 const positions = [
   'c',
@@ -222,7 +219,12 @@ export function TeamChart({ id }: { id: string }) {
                         'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',
                       )}
                     >
-                      <span>{player.name}</span>
+                      <Tooltip
+                        className="bg-gray-700 text-gray-100"
+                        content={<PlayerTooltipContent id={player.id} />}
+                      >
+                        <span>{player.name}</span>
+                      </Tooltip>
                       <span className="uppercase">
                         {player.positions.join('/')}
                       </span>
@@ -257,7 +259,12 @@ export function TeamChart({ id }: { id: string }) {
                     <span className="uppercase">
                       {player.positions.join('/')}
                     </span>
-                    <span>{player.name}</span>
+                    <Tooltip
+                      className="bg-gray-700 text-gray-100"
+                      content={<PlayerTooltipContent id={player.id} />}
+                    >
+                      <span>{player.name}</span>
+                    </Tooltip>
                   </Draggable>
                   <PlayerAttributesSummary kind="overall" id={playerId} />
                   <PlayerAttributesSummary kind="stamina" id={playerId} />
@@ -293,7 +300,12 @@ export function TeamChart({ id }: { id: string }) {
                     <span className="uppercase">
                       {player.positions.join('/')}
                     </span>
-                    <span>{player.name}</span>
+                    <Tooltip
+                      className="bg-gray-700 text-gray-100"
+                      content={<PlayerTooltipContent id={player.id} />}
+                    >
+                      <span>{player.name}</span>
+                    </Tooltip>
                   </Draggable>
                   <PlayerAttributesSummary kind="overall" id={playerId} />
                   <PlayerAttributesSummary kind="stamina" id={playerId} />

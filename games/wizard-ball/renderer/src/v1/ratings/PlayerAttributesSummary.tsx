@@ -2,8 +2,8 @@ import {
   getPlayerOverall,
   Player,
 } from '@long-game/game-wizard-ball-definition';
-import { hooks } from './gameClient';
-import { attributeToColor } from './utils';
+import { hooks } from '../gameClient';
+import { attributeToColor } from '../utils';
 
 const attributes = [
   { key: 'strength', label: 'STR' },

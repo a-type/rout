@@ -1,4 +1,4 @@
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { Tabs } from '@a-type/ui';
 import { useState } from 'react';
 import { GameLog } from './GameLog';

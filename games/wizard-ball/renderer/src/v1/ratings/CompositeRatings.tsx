@@ -4,7 +4,7 @@ import {
   getPitchingCompositeRatings,
   Player,
 } from '@long-game/game-wizard-ball-definition';
-import { roundFloat } from './utils';
+import { roundFloat } from '../utils';
 import { Tooltip } from '@a-type/ui';
 
 const battingRatingList: Array<{
@@ -94,10 +94,10 @@ const pitchingRatingList: Array<{
     tooltip: 'Weakens the launch angle of contact',
   },
   {
-    value: 'dependable',
-    label: 'Dependable',
+    value: 'velocity',
+    label: 'Velocity',
     color: '#FF8C00',
-    tooltip: 'Improves pitch quality with more balls',
+    tooltip: 'Improves pitch speed',
   },
   {
     value: 'strikeout',
@@ -118,10 +118,10 @@ const pitchingRatingList: Array<{
     tooltip: 'Reduces power of hits against the pitcher',
   },
   {
-    value: 'extraBases',
-    label: 'Extra Bases',
+    value: 'movement',
+    label: 'Movement',
     color: '#20B2AA',
-    tooltip: 'Reduces chances of extra-base hits against the pitcher',
+    tooltip: 'Improves pitch movement',
   },
   {
     value: 'durability',

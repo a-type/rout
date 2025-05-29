@@ -1,9 +1,6 @@
 import { useSearchParams } from '@verdant-web/react-router';
-import { hooks } from './gameClient';
-import { battingStats, calculatePlayerStats, pitchingStats } from './stats';
-import { Tabs } from '@a-type/ui';
-import { useState } from 'react';
-import { GameLog } from './GameLog';
+import { hooks } from '../gameClient';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 
 type StatValue =
   | (typeof battingStats)[number]['value']

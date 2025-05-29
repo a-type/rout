@@ -50,11 +50,11 @@ export type BattingCompositeRatings = {
 export type PitchingCompositeRatings = {
   contact: number;
   hitAngle: number;
-  dependable: number;
+  movement: number;
   strikeout: number;
   accuracy: number;
   hitPower: number;
-  extraBases: number;
+  velocity: number;
   durability: number;
   deception: number;
   dueling: number;
