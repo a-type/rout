@@ -3,13 +3,12 @@ import { Tabs } from '@a-type/ui';
 import { useState } from 'react';
 import { GameLog } from './GameLog';
 import { GameBoxScore } from './GameBoxScore';
+import { useGameResults } from '../useGameResults';
 
 export function GamePage({ id }: { id: string }) {
   const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
   const { finalState } = hooks.useGameSuite();
-  const game = finalState.league.gameResults
-    .flat()
-    .find((game) => game.id === id);
+  const game = useGameResults({ id });
   if (!game) {
     return <div>Game not found</div>;
   }

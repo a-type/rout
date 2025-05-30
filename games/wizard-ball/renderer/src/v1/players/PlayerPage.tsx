@@ -1,5 +1,4 @@
 import {
-  PlayerStats,
   speciesIcons,
   perks,
   getPlayerOverall,
@@ -11,7 +10,6 @@ import { Attributes } from '../ratings/Attributes';
 import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { CompositeRatings } from '../ratings/CompositeRatings';
 import { ItemChip } from '../items/ItemChip';
-import { PerkCard } from '../perks/PerkCard';
 import { PerkChip } from '../perks/PerkChip';
 
 export function PlayerPage({ id }: { id: string }) {
@@ -50,9 +48,12 @@ export function PlayerPage({ id }: { id: string }) {
     return `${homeTeam.name} vs ${awayTeam.name}`;
   };
 
-  const totalPlayerStats = calculatePlayerStats(finalState.league, {
-    playerIds: [id],
-  });
+  const totalPlayerStats = calculatePlayerStats(
+    finalState.league.gameResults.flat(),
+    {
+      playerIds: [id],
+    },
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -134,10 +135,13 @@ export function PlayerPage({ id }: { id: string }) {
             </thead>
             <tbody>
               {games.map((game, index) => {
-                const stats = calculatePlayerStats(finalState.league, {
-                  gameIds: [game.id],
-                  playerIds: [id],
-                })[id];
+                const stats = calculatePlayerStats(
+                  finalState.league.gameResults.flat(),
+                  {
+                    gameIds: [game.id],
+                    playerIds: [id],
+                  },
+                )[id];
                 return (
                   <tr
                     key={index}
@@ -205,10 +209,13 @@ export function PlayerPage({ id }: { id: string }) {
                 </thead>
                 <tbody>
                   {games.map((game, index) => {
-                    const stats = calculatePlayerStats(finalState.league, {
-                      gameIds: [game.id],
-                      playerIds: [id],
-                    })[id];
+                    const stats = calculatePlayerStats(
+                      finalState.league.gameResults.flat(),
+                      {
+                        gameIds: [game.id],
+                        playerIds: [id],
+                      },
+                    )[id];
                     return (
                       <tr
                         key={index}

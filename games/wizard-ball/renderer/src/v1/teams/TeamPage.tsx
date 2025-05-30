@@ -32,9 +32,10 @@ export function TeamPage({ id }: { id: TeamId }) {
   const mySchedule = schedule.flatMap((r) =>
     r.filter((g) => g.awayTeamId === id || g.homeTeamId === id),
   );
-  const myGameResults = finalState.league.gameResults.flatMap((round) =>
-    round.filter((r) => r.winner === id || r.loser === id),
-  );
+
+  const myGameResults = finalState.league.gameResults
+    .flat()
+    .filter((game) => game.winner === id || game.loser === id);
 
   const renderColorCell = (value: number, max: number = 20) => {
     const { bg } = attributeToColor(value, max);

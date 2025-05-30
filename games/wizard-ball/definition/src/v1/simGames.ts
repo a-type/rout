@@ -30,7 +30,7 @@ import {
 } from './attributes';
 import Logger from './logger';
 
-const logger = new Logger('none');
+const logger = new Logger('state');
 // const logger = new Logger('console');
 
 export function simulateRound(
@@ -40,6 +40,10 @@ export function simulateRound(
 ): RoundResult {
   const results: RoundResult = [];
   for (const game of round) {
+    // Hack - ensure that only the most recent round gets the game logs
+    league.gameResults = league.gameResults.map((r) =>
+      r.map(({ gameLog, ...g }) => g),
+    );
     const result = simulateGame(random, league, game);
     results.push(result);
   }
@@ -66,12 +70,11 @@ function checkGameOver(
   return false;
 }
 
-function simulateGame(
-  random: GameRandom,
+export function setupGame(
   league: League,
   game: LeagueGame,
-): GameResult {
-  let gameState = initialGameState();
+  gameState: LeagueGameState = initialGameState(),
+) {
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
   let awayPitcher: string = '',
@@ -102,6 +105,18 @@ function simulateGame(
     };
     gameState.currentBatterIndex[teamId] = 0;
   }
+  return gameState;
+}
+
+export function simulateGame(
+  random: GameRandom,
+  league: League,
+  game: LeagueGame,
+): GameResult {
+  let gameState = initialGameState();
+  gameState = setupGame(league, game, gameState);
+  const homePitcher = gameState.teamData[game.homeTeamId].pitcher;
+  const awayPitcher = gameState.teamData[game.awayTeamId].pitcher;
   while (!checkGameOver(gameState, game)) {
     gameState = simulateInning(random, gameState, league);
     if (checkGameOver(gameState, game)) {
@@ -187,7 +202,7 @@ function randomByWeight<T>(
   return weights[weights.length - 1].value; // Fallback
 }
 
-function initialGameState(): LeagueGameState {
+export function initialGameState(): LeagueGameState {
   return {
     balls: 0,
     strikes: 0,
@@ -1091,7 +1106,7 @@ function determineSteal(
   return gameState;
 }
 
-function simulatePitch(
+export function simulatePitch(
   random: GameRandom,
   gameState: LeagueGameState,
   league: League,

@@ -9,6 +9,7 @@ import {
   hitTypeToString,
   nthToString,
 } from '../utils';
+import { useGameResults } from '../useGameResults';
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
   switch (event.kind) {
@@ -166,14 +167,14 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
 }
 
 export function GameLog({ id }: { id: string }) {
-  const { finalState } = hooks.useGameSuite();
-  const gameResult = finalState.league.gameResults
-    .flat()
-    .find((g) => g.id === id);
-  if (!gameResult) {
+  const game = useGameResults({ id });
+  if (!game) {
     return <div>Game not found</div>;
   }
-  const log = gameResult.gameLog;
+  const log = game.gameLog;
+  if (!log || log.length === 0) {
+    return <div>No game log available</div>;
+  }
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-2xl font-bold mb-0">Game Log</h1>

@@ -1,10 +1,5 @@
-import type {
-  PlayerId,
-  PlayerStats,
-} from '@long-game/game-wizard-ball-definition';
 import { hooks } from './gameClient';
 import { clsx, Tabs } from '@a-type/ui';
-import { PlayerName } from './players/PlayerName';
 import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
 import {
@@ -13,7 +8,6 @@ import {
   calculatePlayerStats,
   pitchingStats,
 } from './stats';
-import { TeamIcon } from './TeamIcon';
 import { PlayerChip } from './players/PlayerChip';
 
 const invertList = ['era', 'whip', 'bbPerNine'];
@@ -23,8 +17,11 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
     kind === 'batting' ? battingStats[0].value : pitchingStats[0].value,
   );
   const { finalState } = hooks.useGameSuite();
+
   const [, setSearchParams] = useSearchParams();
-  const playerStats = calculatePlayerStats(finalState.league);
+  const playerStats = calculatePlayerStats(
+    finalState.league.gameResults.flat(),
+  );
 
   const findTop = (stat: keyof AllStats, count: number = 10) => {
     const isInverted = invertList.includes(stat);

@@ -1,6 +1,7 @@
 import { useSearchParams } from '@verdant-web/react-router';
 import { hooks } from '../gameClient';
 import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
+import { useGameResults } from '../useGameResults';
 
 type StatValue =
   | (typeof battingStats)[number]['value']
@@ -18,9 +19,7 @@ const boxScorePitchingStats = pitchingStats.filter(
 export function GameBoxScore({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
   const [, setSearchParams] = useSearchParams();
-  const game = finalState.league.gameResults
-    .flat()
-    .find((game) => game.id === id);
+  const game = useGameResults({ id });
   if (!game) {
     return <div>Game not found</div>;
   }
@@ -37,7 +36,7 @@ export function GameBoxScore({ id }: { id: string }) {
   );
   const homeTeamPlayers = game.teamData[game.homeTeamId].battingOrder;
   const awayTeamPlayers = game.teamData[game.awayTeamId].battingOrder;
-  const stats = calculatePlayerStats(finalState.league, { gameIds: [game.id] });
+  const stats = calculatePlayerStats([game]);
   return (
     <>
       <table className="mb-2 text-center border-collapse">

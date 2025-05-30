@@ -100,8 +100,7 @@ export const gameDefinition: GameDefinition<
     };
   },
 
-  getPlayerState: ({ globalState, playerId }) => {
-    // TODO: compute the player state from the global state
+  getPlayerState: ({ globalState }) => {
     return {
       league: globalState.league,
     };

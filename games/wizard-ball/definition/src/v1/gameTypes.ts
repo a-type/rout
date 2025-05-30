@@ -140,7 +140,7 @@ export type GameResult = {
   score: {
     [teamId: string]: number;
   };
-  gameLog: GameLog;
+  gameLog?: GameLog;
 };
 
 export type PlayerStats = {

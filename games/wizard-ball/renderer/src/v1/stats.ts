@@ -1,4 +1,5 @@
 import {
+  GameResult,
   League,
   PlayerId,
   PlayerStats,
@@ -56,15 +57,14 @@ export const pitchingStats = [
 ] as const satisfies Array<StatInfo>;
 
 export function calculatePlayerStats(
-  league: League,
+  gameResults: GameResult[],
   filter: {
     playerIds?: PlayerId[];
     gameIds?: string[];
   } = {},
 ) {
   const playerStats: Record<PlayerId, PlayerStats> = {};
-  league.gameResults
-    .flat()
+  gameResults
     .filter((game) => !filter.gameIds || filter.gameIds.includes(game.id))
     .forEach((game) => {
       Object.entries(game.playerStats)
