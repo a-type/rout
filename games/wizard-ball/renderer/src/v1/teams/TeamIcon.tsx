@@ -1,4 +1,4 @@
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 
 export function TeamIcon({ id, size = 32 }: { id: string; size?: number }) {
   const { finalState } = hooks.useGameSuite();

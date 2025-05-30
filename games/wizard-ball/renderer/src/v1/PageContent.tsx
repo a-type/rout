@@ -1,9 +1,10 @@
 import { useSearchParams } from '@verdant-web/react-router';
 import { TeamPage } from './teams/TeamPage';
-import { TeamStandings } from './TeamStandings';
+import { TeamStandings } from './teams/TeamStandings';
 import { PlayerPage } from './players/PlayerPage';
 import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
+import { UpcomingGames } from './UpcomingGames';
 
 export function PageContent() {
   const [params] = useSearchParams();
@@ -22,6 +23,7 @@ export function PageContent() {
   }
   return (
     <div>
+      <UpcomingGames />
       <TeamStandings />
       {/* Two column layout */}
       <div className="flex flex-col md:flex-row gap-2">

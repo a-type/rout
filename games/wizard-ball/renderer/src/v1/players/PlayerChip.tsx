@@ -1,6 +1,6 @@
 import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
-import { TeamIcon } from '../TeamIcon';
+import { TeamIcon } from '../teams/TeamIcon';
 import { PlayerTooltipContent } from './PlayerTooltipContent';
 
 export function PlayerChip({

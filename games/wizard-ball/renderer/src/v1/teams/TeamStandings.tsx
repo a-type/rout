@@ -1,5 +1,5 @@
 import { clsx } from '@a-type/ui';
-import { hooks } from './gameClient';
+import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
 
 export function TeamStandings() {

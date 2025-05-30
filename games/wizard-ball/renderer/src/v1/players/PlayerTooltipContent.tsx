@@ -3,8 +3,8 @@ import {
   perks,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { TeamName } from '../TeamName';
-import { TeamIcon } from '../TeamIcon';
+import { TeamName } from '../teams/TeamName';
+import { TeamIcon } from '../teams/TeamIcon';
 import { Attributes } from '../ratings/Attributes';
 import { ItemChip } from '../items/ItemChip';
 

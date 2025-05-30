@@ -1,6 +1,6 @@
 import type { GameLogEvent } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { TeamName } from '../TeamName';
+import { TeamName } from '../teams/TeamName';
 import { PlayerName } from '../players/PlayerName';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
 import {
