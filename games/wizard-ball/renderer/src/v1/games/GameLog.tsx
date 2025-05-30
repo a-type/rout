@@ -10,6 +10,7 @@ import {
   nthToString,
 } from '../utils';
 import { useGameResults } from '../useGameResults';
+import { PlayerChip } from '../players/PlayerChip';
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
   switch (event.kind) {
@@ -48,10 +49,10 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'strike':
       return (
         <>
-          <PlayerName bold id={event.pitcherId} /> throws a{' '}
+          <PlayerChip noPositions id={event.pitcherId} /> throws a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
-          <PlayerName bold id={event.batterId} /> {event.swung ? '(swung)' : ''}{' '}
-          ({event.balls}-{event.strikes}
+          <PlayerChip noPositions id={event.batterId} />{' '}
+          {event.swung ? '(swung)' : ''} ({event.balls}-{event.strikes}
           ).
         </>
       );
@@ -59,8 +60,9 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'ball':
       return (
         <>
-          <PlayerName bold id={event.pitcherId} /> throws a ball to{' '}
-          <PlayerName bold id={event.batterId} /> ({event.balls}-{event.strikes}
+          <PlayerChip noPositions id={event.pitcherId} /> throws a ball to{' '}
+          <PlayerChip noPositions id={event.batterId} /> ({event.balls}-
+          {event.strikes}
           ).
         </>
       );
@@ -68,12 +70,12 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'out':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> made contact on a{' '}
+          <PlayerChip noPositions id={event.batterId} /> made contact on a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} but is gotten out
           {event.defenderId ? (
             <>
               {' '}
-              by <PlayerName bold id={event.defenderId} /> (
+              by <PlayerChip noPositions id={event.defenderId} /> (
               {event.defender?.toUpperCase()}) on a{' '}
               {event.power === 'normal' ? '' : event.power}{' '}
               {hitTypeToString(event.type)} to{' '}
@@ -87,77 +89,77 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
     case 'hit':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> gets a{' '}
+          <PlayerChip noPositions id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
           {hitTypeToString(event.type)} hit on a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()})!{' '}
-          <PlayerName bold id={event.pitcherId} /> gives up a hit.
+          <PlayerChip noPositions id={event.pitcherId} /> gives up a hit.
         </>
       );
 
     case 'homeRun':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> hits a{' '}
+          <PlayerChip noPositions id={event.batterId} /> hits a{' '}
           {hitTypeToString(event.type)} home run on a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} !{' '}
-          <PlayerName bold id={event.pitcherId} /> gives up a home run.
+          <PlayerChip noPositions id={event.pitcherId} /> gives up a home run.
         </>
       );
 
     case 'triple':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> gets a{' '}
+          <PlayerChip noPositions id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
           {hitTypeToString(event.type)} triple on a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()}) !{' '}
-          <PlayerName bold id={event.pitcherId} /> gives up a triple.
+          <PlayerChip noPositions id={event.pitcherId} /> gives up a triple.
         </>
       );
 
     case 'double':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> gets a{' '}
+          <PlayerChip noPositions id={event.batterId} /> gets a{' '}
           {event.power === 'normal' ? '' : event.power}{' '}
           {hitTypeToString(event.type)} double on a{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()}) !{' '}
-          <PlayerName bold id={event.pitcherId} /> gives up a double.
+          <PlayerChip noPositions id={event.pitcherId} /> gives up a double.
         </>
       );
     case 'walk':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> walks!{' '}
-          <PlayerName bold id={event.pitcherId} /> gives up a walk.
+          <PlayerChip noPositions id={event.batterId} /> walks!{' '}
+          <PlayerChip noPositions id={event.pitcherId} /> gives up a walk.
         </>
       );
     case 'strikeout':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> strikes out{' '}
+          <PlayerChip noPositions id={event.batterId} /> strikes out{' '}
           {event.swung
             ? event.inStrikeZone
               ? 'swinging'
               : 'chasing'
             : 'looking'}
-          ! <PlayerName bold id={event.pitcherId} /> gets the strikeout.
+          ! <PlayerChip noPositions id={event.pitcherId} /> gets the strikeout.
         </>
       );
     case 'foul':
       return (
         <>
-          <PlayerName bold id={event.batterId} /> fouls off the{' '}
+          <PlayerChip noPositions id={event.batterId} /> fouls off the{' '}
           {event.inStrikeZone ? 'strike' : 'ball'} from{' '}
-          <PlayerName bold id={event.pitcherId} /> ({event.balls}-
+          <PlayerChip noPositions id={event.pitcherId} /> ({event.balls}-
           {event.strikes}).
         </>
       );

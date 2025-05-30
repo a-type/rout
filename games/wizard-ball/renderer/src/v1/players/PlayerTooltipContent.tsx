@@ -24,7 +24,7 @@ export function PlayerTooltipContent({ id }: { id: string }) {
       <span className="text-sm text-gray-400 capitalize mb-2">
         {player.species} {player.class}
       </span>
-      <span>{player.perkIds.map((p) => perks[p].name).join(', ')}</span>
+      <span>{player.perkIds.map((p) => perks[p]?.name).join(', ')}</span>
       <span>
         {player.itemIds.map((i) => (
           <ItemChip key={i} id={i} />

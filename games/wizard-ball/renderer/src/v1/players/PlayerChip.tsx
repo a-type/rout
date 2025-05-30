@@ -7,10 +7,12 @@ export function PlayerChip({
   id,
   noBackground,
   noTeamIcon,
+  noPositions,
 }: {
   id: string;
   noBackground?: boolean;
   noTeamIcon?: boolean;
+  noPositions?: boolean;
 }) {
   const { finalState } = hooks.useGameSuite();
   const player = finalState.league.playerLookup[id];
@@ -25,13 +27,14 @@ export function PlayerChip({
       <span
         className={clsx(
           noBackground ? '' : 'p-1 bg-gray-800 hover:bg-gray-700',
-          'flex flex-row items-center gap-1 rounded cursor-pointer ',
+          'inline-flex flex-row items-center gap-1 rounded cursor-pointer ',
         )}
       >
         {player.teamId && !noTeamIcon && (
           <TeamIcon id={player.teamId} size={16} />
         )}{' '}
-        {player.name} ({player.positions.join('/').toUpperCase()})
+        {player.name}{' '}
+        {noPositions ? '' : <>({player.positions.join('/').toUpperCase()})</>}
       </span>
     </Tooltip>
   );

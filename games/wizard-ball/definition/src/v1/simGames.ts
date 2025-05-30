@@ -77,17 +77,10 @@ export function setupGame(
 ) {
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
-  let awayPitcher: string = '',
-    homePitcher: string = '';
   for (const teamId of [game.homeTeamId, game.awayTeamId]) {
     const team = league.teamLookup[teamId];
     const pitcher =
       team.pitchingOrder[team.nextPitcherIndex % team.pitchingOrder.length];
-    if (teamId === game.awayTeamId) {
-      awayPitcher = pitcher;
-    } else {
-      homePitcher = pitcher;
-    }
     team.nextPitcherIndex =
       (team.nextPitcherIndex + 1) % team.pitchingOrder.length;
     gameState.teamData[teamId] = {
@@ -415,7 +408,7 @@ function getModifiedAttributes(
       charisma: -reduction,
     },
   );
-  const clutchMod = clutchFactor * scaleAttribute(baseStats.charisma, 5);
+  const clutchMod = clutchFactor * scaleAttribute(baseStats.charisma, 10);
   return sumObjects(baseStats, {
     strength: clutchMod,
     agility: clutchMod,
@@ -552,7 +545,7 @@ function determineSwing(
     ? pitchData.swingStrikeFactor
     : pitchData.swingBallFactor;
   const plateDisciplineFactor =
-    scaleAttributePercent(batterComposite.plateDiscipline, 2) **
+    scaleAttributePercent(batterComposite.plateDiscipline, 3) **
     (isStrike ? 1 : -1);
   const swing = randomByWeight<true | false>(random, [
     {
@@ -577,7 +570,7 @@ function determineContact(
   );
   let baseContactChance = isStrike ? 0.8 : 0.6;
 
-  const batterContactFactor = scaleAttributePercent(batterComposite.contact, 2);
+  const batterContactFactor = scaleAttributePercent(batterComposite.contact, 4);
   const pitchContactFactor = isStrike
     ? pitchData.contactStrikeFactor
     : pitchData.contactBallFactor;
@@ -700,7 +693,7 @@ function determinePitchType(
     baseStrikeChanceTable[game.strikes]?.[game.balls] ?? 0.6;
   const strikeFactor =
     basePitchData.strikeFactor *
-    scaleAttributePercent(pitcherComposite.accuracy, 1.2);
+    scaleAttributePercent(pitcherComposite.accuracy, 3);
 
   // Determine whether the pitch is a ball or strike
   const isStrike = randomByWeight<true | false>(random, [
@@ -730,13 +723,11 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  pitchData.swingStrikeFactor *=
-    1 / scaleAttributePercent(modifiedVelocity, 1.5);
-  pitchData.swingBallFactor *= scaleAttributePercent(modifiedMovement, 1.5);
+  pitchData.swingStrikeFactor *= 1 / scaleAttributePercent(modifiedVelocity, 2);
+  pitchData.swingBallFactor *= scaleAttributePercent(modifiedMovement, 2);
   pitchData.contactStrikeFactor *=
-    1 / scaleAttributePercent(modifiedVelocity, 1.5);
-  pitchData.contactBallFactor *=
-    1 / scaleAttributePercent(modifiedMovement, 1.5);
+    1 / scaleAttributePercent(modifiedVelocity, 2);
+  pitchData.contactBallFactor *= 1 / scaleAttributePercent(modifiedMovement, 2);
   Object.keys(pitchData.hitModiferTable.power).forEach((key) => {
     if (!key || !pitchData.hitModiferTable.power[key as HitPower]) {
       return;
@@ -758,10 +749,10 @@ function determinePitchType(
   );
   pitchData.hitModiferTable.type.grounder =
     (pitchData.hitModiferTable.type.grounder ?? 1) *
-    scaleAttributePercent(pitcherComposite.hitAngle, 1.5);
+    scaleAttributePercent(pitcherComposite.hitAngle, 2);
   pitchData.hitModiferTable.power.strong =
     (pitchData.hitModiferTable.power.strong ?? 1) /
-    scaleAttributePercent(pitcherComposite.hitPower, 1.5);
+    scaleAttributePercent(pitcherComposite.hitPower, 2);
   // pitchData.hitModiferTable.type.lineDrive =
   //   (pitchData.hitModiferTable.type.lineDrive ?? 1) /
   //   scaleAttributePercent(pitcherComposite.extraBases, 1.5);
@@ -877,16 +868,16 @@ function determineHitResult(
     isStrike
       ? {
           grounder: 4,
-          fly: 3 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+          fly: 3 * scaleAttributePercent(batterCompositeRatings.hitAngle, 2),
           lineDrive:
-            2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+            2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 2),
           popUp: 1,
         }
       : {
           grounder: 6,
-          fly: 2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+          fly: 2 * scaleAttributePercent(batterCompositeRatings.hitAngle, 2),
           lineDrive:
-            1 * scaleAttributePercent(batterCompositeRatings.hitAngle, 1.5),
+            1 * scaleAttributePercent(batterCompositeRatings.hitAngle, 2),
           popUp: 2,
         },
     pitchData.hitModiferTable.type,
@@ -903,7 +894,7 @@ function determineHitResult(
   const defenderComposite = getBattingCompositeRatings(
     getModifiedAttributes(defendingPlayerId, league, gameState),
   );
-  const defenseModifer = scaleAttributePercent(defenderComposite.fielding, 2);
+  const defenseModifer = scaleAttributePercent(defenderComposite.fielding, 3);
   let baseHitTable: Partial<HitTable> = {};
   let outChance = 0.5;
   if (hitType === 'grounder') {
@@ -920,11 +911,11 @@ function determineHitResult(
     } else if (hitPower === 'strong') {
       baseHitTable = {
         double:
-          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+          0.3 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
         hit: 3,
         out: 5,
         triple:
-          0.1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+          0.1 * scaleAttributePercent(batterCompositeRatings.extraBases, 4),
       };
     }
   } else if (hitType === 'fly') {
@@ -936,21 +927,21 @@ function determineHitResult(
     } else if (hitPower === 'normal') {
       baseHitTable = {
         hit: 2,
-        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 4),
         out: 15,
         triple:
-          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 8),
         homeRun:
-          0.1 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
+          0.1 * scaleAttributePercent(batterCompositeRatings.homeRuns, 3),
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
         hit: 0.5,
-        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 5),
         out: 2,
         triple:
-          0.4 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
-        homeRun: 6 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
+          0.5 * scaleAttributePercent(batterCompositeRatings.extraBases, 10),
+        homeRun: 6 * scaleAttributePercent(batterCompositeRatings.homeRuns, 3),
       };
     }
   } else if (hitType === 'lineDrive') {
@@ -964,18 +955,18 @@ function determineHitResult(
         hit: 4,
         out: 1,
         double:
-          0.5 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+          0.5 * scaleAttributePercent(batterCompositeRatings.extraBases, 3),
         triple:
-          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+          0.3 * scaleAttributePercent(batterCompositeRatings.extraBases, 6),
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
         hit: 8,
-        double: 2 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        double: 2 * scaleAttributePercent(batterCompositeRatings.extraBases, 4),
         out: 1,
-        triple: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 2),
+        triple: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 8),
         homeRun:
-          0.5 * scaleAttributePercent(batterCompositeRatings.homeRuns, 2),
+          0.5 * scaleAttributePercent(batterCompositeRatings.homeRuns, 5),
       };
     }
   } else if (hitType === 'popUp') {
@@ -1034,11 +1025,12 @@ function attemptSteal(
     getModifiedAttributes(playerId, league, gameState),
   );
   const agilityFactor = scaleAttributePercent(
-    batterComposite.stealing + (10 - defenderComposite.fielding) / 4,
-    2,
+    batterComposite.stealing + (10 - defenderComposite.fielding) / 5,
+    1 / 0.8,
   );
-  const stealSuccessChance =
-    (fromBase === 2 ? 0.8 : 0.75) ** (1 / agilityFactor);
+  const baseFactor = fromBase === 2 ? 0.8 : 0.7;
+  const stealSuccessChance = baseFactor * agilityFactor;
+  // (fromBase === 2 ? 0.8 : 0.75) ** (1 / agilityFactor);
   if (random.float(0, 1) < stealSuccessChance) {
     gameState.bases[fromBase] = null;
     if (fromBase === 3) {
@@ -1081,10 +1073,10 @@ function determineSteal(
       getModifiedAttributes(playerOnFirst, league, gameState),
     );
     const agilityFactor = scaleAttributePercent(
-      runnerComposite.stealing + (10 - catcherComposite.fielding) / 4,
+      runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
       20,
     );
-    const stealAttemptChance = 0.01 * agilityFactor;
+    const stealAttemptChance = 0.04 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 1, league);
     }
@@ -1094,10 +1086,10 @@ function determineSteal(
       getModifiedAttributes(playerOnSecond, league, gameState),
     );
     const agilityFactor = scaleAttributePercent(
-      runnerComposite.stealing + (10 - catcherComposite.fielding) / 4,
+      runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
       20,
     );
-    const stealAttemptChance = 0.004 * agilityFactor;
+    const stealAttemptChance = 0.01 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
       gameState = attemptSteal(random, gameState, 2, league);
     }
@@ -1344,14 +1336,14 @@ export function simulatePitch(
   pitcher.stamina = Math.max(
     -0.25,
     pitcher.stamina +
-      scaleAttributePercent(pitcherComposite.durability, 1.005) -
-      1.015,
+      scaleAttributePercent(pitcherComposite.durability, 1.004) -
+      1.008,
   );
   batter.stamina = Math.max(
     -0.25,
     batter.stamina +
-      scaleAttributePercent(batterComposite.durability, 1.005) -
-      1.015,
+      scaleAttributePercent(batterComposite.durability, 1.007) -
+      1.014,
   );
 
   if (nextBatter) {
