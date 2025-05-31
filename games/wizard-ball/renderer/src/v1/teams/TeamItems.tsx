@@ -2,7 +2,9 @@ import {
   DndContext,
   DragEndEvent,
   KeyboardSensor,
+  MouseSensor,
   PointerSensor,
+  TouchSensor,
   useDroppable,
   useSensor,
   useSensors,
@@ -71,10 +73,7 @@ export function TeamItems({ id }: { id: string }) {
   const teamBench = useBench(id);
   const teamRotation = usePitchingRotation(id);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor),
-  );
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   const assignedItems = Object.values(itemAssignments).flat();
   const unassignedItems = teamItems.filter(

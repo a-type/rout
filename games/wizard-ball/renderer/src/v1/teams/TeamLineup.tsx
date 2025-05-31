@@ -13,7 +13,9 @@ import {
   DragOverlay,
   DragStartEvent,
   KeyboardSensor,
+  MouseSensor,
   PointerSensor,
+  TouchSensor,
   UniqueIdentifier,
   useSensor,
   useSensors,
@@ -88,12 +90,7 @@ export function TeamLineup({ id }: { id: string }) {
     }));
   }, [items]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
@@ -137,19 +134,23 @@ export function TeamLineup({ id }: { id: string }) {
             return (
               <div key={playerId} className="flex items-center gap-2">
                 <span>{idx + 1}</span>
-                <Tooltip
-                  className="bg-gray-700 text-gray-100"
-                  content={<PlayerTooltipContent id={player.id} />}
+
+                <SortableItem
+                  disabled={currentUserId !== team.ownerId}
+                  id={position}
+                  className="bg-gray-700 border p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-500"
                 >
-                  <SortableItem
-                    disabled={currentUserId !== team.ownerId}
-                    id={position}
-                    className="bg-gray-700 border p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                  <Tooltip
+                    className="bg-gray-700 text-gray-100"
+                    content={<PlayerTooltipContent id={player.id} />}
                   >
-                    <span className="uppercase">{position}</span>
-                    <span>{player.name}</span>
-                  </SortableItem>
-                </Tooltip>
+                    <div className="flex items-center gap-1">
+                      <span className="uppercase">{position}</span>
+                      <span>{player.name}</span>
+                    </div>
+                  </Tooltip>
+                </SortableItem>
+
                 <PlayerAttributesSummary kind="overall" id={playerId} />
                 <PlayerAttributesSummary kind="stamina" id={playerId} />
               </div>

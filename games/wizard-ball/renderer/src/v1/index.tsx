@@ -25,7 +25,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
   const [searchParams, setSearchParams] = useSearchParams();
   return (
     <Box className="flex flex-col gap-2">
-      <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center">
+      <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
         <Button
           onClick={() => {
             gameSuite.submitTurn(gameSuite.localTurnData || {});
