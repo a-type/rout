@@ -16,6 +16,7 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
+import { randomTable } from './utils';
 
 export function generateLeague(
   random: GameRandom,
@@ -360,13 +361,22 @@ function generatePlayerName(random: GameRandom, race: SpeciesType): string {
 }
 
 function generateItem(random: GameRandom): {
-  power: number;
   itemDef: string;
   instanceId: string;
 } {
+  const rarity = randomTable(random, {
+    common: 16,
+    uncommon: 8,
+    rare: 4,
+    epic: 2,
+    legendary: 1,
+  });
   return {
-    power: random.int(1, 3),
-    itemDef: random.item(Object.keys(itemData)),
+    itemDef: random.item(
+      Object.entries(itemData)
+        .filter(([, item]) => item.rarity === rarity)
+        .map(([key]) => key),
+    ),
     instanceId: random.id(),
   };
 }

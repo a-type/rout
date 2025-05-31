@@ -62,7 +62,6 @@ export function PlayerPage({ id }: { id: string }) {
     id,
     player.positions.includes('p') ? 'pitching' : 'batting',
   );
-  console.log('Player composites', playerComposites);
 
   return (
     <div className="flex flex-col gap-4">
@@ -197,7 +196,7 @@ export function PlayerPage({ id }: { id: string }) {
                     key={stat.value}
                     className="px-3 py-2 border-t text-center"
                   >
-                    {totalPlayerStats[id]?.[stat.value]}
+                    {totalPlayerStats[id]?.[stat.value] ?? 0}
                   </td>
                 ))}
               </tr>
@@ -271,7 +270,7 @@ export function PlayerPage({ id }: { id: string }) {
                         key={stat.value}
                         className="px-3 py-2 border-t text-center"
                       >
-                        {totalPlayerStats[id][stat.value]}
+                        {totalPlayerStats[id]?.[stat.value] ?? 0}
                       </td>
                     ))}
                   </tr>

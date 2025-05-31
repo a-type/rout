@@ -132,6 +132,15 @@ export const gameDefinition: GameDefinition<
       team.battingOrder = turn.data.nextBattingOrder ?? team.battingOrder;
       team.positionChart = turn.data.nextPositionChart ?? team.positionChart;
       team.pitchingOrder = turn.data.nextPitchingOrder ?? team.pitchingOrder;
+      turn.data.nextItemAssignments &&
+        Object.entries(turn.data.nextItemAssignments).forEach(
+          ([playerId, itemIds]) => {
+            const player = globalState.league.playerLookup[playerId];
+            if (player) {
+              player.itemIds = itemIds;
+            }
+          },
+        );
     });
 
     const results = simulateRound(random, globalState.league, currentRound);

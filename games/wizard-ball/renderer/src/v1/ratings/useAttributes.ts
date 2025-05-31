@@ -14,7 +14,7 @@ function getActivePerks(player: Player, league: League) {
   return [
     ...player.itemIds
       .map((iid) => league.itemLookup[iid])
-      .map((item) => itemData[item.itemDef].effect({ power: item.power })),
+      .map((item) => itemData[item.itemDef].effect()),
     ...player.perkIds.map((pid) => perks[pid].effect()),
   ];
 }

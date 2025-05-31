@@ -19,6 +19,7 @@ import type {
 } from './gameTypes';
 import {
   multiplyObjects,
+  randomTable,
   scaleAttribute,
   scaleAttributePercent,
   sumObjects,
@@ -162,23 +163,6 @@ export type PitchOutcome =
   | 'triple'
   | 'homeRun'
   | 'foul';
-
-function randomTable<T extends string>(
-  random: GameRandom,
-  table: Record<T, number>,
-): T {
-  const entries = Object.entries(table) as [T, number][];
-  const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
-  const randomValue = random.int(0, totalWeight - 1);
-  let cumulativeWeight = 0;
-  for (const [value, weight] of entries) {
-    cumulativeWeight += weight;
-    if (randomValue < cumulativeWeight) {
-      return value;
-    }
-  }
-  return entries[entries.length - 1][0]; // Fallback
-}
 
 function randomByWeight<T>(
   random: GameRandom,

@@ -1,17 +1,11 @@
 import {
   BattingCompositeRatings,
   BattingCompositeType,
-  getBattingCompositeRatings,
   getPitchingCompositeRatings,
-  itemData,
-  perks,
   PitchingCompositeRatings,
-  Player,
 } from '@long-game/game-wizard-ball-definition';
 import { roundFloat } from '../utils';
 import { Tooltip } from '@a-type/ui';
-import { hooks } from '../gameClient';
-import { sumObjects } from '../../../../definition/src/v1/utils';
 import { Bar } from './Bar';
 
 const battingRatingList: Array<{

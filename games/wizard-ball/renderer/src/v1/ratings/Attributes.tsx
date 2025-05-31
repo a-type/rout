@@ -1,12 +1,6 @@
-import {
-  itemData,
-  perks,
-  Player,
-} from '@long-game/game-wizard-ball-definition';
+import { Player } from '@long-game/game-wizard-ball-definition';
 import { Fragment } from 'react/jsx-runtime';
 import { roundFloat } from '../utils';
-import { hooks } from '../gameClient';
-import { sumObjects } from '../../../../definition/src/v1/utils';
 import { Bar } from './Bar';
 
 const attributeList: Array<{

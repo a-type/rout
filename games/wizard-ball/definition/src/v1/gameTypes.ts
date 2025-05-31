@@ -105,7 +105,6 @@ export type League = {
   itemLookup: Record<
     string,
     {
-      power: number;
       itemDef: string;
       teamId: TeamId | null;
     }

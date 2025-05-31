@@ -155,7 +155,11 @@ export function TeamItems({ id }: { id: string }) {
           }
           const playerId = player.id;
           return (
-            <DroppablePlayerArea key={playerId} id={playerId}>
+            <DroppablePlayerArea
+              key={playerId}
+              id={playerId}
+              className="items-center"
+            >
               <span className="uppercase">{position}</span>
               <PlayerChip noBackground noPositions noTeamIcon id={playerId} />
               <div className="flex flex-wrap gap-2">

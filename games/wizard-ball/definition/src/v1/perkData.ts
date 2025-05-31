@@ -42,7 +42,7 @@ export type Perk = {
     isPitcher: boolean;
     isRunner: boolean;
   }) => boolean;
-  effect: (props?: { power?: number }) => PerkEffect;
+  effect: () => PerkEffect;
 };
 
 export const perks: Record<string, Perk> = {
