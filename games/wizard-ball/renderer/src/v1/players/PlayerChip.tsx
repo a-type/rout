@@ -2,6 +2,7 @@ import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
 import { TeamIcon } from '../teams/TeamIcon';
 import { PlayerTooltipContent } from './PlayerTooltipContent';
+import { useSearchParams } from '@verdant-web/react-router';
 
 export function PlayerChip({
   id,
@@ -14,6 +15,7 @@ export function PlayerChip({
   noTeamIcon?: boolean;
   noPositions?: boolean;
 }) {
+  const [, setSearchParams] = useSearchParams();
   const { finalState } = hooks.useGameSuite();
   const player = finalState.league.playerLookup[id];
   if (!player) {
@@ -29,6 +31,14 @@ export function PlayerChip({
           noBackground ? '' : 'p-1 bg-gray-800 hover:bg-gray-700',
           'inline-flex flex-row items-center gap-1 rounded cursor-pointer ',
         )}
+        onClick={() => {
+          setSearchParams((params) => {
+            params.delete('teamId');
+            params.delete('gameId');
+            params.set('playerId', id);
+            return params;
+          });
+        }}
       >
         {player.teamId && !noTeamIcon && (
           <TeamIcon id={player.teamId} size={16} />

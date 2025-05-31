@@ -11,6 +11,10 @@ import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { CompositeRatings } from '../ratings/CompositeRatings';
 import { ItemChip } from '../items/ItemChip';
 import { PerkChip } from '../perks/PerkChip';
+import {
+  usePlayerAttributes,
+  usePlayerComposite,
+} from '../ratings/useAttributes';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -24,7 +28,6 @@ export function PlayerPage({ id }: { id: string }) {
     : null;
   const playerName = player.name;
   const playerPositions = player.positions.join(', ');
-  const overall = getPlayerOverall(player);
 
   const games = finalState.league.gameResults
     .flat()
@@ -54,6 +57,12 @@ export function PlayerPage({ id }: { id: string }) {
       playerIds: [id],
     },
   );
+  const playerAttributes = usePlayerAttributes(id);
+  const playerComposites = usePlayerComposite(
+    id,
+    player.positions.includes('p') ? 'pitching' : 'batting',
+  );
+  console.log('Player composites', playerComposites);
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,20 +110,27 @@ export function PlayerPage({ id }: { id: string }) {
           <div className="col-span-1">
             <h2>Items</h2>
             <div className="flex flex-col gap-2 items-start">
-              {player.itemIds.map((itemId) => (
-                <ItemChip key={itemId} id={itemId} />
-              ))}
+              {player.itemIds.length > 0 ? (
+                player.itemIds.map((itemId) => (
+                  <ItemChip key={itemId} id={itemId} />
+                ))
+              ) : (
+                <span className="text-gray-400">No items equipped</span>
+              )}
             </div>
           </div>
         </div>
       </div>
       <Attributes
-        attributes={{ ...player.attributes, overall }}
+        id={player.id}
+        attributes={playerAttributes.baseAttributes}
+        attributesModified={playerAttributes.attributeMod}
         stamina={player.stamina}
       />
       <CompositeRatings
         kind={player.positions.includes('p') ? 'pitching' : 'batting'}
-        attributes={player.attributes}
+        compositeRatings={playerComposites.base}
+        compositeMod={playerComposites.adjusted}
       />
       <div>
         <h2 className="text-xl font-semibold mb-2">Batting Stats</h2>

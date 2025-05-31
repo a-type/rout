@@ -4,7 +4,7 @@ import { gameDefinition as v1 } from './v1/gameDefinition';
 export { speciesIcons } from './v1/speciesData';
 export { perks } from './v1/perkData';
 export * from './v1/attributes';
-export { getInningInfo } from './v1/utils';
+export { getInningInfo, sumObjects, sum } from './v1/utils';
 export { itemData } from './v1/itemData';
 
 export default {

@@ -1,11 +1,18 @@
 import {
+  BattingCompositeRatings,
   BattingCompositeType,
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
+  itemData,
+  perks,
+  PitchingCompositeRatings,
   Player,
 } from '@long-game/game-wizard-ball-definition';
 import { roundFloat } from '../utils';
 import { Tooltip } from '@a-type/ui';
+import { hooks } from '../gameClient';
+import { sumObjects } from '../../../../definition/src/v1/utils';
+import { Bar } from './Bar';
 
 const battingRatingList: Array<{
   value: BattingCompositeType;
@@ -144,45 +151,51 @@ const pitchingRatingList: Array<{
 ];
 
 export function CompositeRatings({
-  attributes,
+  id,
+  compositeRatings,
+  compositeMod,
   kind,
 }: {
-  attributes: Player['attributes'];
+  id?: string;
+  compositeRatings: PitchingCompositeRatings | BattingCompositeRatings;
+  compositeMod?: PitchingCompositeRatings | BattingCompositeRatings;
   kind: 'batting' | 'pitching';
 }) {
-  const compositeRatings =
-    kind === 'batting'
-      ? getBattingCompositeRatings(attributes)
-      : getPitchingCompositeRatings(attributes);
   return (
     <div className="flex flex-col gap-2">
       <h2 className="mb-1">Composite ratings</h2>
       <div className="grid grid-cols-12 gap-x-2 gap-y-1 items-center">
         {(kind === 'batting' ? battingRatingList : pitchingRatingList).map(
-          ({ value, label, color, tooltip }) => (
-            <Tooltip key={value} content={tooltip}>
-              <div className="col-span-6 grid grid-cols-12 p-1">
-                <span className="font-semibold col-span-3">{label}:</span>
-                <span className="col-span-1 text-right">
-                  {/*  @ts-expect-error */}
-                  {roundFloat(compositeRatings[value], 1)}
-                </span>
-                <div className="col-span-8 flex items-center ml-4">
-                  <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
-                    <div
-                      className="h-full"
-                      style={{
-                        backgroundColor: color,
-                        // @ts-expect-error
-                        width: `${(compositeRatings[value] / 20) * 100}%`,
-                        transition: 'width 0.3s',
-                      }}
-                    />
+          ({ value, label, color, tooltip }) => {
+            /*  @ts-expect-error */
+            const baseValue = compositeRatings[value] || 0;
+            /*  @ts-expect-error */
+            const modValue = baseValue + (compositeMod?.[value] ?? 0);
+            const minValue = Math.min(baseValue, modValue);
+            const maxValue = Math.max(baseValue, modValue);
+            const increase = maxValue > baseValue;
+            return (
+              <Tooltip key={value} content={tooltip}>
+                <div className="col-span-6 grid grid-cols-12 p-1">
+                  <span className="font-semibold col-span-3">{label}:</span>
+                  <span className="col-span-1 text-right">
+                    {roundFloat(modValue, 1)}
+                  </span>
+                  <div className="col-span-8 flex items-center ml-4">
+                    <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+                      <Bar
+                        minValue={minValue}
+                        maxValue={maxValue}
+                        color={color}
+                        increase={increase}
+                        range={20}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Tooltip>
-          ),
+              </Tooltip>
+            );
+          },
         )}
       </div>
     </div>
