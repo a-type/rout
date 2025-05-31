@@ -7,6 +7,7 @@ import { TeamName } from '../teams/TeamName';
 import { TeamIcon } from '../teams/TeamIcon';
 import { Attributes } from '../ratings/Attributes';
 import { ItemChip } from '../items/ItemChip';
+import { PerkChip } from '../perks/PerkChip';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -24,12 +25,15 @@ export function PlayerTooltipContent({ id }: { id: string }) {
       <span className="text-sm text-gray-400 capitalize mb-2">
         {player.species} {player.class}
       </span>
-      <span>{player.perkIds.map((p) => perks[p]?.name).join(', ')}</span>
-      <span>
+      <span className="flex flex-row items-center gap-2 mb-2">
+        {player.perkIds.map((p, idx) => (
+          <PerkChip id={p} key={idx} />
+        ))}
         {player.itemIds.map((i) => (
           <ItemChip key={i} id={i} />
         ))}
       </span>
+      <span></span>
       {team && (
         <div className="flex flex-row items-center gap-2 mb-2">
           <TeamIcon id={team} />

@@ -2,7 +2,6 @@ import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
 import { TeamIcon } from '../teams/TeamIcon';
 import { PlayerTooltipContent } from './PlayerTooltipContent';
-import { Position } from '@long-game/game-wizard-ball-definition';
 
 export function PlayerChip({
   id,

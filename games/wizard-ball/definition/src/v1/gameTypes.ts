@@ -61,6 +61,7 @@ export type PitchingCompositeRatings = {
 };
 
 export type BattingCompositeType = keyof BattingCompositeRatings;
+export type PitchingCompositeType = keyof PitchingCompositeRatings;
 
 export type Player = {
   name: string;

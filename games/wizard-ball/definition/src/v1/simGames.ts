@@ -1,7 +1,7 @@
 import { GameRandom } from '@long-game/game-definition';
 import type {
   Base,
-  GameLogEvent,
+  BattingCompositeRatings,
   GameResult,
   HitArea,
   HitPower,
@@ -10,6 +10,7 @@ import type {
   LeagueGame,
   LeagueGameState,
   LeagueRound,
+  PitchingCompositeRatings,
   Player,
   PlayerId,
   PlayerStats,
@@ -22,7 +23,7 @@ import {
   scaleAttributePercent,
   sumObjects,
 } from './utils';
-import { PitchData, ActualPitch, pitchTypes, PitchKind } from './pitchData';
+import { ActualPitch, pitchTypes, PitchKind } from './pitchData';
 import { Perk, perks } from './perkData';
 import {
   getBattingCompositeRatings,
@@ -384,6 +385,7 @@ function getModifiedAttributes(
   playerId: string,
   league: League,
   gameState: LeagueGameState,
+  activePerks: Perk[],
 ): Player['attributes'] {
   const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
@@ -393,7 +395,6 @@ function getModifiedAttributes(
   const stamina = Math.min(1, Math.max(0, player.stamina));
   const staminaFactor = (1 - stamina) * 0;
   const reduction = staminaFactor + (isPitcherBatting ? 4 : 0);
-  const activePerks = getActivePlayerPerks(playerId, league, gameState);
   const baseStats = sumObjects(
     player.attributes,
     ...(activePerks
@@ -416,6 +417,47 @@ function getModifiedAttributes(
     wisdom: clutchMod,
     intelligence: clutchMod,
   });
+}
+function getModifiedCompositeBattingRatings(
+  playerId: string,
+  league: League,
+  gameState: LeagueGameState,
+  activePerks: Perk[] = [],
+): BattingCompositeRatings {
+  const attributes = getModifiedAttributes(
+    playerId,
+    league,
+    gameState,
+    activePerks,
+  );
+  const baseCompositeRatings = getBattingCompositeRatings(attributes);
+  return sumObjects(
+    baseCompositeRatings,
+    ...(activePerks
+      .map((p) => p.effect().battingCompositeBonus)
+      .filter(Boolean) as Partial<BattingCompositeRatings>[]),
+  );
+}
+
+function getModifiedCompositePitchingRatings(
+  playerId: string,
+  league: League,
+  gameState: LeagueGameState,
+  activePerks: Perk[] = [],
+): PitchingCompositeRatings {
+  const attributes = getModifiedAttributes(
+    playerId,
+    league,
+    gameState,
+    activePerks,
+  );
+  const baseCompositeRatings = getPitchingCompositeRatings(attributes);
+  return sumObjects(
+    baseCompositeRatings,
+    ...(activePerks
+      .map((p) => p.effect().pitchingCompositeBonus)
+      .filter(Boolean) as Partial<PitchingCompositeRatings>[]),
+  );
 }
 
 function applyWalk(gameState: LeagueGameState): LeagueGameState {
@@ -515,11 +557,20 @@ function determineSwing(
   batter: Player,
   league: League,
   game: LeagueGameState,
-  pitchData: PitchData,
+  pitchData: ActualPitch,
 ): boolean {
   const baseSwingChance = isStrike ? 0.68 : 0.25;
-  const batterComposite = getBattingCompositeRatings(
-    getModifiedAttributes(batter.id, league, game),
+  const activePerks = getActivePlayerPerks(
+    batter.id,
+    league,
+    game,
+    pitchData.kind,
+  );
+  const batterComposite = getModifiedCompositeBattingRatings(
+    batter.id,
+    league,
+    game,
+    activePerks,
   );
   const count = 2 * game.strikes - game.balls;
   // const countWeight = 2 ** (batterComposite.plateDiscipline / 5) - 1;
@@ -563,10 +614,19 @@ function determineContact(
   batter: Player,
   league: League,
   gameState: LeagueGameState,
-  pitchData: PitchData,
+  pitchData: ActualPitch,
 ): boolean {
-  const batterComposite = getBattingCompositeRatings(
-    getModifiedAttributes(batter.id, league, gameState),
+  const activePerks = getActivePlayerPerks(
+    batter.id,
+    league,
+    gameState,
+    pitchData.kind,
+  );
+  const batterComposite = getModifiedCompositeBattingRatings(
+    batter.id,
+    league,
+    gameState,
+    activePerks,
   );
   let baseContactChance = isStrike ? 0.8 : 0.6;
 
@@ -610,11 +670,19 @@ function determinePitchType(
 ): ActualPitch {
   const pitchKind = random.item(Object.keys(pitchTypes) as PitchKind[]);
   const activePerks = getActivePlayerPerks(pitcher.id, league, game, pitchKind);
-  const batterComposite = getBattingCompositeRatings(
-    getModifiedAttributes(batter.id, league, game),
+  const batterComposite = getModifiedCompositeBattingRatings(
+    batter.id,
+    league,
+    game,
+    activePerks,
   );
-  const pitcherAttributes = getModifiedAttributes(pitcher.id, league, game);
-  const pitcherComposite = getPitchingCompositeRatings(pitcherAttributes);
+
+  const pitcherComposite = getModifiedCompositePitchingRatings(
+    pitcher.id,
+    league,
+    game,
+    activePerks,
+  );
 
   const randomMod = 3 * random.float(-1, 1);
   let attributeTotal = 10 + randomMod;
@@ -839,8 +907,13 @@ function determineHitResult(
       );
     }
   });
-  const batterAttributes = getModifiedAttributes(batter, league, gameState);
-  const batterCompositeRatings = getBattingCompositeRatings(batterAttributes);
+
+  const batterCompositeRatings = getModifiedCompositeBattingRatings(
+    batter,
+    league,
+    gameState,
+    activePerks,
+  );
   const hitAreaTable: Record<HitArea, number> = {
     farLeft: 1,
     left: 2,
@@ -891,8 +964,11 @@ function determineHitResult(
   if (!defendingPlayerId) {
     throw new Error(`No player found for defender position: ${defender}`);
   }
-  const defenderComposite = getBattingCompositeRatings(
-    getModifiedAttributes(defendingPlayerId, league, gameState),
+  const defenderComposite = getModifiedCompositeBattingRatings(
+    defendingPlayerId,
+    league,
+    gameState,
+    activePerks,
   );
   const defenseModifer = scaleAttributePercent(defenderComposite.fielding, 3);
   let baseHitTable: Partial<HitTable> = {};
@@ -1018,11 +1094,17 @@ function attemptSteal(
   if (!catcherId) {
     throw new Error('No catcher found for steal attempt');
   }
-  const defenderComposite = getBattingCompositeRatings(
-    getModifiedAttributes(catcherId, league, gameState),
+  const defenderComposite = getModifiedCompositeBattingRatings(
+    catcherId,
+    league,
+    gameState,
+    getActivePlayerPerks(catcherId, league, gameState),
   );
-  const batterComposite = getBattingCompositeRatings(
-    getModifiedAttributes(playerId, league, gameState),
+  const batterComposite = getModifiedCompositeBattingRatings(
+    playerId,
+    league,
+    gameState,
+    getActivePlayerPerks(playerId, league, gameState),
   );
   const agilityFactor = scaleAttributePercent(
     batterComposite.stealing + (10 - defenderComposite.fielding) / 5,
@@ -1062,15 +1144,21 @@ function determineSteal(
   if (!catcherId) {
     throw new Error('No catcher found for steal attempt');
   }
-  const catcherComposite = getBattingCompositeRatings(
-    getModifiedAttributes(catcherId, league, gameState),
+  const catcherComposite = getModifiedCompositeBattingRatings(
+    catcherId,
+    league,
+    gameState,
+    getActivePlayerPerks(catcherId, league, gameState),
   );
   const playerOnFirst = gameState.bases[1];
   const playerOnSecond = gameState.bases[2];
   const playerOnThird = gameState.bases[3];
   if (playerOnFirst !== null && playerOnSecond === null) {
-    const runnerComposite = getBattingCompositeRatings(
-      getModifiedAttributes(playerOnFirst, league, gameState),
+    const runnerComposite = getModifiedCompositeBattingRatings(
+      playerOnFirst,
+      league,
+      gameState,
+      getActivePlayerPerks(playerOnFirst, league, gameState),
     );
     const agilityFactor = scaleAttributePercent(
       runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
@@ -1082,8 +1170,11 @@ function determineSteal(
     }
   }
   if (playerOnSecond !== null && playerOnThird === null) {
-    const runnerComposite = getBattingCompositeRatings(
-      getModifiedAttributes(playerOnSecond, league, gameState),
+    const runnerComposite = getModifiedCompositeBattingRatings(
+      playerOnSecond,
+      league,
+      gameState,
+      getActivePlayerPerks(playerOnSecond, league, gameState),
     );
     const agilityFactor = scaleAttributePercent(
       runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
@@ -1327,11 +1418,17 @@ export function simulatePitch(
   }
 
   // Adjust pitching stamina
-  const pitcherComposite = getPitchingCompositeRatings(
-    getModifiedAttributes(pitcherId, league, gameState),
+  const pitcherComposite = getModifiedCompositePitchingRatings(
+    pitcherId,
+    league,
+    gameState,
+    getActivePlayerPerks(pitcherId, league, gameState, pitchData.kind),
   );
-  const batterComposite = getBattingCompositeRatings(
-    getModifiedAttributes(batter.id, league, gameState),
+  const batterComposite = getModifiedCompositeBattingRatings(
+    batter.id,
+    league,
+    gameState,
+    getActivePlayerPerks(batter.id, league, gameState, pitchData.kind),
   );
   pitcher.stamina = Math.max(
     -0.25,

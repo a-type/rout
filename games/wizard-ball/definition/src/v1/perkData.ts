@@ -1,9 +1,11 @@
 import { ClassType } from './classData';
 import {
   AttributeType,
+  BattingCompositeType,
   HitPower,
   HitType,
   LeagueGameState,
+  PitchingCompositeType,
   Position,
 } from './gameTypes';
 import { PitchKind } from './pitchData';
@@ -12,6 +14,8 @@ import { SpeciesType } from './speciesData';
 
 export type PerkEffect = {
   attributeBonus?: Partial<Record<AttributeType, number>>;
+  battingCompositeBonus?: Partial<Record<BattingCompositeType, number>>;
+  pitchingCompositeBonus?: Partial<Record<PitchingCompositeType, number>>;
   hitTableFactor?: Partial<Record<PitchOutcome, number>>;
   hitModiferTable?: Partial<{
     power: Partial<Record<HitPower, number>>;
@@ -76,8 +80,8 @@ export const perks: Record<string, Perk> = {
       classType === 'fighter',
     condition: ({ isBatter }) => isBatter,
     effect: () => ({
-      hitTableFactor: {
-        homeRun: 1.5,
+      battingCompositeBonus: {
+        homeRuns: 2,
       },
     }),
   },
@@ -130,14 +134,14 @@ export const perks: Record<string, Perk> = {
   },
   stealer: {
     name: 'Stealer',
-    description: 'Increased agility when stealing.',
+    description: 'Increased stealing ability.',
     kind: 'batting',
     requirements: ({ classType, species }) =>
       classType === 'rogue' || ['rabbit', 'fox'].includes(species),
-    condition: ({ isRunner, isMe }) => isRunner && isMe,
+    condition: ({ isMe }) => isMe,
     effect: () => ({
-      attributeBonus: {
-        agility: 4,
+      battingCompositeBonus: {
+        stealing: 4,
       },
     }),
   },
