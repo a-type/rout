@@ -33,21 +33,27 @@ export function Attributes({
   return (
     <div className="flex flex-col gap-2">
       <h2 className="mb-1">Attributes</h2>
-      <div className="flex gap-2 items-center">
-        <span className="font-semibold">Overall:</span>
-        <span>{roundFloat(overall, 1)}</span>
-        <Bar
-          minValue={Math.min(baseOverall, overall)}
-          maxValue={Math.max(baseOverall, overall)}
-          color="#F97316" // orange-500
-          increase={overall > baseOverall}
-          range={120}
-        />
+
+      <div className="grid grid-cols-6 sm:grid-cols-12  gap-x-4 gap-y-2 items-center">
+        <span className="font-semibold col-span-2">Overall:</span>
+        <span className="col-span-1 text-right">{roundFloat(overall, 1)}</span>
+        <div className="col-span-3 flex items-center">
+          <Bar
+            minValue={Math.min(baseOverall, overall)}
+            maxValue={Math.max(baseOverall, overall)}
+            color="#F97316" // orange-500
+            increase={overall > baseOverall}
+            range={120}
+          />
+        </div>
+
         {stamina || stamina === 0 ? (
           <>
-            <span className="font-semibold">Stamina:</span>
-            <span>{roundFloat(stamina * 100, 0)}%</span>
-            <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+            <span className="font-semibold col-span-2">Stamina:</span>
+            <span className="col-span-1 text-right">
+              {roundFloat(stamina * 100, 0)}%
+            </span>
+            <div className="col-span-3 w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
               <div
                 className="h-full bg-lime-500"
                 style={{
@@ -58,8 +64,7 @@ export function Attributes({
             </div>
           </>
         ) : null}
-      </div>
-      <div className="grid grid-cols-12 gap-x-4 gap-y-2 items-center">
+
         {attributeList.map(({ value, label, color }) => {
           const baseValue = attributes[value] || 0;
           const modValue = baseValue + (attributesModified?.[value] ?? 0);

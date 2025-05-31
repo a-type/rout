@@ -158,7 +158,7 @@ export function CompositeRatings({
   return (
     <div className="flex flex-col gap-2">
       <h2 className="mb-1">Composite ratings</h2>
-      <div className="grid grid-cols-12 gap-x-2 gap-y-1 items-center">
+      <div className="grid grid-cols-6 sm:grid-cols-12 gap-x-2 gap-y-1 items-center">
         {(kind === 'batting' ? battingRatingList : pitchingRatingList).map(
           ({ value, label, color, tooltip }) => {
             /*  @ts-expect-error */
