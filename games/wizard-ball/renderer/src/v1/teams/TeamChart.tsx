@@ -5,15 +5,12 @@ import {
   DragEndEvent,
   KeyboardSensor,
   PointerSensor,
-  useDraggable,
-  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useEffect, useState } from 'react';
 
-import { HTMLAttributes } from 'react';
 import {
   Position,
   PositionChart,
@@ -21,6 +18,8 @@ import {
 import { clsx, Tooltip } from '@a-type/ui';
 import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
+import { Draggable } from './Draggable';
+import { Droppable } from './Droppable';
 
 const positions = [
   'c',
@@ -32,60 +31,6 @@ const positions = [
   'cf',
   'rf',
 ] as const satisfies Position[];
-
-function Draggable({
-  children,
-  id,
-  className,
-  disabled,
-  ...props
-}: {
-  children: React.ReactNode;
-  id: string;
-  disabled?: boolean;
-} & HTMLAttributes<HTMLDivElement>) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    disabled,
-  });
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
-
-  return (
-    <div
-      className={clsx(className)}
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Droppable({
-  className,
-  id,
-  children,
-}: {
-  id: string;
-  children: React.ReactNode;
-} & HTMLAttributes<HTMLDivElement>) {
-  const { setNodeRef, isOver } = useDroppable({ id });
-
-  return (
-    <div
-      className={clsx(className, isOver ? 'bg-gray-800 rounded' : '')}
-      ref={setNodeRef}
-    >
-      {children}
-    </div>
-  );
-}
 
 export function TeamChart({ id }: { id: string }) {
   const {

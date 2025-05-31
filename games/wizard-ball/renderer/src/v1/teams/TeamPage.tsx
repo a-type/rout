@@ -12,12 +12,14 @@ import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';
 import { attributeToColor } from '../utils';
+import { TeamItems } from './TeamItems';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
   { value: 'battingOrder', label: 'Batting Order' },
   { value: 'depthChart', label: 'Depth Chart' },
   { value: 'players', label: 'Players' },
+  { value: 'items', label: 'Items' },
   { value: 'games', label: 'Games' },
 ] as const satisfies Array<{ label: string; value: string }>;
 
@@ -100,6 +102,9 @@ export function TeamPage({ id }: { id: TeamId }) {
         </Tabs.Content>
         <Tabs.Content value="depthChart">
           <TeamChart id={id} />
+        </Tabs.Content>
+        <Tabs.Content value="items">
+          <TeamItems id={id} />
         </Tabs.Content>
         <Tabs.Content value="players">
           <div>

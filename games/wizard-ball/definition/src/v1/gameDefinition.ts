@@ -15,6 +15,7 @@ export type TurnData = {
   nextBattingOrder?: Position[];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
+  nextItemAssignments?: Record<PlayerId, string[]>;
 };
 
 export const gameDefinition: GameDefinition<
@@ -84,6 +85,15 @@ export const gameDefinition: GameDefinition<
       prospectiveTurn.data.nextPositionChart ?? team.positionChart;
     team.pitchingOrder =
       prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder;
+    prospectiveTurn.data.nextItemAssignments &&
+      Object.entries(prospectiveTurn.data.nextItemAssignments).forEach(
+        ([playerId, itemIds]) => {
+          const player = playerState.league.playerLookup[playerId];
+          if (player) {
+            player.itemIds = itemIds;
+          }
+        },
+      );
     return playerState;
   },
 

@@ -30,6 +30,7 @@ import { Position } from '@long-game/game-wizard-ball-definition';
 import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
+import { useLineup } from './useLineup';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -81,9 +82,10 @@ export function TeamLineup({ id }: { id: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Position[]>(lineup);
   useEffect(() => {
-    prepareTurn({
+    prepareTurn((turn) => ({
+      ...turn,
       nextBattingOrder: items,
-    });
+    }));
   }, [items]);
 
   const sensors = useSensors(
