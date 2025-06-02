@@ -8,9 +8,10 @@ import {
   PitchingCompositeType,
   Position,
 } from './gameTypes';
-import { PitchKind } from './pitchData';
-import { PitchOutcome } from './simGames';
-import { SpeciesType } from './speciesData';
+import type { PitchKind } from './pitchData';
+import type { PitchOutcome } from './simGames';
+import type { SpeciesType } from './speciesData';
+import type { WeatherType } from './weatherData';
 
 export type PerkEffect = {
   attributeBonus?: Partial<Record<AttributeType, number>>;
@@ -41,6 +42,7 @@ export type Perk = {
     isBatter: boolean;
     isPitcher: boolean;
     isRunner: boolean;
+    weather: WeatherType;
   }) => boolean;
   effect: () => PerkEffect;
 };

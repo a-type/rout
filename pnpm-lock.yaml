@@ -614,6 +614,9 @@ importers:
       '@verdant-web/react-router':
         specifier: 'catalog:'
         version: 0.8.0(react@19.1.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       react:
         specifier: 'catalog:'
         version: 19.1.0
@@ -4561,6 +4564,9 @@ packages:
 
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+
+  dayjs@1.11.13:
+    resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
   debug@4.4.0:
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
@@ -10964,6 +10970,8 @@ snapshots:
       '@babel/runtime': 7.25.6
 
   date-fns@4.1.0: {}
+
+  dayjs@1.11.13: {}
 
   debug@4.4.0:
     dependencies:

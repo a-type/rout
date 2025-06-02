@@ -2,6 +2,7 @@ import { PrefixedId } from '@long-game/common';
 import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
 import { PitchOutcome } from './simGames';
+import { WeatherType } from './weatherData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -93,6 +94,7 @@ export type LeagueGame = {
   id: GameId;
   homeTeamId: TeamId;
   awayTeamId: TeamId;
+  weather: WeatherType;
 };
 
 export type LeagueRound = Array<LeagueGame>;
@@ -141,6 +143,7 @@ export type GameResult = {
     [teamId: string]: number;
   };
   gameLog?: GameLog;
+  weather: WeatherType;
 };
 
 export type PlayerStats = {
@@ -192,6 +195,7 @@ export type LeagueGameState = {
   outs: number;
   playerStats: Record<PlayerId, PlayerStats>;
   gameLog: GameLog;
+  weather: WeatherType;
 };
 
 export type GameLogEvent =

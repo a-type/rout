@@ -32,6 +32,9 @@ export const gameDefinition: GameDefinition<
       requireAllPlayersToPlay: false,
     }),
     development: roundFormat.sync(),
+    // development: roundFormat.periodic('minutes', 1, {
+    //   requireAllPlayersToPlay: false,
+    // }),
   }),
   // run on both client and server
 

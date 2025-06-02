@@ -17,6 +17,7 @@ import { perks } from './perkData';
 import { getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
 import { randomTable } from './utils';
+import { weather as weatherData, WeatherType } from './weatherData';
 
 export function generateLeague(
   random: GameRandom,
@@ -205,17 +206,20 @@ export function generateLeague(
       const away = teamIds[n - 1 - i];
       if (home !== 'BYE' && away !== 'BYE') {
         // Alternate home/away by round for balance
+        const weather = random.item(Object.keys(weatherData)) as WeatherType;
         if (round % 2 === 0) {
           roundGames.push({
             id: random.id(),
             homeTeamId: home,
             awayTeamId: away,
+            weather,
           });
         } else {
           roundGames.push({
             id: random.id(),
             homeTeamId: away,
             awayTeamId: home,
+            weather,
           });
         }
       }

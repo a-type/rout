@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { GameLog } from './GameLog';
 import { GameBoxScore } from './GameBoxScore';
 import { useGameResults } from '../useGameResults';
+import { WeatherChip } from '../WeatherChip';
 
 export function GamePage({ id }: { id: string }) {
   const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
@@ -35,14 +36,19 @@ export function GamePage({ id }: { id: string }) {
             </>
           )}
         </h1>
-        <Tabs.List className="mb-2">
-          <Tabs.Trigger value="boxScore" className="p-1">
-            Box Score
-          </Tabs.Trigger>
-          <Tabs.Trigger value="gameLog" className="p-1">
-            Game Log
-          </Tabs.Trigger>
-        </Tabs.List>
+        <div className="flex flex-row gap-2 items-center mb-2">
+          <Tabs.List className="mb-0">
+            <Tabs.Trigger value="boxScore" className="p-1">
+              Box Score
+            </Tabs.Trigger>
+            <Tabs.Trigger value="gameLog" className="p-1">
+              Game Log
+            </Tabs.Trigger>
+          </Tabs.List>
+          <div className="ml-auto my-auto">
+            <WeatherChip id={game.weather} />
+          </div>
+        </div>
         {tab === 'boxScore' && <GameBoxScore id={id} />}
         {tab === 'gameLog' && <GameLog id={id} />}
       </div>

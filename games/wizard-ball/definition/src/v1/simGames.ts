@@ -25,12 +25,13 @@ import {
   sumObjects,
 } from './utils';
 import { ActualPitch, pitchTypes, PitchKind } from './pitchData';
-import { Perk, perks } from './perkData';
+import { Perk, PerkEffect, perks } from './perkData';
 import {
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
 } from './attributes';
 import Logger from './logger';
+import { weather as weatherData } from './weatherData';
 
 const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -77,6 +78,7 @@ export function setupGame(
   game: LeagueGame,
   gameState: LeagueGameState = initialGameState(),
 ) {
+  gameState.weather = game.weather;
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
   for (const teamId of [game.homeTeamId, game.awayTeamId]) {
@@ -151,6 +153,7 @@ export function simulateGame(
     loser,
     score,
     gameLog: gameState.gameLog,
+    weather: gameState.weather,
   };
 }
 
@@ -198,6 +201,7 @@ export function initialGameState(): LeagueGameState {
     teamData: {},
     playerStats: {},
     gameLog: [],
+    weather: 'clear',
   };
 }
 
@@ -337,39 +341,46 @@ function getActivePlayerPerks(
   league: League,
   gameState: LeagueGameState,
   pitchKind?: PitchKind,
-): Perk[] {
+): PerkEffect[] {
   const { battingTeam, pitchingTeam } = gameState;
+  const weatherId = gameState.weather;
+  const weatherInfo = weatherData[weatherId];
   const players = [
     ...gameState.teamData[battingTeam].battingOrder,
     ...gameState.teamData[pitchingTeam].battingOrder,
   ].map((pid) => league.playerLookup[pid]);
-  return players.flatMap((player) =>
-    player.perkIds
-      .map((id) => perks[id as keyof typeof perks])
-      .filter(Boolean)
-      .filter(
-        (p: Perk) =>
-          !p.condition ||
-          p.condition({
-            pitchKind,
-            gameState,
-            isMe: player.id === playerId,
-            isBatter: player.id === getCurrentBatter(gameState),
-            isPitcher: player.id === getCurrentPitcher(gameState),
-            isRunner:
-              gameState.bases[1] === player.id ||
-              gameState.bases[2] === player.id ||
-              gameState.bases[3] === player.id,
-          }),
-      ),
-  );
+  return [
+    weatherInfo.effect(),
+    ...players.flatMap((player) =>
+      player.perkIds
+        .map((id) => perks[id as keyof typeof perks])
+        .filter(Boolean)
+        .filter(
+          (p: Perk) =>
+            !p.condition ||
+            p.condition({
+              pitchKind,
+              gameState,
+              weather: weatherId,
+              isMe: player.id === playerId,
+              isBatter: player.id === getCurrentBatter(gameState),
+              isPitcher: player.id === getCurrentPitcher(gameState),
+              isRunner:
+                gameState.bases[1] === player.id ||
+                gameState.bases[2] === player.id ||
+                gameState.bases[3] === player.id,
+            }),
+        )
+        .map((p) => p.effect()),
+    ),
+  ];
 }
 
 function getModifiedAttributes(
   playerId: string,
   league: League,
   gameState: LeagueGameState,
-  activePerks: Perk[],
+  activePerks: PerkEffect[],
 ): Player['attributes'] {
   const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
@@ -381,9 +392,9 @@ function getModifiedAttributes(
   const reduction = staminaFactor + (isPitcherBatting ? 4 : 0);
   const baseStats = sumObjects(
     player.attributes,
-    ...(activePerks
-      .map((p) => p.effect().attributeBonus)
-      .filter(Boolean) as Partial<Player['attributes']>[]),
+    ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
+      Player['attributes']
+    >[]),
     {
       strength: -reduction,
       agility: -reduction,
@@ -406,7 +417,7 @@ function getModifiedCompositeBattingRatings(
   playerId: string,
   league: League,
   gameState: LeagueGameState,
-  activePerks: Perk[] = [],
+  activePerks: PerkEffect[] = [],
 ): BattingCompositeRatings {
   const attributes = getModifiedAttributes(
     playerId,
@@ -418,7 +429,7 @@ function getModifiedCompositeBattingRatings(
   return sumObjects(
     baseCompositeRatings,
     ...(activePerks
-      .map((p) => p.effect().battingCompositeBonus)
+      .map((p) => p.battingCompositeBonus)
       .filter(Boolean) as Partial<BattingCompositeRatings>[]),
   );
 }
@@ -427,7 +438,7 @@ function getModifiedCompositePitchingRatings(
   playerId: string,
   league: League,
   gameState: LeagueGameState,
-  activePerks: Perk[] = [],
+  activePerks: PerkEffect[] = [],
 ): PitchingCompositeRatings {
   const attributes = getModifiedAttributes(
     playerId,
@@ -439,7 +450,7 @@ function getModifiedCompositePitchingRatings(
   return sumObjects(
     baseCompositeRatings,
     ...(activePerks
-      .map((p) => p.effect().pitchingCompositeBonus)
+      .map((p) => p.pitchingCompositeBonus)
       .filter(Boolean) as Partial<PitchingCompositeRatings>[]),
   );
 }
@@ -694,7 +705,7 @@ function determinePitchType(
   //     throw new Error(`Unknown pitch kind: ${pitchKind}`);
   // }
   activePerks.forEach((perk) => {
-    const qb = perk.effect().qualityBonus;
+    const qb = perk.qualityBonus;
     if (qb) {
       attributeTotal += qb;
     }
@@ -877,7 +888,7 @@ function determineHitResult(
     pitchData.kind,
   );
   activePerks.forEach((perk) => {
-    const h = perk.effect().hitModiferTable;
+    const h = perk.hitModiferTable;
     if (h?.power)
       pitchData.hitModiferTable.power = multiplyObjects(
         pitchData.hitModiferTable.power,
@@ -1047,7 +1058,7 @@ function determineHitResult(
   };
   hitTable = multiplyHitTables(hitTable, { out: defenseModifer });
   for (const perk of activePerks) {
-    const h = perk.effect().hitTableFactor;
+    const h = perk.hitTableFactor;
     if (h) {
       hitTable = multiplyHitTables(hitTable, h);
     }
