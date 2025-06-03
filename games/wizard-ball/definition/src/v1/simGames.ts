@@ -18,7 +18,6 @@ import type {
   RoundResult,
 } from './gameTypes';
 import {
-  getInningInfo,
   multiplyObjects,
   randomTable,
   scaleAttribute,
@@ -769,7 +768,7 @@ function determinePitchType(
     baseStrikeChanceTable[game.strikes]?.[game.balls] ?? 0.6;
   const strikeFactor =
     basePitchData.strikeFactor *
-    scaleAttributePercent(pitcherComposite.accuracy, 3);
+    scaleAttributePercent(pitcherComposite.accuracy, 4);
 
   // Determine whether the pitch is a ball or strike
   const isStrike = randomByWeight<true | false>(random, [

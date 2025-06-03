@@ -205,25 +205,27 @@ export function generateLeague(
   for (let round = 0; round < roundCount; round++) {
     const roundGames: LeagueRound = [];
     for (let i = 0; i < n / 2; i++) {
-      const home = teamIds[i];
-      const away = teamIds[n - 1 - i];
-      if (home !== 'BYE' && away !== 'BYE') {
+      const team1 = teamIds[i];
+      const team2 = teamIds[n - 1 - i];
+      if (team1 !== 'BYE' && team2 !== 'BYE') {
         // Alternate home/away by round for balance
         const weather = random.item(Object.keys(weatherData)) as WeatherType;
-        const ballpark = league.teamLookup[home].ballpark;
+
         if (round % 2 === 0) {
+          const ballpark = league.teamLookup[team1].ballpark;
           roundGames.push({
             id: random.id(),
-            homeTeamId: home,
-            awayTeamId: away,
+            homeTeamId: team1,
+            awayTeamId: team2,
             weather,
             ballpark,
           });
         } else {
+          const ballpark = league.teamLookup[team2].ballpark;
           roundGames.push({
             id: random.id(),
-            homeTeamId: away,
-            awayTeamId: home,
+            homeTeamId: team2,
+            awayTeamId: team1,
             weather,
             ballpark,
           });
