@@ -2,10 +2,8 @@ import { itemData } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
 
-export function ItemChip({ id }: { id: string }) {
-  const { finalState } = hooks.useGameSuite();
-  const item = finalState.league.itemLookup[id];
-  const itemDef = itemData[item.itemDef];
+export function ItemDefChip({ id }: { id: string }) {
+  const itemDef = itemData[id];
   if (!itemDef) {
     return <span className="text-red-500">Unknown Item</span>;
   }
@@ -37,4 +35,10 @@ export function ItemChip({ id }: { id: string }) {
       </span>
     </Tooltip>
   );
+}
+
+export function ItemChip({ id }: { id: string }) {
+  const { finalState } = hooks.useGameSuite();
+  const item = finalState.league.itemLookup[id];
+  return <ItemDefChip id={item.itemDef} />;
 }

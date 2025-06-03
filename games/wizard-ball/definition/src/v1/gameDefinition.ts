@@ -1,17 +1,21 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { League, PlayerId, Position, PositionChart } from './gameTypes';
-import { generateLeague } from './generation';
+import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
+import { generateChoices, generateItem, generateLeague } from './generation';
 import { simulateRound } from './simGames';
+import { itemData } from './itemData';
 
 export type GlobalState = {
   league: League;
+  choices: Record<string, Choice[]>;
 };
 
 export type PlayerState = {
   league: League;
+  choices: Choice[];
 };
 
 export type TurnData = {
+  choiceId?: string;
   nextBattingOrder?: Position[];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
@@ -39,6 +43,14 @@ export const gameDefinition: GameDefinition<
   // run on both client and server
 
   validateTurn: ({ playerState, turn }) => {
+    if (turn.data.choiceId) {
+      const validChoice = playerState.choices.some(
+        (c) => c.id === turn.data.choiceId,
+      );
+      if (!validChoice) {
+        return `Invalid choice ID: ${turn.data.choiceId}`;
+      }
+    }
     // check that there are nine players, unique, and on your team
     if (!!turn.data.nextBattingOrder) {
       if (turn.data.nextBattingOrder.length !== 9) {
@@ -109,17 +121,21 @@ export const gameDefinition: GameDefinition<
     );
     return {
       league,
-      week: 0,
+      choices: generateChoices(
+        random,
+        members.map((m) => m.id),
+      ),
     };
   },
 
-  getPlayerState: ({ globalState }) => {
+  getPlayerState: ({ globalState, playerId }) => {
     return {
+      choices: globalState.choices[playerId],
       league: globalState.league,
     };
   },
 
-  applyRoundToGlobalState: ({ globalState, round, random }) => {
+  applyRoundToGlobalState: ({ globalState, round, random, members }) => {
     const currentRound =
       globalState.league.schedule[globalState.league.currentWeek];
     // update batting orders
@@ -144,6 +160,24 @@ export const gameDefinition: GameDefinition<
             }
           },
         );
+
+      if (turn.data.choiceId) {
+        const choice = globalState.choices[turn.playerId].find(
+          (c) => c.id === turn.data.choiceId,
+        );
+        if (!choice) {
+          throw new Error(
+            `Could not find choice with ID ${turn.data.choiceId} for player ${turn.playerId}`,
+          );
+        }
+        if (choice.kind === 'item') {
+          const item = generateItem(random, choice.itemDefId);
+          globalState.league.itemLookup[item.instanceId] = {
+            itemDef: choice.itemDefId,
+            teamId: team.id,
+          };
+        }
+      }
     });
 
     const results = simulateRound(random, globalState.league, currentRound);
@@ -161,8 +195,13 @@ export const gameDefinition: GameDefinition<
       gameResults: [...globalState.league.gameResults, results],
       currentWeek: globalState.league.currentWeek + 1,
     };
+
     return {
       ...globalState,
+      choices: generateChoices(
+        random,
+        members.map((m) => m.id),
+      ),
       league: nextLeague,
     };
   },

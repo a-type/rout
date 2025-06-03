@@ -1,5 +1,6 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
+  Choice,
   League,
   LeagueRound,
   Player,
@@ -371,10 +372,7 @@ function generatePlayerName(random: GameRandom, race: SpeciesType): string {
   return `${firstName} ${lastName}`;
 }
 
-function generateItem(random: GameRandom): {
-  itemDef: string;
-  instanceId: string;
-} {
+export function pickRandomItemDef(random: GameRandom): string {
   const rarity = randomTable(random, {
     common: 16,
     uncommon: 8,
@@ -382,12 +380,42 @@ function generateItem(random: GameRandom): {
     epic: 2,
     legendary: 1,
   });
+
+  return random.item(
+    Object.entries(itemData)
+      .filter(([, item]) => item.rarity === rarity)
+      .map(([key]) => key),
+  );
+}
+
+export function generateItem(
+  random: GameRandom,
+  itemDef?: string,
+): {
+  itemDef: string;
+  instanceId: string;
+} {
   return {
-    itemDef: random.item(
-      Object.entries(itemData)
-        .filter(([, item]) => item.rarity === rarity)
-        .map(([key]) => key),
-    ),
+    itemDef: itemDef ?? pickRandomItemDef(random),
     instanceId: random.id(),
   };
+}
+
+export function generateChoices(
+  random: GameRandom,
+  ids: string[],
+): Record<string, Choice[]> {
+  // Generate choices
+  const choices: Record<string, Choice[]> = {};
+  ids.forEach((id) => {
+    choices[id] = [];
+    for (let i = 0; i < 3; i++) {
+      choices[id].push({
+        kind: 'item',
+        itemDefId: pickRandomItemDef(random),
+        id: random.id(),
+      });
+    }
+  });
+  return choices;
 }

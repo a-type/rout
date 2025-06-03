@@ -5,6 +5,7 @@ import { PlayerPage } from './players/PlayerPage';
 import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
 import { UpcomingGames } from './UpcomingGames';
+import { Choices } from './Choices';
 
 export function PageContent() {
   const [params] = useSearchParams();
@@ -23,6 +24,7 @@ export function PageContent() {
   }
   return (
     <div>
+      <Choices />
       <UpcomingGames />
       <TeamStandings />
       {/* Two column layout */}
