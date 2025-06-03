@@ -41,6 +41,7 @@ export function PlayerTooltipContent({ id }: { id: string }) {
         id={player.id}
         attributes={attributes.baseAttributes}
         attributesModified={attributes.attributeMod}
+        stamina={player.stamina}
       />
     </div>
   );

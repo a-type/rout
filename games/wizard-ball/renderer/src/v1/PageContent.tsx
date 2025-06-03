@@ -1,4 +1,3 @@
-import { useSearchParams } from '@verdant-web/react-router';
 import { TeamPage } from './teams/TeamPage';
 import { TeamStandings } from './teams/TeamStandings';
 import { PlayerPage } from './players/PlayerPage';
@@ -6,6 +5,7 @@ import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
 import { UpcomingGames } from './UpcomingGames';
 import { Choices } from './Choices';
+import { Routes, Route, useSearchParams } from 'react-router';
 
 export function PageContent() {
   const [params] = useSearchParams();

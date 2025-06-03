@@ -2,6 +2,8 @@ import { useSearchParams } from '@verdant-web/react-router';
 import { hooks } from '../gameClient';
 import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { useGameResults } from '../useGameResults';
+import { Link } from 'react-router';
+import { PlayerName } from '../players/PlayerName';
 
 type StatValue =
   | (typeof battingStats)[number]['value']
@@ -18,7 +20,6 @@ const boxScorePitchingStats = pitchingStats.filter(
 
 export function GameBoxScore({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
-  const [, setSearchParams] = useSearchParams();
   const game = useGameResults({ id });
   if (!game) {
     return <div>Game not found</div>;
@@ -119,17 +120,11 @@ export function GameBoxScore({ id }: { id: string }) {
               <tr
                 key={playerId}
                 className="cursor-pointer hover:bg-gray-500/50"
-                onClick={() => {
-                  setSearchParams((params) => {
-                    params.delete('teamId');
-                    params.delete('gameId');
-                    params.set('playerId', playerId);
-                    return params;
-                  });
-                }}
               >
                 <td className="text-left">
-                  {finalState.league.playerLookup[playerId].name}
+                  <Link to={{ search: '?playerId=' + playerId }}>
+                    <PlayerName id={playerId} />
+                  </Link>
                 </td>
                 {boxScoreBattingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
@@ -150,17 +145,11 @@ export function GameBoxScore({ id }: { id: string }) {
               <tr
                 key={playerId}
                 className="cursor-pointer hover:bg-gray-500/50"
-                onClick={() => {
-                  setSearchParams((params) => {
-                    params.delete('teamId');
-                    params.delete('gameId');
-                    params.set('playerId', playerId);
-                    return params;
-                  });
-                }}
               >
                 <td className="text-left">
-                  {finalState.league.playerLookup[playerId].name}
+                  <Link to={{ search: '?playerId=' + playerId }}>
+                    <PlayerName id={playerId} />
+                  </Link>
                 </td>
                 {boxScoreBattingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
@@ -199,17 +188,11 @@ export function GameBoxScore({ id }: { id: string }) {
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"
-                onClick={() => {
-                  setSearchParams((params) => {
-                    params.delete('teamId');
-                    params.delete('gameId');
-                    params.set('playerId', pitcherId);
-                    return params;
-                  });
-                }}
               >
                 <td className="text-left">
-                  {finalState.league.playerLookup[pitcherId].name}
+                  <Link to={{ search: '?playerId=' + pitcherId }}>
+                    <PlayerName id={pitcherId} />
+                  </Link>
                 </td>
                 {boxScorePitchingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
@@ -230,17 +213,11 @@ export function GameBoxScore({ id }: { id: string }) {
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"
-                onClick={() => {
-                  setSearchParams((params) => {
-                    params.delete('teamId');
-                    params.delete('gameId');
-                    params.set('playerId', pitcherId);
-                    return params;
-                  });
-                }}
               >
                 <td className="text-left">
-                  {finalState.league.playerLookup[pitcherId].name}
+                  <Link to={{ search: '?playerId=' + pitcherId }}>
+                    <PlayerName id={pitcherId} />
+                  </Link>
                 </td>
                 {boxScorePitchingStats.map((stat) => (
                   <td key={stat.value} className="p-1">

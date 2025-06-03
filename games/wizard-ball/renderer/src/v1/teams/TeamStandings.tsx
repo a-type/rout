@@ -1,12 +1,12 @@
 import { clsx } from '@a-type/ui';
 import { hooks } from '../gameClient';
 import { useSearchParams } from '@verdant-web/react-router';
+import { Link } from 'react-router';
 
 export function TeamStandings() {
   const { finalState, players } = hooks.useGameSuite();
   const teams = Object.values(finalState.league.teamLookup);
   const sortedTeams = teams.sort((a, b) => b.wins - a.wins);
-  const [, setSearchParams] = useSearchParams();
 
   return (
     <div className="flex flex-col">
@@ -27,12 +27,6 @@ export function TeamStandings() {
                 'cursor-pointer hover:bg-gray-700 p-1',
                 idx % 2 === 0 && 'bg-gray-500/30',
               )}
-              onClick={() => {
-                setSearchParams((params) => {
-                  params.set('teamId', team.id);
-                  return params;
-                });
-              }}
             >
               <td
                 className="text-left pl-2 flex items-center gap-2"
@@ -40,8 +34,13 @@ export function TeamStandings() {
                   color: team.ownerId ? players[team.ownerId].color : 'inherit',
                 }}
               >
-                <span style={{ fontSize: 24 }}>{team.icon}</span>
-                {team.name}
+                <Link
+                  className="text-left pl-2 flex items-center gap-2"
+                  to={{ search: '?teamId=' + team.id }}
+                >
+                  <span style={{ fontSize: 24 }}>{team.icon}</span>
+                  {team.name}
+                </Link>
               </td>
               <td className="text-center p-1">{team.wins}</td>
               <td className="text-center p-1">{team.losses}</td>

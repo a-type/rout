@@ -15,10 +15,10 @@ import {
   usePlayerAttributes,
   usePlayerComposite,
 } from '../ratings/useAttributes';
+import { Link } from 'react-router';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
-  const [, setSearchParams] = useSearchParams();
   const player = finalState.league.playerLookup[id];
   if (!player) {
     return <div>Player not found</div>;
@@ -74,18 +74,14 @@ export function PlayerPage({ id }: { id: string }) {
         </div>
         <div className="mb-1 text-md">
           {team ? (
-            <div
-              className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
-              onClick={() => {
-                setSearchParams((params) => {
-                  params.delete('playerId');
-                  params.set('teamId', team.id);
-                  return params;
-                });
+            <Link
+              to={{
+                search: `?teamId=${team.id}`,
               }}
+              className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
             >
               {team.icon} {team.name} ({team.wins} - {team.losses})
-            </div>
+            </Link>
           ) : (
             'Free Agent'
           )}
@@ -164,17 +160,11 @@ export function PlayerPage({ id }: { id: string }) {
                       index % 2 === 0 && 'bg-gray-500/30',
                       'cursor-pointer hover:bg-gray-500/50',
                     )}
-                    onClick={() => {
-                      setSearchParams((params) => {
-                        params.delete('teamId');
-                        params.delete('playerId');
-                        params.set('gameId', game.id);
-                        return params;
-                      });
-                    }}
                   >
                     <td className="px-3 py-2 border-b whitespace-nowrap">
-                      {renderGameName(game.id)}
+                      <Link to={{ search: `?gameId=${game.id}` }}>
+                        {renderGameName(game.id)}
+                      </Link>
                     </td>
                     {battingStats.map((stat) => (
                       <td
@@ -238,17 +228,11 @@ export function PlayerPage({ id }: { id: string }) {
                           index % 2 === 0 && 'bg-gray-500/30',
                           'cursor-pointer hover:bg-gray-500/50',
                         )}
-                        onClick={() => {
-                          setSearchParams((params) => {
-                            params.delete('teamId');
-                            params.delete('playerId');
-                            params.set('gameId', game.id);
-                            return params;
-                          });
-                        }}
                       >
                         <td className="px-3 py-2 border-b whitespace-nowrap">
-                          {renderGameName(game.id)}
+                          <Link to={{ search: `?gameId=${game.id}` }}>
+                            {renderGameName(game.id)}
+                          </Link>
                         </td>
                         {pitchingStats.map((stat) => (
                           <td

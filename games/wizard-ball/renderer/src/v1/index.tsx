@@ -3,6 +3,7 @@ import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { PageContent } from './PageContent';
 import { useSearchParams } from '@verdant-web/react-router';
+import { BrowserRouter, Link } from 'react-router';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -14,7 +15,11 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
     return <GameRecap />;
   }
 
-  return <Gameplay />;
+  return (
+    <BrowserRouter>
+      <Gameplay />
+    </BrowserRouter>
+  );
 });
 
 export const ChatMessage = DefaultChatMessage;
@@ -22,7 +27,7 @@ export const ChatMessage = DefaultChatMessage;
 // perhaps you'll want to move these to other modules.
 
 const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   return (
     <Box className="flex flex-col gap-2">
       <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
@@ -41,18 +46,12 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
           Force round
         </Button>
         {[...searchParams.keys()].length > 0 && (
-          <Button
-            onClick={() => {
-              setSearchParams((params) => {
-                params.delete('teamId');
-                params.delete('playerId');
-                params.delete('gameId');
-                return params;
-              });
-            }}
+          <Link
+            to={{ search: '' }}
+            className="rounded bg-gray-700 hover:bg-gray-600 p-2 text-sm"
           >
             Back
-          </Button>
+          </Link>
         )}
         {gameSuite.turnError}
       </div>

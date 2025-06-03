@@ -18,7 +18,6 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
   );
   const { finalState } = hooks.useGameSuite();
 
-  const [, setSearchParams] = useSearchParams();
   const playerStats = calculatePlayerStats(
     finalState.league.gameResults.flat(),
   );
@@ -72,20 +71,10 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
         <table className="table-auto border border-gray-300 rounded-lg shadow-sm">
           <tbody>
             {findTop(tabValue).map((player) => {
-              const teamId =
-                finalState.league.playerLookup[player.playerId].teamId;
               return (
                 <tr
                   key={player.playerId}
                   className="cursor-pointer hover:bg-gray-500/50 p-1"
-                  onClick={() => {
-                    setSearchParams((params) => {
-                      params.delete('teamId');
-                      params.delete('gameId');
-                      params.set('playerId', player.playerId);
-                      return params;
-                    });
-                  }}
                 >
                   <td className="text-left p-1 flex items-center gap-2">
                     <PlayerChip id={player.playerId} noBackground />

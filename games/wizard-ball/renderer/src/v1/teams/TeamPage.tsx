@@ -14,6 +14,7 @@ import { TeamChart } from './TeamChart';
 import { attributeToColor } from '../utils';
 import { TeamItems } from './TeamItems';
 import { BallparkChip } from '../BallparkChip';
+import { Link } from 'react-router';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -30,7 +31,6 @@ export function TeamPage({ id }: { id: TeamId }) {
   const [view, setView] = useState<TabValue>('summary');
   const { finalState, players } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id] as Team;
-  const [, setSearchParams] = useSearchParams();
   const schedule = finalState.league.schedule;
   const mySchedule = schedule.flatMap((r) =>
     r.filter((g) => g.awayTeamId === id || g.homeTeamId === id),
@@ -142,15 +142,16 @@ export function TeamPage({ id }: { id: TeamId }) {
                       <tr
                         key={player.id}
                         className="cursor-pointer hover:bg-gray-700"
-                        onClick={() => {
-                          setSearchParams((params) => {
-                            params.delete('teamId');
-                            params.set('playerId', player.id);
-                            return params;
-                          });
-                        }}
                       >
-                        <td className="p-1">{player.name}</td>
+                        <td className="p-1">
+                          <Link
+                            to={{
+                              search: '?playerId=' + player.id,
+                            }}
+                          >
+                            {player.name}
+                          </Link>
+                        </td>
                         <td className="p-1">
                           {player.positions[0].toUpperCase()}
                         </td>
@@ -201,22 +202,16 @@ export function TeamPage({ id }: { id: TeamId }) {
                 const location = home ? 'home' : 'away';
                 const result = `${gameResult} (${location}) vs ${opponent.name} (${score})`;
                 return (
-                  <div
+                  <Link
+                    to={{ search: '?gameId=' + game.id }}
                     key={index}
                     className={clsx(
                       'text-sm cursor-pointer hover:bg-gray-700',
                       win ? 'text-green-500' : 'text-red-500',
                     )}
-                    onClick={() => {
-                      setSearchParams((params) => {
-                        params.delete('teamId');
-                        params.set('gameId', game.id);
-                        return params;
-                      });
-                    }}
                   >
                     {result}
-                  </div>
+                  </Link>
                 );
               })}
             </div>
