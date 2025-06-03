@@ -3,6 +3,7 @@ import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
 import { PitchOutcome } from './simGames';
 import { WeatherType } from './weatherData';
+import { BallparkType } from './ballparkData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -22,6 +23,7 @@ export type Team = {
   nextPitcherIndex: number;
   wins: number;
   losses: number;
+  ballpark: BallparkType;
 };
 
 export type PlayerAttributes = {
@@ -95,6 +97,7 @@ export type LeagueGame = {
   homeTeamId: TeamId;
   awayTeamId: TeamId;
   weather: WeatherType;
+  ballpark: BallparkType;
 };
 
 export type LeagueRound = Array<LeagueGame>;
@@ -144,6 +147,7 @@ export type GameResult = {
   };
   gameLog?: GameLog;
   weather: WeatherType;
+  ballpark: BallparkType;
 };
 
 export type PlayerStats = {
@@ -172,6 +176,7 @@ export type PlayerStats = {
 };
 
 export type LeagueGameState = {
+  leagueGame: LeagueGame;
   battingTeam: TeamId;
   pitchingTeam: TeamId;
   teamData: Record<
@@ -196,6 +201,7 @@ export type LeagueGameState = {
   playerStats: Record<PlayerId, PlayerStats>;
   gameLog: GameLog;
   weather: WeatherType;
+  ballpark: BallparkType;
 };
 
 export type GameLogEvent =

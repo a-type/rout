@@ -3,6 +3,7 @@ import { TeamIcon } from './teams/TeamIcon';
 import { TeamName } from './teams/TeamName';
 import dayjs from 'dayjs';
 import { WeatherChip } from './WeatherChip';
+import { BallparkChip } from './BallparkChip';
 
 export function UpcomingGames() {
   const { finalState, latestRoundIndex, nextRoundCheckAt } =
@@ -34,7 +35,10 @@ export function UpcomingGames() {
                   <TeamName bold id={game.homeTeamId} />
                 </span>
               </div>
-              <WeatherChip id={game.weather} />
+              <div className="flex flex-row gap-2 items-center">
+                <BallparkChip id={game.ballpark} />
+                <WeatherChip id={game.weather} />
+              </div>
             </div>
           );
         })}

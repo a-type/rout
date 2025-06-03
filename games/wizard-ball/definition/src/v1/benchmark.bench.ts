@@ -33,7 +33,7 @@ describe('benchmark', () => {
 
   describe('sim pitch', () => {
     const league = generateLeague(random, [], { numTeams: 2, numRounds: 1 });
-    let gameState = initialGameState();
+    let gameState = initialGameState(league.schedule[league.currentWeek][0]);
     gameState = setupGame(
       league,
       league.schedule[league.currentWeek][0],

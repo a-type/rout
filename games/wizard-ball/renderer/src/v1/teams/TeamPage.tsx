@@ -13,6 +13,7 @@ import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';
 import { attributeToColor } from '../utils';
 import { TeamItems } from './TeamItems';
+import { BallparkChip } from '../BallparkChip';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -66,6 +67,9 @@ export function TeamPage({ id }: { id: TeamId }) {
             <span style={{ fontSize: 64 }}>{team.icon}</span> {team.name} (
             {team.wins} - {team.losses})
           </h2>
+          <div>
+            <BallparkChip id={team.ballpark} />
+          </div>
           <div className="flex items-center gap-3 ml-auto mr-8">
             Owner:{' '}
             {team.ownerId ? (

@@ -18,6 +18,7 @@ import type {
   RoundResult,
 } from './gameTypes';
 import {
+  getInningInfo,
   multiplyObjects,
   randomTable,
   scaleAttribute,
@@ -32,6 +33,7 @@ import {
 } from './attributes';
 import Logger from './logger';
 import { weather as weatherData } from './weatherData';
+import { ballparkData } from './ballparkData';
 
 const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -76,9 +78,10 @@ function checkGameOver(
 export function setupGame(
   league: League,
   game: LeagueGame,
-  gameState: LeagueGameState = initialGameState(),
+  gameState: LeagueGameState = initialGameState(game),
 ) {
   gameState.weather = game.weather;
+  gameState.ballpark = game.ballpark;
   gameState.battingTeam = game.awayTeamId;
   gameState.pitchingTeam = game.homeTeamId;
   for (const teamId of [game.homeTeamId, game.awayTeamId]) {
@@ -110,7 +113,7 @@ export function simulateGame(
   league: League,
   game: LeagueGame,
 ): GameResult {
-  let gameState = initialGameState();
+  let gameState = initialGameState(game);
   gameState = setupGame(league, game, gameState);
   const homePitcher = gameState.teamData[game.homeTeamId].pitcher;
   const awayPitcher = gameState.teamData[game.awayTeamId].pitcher;
@@ -154,6 +157,7 @@ export function simulateGame(
     score,
     gameLog: gameState.gameLog,
     weather: gameState.weather,
+    ballpark: gameState.ballpark,
   };
 }
 
@@ -183,7 +187,7 @@ function randomByWeight<T>(
   return weights[weights.length - 1].value; // Fallback
 }
 
-export function initialGameState(): LeagueGameState {
+export function initialGameState(game: LeagueGame): LeagueGameState {
   return {
     balls: 0,
     strikes: 0,
@@ -202,6 +206,8 @@ export function initialGameState(): LeagueGameState {
     playerStats: {},
     gameLog: [],
     weather: 'clear',
+    ballpark: 'bigField',
+    leagueGame: game,
   };
 }
 
@@ -342,15 +348,22 @@ function getActivePlayerPerks(
   gameState: LeagueGameState,
   pitchKind?: PitchKind,
 ): PerkEffect[] {
+  const playerTeam = league.playerLookup[playerId].teamId;
   const { battingTeam, pitchingTeam } = gameState;
   const weatherId = gameState.weather;
   const weatherInfo = weatherData[weatherId];
+  const ballparkId = gameState.ballpark;
+  const ballparkInfo = ballparkData[ballparkId];
   const players = [
     ...gameState.teamData[battingTeam].battingOrder,
     ...gameState.teamData[pitchingTeam].battingOrder,
   ].map((pid) => league.playerLookup[pid]);
   return [
     weatherInfo.effect(),
+    ballparkInfo.effect({
+      gameState,
+      isHome: gameState.leagueGame.homeTeamId === playerTeam,
+    }),
     ...players.flatMap((player) =>
       player.perkIds
         .map((id) => perks[id as keyof typeof perks])

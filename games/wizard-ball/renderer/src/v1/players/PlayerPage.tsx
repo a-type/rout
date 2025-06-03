@@ -173,7 +173,7 @@ export function PlayerPage({ id }: { id: string }) {
                       });
                     }}
                   >
-                    <td className="px-3 py-2 border-b">
+                    <td className="px-3 py-2 border-b whitespace-nowrap">
                       {renderGameName(game.id)}
                     </td>
                     {battingStats.map((stat) => (
@@ -247,7 +247,7 @@ export function PlayerPage({ id }: { id: string }) {
                           });
                         }}
                       >
-                        <td className="px-3 py-2 border-b">
+                        <td className="px-3 py-2 border-b whitespace-nowrap">
                           {renderGameName(game.id)}
                         </td>
                         {pitchingStats.map((stat) => (

@@ -29,7 +29,7 @@ export type PerkEffect = {
 export type Perk = {
   name: string;
   description: string;
-  kind: 'batting' | 'pitching';
+  kind: 'batting' | 'pitching' | 'any';
   requirements?: (props: {
     positions: Position[];
     species: SpeciesType;
@@ -293,6 +293,41 @@ export const perks: Record<string, Perk> = {
       isPitcher && pitchKind === 'sinker',
     effect: () => ({
       qualityBonus: 2,
+    }),
+  },
+  eagerBeaver: {
+    name: 'Eager Beaver',
+    description: 'Improves stats in the first three innings.',
+    kind: 'any',
+    requirements: ({ species }) => species === 'beaver',
+    condition: ({ gameState }) => gameState.currentInning <= 6,
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
+    }),
+  },
+  waterkin: {
+    name: 'Waterkin',
+    description: 'Improves stats in rainy weather.',
+    kind: 'any',
+    requirements: ({ species }) => species === 'turtle' || species === 'beaver',
+    condition: ({ weather }) =>
+      weather === 'rain' || weather === 'lightningStorm',
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
     }),
   },
 } satisfies Record<string, Perk>;

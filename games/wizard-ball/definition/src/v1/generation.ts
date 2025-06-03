@@ -18,6 +18,7 @@ import { getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
 import { randomTable } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
+import { ballparkData, BallparkType } from './ballparkData';
 
 export function generateLeague(
   random: GameRandom,
@@ -31,7 +32,7 @@ export function generateLeague(
 ): League {
   const playersPerTeam = options.numPlayers ?? 16;
   const roundCount = options.numRounds ?? 20;
-  const teamCount = options.numTeams ?? 4;
+  const teamCount = options.numTeams ?? 6;
   let league: League = {
     name: 'League name',
     teamIds: [],
@@ -43,9 +44,10 @@ export function generateLeague(
     currentWeek: 0,
   };
 
+  const ballparks = random.shuffle(Object.keys(ballparkData)) as BallparkType[];
   // Generate teams
-  const teams = Array.from({ length: teamCount }).map(() =>
-    generateTeam(random),
+  const teams = Array.from({ length: teamCount }).map((_, idx) =>
+    generateTeam(random, ballparks[idx]),
   );
   const teamNames = generateTeamNames(random, teams.length);
   teams.forEach((team, index) => {
@@ -207,12 +209,14 @@ export function generateLeague(
       if (home !== 'BYE' && away !== 'BYE') {
         // Alternate home/away by round for balance
         const weather = random.item(Object.keys(weatherData)) as WeatherType;
+        const ballpark = league.teamLookup[home].ballpark;
         if (round % 2 === 0) {
           roundGames.push({
             id: random.id(),
             homeTeamId: home,
             awayTeamId: away,
             weather,
+            ballpark,
           });
         } else {
           roundGames.push({
@@ -220,6 +224,7 @@ export function generateLeague(
             homeTeamId: away,
             awayTeamId: home,
             weather,
+            ballpark,
           });
         }
       }
@@ -232,7 +237,7 @@ export function generateLeague(
   return league;
 }
 
-function generateTeam(random: GameRandom): Team {
+function generateTeam(random: GameRandom, ballpark: BallparkType): Team {
   let team: Team = {
     name: 'Unnamed Team',
     icon: '⚾',
@@ -254,6 +259,7 @@ function generateTeam(random: GameRandom): Team {
     nextPitcherIndex: 0,
     wins: 0,
     losses: 0,
+    ballpark,
   };
   return team;
 }
@@ -294,7 +300,8 @@ function generatePlayer(
     const perkOptions = Object.keys(perks).filter((p) => {
       const perk = perks[p as keyof typeof perks];
       return (
-        perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting') &&
+        (perk.kind === 'any' ||
+          perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting')) &&
         (!perk.requirements ||
           perk.requirements({ species, classType, positions }))
       );

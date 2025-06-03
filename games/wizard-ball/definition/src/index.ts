@@ -7,6 +7,7 @@ export * from './v1/attributes';
 export { getInningInfo, sumObjects, sum } from './v1/utils';
 export { itemData } from './v1/itemData';
 export { weather, type WeatherType } from './v1/weatherData';
+export { ballparkData, type BallparkType } from './v1/ballparkData';
 
 export default {
   id: 'wizard-ball',
