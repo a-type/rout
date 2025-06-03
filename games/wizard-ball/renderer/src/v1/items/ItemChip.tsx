@@ -1,6 +1,11 @@
-import { itemData } from '@long-game/game-wizard-ball-definition';
+import {
+  AttributeType,
+  itemData,
+} from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
+import { compositeToString, shortAttribute } from '../utils';
+import { PerkEffect } from './PerkEffect';
 
 export function ItemDefChip({ id }: { id: string }) {
   const itemDef = itemData[id];
@@ -9,6 +14,7 @@ export function ItemDefChip({ id }: { id: string }) {
   }
   const itemName = itemDef.name;
   const itemRarity = itemDef.rarity;
+  const itemEffect = itemDef.effect();
   const rarityColor = {
     common: '#9CA3AF',
     uncommon: '#34D399',
@@ -19,7 +25,12 @@ export function ItemDefChip({ id }: { id: string }) {
   return (
     <Tooltip
       className="bg-gray-700 text-gray-100"
-      content={itemDef.description}
+      content={
+        <div className="flex flex-col gap-1">
+          <span>{itemDef.description}</span>
+          <PerkEffect effect={itemEffect} />
+        </div>
+      }
     >
       <span
         className={clsx(

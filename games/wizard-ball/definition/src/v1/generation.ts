@@ -307,8 +307,9 @@ function generatePlayer(
           perk.requirements({ species, classType, positions }))
       );
     });
-
-    player.perkIds.push(random.item(perkOptions));
+    if (perkOptions.length > 0) {
+      player.perkIds.push(random.item(perkOptions));
+    }
   }
   return player;
 }

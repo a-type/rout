@@ -3,6 +3,7 @@ import {
   weather as weatherData,
   type WeatherType,
 } from '@long-game/game-wizard-ball-definition';
+import { PerkEffect } from './items/PerkEffect';
 
 export function WeatherChip({ id }: { id: WeatherType }) {
   const weather = weatherData[id];
@@ -13,7 +14,12 @@ export function WeatherChip({ id }: { id: WeatherType }) {
   const { color, icon, name } = weather;
   return (
     <Tooltip
-      content={weather.description}
+      content={
+        <div className="flex flex-col gap-1">
+          <span>{weather.description}</span>
+          <PerkEffect effect={weather.effect()} />
+        </div>
+      }
       className="bg-gray-700 text-gray-100 max-w-[400px]"
     >
       <span

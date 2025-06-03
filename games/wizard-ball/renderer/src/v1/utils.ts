@@ -1,4 +1,10 @@
-import { HitArea, HitType } from '@long-game/game-wizard-ball-definition';
+import {
+  AttributeType,
+  BattingCompositeType,
+  HitArea,
+  HitType,
+  PitchingCompositeType,
+} from '@long-game/game-wizard-ball-definition';
 
 export function roundFloat(value: number, decimalPlaces: number = 2): number {
   const factor = Math.pow(10, decimalPlaces);
@@ -73,4 +79,39 @@ export function hitTypeToString(hitType: HitType): string {
     default:
       return 'Unknown Hit Type';
   }
+}
+
+export function shortAttribute(key: AttributeType): string {
+  const lookup: Record<AttributeType, string> = {
+    agility: 'Agi',
+    charisma: 'Cha',
+    constitution: 'Con',
+    intelligence: 'Int',
+    strength: 'Str',
+    wisdom: 'Wis',
+  };
+  return lookup[key];
+}
+
+export function compositeToString(
+  key: BattingCompositeType | PitchingCompositeType,
+): string {
+  const lookup: Record<BattingCompositeType | PitchingCompositeType, string> = {
+    contact: 'Contact',
+    accuracy: 'Accuracy',
+    hitAngle: 'Hit angle',
+    hitPower: 'Hit power',
+    extraBases: 'Extra bases',
+    homeRuns: 'Home runs',
+    fielding: 'Fielding',
+    stealing: 'Stealing',
+    durability: 'Durability',
+    plateDiscipline: 'Plate discipline',
+    dueling: 'Dueling',
+    movement: 'Movement',
+    velocity: 'Velocity',
+    strikeout: 'Strikeout',
+    deception: 'Deception',
+  };
+  return lookup[key];
 }
