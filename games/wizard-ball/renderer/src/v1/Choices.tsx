@@ -4,7 +4,7 @@ import { ItemDefChip } from './items/ItemChip';
 import { clsx, Button } from '@a-type/ui';
 import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { PlayerChip } from './players/PlayerChip';
-import { shortAttribute } from './utils';
+import { useSendTurn, shortAttribute } from './utils';
 import { PerkChip } from './perks/PerkChip';
 
 function Choice({ choice }: { choice: ChoiceType }) {
@@ -69,14 +69,14 @@ function Choice({ choice }: { choice: ChoiceType }) {
 }
 
 export function Choices() {
-  const { finalState, prepareTurn, localTurnData } = hooks.useGameSuite();
+  const { finalState, localTurnData } = hooks.useGameSuite();
+  const sendTurn = useSendTurn();
   const [selection, setSelection] = useState<string>(
     localTurnData?.choiceId ?? '',
   );
-  useEffect(() => {});
   useEffect(() => {
     if (selection) {
-      prepareTurn((turn) => ({ ...turn, choiceId: selection }));
+      sendTurn((turn) => ({ ...turn, choiceId: selection }));
     }
   }, [selection]);
   const options = finalState.choices;

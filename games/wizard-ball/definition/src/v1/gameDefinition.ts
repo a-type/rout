@@ -77,6 +77,7 @@ export const gameDefinition: GameDefinition<
         `Could not find team for player ${prospectiveTurn.playerId}`,
       );
     }
+    // TODO: This is not safe to do on the client because of mobx
     const team = playerState.league.teamLookup[teamId];
     team.battingOrder =
       prospectiveTurn.data.nextBattingOrder ?? team.battingOrder;

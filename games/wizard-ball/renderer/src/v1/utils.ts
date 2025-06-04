@@ -5,6 +5,8 @@ import {
   HitType,
   PitchingCompositeType,
 } from '@long-game/game-wizard-ball-definition';
+import { hooks } from './gameClient';
+import { TurnData } from '@long-game/game-wizard-ball-definition/v1';
 
 export function roundFloat(value: number, decimalPlaces: number = 2): number {
   const factor = Math.pow(10, decimalPlaces);
@@ -114,4 +116,15 @@ export function compositeToString(
     deception: 'Deception',
   };
   return lookup[key];
+}
+
+export function useSendTurn() {
+  const { submitTurn, nextRoundCheckAt, prepareTurn } = hooks.useGameSuite();
+  return (fn: (turnData: TurnData | null) => TurnData) => {
+    if (nextRoundCheckAt) {
+      return submitTurn(fn);
+    }
+    console.log('preparing turn');
+    return prepareTurn(fn);
+  };
 }

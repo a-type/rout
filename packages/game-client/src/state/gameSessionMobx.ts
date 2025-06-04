@@ -423,7 +423,12 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.#events.emit('turnPrepared');
   };
 
-  @action submitTurn = async (override?: GetTurnData<TGame>) => {
+  @action submitTurn = async (
+    override?:
+      | GetTurnData<TGame>
+      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>)
+      | null,
+  ) => {
     if (override) {
       this.prepareTurn(override);
     }

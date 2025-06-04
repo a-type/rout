@@ -33,6 +33,7 @@ import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { useLineup } from './useLineup';
+import { useSendTurn } from '../utils';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -74,17 +75,14 @@ function SortableItem({ id, children, disabled, ...rest }: SortableItemProps) {
 }
 
 export function TeamLineup({ id }: { id: string }) {
-  const {
-    finalState,
-    prepareTurn,
-    playerId: currentUserId,
-  } = hooks.useGameSuite();
+  const { finalState, playerId: currentUserId } = hooks.useGameSuite();
+  const sendTurn = useSendTurn();
   const team = finalState.league.teamLookup[id];
   const lineup = team.battingOrder;
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Position[]>(lineup);
   useEffect(() => {
-    prepareTurn((turn) => ({
+    sendTurn((turn) => ({
       ...turn,
       nextBattingOrder: items,
     }));
