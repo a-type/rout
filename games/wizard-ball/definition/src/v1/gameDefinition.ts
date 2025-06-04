@@ -32,7 +32,7 @@ export const gameDefinition: GameDefinition<
   minimumPlayers: 1,
   maximumPlayers: 10,
   getRoundIndex: roundFormat.perEnvironment({
-    production: roundFormat.periodic('days', 1, {
+    production: roundFormat.periodic('hours', 8, {
       requireAllPlayersToPlay: false,
     }),
     development: roundFormat.sync(),

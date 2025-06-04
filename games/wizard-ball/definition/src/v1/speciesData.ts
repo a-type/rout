@@ -25,6 +25,10 @@ export const speciesData = {
     intelligence: 2,
     charisma: -2,
   },
+  lizard: {
+    charisma: 2,
+    strength: -2,
+  },
 } as const satisfies Record<string, Partial<PlayerAttributes>>;
 
 export type SpeciesType = keyof typeof speciesData;
@@ -36,4 +40,5 @@ export const speciesIcons: Record<SpeciesType, string> = {
   badger: '🦡',
   beaver: '🦫',
   owl: '🦉',
+  lizard: '🦎',
 } as const satisfies Record<SpeciesType, string>;

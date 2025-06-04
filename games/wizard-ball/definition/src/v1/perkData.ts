@@ -122,7 +122,8 @@ export const perks: Record<string, Perk> = {
     name: 'Rage',
     description: 'Increases chance to hit on contact with 2 strikes.',
     kind: 'batting',
-    requirements: ({ classType }) => classType === 'barbarian',
+    requirements: ({ classType, species }) =>
+      classType === 'barbarian' || species === 'lizard',
     condition: ({ gameState, isBatter }) => isBatter && gameState.strikes === 2,
     effect: () => ({
       battingCompositeBonus: {
@@ -191,6 +192,8 @@ export const perks: Record<string, Perk> = {
     name: 'Strikeout Machine',
     description: 'Increases quality on 2 strike counts.',
     kind: 'pitching',
+    requirements: ({ classType, species }) =>
+      classType === 'barbarian' || species === 'lizard',
     condition: ({ gameState, isPitcher }) =>
       isPitcher && gameState.strikes === 2,
     effect: () => ({
@@ -333,6 +336,40 @@ export const perks: Record<string, Perk> = {
     kind: 'any',
     requirements: ({ species }) => species === 'owl',
     condition: ({ gameState }) => gameState.currentInning >= 15,
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
+    }),
+  },
+  solarPowered: {
+    name: 'Solar Powered',
+    description: 'Improves stats in sunny weather.',
+    kind: 'any',
+    requirements: ({ species }) => species === 'lizard',
+    condition: ({ weather }) => weather === 'clear' || weather === 'heat',
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
+    }),
+  },
+  windMachine: {
+    name: 'Wind Machine',
+    description: 'Improves stats in windy weather.',
+    kind: 'any',
+    requirements: ({ species }) => species === 'fox',
+    condition: ({ weather }) => weather === 'windy',
     effect: () => ({
       attributeBonus: {
         strength: 2,
