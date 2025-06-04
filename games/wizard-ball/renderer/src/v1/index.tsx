@@ -2,7 +2,7 @@ import { Box, Button } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { PageContent } from './PageContent';
-import { BrowserRouter, Link, useSearchParams } from 'react-router';
+import { BrowserRouter, Link, NavLink, useSearchParams } from 'react-router';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -26,10 +26,13 @@ export const ChatMessage = DefaultChatMessage;
 // perhaps you'll want to move these to other modules.
 
 const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
-  const [searchParams] = useSearchParams();
+  const { finalState, playerId } = gameSuite;
+  const myTeamId = Object.entries(finalState.league.teamLookup).find(
+    ([, team]) => team.ownerId === playerId,
+  )?.[0];
   return (
     <Box className="flex flex-col gap-2">
-      <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
+      <div className="fixed flex gap-4 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
         <Button
           onClick={() => {
             gameSuite.submitTurn();
@@ -44,14 +47,27 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         >
           Force round
         </Button>
-        {[...searchParams.keys()].length > 0 && (
-          <Link
-            to={{ search: '' }}
-            className="rounded bg-gray-700 hover:bg-gray-600 p-2 text-sm"
-          >
-            Back
-          </Link>
-        )}
+        <NavLink
+          to={{
+            search: '',
+          }}
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to={{
+            search: 'league',
+          }}
+        >
+          League
+        </NavLink>
+        <NavLink
+          to={{
+            search: `teamId=${myTeamId}`,
+          }}
+        >
+          My Team
+        </NavLink>
         {gameSuite.turnError}
       </div>
       <div className="p-4 mt-16">

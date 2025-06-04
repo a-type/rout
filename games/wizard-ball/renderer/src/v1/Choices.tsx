@@ -85,7 +85,7 @@ export function Choices() {
   }
   return (
     <div className="mb-4">
-      <h2 className="text-lg font-bold mb-2">Choices</h2>
+      <h2 className="text-lg font-bold mb-2">Choose a boon!</h2>
       <div className="flex flex-row gap-2">
         {options.map((choice) => {
           return (

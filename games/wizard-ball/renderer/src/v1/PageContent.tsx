@@ -5,13 +5,15 @@ import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
 import { UpcomingGames } from './UpcomingGames';
 import { Choices } from './Choices';
-import { Routes, Route, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { RecentResults } from './RecentResults';
 
 export function PageContent() {
   const [params] = useSearchParams();
   const teamId = params.get('teamId');
   const playerId = params.get('playerId');
   const gameId = params.get('gameId');
+  const league = params.get('league');
 
   if (gameId) {
     return <GamePage id={gameId} />;
@@ -22,16 +24,23 @@ export function PageContent() {
   if (teamId) {
     return <TeamPage id={teamId} />;
   }
+  if (league !== null) {
+    return (
+      <>
+        <TeamStandings />
+        {/* Two column layout */}
+        <div className="flex flex-col md:flex-row gap-2">
+          <LeagueLeaders kind="batting" />
+          <LeagueLeaders kind="pitching" />
+        </div>
+      </>
+    );
+  }
   return (
     <div>
       <Choices />
+      <RecentResults />
       <UpcomingGames />
-      <TeamStandings />
-      {/* Two column layout */}
-      <div className="flex flex-col md:flex-row gap-2">
-        <LeagueLeaders kind="batting" />
-        <LeagueLeaders kind="pitching" />
-      </div>
     </div>
   );
 }

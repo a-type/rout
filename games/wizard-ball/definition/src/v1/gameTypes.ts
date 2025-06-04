@@ -23,6 +23,7 @@ export type Team = {
   nextPitcherIndex: number;
   wins: number;
   losses: number;
+  runDifferential: number;
   ballpark: BallparkType;
 };
 

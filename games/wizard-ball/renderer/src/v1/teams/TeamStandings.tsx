@@ -1,6 +1,5 @@
 import { clsx } from '@a-type/ui';
 import { hooks } from '../gameClient';
-import { useSearchParams } from '@verdant-web/react-router';
 import { Link } from 'react-router';
 
 export function TeamStandings() {
@@ -17,6 +16,7 @@ export function TeamStandings() {
             <th className="p-1">Team</th>
             <th className="p-1">Wins</th>
             <th className="p-1">Losses</th>
+            <th className="p-1">RD</th>
           </tr>
         </thead>
         <tbody>
@@ -44,6 +44,7 @@ export function TeamStandings() {
               </td>
               <td className="text-center p-1">{team.wins}</td>
               <td className="text-center p-1">{team.losses}</td>
+              <td className="text-center p-1">{team.runDifferential}</td>
             </tr>
           ))}
         </tbody>

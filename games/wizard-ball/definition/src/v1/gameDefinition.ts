@@ -173,6 +173,10 @@ export const gameDefinition: GameDefinition<
       const loser = globalState.league.teamLookup[result.loser];
       winner.wins += 1;
       loser.losses += 1;
+      winner.runDifferential +=
+        result.score[result.winner] - result.score[result.loser];
+      loser.runDifferential -=
+        result.score[result.winner] - result.score[result.loser];
     }
     const nextLeague: League = {
       ...globalState.league,

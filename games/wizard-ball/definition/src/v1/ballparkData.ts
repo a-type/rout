@@ -22,7 +22,7 @@ export const ballparkData = {
     description:
       'A spacious field with deep outfield, reducing home runs but increasing extra base hits.',
     icon: '🏟️',
-    color: '#4CAF50',
+    color: '#AED581',
     weather: {
       clear: 3,
       rain: 3,
@@ -86,7 +86,7 @@ export const ballparkData = {
     description:
       'A gigantic tree stump that serves as a natural stadium, with a unique atmosphere that boosts charisma.',
     icon: '🌳',
-    color: '#8BC34A',
+    color: '#388E3C',
     weather: {},
     effect: ({ isHome } = {}) => ({
       attributeBonus: {
@@ -99,7 +99,7 @@ export const ballparkData = {
     description:
       'The hideout of notorius rogues and thieves, where stealing is much easier.',
     icon: '🏴‍☠️',
-    color: '#FF5722',
+    color: '#E1BEE7',
     weather: {
       fog: 5,
     },
@@ -114,7 +114,7 @@ export const ballparkData = {
     description:
       'A park protected by rangers; the clear air and open space makes it easier to pitch and field.',
     icon: '🏞️',
-    color: '#4CAF50',
+    color: '#03A9F4',
     weather: {
       clear: 4,
       rain: 4,
@@ -147,6 +147,26 @@ export const ballparkData = {
     effect: ({ isHome } = {}) => ({
       attributeBonus: {
         constitution: isHome ? 5 : 1,
+      },
+    }),
+  },
+  dryDesert: {
+    name: 'Dry Desert',
+    description:
+      'A vast desert with scorching heat, making it harder to maintain stamina.',
+    icon: '🏜️',
+    color: '#FF5722',
+    weather: {
+      clear: 3,
+      windy: 2,
+      heat: 5,
+    },
+    effect: ({ isHome } = {}) => ({
+      battingCompositeBonus: {
+        durability: isHome ? -1 : -4,
+      },
+      pitchingCompositeBonus: {
+        durability: isHome ? -1 : -4,
       },
     }),
   },
