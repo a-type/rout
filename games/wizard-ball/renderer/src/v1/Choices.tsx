@@ -5,6 +5,7 @@ import { clsx, Button } from '@a-type/ui';
 import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { PlayerChip } from './players/PlayerChip';
 import { shortAttribute } from './utils';
+import { PerkChip } from './perks/PerkChip';
 
 function Choice({ choice }: { choice: ChoiceType }) {
   if (choice.kind === 'item') {
@@ -15,6 +16,17 @@ function Choice({ choice }: { choice: ChoiceType }) {
       </>
     );
   }
+  if (choice.kind === 'perk') {
+    return (
+      <>
+        <span className="text-sm font-semibold">
+          <PlayerChip id={choice.playerId} />
+        </span>
+        <span className="font-normal">gains</span>
+        <PerkChip id={choice.perkId} />
+      </>
+    );
+  }
   if (choice.kind === 'attributeBoost') {
     const { amount, attribute } = choice;
     return (
@@ -22,6 +34,25 @@ function Choice({ choice }: { choice: ChoiceType }) {
         <span className="text-sm font-semibold">
           <PlayerChip id={choice.playerId} />{' '}
         </span>
+        <span className="font-normal">gains</span>
+        <span
+          className={clsx(
+            'text-sm uppercase',
+            amount > 0 ? 'text-green-500' : 'text-red-500',
+          )}
+        >
+          {amount > 0 ? '+' : ''}
+          {amount} {shortAttribute(attribute)}
+        </span>
+      </>
+    );
+  }
+  if (choice.kind === 'teamBoost') {
+    const { amount, attribute } = choice;
+    return (
+      <>
+        <span className="text-sm font-semibold">ENTIRE TEAM</span>
+        <span className="font-normal">gains</span>
         <span
           className={clsx(
             'text-sm uppercase',
@@ -64,10 +95,10 @@ export function Choices() {
               }}
               key={choice.id}
               className={clsx(
-                'flex flex-col gap-2 items-center justify-between bg-gray-800 border-solidpx-2 py-4 rounded',
+                'flex flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
                 selection === choice.id
-                  ? 'border-2 border-blue-500'
-                  : 'border-gray-300',
+                  ? 'outline outline-4 outline-blue-500'
+                  : '',
               )}
             >
               <Choice choice={choice} />

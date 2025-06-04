@@ -1,8 +1,8 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
-import { generateChoices, generateItem, generateLeague } from './generation';
+import { generateItem, generateLeague } from './generation';
 import { simulateRound } from './simGames';
-import { itemData } from './itemData';
+import { applyChoice, generateChoices } from './boosts';
 
 export type GlobalState = {
   league: League;
@@ -155,25 +155,12 @@ export const gameDefinition: GameDefinition<
             `Could not find choice with ID ${turn.data.choiceId} for player ${turn.playerId}`,
           );
         }
-        if (choice.kind === 'item') {
-          const item = generateItem(random, choice.itemDefId);
-          globalState.league.itemLookup[item.instanceId] = {
-            itemDef: choice.itemDefId,
-            teamId: team.id,
-          };
-        }
-        if (choice.kind === 'attributeBoost') {
-          const player = globalState.league.playerLookup[choice.playerId];
-          if (!player) {
-            throw new Error(
-              `Could not find player with ID ${choice.playerId} for attribute boost`,
-            );
-          }
-          player.attributes[choice.attribute] = Math.max(
-            1,
-            player.attributes[choice.attribute] + choice.amount,
-          );
-        }
+        globalState.league = applyChoice(
+          random,
+          choice,
+          globalState.league,
+          team,
+        );
       }
     });
 

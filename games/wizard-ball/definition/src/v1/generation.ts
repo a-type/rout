@@ -1,6 +1,7 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
   Choice,
+  ChoiceKind,
   League,
   LeagueRound,
   Player,
@@ -316,17 +317,21 @@ function generatePlayer(
   }
 
   if (!options.skipPerks) {
-    const perkOptions = Object.keys(perks).filter((p) => {
-      const perk = perks[p as keyof typeof perks];
-      return (
-        (perk.kind === 'any' ||
-          perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting')) &&
-        (!perk.requirements ||
-          perk.requirements({ species, classType, positions }))
-      );
-    });
-    if (perkOptions.length > 0) {
-      player.perkIds.push(random.item(perkOptions));
+    const perkCount = random.float(0, 1) < 0.2 ? 2 : 1;
+    for (let i = 0; i < perkCount; i++) {
+      const perkOptions = Object.keys(perks).filter((p) => {
+        const perk = perks[p as keyof typeof perks];
+        return (
+          (perk.kind === 'any' ||
+            perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting')) &&
+          (!perk.requirements ||
+            perk.requirements({ species, classType, positions })) &&
+          !player.perkIds.includes(p)
+        );
+      });
+      if (perkOptions.length === 0) continue;
+      const chosenPerk = random.item(perkOptions);
+      player.perkIds.push(chosenPerk);
     }
   }
   return player;
@@ -418,50 +423,4 @@ export function generateItem(
     itemDef: itemDef ?? pickRandomItemDef(random),
     instanceId: random.id(),
   };
-}
-
-export function generateChoices(
-  random: GameRandom,
-  ids: string[],
-  league: League,
-): Record<string, Choice[]> {
-  // Generate choices
-  const choices: Record<string, Choice[]> = {};
-  ids.forEach((id) => {
-    choices[id] = [];
-    for (let i = 0; i < 3; i++) {
-      const kind = random.item(['item', 'attributeBoost']);
-      if (kind === 'attributeBoost') {
-        const team = Object.values(league.teamLookup).find(
-          (t) => t.ownerId === id,
-        );
-        if (!team) {
-          throw new Error(`Team not found for player ID: ${id}`);
-        }
-        const playerIds = team.playerIds;
-        choices[id].push({
-          kind: 'attributeBoost',
-          attribute: random.item([
-            'strength',
-            'agility',
-            'constitution',
-            'wisdom',
-            'intelligence',
-            'charisma',
-          ]),
-          playerId: random.item(playerIds),
-          amount: random.int(1, 3),
-          id: random.id(),
-        });
-        continue;
-      } else if (kind === 'item') {
-        choices[id].push({
-          kind: 'item',
-          itemDefId: pickRandomItemDef(random),
-          id: random.id(),
-        });
-      }
-    }
-  });
-  return choices;
 }

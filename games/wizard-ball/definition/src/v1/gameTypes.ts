@@ -280,4 +280,18 @@ export type Choice =
       attribute: AttributeType;
       amount: number;
       playerId: PlayerId;
+    }
+  | {
+      id: string;
+      kind: 'teamBoost';
+      attribute: AttributeType;
+      amount: number;
+    }
+  | {
+      id: string;
+      kind: 'perk';
+      perkId: string;
+      playerId: PlayerId;
     };
+
+export type ChoiceKind = Choice['kind'];

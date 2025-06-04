@@ -400,7 +400,8 @@ function getModifiedAttributes(
     getCurrentBatter(gameState) === playerId &&
     gameState.teamData[gameState.battingTeam].pitcher === playerId;
   const stamina = Math.min(1, Math.max(0, player.stamina));
-  const staminaFactor = (1 - stamina) * 0;
+  // TODO: Bring this up when relief pitchers are added
+  const staminaFactor = (1 - stamina) * 4;
   const reduction = staminaFactor + (isPitcherBatting ? 4 : 0);
   const baseStats = sumObjects(
     player.attributes,
@@ -693,7 +694,8 @@ function determinePitchType(
 
   const randomMod = 3 * random.float(-1, 1);
   let attributeTotal = 10 + randomMod;
-  attributeTotal += 0.2 * (pitcherComposite.dueling - batterComposite.dueling);
+  const duelingFactor = pitcherComposite.dueling - batterComposite.dueling;
+  attributeTotal += 0.2 * Math.pow(duelingFactor, 2) * Math.sign(duelingFactor);
   attributeTotal += 0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
   // attributeTotal +=
   //   (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;

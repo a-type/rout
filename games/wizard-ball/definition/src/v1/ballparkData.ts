@@ -124,9 +124,9 @@ export const ballparkData = {
         fielding: isHome ? 4 : 2,
       },
       pitchingCompositeBonus: {
-        velocity: isHome ? 3 : 2,
-        accuracy: isHome ? 3 : 2,
-        dueling: isHome ? 3 : 2,
+        velocity: isHome ? 2 : 1,
+        accuracy: isHome ? 2 : 1,
+        dueling: isHome ? 5 : 3,
       },
     }),
   },
