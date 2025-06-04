@@ -108,6 +108,7 @@ export const gameDefinition: GameDefinition<
       choices: generateChoices(
         random,
         members.map((m) => m.id),
+        league,
       ),
     };
   },
@@ -161,6 +162,18 @@ export const gameDefinition: GameDefinition<
             teamId: team.id,
           };
         }
+        if (choice.kind === 'attributeBoost') {
+          const player = globalState.league.playerLookup[choice.playerId];
+          if (!player) {
+            throw new Error(
+              `Could not find player with ID ${choice.playerId} for attribute boost`,
+            );
+          }
+          player.attributes[choice.attribute] = Math.max(
+            1,
+            player.attributes[choice.attribute] + choice.amount,
+          );
+        }
       }
     });
 
@@ -185,6 +198,7 @@ export const gameDefinition: GameDefinition<
       choices: generateChoices(
         random,
         members.map((m) => m.id),
+        nextLeague,
       ),
       league: nextLeague,
     };

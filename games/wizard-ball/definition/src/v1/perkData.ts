@@ -111,11 +111,10 @@ export const perks: Record<string, Perk> = {
     condition: ({ gameState, isPitcher }) =>
       isPitcher && (!!gameState.bases[2] || !!gameState.bases[3]),
     effect: () => ({
-      hitTableFactor: {
-        hit: 1.5,
-        double: 1.5,
-        triple: 1.5,
-        homeRun: 1.5,
+      battingCompositeBonus: {
+        contact: 2,
+        hitAngle: 2,
+        hitPower: 2,
       },
     }),
   },
@@ -126,11 +125,10 @@ export const perks: Record<string, Perk> = {
     requirements: ({ classType }) => classType === 'barbarian',
     condition: ({ gameState, isBatter }) => isBatter && gameState.strikes === 2,
     effect: () => ({
-      hitTableFactor: {
-        hit: 1.5,
-        double: 1.5,
-        triple: 1.5,
-        homeRun: 1.5,
+      battingCompositeBonus: {
+        contact: 2,
+        hitAngle: 2,
+        hitPower: 2,
       },
     }),
   },
@@ -189,7 +187,6 @@ export const perks: Record<string, Perk> = {
       },
     }),
   },
-
   strikeoutMachine: {
     name: 'Strikeout Machine',
     description: 'Increases quality on 2 strike counts.',
@@ -319,6 +316,23 @@ export const perks: Record<string, Perk> = {
     requirements: ({ species }) => species === 'turtle' || species === 'beaver',
     condition: ({ weather }) =>
       weather === 'rain' || weather === 'lightningStorm',
+    effect: () => ({
+      attributeBonus: {
+        strength: 2,
+        agility: 2,
+        intelligence: 2,
+        wisdom: 2,
+        charisma: 2,
+        constitution: 2,
+      },
+    }),
+  },
+  midnightOil: {
+    name: 'Midnight Oil',
+    description: 'Improves stats in the 8th inning or later.',
+    kind: 'any',
+    requirements: ({ species }) => species === 'owl',
+    condition: ({ gameState }) => gameState.currentInning >= 15,
     effect: () => ({
       attributeBonus: {
         strength: 2,

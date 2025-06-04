@@ -268,8 +268,16 @@ export type HitArea = 'farLeft' | 'left' | 'center' | 'right' | 'farRight';
 export type HitPower = 'weak' | 'normal' | 'strong';
 export type HitType = 'grounder' | 'fly' | 'lineDrive' | 'popUp';
 
-export type Choice = {
-  id: string;
-  kind: 'item';
-  itemDefId: string;
-};
+export type Choice =
+  | {
+      id: string;
+      kind: 'item';
+      itemDefId: string;
+    }
+  | {
+      id: string;
+      kind: 'attributeBoost';
+      attribute: AttributeType;
+      amount: number;
+      playerId: PlayerId;
+    };

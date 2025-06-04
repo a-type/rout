@@ -303,7 +303,7 @@ function generatePlayer(
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
   };
-  const positions: Position[] = ['1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
+  const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
     player.positions.push(random.item(positions));
   }
@@ -423,17 +423,44 @@ export function generateItem(
 export function generateChoices(
   random: GameRandom,
   ids: string[],
+  league: League,
 ): Record<string, Choice[]> {
   // Generate choices
   const choices: Record<string, Choice[]> = {};
   ids.forEach((id) => {
     choices[id] = [];
     for (let i = 0; i < 3; i++) {
-      choices[id].push({
-        kind: 'item',
-        itemDefId: pickRandomItemDef(random),
-        id: random.id(),
-      });
+      const kind = random.item(['item', 'attributeBoost']);
+      if (kind === 'attributeBoost') {
+        const team = Object.values(league.teamLookup).find(
+          (t) => t.ownerId === id,
+        );
+        if (!team) {
+          throw new Error(`Team not found for player ID: ${id}`);
+        }
+        const playerIds = team.playerIds;
+        choices[id].push({
+          kind: 'attributeBoost',
+          attribute: random.item([
+            'strength',
+            'agility',
+            'constitution',
+            'wisdom',
+            'intelligence',
+            'charisma',
+          ]),
+          playerId: random.item(playerIds),
+          amount: random.int(1, 3),
+          id: random.id(),
+        });
+        continue;
+      } else if (kind === 'item') {
+        choices[id].push({
+          kind: 'item',
+          itemDefId: pickRandomItemDef(random),
+          id: random.id(),
+        });
+      }
     }
   });
   return choices;

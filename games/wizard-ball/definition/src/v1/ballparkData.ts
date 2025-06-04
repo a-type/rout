@@ -77,7 +77,7 @@ export const ballparkData = {
     },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
-        fielding: isHome ? -3 : -5,
+        fielding: isHome ? -1 : -5,
       },
     }),
   },
@@ -124,9 +124,29 @@ export const ballparkData = {
         fielding: isHome ? 4 : 2,
       },
       pitchingCompositeBonus: {
-        velocity: isHome ? 3 : 1,
-        accuracy: isHome ? 3 : 1,
-        dueling: isHome ? 3 : 1,
+        velocity: isHome ? 3 : 2,
+        accuracy: isHome ? 3 : 2,
+        dueling: isHome ? 3 : 2,
+      },
+    }),
+  },
+  theBurrow: {
+    name: 'The Burrow',
+    description:
+      'A cozy underground stadium with no weather and a warm atmosphere, boosting hardiness.',
+    icon: '🐇',
+    color: '#795548',
+    weather: {
+      clear: 1,
+      fog: 0,
+      rain: 0,
+      snow: 0,
+      windy: 0,
+      lightningStorm: 0,
+    },
+    effect: ({ isHome } = {}) => ({
+      attributeBonus: {
+        constitution: isHome ? 5 : 1,
       },
     }),
   },

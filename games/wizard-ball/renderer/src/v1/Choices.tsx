@@ -2,6 +2,40 @@ import { useEffect, useState } from 'react';
 import { hooks } from './gameClient';
 import { ItemDefChip } from './items/ItemChip';
 import { clsx, Button } from '@a-type/ui';
+import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
+import { PlayerChip } from './players/PlayerChip';
+import { shortAttribute } from './utils';
+
+function Choice({ choice }: { choice: ChoiceType }) {
+  if (choice.kind === 'item') {
+    return (
+      <>
+        <span className="text-sm font-semibold">Gain </span>
+        <ItemDefChip id={choice.itemDefId} />
+      </>
+    );
+  }
+  if (choice.kind === 'attributeBoost') {
+    const { amount, attribute } = choice;
+    return (
+      <>
+        <span className="text-sm font-semibold">
+          <PlayerChip id={choice.playerId} />{' '}
+        </span>
+        <span
+          className={clsx(
+            'text-sm uppercase',
+            amount > 0 ? 'text-green-500' : 'text-red-500',
+          )}
+        >
+          {amount > 0 ? '+' : ''}
+          {amount} {shortAttribute(attribute)}
+        </span>
+      </>
+    );
+  }
+  return <span className="text-sm font-semibold">Unknown choice kind</span>;
+}
 
 export function Choices() {
   const { finalState, prepareTurn, localTurnData } = hooks.useGameSuite();
@@ -36,12 +70,7 @@ export function Choices() {
                   : 'border-gray-300',
               )}
             >
-              {choice.kind === 'item' ? (
-                <>
-                  <span className="text-sm font-semibold">Gain </span>
-                  <ItemDefChip id={choice.itemDefId} />
-                </>
-              ) : null}
+              <Choice choice={choice} />
             </Button>
           );
         })}
