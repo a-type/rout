@@ -17,7 +17,7 @@ export function UpcomingGames() {
       <h2 className="text-lg font-bold mb-2">
         Upcoming Games {nextRoundText ? `at ${nextRoundText}` : null}
       </h2>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 flex-wrap">
         {upcomingGames.map((game) => {
           return (
             <div

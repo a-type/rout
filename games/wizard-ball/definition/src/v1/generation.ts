@@ -213,6 +213,14 @@ export function generateLeague(
 
         if (round % 2 === 0) {
           const ballpark = league.teamLookup[team1].ballpark;
+          const weatherTable = {
+            ...Object.keys(weatherData).reduce(
+              (acc, w) => ({ ...acc, [w]: 1 }),
+              {},
+            ),
+            ...ballparkData[ballpark].weather,
+          };
+          const weather = randomTable(random, weatherTable);
           roundGames.push({
             id: random.id(),
             homeTeamId: team1,
@@ -222,6 +230,14 @@ export function generateLeague(
           });
         } else {
           const ballpark = league.teamLookup[team2].ballpark;
+          const weatherTable = {
+            ...Object.keys(weatherData).reduce(
+              (acc, w) => ({ ...acc, [w]: 1 }),
+              {},
+            ),
+            ...ballparkData[ballpark].weather,
+          };
+          const weather = randomTable(random, weatherTable);
           roundGames.push({
             id: random.id(),
             homeTeamId: team2,

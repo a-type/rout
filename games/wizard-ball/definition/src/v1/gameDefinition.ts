@@ -56,25 +56,9 @@ export const gameDefinition: GameDefinition<
       if (turn.data.nextBattingOrder.length !== 9) {
         return 'You must select exactly 9 players for your batting order';
       }
-
-      const playerIds = new Set(turn.data.nextBattingOrder);
-      if (playerIds.size !== turn.data.nextBattingOrder.length) {
+      const uniquePositions = new Set(turn.data.nextBattingOrder);
+      if (uniquePositions.size !== 9) {
         return 'You must select unique players for your batting order';
-      }
-      const myTeam = Object.keys(playerState.league.teamLookup).find(
-        (teamId) =>
-          playerState.league.teamLookup[teamId].ownerId === turn.playerId,
-      );
-      if (!myTeam) {
-        return `Could not find team for player ${turn.playerId}`;
-      }
-      const validPlayers = playerState.league.teamLookup[myTeam].playerIds;
-      if (
-        !turn.data.nextBattingOrder.every((playerId) =>
-          validPlayers.includes(playerId),
-        )
-      ) {
-        return 'You can only select players on your team for your batting order';
       }
     }
     return;

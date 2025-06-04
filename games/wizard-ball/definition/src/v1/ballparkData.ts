@@ -1,11 +1,13 @@
 import { LeagueGameState } from './gameTypes';
 import { PerkEffect } from './perkData';
+import { WeatherType } from './weatherData';
 
 export type Ballpark = {
   name: string;
   description: string;
   icon: string;
   color: string;
+  weather: Partial<Record<WeatherType, number>>;
   effect: (props?: {
     gameState?: LeagueGameState;
     isHome?: boolean;
@@ -21,6 +23,10 @@ export const ballparkData = {
       'A spacious field with deep outfield, reducing home runs but increasing extra base hits.',
     icon: '🏟️',
     color: '#4CAF50',
+    weather: {
+      clear: 3,
+      rain: 3,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         homeRuns: isHome ? -2 : -4,
@@ -34,6 +40,9 @@ export const ballparkData = {
       "A huge dam that spans a babbling brook. It's easier to get hits here.",
     icon: '🪵',
     color: '#8D6E63',
+    weather: {
+      rain: 5,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         contact: isHome ? 4 : 2,
@@ -46,6 +55,11 @@ export const ballparkData = {
       'A high-altitude field with thin air, making long hits more common.',
     icon: '🏔️',
     color: '#FF9800',
+    weather: {
+      lightningStorm: 4,
+      windy: 4,
+      snow: 4,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         hitAngle: isHome ? 5 : 3,
@@ -58,6 +72,9 @@ export const ballparkData = {
     description: 'A serene meadow with tall grass, making it harder to field.',
     icon: '🌾',
     color: '#FFEB3B',
+    weather: {
+      clear: 4,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         fielding: isHome ? -3 : -5,
@@ -70,6 +87,7 @@ export const ballparkData = {
       'A gigantic tree stump that serves as a natural stadium, with a unique atmosphere that boosts charisma.',
     icon: '🌳',
     color: '#8BC34A',
+    weather: {},
     effect: ({ isHome } = {}) => ({
       attributeBonus: {
         charisma: isHome ? 4 : 2,
@@ -82,6 +100,9 @@ export const ballparkData = {
       'The hideout of notorius rogues and thieves, where stealing is much easier.',
     icon: '🏴‍☠️',
     color: '#FF5722',
+    weather: {
+      fog: 5,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         stealing: isHome ? 5 : 3,
@@ -94,6 +115,10 @@ export const ballparkData = {
       'A park protected by rangers; the clear air and open space makes it easier to pitch and field.',
     icon: '🏞️',
     color: '#4CAF50',
+    weather: {
+      clear: 4,
+      rain: 4,
+    },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
         fielding: isHome ? 4 : 2,

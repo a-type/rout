@@ -107,4 +107,27 @@ export const weather = {
       },
     }),
   },
+  windy: {
+    name: 'Windy',
+    icon: '💨',
+    color: '#c5cae9',
+    description:
+      'Windy conditions increase the chance of fly balls and improve pitching movement.',
+    effect: () => ({
+      battingCompositeBonus: {
+        hitAngle: 4,
+      },
+      pitchingCompositeBonus: {
+        movement: 4,
+      },
+      hitModiferTable: {
+        type: {
+          grounder: 0.8,
+          lineDrive: 1,
+          fly: 1.2,
+          popUp: 1.1,
+        },
+      },
+    }),
+  },
 } satisfies Record<string, Weather>;

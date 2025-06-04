@@ -4,8 +4,11 @@ import { ItemDefChip } from './items/ItemChip';
 import { clsx, Button } from '@a-type/ui';
 
 export function Choices() {
-  const [selection, setSelection] = useState<string>();
-  const { finalState, prepareTurn } = hooks.useGameSuite();
+  const { finalState, prepareTurn, localTurnData } = hooks.useGameSuite();
+  const [selection, setSelection] = useState<string>(
+    localTurnData?.choiceId ?? '',
+  );
+  useEffect(() => {});
   useEffect(() => {
     if (selection) {
       prepareTurn((turn) => ({ ...turn, choiceId: selection }));

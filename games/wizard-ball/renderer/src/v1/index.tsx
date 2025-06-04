@@ -2,8 +2,7 @@ import { Box, Button } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { PageContent } from './PageContent';
-import { useSearchParams } from '@verdant-web/react-router';
-import { BrowserRouter, Link } from 'react-router';
+import { BrowserRouter, Link, useSearchParams } from 'react-router';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -33,7 +32,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
       <div className="fixed flex gap-2 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
         <Button
           onClick={() => {
-            gameSuite.submitTurn(gameSuite.localTurnData || {});
+            gameSuite.submitTurn();
           }}
         >
           Next round
