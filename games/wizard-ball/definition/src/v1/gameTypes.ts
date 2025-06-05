@@ -176,6 +176,7 @@ export type PlayerStats = {
   pWalks: number;
   hitsAllowed: number;
   homeRunsAllowed: number;
+  saves: number;
 };
 
 export type LeagueGameState = {
@@ -207,6 +208,7 @@ export type LeagueGameState = {
   ballpark: BallparkType;
   winningPitcherId: PlayerId | null;
   losingPitcherId: PlayerId | null;
+  saveElligiblePitcherId: PlayerId | null;
 };
 
 export type GameLogEvent =

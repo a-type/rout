@@ -400,4 +400,23 @@ export const perks: Record<string, Perk> = {
       },
     }),
   },
+  closer: {
+    name: 'Closer',
+    description: 'Improves pitching in the 9th inning or later.',
+    kind: 'pitching',
+    requirements: ({ species, classType, positions }) =>
+      positions.includes('rp') && (species === 'fox' || classType === 'bard'),
+    condition: ({ gameState, isPitcher }) =>
+      isPitcher && gameState.currentInning >= 18,
+    effect: () => ({
+      attributeBonus: {
+        strength: 4,
+        agility: 4,
+        intelligence: 4,
+        wisdom: 4,
+        charisma: 4,
+        constitution: 4,
+      },
+    }),
+  },
 } satisfies Record<string, Perk>;

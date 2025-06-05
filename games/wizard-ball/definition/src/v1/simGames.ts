@@ -144,6 +144,21 @@ export function simulateGame(
       losses: 1,
     });
   }
+  const lastPitcherForWinner = last(gameState.teamData[winner].pitchers);
+  if (
+    lastPitcherForWinner &&
+    gameState.playerStats[lastPitcherForWinner].outsPitched >= 9
+  ) {
+    gameState.saveElligiblePitcherId = lastPitcherForWinner;
+  }
+  if (
+    gameState.saveElligiblePitcherId &&
+    gameState.saveElligiblePitcherId !== gameState.winningPitcherId
+  ) {
+    gameState = addToPlayerStats(gameState, gameState.saveElligiblePitcherId, {
+      saves: 1,
+    });
+  }
 
   const score = {
     [game.homeTeamId]: homeScore,
@@ -214,6 +229,7 @@ export function initialGameState(game: LeagueGame): LeagueGameState {
     leagueGame: game,
     winningPitcherId: null,
     losingPitcherId: null,
+    saveElligiblePitcherId: null,
   };
 }
 
@@ -243,6 +259,7 @@ function addToPlayerStats(
       caughtStealing: 0,
       wins: 0,
       losses: 0,
+      saves: 0,
     };
   }
   const playerStats = gameState.playerStats[playerId];
@@ -1465,9 +1482,9 @@ export function simulatePitch(
     pitcher.stamina +
       scaleAttributePercent(
         pitcherComposite.durability,
-        isReliever ? 1.008 : 1.003,
+        isReliever ? 1.02 : 1.003,
       ) -
-      (isReliever ? 1.016 : 1.01),
+      (isReliever ? 1.04 : 1.014),
   );
   batter.stamina = Math.max(
     -0.25,
@@ -1483,20 +1500,22 @@ export function simulatePitch(
 
   const battingTeamScore = gameState.teamData[gameState.battingTeam].score;
   const pitchingTeamScore = gameState.teamData[gameState.pitchingTeam].score;
-  if (
-    battingTeamScore >= pitchingTeamScore &&
-    (!gameState.winningPitcherId ||
+  if (battingTeamScore >= pitchingTeamScore) {
+    gameState.saveElligiblePitcherId = null;
+    if (
+      !gameState.winningPitcherId ||
       league.teamLookup[gameState.pitchingTeam].playerIds.includes(
         gameState.winningPitcherId,
-      ))
-  ) {
-    const tied = battingTeamScore === pitchingTeamScore;
-    gameState.winningPitcherId = tied
-      ? null
-      : last(gameState.teamData[gameState.battingTeam].pitchers)!;
-    gameState.losingPitcherId = tied
-      ? null
-      : last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
+      )
+    ) {
+      const tied = battingTeamScore === pitchingTeamScore;
+      gameState.winningPitcherId = tied
+        ? null
+        : last(gameState.teamData[gameState.battingTeam].pitchers)!;
+      gameState.losingPitcherId = tied
+        ? null
+        : last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
+    }
   }
 
   return gameState;
@@ -1550,16 +1569,36 @@ function swapPitcher(
   gameState: LeagueGameState,
   newPitcherId: PlayerId,
 ): LeagueGameState {
+  const oldPitcherId = getCurrentPitcher(gameState);
   gameState = logger.addToGameLog(
     {
       kind: 'pitcherChange',
       teamId: gameState.pitchingTeam,
-      oldPitcherId: getCurrentPitcher(gameState),
+      oldPitcherId,
       newPitcherId,
     },
     gameState,
   );
   gameState.teamData[gameState.pitchingTeam].pitchers.push(newPitcherId);
+  // determine save elligibility
+  const rd =
+    gameState.teamData[gameState.pitchingTeam].score -
+    gameState.teamData[gameState.battingTeam].score;
+  const potentialRuns =
+    2 + Object.values(gameState.bases).filter((b) => b !== null).length;
+  const inningInfo = getInningInfo(gameState.currentInning);
+  const potentiallyLastInning =
+    inningInfo.inning >= 9 ||
+    (inningInfo.inning === 8 && inningInfo.half === 'bottom');
+  if (gameState.saveElligiblePitcherId === oldPitcherId) {
+    gameState.saveElligiblePitcherId = null;
+  }
+  if (
+    (rd > 0 && rd <= 3 && (!potentiallyLastInning || gameState.outs === 0)) ||
+    rd <= potentialRuns
+  ) {
+    gameState.saveElligiblePitcherId = newPitcherId;
+  }
   return gameState;
 }
 

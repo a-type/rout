@@ -181,10 +181,10 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
               >
-                <strong>{awayTeam.name}</strong>
+                <strong>{homeTeam.name}</strong>
               </td>
             </tr>
-            {game.teamData[awayTeam.id].pitchers.map((pitcherId) => (
+            {game.teamData[homeTeam.id].pitchers.map((pitcherId) => (
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"
@@ -206,10 +206,10 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
               >
-                <strong>{homeTeam.name}</strong>
+                <strong>{awayTeam.name}</strong>
               </td>
             </tr>
-            {game.teamData[homeTeam.id].pitchers.map((pitcherId) => (
+            {game.teamData[awayTeam.id].pitchers.map((pitcherId) => (
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"

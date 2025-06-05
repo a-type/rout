@@ -54,6 +54,7 @@ export const pitchingStats = [
   { label: 'WHIP', value: 'whip' },
   { label: 'K/9', value: 'kPerNine' },
   { label: 'BB/9', value: 'bbPerNine' },
+  { label: 'SV', value: 'saves' },
 ] as const satisfies Array<StatInfo>;
 
 export function calculatePlayerStats(

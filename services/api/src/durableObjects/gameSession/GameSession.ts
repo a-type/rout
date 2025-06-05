@@ -200,12 +200,12 @@ export class GameSession extends DurableObject<ApiBindings> {
   async delete() {
     if (await this.getIsInitialized()) {
       const sessionData = await this.#getSessionData();
-      if (sessionData.startedAt) {
-        throw new LongGameError(
-          LongGameError.Code.BadRequest,
-          'Cannot delete a game session that has started',
-        );
-      }
+      // if (sessionData.startedAt) {
+      //   throw new LongGameError(
+      //     LongGameError.Code.BadRequest,
+      //     'Cannot delete a game session that has started',
+      //   );
+      // }
     }
     return this.#delete();
   }
