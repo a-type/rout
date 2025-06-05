@@ -33,7 +33,7 @@ export function generateLeague(
   } = {},
 ): League {
   const playersPerTeam = options.numPlayers ?? 16;
-  const roundCount = options.numRounds ?? 20;
+  const roundCount = options.numRounds ?? 10;
   const teamCount = options.numTeams ?? 6;
   let league: League = {
     name: 'League name',

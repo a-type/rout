@@ -68,7 +68,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ isBatter }) => isBatter,
     effect: () => ({
       hitTableFactor: {
-        triple: 4,
+        triple: 2,
       },
     }),
   },

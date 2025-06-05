@@ -7,8 +7,10 @@ import { UpcomingGames } from './UpcomingGames';
 import { Choices } from './Choices';
 import { useSearchParams } from 'react-router';
 import { RecentResults } from './RecentResults';
+import { hooks } from './gameClient';
 
 export function PageContent() {
+  const { gameStatus } = hooks.useGameSuite();
   const [params] = useSearchParams();
   const teamId = params.get('teamId');
   const playerId = params.get('playerId');
@@ -24,7 +26,7 @@ export function PageContent() {
   if (teamId) {
     return <TeamPage id={teamId} />;
   }
-  if (league !== null) {
+  if (league !== null || gameStatus.status === 'complete') {
     return (
       <>
         <TeamStandings />

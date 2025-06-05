@@ -204,7 +204,7 @@ export const gameDefinition: GameDefinition<
     return turn;
   },
 
-  getStatus: ({ globalState, rounds }) => {
+  getStatus: ({ globalState, rounds, members }) => {
     return {
       status:
         globalState.league.currentWeek >= globalState.league.schedule.length
