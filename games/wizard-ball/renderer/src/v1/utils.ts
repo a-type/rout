@@ -83,6 +83,31 @@ export function hitTypeToString(hitType: HitType): string {
   }
 }
 
+export function pitchQualityToString(quality: number): string {
+  if (quality < 0.2) {
+    return 'terrible';
+  }
+  if (quality < 0.4) {
+    return 'awful';
+  }
+  if (quality < 0.6) {
+    return 'bad';
+  }
+  if (quality < 0.8) {
+    return 'mediocre';
+  }
+  if (quality < 1) {
+    return 'middling';
+  }
+  if (quality < 1.2) {
+    return 'great';
+  }
+  if (quality < 1.5) {
+    return 'excellent';
+  }
+  return 'elite';
+}
+
 export function shortAttribute(key: AttributeType): string {
   const lookup: Record<AttributeType, string> = {
     agility: 'Agi',

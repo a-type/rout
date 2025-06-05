@@ -151,17 +151,19 @@ export const gameDefinition: GameDefinition<
         const choice = globalState.choices[turn.playerId].find(
           (c) => c.id === turn.data.choiceId,
         );
-        if (!choice) {
-          throw new Error(
-            `Could not find choice with ID ${turn.data.choiceId} for player ${turn.playerId}`,
+        if (choice) {
+          globalState.league = applyChoice(
+            random,
+            choice,
+            globalState.league,
+            team,
           );
+        } else {
+          // Temporarily commented out this error for easier testing
+          //  throw new Error(
+          //   `Could not find choice with ID ${turn.data.choiceId} for player ${turn.playerId}`,
+          // );
         }
-        globalState.league = applyChoice(
-          random,
-          choice,
-          globalState.league,
-          team,
-        );
       }
     });
 

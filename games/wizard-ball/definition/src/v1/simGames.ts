@@ -694,7 +694,8 @@ function determinePitchType(
 
   const randomMod = 3 * random.float(-1, 1);
   let attributeTotal = 10 + randomMod;
-  const duelingFactor = pitcherComposite.dueling - batterComposite.dueling;
+  const duelingFactor =
+    0.5 * (pitcherComposite.dueling - batterComposite.dueling);
   attributeTotal += 0.2 * Math.pow(duelingFactor, 2) * Math.sign(duelingFactor);
   attributeTotal += 0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
   // attributeTotal +=
@@ -766,6 +767,7 @@ function determinePitchType(
       3: 0.61,
     },
   };
+
   const baseStrikeChance =
     baseStrikeChanceTable[game.strikes]?.[game.balls] ?? 0.6;
   const strikeFactor =
@@ -1267,7 +1269,12 @@ export function simulatePitch(
           pWalks: 1,
         });
         gameState = logger.addToGameLog(
-          { kind: 'walk', batterId, pitcherId },
+          {
+            kind: 'walk',
+            batterId,
+            pitcherId,
+            pitchQuality: pitchData.quality,
+          },
           gameState,
         );
         nextBatter = true;
@@ -1279,6 +1286,7 @@ export function simulatePitch(
             pitcherId,
             strikes: gameState.strikes,
             balls: gameState.balls,
+            pitchQuality: pitchData.quality,
           },
           gameState,
         );
@@ -1305,6 +1313,7 @@ export function simulatePitch(
             pitcherId,
             swung: batterSwung,
             inStrikeZone: pitchData.isStrike,
+            pitchQuality: pitchData.quality,
           },
           gameState,
         );
@@ -1320,6 +1329,7 @@ export function simulatePitch(
             balls: gameState.balls,
             inStrikeZone: pitchData.isStrike,
             swung: batterSwung,
+            pitchQuality: pitchData.quality,
           },
           gameState,
         );
@@ -1339,6 +1349,7 @@ export function simulatePitch(
           strikes: gameState.strikes,
           balls: gameState.balls,
           inStrikeZone: pitchData.isStrike,
+          pitchQuality: pitchData.quality,
         },
         gameState,
       );
@@ -1375,6 +1386,7 @@ export function simulatePitch(
           defender: hitResult.defender,
           defenderId: hitResult.defenderId,
           inStrikeZone: pitchData.isStrike,
+          pitchQuality: pitchData.quality,
         },
         gameState,
       );
@@ -1403,6 +1415,7 @@ export function simulatePitch(
           defender: hitResult.defender,
           defenderId: hitResult.defenderId,
           inStrikeZone: pitchData.isStrike,
+          pitchQuality: pitchData.quality,
         },
         gameState,
       );

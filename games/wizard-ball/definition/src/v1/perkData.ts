@@ -68,7 +68,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ isBatter }) => isBatter,
     effect: () => ({
       hitTableFactor: {
-        triple: 2,
+        triple: 4,
       },
     }),
   },
@@ -83,7 +83,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ isBatter }) => isBatter,
     effect: () => ({
       battingCompositeBonus: {
-        homeRuns: 2,
+        homeRuns: 4,
       },
     }),
   },
@@ -154,7 +154,7 @@ export const perks: Record<string, Perk> = {
       classType === 'bard' || ['rabbit', 'fox'].includes(species),
     condition: ({ isRunner }) => isRunner,
     effect: () => ({
-      qualityBonus: -2,
+      qualityBonus: -4,
     }),
   },
   ace: {
@@ -334,7 +334,8 @@ export const perks: Record<string, Perk> = {
     name: 'Midnight Oil',
     description: 'Improves stats in the 8th inning or later.',
     kind: 'any',
-    requirements: ({ species }) => species === 'owl',
+    requirements: ({ species, classType }) =>
+      species === 'owl' || classType === 'cleric',
     condition: ({ gameState }) => gameState.currentInning >= 15,
     effect: () => ({
       attributeBonus: {
@@ -351,7 +352,8 @@ export const perks: Record<string, Perk> = {
     name: 'Solar Powered',
     description: 'Improves stats in sunny weather.',
     kind: 'any',
-    requirements: ({ species }) => species === 'lizard',
+    requirements: ({ species, classType }) =>
+      species === 'lizard' || classType === 'cleric',
     condition: ({ weather }) => weather === 'clear' || weather === 'heat',
     effect: () => ({
       attributeBonus: {
@@ -368,7 +370,8 @@ export const perks: Record<string, Perk> = {
     name: 'Wind Machine',
     description: 'Improves stats in windy weather.',
     kind: 'any',
-    requirements: ({ species }) => species === 'fox',
+    requirements: ({ species, classType }) =>
+      species === 'fox' || classType === 'cleric',
     condition: ({ weather }) => weather === 'windy',
     effect: () => ({
       attributeBonus: {
@@ -378,6 +381,22 @@ export const perks: Record<string, Perk> = {
         wisdom: 2,
         charisma: 2,
         constitution: 2,
+      },
+    }),
+  },
+  steady: {
+    name: 'Steady',
+    description: 'Improves pitching with runners in scoring position.',
+    kind: 'pitching',
+    requirements: ({ species }) =>
+      ['fox', 'turtle', 'badger'].includes(species),
+    condition: ({ gameState, isPitcher }) =>
+      isPitcher && (!!gameState.bases[2] || !!gameState.bases[3]),
+    effect: () => ({
+      pitchingCompositeBonus: {
+        movement: 4,
+        contact: 4,
+        deception: 4,
       },
     }),
   },

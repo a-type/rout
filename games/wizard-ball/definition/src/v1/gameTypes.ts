@@ -220,6 +220,7 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       strikes: number;
       balls: number;
+      pitchQuality: number;
     }
   | {
       kind: 'foul';
@@ -228,6 +229,7 @@ export type GameLogEvent =
       strikes: number;
       balls: number;
       inStrikeZone: boolean;
+      pitchQuality: number;
     }
   | {
       kind: 'strike';
@@ -237,6 +239,7 @@ export type GameLogEvent =
       balls: number;
       inStrikeZone: boolean;
       swung: boolean;
+      pitchQuality: number;
     }
   | {
       kind: 'strikeout';
@@ -244,11 +247,13 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       inStrikeZone: boolean;
       swung: boolean;
+      pitchQuality: number;
     }
   | {
       kind: 'walk';
       batterId: PlayerId;
       pitcherId: PlayerId;
+      pitchQuality: number;
     };
 
 export type HitGameLogEvent = {
@@ -261,6 +266,7 @@ export type HitGameLogEvent = {
   defender: Position | null;
   defenderId: PlayerId | null;
   inStrikeZone: boolean;
+  pitchQuality: number;
 };
 
 export type GameLog = Array<GameLogEvent>;

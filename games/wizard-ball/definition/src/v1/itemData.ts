@@ -81,14 +81,15 @@ export const itemData: Record<string, ItemInfo> = {
   goldenBat: {
     name: 'Golden Bat',
     description:
-      'A legendary bat that increases the wearers hitting power and launch angle',
+      'A legendary bat that dramatically increases the wearers hitting power and launch angle',
     icon: '🏏',
     rarity: 'legendary',
     condition: ({ isMe }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
-        hitPower: 3,
-        hitAngle: 3,
+        hitPower: 7,
+        hitAngle: 7,
+        homeRuns: 7,
       },
     }),
   },
@@ -113,7 +114,7 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
-        stealing: 3,
+        stealing: 4,
       },
     }),
   },
@@ -125,9 +126,9 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
-        velocity: 2,
-        accuracy: 2,
-        movement: 2,
+        velocity: 7,
+        deception: 7,
+        movement: 7,
       },
     }),
   },
@@ -135,11 +136,11 @@ export const itemData: Record<string, ItemInfo> = {
     name: 'Jump Boots',
     description: 'Boots that allow the wearer to get extra bases',
     icon: '👢',
-    rarity: 'rare',
+    rarity: 'uncommon',
     condition: ({ isMe }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
-        extraBases: 3,
+        extraBases: 4,
       },
     }),
   },
@@ -151,7 +152,7 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
-        plateDiscipline: 3,
+        plateDiscipline: 4,
       },
     }),
   },
@@ -163,10 +164,10 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
-        dueling: 4,
+        dueling: 5,
       },
       pitchingCompositeBonus: {
-        dueling: 4,
+        dueling: 5,
       },
     }),
   },
@@ -195,8 +196,8 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
-        velocity: 3,
-        accuracy: -3,
+        velocity: 4,
+        accuracy: -2,
       },
     }),
   },
@@ -208,8 +209,8 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
-        movement: 3,
-        velocity: -3,
+        movement: 4,
+        velocity: -2,
       },
     }),
   },
@@ -230,7 +231,7 @@ export const itemData: Record<string, ItemInfo> = {
     name: 'Magician Hat',
     description: 'A hat that enhances deception',
     icon: '🎩',
-    rarity: 'epic',
+    rarity: 'rare',
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
@@ -246,10 +247,10 @@ export const itemData: Record<string, ItemInfo> = {
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
-        durability: 4,
+        durability: 5,
       },
       battingCompositeBonus: {
-        durability: 4,
+        durability: 5,
       },
     }),
   },
