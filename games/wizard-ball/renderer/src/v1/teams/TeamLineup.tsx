@@ -28,11 +28,10 @@ import {
 import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
-import { Position } from '@long-game/game-wizard-ball-definition';
+import { Position, isPitcher } from '@long-game/game-wizard-ball-definition';
 import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
-import { useLineup } from './useLineup';
 import { useSendTurn } from '../utils';
 
 const Item = forwardRef<
@@ -121,10 +120,9 @@ export function TeamLineup({ id }: { id: string }) {
         <h2>Lineup</h2>
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           {items.map((position, idx) => {
-            const playerId =
-              position === 'p'
-                ? team.pitchingOrder[team.nextPitcherIndex]
-                : team.positionChart[position];
+            const playerId = isPitcher(position)
+              ? team.pitchingOrder[team.nextPitcherIndex]
+              : team.positionChart[position];
             if (!playerId) {
               return null;
             }

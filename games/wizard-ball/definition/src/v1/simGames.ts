@@ -15,13 +15,18 @@ import type {
   PlayerId,
   PlayerStats,
   Position,
+  PositionChart,
   RoundResult,
 } from './gameTypes';
 import {
+  getInningInfo,
+  isPitcher,
+  last,
   multiplyObjects,
   randomTable,
   scaleAttribute,
   scaleAttributePercent,
+  sum,
   sumObjects,
 } from './utils';
 import { ActualPitch, pitchTypes, PitchKind } from './pitchData';
@@ -29,6 +34,7 @@ import { Perk, PerkEffect, perks } from './perkData';
 import {
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
+  getPlayerOverall,
 } from './attributes';
 import Logger from './logger';
 import { weather as weatherData } from './weatherData';
@@ -68,6 +74,7 @@ function checkGameOver(
   if (gameState.currentInning > 50) {
     return true;
   }
+  // TODO: Fix this to handle home vs away properly
   if (gameState.currentInning >= 18 && battingScore > pitchingScore) {
     return true;
   }
@@ -91,9 +98,9 @@ export function setupGame(
       (team.nextPitcherIndex + 1) % team.pitchingOrder.length;
     gameState.teamData[teamId] = {
       score: 0,
-      pitcher,
+      pitchers: [pitcher],
       battingOrder: team.battingOrder.map((pos) => {
-        if (pos === 'p') {
+        if (isPitcher(pos)) {
           return pitcher;
         }
         if (!team.positionChart[pos]) {
@@ -114,8 +121,6 @@ export function simulateGame(
 ): GameResult {
   let gameState = initialGameState(game);
   gameState = setupGame(league, game, gameState);
-  const homePitcher = gameState.teamData[game.homeTeamId].pitcher;
-  const awayPitcher = gameState.teamData[game.awayTeamId].pitcher;
   while (!checkGameOver(gameState, game)) {
     gameState = simulateInning(random, gameState, league);
     if (checkGameOver(gameState, game)) {
@@ -129,14 +134,16 @@ export function simulateGame(
   const winner = homeScore > awayScore ? game.homeTeamId : game.awayTeamId;
   const loser = homeScore > awayScore ? game.awayTeamId : game.homeTeamId;
   // Update W/L for pitchers
-  gameState = addToPlayerStats(gameState, homePitcher, {
-    wins: winner === game.homeTeamId ? 1 : 0,
-    losses: winner === game.homeTeamId ? 0 : 1,
-  });
-  gameState = addToPlayerStats(gameState, awayPitcher, {
-    wins: winner === game.awayTeamId ? 1 : 0,
-    losses: winner === game.awayTeamId ? 0 : 1,
-  });
+  if (gameState.winningPitcherId) {
+    gameState = addToPlayerStats(gameState, gameState.winningPitcherId, {
+      wins: 1,
+    });
+  }
+  if (gameState.losingPitcherId) {
+    gameState = addToPlayerStats(gameState, gameState.losingPitcherId, {
+      losses: 1,
+    });
+  }
 
   const score = {
     [game.homeTeamId]: homeScore,
@@ -150,8 +157,6 @@ export function simulateGame(
     homeTeamId: game.homeTeamId,
     awayTeamId: game.awayTeamId,
     teamData: gameState.teamData,
-    awayPitcher,
-    homePitcher,
     loser,
     score,
     gameLog: gameState.gameLog,
@@ -207,6 +212,8 @@ export function initialGameState(game: LeagueGame): LeagueGameState {
     weather: 'clear',
     ballpark: 'bigField',
     leagueGame: game,
+    winningPitcherId: null,
+    losingPitcherId: null,
   };
 }
 
@@ -338,7 +345,7 @@ function getCurrentBatter(gameState: LeagueGameState): string {
 }
 
 function getCurrentPitcher(gameState: LeagueGameState): string {
-  return gameState.teamData[gameState.pitchingTeam].pitcher;
+  return last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
 }
 
 function getActivePlayerPerks(
@@ -398,10 +405,10 @@ function getModifiedAttributes(
   const player = league.playerLookup[playerId];
   const isPitcherBatting =
     getCurrentBatter(gameState) === playerId &&
-    gameState.teamData[gameState.battingTeam].pitcher === playerId;
+    last(gameState.teamData[gameState.battingTeam].pitchers) === playerId;
   const stamina = Math.min(1, Math.max(0, player.stamina));
   // TODO: Bring this up when relief pitchers are added
-  const staminaFactor = (1 - stamina) * 4;
+  const staminaFactor = Math.max(0, (0.8 - stamina) * 6);
   const reduction = staminaFactor + (isPitcherBatting ? 4 : 0);
   const baseStats = sumObjects(
     player.attributes,
@@ -844,7 +851,7 @@ function determineDefender(
   random: GameRandom,
   hitArea: HitArea,
   hitType: HitType,
-): Exclude<Position, 'p'> {
+): keyof PositionChart {
   switch (hitType) {
     case 'grounder':
     case 'lineDrive':
@@ -1452,16 +1459,20 @@ export function simulatePitch(
     gameState,
     getActivePlayerPerks(batter.id, league, gameState, pitchData.kind),
   );
+  const isReliever = pitcher.positions.some((pos) => pos === 'rp');
   pitcher.stamina = Math.max(
     -0.25,
     pitcher.stamina +
-      scaleAttributePercent(pitcherComposite.durability, 1.004) -
-      1.008,
+      scaleAttributePercent(
+        pitcherComposite.durability,
+        isReliever ? 1.008 : 1.003,
+      ) -
+      (isReliever ? 1.016 : 1.01),
   );
   batter.stamina = Math.max(
     -0.25,
     batter.stamina +
-      scaleAttributePercent(batterComposite.durability, 1.007) -
+      scaleAttributePercent(batterComposite.durability, 1.006) -
       1.014,
   );
 
@@ -1470,6 +1481,85 @@ export function simulatePitch(
     gameState = resetCount(gameState);
   }
 
+  const battingTeamScore = gameState.teamData[gameState.battingTeam].score;
+  const pitchingTeamScore = gameState.teamData[gameState.pitchingTeam].score;
+  if (
+    battingTeamScore >= pitchingTeamScore &&
+    (!gameState.winningPitcherId ||
+      league.teamLookup[gameState.pitchingTeam].playerIds.includes(
+        gameState.winningPitcherId,
+      ))
+  ) {
+    const tied = battingTeamScore === pitchingTeamScore;
+    gameState.winningPitcherId = tied
+      ? null
+      : last(gameState.teamData[gameState.battingTeam].pitchers)!;
+    gameState.losingPitcherId = tied
+      ? null
+      : last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
+  }
+
+  return gameState;
+}
+
+function considerSwapPitcher(
+  gameState: LeagueGameState,
+  league: League,
+): PlayerId | null {
+  if (gameState.strikes !== 0 || gameState.balls !== 0) {
+    // Don't swap pitchers if the count is not reset
+    return null;
+  }
+  const pitcherId = getCurrentPitcher(gameState);
+  const pitcher = league.playerLookup[pitcherId];
+  if (!pitcher) {
+    throw new Error(`No pitcher found for team ${gameState.pitchingTeam}`);
+  }
+  if (pitcher.stamina > 0.2) {
+    return null;
+  }
+  const team = league.teamLookup[gameState.pitchingTeam];
+  const alternatePitchers = team.playerIds
+    .map((pid) => league.playerLookup[pid])
+    .filter(
+      (p) =>
+        !team.pitchingOrder.includes(p.id) &&
+        p.positions.some((pos) => isPitcher(pos)) &&
+        p.stamina > 0.5,
+    );
+  if (alternatePitchers.length === 0) {
+    return null;
+  }
+  // Sort by overall
+  return alternatePitchers.reduce((a, b) => {
+    const aOverall = sum(
+      ...Object.values(getModifiedAttributes(a.id, league, gameState, [])),
+    );
+    const bOverall = sum(
+      ...Object.values(getModifiedAttributes(b.id, league, gameState, [])),
+    );
+    if (aOverall > bOverall) {
+      return a;
+    } else {
+      return b;
+    }
+  }).id;
+}
+
+function swapPitcher(
+  gameState: LeagueGameState,
+  newPitcherId: PlayerId,
+): LeagueGameState {
+  gameState = logger.addToGameLog(
+    {
+      kind: 'pitcherChange',
+      teamId: gameState.pitchingTeam,
+      oldPitcherId: getCurrentPitcher(gameState),
+      newPitcherId,
+    },
+    gameState,
+  );
+  gameState.teamData[gameState.pitchingTeam].pitchers.push(newPitcherId);
   return gameState;
 }
 
@@ -1495,6 +1585,10 @@ function simulateInning(
     gameState,
   );
   while (gameState.outs < 3) {
+    const nextPitcher = considerSwapPitcher(gameState, league);
+    if (nextPitcher) {
+      gameState = swapPitcher(gameState, nextPitcher);
+    }
     gameState = simulatePitch(random, gameState, league);
   }
   const nextScore = gameState.teamData[gameState.battingTeam].score;

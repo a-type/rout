@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import {
   Position,
   PositionChart,
+  isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { clsx, Tooltip } from '@a-type/ui';
 import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
@@ -91,7 +92,7 @@ export function TeamChart({ id }: { id: string }) {
           [position]: playerId,
         };
         if (currentPosition) {
-          nextPositionChart[currentPosition as Exclude<Position, 'p'>] = null;
+          nextPositionChart[currentPosition as keyof PositionChart] = null;
         }
         return nextPositionChart;
       });
@@ -186,8 +187,10 @@ export function TeamChart({ id }: { id: string }) {
         <Droppable id="bench" className="flex flex-col gap-1">
           {team.playerIds
             .filter((p) => !Object.values(depthChart).includes(p))
-            .filter(
-              (p) => finalState.league.playerLookup[p].positions[0] !== 'p',
+            .filter((p) =>
+              finalState.league.playerLookup[p].positions.every(
+                (p) => !isPitcher(p),
+              ),
             )
             .map((playerId) => {
               const player = finalState.league.playerLookup[playerId];
@@ -256,6 +259,41 @@ export function TeamChart({ id }: { id: string }) {
             );
           })}
         </div>
+        <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+        <h4 className="mt-0 mb-2">Relievers</h4>
+        <Droppable id="relievers" className="flex flex-col gap-1">
+          {team.playerIds
+            .filter((p) => !pitchingOrder.includes(p))
+            .filter((p) =>
+              finalState.league.playerLookup[p].positions.some((p) =>
+                isPitcher(p),
+              ),
+            )
+            .map((playerId) => {
+              const player = finalState.league.playerLookup[playerId];
+              return (
+                <div key={playerId} className="flex items-center gap-2">
+                  <Draggable
+                    disabled={currentUserId !== team.ownerId}
+                    id={playerId}
+                    className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                  >
+                    <span className="uppercase">
+                      {player.positions.join('/')}
+                    </span>
+                    <Tooltip
+                      className="bg-gray-700 text-gray-100"
+                      content={<PlayerTooltipContent id={player.id} />}
+                    >
+                      <span>{player.name}</span>
+                    </Tooltip>
+                  </Draggable>
+                  <PlayerAttributesSummary kind="overall" id={playerId} />
+                  <PlayerAttributesSummary kind="stamina" id={playerId} />
+                </div>
+              );
+            })}
+        </Droppable>
       </DndContext>
     </div>
   );

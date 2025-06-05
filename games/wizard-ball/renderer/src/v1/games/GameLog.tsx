@@ -47,6 +47,21 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         </div>
       );
 
+    case 'pitcherChange':
+      return (
+        <div className="flex flex-col items-start">
+          <hr className="w-full h-1 border-none bg-gray-500" />
+          <div className="flex flex-col items-start gap-1">
+            <div>
+              <PlayerChip noPositions id={event.newPitcherId} /> is now pitching
+              for <TeamName bold id={event.teamId} />, replacing{' '}
+              <PlayerChip noPositions id={event.oldPitcherId} />.
+            </div>
+          </div>
+          <hr className="w-full h-1 border-none bg-gray-500" />
+        </div>
+      );
+
     case 'strike':
       return (
         <>
@@ -191,12 +206,13 @@ export function GameLog({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-2xl font-bold mb-0">Game Log</h1>
-      <div className="flex flex-col gap-">
+      <div className="flex flex-col">
         {log.map((entry, index) => (
           <div key={index} className="p-1">
             <GameLogEvent event={entry} />
           </div>
         ))}
+        {/* TODO: Add final score */}
       </div>
     </div>
   );

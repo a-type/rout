@@ -1,4 +1,5 @@
 import { GameRandom } from '@long-game/game-definition';
+import type { Player, Position } from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,
@@ -92,4 +93,12 @@ export function getInningInfo(inning: number): {
     inning: Math.ceil(inning / 2),
     half,
   };
+}
+
+export function isPitcher(position: Position): position is 'sp' | 'rp' {
+  return position === 'sp' || position === 'rp';
+}
+
+export function last<T>(arr: T[]): T | undefined {
+  return arr[arr.length - 1];
 }

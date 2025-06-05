@@ -184,7 +184,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 <strong>{awayTeam.name}</strong>
               </td>
             </tr>
-            {[game.awayPitcher].map((pitcherId) => (
+            {game.teamData[awayTeam.id].pitchers.map((pitcherId) => (
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"
@@ -209,7 +209,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 <strong>{homeTeam.name}</strong>
               </td>
             </tr>
-            {[game.homePitcher].map((pitcherId) => (
+            {game.teamData[homeTeam.id].pitchers.map((pitcherId) => (
               <tr
                 key={pitcherId}
                 className="cursor-pointer hover:bg-gray-500/50"

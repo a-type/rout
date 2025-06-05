@@ -9,7 +9,10 @@ export type TeamId = string;
 export type PlayerId = string;
 export type GameId = string;
 
-export type PositionChart = Record<Exclude<Position, 'p'>, PlayerId | null>;
+export type PositionChart = Record<
+  Exclude<Position, 'sp' | 'rp'>,
+  PlayerId | null
+>;
 
 export type Team = {
   icon: string;
@@ -89,7 +92,8 @@ export type Position =
   | 'lf'
   | 'cf'
   | 'rf'
-  | 'p';
+  | 'sp'
+  | 'rp';
 
 export type Base = 1 | 2 | 3;
 
@@ -133,7 +137,7 @@ export type GameResult = {
     TeamId,
     {
       battingOrder: PlayerId[];
-      pitcher: PlayerId;
+      pitchers: PlayerId[];
     }
   >;
   inningData: Array<{
@@ -141,8 +145,6 @@ export type GameResult = {
     battingTeam: TeamId;
     pitchingTeam: TeamId;
   }>;
-  awayPitcher: PlayerId;
-  homePitcher: PlayerId;
   score: {
     [teamId: string]: number;
   };
@@ -184,7 +186,7 @@ export type LeagueGameState = {
     TeamId,
     {
       battingOrder: PlayerId[];
-      pitcher: PlayerId;
+      pitchers: PlayerId[];
       score: number;
     }
   >;
@@ -203,6 +205,8 @@ export type LeagueGameState = {
   gameLog: GameLog;
   weather: WeatherType;
   ballpark: BallparkType;
+  winningPitcherId: PlayerId | null;
+  losingPitcherId: PlayerId | null;
 };
 
 export type GameLogEvent =
@@ -213,6 +217,12 @@ export type GameLogEvent =
       battingTeam: TeamId;
       pitchingTeam: TeamId;
       score: Record<TeamId, number>;
+    }
+  | {
+      kind: 'pitcherChange';
+      teamId: TeamId;
+      oldPitcherId: PlayerId;
+      newPitcherId: PlayerId;
     }
   | {
       kind: 'ball';

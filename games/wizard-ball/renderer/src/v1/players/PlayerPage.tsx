@@ -2,9 +2,9 @@ import {
   speciesIcons,
   perks,
   getPlayerOverall,
+  isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { useSearchParams } from '@verdant-web/react-router';
 import { clsx } from '@a-type/ui';
 import { Attributes } from '../ratings/Attributes';
 import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
@@ -60,7 +60,7 @@ export function PlayerPage({ id }: { id: string }) {
   const playerAttributes = usePlayerAttributes(id);
   const playerComposites = usePlayerComposite(
     id,
-    player.positions.includes('p') ? 'pitching' : 'batting',
+    player.positions.some((pos) => isPitcher(pos)) ? 'pitching' : 'batting',
   );
 
   return (
@@ -125,7 +125,9 @@ export function PlayerPage({ id }: { id: string }) {
         stamina={player.stamina}
       />
       <CompositeRatings
-        kind={player.positions.includes('p') ? 'pitching' : 'batting'}
+        kind={
+          player.positions.some((p) => isPitcher(p)) ? 'pitching' : 'batting'
+        }
         compositeRatings={playerComposites.base}
         compositeMod={playerComposites.adjusted}
       />
@@ -195,7 +197,7 @@ export function PlayerPage({ id }: { id: string }) {
             </tfoot>
           </table>
         </div>
-        {player.positions.includes('p') && (
+        {player.positions.some((p) => isPitcher(p)) && (
           <>
             <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
             <div className="flex flex-col gap-2">

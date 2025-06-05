@@ -18,7 +18,7 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
-import { randomTable } from './utils';
+import { isPitcher, randomTable } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 
@@ -32,7 +32,7 @@ export function generateLeague(
     skipPerks?: boolean;
   } = {},
 ): League {
-  const playersPerTeam = options.numPlayers ?? 16;
+  const playersPerTeam = options.numPlayers ?? 19;
   const roundCount = options.numRounds ?? 10;
   const teamCount = options.numTeams ?? 6;
   let league: League = {
@@ -87,10 +87,13 @@ export function generateLeague(
       'lf',
       'cf',
       'rf',
-      'p',
-      'p',
-      'p',
-      'p',
+      'sp',
+      'sp',
+      'sp',
+      'sp',
+      'rp',
+      'rp',
+      'rp',
     ];
     team.battingOrder = forcedPositions.slice(0, 9);
     for (let i = 0; i < playersPerTeam; i++) {
@@ -114,10 +117,10 @@ export function generateLeague(
       const position = player.positions[0];
       player.teamId = team.id;
       team.playerIds.push(player.id);
-      if (position !== 'p' && team.positionChart[position] === null) {
+      if (!isPitcher(position) && team.positionChart[position] === null) {
         team.positionChart[position] = player.id;
       }
-      if (forcedPositions[i] === 'p') {
+      if (forcedPositions[i] === 'sp') {
         team.pitchingOrder.push(player.id);
       }
       league.playerLookup[player.id] = player;
@@ -154,8 +157,8 @@ export function generateLeague(
     // sort batting order by overall
     team.battingOrder.sort((a, b) => {
       // sort pitcher last
-      if (a === 'p' && b !== 'p') return 1;
-      if (b === 'p' && a !== 'p') return -1;
+      if (isPitcher(a) && !isPitcher(b)) return 1;
+      if (isPitcher(b) && !isPitcher(a)) return -1;
       const playerA = team.positionChart[a as keyof typeof team.positionChart];
       const playerB = team.positionChart[b as keyof typeof team.positionChart];
       if (!playerA || !playerB) return 0;
@@ -309,7 +312,8 @@ function generatePlayer(
   if (player.positions.length === 0) {
     player.positions.push(random.item(positions));
   }
-  const extraPositions = forcedPosition === 'p' ? 0 : random.int(0, 2);
+  const extraPositions =
+    forcedPosition && isPitcher(forcedPosition) ? 0 : random.int(0, 2);
   for (let i = 0; i < extraPositions; i++) {
     const position = random.item(positions);
     if (!player.positions.includes(position)) {
@@ -324,7 +328,10 @@ function generatePlayer(
         const perk = perks[p as keyof typeof perks];
         return (
           (perk.kind === 'any' ||
-            perk.kind === (forcedPosition === 'p' ? 'pitching' : 'batting')) &&
+            perk.kind ===
+              (forcedPosition && isPitcher(forcedPosition)
+                ? 'pitching'
+                : 'batting')) &&
           (!perk.requirements ||
             perk.requirements({ species, classType, positions })) &&
           !player.perkIds.includes(p)

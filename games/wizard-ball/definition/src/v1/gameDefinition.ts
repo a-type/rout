@@ -169,7 +169,12 @@ export const gameDefinition: GameDefinition<
 
     const results = simulateRound(random, globalState.league, currentRound);
     Object.values(globalState.league.playerLookup).forEach((player) => {
-      player.stamina = Math.min(1, player.stamina + 0.25);
+      const recovery = player.positions.some((p) => p === 'sp')
+        ? 0.25
+        : player.positions.some((p) => p === 'rp')
+        ? 0.25
+        : 0.4;
+      player.stamina = Math.min(1, player.stamina + recovery);
     });
     for (const result of results) {
       const winner = globalState.league.teamLookup[result.winner];
