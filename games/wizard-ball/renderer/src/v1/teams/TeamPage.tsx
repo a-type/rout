@@ -15,6 +15,7 @@ import { attributeToColor } from '../utils';
 import { TeamItems } from './TeamItems';
 import { BallparkChip } from '../BallparkChip';
 import { Link } from 'react-router';
+import { TeamPlayers } from './TeamPlayers';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -39,18 +40,6 @@ export function TeamPage({ id }: { id: TeamId }) {
   const myGameResults = finalState.league.gameResults
     .flat()
     .filter((game) => game.winner === id || game.loser === id);
-
-  const renderColorCell = (value: number, max: number = 20) => {
-    const { bg } = attributeToColor(value, max);
-    return (
-      <td
-        className="text-center"
-        style={{ backgroundColor: bg, color: '#222' }}
-      >
-        {value}
-      </td>
-    );
-  };
 
   const teamAttributes = getTeamAvgAttributes(finalState.league, team.id);
 
@@ -111,63 +100,7 @@ export function TeamPage({ id }: { id: TeamId }) {
           <TeamItems id={id} />
         </Tabs.Content>
         <Tabs.Content value="players">
-          <div>
-            <h3 className="mt-4">Players</h3>
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="text-left p-1">Name</th>
-                  <th className="text-left p-1">Position</th>
-                  <th className="text-center p-1">OVR</th>
-                  <th className="text-center p-1">STR</th>
-                  <th className="text-center p-1">AGI</th>
-                  <th className="text-center p-1">CON</th>
-                  <th className="text-center p-1">WIS</th>
-                  <th className="text-center p-1">INT</th>
-                  <th className="text-center p-1">CHA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {team.playerIds
-                  .map((playerId) => {
-                    const player = finalState.league.playerLookup[playerId];
-                    const overall = Object.values(player.attributes).reduce(
-                      (a, b) => a + b,
-                    );
-                    return { player, overall };
-                  })
-                  .sort((a, b) => b.overall - a.overall)
-                  .map(({ player, overall }) => {
-                    return (
-                      <tr
-                        key={player.id}
-                        className="cursor-pointer hover:bg-gray-700"
-                      >
-                        <td className="p-1">
-                          <Link
-                            to={{
-                              search: '?playerId=' + player.id,
-                            }}
-                          >
-                            {player.name}
-                          </Link>
-                        </td>
-                        <td className="p-1">
-                          {player.positions[0].toUpperCase()}
-                        </td>
-                        {renderColorCell(overall, 100)}
-                        {renderColorCell(player.attributes.strength)}
-                        {renderColorCell(player.attributes.agility)}
-                        {renderColorCell(player.attributes.constitution)}
-                        {renderColorCell(player.attributes.wisdom)}
-                        {renderColorCell(player.attributes.intelligence)}
-                        {renderColorCell(player.attributes.charisma)}
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
+          <TeamPlayers id={id} />
         </Tabs.Content>
         <Tabs.Content value="games">
           <div>

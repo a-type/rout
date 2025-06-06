@@ -41,6 +41,7 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
       ...stats,
     }));
   };
+  const results = findTop(tabValue);
 
   return (
     <Tabs
@@ -70,19 +71,27 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
         </h2>
         <table className="table-auto border border-gray-300 rounded-lg shadow-sm">
           <tbody>
-            {findTop(tabValue).map((player) => {
-              return (
-                <tr
-                  key={player.playerId}
-                  className="cursor-pointer hover:bg-gray-500/50 p-1"
-                >
-                  <td className="text-left p-1 flex items-center gap-2">
-                    <PlayerChip id={player.playerId} noBackground />
-                  </td>
-                  <td className="text-right p-1">{player[tabValue]}</td>
-                </tr>
-              );
-            })}
+            {results.length === 0 ? (
+              <tr>
+                <td colSpan={2} className="text-center p-4 text-gray-400">
+                  No players have stats for this category yet.
+                </td>
+              </tr>
+            ) : (
+              results.map((player) => {
+                return (
+                  <tr
+                    key={player.playerId}
+                    className="cursor-pointer hover:bg-gray-500/50 p-1"
+                  >
+                    <td className="text-left p-1 flex items-center gap-2">
+                      <PlayerChip id={player.playerId} noBackground />
+                    </td>
+                    <td className="text-right p-1">{player[tabValue]}</td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

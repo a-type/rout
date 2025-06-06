@@ -1,5 +1,5 @@
 import { GameRandom } from '@long-game/game-definition';
-import type { Player, Position } from './gameTypes';
+import type { LeagueGameState, Player, Position } from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,

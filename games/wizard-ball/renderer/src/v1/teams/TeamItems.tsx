@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { clsx } from '@a-type/ui';
 import { useBench } from './useBench';
 import { usePitchingRotation } from './usePitchingRotation';
+import { usePitchingRelievers } from './usePitchingRelievers';
 
 function DroppablePlayerArea({
   id,
@@ -72,6 +73,7 @@ export function TeamItems({ id }: { id: string }) {
   const teamLineup = useLineup(id);
   const teamBench = useBench(id);
   const teamRotation = usePitchingRotation(id);
+  const teamRelievers = usePitchingRelievers(id);
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
@@ -192,6 +194,21 @@ export function TeamItems({ id }: { id: string }) {
         <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
         <h2 className="mt-0 mb-2">Pitching Rotation</h2>
         {teamRotation.map(({ player: { id: playerId } }) => {
+          return (
+            <DroppablePlayerArea key={playerId} id={playerId}>
+              <PlayerChip noBackground noTeamIcon id={playerId} />
+              <div className="flex flex-wrap gap-2">
+                {itemAssignments[playerId]?.map((itemId) => (
+                  <Draggable key={itemId} id={itemId}>
+                    <ItemChip id={itemId} />
+                  </Draggable>
+                ))}
+              </div>
+            </DroppablePlayerArea>
+          );
+        })}
+        <h2 className="mt-0 mb-2">Relievers</h2>
+        {teamRelievers.map(({ id: playerId }) => {
           return (
             <DroppablePlayerArea key={playerId} id={playerId}>
               <PlayerChip noBackground noTeamIcon id={playerId} />

@@ -848,7 +848,7 @@ function determinePitchType(
 
   pitchData.swingBallFactor *= scaleAttributePercent(
     pitcherComposite.deception,
-    1.5,
+    3,
   );
   pitchData.hitModiferTable.type.grounder =
     (pitchData.hitModiferTable.type.grounder ?? 1) *
@@ -1147,7 +1147,6 @@ function attemptSteal(
   );
   const baseFactor = fromBase === 2 ? 0.8 : 0.7;
   const stealSuccessChance = baseFactor * agilityFactor;
-  // (fromBase === 2 ? 0.8 : 0.75) ** (1 / agilityFactor);
   if (random.float(0, 1) < stealSuccessChance) {
     gameState.bases[fromBase] = null;
     if (fromBase === 3) {
@@ -1166,6 +1165,9 @@ function attemptSteal(
       caughtStealing: 1,
     });
     gameState.outs += 1;
+    gameState = addToPlayerStats(gameState, getCurrentPitcher(gameState), {
+      outsPitched: 1,
+    });
   }
   return gameState;
 }
