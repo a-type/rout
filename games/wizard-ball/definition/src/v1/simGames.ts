@@ -701,6 +701,8 @@ function determinePitchType(
     0.5 * (pitcherComposite.dueling - batterComposite.dueling);
   attributeTotal += 0.2 * Math.pow(duelingFactor, 2) * Math.sign(duelingFactor);
   attributeTotal += 0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
+  attributeTotal +=
+    (0.2 * (pitcherComposite.composure - 10) * game.balls * 2) / 3;
   // attributeTotal +=
   //   (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;
 
@@ -825,10 +827,6 @@ function determinePitchType(
       (pitchData.hitModiferTable.type[key as HitType] ?? 1) ** quality;
   });
 
-  pitchData.swingBallFactor *= scaleAttributePercent(
-    pitcherComposite.deception,
-    3,
-  );
   pitchData.hitModiferTable.type.grounder =
     (pitchData.hitModiferTable.type.grounder ?? 1) *
     scaleAttributePercent(pitcherComposite.hitAngle, 2);

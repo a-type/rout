@@ -83,7 +83,7 @@ export function getPitchingCompositeRatings(
     hitPower: avg(agi, wis),
     movement: avg(agi, int),
     durability: avg(con, wis),
-    deception: avg(con, int),
+    composure: avg(con, int),
     dueling: avg(wis, int),
   };
 }

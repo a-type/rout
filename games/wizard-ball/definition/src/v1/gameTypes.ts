@@ -63,7 +63,7 @@ export type PitchingCompositeRatings = {
   hitPower: number;
   velocity: number;
   durability: number;
-  deception: number;
+  composure: number;
   dueling: number;
 };
 

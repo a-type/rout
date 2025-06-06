@@ -135,11 +135,10 @@ const pitchingRatingList: Array<{
     tooltip: 'CON + WIS: Reduces rate of stamina usage for pitchers',
   },
   {
-    value: 'deception',
-    label: 'Deception',
+    value: 'composure',
+    label: 'Composure',
     color: '#FF4500',
-    tooltip:
-      'CON + INT: Increases the chance of batters swinging at bad pitches',
+    tooltip: 'CON + INT: Improves pitch quality when behind in the count',
   },
   {
     value: 'dueling',

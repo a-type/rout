@@ -396,7 +396,7 @@ export const perks: Record<string, Perk> = {
       pitchingCompositeBonus: {
         movement: 4,
         contact: 4,
-        deception: 4,
+        composure: 4,
       },
     }),
   },

@@ -138,7 +138,7 @@ export function compositeToString(
     movement: 'Movement',
     velocity: 'Velocity',
     strikeout: 'Strikeout',
-    deception: 'Deception',
+    composure: 'Composure',
   };
   return lookup[key];
 }

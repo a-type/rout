@@ -49,7 +49,7 @@ const columns = {
     { label: 'HP', key: 'hitPower' },
     { label: 'VEL', key: 'velocity' },
     { label: 'DUR', key: 'durability' },
-    { label: 'DEC', key: 'deception' },
+    { label: 'COM', key: 'composure' },
     { label: 'DUEL', key: 'dueling' },
   ],
 };

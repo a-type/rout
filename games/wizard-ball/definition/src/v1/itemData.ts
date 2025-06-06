@@ -127,7 +127,7 @@ export const itemData: Record<string, ItemInfo> = {
     effect: () => ({
       pitchingCompositeBonus: {
         velocity: 7,
-        deception: 7,
+        composure: 7,
         movement: 7,
       },
     }),
@@ -229,13 +229,13 @@ export const itemData: Record<string, ItemInfo> = {
   },
   magicianHat: {
     name: 'Magician Hat',
-    description: 'A hat that enhances deception',
+    description: 'A hat that enhances composure',
     icon: '🎩',
     rarity: 'rare',
     condition: ({ isMe }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
-        deception: 4,
+        composure: 4,
       },
     }),
   },
