@@ -262,6 +262,11 @@ function resetBases(gameState: LeagueGameState): LeagueGameState {
   return gameState;
 }
 
+function runnersOnBases(gameState: LeagueGameState): number {
+  return Object.values(gameState.bases).filter((playerId) => playerId !== null)
+    .length;
+}
+
 function advanceRunnerForced(
   gameState: LeagueGameState,
   base: Base,
@@ -672,6 +677,19 @@ function multiplyHitTables(
   return result;
 }
 
+function getCountAdvantage(
+  balls: number,
+  strikes: number,
+): 'behind' | 'neutral' | 'ahead' {
+  if (balls - strikes >= 2) {
+    return 'behind';
+  }
+  if (strikes === 2 || strikes > balls) {
+    return 'ahead';
+  }
+  return 'neutral';
+}
+
 function determinePitchType(
   random: GameRandom,
   batter: Player,
@@ -752,47 +770,40 @@ function determinePitchType(
     velocity: modifiedVelocity,
   });
 
-  const baseStrikeChanceTable: Record<number, Record<number, number>> = {
-    0: {
-      0: 0.62,
-      1: 0.6,
-      2: 0.58,
-      3: 0.54,
-    },
-    1: {
-      0: 0.64,
-      1: 0.63,
-      2: 0.61,
-      3: 0.57,
-    },
-    2: {
-      0: 0.66,
-      1: 0.65,
-      2: 0.63,
-      3: 0.61,
-    },
-  };
+  const countAdvantage = getCountAdvantage(game.balls, game.strikes);
+  const countFactor =
+    {
+      behind: 4,
+      neutral: 1,
+      ahead: -2,
+    }[countAdvantage] ?? 0;
+  const strikeDesireChance =
+    0.66 *
+    scaleAttributePercent(
+      10 +
+        0.2 * (10 - getPlayerOverall(batter) / 6) +
+        countFactor +
+        runnersOnBases(game) * 2,
+      1.5,
+    );
+  const strikeDesire = random.float(0, 1) < strikeDesireChance;
 
-  const baseStrikeChance =
-    baseStrikeChanceTable[game.strikes]?.[game.balls] ?? 0.6;
   const strikeFactor =
-    basePitchData.strikeFactor *
-    scaleAttributePercent(pitcherComposite.accuracy, 4);
+    0.55 +
+    scaleAttribute(
+      pitcherComposite.accuracy + basePitchData.accuracyBonus,
+      0.4,
+    );
 
-  // Determine whether the pitch is a ball or strike
-  const isStrike = randomByWeight<true | false>(random, [
-    {
-      value: true,
-      weight: baseStrikeChance * strikeFactor,
-    },
-    {
-      value: false,
-      weight: 1 - baseStrikeChance,
-    },
-  ]);
+  const isStrike =
+    random.float(0, 1) < strikeFactor ? strikeDesire : !strikeDesire;
+  if (isStrike !== strikeDesire) {
+    quality -= 0.2;
+  }
+
   const pitchData: ActualPitch = {
     ...basePitchData,
-    strikeFactor,
+    accuracyBonus: basePitchData.accuracyBonus,
     kind: pitchKind,
     quality,
     isStrike,
@@ -807,8 +818,13 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  pitchData.swingStrikeFactor *= 1 / scaleAttributePercent(modifiedVelocity, 2);
-  pitchData.swingBallFactor *= scaleAttributePercent(modifiedMovement, 2);
+  pitchData.swingStrikeFactor *=
+    1 /
+    scaleAttributePercent(modifiedVelocity, 2) /
+    scaleAttributePercent(pitcherComposite.accuracy, 1.5);
+  pitchData.swingBallFactor *=
+    scaleAttributePercent(modifiedMovement, 2) *
+    scaleAttributePercent(pitcherComposite.accuracy, 1.5);
   pitchData.contactStrikeFactor *=
     1 / scaleAttributePercent(modifiedVelocity, 2);
   pitchData.contactBallFactor *= 1 / scaleAttributePercent(modifiedMovement, 2);

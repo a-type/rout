@@ -1,8 +1,7 @@
 import { HitPower, HitType } from './gameTypes';
-import { scaleAttributePercent } from './utils';
 
 export type PitchData = {
-  strikeFactor: number;
+  accuracyBonus: number;
   contactStrikeFactor: number;
   contactBallFactor: number;
   swingStrikeFactor: number;
@@ -19,7 +18,7 @@ export type ActualPitch = PitchData & {
 };
 export const pitchTypes = {
   fastball: ({ quality, velocity, movement }) => ({
-    strikeFactor: 1,
+    accuracyBonus: 0,
     contactStrikeFactor: 1,
     contactBallFactor: 1,
     swingStrikeFactor: 1,
@@ -39,7 +38,7 @@ export const pitchTypes = {
     },
   }),
   curveball: ({ quality, velocity, movement }) => ({
-    strikeFactor: 0.75,
+    accuracyBonus: -5,
     contactStrikeFactor: 0.8,
     contactBallFactor: 0.6,
     swingStrikeFactor: 0.8,
@@ -59,7 +58,7 @@ export const pitchTypes = {
     },
   }),
   changeup: ({ quality, velocity, movement }) => ({
-    strikeFactor: 0.8,
+    accuracyBonus: -3,
     contactStrikeFactor: 0.9,
     contactBallFactor: 0.7,
     swingStrikeFactor: 1.1,
@@ -79,7 +78,7 @@ export const pitchTypes = {
     },
   }),
   slider: ({ quality, velocity, movement }) => ({
-    strikeFactor: 0.8,
+    accuracyBonus: -3,
     contactStrikeFactor: 0.8,
     contactBallFactor: 0.5,
     swingStrikeFactor: 1.2,
@@ -99,7 +98,7 @@ export const pitchTypes = {
     },
   }),
   sinker: ({ quality, velocity, movement }) => ({
-    strikeFactor: 0.9,
+    accuracyBonus: -2,
     contactStrikeFactor: 1.1,
     contactBallFactor: 1.1,
     swingStrikeFactor: 0.9,
