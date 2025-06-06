@@ -109,8 +109,8 @@ export function calculatePlayerStats(
       onBasePercentage,
       sluggingPercentage,
       inningsPitched: (
-        Math.floor(stats.outsPitched / 3) +
-        (stats.outsPitched % 3) / 10
+        Math.floor((stats.outsPitched ?? 0) / 3) +
+        ((stats.outsPitched ?? 0) % 3) / 10
       ).toString(),
       kPerNine: roundFloat(
         ((stats.ks || 0) / ((stats.outsPitched || 1) / 3)) * 9,
@@ -121,11 +121,12 @@ export function calculatePlayerStats(
         2,
       ).toFixed(2),
       era: roundFloat(
-        (stats.earnedRuns / ((stats.outsPitched || 1) / 3)) * 9,
+        ((stats.earnedRuns ?? 0) / ((stats.outsPitched || 1) / 3)) * 9,
         2,
       ).toFixed(2),
       whip: roundFloat(
-        (stats.hitsAllowed + stats.pWalks) / ((stats.outsPitched || 1) / 3),
+        ((stats.hitsAllowed ?? 0) + (stats.pWalks ?? 0)) /
+          ((stats.outsPitched || 1) / 3),
         2,
       ).toFixed(2),
     };

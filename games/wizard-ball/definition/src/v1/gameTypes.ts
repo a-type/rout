@@ -153,7 +153,7 @@ export type GameResult = {
   ballpark: BallparkType;
 };
 
-export type PlayerStats = {
+export type PlayerStats = Partial<{
   // batting stats
   atBats: number;
   hits: number;
@@ -177,7 +177,7 @@ export type PlayerStats = {
   hitsAllowed: number;
   homeRunsAllowed: number;
   saves: number;
-};
+}>;
 
 export type LeagueGameState = {
   leagueGame: LeagueGame;

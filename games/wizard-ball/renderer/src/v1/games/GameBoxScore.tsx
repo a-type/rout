@@ -128,7 +128,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 </td>
                 {boxScoreBattingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
-                    {stats[playerId][stat.value]}
+                    {stats[playerId][stat.value] ?? 0}
                   </td>
                 ))}
               </tr>
@@ -153,7 +153,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 </td>
                 {boxScoreBattingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
-                    {stats[playerId][stat.value]}
+                    {stats[playerId][stat.value] ?? 0}
                   </td>
                 ))}
               </tr>
@@ -196,7 +196,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 </td>
                 {boxScorePitchingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
-                    {stats[pitcherId][stat.value]}
+                    {stats[pitcherId][stat.value] ?? 0}
                   </td>
                 ))}
               </tr>
@@ -221,7 +221,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 </td>
                 {boxScorePitchingStats.map((stat) => (
                   <td key={stat.value} className="p-1">
-                    {stats[pitcherId][stat.value]}
+                    {stats[pitcherId][stat.value] ?? 0}
                   </td>
                 ))}
               </tr>

@@ -147,7 +147,7 @@ export function simulateGame(
   const lastPitcherForWinner = last(gameState.teamData[winner].pitchers);
   if (
     lastPitcherForWinner &&
-    gameState.playerStats[lastPitcherForWinner].outsPitched >= 9
+    (gameState.playerStats[lastPitcherForWinner]?.outsPitched ?? 0) >= 9
   ) {
     gameState.saveElligiblePitcherId = lastPitcherForWinner;
   }
@@ -239,28 +239,7 @@ function addToPlayerStats(
   stats: Partial<PlayerStats>,
 ): LeagueGameState {
   if (!gameState.playerStats[playerId]) {
-    gameState.playerStats[playerId] = {
-      atBats: 0,
-      hits: 0,
-      doubles: 0,
-      triples: 0,
-      homeRuns: 0,
-      runsBattedIn: 0,
-      runs: 0,
-      walks: 0,
-      strikeouts: 0,
-      outsPitched: 0,
-      earnedRuns: 0,
-      ks: 0,
-      pWalks: 0,
-      hitsAllowed: 0,
-      homeRunsAllowed: 0,
-      stolenBases: 0,
-      caughtStealing: 0,
-      wins: 0,
-      losses: 0,
-      saves: 0,
-    };
+    gameState.playerStats[playerId] = {};
   }
   const playerStats = gameState.playerStats[playerId];
   for (const key of Object.keys(stats)) {

@@ -175,7 +175,7 @@ export function PlayerPage({ id }: { id: string }) {
                         key={stat.value}
                         className="px-3 py-2 border-b text-center"
                       >
-                        {stats[stat.value]}
+                        {stats[stat.value] ?? 0}
                       </td>
                     ))}
                   </tr>
@@ -243,7 +243,7 @@ export function PlayerPage({ id }: { id: string }) {
                             key={stat.value}
                             className="px-3 py-2 border-b text-center"
                           >
-                            {stats[stat.value]}
+                            {stats[stat.value] ?? 0}
                           </td>
                         ))}
                       </tr>

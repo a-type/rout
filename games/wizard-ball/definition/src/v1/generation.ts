@@ -33,7 +33,7 @@ export function generateLeague(
   } = {},
 ): League {
   const playersPerTeam = options.numPlayers ?? 19;
-  const roundCount = options.numRounds ?? 10;
+  const roundCount = options.numRounds ?? 20;
   const teamCount = options.numTeams ?? 6;
   let league: League = {
     name: 'League name',
@@ -351,7 +351,7 @@ function generateAttributes(
   classType: ClassType,
 ): Player['attributes'] {
   const pool = Array.from({ length: 8 }, (_, i) => i + 1)
-    .map(() => random.int(3, 18))
+    .map(() => random.int(4, 17))
     .sort((a, b) => a - b);
   const bestAttribute = classData[classType];
   const results = pool.slice(1, -1);

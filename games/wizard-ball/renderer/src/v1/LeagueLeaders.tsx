@@ -27,12 +27,12 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
     let list = Object.entries(playerStats)
       .filter(([, stats]) => {
         return (
-          (kind === 'pitching' && stats.outsPitched > 0) ||
+          (kind === 'pitching' && (stats.outsPitched ?? 0) > 0) ||
           (kind === 'batting' &&
-            stats.atBats > finalState.league.currentWeek * 3)
+            (stats.atBats ?? 0) > finalState.league.currentWeek * 3)
         );
       })
-      .sort(([, a], [, b]) => Number(b[stat]) - Number(a[stat]));
+      .sort(([, a], [, b]) => Number(b[stat] ?? 0) - Number(a[stat] ?? 0));
     if (isInverted) {
       list = list.reverse();
     }
@@ -87,7 +87,7 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
                     <td className="text-left p-1 flex items-center gap-2">
                       <PlayerChip id={player.playerId} noBackground />
                     </td>
-                    <td className="text-right p-1">{player[tabValue]}</td>
+                    <td className="text-right p-1">{player[tabValue] ?? 0}</td>
                   </tr>
                 );
               })
