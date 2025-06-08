@@ -1,5 +1,4 @@
-import { GameRandom } from '@long-game/game-definition';
-import type { LeagueGameState, Player, Position } from './gameTypes';
+import type { Position } from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,
@@ -11,6 +10,10 @@ export function scaleAttribute(
 
 export function scaleAttributePercent(attribute: number, max: number): number {
   return Math.pow(max, scaleAttribute(attribute));
+}
+
+export function lerp(start: number, end: number, t: number): number {
+  return start + (end - start) * t;
 }
 
 export function sum(...values: number[]): number {

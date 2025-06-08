@@ -6,15 +6,33 @@ export type PitchData = {
   contactBallFactor: number;
   swingStrikeFactor: number;
   swingBallFactor: number;
-  hitModiferTable: {
+  hitModifierTable: {
     power: Partial<Record<HitPower, number>>;
     type: Partial<Record<HitType, number>>;
   };
 };
-export type ActualPitch = PitchData & {
+export type ActualPitch = Omit<
+  PitchData,
+  | 'contactStrikeFactor'
+  | 'contactBallFactor'
+  | 'swingStrikeFactor'
+  | 'swingBallFactor'
+> & {
   quality: number;
   kind: PitchKind;
   isStrike: boolean;
+  velocity: number;
+  movement: number;
+  contactFactor: number;
+  swingFactor: number;
+  contactChance?: {
+    raw: number;
+    adjusted: number;
+    pitcherFactor: number;
+    batterFactor: number;
+    batterRating: number;
+    activePerks: string[];
+  };
 };
 export const pitchTypes = {
   fastball: ({ quality, velocity, movement }) => ({
@@ -23,7 +41,7 @@ export const pitchTypes = {
     contactBallFactor: 1,
     swingStrikeFactor: 1,
     swingBallFactor: 1,
-    hitModiferTable: {
+    hitModifierTable: {
       power: {
         weak: 0.8,
         normal: 1.0,
@@ -43,7 +61,7 @@ export const pitchTypes = {
     contactBallFactor: 0.6,
     swingStrikeFactor: 0.8,
     swingBallFactor: 0.6,
-    hitModiferTable: {
+    hitModifierTable: {
       power: {
         weak: 1.2,
         normal: 1.0,
@@ -63,7 +81,7 @@ export const pitchTypes = {
     contactBallFactor: 0.7,
     swingStrikeFactor: 1.1,
     swingBallFactor: 1.2,
-    hitModiferTable: {
+    hitModifierTable: {
       power: {
         weak: 1.1,
         normal: 1.0,
@@ -83,7 +101,7 @@ export const pitchTypes = {
     contactBallFactor: 0.5,
     swingStrikeFactor: 1.2,
     swingBallFactor: 1.35,
-    hitModiferTable: {
+    hitModifierTable: {
       power: {
         weak: 1.1,
         normal: 1.0,
@@ -103,7 +121,7 @@ export const pitchTypes = {
     contactBallFactor: 1.1,
     swingStrikeFactor: 0.9,
     swingBallFactor: 1.0,
-    hitModiferTable: {
+    hitModifierTable: {
       power: {
         weak: 1.1,
         normal: 1.0,
@@ -123,7 +141,7 @@ export const pitchTypes = {
   //   contactBallFactor: 1.05,
   //   swingStrikeFactor: 0.95,
   //   swingBallFactor: 1.0,
-  //   hitModiferTable: {
+  //   hitModifierTable: {
   //     power: {
   //       weak: 1.0,
   //       normal: 1.0,
@@ -143,7 +161,7 @@ export const pitchTypes = {
   //   contactBallFactor: 1.02,
   //   swingStrikeFactor: 0.98,
   //   swingBallFactor: 1.0,
-  //   hitModiferTable: {
+  //   hitModifierTable: {
   //     power: { weak: 1.05, normal: 1.0, strong: 0.95 },
   //     type: { grounder: 1.08, lineDrive: 0.97, fly: 0.97, popUp: 1.02 },
   //   },

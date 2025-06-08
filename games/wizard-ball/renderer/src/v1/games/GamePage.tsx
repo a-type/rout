@@ -5,6 +5,7 @@ import { GameLog } from './GameLog';
 import { GameBoxScore } from './GameBoxScore';
 import { useGameResults } from '../useGameResults';
 import { WeatherChip } from '../WeatherChip';
+import { BallparkChip } from '../BallparkChip';
 
 export function GamePage({ id }: { id: string }) {
   const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
@@ -48,7 +49,8 @@ export function GamePage({ id }: { id: string }) {
               Game Log
             </Tabs.Trigger>
           </Tabs.List>
-          <div className="ml-auto my-auto">
+          <div className="ml-auto my-auto flex flex-row gap-2">
+            <BallparkChip id={game.ballpark} />
             <WeatherChip id={game.weather} />
           </div>
         </div>

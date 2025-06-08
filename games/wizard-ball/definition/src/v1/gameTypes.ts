@@ -4,6 +4,7 @@ import { ClassType } from './classData';
 import { PitchOutcome } from './simGames';
 import { WeatherType } from './weatherData';
 import { BallparkType } from './ballparkData';
+import { ActualPitch } from './pitchData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -211,6 +212,8 @@ export type LeagueGameState = {
   saveElligiblePitcherId: PlayerId | null;
 };
 
+export type LogsPitchData = Omit<ActualPitch, 'hitModifierTable'>;
+
 export type GameLogEvent =
   | HitGameLogEvent
   | {
@@ -232,7 +235,7 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       strikes: number;
       balls: number;
-      pitchQuality: number;
+      pitchData: LogsPitchData;
     }
   | {
       kind: 'foul';
@@ -240,8 +243,7 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       strikes: number;
       balls: number;
-      inStrikeZone: boolean;
-      pitchQuality: number;
+      pitchData: LogsPitchData;
     }
   | {
       kind: 'strike';
@@ -249,23 +251,21 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       strikes: number;
       balls: number;
-      inStrikeZone: boolean;
       swung: boolean;
-      pitchQuality: number;
+      pitchData: LogsPitchData;
     }
   | {
       kind: 'strikeout';
       batterId: PlayerId;
       pitcherId: PlayerId;
-      inStrikeZone: boolean;
       swung: boolean;
-      pitchQuality: number;
+      pitchData: LogsPitchData;
     }
   | {
       kind: 'walk';
       batterId: PlayerId;
       pitcherId: PlayerId;
-      pitchQuality: number;
+      pitchData: LogsPitchData;
     };
 
 export type HitGameLogEvent = {
@@ -277,11 +277,17 @@ export type HitGameLogEvent = {
   type: HitType;
   defender: Position | null;
   defenderId: PlayerId | null;
-  inStrikeZone: boolean;
-  pitchQuality: number;
+  pitchData: LogsPitchData;
+  hitTable: HitTable;
+  defenderRating: number;
 };
 
 export type GameLog = Array<GameLogEvent>;
+
+export type HitTable = Record<
+  Exclude<PitchOutcome, 'ball' | 'strike' | 'foul'>,
+  number
+>;
 
 export type HitArea = 'farLeft' | 'left' | 'center' | 'right' | 'farRight';
 export type HitPower = 'weak' | 'normal' | 'strong';

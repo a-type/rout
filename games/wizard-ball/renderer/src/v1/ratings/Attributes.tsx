@@ -63,7 +63,9 @@ export function Attributes({
               />
             </div>
           </>
-        ) : null}
+        ) : (
+          <span className="col-span-6"></span>
+        )}
 
         {attributeList.map(({ value, label, color }) => {
           const baseValue = attributes[value] || 0;

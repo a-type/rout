@@ -8,9 +8,9 @@ import {
   PitchingCompositeType,
   Position,
   Player,
+  HitTable,
 } from './gameTypes';
 import type { PitchKind } from './pitchData';
-import type { PitchOutcome } from './simGames';
 import type { SpeciesType } from './speciesData';
 import type { WeatherType } from './weatherData';
 import { capitalize } from './utils';
@@ -19,8 +19,8 @@ export type PerkEffect = {
   attributeBonus?: Partial<Record<AttributeType, number>>;
   battingCompositeBonus?: Partial<Record<BattingCompositeType, number>>;
   pitchingCompositeBonus?: Partial<Record<PitchingCompositeType, number>>;
-  hitTableFactor?: Partial<Record<PitchOutcome, number>>;
-  hitModiferTable?: Partial<{
+  hitTableFactor?: Partial<HitTable>;
+  hitModifierTable?: Partial<{
     power: Partial<Record<HitPower, number>>;
     type: Partial<Record<HitType, number>>;
   }>;
@@ -149,41 +149,41 @@ export const perks: Record<string, Perk> = {
       },
     }),
   },
-  hardy: {
-    name: 'Hardy',
-    description:
-      'Lower chance of getting out but higher chance of fouling off.',
-    kind: 'batting',
-    rarity: 'common',
-    requirements: ({ species, classType }) =>
-      ['badger', 'turtle', 'beaver'].includes(species) ||
-      classType === 'fighter',
-    condition: ({ isBatter }) => isBatter,
-    effect: () => ({
-      hitTableFactor: {
-        out: 0.8,
-        foul: 1.2,
-      },
-    }),
-  },
-  hardyPlus: {
-    name: 'Hardy+',
-    description:
-      'Much lower chance of getting out but higher chance of fouling off.',
-    kind: 'batting',
-    rarity: 'rare',
-    requirements: ({ species, classType, attributes }) =>
-      attributes.constitution >= 14 &&
-      (['badger', 'turtle', 'beaver'].includes(species) ||
-        classType === 'fighter'),
-    condition: ({ isBatter }) => isBatter,
-    effect: () => ({
-      hitTableFactor: {
-        out: 0.6,
-        foul: 1.4,
-      },
-    }),
-  },
+  // hardy: {
+  //   name: 'Hardy',
+  //   description:
+  //     'Lower chance of getting out but higher chance of fouling off.',
+  //   kind: 'batting',
+  //   rarity: 'common',
+  //   requirements: ({ species, classType }) =>
+  //     ['badger', 'turtle', 'beaver'].includes(species) ||
+  //     classType === 'fighter',
+  //   condition: ({ isBatter }) => isBatter,
+  //   effect: () => ({
+  //     hitTableFactor: {
+  //       out: 0.9,
+  //       foul: 1.2,
+  //     },
+  //   }),
+  // },
+  // hardyPlus: {
+  //   name: 'Hardy+',
+  //   description:
+  //     'Much lower chance of getting out but higher chance of fouling off.',
+  //   kind: 'batting',
+  //   rarity: 'rare',
+  //   requirements: ({ species, classType, attributes }) =>
+  //     attributes.constitution >= 14 &&
+  //     (['badger', 'turtle', 'beaver'].includes(species) ||
+  //       classType === 'fighter'),
+  //   condition: ({ isBatter }) => isBatter,
+  //   effect: () => ({
+  //     hitTableFactor: {
+  //       out: 0.8,
+  //       foul: 1.4,
+  //     },
+  //   }),
+  // },
   cleanup: {
     name: 'Cleanup',
     description: 'Increases chance to hit with runners in scoring position.',
@@ -422,7 +422,7 @@ export const perks: Record<string, Perk> = {
       classType === 'cleric' || species === 'turtle',
     condition: ({ isPitcher }) => isPitcher,
     effect: () => ({
-      hitModiferTable: {
+      hitModifierTable: {
         power: {
           weak: 1.5,
         },
@@ -439,7 +439,7 @@ export const perks: Record<string, Perk> = {
       (classType === 'cleric' || species === 'turtle'),
     condition: ({ isPitcher }) => isPitcher,
     effect: () => ({
-      hitModiferTable: {
+      hitModifierTable: {
         power: {
           weak: 2.5,
         },
@@ -455,7 +455,7 @@ export const perks: Record<string, Perk> = {
       classType === 'wizard' || species === 'turtle',
     condition: ({ isPitcher }) => isPitcher,
     effect: () => ({
-      hitModiferTable: {
+      hitModifierTable: {
         type: {
           grounder: 1.5,
         },
@@ -471,7 +471,7 @@ export const perks: Record<string, Perk> = {
       classType === 'wizard' || species === 'turtle',
     condition: ({ isPitcher }) => isPitcher,
     effect: () => ({
-      hitModiferTable: {
+      hitModifierTable: {
         type: {
           grounder: 2.5,
         },
@@ -799,6 +799,7 @@ export const perks: Record<string, Perk> = {
     description: 'Improves all stats significantly.',
     kind: 'any',
     rarity: 'legendary',
+    condition: ({ isMe }) => isMe,
     effect: () => ({
       attributeBonus: {
         strength: 5,

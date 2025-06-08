@@ -13,6 +13,10 @@ export function roundFloat(value: number, decimalPlaces: number = 2): number {
   return Math.round(value * factor) / factor;
 }
 
+export function toPercentage(value: number, decimalPlaces: number = 1): string {
+  return `${roundFloat(value * 100, decimalPlaces)}%`;
+}
+
 export function attributeToColor(
   value: number,
   max: number = 20,

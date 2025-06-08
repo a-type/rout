@@ -32,7 +32,7 @@ export const weather = {
       pitchingCompositeBonus: {
         accuracy: -2,
       },
-      hitModiferTable: {
+      hitModifierTable: {
         type: {
           grounder: 1.2,
           lineDrive: 0.8,
@@ -120,7 +120,7 @@ export const weather = {
       pitchingCompositeBonus: {
         movement: 4,
       },
-      hitModiferTable: {
+      hitModifierTable: {
         type: {
           grounder: 0.8,
           lineDrive: 1,
