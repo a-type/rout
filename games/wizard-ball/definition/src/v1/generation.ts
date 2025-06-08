@@ -308,6 +308,7 @@ function generatePlayer(
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
+    xp: random.int(0, 1000),
   };
   const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {

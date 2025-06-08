@@ -3,6 +3,7 @@ import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
 import { generateItem, generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, generateChoices } from './boosts';
+import { getLevelFromXp } from './attributes';
 
 export type GlobalState = {
   league: League;
@@ -204,6 +205,23 @@ export const gameDefinition: GameDefinition<
         result.score[result.winner] - result.score[result.loser];
       loser.runDifferential -=
         result.score[result.winner] - result.score[result.loser];
+
+      // assign xp based on performance
+      [winner, loser].forEach((team) =>
+        team.playerIds.forEach((playerId) => {
+          const player = globalState.league.playerLookup[playerId];
+          // TODO: Reevaluate how to assign XP
+          const initialLevel = getLevelFromXp(player.xp);
+          player.xp += 10;
+          const newLevel = getLevelFromXp(player.xp);
+          for (let i = initialLevel; i < newLevel; i++) {
+            const attr = random.item(
+              Object.keys(player.attributes),
+            ) as keyof typeof player.attributes;
+            player.attributes[attr] += 1;
+          }
+        }),
+      );
     }
     const nextLeague: League = {
       ...globalState.league,

@@ -5,6 +5,7 @@ import { clsx, Tabs } from '@a-type/ui';
 import { useState } from 'react';
 import {
   getBattingCompositeRatings,
+  getLevelFromXp,
   getPitchingCompositeRatings,
   getPlayerOverall,
   isPitcher,
@@ -13,6 +14,7 @@ import {
 const columns = {
   attributes: [
     { label: 'Name', key: 'name' },
+    { label: 'Level', key: 'level' },
     { label: 'Position', key: 'position' },
     { label: 'OVR', key: 'overall' },
     { label: 'STR', key: 'strength' },
@@ -24,6 +26,7 @@ const columns = {
   ],
   battingComposite: [
     { label: 'Name', key: 'name' },
+    { label: 'Level', key: 'level' },
     { label: 'Position', key: 'position' },
     { label: 'OVR', key: 'overall' },
     { label: 'XBS', key: 'extraBases' },
@@ -39,6 +42,7 @@ const columns = {
   ],
   pitchingComposite: [
     { label: 'Name', key: 'name' },
+    { label: 'Level', key: 'level' },
     { label: 'Position', key: 'position' },
     { label: 'OVR', key: 'overall' },
     { label: 'CON', key: 'contact' },
@@ -156,6 +160,7 @@ export function TeamPlayers({ id }: { id: string }) {
                   name: player.name,
                   position: player.positions.join('/').toUpperCase(),
                   overall,
+                  level: getLevelFromXp(player.xp),
                 };
                 return (
                   <tr
@@ -164,7 +169,11 @@ export function TeamPlayers({ id }: { id: string }) {
                   >
                     {columns[tab].map((col) => {
                       const value = (data as any)[col.key];
-                      if (col.key !== 'name' && col.key !== 'position') {
+                      if (
+                        col.key !== 'name' &&
+                        col.key !== 'position' &&
+                        col.key !== 'level'
+                      ) {
                         return renderColorCell(
                           value,
                           col.key === 'overall' ? 120 : undefined,
@@ -184,6 +193,8 @@ export function TeamPlayers({ id }: { id: string }) {
                             <Link to={{ search: '?playerId=' + player.id }}>
                               {data.name}
                             </Link>
+                          ) : col.key === 'level' ? (
+                            data.level
                           ) : col.key === 'position' ? (
                             data.position
                           ) : (

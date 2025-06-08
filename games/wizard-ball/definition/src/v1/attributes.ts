@@ -87,3 +87,16 @@ export function getPitchingCompositeRatings(
     dueling: avg(wis, int),
   };
 }
+
+export function getXpForLevel(level: number): number {
+  return 10 + level ** 2;
+}
+
+export function getLevelFromXp(xp: number): number {
+  let level = 0;
+  while (xp >= getXpForLevel(level)) {
+    xp -= getXpForLevel(level);
+    level++;
+  }
+  return level;
+}

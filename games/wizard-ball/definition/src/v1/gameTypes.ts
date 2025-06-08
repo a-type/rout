@@ -82,6 +82,7 @@ export type Player = {
   itemIds: string[];
   attributes: PlayerAttributes;
   stamina: number;
+  xp: number;
 };
 
 export type Position =
