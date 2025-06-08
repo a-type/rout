@@ -1,14 +1,12 @@
-import wizardBall from '@long-game/game-wizard-ball-definition';
-import hearts from '@long-game/game-hearts-definition';
 import { GameModule } from '@long-game/game-definition';
 import gudnak from '@long-game/game-gudnak-definition';
+import hearts from '@long-game/game-hearts-definition';
 import numberGuess from '@long-game/game-number-guess-definition';
 import scribble from '@long-game/game-scribble-definition';
-import territory from '@long-game/game-territory-definition';
+import wizardBall from '@long-game/game-wizard-ball-definition';
 
 const games: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
-  [territory.id]: territory,
   [gudnak.id]: gudnak,
   [scribble.id]: scribble,
   [hearts.id]: hearts,

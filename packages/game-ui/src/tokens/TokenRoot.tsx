@@ -1,4 +1,4 @@
-import { DndContext } from '@dnd-kit/core';
+import { DragDropProvider } from '@dnd-kit/react';
 import { ReactNode } from 'react';
 
 export interface TokenRootProps {
@@ -6,5 +6,5 @@ export interface TokenRootProps {
 }
 
 export function TokenRoot({ children }: TokenRootProps) {
-  return <DndContext>{children}</DndContext>;
+  return <DragDropProvider>{children}</DragDropProvider>;
 }

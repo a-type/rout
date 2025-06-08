@@ -40,7 +40,10 @@
     "three": "catalog:",
     "valtio": "catalog:",
     "react-flip-toolkit": "catalog:",
-    "@dnd-kit/core": "catalog:",
+    "@dnd-kit/react": "catalog:",
+    "@dnd-kit/helpers": "catalog:",
+    "@dnd-kit/abstract": "catalog:",
+    "@dnd-kit/dom": "catalog:",
     "motion": "catalog:",
     "@use-gesture/react": "catalog:"
   },

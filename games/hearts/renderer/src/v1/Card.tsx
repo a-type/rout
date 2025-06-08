@@ -23,7 +23,7 @@ const suitToIcon: Record<string, IconName> = {
 export function Card({ id, playerId, ...rest }: CardProps) {
   return (
     <CardRoot asChild data-color={getCardColor(id)} data-suit={getCardSuit(id)}>
-      <Token id={id} {...rest}>
+      <Token id={id} data={id} {...rest}>
         <Box className="flex flex-col items-center justify-center h-full m-auto text-xl">
           <Box className="font-bold">{getCardDisplayRank(id)}</Box>
           <Box>

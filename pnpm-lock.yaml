@@ -30,9 +30,18 @@ catalogs:
     '@cloudflare/workers-types':
       specifier: ^4.20250124.3
       version: 4.20250124.3
-    '@dnd-kit/core':
-      specifier: 6.3.1
-      version: 6.3.1
+    '@dnd-kit/abstract':
+      specifier: 0.1.18
+      version: 0.1.18
+    '@dnd-kit/dom':
+      specifier: 0.1.18
+      version: 0.1.18
+    '@dnd-kit/helpers':
+      specifier: 0.1.18
+      version: 0.1.18
+    '@dnd-kit/react':
+      specifier: 0.1.18
+      version: 0.1.18
     '@hono/zod-validator':
       specifier: ^0.4.3
       version: 0.4.3
@@ -510,62 +519,6 @@ importers:
         specifier: 'catalog:'
         version: 3.0.4(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
 
-  games/territory/definition:
-    dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
-      '@long-game/game-definition':
-        specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.0.4(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
-
-  games/territory/renderer:
-    dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
-      '@long-game/game-client':
-        specifier: workspace:*
-        version: link:../../../packages/game-client
-      '@long-game/game-definition':
-        specifier: workspace:*
-        version: link:../../../packages/game-definition
-      '@long-game/game-territory-definition':
-        specifier: workspace:*
-        version: link:../definition
-      '@long-game/game-ui':
-        specifier: workspace:*
-        version: link:../../../packages/game-ui
-      react:
-        specifier: 'catalog:'
-        version: 19.1.0
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.1.0(react@19.1.0)
-    devDependencies:
-      '@long-game/scripts':
-        specifier: workspace:*
-        version: link:../../../packages/scripts
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.1.2
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.1.2(@types/react@19.1.2)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.0.4(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
-
   games/wizard-ball/definition:
     dependencies:
       '@long-game/common':
@@ -860,9 +813,6 @@ importers:
       '@long-game/game-scribble-renderer':
         specifier: workspace:*
         version: link:../../games/scribble/renderer
-      '@long-game/game-territory-renderer':
-        specifier: workspace:*
-        version: link:../../games/territory/renderer
       '@long-game/game-wizard-ball-renderer':
         specifier: workspace:*
         version: link:../../games/wizard-ball/renderer
@@ -885,9 +835,18 @@ importers:
       '@a-type/ui':
         specifier: 'catalog:'
         version: 2.1.8(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(unocss@66.0.0(postcss@8.5.3)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))
-      '@dnd-kit/core':
+      '@dnd-kit/abstract':
         specifier: 'catalog:'
-        version: 6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 0.1.18
+      '@dnd-kit/dom':
+        specifier: 'catalog:'
+        version: 0.1.18
+      '@dnd-kit/helpers':
+        specifier: 'catalog:'
+        version: 0.1.18
+      '@dnd-kit/react':
+        specifier: 'catalog:'
+        version: 0.1.18(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
@@ -964,9 +923,6 @@ importers:
       '@long-game/game-scribble-definition':
         specifier: workspace:*
         version: link:../../games/scribble/definition
-      '@long-game/game-territory-definition':
-        specifier: workspace:*
-        version: link:../../games/territory/definition
       '@long-game/game-wizard-ball-definition':
         specifier: workspace:*
         version: link:../../games/wizard-ball/definition
@@ -2092,10 +2048,16 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
+  '@dnd-kit/abstract@0.1.18':
+    resolution: {integrity: sha512-oe2i/Y8iprBZFVSLQ2graHusxO6rf3T9X1JclV9KZ5VKgon1lKr6Kv/Jm7GSz1OmmeHYy9yC1jeZJRr53PGTzQ==}
+
   '@dnd-kit/accessibility@3.1.1':
     resolution: {integrity: sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==}
     peerDependencies:
       react: '>=16.8.0'
+
+  '@dnd-kit/collision@0.1.18':
+    resolution: {integrity: sha512-xqc6yfzyP+nLupssKZy7VAkn8119k6J1gpmPJdzQAIjDwlnQuceUP5MZSFnZ4RztW9Gzky6lirMp/eMJnzaZ0g==}
 
   '@dnd-kit/core@6.3.1':
     resolution: {integrity: sha512-xkGBRQQab4RLwgXxoqETICr6S5JlogafbhNsidmrkVv2YRs5MLwpjoF2qpiGjQt8S9AoxtIV603s0GIUpY5eYQ==}
@@ -2103,17 +2065,35 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
+  '@dnd-kit/dom@0.1.18':
+    resolution: {integrity: sha512-sG9j7Nm+DOz2XmdJXH9CLnoMKFSL7UPT46nh/C8gmTK2yCgP3JNL6WbKVD7rFzStsw0lfbCdudEPKCqNpfdcqQ==}
+
+  '@dnd-kit/geometry@0.1.18':
+    resolution: {integrity: sha512-il+RqQ/EJ/AWy/yvfLdHvnvhVonU7xV5DaazWAiRSUginjkFxkJkyAooy19ETSEGQJlWXAo1zvMVUaJfOdI7zg==}
+
+  '@dnd-kit/helpers@0.1.18':
+    resolution: {integrity: sha512-k4hVXIb8ysPt+J0KOxbBTc6rG0JSlsrNevI/fCHLbyXvEyj1imxl7yOaAQX13cAZnte88db6JvbgsSWlVjtxbw==}
+
   '@dnd-kit/modifiers@9.0.0':
     resolution: {integrity: sha512-ybiLc66qRGuZoC20wdSSG6pDXFikui/dCNGthxv4Ndy8ylErY0N3KVxY2bgo7AWwIbxDmXDg3ylAFmnrjcbVvw==}
     peerDependencies:
       '@dnd-kit/core': ^6.3.0
       react: '>=16.8.0'
 
+  '@dnd-kit/react@0.1.18':
+    resolution: {integrity: sha512-OCeCO9WbKnN4rVlEOEe9QWxSIFzP0m/fBFmVYfu2pDSb4pemRkfrvCsI/FH3jonuESYS8qYnN9vc8Vp3EiCWCA==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
   '@dnd-kit/sortable@10.0.0':
     resolution: {integrity: sha512-+xqhmIIzvAYMGfBYYnbKuNicfSsk4RksY2XdmJhT+HAC01nix6fHCztU68jooFiMUB01Ky3F0FyOvhG/BZrWkg==}
     peerDependencies:
       '@dnd-kit/core': ^6.3.0
       react: '>=16.8.0'
+
+  '@dnd-kit/state@0.1.18':
+    resolution: {integrity: sha512-LRcu4pmSP5KLRN1FWY3tqpi6MaNZ39+CX7RUNM8yVla8umDRd78jlkKYbSyDHUYzYujUCFeQvOCTRD43RqRG3Q==}
 
   '@dnd-kit/utilities@3.2.2':
     resolution: {integrity: sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg==}
@@ -2902,6 +2882,9 @@ packages:
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
+
+  '@preact/signals-core@1.9.0':
+    resolution: {integrity: sha512-uUgFHJLWxb33rfCtb1g+1e3Rg7Jl5EALhGTHlQ5Y0w37OF+fdidYdYEE6crbpUOYDOjlmelIWf0ulXr1ggfUkg==}
 
   '@radix-ui/colors@3.0.0':
     resolution: {integrity: sha512-FUOsGBkHrYJwCSEtWRCIfQbZG7q1e6DgxCIOe1SUQzDe/7rXXeA47s8yCn6fuTNQAj1Zq4oTFi9Yjp3wzElcxg==}
@@ -8550,9 +8533,21 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
+  '@dnd-kit/abstract@0.1.18':
+    dependencies:
+      '@dnd-kit/geometry': 0.1.18
+      '@dnd-kit/state': 0.1.18
+      tslib: 2.7.0
+
   '@dnd-kit/accessibility@3.1.1(react@19.1.0)':
     dependencies:
       react: 19.1.0
+      tslib: 2.7.0
+
+  '@dnd-kit/collision@0.1.18':
+    dependencies:
+      '@dnd-kit/abstract': 0.1.18
+      '@dnd-kit/geometry': 0.1.18
       tslib: 2.7.0
 
   '@dnd-kit/core@6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
@@ -8563,6 +8558,24 @@ snapshots:
       react-dom: 19.1.0(react@19.1.0)
       tslib: 2.7.0
 
+  '@dnd-kit/dom@0.1.18':
+    dependencies:
+      '@dnd-kit/abstract': 0.1.18
+      '@dnd-kit/collision': 0.1.18
+      '@dnd-kit/geometry': 0.1.18
+      '@dnd-kit/state': 0.1.18
+      tslib: 2.7.0
+
+  '@dnd-kit/geometry@0.1.18':
+    dependencies:
+      '@dnd-kit/state': 0.1.18
+      tslib: 2.7.0
+
+  '@dnd-kit/helpers@0.1.18':
+    dependencies:
+      '@dnd-kit/abstract': 0.1.18
+      tslib: 2.7.0
+
   '@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -8570,11 +8583,25 @@ snapshots:
       react: 19.1.0
       tslib: 2.7.0
 
+  '@dnd-kit/react@0.1.18(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@dnd-kit/abstract': 0.1.18
+      '@dnd-kit/dom': 0.1.18
+      '@dnd-kit/state': 0.1.18
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      tslib: 2.7.0
+
   '@dnd-kit/sortable@10.0.0(@dnd-kit/core@6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@dnd-kit/utilities': 3.2.2(react@19.1.0)
       react: 19.1.0
+      tslib: 2.7.0
+
+  '@dnd-kit/state@0.1.18':
+    dependencies:
+      '@preact/signals-core': 1.9.0
       tslib: 2.7.0
 
   '@dnd-kit/utilities@3.2.2(react@19.1.0)':
@@ -9061,6 +9088,8 @@ snapshots:
       '@noble/hashes': 1.3.3
 
   '@polka/url@1.0.0-next.28': {}
+
+  '@preact/signals-core@1.9.0': {}
 
   '@radix-ui/colors@3.0.0': {}
 

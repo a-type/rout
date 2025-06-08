@@ -1,188 +1,105 @@
-import { Box, clsx, useSize } from '@a-type/ui';
-import { useDroppable } from '@dnd-kit/core';
-import { AnimatePresence, motion } from 'motion/react';
-import { Children, ReactNode, Ref, useRef, useState } from 'react';
-import { useClickAway } from '../hooks/useClickAway';
-import { useMediaQuery } from '../hooks/useMediaQuery';
-import { useMergedRef } from '../hooks/useMergedRef';
+import { Box } from '@a-type/ui';
+import { useDraggable } from '@dnd-kit/react';
+import { AnimatePresence } from 'motion/react';
+import { ReactNode, Ref, useState } from 'react';
+import { CenterOnCursorModifier } from './CenterOnCursorModifier';
+import { TokenHandDragSensor } from './TokenHandDragSensor';
+import { TokenSpace } from './TokenSpace';
+import { TokenDragData } from './types';
 
-export interface TokenHandProps {
-  children: ReactNode;
-  childIds: string[];
+/**
+ * A generic 'hand' of Token representations which the user can drag tokens
+ * out of. The sizing of the tokens is dynamic to fit in the available space
+ * without scrolling, but the representations in the hand must therefore be
+ * capable of being quite small and still legible.
+ *
+ * When the user either swipes (touch) or hovers (mouse) over the hand, the
+ * intersected token will show a large version above the cursor.
+ *
+ * When the user continues the gesture (either still touching, or clicking and holding
+ * from hover), and moves upward past a threshold, the selected token will be lifted from the hand
+ * and become a draggable, to be dropped elsewhere.
+ */
+
+export interface TokenHandProps<T> {
+  values: TokenDragData<T>[];
+  render: (value: TokenDragData<T>) => ReactNode;
+  renderDetailed?: (value: TokenDragData<T>) => ReactNode;
   ref?: Ref<HTMLDivElement>;
   className?: string;
+  onDrop?: (value: TokenDragData<T>) => void;
 }
 
-export function TokenHand({
-  children: rawChildren,
+export function TokenHand<T = unknown>({
+  values,
+  render: renderCompact,
+  renderDetailed = renderCompact,
   ref: userRef,
-  childIds,
   className,
-}: TokenHandProps) {
-  const children = Children.toArray(rawChildren);
-  const { setNodeRef, active } = useDroppable({
-    id: 'hand',
-  });
+  onDrop,
+}: TokenHandProps<T>) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [expandHand, setExpandHand] = useState(false);
-  const handRef = useRef<HTMLDivElement>(null);
-  useClickAway(() => {
-    setExpandHand(false);
-  }, handRef);
-
-  const isMedium = useMediaQuery('(min-width: 768px)');
-  const isLarge = useMediaQuery('(min-width: 1024px)');
-
-  const maxRotation = isLarge ? 30 : isMedium ? 25 : 20;
-
-  const [availableWidth, setAvailableWidth] = useState(0);
-  const sizeRef = useSize<HTMLDivElement>(({ width }) =>
-    setAvailableWidth(width),
-  );
-  const tokenSize = isLarge ? 200 : isMedium ? 200 : 120;
-  const overlapOffset = tokenSize * 0.05;
-
-  const totalWidth = (children.length - 1) * overlapOffset + tokenSize;
-  const centerOffset = (availableWidth - totalWidth) / 2;
-
-  const finalRef = useMergedRef<HTMLDivElement>(setNodeRef, sizeRef, userRef);
 
   return (
-    <Box
-      ref={finalRef}
-      className={clsx('relative flex flex-row w-full', className)}
-      style={{ height: tokenSize * 0.5 }}
-    >
-      <motion.div
-        className="w-full z-50"
-        ref={handRef}
-        initial={{
-          y: 0,
-          scale: 0.8,
-        }}
-        onTapStart={() => setExpandHand(true)}
-        onTapCancel={() => setExpandHand(false)}
-        animate={expandHand ? { y: -25, scale: 1 } : {}}
-        whileHover={
-          isLarge || isMedium
-            ? {
-                y: isLarge ? -100 : isMedium ? -75 : -50,
-                scale: 1,
-                height: '300%',
-              }
-            : undefined
-        }
-        transition={{
-          type: 'spring',
-          duration: 0.4,
-          bounce: 0.25,
-        }}
-      >
+    <Box ref={userRef} d="row" full="width" className={className} asChild>
+      <TokenSpace id="hand" onDrop={(v) => onDrop?.(v as TokenDragData<T>)}>
         <AnimatePresence>
-          {children.map((child, index) => {
-            const isHovered = hoveredIndex === index;
-            const isBeforeHovered =
-              hoveredIndex !== null && index < hoveredIndex;
-            const isAfterHovered =
-              hoveredIndex !== null && index > hoveredIndex;
-            const isBeingDragged = active && active.id === childIds[index];
-
-            const xOffset = (() => {
-              if (isHovered || isBeingDragged) {
-                return index * overlapOffset + centerOffset;
-              } else if (isBeforeHovered) {
-                return index * overlapOffset + centerOffset - overlapOffset / 2;
-              } else if (isAfterHovered) {
-                return index * overlapOffset + centerOffset + overlapOffset / 2;
-              } else {
-                return index * overlapOffset + centerOffset;
-              }
-            })();
-
-            // adjust rotation before and after hovered card
-            const rotationOffset = (() => {
-              if (isHovered) {
-                return 0;
-              } else if (isBeforeHovered) {
-                return -5;
-              } else if (isAfterHovered) {
-                return 5;
-              } else {
-                return 0;
-              }
-            })();
-
-            // each card takes up a fratction of the total rotation, with limits when you don't have many cards
-            // so it doesn't look too weird
-            const rotationFactor = Math.min(10, maxRotation / children.length);
-            const rotation =
-              rotationOffset +
-              rotationFactor * (index + 0.5 - children.length / 2);
-
-            // using manual rotation to avoid transform origin issues with dndkit
-            const { x, y } = rotatePointAroundAnotherPoint(
-              { x: 0, y: 0 },
-              { x: 0, y: tokenSize * 4 },
-              rotation,
-            );
-
+          {values.map((value, index) => {
             return (
-              <motion.div
-                layout
-                key={childIds[index]}
-                className="absolute"
-                style={{
-                  width: `${tokenSize}px`,
-                  zIndex: isHovered ? 10 : index,
-                }}
-                animate={{
-                  x: x + xOffset,
-                  y: y + (isHovered ? -20 : 0),
-                  rotate: isBeingDragged ? 0 : rotation,
-                }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  type: 'spring',
-                  duration: 0.4,
-                  bounce: 0.25,
-                }}
-                onTouchStart={() => setHoveredIndex(index)}
-                onTouchCancel={() => setHoveredIndex(null)}
-                onPointerEnter={(ev) => {
-                  if (ev.pointerType === 'mouse') {
-                    setHoveredIndex(index);
-                  }
-                }}
-                onPointerLeave={(ev) => {
-                  if (ev.pointerType === 'mouse') {
-                    setHoveredIndex(null);
-                  }
-                }}
+              <TokenHandItem
+                id={value.id}
+                key={value.id}
+                value={value}
+                index={index}
+                hoveredIndex={hoveredIndex}
+                setHoveredIndex={setHoveredIndex}
               >
-                {child}
-              </motion.div>
+                {renderCompact(value)}
+              </TokenHandItem>
             );
           })}
         </AnimatePresence>
-      </motion.div>
+      </TokenSpace>
     </Box>
   );
 }
 
-export function rotatePointAroundAnotherPoint(
-  point: { x: number; y: number },
-  center: { x: number; y: number },
-  angle: number,
-) {
-  const radians = (angle * Math.PI) / 180;
-  const cos = Math.cos(radians);
-  const sin = Math.sin(radians);
+function TokenHandItem({
+  id,
+  value,
+  index,
+  hoveredIndex,
+  setHoveredIndex,
+  children,
+}: {
+  id: string;
+  value: any;
+  index: number;
+  hoveredIndex: number | null;
+  setHoveredIndex: (index: number | null) => void;
+  children: ReactNode;
+}) {
+  const isHovered = hoveredIndex === index;
+  const { ref } = useDraggable({
+    id,
+    data: { id, type: 'token', data: value },
+    sensors: [
+      // this custom sensor only activates when the user pulls the token
+      // upward out of the hand.
+      TokenHandDragSensor.configure({}),
+    ],
+    modifiers: [CenterOnCursorModifier],
+  });
 
-  const translatedX = point.x - center.x;
-  const translatedY = point.y - center.y;
-
-  return {
-    x: translatedX * cos - translatedY * sin + center.x,
-    y: translatedX * sin + translatedY * cos + center.y,
-  };
+  return (
+    <Box
+      key={value.id}
+      className="relative flex-shrink-0 touch-none"
+      onPointerEnter={() => setHoveredIndex(index)}
+      onPointerLeave={() => setHoveredIndex(null)}
+      ref={ref}
+    >
+      {children}
+    </Box>
+  );
 }

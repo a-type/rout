@@ -18,7 +18,6 @@
   "dependencies": {
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-number-guess-definition": "workspace:*",
-    "@long-game/game-territory-definition": "workspace:*",
     "@long-game/game-scribble-definition": "workspace:*",
     "@long-game/game-gudnak-definition": "workspace:*",
     "@long-game/game-hearts-definition": "workspace:*",

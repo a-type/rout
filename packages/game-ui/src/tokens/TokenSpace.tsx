@@ -1,5 +1,5 @@
 import { clsx } from '@a-type/ui';
-import { useDndMonitor, useDroppable } from '@dnd-kit/core';
+import { useDragDropMonitor, useDroppable } from '@dnd-kit/react';
 import { ReactNode } from 'react';
 import { isToken, TokenDragData } from './types';
 
@@ -18,7 +18,7 @@ export function TokenSpace({
   disabled,
   className,
 }: TokenSpaceProps) {
-  const { isOver, setNodeRef } = useDroppable({
+  const { isDropTarget, ref } = useDroppable({
     id,
     disabled,
     data: {
@@ -26,11 +26,13 @@ export function TokenSpace({
     },
   });
 
-  useDndMonitor({
+  useDragDropMonitor({
     onDragEnd(event) {
-      console.log(event);
-      if (event.over?.id === id && isToken(event.active.data.current)) {
-        const token = event.active.data.current;
+      const over = event.operation.target;
+      const source = event.operation.source;
+      if (!source || !over) return;
+      if (over?.id === id && isToken(source.data)) {
+        const token = source.data;
         onDrop?.(token);
       }
     },
@@ -39,9 +41,13 @@ export function TokenSpace({
   return (
     <div
       id={id}
-      className={clsx('relative', className)}
-      data-over={isOver}
-      ref={setNodeRef}
+      className={clsx(
+        'relative',
+        isDropTarget && 'ring-primary ring-2 ring-solid',
+        className,
+      )}
+      data-over={isDropTarget}
+      ref={ref}
     >
       {children}
     </div>

@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@long-game/game-number-guess-renderer": "workspace:*",
-    "@long-game/game-territory-renderer": "workspace:*",
     "@long-game/game-gudnak-renderer": "workspace:*",
     "@long-game/game-scribble-renderer": "workspace:*",
     "@long-game/game-hearts-renderer": "workspace:*",
