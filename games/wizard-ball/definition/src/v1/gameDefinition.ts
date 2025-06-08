@@ -77,24 +77,43 @@ export const gameDefinition: GameDefinition<
         `Could not find team for player ${prospectiveTurn.playerId}`,
       );
     }
-    // TODO: This is not safe to do on the client because of mobx
     const team = playerState.league.teamLookup[teamId];
-    team.battingOrder =
-      prospectiveTurn.data.nextBattingOrder ?? team.battingOrder;
-    team.positionChart =
-      prospectiveTurn.data.nextPositionChart ?? team.positionChart;
-    team.pitchingOrder =
-      prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder;
-    prospectiveTurn.data.nextItemAssignments &&
-      Object.entries(prospectiveTurn.data.nextItemAssignments).forEach(
-        ([playerId, itemIds]) => {
-          const player = playerState.league.playerLookup[playerId];
-          if (player) {
-            player.itemIds = itemIds;
-          }
+    return {
+      ...playerState,
+      league: {
+        ...playerState.league,
+        playerLookup: {
+          ...playerState.league.playerLookup,
+          ...Object.entries(
+            prospectiveTurn.data.nextItemAssignments ?? {},
+          ).reduce((acc, [playerId, itemIds]) => {
+            const player = playerState.league.playerLookup[playerId];
+            if (player) {
+              return {
+                ...acc,
+                [playerId]: {
+                  ...player,
+                  itemIds: itemIds ?? player.itemIds,
+                },
+              };
+            }
+            return acc;
+          }, {}),
         },
-      );
-    return playerState;
+        teamLookup: {
+          ...playerState.league.teamLookup,
+          [teamId]: {
+            ...team,
+            battingOrder:
+              prospectiveTurn.data.nextBattingOrder ?? team.battingOrder,
+            positionChart:
+              prospectiveTurn.data.nextPositionChart ?? team.positionChart,
+            pitchingOrder:
+              prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder,
+          },
+        },
+      },
+    };
   },
 
   // run on server

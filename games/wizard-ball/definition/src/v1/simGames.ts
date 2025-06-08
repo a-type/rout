@@ -23,7 +23,6 @@ import {
   isPitcher,
   last,
   multiplyObjects,
-  randomTable,
   scaleAttribute,
   scaleAttributePercent,
   sum,
@@ -355,7 +354,8 @@ function getActivePlayerPerks(
   gameState: LeagueGameState,
   pitchKind?: PitchKind,
 ): PerkEffect[] {
-  const playerTeam = league.playerLookup[playerId].teamId;
+  const targetPlayer = league.playerLookup[playerId];
+  const playerTeam = targetPlayer.teamId;
   const { battingTeam, pitchingTeam } = gameState;
   const weatherId = gameState.weather;
   const weatherInfo = weatherData[weatherId];
@@ -375,13 +375,16 @@ function getActivePlayerPerks(
       player.perkIds
         .map((id) => perks[id as keyof typeof perks])
         .filter(Boolean)
-        .filter(
-          (p: Perk) =>
+        .filter((p: Perk) => {
+          return (
             !p.condition ||
             p.condition({
               pitchKind,
               gameState,
+              targetPlayer,
+              sourcePlayer: player,
               weather: weatherId,
+              isMyTeam: playerTeam === player.teamId,
               isMe: player.id === playerId,
               isBatter: player.id === getCurrentBatter(gameState),
               isPitcher: player.id === getCurrentPitcher(gameState),
@@ -389,8 +392,9 @@ function getActivePlayerPerks(
                 gameState.bases[1] === player.id ||
                 gameState.bases[2] === player.id ||
                 gameState.bases[3] === player.id,
-            }),
-        )
+            })
+          );
+        })
         .map((p) => p.effect()),
     ),
   ];
@@ -949,7 +953,7 @@ function determineHitResult(
     right: 2,
     farRight: 1,
   };
-  const hitArea = randomTable(random, hitAreaTable);
+  const hitArea = random.table(hitAreaTable);
   const hitPowerTable: Record<HitPower, number> = multiplyObjects(
     isStrike
       ? {
@@ -964,7 +968,7 @@ function determineHitResult(
         },
     pitchData.hitModiferTable.power,
   );
-  const hitPower = randomTable(random, hitPowerTable);
+  const hitPower = random.table(hitPowerTable);
   const hitTypeTable: Record<HitType, number> = multiplyObjects(
     isStrike
       ? {
@@ -983,7 +987,7 @@ function determineHitResult(
         },
     pitchData.hitModiferTable.type,
   );
-  const hitType = randomTable(random, hitTypeTable);
+  const hitType = random.table(hitTypeTable);
 
   // Determine defender based on hit direction and type
   const defender = determineDefender(random, hitArea, hitType);
@@ -1097,7 +1101,7 @@ function determineHitResult(
     }
   }
 
-  const result = randomTable(random, hitTable) as PitchOutcome;
+  const result = random.table(hitTable) as PitchOutcome;
   return {
     hitArea,
     hitPower,

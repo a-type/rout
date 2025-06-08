@@ -56,6 +56,7 @@ function generateChoice(
               classType: player.class,
               species: player.species,
               positions: player.positions,
+              attributes: player.attributes,
             }),
         )
         .map(([perkId, _]) => perkId);

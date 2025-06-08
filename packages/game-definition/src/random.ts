@@ -22,6 +22,20 @@ export class GameRandom {
     return items[this.int(0, items.length)];
   }
 
+  table<T extends string>(table: Record<T, number>): T {
+    const entries = Object.entries(table) as [T, number][];
+    const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
+    const randomValue = this.int(0, totalWeight - 1);
+    let cumulativeWeight = 0;
+    for (const [value, weight] of entries) {
+      cumulativeWeight += weight;
+      if (randomValue < cumulativeWeight) {
+        return value;
+      }
+    }
+    return entries[entries.length - 1][0]; // Fallback
+  }
+
   id() {
     // counting up is unique. since games run
     // deterministically, we don't need anything

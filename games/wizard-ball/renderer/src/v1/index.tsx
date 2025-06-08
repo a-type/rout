@@ -63,24 +63,18 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         >
           My Team
         </NavLink>
+        <NavLink
+          to={{
+            search: 'debug',
+          }}
+        >
+          Debug
+        </NavLink>
         {gameSuite.turnError}
       </div>
       <div className="p-4 mt-16">
         <PageContent />
       </div>
     </Box>
-  );
-});
-
-const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
-  return (
-    <div className="flex flex-col gap-2 p-4">
-      <TeamStandings />
-      {/* Two column layout */}
-      <div className="flex flex-col md:flex-row gap-2">
-        <LeagueLeaders kind="batting" />
-        <LeagueLeaders kind="pitching" />
-      </div>
-    </div>
   );
 });

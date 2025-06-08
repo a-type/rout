@@ -1,6 +1,6 @@
 import { hooks } from '../gameClient';
 import { Tabs } from '@a-type/ui';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { GameLog } from './GameLog';
 import { GameBoxScore } from './GameBoxScore';
 import { useGameResults } from '../useGameResults';
@@ -8,6 +8,7 @@ import { WeatherChip } from '../WeatherChip';
 
 export function GamePage({ id }: { id: string }) {
   const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
+  const [isPending, startTransition] = useTransition();
   const { finalState } = hooks.useGameSuite();
   const game = useGameResults({ id });
   if (!game) {
@@ -21,7 +22,9 @@ export function GamePage({ id }: { id: string }) {
     <Tabs
       value={tab}
       onValueChange={(tab) => {
-        setTab(tab as any);
+        startTransition(() => {
+          setTab(tab as any);
+        });
       }}
     >
       <div className="flex flex-col gap-2">
@@ -49,8 +52,13 @@ export function GamePage({ id }: { id: string }) {
             <WeatherChip id={game.weather} />
           </div>
         </div>
-        {tab === 'boxScore' && <GameBoxScore id={id} />}
-        {tab === 'gameLog' && <GameLog id={id} />}
+        {isPending ? (
+          <div className="text-gray-500">Loading...</div>
+        ) : tab === 'boxScore' ? (
+          <GameBoxScore id={id} />
+        ) : tab === 'gameLog' ? (
+          <GameLog id={id} />
+        ) : null}
       </div>
     </Tabs>
   );

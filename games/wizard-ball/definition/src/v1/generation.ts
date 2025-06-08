@@ -18,7 +18,7 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
-import { isPitcher, randomTable } from './utils';
+import { isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 
@@ -189,6 +189,7 @@ export function generateLeague(
             species: playerObj.species,
             classType: playerObj.class,
             positions: playerObj.positions,
+            attributes: playerObj.attributes,
           })
         ) {
           playerObj.itemIds.push(instanceId);
@@ -224,7 +225,7 @@ export function generateLeague(
             ),
             ...ballparkData[ballpark].weather,
           };
-          const weather = randomTable(random, weatherTable);
+          const weather = random.table(weatherTable);
           roundGames.push({
             id: random.id(),
             homeTeamId: team1,
@@ -241,7 +242,7 @@ export function generateLeague(
             ),
             ...ballparkData[ballpark].weather,
           };
-          const weather = randomTable(random, weatherTable);
+          const weather = random.table(weatherTable);
           roundGames.push({
             id: random.id(),
             homeTeamId: team2,
@@ -322,7 +323,8 @@ function generatePlayer(
   }
 
   if (!options.skipPerks) {
-    const perkCount = random.float(0, 1) < 0.2 ? 2 : 1;
+    const perkCount =
+      random.float(0, 1) < 0.33 ? (random.float(0, 1) < 0.2 ? 3 : 2) : 1;
     for (let i = 0; i < perkCount; i++) {
       const perkOptions = Object.keys(perks).filter((p) => {
         const perk = perks[p as keyof typeof perks];
@@ -333,7 +335,12 @@ function generatePlayer(
                 ? 'pitching'
                 : 'batting')) &&
           (!perk.requirements ||
-            perk.requirements({ species, classType, positions })) &&
+            perk.requirements({
+              species,
+              classType,
+              positions,
+              attributes: player.attributes,
+            })) &&
           !player.perkIds.includes(p)
         );
       });
@@ -405,7 +412,7 @@ function generatePlayerName(random: GameRandom, race: SpeciesType): string {
 }
 
 export function pickRandomItemDef(random: GameRandom): string {
-  const rarity = randomTable(random, {
+  const rarity = random.table({
     common: 16,
     uncommon: 8,
     rare: 4,
