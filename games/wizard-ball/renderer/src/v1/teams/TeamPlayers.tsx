@@ -9,6 +9,7 @@ import {
   getPitchingCompositeRatings,
   getPlayerOverall,
   isPitcher,
+  PITCHER_BATTING_PENALTY,
 } from '@long-game/game-wizard-ball-definition';
 
 const columns = {
@@ -144,9 +145,17 @@ export function TeamPlayers({ id }: { id: string }) {
                   player.attributes,
                 );
                 const pitchingComposite = getPitchingCompositeRatings(
+                  player,
                   player.attributes,
                 );
-                const overall = getPlayerOverall(player);
+                let overall = getPlayerOverall(player);
+                if (
+                  tab === 'battingComposite' &&
+                  player.positions.some((p) => isPitcher(p))
+                ) {
+                  // TODO: This is pretty hacky since it doesn't future proof this
+                  overall -= PITCHER_BATTING_PENALTY * 6;
+                }
                 return {
                   attributes: player.attributes,
                   overall,

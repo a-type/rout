@@ -475,7 +475,8 @@ function getModifiedCompositePitchingRatings(
     gameState,
     activePerks.map((p) => p.effect),
   );
-  const baseCompositeRatings = getPitchingCompositeRatings(attributes);
+  const player = league.playerLookup[playerId];
+  const baseCompositeRatings = getPitchingCompositeRatings(player, attributes);
   return sumObjects(
     baseCompositeRatings,
     ...(activePerks

@@ -1,4 +1,4 @@
-import type { Position } from './gameTypes';
+import type { League, Player, Position } from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,
@@ -85,10 +85,29 @@ export function isPitcher(position: Position): position is 'sp' | 'rp' {
   return position === 'sp' || position === 'rp';
 }
 
+export function hasPitcherPosition(positions: Position[]): boolean {
+  return positions.some(isPitcher);
+}
+
 export function last<T>(arr: T[]): T | undefined {
   return arr[arr.length - 1];
 }
 
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function getTeamBench(league: League, teamId: string): Player[] {
+  const team = league.teamLookup[teamId];
+  return team.playerIds
+    .map((pid) => {
+      return league.playerLookup[pid] ?? null;
+    })
+    .filter(
+      (p) =>
+        p !== null &&
+        !Object.values(team.positionChart).includes(p.id) &&
+        !team.pitchingOrder.includes(p.id) &&
+        !p.positions.some((pos) => pos === 'rp'),
+    );
 }

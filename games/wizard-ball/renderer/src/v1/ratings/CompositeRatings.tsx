@@ -5,8 +5,9 @@ import {
   PitchingCompositeRatings,
 } from '@long-game/game-wizard-ball-definition';
 import { roundFloat } from '../utils';
-import { Tooltip } from '@a-type/ui';
+import { clsx, Tooltip } from '@a-type/ui';
 import { Bar } from './Bar';
+import { hooks } from '../gameClient';
 
 const battingRatingList: Array<{
   value: BattingCompositeType;
@@ -160,6 +161,13 @@ export function CompositeRatings({
   compositeMod?: PitchingCompositeRatings | BattingCompositeRatings;
   kind: 'batting' | 'pitching';
 }) {
+  const { finalState } = hooks.useGameSuite();
+  const advantageTypes = id
+    ? finalState.league.playerLookup[id].advantageTypes
+    : [];
+  const disadvantageTypes = id
+    ? finalState.league.playerLookup[id].disadvantageTypes
+    : [];
   return (
     <div className="flex flex-col gap-2">
       <h2 className="mb-1">Composite ratings</h2>
@@ -176,7 +184,18 @@ export function CompositeRatings({
             return (
               <Tooltip key={value} content={tooltip}>
                 <div className="col-span-6 grid grid-cols-12 p-1">
-                  <span className="font-semibold col-span-3">{label}:</span>
+                  <span
+                    className={clsx(
+                      'font-semibold col-span-3',
+                      advantageTypes.includes(value)
+                        ? 'text-green-500'
+                        : disadvantageTypes.includes(value)
+                        ? 'text-red-500'
+                        : '',
+                    )}
+                  >
+                    {label}:
+                  </span>
                   <span className="col-span-1 text-right">
                     {roundFloat(modValue, 1)}
                   </span>

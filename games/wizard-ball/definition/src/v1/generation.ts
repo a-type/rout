@@ -1,7 +1,9 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
+  BattingCompositeType,
   League,
   LeagueRound,
+  PitchingCompositeType,
   Player,
   PlayerAttributes,
   Position,
@@ -20,6 +22,32 @@ import { isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 import { applyXpAuto } from './boosts';
+
+const battingCompositeTypes = [
+  'extraBases',
+  'hitAngle',
+  'hitPower',
+  'homeRuns',
+  'contact',
+  'stealing',
+  'fielding',
+  'durability',
+  'plateDiscipline',
+  'dueling',
+] as const satisfies BattingCompositeType[];
+
+const pitchingCompositeTypes = [
+  'contact',
+  'hitAngle',
+  'movement',
+  'strikeout',
+  'accuracy',
+  'hitPower',
+  'velocity',
+  'durability',
+  'composure',
+  'dueling',
+] as const satisfies PitchingCompositeType[];
 
 export function generateLeague(
   random: GameRandom,
@@ -297,6 +325,12 @@ function generatePlayer(
   const species = random.item(Object.keys(names) as SpeciesType[]);
   const classType = random.item(Object.keys(classData)) as ClassType;
 
+  const typeList =
+    !forcedPosition || !isPitcher(forcedPosition)
+      ? battingCompositeTypes
+      : pitchingCompositeTypes;
+  const shuffledTypes = random.shuffle([...typeList]);
+
   let player: Player = {
     name: generatePlayerName(random, species),
     species: species,
@@ -309,6 +343,8 @@ function generatePlayer(
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
     xp: 0,
+    advantageTypes: [shuffledTypes[0]],
+    disadvantageTypes: [shuffledTypes[1]],
   };
   const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {

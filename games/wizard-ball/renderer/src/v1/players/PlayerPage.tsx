@@ -137,6 +137,7 @@ export function PlayerPage({ id }: { id: string }) {
         stamina={player.stamina}
       />
       <CompositeRatings
+        id={id}
         kind={
           player.positions.some((p) => isPitcher(p)) ? 'pitching' : 'batting'
         }

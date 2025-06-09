@@ -71,9 +71,9 @@ function getPlayerComposite(
     );
     return { base: baseComposite, adjusted: adjustedComposite };
   }
-  const baseComposite = getPitchingCompositeRatings(baseAttributes);
+  const baseComposite = getPitchingCompositeRatings(player, baseAttributes);
   const adjustedComposite = sumObjects(
-    getPitchingCompositeRatings(attributeMod),
+    getPitchingCompositeRatings(player, attributeMod),
     ...perkEffects
       .filter((e) => !!e.pitchingCompositeBonus)
       .map((e) => e.pitchingCompositeBonus!),

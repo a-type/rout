@@ -3,6 +3,7 @@ import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
+import { getTeamBench } from './utils';
 
 export type GlobalState = {
   league: League;
@@ -262,13 +263,19 @@ export const gameDefinition: GameDefinition<
       loser.runDifferential -=
         result.score[result.winner] - result.score[result.loser];
 
-      [winner, loser].forEach((team) =>
+      [winner, loser].forEach((team) => {
+        const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
-          // TODO: modify xp gain based on bench status
-          globalState = applyXp(random, player, globalState, 10);
-        }),
-      );
+          const isBenchPlayer = teamBench.some((p) => p.id === playerId);
+          globalState = applyXp(
+            random,
+            player,
+            globalState,
+            isBenchPlayer ? 20 : 10,
+          );
+        });
+      });
     }
     const nextLeague: League = {
       ...globalState.league,

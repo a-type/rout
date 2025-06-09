@@ -5,8 +5,12 @@ import {
   League,
   Player,
   PlayerAttributes,
+  BattingCompositeType,
+  PitchingCompositeType,
 } from './gameTypes';
 import { avg, isPitcher, sum, sumObjects } from './utils';
+
+export const PITCHER_BATTING_PENALTY = 5;
 
 export function getPlayerOverall(player: Player): number {
   const attributes = player.attributes;
@@ -46,7 +50,7 @@ export function getBattingCompositeRatings(
   attributes: PlayerAttributes,
 ): BattingCompositeRatings {
   const pitcher = player.positions.some((p) => isPitcher(p));
-  const pitcherMod = pitcher ? -5 : 0;
+  const pitcherMod = pitcher ? -PITCHER_BATTING_PENALTY : 0;
   const {
     strength: str,
     agility: agi,
@@ -54,21 +58,38 @@ export function getBattingCompositeRatings(
     wisdom: wis,
     intelligence: int,
   } = attributes;
-  return {
-    extraBases: avg(str, agi) + pitcherMod,
-    hitAngle: avg(str, con) + pitcherMod,
-    hitPower: avg(str, wis) + pitcherMod,
-    homeRuns: avg(str, int) + pitcherMod,
-    contact: avg(agi, con) + pitcherMod,
-    stealing: avg(agi, wis) + pitcherMod,
-    fielding: avg(agi, int) + pitcherMod,
-    durability: avg(con, wis) + pitcherMod,
-    plateDiscipline: avg(con, int) + pitcherMod,
-    dueling: avg(wis, int) + pitcherMod,
-  };
+  return Object.fromEntries(
+    Object.entries({
+      extraBases: [str, agi],
+      hitAngle: [str, con],
+      hitPower: [str, wis],
+      homeRuns: [str, int],
+      contact: [agi, con],
+      stealing: [agi, wis],
+      fielding: [agi, int],
+      durability: [con, wis],
+      plateDiscipline: [con, int],
+      dueling: [wis, int],
+    }).map(([key, attrs]) => {
+      const advantaged = player.advantageTypes.includes(
+        key as BattingCompositeType,
+      );
+      const disadvantaged = player.disadvantageTypes.includes(
+        key as BattingCompositeType,
+      );
+      if (advantaged) {
+        return [key, Math.max(...attrs) + pitcherMod];
+      }
+      if (disadvantaged) {
+        return [key, Math.min(...attrs) + pitcherMod];
+      }
+      return [key, avg(...attrs) + pitcherMod];
+    }),
+  ) as BattingCompositeRatings;
 }
 
 export function getPitchingCompositeRatings(
+  player: Player,
   attributes: PlayerAttributes,
 ): PitchingCompositeRatings {
   const {
@@ -78,18 +99,34 @@ export function getPitchingCompositeRatings(
     wisdom: wis,
     intelligence: int,
   } = attributes;
-  return {
-    contact: avg(str, agi),
-    hitAngle: avg(str, con),
-    velocity: avg(str, wis),
-    strikeout: avg(str, int),
-    accuracy: avg(agi, con),
-    hitPower: avg(agi, wis),
-    movement: avg(agi, int),
-    durability: avg(con, wis),
-    composure: avg(con, int),
-    dueling: avg(wis, int),
-  };
+  return Object.fromEntries(
+    Object.entries({
+      contact: [str, agi],
+      hitAngle: [str, con],
+      velocity: [str, wis],
+      strikeout: [str, int],
+      accuracy: [agi, con],
+      hitPower: [agi, wis],
+      movement: [agi, int],
+      durability: [con, wis],
+      composure: [con, int],
+      dueling: [wis, int],
+    }).map(([key, attrs]) => {
+      const advantaged = player.advantageTypes.includes(
+        key as PitchingCompositeType,
+      );
+      const disadvantaged = player.disadvantageTypes.includes(
+        key as PitchingCompositeType,
+      );
+      if (advantaged) {
+        return [key, Math.max(...attrs)];
+      }
+      if (disadvantaged) {
+        return [key, Math.min(...attrs)];
+      }
+      return [key, avg(...attrs)];
+    }),
+  ) as PitchingCompositeRatings;
 }
 
 export function getXpForLevel(level: number): number {

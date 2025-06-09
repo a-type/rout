@@ -70,6 +70,7 @@ export type PitchingCompositeRatings = {
 
 export type BattingCompositeType = keyof BattingCompositeRatings;
 export type PitchingCompositeType = keyof PitchingCompositeRatings;
+export type CompositeType = BattingCompositeType | PitchingCompositeType;
 
 export type Player = {
   name: string;
@@ -81,6 +82,8 @@ export type Player = {
   perkIds: string[];
   itemIds: string[];
   attributes: PlayerAttributes;
+  advantageTypes: CompositeType[];
+  disadvantageTypes: CompositeType[];
   stamina: number;
   xp: number;
 };
