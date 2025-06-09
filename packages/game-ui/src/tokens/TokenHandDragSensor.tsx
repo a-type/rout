@@ -46,7 +46,9 @@ export class TokenHandDragSensor extends Sensor {
         console.log('down', source.id);
 
         this.initialCoordinates = getCoordinates(event);
-        document.addEventListener('pointermove', handleMove);
+        document.addEventListener('pointermove', handleMove, {
+          passive: false,
+        });
         // We set the active candidate ID to the source ID
         TokenHandDragSensor.globalState.activeCandidateId = source.id;
       };

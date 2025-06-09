@@ -17,6 +17,7 @@ export function TokenSpace({
   onDrop,
   disabled,
   className,
+  ...rest
 }: TokenSpaceProps) {
   const { isDropTarget, ref } = useDroppable({
     id,
@@ -48,6 +49,7 @@ export function TokenSpace({
       )}
       data-over={isDropTarget}
       ref={ref}
+      {...rest}
     >
       {children}
     </div>

@@ -47,6 +47,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
         })
         .map((card) => ({ id: card, data: card, type: 'token' }))}
       render={({ data: card }) => <Card id={card} />}
+      renderDetailed={({ data: card }) => <Card id={card} className="w-60vw" />}
     />
   );
 });

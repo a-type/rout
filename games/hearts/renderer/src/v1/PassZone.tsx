@@ -1,6 +1,6 @@
 import { Box } from '@a-type/ui';
 import { isCard, isPassTurn } from '@long-game/game-hearts-definition/v1';
-import { TokenSpace } from '@long-game/game-ui';
+import { Token, TokenSpace } from '@long-game/game-ui';
 import { Card, CardPlaceholder } from './Card';
 import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
@@ -55,7 +55,11 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
         <CardGrid>
           {new Array(3).fill(null).map((_, i) => {
             if (passed[i]) {
-              return <Card key={passed[i]} id={passed[i]} />;
+              return (
+                <Token id={passed[i]} data={passed[i]}>
+                  <Card key={passed[i]} id={passed[i]} />
+                </Token>
+              );
             } else {
               return <CardPlaceholder key={i} />;
             }
