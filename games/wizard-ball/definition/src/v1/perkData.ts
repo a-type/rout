@@ -37,6 +37,7 @@ export type Perk = {
     species: SpeciesType;
     classType: ClassType;
     attributes: Record<AttributeType, number>;
+    level: number;
   }) => boolean;
   condition?: (props: {
     gameState: LeagueGameState;

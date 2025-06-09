@@ -8,6 +8,7 @@ import { Choices } from './Choices';
 import { useSearchParams } from 'react-router';
 import { RecentResults } from './RecentResults';
 import { hooks } from './gameClient';
+import { Levelups } from './Levelups';
 
 export function PageContent() {
   const { gameStatus, localTurnData } = hooks.useGameSuite();
@@ -54,6 +55,7 @@ export function PageContent() {
   return (
     <div>
       <Choices />
+      <Levelups />
       <RecentResults />
       <UpcomingGames />
     </div>

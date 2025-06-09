@@ -1,3 +1,4 @@
+import { GameRandom } from '@long-game/game-definition';
 import {
   BattingCompositeRatings,
   PitchingCompositeRatings,
@@ -99,4 +100,22 @@ export function getLevelFromXp(xp: number): number {
     level++;
   }
   return level;
+}
+
+export function applyLevelup(
+  random: GameRandom,
+  player: Player,
+  count: number = 1,
+): Player {
+  const newAttributes: PlayerAttributes = { ...player.attributes };
+  for (let i = 0; i < count; i++) {
+    const attr = random.item(
+      Object.keys(newAttributes),
+    ) as keyof PlayerAttributes;
+    newAttributes[attr] += 1;
+  }
+  return {
+    ...player,
+    attributes: newAttributes,
+  };
 }

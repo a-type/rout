@@ -1,22 +1,30 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
 import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
-import { generateItem, generateLeague } from './generation';
+import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
-import { applyChoice, generateChoices } from './boosts';
-import { getLevelFromXp } from './attributes';
+import {
+  applyChoice,
+  applyXp,
+  generateChoices,
+  generateLevelupChoices,
+} from './boosts';
+import { applyLevelup, getLevelFromXp } from './attributes';
 
 export type GlobalState = {
   league: League;
   choices: Record<string, Choice[]>;
+  levelups: Record<string, Record<PlayerId, Choice[][]>>;
 };
 
 export type PlayerState = {
   league: League;
   choices: Choice[];
+  levelups: Record<PlayerId, Choice[][]>;
 };
 
 export type TurnData = {
   choiceId?: string;
+  levelupChoices?: Record<PlayerId, string[]>;
   nextBattingOrder?: Position[];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
@@ -60,6 +68,23 @@ export const gameDefinition: GameDefinition<
       const uniquePositions = new Set(turn.data.nextBattingOrder);
       if (uniquePositions.size !== 9) {
         return 'You must select unique players for your batting order';
+      }
+    }
+    if (turn.data.levelupChoices) {
+      for (const [playerId, choices] of Object.entries(
+        turn.data.levelupChoices,
+      )) {
+        if (!playerState.levelups[playerId]) {
+          return `No levelup choices available for player ${playerId}`;
+        }
+        const validChoices = playerState.levelups[playerId].flatMap((group) =>
+          group.map((c) => c.id),
+        );
+        for (const choice of choices) {
+          if (!validChoices.includes(choice)) {
+            return `Invalid levelup choice ID: ${choice} for player ${playerId}`;
+          }
+        }
       }
     }
     return;
@@ -131,13 +156,21 @@ export const gameDefinition: GameDefinition<
         members.map((m) => m.id),
         league,
       ),
+      levelups: {},
     };
   },
 
   getPlayerState: ({ globalState, playerId }) => {
+    const myTeam = Object.values(globalState.league.teamLookup).find(
+      (t) => t.ownerId === playerId,
+    );
+    if (!myTeam) {
+      throw new Error(`Could not find team for player ${playerId}`);
+    }
     return {
+      ...globalState,
       choices: globalState.choices[playerId],
-      league: globalState.league,
+      levelups: globalState.levelups[playerId] || [],
     };
   },
 
@@ -185,6 +218,35 @@ export const gameDefinition: GameDefinition<
           // );
         }
       }
+
+      if (turn.data.levelupChoices) {
+        for (const [playerId, choices] of Object.entries(
+          turn.data.levelupChoices,
+        )) {
+          const player = globalState.league.playerLookup[playerId];
+          if (!player) {
+            throw new Error(`Player with ID ${playerId} not found`);
+          }
+          choices.forEach((choiceId, idx) => {
+            const choice = globalState.levelups[turn.playerId]?.[playerId]?.[
+              idx
+            ]?.find((c) => c.id === choiceId);
+            if (!choice) {
+              return;
+              // throw new Error(
+              //   `Could not find levelup choice with ID ${choiceId} for player ${playerId}`,
+              // );
+            }
+            globalState.league = applyChoice(
+              random,
+              choice,
+              globalState.league,
+              team,
+            );
+          });
+        }
+        globalState.levelups[turn.playerId] = {};
+      }
     });
 
     const results = simulateRound(random, globalState.league, currentRound);
@@ -210,16 +272,7 @@ export const gameDefinition: GameDefinition<
       [winner, loser].forEach((team) =>
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
-          // TODO: Reevaluate how to assign XP
-          const initialLevel = getLevelFromXp(player.xp);
-          player.xp += 10;
-          const newLevel = getLevelFromXp(player.xp);
-          for (let i = initialLevel; i < newLevel; i++) {
-            const attr = random.item(
-              Object.keys(player.attributes),
-            ) as keyof typeof player.attributes;
-            player.attributes[attr] += 1;
-          }
+          globalState = applyXp(random, player, globalState, 10);
         }),
       );
     }

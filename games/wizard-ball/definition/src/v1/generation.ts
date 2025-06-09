@@ -1,7 +1,5 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
-  Choice,
-  ChoiceKind,
   League,
   LeagueRound,
   Player,
@@ -16,7 +14,7 @@ import { PrefixedId } from '@long-game/common';
 import { speciesData, SpeciesType } from './speciesData';
 import { classData, ClassType } from './classData';
 import { perks } from './perkData';
-import { getPlayerOverall } from './attributes';
+import { getLevelFromXp, getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
 import { isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
@@ -102,11 +100,11 @@ export function generateLeague(
         skipPerks: options.skipPerks,
       });
       plusAttributes.forEach((plusAttribute) => {
-        player.attributes[plusAttribute] += 2;
+        player.attributes[plusAttribute] += 1;
       });
 
       minusAttributes.forEach((minusAttribute) => {
-        player.attributes[minusAttribute] -= 2;
+        player.attributes[minusAttribute] -= 1;
       });
       attributes.forEach((attribute) => {
         player.attributes[attribute] = Math.min(
@@ -182,6 +180,7 @@ export function generateLeague(
       league.itemLookup[instanceId] = { ...item, teamId: team.id };
       for (const player of random.shuffle(team.playerIds)) {
         const playerObj = league.playerLookup[player];
+        const level = getLevelFromXp(playerObj.xp);
         const i = itemData[item.itemDef];
         if (
           !i.requirements ||
@@ -190,6 +189,7 @@ export function generateLeague(
             classType: playerObj.class,
             positions: playerObj.positions,
             attributes: playerObj.attributes,
+            level,
           })
         ) {
           playerObj.itemIds.push(instanceId);
@@ -214,8 +214,6 @@ export function generateLeague(
       const team2 = teamIds[n - 1 - i];
       if (team1 !== 'BYE' && team2 !== 'BYE') {
         // Alternate home/away by round for balance
-        const weather = random.item(Object.keys(weatherData)) as WeatherType;
-
         if (round % 2 === 0) {
           const ballpark = league.teamLookup[team1].ballpark;
           const weatherTable = {
@@ -308,7 +306,7 @@ function generatePlayer(
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
-    xp: random.int(0, 1000),
+    xp: random.int(0, 300),
   };
   const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
@@ -326,6 +324,7 @@ function generatePlayer(
   if (!options.skipPerks) {
     const perkCount =
       random.float(0, 1) < 0.33 ? (random.float(0, 1) < 0.2 ? 3 : 2) : 1;
+    const level = getLevelFromXp(player.xp);
     for (let i = 0; i < perkCount; i++) {
       const perkOptions = Object.keys(perks).filter((p) => {
         const perk = perks[p as keyof typeof perks];
@@ -341,6 +340,7 @@ function generatePlayer(
               classType,
               positions,
               attributes: player.attributes,
+              level,
             })) &&
           !player.perkIds.includes(p)
         );

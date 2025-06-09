@@ -1,7 +1,9 @@
 import { GameRandom } from '@long-game/game-definition';
-import { League, Choice, ChoiceKind, Team } from './gameTypes';
+import { League, Choice, ChoiceKind, Team, Player } from './gameTypes';
 import { generateItem, pickRandomItemDef } from './generation';
 import { perks } from './perkData';
+import { applyLevelup, getLevelFromXp } from './attributes';
+import { GlobalState } from './gameDefinition';
 
 export function generateChoices(
   random: GameRandom,
@@ -47,6 +49,7 @@ function generateChoice(
     case 'perk':
       const playerId = random.item(team.playerIds);
       const player = league.playerLookup[playerId];
+      const level = getLevelFromXp(player.xp);
       const validPerks = Object.entries(perks)
         .filter(([perkId]) => !player.perkIds.includes(perkId))
         .filter(
@@ -57,6 +60,7 @@ function generateChoice(
               species: player.species,
               positions: player.positions,
               attributes: player.attributes,
+              level,
             }),
         )
         .map(([perkId, _]) => perkId);
@@ -105,6 +109,46 @@ function generateChoice(
   }
 }
 
+export function generateLevelupChoices(
+  random: GameRandom,
+  playerId: string,
+  league: League,
+): Choice[] {
+  const player = league.playerLookup[playerId];
+  if (!player) {
+    throw new Error(`Player with ID ${playerId} not found`);
+  }
+  const level = getLevelFromXp(player.xp);
+  const validPerks = Object.entries(perks)
+    .filter(([perkId]) => !player.perkIds.includes(perkId))
+    .filter(
+      ([_, perk]) =>
+        !perk.requirements ||
+        perk.requirements({
+          classType: player.class,
+          species: player.species,
+          positions: player.positions,
+          attributes: player.attributes,
+          level,
+        }),
+    )
+    .map(([perkId, _]) => perkId);
+  if (validPerks.length < 3) {
+    return [];
+  }
+  const perkChoices = random
+    .shuffle(validPerks)
+    .slice(0, 3)
+    .map((perkId) => ({
+      kind: 'perk' as const,
+      perkId,
+      playerId,
+      id: random.id(),
+    }));
+
+  return perkChoices;
+}
+
 export function applyChoice(
   random: GameRandom,
   choice: Choice,
@@ -147,4 +191,54 @@ export function applyChoice(
     player.perkIds.push(choice.perkId);
   }
   return league;
+}
+
+export function applyXp(
+  random: GameRandom,
+  player: Player,
+  globalState: GlobalState,
+  amount: number,
+  forcePickRandom = false,
+): GlobalState {
+  const team = globalState.league.teamLookup[player.teamId!];
+  const initialLevel = getLevelFromXp(player.xp);
+  player.xp += amount;
+  const newLevel = getLevelFromXp(player.xp);
+  if (newLevel > initialLevel) {
+    globalState.league.playerLookup[player.id] = applyLevelup(
+      random,
+      player,
+      newLevel - initialLevel,
+    );
+    for (let i = initialLevel + 1; i <= newLevel; i++) {
+      if (random.float() < 0.2) {
+        const choices = generateLevelupChoices(
+          random,
+          player.id,
+          globalState.league,
+        );
+        if (team.ownerId && !forcePickRandom) {
+          globalState.levelups = {
+            ...globalState.levelups,
+            [team.ownerId]: {
+              ...globalState.levelups[team.ownerId],
+              [player.id]: [
+                ...(globalState.levelups[team.ownerId]?.[player.id] ?? []),
+                choices,
+              ],
+            },
+          };
+        } else {
+          // CPU teams just pick the first choice
+          globalState.league = applyChoice(
+            random,
+            choices[0],
+            globalState.league,
+            team,
+          );
+        }
+      }
+    }
+  }
+  return globalState;
 }

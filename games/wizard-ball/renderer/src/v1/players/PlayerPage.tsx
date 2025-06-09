@@ -1,10 +1,7 @@
 import {
   speciesIcons,
   perks,
-  getPlayerOverall,
   isPitcher,
-  getLevelFromXp,
-  getXpForLevel,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { clsx } from '@a-type/ui';
@@ -18,8 +15,8 @@ import {
   usePlayerComposite,
 } from '../ratings/useAttributes';
 import { Link } from 'react-router';
-import { Bar } from '../ratings/Bar';
 import { XpBar } from '../ratings/XpBar';
+import { LevelupChoices } from '../Choices';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -94,6 +91,12 @@ export function PlayerPage({ id }: { id: string }) {
           Positions: {playerPositions.toUpperCase()}
         </div>
         <XpBar xp={player.xp} />
+        {finalState.levelups[id] && (
+          <div className="text-sm text-green-500 mb-2">
+            <span className="font-semibold">Level Up! Choose a boon:</span>{' '}
+            <LevelupChoices id={id} />
+          </div>
+        )}
       </div>
       <div>
         <div className="grid grid-cols-2 gap-4">

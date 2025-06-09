@@ -1509,15 +1509,23 @@ export function simulatePitch(
     getActivePlayerPerks(batter.id, league, gameState, pitchData.kind),
   );
   const isReliever = pitcher.positions.some((pos) => pos === 'rp');
-  pitcher.stamina = Math.max(
-    -0.25,
-    pitcher.stamina +
-      scaleAttributePercent(
-        pitcherComposite.durability,
-        isReliever ? 1.015 : 1.002,
-      ) -
-      (isReliever ? 1.03 : 1.01),
-  );
+  let pitcherStaminaChange =
+    scaleAttributePercent(
+      pitcherComposite.durability,
+      isReliever ? 1.015 : 1.002,
+    ) - (isReliever ? 1.03 : 1.01);
+  pitcherStaminaChange *=
+    {
+      strike: 1,
+      ball: 1,
+      foul: 1,
+      out: 1,
+      hit: 1.5,
+      double: 2,
+      triple: 3,
+      homeRun: 5,
+    }[outcome] ?? 1;
+  pitcher.stamina = Math.max(-0.25, pitcher.stamina + pitcherStaminaChange);
   batter.stamina = Math.max(
     -0.25,
     batter.stamina +

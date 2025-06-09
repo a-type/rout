@@ -7,7 +7,7 @@ import { PlayerChip } from './players/PlayerChip';
 import { useSendTurn, shortAttribute } from './utils';
 import { PerkChip } from './perks/PerkChip';
 
-function Choice({ choice }: { choice: ChoiceType }) {
+export function Choice({ choice }: { choice: ChoiceType }) {
   if (choice.kind === 'item') {
     return (
       <>
@@ -111,6 +111,57 @@ export function Choices() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+export function LevelupChoices({ id }: { id: string }) {
+  const { finalState, localTurnData } = hooks.useGameSuite();
+  const sendTurn = useSendTurn();
+  const [selection, setSelection] = useState<string[]>(
+    localTurnData?.levelupChoices?.[id] ?? [],
+  );
+  useEffect(() => {
+    if (selection?.length > 0) {
+      sendTurn((turn) => ({
+        ...turn,
+        levelupChoices: { ...turn?.levelupChoices, [id]: selection },
+      }));
+    }
+  }, [selection]);
+  const optionsGroups = finalState.levelups[id];
+  if (!optionsGroups || optionsGroups.length === 0) {
+    return <div className="text-gray-500">No choices available.</div>;
+  }
+  return (
+    <div className="my-4 flex flex-col gap-4">
+      {optionsGroups.map((options, idx) => (
+        <div className="flex flex-row gap-2">
+          {options.map((choice) => {
+            return (
+              <Button
+                onClick={() => {
+                  setSelection((v) =>
+                    // update choice with index
+                    v[idx] === choice.id
+                      ? v.filter((c) => c !== choice.id)
+                      : [...v.slice(0, idx), choice.id, ...v.slice(idx + 1)],
+                  );
+                }}
+                key={choice.id}
+                className={clsx(
+                  'flex flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
+                  selection[idx] === choice.id
+                    ? 'outline outline-4 outline-blue-500'
+                    : '',
+                )}
+              >
+                <Choice choice={choice} />
+              </Button>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
