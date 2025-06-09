@@ -1,11 +1,22 @@
 import { Box } from '@a-type/ui';
-import { useDraggable } from '@dnd-kit/react';
-import { frame, motion, useMotionTemplate, useSpring } from 'motion/react';
-import { memo, ReactNode, Ref, useEffect } from 'react';
+import {
+  AnimatePresence,
+  frame,
+  motion,
+  useMotionTemplate,
+  useSpring,
+} from 'motion/react';
+import {
+  createContext,
+  memo,
+  ReactNode,
+  Ref,
+  useContext,
+  useEffect,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { proxy, useSnapshot } from 'valtio';
-import { CenterOnCursorModifier } from './CenterOnCursorModifier';
-import { TokenHandDragSensor } from './TokenHandDragSensor';
+import { Token } from './Token';
 import { TokenSpace } from './TokenSpace';
 import { TokenDragData } from './types';
 
@@ -43,67 +54,50 @@ export function TokenHand<T = unknown>({
   onDrop,
 }: TokenHandProps<T>) {
   return (
-    <>
+    <TokenHandContext.Provider value={true}>
       <Box ref={userRef} d="row" full="width" className={className} asChild>
         <TokenSpace id="hand" onDrop={(v) => onDrop?.(v as TokenDragData<T>)}>
-          {values.map((value, index) => {
-            return (
-              <TokenHandItem
-                id={value.id}
-                key={value.id}
-                value={value}
-                index={index}
-              >
-                {renderCompact(value)}
-              </TokenHandItem>
-            );
-          })}
+          <AnimatePresence>
+            {values.map((value, index) => {
+              return (
+                <TokenHandItem key={value.id} value={value} index={index}>
+                  {renderCompact(value)}
+                </TokenHandItem>
+              );
+            })}
+          </AnimatePresence>
         </TokenSpace>
       </Box>
       {renderDetailed && (
         <TokenHandPreview values={values} renderDetailed={renderDetailed} />
       )}
-    </>
+    </TokenHandContext.Provider>
   );
 }
 
 const TokenHandItem = memo(function TokenHandItem({
-  id,
   value,
   index,
   children,
 }: {
-  id: string;
-  value: any;
+  value: TokenDragData;
   index: number;
   children: ReactNode;
 }) {
-  const { ref } = useDraggable({
-    id,
-    data: { id, type: 'token', data: value },
-    sensors: [
-      // this custom sensor only activates when the user pulls the token
-      // upward out of the hand.
-      TokenHandDragSensor.configure({}),
-    ],
-    modifiers: [CenterOnCursorModifier],
-  });
-
   return (
-    <Box
-      key={value.id}
-      className="relative flex-shrink-0 touch-none"
+    <Token
+      id={value.id}
+      data={value.data}
       onPointerEnter={() => {
-        console.log('hovered', value.id);
-        hoverState.index = index;
+        // hoverState.index = index;
       }}
       onPointerLeave={() => {
         hoverState.index = -1;
       }}
-      ref={ref}
+      exit={{ width: 0 }}
     >
       {children}
-    </Box>
+    </Token>
   );
 });
 
@@ -154,4 +148,9 @@ function useFollowPointer(offset: { x: number; y: number } = { x: 0, y: 0 }) {
   }, []);
 
   return { x, y };
+}
+
+const TokenHandContext = createContext<boolean>(false);
+export function useIsTokenInHand() {
+  return useContext(TokenHandContext);
 }
