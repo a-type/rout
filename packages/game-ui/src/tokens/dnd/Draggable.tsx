@@ -131,6 +131,8 @@ function DraggableHandle({
         gestureContext.current.initial = { x: 0, y: 0 };
         gestureContext.current.current = { x: 0, y: 0 };
         gestureContext.current.delta = { x: 0, y: 0 };
+        draggable.localMovement.x.set(0);
+        draggable.localMovement.y.set(0);
         return;
       } else {
         // if not activated, check for activation
@@ -145,6 +147,12 @@ function DraggableHandle({
             // If no activation constraint is provided, we assume the drag should start
             setDragging(draggable, gestureContext.current.current);
           }
+          draggable.localMovement.x.set(
+            gestureContext.current.current.x - gestureContext.current.initial.x,
+          );
+          draggable.localMovement.y.set(
+            gestureContext.current.current.y - gestureContext.current.initial.y,
+          );
         } else {
           console.debug('dragging', draggable.id);
           // we are dragging this item
