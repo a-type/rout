@@ -5,13 +5,11 @@ import {
   type TeamId,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { useSearchParams } from '@verdant-web/react-router';
 import { useState } from 'react';
 import { Attributes } from '../ratings/Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';
-import { attributeToColor } from '../utils';
 import { TeamItems } from './TeamItems';
 import { BallparkChip } from '../BallparkChip';
 import { Link } from 'react-router';

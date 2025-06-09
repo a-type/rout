@@ -93,13 +93,13 @@ export function getXpForLevel(level: number): number {
   return 10 + level ** 2;
 }
 
-export function getLevelFromXp(xp: number): number {
+export function getLevelFromXp(xp: number): { level: number; xp: number } {
   let level = 0;
   while (xp >= getXpForLevel(level)) {
     xp -= getXpForLevel(level);
     level++;
   }
-  return level;
+  return { level: level + 1, xp };
 }
 
 export function applyLevelup(

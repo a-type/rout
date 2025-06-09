@@ -19,6 +19,7 @@ import { itemData } from './itemData';
 import { isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
+import { applyXpAuto } from './boosts';
 
 export function generateLeague(
   random: GameRandom,
@@ -122,6 +123,7 @@ export function generateLeague(
         team.pitchingOrder.push(player.id);
       }
       league.playerLookup[player.id] = player;
+      league = applyXpAuto(random, player, league, random.int(0, 200));
     }
 
     // ensure pc plays good players and hase a sane batting order
@@ -129,28 +131,28 @@ export function generateLeague(
 
     // TODO: Fix this!
 
-    // team.playerIds
-    //   .map((playerId) => {
-    //     const player = league.playerLookup[playerId];
-    //     return player;
-    //   })
-    //   .filter(
-    //     (player) =>
-    //       player.positions.some((pos) => pos !== 'p') &&
-    //       !Object.values(team.positionChart).includes(player.id),
-    //   )
-    //   .forEach((player) => {
-    //     for (const pos of player.positions) {
-    //       if (pos !== 'p' && team.positionChart[pos] !== null) {
-    //         const currentPlayerId = team.positionChart[pos];
-    //         const currentPlayer = league.playerLookup[currentPlayerId];
-    //         if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
-    //           team.positionChart[pos] = player.id;
-    //           return;
-    //         }
-    //       }
-    //     }
-    //   });
+    team.playerIds
+      .map((playerId) => {
+        const player = league.playerLookup[playerId];
+        return player;
+      })
+      .filter(
+        (player) =>
+          player.positions.every((pos) => !isPitcher(pos)) &&
+          !Object.values(team.positionChart).includes(player.id),
+      )
+      .forEach((player) => {
+        for (const pos of player.positions) {
+          if (!isPitcher(pos) && team.positionChart[pos] !== null) {
+            const currentPlayerId = team.positionChart[pos];
+            const currentPlayer = league.playerLookup[currentPlayerId];
+            if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
+              team.positionChart[pos] = player.id;
+              return;
+            }
+          }
+        }
+      });
 
     // sort batting order by overall
     team.battingOrder.sort((a, b) => {
@@ -180,7 +182,7 @@ export function generateLeague(
       league.itemLookup[instanceId] = { ...item, teamId: team.id };
       for (const player of random.shuffle(team.playerIds)) {
         const playerObj = league.playerLookup[player];
-        const level = getLevelFromXp(playerObj.xp);
+        const { level } = getLevelFromXp(playerObj.xp);
         const i = itemData[item.itemDef];
         if (
           !i.requirements ||
@@ -306,7 +308,7 @@ function generatePlayer(
     positions: forcedPosition ? [forcedPosition] : [],
     attributes: generateAttributes(random, species, classType),
     stamina: 1,
-    xp: random.int(0, 300),
+    xp: 0,
   };
   const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
@@ -322,9 +324,10 @@ function generatePlayer(
   }
 
   if (!options.skipPerks) {
-    const perkCount =
-      random.float(0, 1) < 0.33 ? (random.float(0, 1) < 0.2 ? 3 : 2) : 1;
-    const level = getLevelFromXp(player.xp);
+    // const perkCount =
+    //   random.float(0, 1) < 0.33 ? (random.float(0, 1) < 0.2 ? 3 : 2) : 1;
+    const perkCount = random.float(0, 1) < 0.25 ? 1 : 0;
+    const { level } = getLevelFromXp(player.xp);
     for (let i = 0; i < perkCount; i++) {
       const perkOptions = Object.keys(perks).filter((p) => {
         const perk = perks[p as keyof typeof perks];
@@ -359,7 +362,7 @@ function generateAttributes(
   classType: ClassType,
 ): Player['attributes'] {
   const pool = Array.from({ length: 8 }, (_, i) => i + 1)
-    .map(() => random.int(4, 17))
+    .map(() => random.int(3, 16))
     .sort((a, b) => a - b);
   const bestAttribute = classData[classType];
   const results = pool.slice(1, -1);

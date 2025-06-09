@@ -103,13 +103,17 @@ export function PlayerPage({ id }: { id: string }) {
           <div className="col-span-1">
             <h2>Perks</h2>
             <div className="flex flex-col gap-2 items-start">
-              {player.perkIds.map((perkId) => {
-                const perk = perks[perkId as keyof typeof perks];
-                if (!perk) {
-                  return null;
-                }
-                return <PerkChip key={perkId} id={perkId} />;
-              })}
+              {player.perkIds.length > 0 ? (
+                player.perkIds.map((perkId) => {
+                  const perk = perks[perkId as keyof typeof perks];
+                  if (!perk) {
+                    return null;
+                  }
+                  return <PerkChip key={perkId} id={perkId} />;
+                })
+              ) : (
+                <span className="text-gray-400">No perks</span>
+              )}
             </div>
           </div>
           <div className="col-span-1">

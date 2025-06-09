@@ -136,7 +136,7 @@ export function LevelupChoices({ id }: { id: string }) {
   return (
     <div className="my-4 flex flex-col gap-4">
       {optionsGroups.map((options, idx) => (
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2" key={idx}>
           {options.map((choice) => {
             return (
               <Button

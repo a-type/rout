@@ -1,4 +1,5 @@
 import { Perk } from './perkData';
+import { isPitcher } from './utils';
 
 export type ItemInfo = Omit<Perk, 'kind'> & {
   icon: string;
@@ -85,6 +86,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🏏',
     rarity: 'legendary',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         hitPower: 7,
@@ -100,6 +102,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🧤',
     rarity: 'rare',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         fielding: 4,
@@ -112,6 +115,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🎭',
     rarity: 'rare',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         stealing: 4,
@@ -124,6 +128,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🧢',
     rarity: 'legendary',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
         velocity: 7,
@@ -138,6 +143,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '👢',
     rarity: 'uncommon',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         extraBases: 4,
@@ -150,6 +156,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '📿',
     rarity: 'rare',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         plateDiscipline: 4,
@@ -194,6 +201,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🔥',
     rarity: 'common',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
         velocity: 4,
@@ -207,6 +215,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '❄️',
     rarity: 'common',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
         movement: 4,
@@ -220,6 +229,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '⚡',
     rarity: 'uncommon',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
         accuracy: 2,
@@ -233,6 +243,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '🎩',
     rarity: 'rare',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
         composure: 4,
@@ -261,6 +272,7 @@ export const itemData: Record<string, ItemInfo> = {
     icon: '💰',
     rarity: 'uncommon',
     condition: ({ isMe }) => isMe,
+    requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
         contact: 3,

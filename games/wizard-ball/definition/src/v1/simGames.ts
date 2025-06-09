@@ -1513,7 +1513,7 @@ export function simulatePitch(
     scaleAttributePercent(
       pitcherComposite.durability,
       isReliever ? 1.015 : 1.002,
-    ) - (isReliever ? 1.03 : 1.01);
+    ) - (isReliever ? 1.03 : 1.007);
   pitcherStaminaChange *=
     {
       strike: 1,

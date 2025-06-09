@@ -65,10 +65,11 @@ export function TeamPlayers({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
   const team = finalState.league.teamLookup[id];
 
-  const renderColorCell = (value: number, max: number = 20) => {
+  const renderColorCell = (key: string, value: number, max: number = 20) => {
     const { bg } = attributeToColor(value, max);
     return (
       <td
+        key={key}
         className="text-center"
         style={{ backgroundColor: bg, color: '#222' }}
       >
@@ -160,7 +161,7 @@ export function TeamPlayers({ id }: { id: string }) {
                   name: player.name,
                   position: player.positions.join('/').toUpperCase(),
                   overall,
-                  level: getLevelFromXp(player.xp),
+                  level: getLevelFromXp(player.xp).level,
                 };
                 return (
                   <tr
@@ -175,6 +176,7 @@ export function TeamPlayers({ id }: { id: string }) {
                         col.key !== 'level'
                       ) {
                         return renderColorCell(
+                          col.key,
                           value,
                           col.key === 'overall' ? 120 : undefined,
                         );

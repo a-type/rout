@@ -4,6 +4,7 @@ import { generateItem, pickRandomItemDef } from './generation';
 import { perks } from './perkData';
 import { applyLevelup, getLevelFromXp } from './attributes';
 import { GlobalState } from './gameDefinition';
+import { isPitcher } from './utils';
 
 export function generateChoices(
   random: GameRandom,
@@ -49,9 +50,15 @@ function generateChoice(
     case 'perk':
       const playerId = random.item(team.playerIds);
       const player = league.playerLookup[playerId];
-      const level = getLevelFromXp(player.xp);
+      const pitcher = player.positions.some((p) => isPitcher(p));
+      const { level } = getLevelFromXp(player.xp);
       const validPerks = Object.entries(perks)
         .filter(([perkId]) => !player.perkIds.includes(perkId))
+        .filter(
+          ([, perk]) =>
+            perk.kind === 'any' ||
+            (pitcher ? perk.kind === 'pitching' : perk.kind === 'batting'),
+        )
         .filter(
           ([_, perk]) =>
             !perk.requirements ||
@@ -113,14 +120,21 @@ export function generateLevelupChoices(
   random: GameRandom,
   playerId: string,
   league: League,
+  count = 3,
 ): Choice[] {
   const player = league.playerLookup[playerId];
+  const pitcher = player.positions.some((p) => isPitcher(p));
   if (!player) {
     throw new Error(`Player with ID ${playerId} not found`);
   }
-  const level = getLevelFromXp(player.xp);
+  const { level } = getLevelFromXp(player.xp);
   const validPerks = Object.entries(perks)
     .filter(([perkId]) => !player.perkIds.includes(perkId))
+    .filter(
+      ([, perk]) =>
+        perk.kind === 'any' ||
+        (pitcher ? perk.kind === 'pitching' : perk.kind === 'batting'),
+    )
     .filter(
       ([_, perk]) =>
         !perk.requirements ||
@@ -133,12 +147,12 @@ export function generateLevelupChoices(
         }),
     )
     .map(([perkId, _]) => perkId);
-  if (validPerks.length < 3) {
+  if (validPerks.length < count) {
     return [];
   }
   const perkChoices = random
     .shuffle(validPerks)
-    .slice(0, 3)
+    .slice(0, count)
     .map((perkId) => ({
       kind: 'perk' as const,
       perkId,
@@ -201,9 +215,9 @@ export function applyXp(
   forcePickRandom = false,
 ): GlobalState {
   const team = globalState.league.teamLookup[player.teamId!];
-  const initialLevel = getLevelFromXp(player.xp);
+  const { level: initialLevel } = getLevelFromXp(player.xp);
   player.xp += amount;
-  const newLevel = getLevelFromXp(player.xp);
+  const { level: newLevel } = getLevelFromXp(player.xp);
   if (newLevel > initialLevel) {
     globalState.league.playerLookup[player.id] = applyLevelup(
       random,
@@ -241,4 +255,31 @@ export function applyXp(
     }
   }
   return globalState;
+}
+
+export function applyXpAuto(
+  random: GameRandom,
+  player: Player,
+  league: League,
+  amount: number,
+): League {
+  const team = league.teamLookup[player.teamId!];
+  const { level: initialLevel } = getLevelFromXp(player.xp);
+  player.xp += amount;
+  const { level: newLevel } = getLevelFromXp(player.xp);
+  if (newLevel > initialLevel) {
+    league.playerLookup[player.id] = applyLevelup(
+      random,
+      player,
+      newLevel - initialLevel,
+    );
+    for (let i = initialLevel + 1; i <= newLevel; i++) {
+      if (random.float() < 0.2) {
+        const [choice] = generateLevelupChoices(random, player.id, league, 1);
+
+        league = applyChoice(random, choice, league, team);
+      }
+    }
+  }
+  return league;
 }
