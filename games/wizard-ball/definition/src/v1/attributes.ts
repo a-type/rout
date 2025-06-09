@@ -6,7 +6,7 @@ import {
   Player,
   PlayerAttributes,
 } from './gameTypes';
-import { avg, sum, sumObjects } from './utils';
+import { avg, isPitcher, sum, sumObjects } from './utils';
 
 export function getPlayerOverall(player: Player): number {
   const attributes = player.attributes;
@@ -42,8 +42,11 @@ export function getTeamAvgAttributes(
 }
 
 export function getBattingCompositeRatings(
+  player: Player,
   attributes: PlayerAttributes,
 ): BattingCompositeRatings {
+  const pitcher = player.positions.some((p) => isPitcher(p));
+  const pitcherMod = pitcher ? -5 : 0;
   const {
     strength: str,
     agility: agi,
@@ -52,16 +55,16 @@ export function getBattingCompositeRatings(
     intelligence: int,
   } = attributes;
   return {
-    extraBases: avg(str, agi),
-    hitAngle: avg(str, con),
-    hitPower: avg(str, wis),
-    homeRuns: avg(str, int),
-    contact: avg(agi, con),
-    stealing: avg(agi, wis),
-    fielding: avg(agi, int),
-    durability: avg(con, wis),
-    plateDiscipline: avg(con, int),
-    dueling: avg(wis, int),
+    extraBases: avg(str, agi) + pitcherMod,
+    hitAngle: avg(str, con) + pitcherMod,
+    hitPower: avg(str, wis) + pitcherMod,
+    homeRuns: avg(str, int) + pitcherMod,
+    contact: avg(agi, con) + pitcherMod,
+    stealing: avg(agi, wis) + pitcherMod,
+    fielding: avg(agi, int) + pitcherMod,
+    durability: avg(con, wis) + pitcherMod,
+    plateDiscipline: avg(con, int) + pitcherMod,
+    dueling: avg(wis, int) + pitcherMod,
   };
 }
 

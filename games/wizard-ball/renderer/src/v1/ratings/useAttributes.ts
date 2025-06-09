@@ -62,9 +62,9 @@ function getPlayerComposite(
   const attributes = getPlayerAttributes(player, league);
   const { baseAttributes, attributeMod } = attributes;
   if (kind === 'batting') {
-    const baseComposite = getBattingCompositeRatings(baseAttributes);
+    const baseComposite = getBattingCompositeRatings(player, baseAttributes);
     const adjustedComposite = sumObjects(
-      getBattingCompositeRatings(attributeMod),
+      getBattingCompositeRatings(player, attributeMod),
       ...perkEffects
         .filter((e) => !!e.battingCompositeBonus)
         .map((e) => e.battingCompositeBonus!),

@@ -415,12 +415,9 @@ function getModifiedAttributes(
 ): Player['attributes'] {
   const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
-  const isPitcherBatting =
-    getCurrentBatter(gameState) === playerId &&
-    last(gameState.teamData[gameState.battingTeam].pitchers) === playerId;
   const stamina = Math.min(1, Math.max(0, player.stamina));
-  const staminaFactor = Math.max(0, (0.8 - stamina) * 6);
-  const reduction = staminaFactor + (isPitcherBatting ? 4 : 0);
+  const staminaFactor = Math.max(0, (0.8 - stamina) * 5);
+  const reduction = staminaFactor;
   const baseStats = sumObjects(
     player.attributes,
     ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
@@ -450,13 +447,14 @@ function getModifiedCompositeBattingRatings(
   gameState: LeagueGameState,
   activePerks: PerkInfo[] = [],
 ): BattingCompositeRatings {
+  const player = league.playerLookup[playerId];
   const attributes = getModifiedAttributes(
     playerId,
     league,
     gameState,
     activePerks.map((p) => p.effect),
   );
-  const baseCompositeRatings = getBattingCompositeRatings(attributes);
+  const baseCompositeRatings = getBattingCompositeRatings(player, attributes);
   return sumObjects(
     baseCompositeRatings,
     ...(activePerks

@@ -39,7 +39,7 @@ export const gameDefinition: GameDefinition<
       requireAllPlayersToPlay: false,
     }),
     development: roundFormat.sync(),
-    // development: roundFormat.periodic('minutes', 1, {
+    // development: roundFormat.periodic('minutes', 5, {
     //   requireAllPlayersToPlay: false,
     // }),
   }),

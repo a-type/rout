@@ -44,7 +44,7 @@ export function TeamPage({ id }: { id: TeamId }) {
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
       <div className="flex flex-col p-2">
-        <div className="flex flex-row items-center gap-2 mb-2">
+        <div className="flex flex-row items-center gap-2 mb-2 flex-wrap">
           <h2
             className="flex items-center gap-2 mb-0"
             style={{

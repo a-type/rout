@@ -91,8 +91,8 @@ export function TeamPlayers({ id }: { id: string }) {
           <Tabs.List className="gap-none ml-auto">
             {[
               { value: 'attributes', label: 'Attributes' },
-              { value: 'battingComposite', label: 'Batting Composite' },
-              { value: 'pitchingComposite', label: 'Pitching Composite' },
+              { value: 'battingComposite', label: 'Batting' },
+              { value: 'pitchingComposite', label: 'Pitching' },
             ].map((option, idx, arr) => (
               <Tabs.Trigger
                 key={option.value}
@@ -140,6 +140,7 @@ export function TeamPlayers({ id }: { id: string }) {
               .map((playerId) => {
                 const player = finalState.league.playerLookup[playerId];
                 const battingComposite = getBattingCompositeRatings(
+                  player,
                   player.attributes,
                 );
                 const pitchingComposite = getPitchingCompositeRatings(

@@ -69,10 +69,10 @@ export function Choice({ choice }: { choice: ChoiceType }) {
 }
 
 export function Choices() {
-  const { finalState, localTurnData } = hooks.useGameSuite();
+  const { finalState, currentTurn } = hooks.useGameSuite();
   const sendTurn = useSendTurn();
   const [selection, setSelection] = useState<string>(
-    localTurnData?.choiceId ?? '',
+    currentTurn?.choiceId ?? '',
   );
   useEffect(() => {
     if (selection) {
@@ -91,7 +91,7 @@ export function Choices() {
           Select one of the following options to improve your team.
         </span>
       </div>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 flex-wrap">
         {options.map((choice) => {
           return (
             <Button
@@ -116,10 +116,10 @@ export function Choices() {
 }
 
 export function LevelupChoices({ id }: { id: string }) {
-  const { finalState, localTurnData } = hooks.useGameSuite();
+  const { finalState, currentTurn } = hooks.useGameSuite();
   const sendTurn = useSendTurn();
   const [selection, setSelection] = useState<string[]>(
-    localTurnData?.levelupChoices?.[id] ?? [],
+    currentTurn?.levelupChoices?.[id] ?? [],
   );
   useEffect(() => {
     if (selection?.length > 0) {
@@ -136,7 +136,7 @@ export function LevelupChoices({ id }: { id: string }) {
   return (
     <div className="my-4 flex flex-col gap-4">
       {optionsGroups.map((options, idx) => (
-        <div className="flex flex-row gap-2" key={idx}>
+        <div className="flex flex-row gap-2 flex-wrap" key={idx}>
           {options.map((choice) => {
             return (
               <Button
