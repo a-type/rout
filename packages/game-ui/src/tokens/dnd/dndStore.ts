@@ -85,10 +85,12 @@ export const useDndStore = create<DndStoreValue>()(
       },
 
       bindData: (id: string, data: any) => {
+        console.debug('bindData', id, data);
         set((state) => {
           state.data[id] = data;
         });
         return () => {
+          console.debug('unbindData', id);
           set((state) => {
             delete state.data[id];
           });

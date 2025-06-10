@@ -1,4 +1,9 @@
-import { motion, useMotionTemplate, useTransform } from 'motion/react';
+import {
+  motion,
+  useMotionTemplate,
+  useSpring,
+  useTransform,
+} from 'motion/react';
 import { useMemo } from 'react';
 import {
   Draggable,
@@ -62,13 +67,15 @@ const TokenLocalGestureMovement: DraggedContainerComponent = ({
       (draggable.gesture.type === 'touch' ? -40 : 0)
     );
   });
-  const distanceScale = useTransform(() => {
-    const dist = Math.sqrt(
-      draggable.gesture.delta.x.get() * draggable.gesture.delta.x.get() +
-        draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
-    );
-    return 1 + dist / 40;
-  });
+  const distanceScale = useSpring(
+    useTransform(() => {
+      const dist = Math.sqrt(
+        draggable.gesture.delta.x.get() * draggable.gesture.delta.x.get() +
+          draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
+      );
+      return 1.2 + dist / 60;
+    }),
+  );
 
   const dragFromHandTransform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
   const defaultTransform = useCenteredDragTransform(draggable);

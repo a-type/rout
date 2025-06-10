@@ -48,7 +48,11 @@ function DraggableRoot({
   const gesture = useInitialDragGesture();
 
   const bindData = useDndStore((state) => state.bindData);
-  useEffect(() => bindData(id, data), [id, data, bindData]);
+  // necessary for multiple concurrent draggables not to clobber...
+  // TODO: simplify...
+  const hasBoundData = useDndStore((state) => !!state.data[id]);
+  const needsRebind = !!data && !hasBoundData;
+  useEffect(() => bindData(id, data), [id, data, bindData, needsRebind]);
 
   return (
     <DraggableContext.Provider
