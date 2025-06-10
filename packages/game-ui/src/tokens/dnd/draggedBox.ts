@@ -2,33 +2,21 @@ export class DraggedBox {
   current: DOMRect | null = null;
 
   #element: HTMLElement | null = null;
-  #resizeObserver: ResizeObserver;
   #rafId: number | null = null;
 
-  constructor() {
-    this.#resizeObserver = new ResizeObserver(this.#onResize);
-    window.addEventListener('resize', this.#onResize);
-    window.addEventListener('orientationchange', this.#onResize);
-    window.addEventListener('scroll', this.#onResize, { passive: true });
-  }
+  constructor() {}
 
   bind = (element: HTMLElement | null) => {
-    if (this.#element) {
-      this.#resizeObserver.unobserve(this.#element);
-    }
-
     this.#element = element;
     if (!element) {
       this.current = null;
       return;
     }
     this.current = element.getBoundingClientRect();
-    this.#resizeObserver.observe(element);
 
     this.start();
 
     return () => {
-      this.#resizeObserver.unobserve(element);
       this.#element = null;
       this.current = null;
       this.stop();
@@ -57,6 +45,16 @@ export class DraggedBox {
 
   update = () => {
     this.#onResize();
+  };
+
+  contains = (x: number, y: number) => {
+    return (
+      this.current &&
+      x >= this.current.left &&
+      x <= this.current.right &&
+      y >= this.current.top &&
+      y <= this.current.bottom
+    );
   };
 }
 

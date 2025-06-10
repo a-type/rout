@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
-import {
-  Draggable,
-  DraggableHandleActivationConstraint,
-  DraggableProps,
-} from './dnd/Draggable';
+import { Draggable, DraggableProps } from './dnd/Draggable';
+import { DragGestureActivationConstraint } from './dnd/useDragGesture';
 import { useIsTokenInHand } from './TokenHand';
 import { makeToken } from './types';
 
@@ -14,7 +11,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
 export function Token({ children, data, ...rest }: TokenProps) {
   const isInHand = useIsTokenInHand();
 
-  const activationConstraint = useMemo<DraggableHandleActivationConstraint>(
+  const activationConstraint = useMemo<DragGestureActivationConstraint>(
     () =>
       isInHand
         ? (ctx) => {
@@ -26,7 +23,10 @@ export function Token({ children, data, ...rest }: TokenProps) {
 
   return (
     <Draggable {...rest} data={makeToken(rest.id, data)}>
-      <Draggable.Handle activationConstraint={activationConstraint}>
+      <Draggable.Handle
+        activationConstraint={activationConstraint}
+        allowStartFromDragIn={isInHand}
+      >
         {children}
       </Draggable.Handle>
     </Draggable>

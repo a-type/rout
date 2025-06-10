@@ -1,4 +1,3 @@
-import { useDrag } from '@use-gesture/react';
 import {
   HTMLMotionProps,
   motion,
@@ -6,19 +5,17 @@ import {
   useAnimationFrame,
   useMotionValue,
 } from 'motion/react';
-import {
-  createContext,
-  HTMLAttributes,
-  ReactNode,
-  useContext,
-  useRef,
-} from 'react';
+import { createContext, HTMLAttributes, ReactNode, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../../hooks/useMergedRef';
 import { useDraggedObjectMotionValues } from './animation';
 import { useDndStore } from './dndStore';
 import { draggedBox } from './draggedBox';
 import { dropRegions } from './DropRegions';
+import {
+  DragGestureActivationConstraint,
+  useDragGesture,
+} from './useDragGesture';
 
 export interface DraggableProps extends HTMLMotionProps<'div'> {
   id: string;
@@ -82,91 +79,21 @@ function useDraggableContext() {
   return context;
 }
 
-export interface DragHandleGestureContext {
-  initial: { x: number; y: number };
-  current: { x: number; y: number };
-  delta: { x: number; y: number };
-}
-
 export interface DraggableHandleProps extends HTMLAttributes<HTMLDivElement> {
-  activationConstraint?: (ctx: DragHandleGestureContext) => boolean;
+  activationConstraint?: DragGestureActivationConstraint;
+  allowStartFromDragIn?: boolean;
 }
-export type DraggableHandleActivationConstraint =
-  DraggableHandleProps['activationConstraint'];
-
 function DraggableHandle({
   children,
   activationConstraint,
+  allowStartFromDragIn = false,
 }: DraggableHandleProps) {
-  const setDragging = useDndStore((state) => state.setDragging);
-  const setDragPosition = useDndStore((state) => state.setDragPosition);
-
   const draggable = useDraggableContext();
-  const gestureContext = useRef<DragHandleGestureContext>({
-    initial: { x: 0, y: 0 },
-    current: { x: 0, y: 0 },
-    delta: { x: 0, y: 0 },
+
+  const { ref } = useDragGesture(draggable, {
+    activationConstraint,
+    allowStartFromDragIn,
   });
-
-  const ref = useRef<HTMLDivElement>(null);
-  useDrag(
-    (state) => {
-      // get this stuff out of the way.
-      if (state.first) {
-        console.debug('start drag gesture', draggable.id);
-        gestureContext.current.initial.x = state.xy[0];
-        gestureContext.current.initial.y = state.xy[1];
-      }
-      gestureContext.current.current.x = state.xy[0];
-      gestureContext.current.current.y = state.xy[1];
-      gestureContext.current.delta.x = state.movement[0];
-      gestureContext.current.delta.y = state.movement[1];
-
-      // If drag is over, end it
-      if (state.last) {
-        if (draggable.isDragged) {
-          console.debug('end drag', draggable.id);
-          useDndStore.getState().endDrag();
-        }
-        gestureContext.current.initial = { x: 0, y: 0 };
-        gestureContext.current.current = { x: 0, y: 0 };
-        gestureContext.current.delta = { x: 0, y: 0 };
-        draggable.localMovement.x.set(0);
-        draggable.localMovement.y.set(0);
-        return;
-      } else {
-        // if not activated, check for activation
-        if (!draggable.isDragged) {
-          if (activationConstraint) {
-            if (activationConstraint(gestureContext.current)) {
-              console.debug('start drag (constraint passed)', draggable.id);
-              setDragging(draggable, gestureContext.current.current);
-            }
-          } else {
-            console.debug('start drag (no constraint)', draggable.id);
-            // If no activation constraint is provided, we assume the drag should start
-            setDragging(draggable, gestureContext.current.current);
-          }
-          draggable.localMovement.x.set(
-            gestureContext.current.current.x - gestureContext.current.initial.x,
-          );
-          draggable.localMovement.y.set(
-            gestureContext.current.current.y - gestureContext.current.initial.y,
-          );
-        } else {
-          console.debug('dragging', draggable.id);
-          // we are dragging this item
-          setDragPosition(
-            gestureContext.current.current.x,
-            gestureContext.current.current.y,
-          );
-        }
-      }
-    },
-    {
-      target: ref,
-    },
-  );
 
   return (
     <motion.div style={{ touchAction: 'none' }} ref={ref}>
@@ -210,8 +137,8 @@ function DndOverlayPortal({
         <motion.div
           style={{
             position: 'relative',
-            x: draggable.localMovement.x,
-            y: draggable.localMovement.y,
+            // x: draggable.localMovement.x,
+            // y: draggable.localMovement.y,
             // we have to keep this element in the DOM while the gesture
             // is active or it breaks. so just hide it...
             opacity: isPortaling ? 0 : 1,

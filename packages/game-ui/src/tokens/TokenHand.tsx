@@ -15,7 +15,7 @@ import {
   useEffect,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { proxy, useSnapshot } from 'valtio';
+import { useDndStore } from './dnd/dndStore';
 import { Token } from './Token';
 import { TokenSpace } from './TokenSpace';
 import { TokenDragData } from './types';
@@ -43,8 +43,6 @@ export interface TokenHandProps<T> {
   onDrop?: (value: TokenDragData<T>) => void;
 }
 
-const hoverState = proxy({ index: -1 });
-
 export function TokenHand<T = unknown>({
   values,
   render: renderCompact,
@@ -60,7 +58,7 @@ export function TokenHand<T = unknown>({
           <AnimatePresence>
             {values.map((value, index) => {
               return (
-                <TokenHandItem key={value.id} value={value} index={index}>
+                <TokenHandItem key={value.id} value={value}>
                   {renderCompact(value)}
                 </TokenHandItem>
               );
@@ -77,25 +75,13 @@ export function TokenHand<T = unknown>({
 
 const TokenHandItem = memo(function TokenHandItem({
   value,
-  index,
   children,
 }: {
   value: TokenDragData;
-  index: number;
   children: ReactNode;
 }) {
   return (
-    <Token
-      id={value.id}
-      data={value.data}
-      onPointerEnter={() => {
-        // hoverState.index = index;
-      }}
-      onPointerLeave={() => {
-        hoverState.index = -1;
-      }}
-      exit={{ width: 0 }}
-    >
+    <Token id={value.id} data={value.data} exit={{ width: 0 }}>
       {children}
     </Token>
   );
@@ -108,16 +94,26 @@ const TokenHandPreview = memo(function TokenHandPreview({
   values: TokenDragData<any>[];
   renderDetailed: (value: TokenDragData<any>) => ReactNode;
 }) {
-  const index = useSnapshot(hoverState).index;
+  // we show a preview when we have a candidate but haven't started dragging yet
+  const candidate = useDndStore((state) =>
+    state.dragging ? null : state.candidate,
+  );
+  // const candidate = { data: values[0], id: values[0].id } as any;
   const previewPosition = useFollowPointer({ x: 0, y: -30 });
   const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;
-  if (index < 0) return null;
+
+  if (!candidate || !values.some((v) => v.id === candidate.id)) {
+    return null;
+  }
+
   return createPortal(
     <motion.div
-      className="pointer-events-none select-none w-max-content h-max-content max-w-30% max-h-40% absolute z-10000"
+      className="pointer-events-none select-none w-50vmin h-50vmin overflow-hidden flex items-center justify-center absolute z-10000"
       style={{ transform }}
     >
-      {renderDetailed(values[index])}
+      <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
+        {renderDetailed(candidate.data as TokenDragData<any>)}
+      </div>
     </motion.div>,
     document.body,
   );

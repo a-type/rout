@@ -16,8 +16,10 @@ export type DragGesture = {
 export type DndStoreValue = {
   overlayElement: HTMLElement | null;
   overlayRef: (element: HTMLElement | null) => void;
+  candidate: DraggableData | null;
   dragging: DraggableData | null;
-  setDragging: (
+  setCandidate: (data: DraggableData | null) => void;
+  startDrag: (
     data: DraggableData | null,
     initialPosition?: { x: number; y: number },
   ) => void;
@@ -35,6 +37,7 @@ export const useDndStore = create<DndStoreValue>()(
   subscribeWithSelector(
     immer((set, get) => ({
       overlayElement: null,
+      candidate: null,
       dragging: null,
       dragGesture: null,
       overRegion: null,
@@ -42,12 +45,21 @@ export const useDndStore = create<DndStoreValue>()(
       overlayRef: (element: HTMLElement | null) => {
         set({ overlayElement: element });
       },
-      setDragging: (data: DraggableData | null, initialPosition) => {
-        set({ dragging: data });
+      setCandidate: (data: DraggableData | null) => {
+        set({ candidate: data });
+        if (data) {
+          dndEvents.emit('candidate', data);
+        }
+      },
+      startDrag: (data: DraggableData | null, initialPosition) => {
+        set({ dragging: data, candidate: null, overRegion: null });
         if (initialPosition) {
           set({ dragGesture: { x: initialPosition.x, y: initialPosition.y } });
         } else {
           set({ dragGesture: { x: 0, y: 0 } });
+        }
+        if (data) {
+          dndEvents.emit('start', data, initialPosition);
         }
       },
       endDrag: () => {
@@ -59,7 +71,12 @@ export const useDndStore = create<DndStoreValue>()(
             dndEvents.emit('cancel', dragging);
           }
         }
-        set({ dragging: null, dragGesture: null, overRegion: null });
+        set({
+          dragging: null,
+          dragGesture: null,
+          overRegion: null,
+          candidate: null,
+        });
       },
       setOverRegion: (regionId: string | null) => {
         set((state) => {

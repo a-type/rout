@@ -59,7 +59,7 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
 
 const CardRoot = withClassName(
   withProps(Box, { surface: 'default', container: 'reset', border: true }),
-  'aspect-[3/4] flex-1 h-auto min-w-40px select-none',
+  'aspect-[3/4] flex-1 h-auto min-w-40px min-h-50px  select-none',
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
   '[&[data-suit=h]]:(color-attention-ink)',
