@@ -148,14 +148,17 @@ export function compositeToString(
 }
 
 export function useSendTurn() {
-  const { submitTurn, nextRoundCheckAt, prepareTurn, currentTurn } =
-    hooks.useGameSuite();
+  const {
+    submitTurn,
+    nextRoundCheckAt,
+    prepareTurn,
+    currentTurn,
+    turnWasSubmitted,
+  } = hooks.useGameSuite();
   return (fn: (turnData: TurnData | null) => TurnData) => {
-    console.log('submit turn', fn);
-    if (nextRoundCheckAt) {
+    if (nextRoundCheckAt && turnWasSubmitted) {
       return submitTurn(fn(currentTurn));
     }
-    console.log('preparing turn');
     return prepareTurn(fn);
   };
 }

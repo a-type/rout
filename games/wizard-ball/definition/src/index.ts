@@ -1,7 +1,8 @@
 import type { GameModule } from '@long-game/game-definition';
 import { gameDefinition as v1 } from './v1/gameDefinition';
 
-export { speciesIcons } from './v1/speciesData';
+export { speciesIcons, speciesData } from './v1/speciesData';
+export { classIcons, classData } from './v1/classData';
 export { perks, type PerkEffect } from './v1/perkData';
 export * from './v1/attributes';
 export { getInningInfo, sumObjects, sum, isPitcher } from './v1/utils';

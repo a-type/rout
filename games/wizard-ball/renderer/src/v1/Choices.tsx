@@ -100,7 +100,7 @@ export function Choices() {
               }}
               key={choice.id}
               className={clsx(
-                'flex flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
+                'flex flex-row md:flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
                 selection === choice.id
                   ? 'outline outline-4 outline-blue-500'
                   : '',

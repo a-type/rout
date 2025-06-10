@@ -1,9 +1,9 @@
-import { Tooltip } from '@a-type/ui';
 import {
   weather as weatherData,
   type WeatherType,
 } from '@long-game/game-wizard-ball-definition';
 import { PerkEffect } from './items/PerkEffect';
+import { TooltipPlus } from './TooltipPlus';
 
 export function WeatherChip({ id }: { id: WeatherType }) {
   const weather = weatherData[id];
@@ -13,7 +13,7 @@ export function WeatherChip({ id }: { id: WeatherType }) {
   }
   const { color, icon, name } = weather;
   return (
-    <Tooltip
+    <TooltipPlus
       content={
         <div className="flex flex-col gap-1">
           <span>{weather.description}</span>
@@ -31,6 +31,6 @@ export function WeatherChip({ id }: { id: WeatherType }) {
       >
         {icon} {name}
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }

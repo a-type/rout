@@ -11,6 +11,8 @@ import {
   isPitcher,
   PITCHER_BATTING_PENALTY,
 } from '@long-game/game-wizard-ball-definition';
+import { PlayerSpecies } from '../players/PlayerSpecies';
+import { PlayerClass } from '../players/PlayerClass';
 
 const columns = {
   attributes: [
@@ -203,6 +205,8 @@ export function TeamPlayers({ id }: { id: string }) {
                         >
                           {col.key === 'name' ? (
                             <Link to={{ search: '?playerId=' + player.id }}>
+                              <PlayerSpecies id={player.id} />
+                              <PlayerClass id={player.id} />
                               {data.name}
                             </Link>
                           ) : col.key === 'level' ? (

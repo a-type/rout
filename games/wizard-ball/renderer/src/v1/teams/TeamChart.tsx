@@ -23,6 +23,8 @@ import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { Draggable } from './Draggable';
 import { Droppable } from './Droppable';
+import { PlayerSpecies } from '../players/PlayerSpecies';
+import { PlayerClass } from '../players/PlayerClass';
 
 const positions = [
   'c',
@@ -166,7 +168,11 @@ export function TeamChart({ id }: { id: string }) {
                         className="bg-gray-700 text-gray-100"
                         content={<PlayerTooltipContent id={player.id} />}
                       >
-                        <span>{player.name}</span>
+                        <span>
+                          {player.name}
+                          <PlayerSpecies id={player.id} />
+                          <PlayerClass id={player.id} />
+                        </span>
                       </Tooltip>
                       <span className="uppercase">
                         {player.positions.join('/')}

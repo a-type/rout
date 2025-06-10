@@ -1,9 +1,7 @@
 import {
   DndContext,
   DragEndEvent,
-  KeyboardSensor,
   MouseSensor,
-  PointerSensor,
   TouchSensor,
   useDroppable,
   useSensor,
@@ -14,7 +12,6 @@ import { ItemChip } from '../items/ItemChip';
 import { Draggable } from './Draggable';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useLineup } from './useLineup';
-import { Droppable } from './Droppable';
 import { PlayerChip } from '../players/PlayerChip';
 import { useEffect, useState } from 'react';
 import { clsx } from '@a-type/ui';
@@ -40,7 +37,7 @@ function DroppablePlayerArea({
       className={clsx(
         className,
         isOver && 'border-dashed border-gray-200 border-1',
-        'flex flex-row gap-2 bg-gray-900 p-2 rounded-lg',
+        'flex flex-row gap-2 bg-gray-900 p-2 rounded-lg items-center',
       )}
     >
       {children}
@@ -162,7 +159,14 @@ export function TeamItems({ id }: { id: string }) {
               className="items-center"
             >
               <span className="uppercase">{position}</span>
-              <PlayerChip noBackground noPositions noTeamIcon id={playerId} />
+              <PlayerChip
+                includeSpecies
+                includeClass
+                noBackground
+                noPositions
+                noTeamIcon
+                id={playerId}
+              />
               <div className="flex flex-wrap gap-2">
                 {itemAssignments[playerId]?.map((itemId) => (
                   <Draggable key={itemId} id={itemId}>
@@ -180,7 +184,13 @@ export function TeamItems({ id }: { id: string }) {
           .map((playerId) => {
             return (
               <DroppablePlayerArea key={playerId} id={playerId}>
-                <PlayerChip noBackground noTeamIcon id={playerId} />
+                <PlayerChip
+                  includeSpecies
+                  includeClass
+                  noBackground
+                  noTeamIcon
+                  id={playerId}
+                />
                 <div className="flex flex-wrap gap-2">
                   {itemAssignments[playerId]?.map((itemId) => (
                     <Draggable key={itemId} id={itemId}>
@@ -196,7 +206,13 @@ export function TeamItems({ id }: { id: string }) {
         {teamRotation.map(({ player: { id: playerId } }) => {
           return (
             <DroppablePlayerArea key={playerId} id={playerId}>
-              <PlayerChip noBackground noTeamIcon id={playerId} />
+              <PlayerChip
+                includeSpecies
+                includeClass
+                noBackground
+                noTeamIcon
+                id={playerId}
+              />
               <div className="flex flex-wrap gap-2">
                 {itemAssignments[playerId]?.map((itemId) => (
                   <Draggable key={itemId} id={itemId}>
@@ -211,7 +227,13 @@ export function TeamItems({ id }: { id: string }) {
         {teamRelievers.map(({ id: playerId }) => {
           return (
             <DroppablePlayerArea key={playerId} id={playerId}>
-              <PlayerChip noBackground noTeamIcon id={playerId} />
+              <PlayerChip
+                includeSpecies
+                includeClass
+                noBackground
+                noTeamIcon
+                id={playerId}
+              />
               <div className="flex flex-wrap gap-2">
                 {itemAssignments[playerId]?.map((itemId) => (
                   <Draggable key={itemId} id={itemId}>

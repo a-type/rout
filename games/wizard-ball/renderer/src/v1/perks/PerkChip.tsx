@@ -1,6 +1,7 @@
-import { clsx, Tooltip } from '@a-type/ui';
+import { clsx } from '@a-type/ui';
 import { perks } from '@long-game/game-wizard-ball-definition';
 import { PerkEffect } from '../items/PerkEffect';
+import { TooltipPlus } from '../TooltipPlus';
 
 export function PerkChip({ id }: { id: string }) {
   const perk = perks[id];
@@ -16,7 +17,7 @@ export function PerkChip({ id }: { id: string }) {
     legendary: '#FBBF24',
   }[rarity];
   return (
-    <Tooltip
+    <TooltipPlus
       content={
         <div className="flex flex-col gap-1">
           <span>{description}</span>
@@ -37,6 +38,6 @@ export function PerkChip({ id }: { id: string }) {
       >
         {name}
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }

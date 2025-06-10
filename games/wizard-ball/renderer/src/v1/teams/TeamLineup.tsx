@@ -33,6 +33,8 @@ import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { useSendTurn } from '../utils';
+import { PlayerSpecies } from '../players/PlayerSpecies';
+import { PlayerClass } from '../players/PlayerClass';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -143,6 +145,8 @@ export function TeamLineup({ id }: { id: string }) {
                     <div className="flex items-center gap-1">
                       <span className="uppercase">{position}</span>
                       <span>{player.name}</span>
+                      <PlayerSpecies id={player.id} />
+                      <PlayerClass id={player.id} />
                     </div>
                   </Tooltip>
                 </SortableItem>

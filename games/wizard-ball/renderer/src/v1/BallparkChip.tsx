@@ -4,6 +4,7 @@ import {
   type BallparkType,
 } from '@long-game/game-wizard-ball-definition';
 import { PerkEffect } from './items/PerkEffect';
+import { TooltipPlus } from './TooltipPlus';
 
 export function BallparkChip({ id }: { id: BallparkType }) {
   const ballpark = ballparkData[id];
@@ -13,7 +14,7 @@ export function BallparkChip({ id }: { id: BallparkType }) {
   }
   const { color, icon, name } = ballpark;
   return (
-    <Tooltip
+    <TooltipPlus
       content={
         <div className="flex flex-col gap-1">
           <span>{ballpark.description}</span>
@@ -31,6 +32,6 @@ export function BallparkChip({ id }: { id: BallparkType }) {
       >
         {icon} {name}
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }

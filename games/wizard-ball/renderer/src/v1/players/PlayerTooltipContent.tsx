@@ -6,6 +6,8 @@ import { ItemChip } from '../items/ItemChip';
 import { PerkChip } from '../perks/PerkChip';
 import { usePlayerAttributes } from '../ratings/useAttributes';
 import { PlayerLevel } from './PlayerLevel';
+import { PlayerSpecies } from './PlayerSpecies';
+import { PlayerClass } from './PlayerClass';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -21,7 +23,8 @@ export function PlayerTooltipContent({ id }: { id: string }) {
         {player.name} ({player.positions.join('/').toUpperCase()})
       </h3>
       <span className="text-sm text-gray-400 capitalize mb-2">
-        <PlayerLevel id={id} /> {player.species} {player.class}
+        <PlayerLevel id={id} /> <PlayerSpecies id={id} />{' '}
+        <PlayerClass id={id} /> {player.species} {player.class}
       </span>
       <span className="flex flex-row items-center gap-2 mb-2">
         {player.perkIds.map((p, idx) => (

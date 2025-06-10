@@ -3,14 +3,20 @@ import { clsx, Tooltip } from '@a-type/ui';
 import { TeamIcon } from '../teams/TeamIcon';
 import { PlayerTooltipContent } from './PlayerTooltipContent';
 import { Link } from 'react-router';
+import { PlayerSpecies } from './PlayerSpecies';
+import { PlayerClass } from './PlayerClass';
 
 export function PlayerChip({
   id,
+  includeSpecies,
+  includeClass,
   noBackground,
   noTeamIcon,
   noPositions,
 }: {
   id: string;
+  includeSpecies?: boolean;
+  includeClass?: boolean;
   noBackground?: boolean;
   noTeamIcon?: boolean;
   noPositions?: boolean;
@@ -35,6 +41,8 @@ export function PlayerChip({
           {player.teamId && !noTeamIcon && (
             <TeamIcon id={player.teamId} size={16} />
           )}{' '}
+          {includeSpecies && <PlayerSpecies id={player.id} />}
+          {includeClass && <PlayerClass id={player.id} />}
           {player.name}{' '}
           {noPositions ? '' : <>({player.positions.join('/').toUpperCase()})</>}
         </span>

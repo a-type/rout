@@ -726,7 +726,7 @@ function determinePitchType(
     activePerks,
   );
 
-  const randomMod = 3 * random.float(-1, 1);
+  const randomMod = 5 * random.float(-1, 1);
   let attributeTotal = 10 + randomMod;
   const duelingFactor =
     0.5 * (pitcherComposite.dueling - batterComposite.dueling);

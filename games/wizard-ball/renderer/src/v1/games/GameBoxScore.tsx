@@ -4,6 +4,9 @@ import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { useGameResults } from '../useGameResults';
 import { Link } from 'react-router';
 import { PlayerName } from '../players/PlayerName';
+import { PlayerSpecies } from '../players/PlayerSpecies';
+import { PlayerClass } from '../players/PlayerClass';
+import { TeamIcon } from '../teams/TeamIcon';
 
 type StatValue =
   | (typeof battingStats)[number]['value']
@@ -55,8 +58,8 @@ export function GameBoxScore({ id }: { id: string }) {
         </thead>
         <tbody>
           <tr>
-            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300">
-              {awayTeam.name}
+            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300 flex items-center gap-1">
+              <TeamIcon size={14} id={awayTeam.id} /> {awayTeam.name}
             </td>
             {awayInnings.map((i, idx) => (
               <td
@@ -71,7 +74,8 @@ export function GameBoxScore({ id }: { id: string }) {
             </td>
           </tr>
           <tr>
-            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300">
+            <td className="pl-2 py-1 text-left border-1 border-solid border-gray-300 flex items-center gap-1">
+              <TeamIcon size={14} id={homeTeam.id} />
               {homeTeam.name}
             </td>
             {homeInnings.map((i, idx) => (
@@ -113,7 +117,9 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScoreBattingStats.length + 1}
                 className="text-center"
               >
-                <strong>{awayTeam.name}</strong>
+                <strong className="flex items-center justify-center">
+                  <TeamIcon size={14} id={awayTeam.id} /> {awayTeam.name}
+                </strong>
               </td>
             </tr>
             {awayTeamPlayers.map((playerId) => (
@@ -123,6 +129,8 @@ export function GameBoxScore({ id }: { id: string }) {
               >
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + playerId }}>
+                    <PlayerSpecies id={playerId} />
+                    <PlayerClass id={playerId} />
                     <PlayerName id={playerId} />
                   </Link>
                 </td>
@@ -138,7 +146,9 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScoreBattingStats.length + 1}
                 className="text-center"
               >
-                <strong>{homeTeam.name}</strong>
+                <strong className="flex items-center justify-center">
+                  <TeamIcon size={14} id={homeTeam.id} /> {homeTeam.name}
+                </strong>
               </td>
             </tr>
             {homeTeamPlayers.map((playerId) => (
@@ -148,6 +158,8 @@ export function GameBoxScore({ id }: { id: string }) {
               >
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + playerId }}>
+                    <PlayerSpecies id={playerId} />
+                    <PlayerClass id={playerId} />
                     <PlayerName id={playerId} />
                   </Link>
                 </td>
@@ -181,7 +193,9 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
               >
-                <strong>{homeTeam.name}</strong>
+                <strong className="flex items-center justify-center">
+                  <TeamIcon size={14} id={homeTeam.id} /> {homeTeam.name}
+                </strong>
               </td>
             </tr>
             {game.teamData[homeTeam.id].pitchers.map((pitcherId) => (
@@ -191,6 +205,8 @@ export function GameBoxScore({ id }: { id: string }) {
               >
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + pitcherId }}>
+                    <PlayerSpecies id={pitcherId} />
+                    <PlayerClass id={pitcherId} />
                     <PlayerName id={pitcherId} />
                   </Link>
                 </td>
@@ -206,7 +222,9 @@ export function GameBoxScore({ id }: { id: string }) {
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
               >
-                <strong>{awayTeam.name}</strong>
+                <strong className="flex items-center justify-center">
+                  <TeamIcon size={14} id={awayTeam.id} /> {awayTeam.name}
+                </strong>
               </td>
             </tr>
             {game.teamData[awayTeam.id].pitchers.map((pitcherId) => (
@@ -216,6 +234,8 @@ export function GameBoxScore({ id }: { id: string }) {
               >
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + pitcherId }}>
+                    <PlayerSpecies id={pitcherId} />
+                    <PlayerClass id={pitcherId} />
                     <PlayerName id={pitcherId} />
                   </Link>
                 </td>

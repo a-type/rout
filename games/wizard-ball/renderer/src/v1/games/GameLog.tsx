@@ -17,7 +17,7 @@ import {
 } from '../utils';
 import { useGameResults } from '../useGameResults';
 import { PlayerChip } from '../players/PlayerChip';
-import { Tooltip } from '@a-type/ui';
+import { TooltipPlus } from '../TooltipPlus';
 
 export function ContactInfoTooltip({
   contactChance,
@@ -28,7 +28,7 @@ export function ContactInfoTooltip({
     return null;
   }
   return (
-    <Tooltip
+    <TooltipPlus
       className="bg-gray-700 text-gray-100 max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
@@ -54,13 +54,13 @@ export function ContactInfoTooltip({
       <span className="bg-gray-700 text-gray-100 p-1 rounded cursor-pointer hover:bg-gray-600 hover:text-gray-200 ml-1 text-xs font-mono">
         INFO
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }
 
 export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
   return (
-    <Tooltip
+    <TooltipPlus
       className="bg-gray-700 text-gray-100 max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
@@ -78,13 +78,13 @@ export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
       <span className="bg-gray-700 text-gray-100 p-1 rounded cursor-pointer hover:bg-gray-600 hover:text-gray-200 ml-1 text-xs font-mono">
         HIT INFO
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }
 
 export function PitchChip({ pitchData }: { pitchData: LogsPitchData }) {
   return (
-    <Tooltip
+    <TooltipPlus
       className="bg-gray-700 text-gray-100 max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
@@ -102,7 +102,7 @@ export function PitchChip({ pitchData }: { pitchData: LogsPitchData }) {
         {pitchQualityToString(pitchData.quality)}{' '}
         {pitchData.isStrike ? 'strike' : 'ball'}
       </span>
-    </Tooltip>
+    </TooltipPlus>
   );
 }
 

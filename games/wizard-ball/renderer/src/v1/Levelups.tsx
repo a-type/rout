@@ -22,12 +22,12 @@ export function Levelups() {
             search: `?playerId=${pid}`,
           }}
         >
-          <div className="inline-flex flex-row items-center gap-2 bg-gray-500/30 p-2 rounded">
+          <div className="inline-flex flex-col md:flex-row items-center gap-2 bg-gray-500/30 p-2 rounded">
             {currentTurn?.levelupChoices?.[pid]?.length ===
               levelups[pid].length && (
               <span className="text-sm text-green-500">Chosen ✓</span>
             )}
-            <PlayerChip id={pid} />
+            <PlayerChip includeClass includeSpecies noTeamIcon id={pid} />
             reached <PlayerLevel id={pid} /> and has a boon pick available!
           </div>
         </Link>
