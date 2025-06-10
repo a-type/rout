@@ -1,12 +1,8 @@
 import { EventSubscriber } from '@a-type/utils';
-import { DraggableData } from './dndStore';
 
 export const dndEvents = new EventSubscriber<{
-  candidate: (dragged: DraggableData) => void;
-  start: (
-    dragged: DraggableData,
-    initialPosition?: { x: number; y: number },
-  ) => void;
-  drop: (dragged: DraggableData, targetId: string) => void;
-  cancel: (dragged: DraggableData) => void;
+  candidate: (id: string) => void;
+  start: (id: string) => void;
+  drop: (id: string, targetId: string) => void;
+  cancel: (id: string) => void;
 }>();

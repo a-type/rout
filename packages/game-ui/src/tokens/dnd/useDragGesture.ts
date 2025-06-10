@@ -1,15 +1,11 @@
+import { MotionValue, useMotionValue } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useElementEvent, useWindowEvent } from '../../hooks/useWindowEvent';
-import { DraggableData, useDndStore } from './dndStore';
+import { dndEvents } from './dndEvents';
+import { useDndStore } from './dndStore';
+import { DragGestureContext, useDraggableContext } from './Draggable';
 import { DraggedBox } from './draggedBox';
-
-export interface DragGestureContext {
-  initial: { x: number; y: number };
-  current: { x: number; y: number };
-  delta: { x: number; y: number };
-  velocity: { x: number; y: number };
-}
 
 export interface DragGestureOptions {
   allowStartFromDragIn?: boolean;
@@ -19,95 +15,91 @@ export interface DragGestureOptions {
 export type DragGestureActivationConstraint =
   DragGestureOptions['activationConstraint'];
 
-export function useDragGesture(
-  draggable: DraggableData,
-  options?: DragGestureOptions,
-) {
+export function useDragGesture(options?: DragGestureOptions) {
+  const draggable = useDraggableContext();
   const ref = useRef<HTMLDivElement>(null);
-  const stateRef = useRef<DragGestureContext>({
-    initial: { x: 0, y: 0 },
-    current: { x: 0, y: 0 },
-    delta: { x: 0, y: 0 },
-    velocity: { x: 0, y: 0 },
-  });
 
   const hasDragging = useDndStore((state) => !!state.dragging);
   const [isCandidate, setCandidate] = useDndStore(
     useShallow((state) => [
-      state.candidate?.id === draggable.id,
+      state.candidate === draggable.id,
       state.setCandidate,
     ]),
   );
-  const [isDragging, startDrag, setDragPosition] = useDndStore(
-    useShallow((state) => [
-      state.dragging?.id === draggable.id,
-      state.startDrag,
-      state.setDragPosition,
-    ]),
+  const [isDragging, startDrag] = useDndStore(
+    useShallow((state) => [state.dragging === draggable.id, state.startDrag]),
   );
 
   const monitorGlobalEvents = isCandidate || isDragging;
 
+  function resetGestureState() {
+    console.debug('resetGestureState', draggable.id);
+    setVector(draggable.gesture.current, 0, 0);
+    setVector(draggable.gesture.delta, 0, 0);
+    setVector(draggable.gesture.velocity, 0, 0);
+    setVector(draggable.gesture.initial, 0, 0);
+    setVector(draggable.gesture.offset, 0, 0);
+    draggable.gesture.type = 'none';
+  }
+
   function beginDrag(ev: InputEvent) {
-    console.debug('beginDrag', draggable.id);
-    stateRef.current.initial = getEventCoordinates(ev);
-    stateRef.current.current = { ...stateRef.current.initial };
-    stateRef.current.delta = { x: 0, y: 0 };
+    const coordinate = getEventCoordinates(ev);
+    console.debug('beginDrag', draggable.id, coordinate);
+    setVector(draggable.gesture.initial, coordinate.x, coordinate.y);
+    setVector(draggable.gesture.current, coordinate.x, coordinate.y);
+    setVector(draggable.gesture.delta, 0, 0);
+    setVector(draggable.gesture.velocity, 0, 0);
+    draggable.gesture.type = isTouchEvent(ev) ? 'touch' : 'mouse';
+
+    // get pointer offset within element bounds
+    const el = ref.current;
+    const elPosition = el?.getBoundingClientRect();
+    const { x, y } = coordinate;
+    const xOffset = elPosition ? x - elPosition.left : 0;
+    const yOffset = elPosition ? y - elPosition.top : 0;
+    setVector(draggable.gesture.offset, xOffset, yOffset);
 
     if (!options?.activationConstraint) {
       return activateDrag(ev);
     } else {
-      setCandidate(draggable);
+      setCandidate(draggable.id);
     }
   }
 
   function activateDrag(ev: InputEvent) {
     console.debug('activateDrag', draggable.id);
-    startDrag(draggable, getEventCoordinates(ev));
+    startDrag(draggable.id);
   }
 
   function moveDrag(ev: InputEvent) {
     // update gesture state
-    if (isCandidate || isDragging) {
-      console.debug('moveDrag', draggable.id);
-      const coords = getEventCoordinates(ev);
-      applySubtraction(
-        stateRef.current.initial,
-        coords,
-        stateRef.current.delta,
-      );
-      applySubtraction(
-        stateRef.current.current,
-        coords,
-        stateRef.current.velocity,
-      );
-      stateRef.current.current = coords;
-    }
+    const coords = getEventCoordinates(ev);
 
-    // apply changes
+    console.debug('moveDrag', draggable.id);
+    applySubtraction(
+      draggable.gesture.initial,
+      coords,
+      draggable.gesture.delta,
+    );
+    applySubtraction(
+      draggable.gesture.current,
+      coords,
+      draggable.gesture.velocity,
+    );
+    setVector(draggable.gesture.current, coords.x, coords.y);
 
     // check for activation constraint
-    if (
-      isCandidate &&
-      !isDragging &&
-      options?.activationConstraint?.(stateRef.current)
-    ) {
-      activateDrag(ev);
-    } else if (isDragging) {
-      // we are dragging this item
-      setDragPosition(stateRef.current.current.x, stateRef.current.current.y);
+    if (isCandidate && !isDragging) {
+      if (options?.activationConstraint?.(draggable.gesture)) {
+        activateDrag(ev);
+      }
     }
   }
 
   function endDrag(ev: InputEvent) {
     console.debug('endDrag', draggable.id);
-    if (isDragging) {
-      // end the drag
-      useDndStore.getState().endDrag();
-    } else if (isCandidate) {
-      // cancel the candidate
-      useDndStore.getState().setCandidate(null);
-    }
+    // end the drag
+    useDndStore.getState().endDrag();
   }
 
   // we attach these to window so we don't lose them
@@ -117,7 +109,7 @@ export function useDragGesture(
 
   // when pointer down starts on our element, that marks it as the active
   // drag candidate
-  useElementEvent(ref, 'pointerdown', beginDrag);
+  useElementEvent(ref, 'pointerdown', beginDrag, { disabled: isCandidate });
 
   // when the pointer enters our element, if a touch our mouse is down,
   // and no other element is dragging, that counts as beginning candidacy
@@ -127,10 +119,11 @@ export function useDragGesture(
     'pointerover',
     (ev) => {
       if (ev.buttons > 0 && !hasDragging) {
+        console.log('pointerover begindrag');
         beginDrag(ev);
       }
     },
-    { disabled: !startFromDragIn },
+    { disabled: !startFromDragIn || isCandidate || isDragging },
   );
   // when using touch, events are locked to the initial touched element,
   // so we can't detect a drag-in from another element by attaching to
@@ -146,19 +139,29 @@ export function useDragGesture(
     (ev) => {
       const position = getEventCoordinates(ev);
       if (box.contains(position.x, position.y)) {
+        console.log('touchmove begindrag');
         beginDrag(ev);
       }
     },
     {
-      disabled: !startFromDragIn,
+      disabled: !startFromDragIn || isCandidate || isDragging,
     },
+  );
+
+  useEffect(
+    () =>
+      dndEvents.subscribe('cancel', (cancelled) => {
+        if (draggable.id === cancelled) {
+          resetGestureState();
+        }
+      }),
+    [draggable],
   );
 
   return {
     ref,
     isCandidate,
     isDragging,
-    stateRef,
   };
 }
 
@@ -181,12 +184,58 @@ function getEventCoordinates(ev: InputEvent): { x: number; y: number } {
   return { x: 0, y: 0 };
 }
 
-function applySubtraction(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-  target: { x: number; y: number } = { x: 0, y: 0 },
-) {
-  target.x = a.x - b.x;
-  target.y = a.y - b.y;
-  return target;
+type VectorLike =
+  | { x: number; y: number }
+  | { x: MotionValue<number>; y: MotionValue<number> };
+
+function getCurrentVector(v: VectorLike): { x: number; y: number } {
+  if (v.x instanceof MotionValue && v.y instanceof MotionValue) {
+    return { x: v.x.get(), y: v.y.get() };
+  } else {
+    return { x: v.x as number, y: v.y as number };
+  }
+}
+
+function setVector(v: VectorLike, x: number, y: number) {
+  if (v.x instanceof MotionValue && v.y instanceof MotionValue) {
+    v.x.set(x);
+    v.y.set(y);
+  } else {
+    v.x = x;
+    v.y = y;
+  }
+}
+
+function applySubtraction(a: VectorLike, b: VectorLike, target: VectorLike) {
+  const aCurrent = getCurrentVector(a);
+  const bCurrent = getCurrentVector(b);
+  const x = bCurrent.x - aCurrent.x;
+  const y = bCurrent.y - aCurrent.y;
+  setVector(target, x, y);
+}
+
+export function useInitialDragGesture(): DragGestureContext {
+  const initialRef = useRef({ x: 0, y: 0 });
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const deltaX = useMotionValue(0);
+  const deltaY = useMotionValue(0);
+  const velocityX = useMotionValue(0);
+  const velocityY = useMotionValue(0);
+  return useRef({
+    initial: initialRef.current,
+    offset: offsetRef.current,
+    current: { x, y },
+    delta: { x: deltaX, y: deltaY },
+    velocity: { x: velocityX, y: velocityY },
+    type: 'none' as const,
+  }).current;
+}
+
+function isTouchEvent(event: InputEvent): event is TouchEvent {
+  return (
+    event instanceof TouchEvent ||
+    (event as PointerEvent).pointerType === 'touch'
+  );
 }

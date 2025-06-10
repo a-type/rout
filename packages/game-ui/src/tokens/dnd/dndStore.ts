@@ -8,26 +8,17 @@ export type DraggableData<T = any> = {
   data: T;
 };
 
-export type DragGesture = {
-  x: number;
-  y: number;
-};
-
 export type DndStoreValue = {
   overlayElement: HTMLElement | null;
   overlayRef: (element: HTMLElement | null) => void;
-  candidate: DraggableData | null;
-  dragging: DraggableData | null;
-  setCandidate: (data: DraggableData | null) => void;
-  startDrag: (
-    data: DraggableData | null,
-    initialPosition?: { x: number; y: number },
-  ) => void;
+  candidate: string | null;
+  dragging: string | null;
+  setCandidate: (id: string) => void;
+  startDrag: (id: string | null) => void;
   endDrag: () => void;
 
-  // DO NOT SUBSCRIBE IN RENDER
-  dragGesture: DragGesture | null;
-  setDragPosition: (x: number, y: number) => void;
+  data: Record<string, any>;
+  bindData: (id: string, data: any) => () => void;
 
   overRegion: string | null;
   setOverRegion: (regionId: string | null) => void;
@@ -39,27 +30,37 @@ export const useDndStore = create<DndStoreValue>()(
       overlayElement: null,
       candidate: null,
       dragging: null,
-      dragGesture: null,
+      dragGesture: { x: 0, y: 0, xOffset: 0, yOffset: 0 },
       overRegion: null,
+      data: {},
 
       overlayRef: (element: HTMLElement | null) => {
         set({ overlayElement: element });
       },
-      setCandidate: (data: DraggableData | null) => {
-        set({ candidate: data });
-        if (data) {
-          dndEvents.emit('candidate', data);
+      setCandidate: (id: string | null) => {
+        const current = get().candidate;
+        if (current && current !== id) {
+          dndEvents.emit('cancel', current);
+        }
+
+        set({ candidate: id, overRegion: null });
+        if (id) {
+          dndEvents.emit('candidate', id);
         }
       },
-      startDrag: (data: DraggableData | null, initialPosition) => {
-        set({ dragging: data, candidate: null, overRegion: null });
-        if (initialPosition) {
-          set({ dragGesture: { x: initialPosition.x, y: initialPosition.y } });
-        } else {
-          set({ dragGesture: { x: 0, y: 0 } });
+      startDrag: (id: string | null) => {
+        const current = get().dragging;
+        if (current && current !== id) {
+          dndEvents.emit('cancel', current);
         }
-        if (data) {
-          dndEvents.emit('start', data, initialPosition);
+
+        set({
+          dragging: id,
+          candidate: null,
+          overRegion: null,
+        });
+        if (id) {
+          dndEvents.emit('start', id);
         }
       },
       endDrag: () => {
@@ -73,7 +74,6 @@ export const useDndStore = create<DndStoreValue>()(
         }
         set({
           dragging: null,
-          dragGesture: null,
           overRegion: null,
           candidate: null,
         });
@@ -83,15 +83,16 @@ export const useDndStore = create<DndStoreValue>()(
           state.overRegion = regionId;
         });
       },
-      setDragPosition: (x: number, y: number) => {
+
+      bindData: (id: string, data: any) => {
         set((state) => {
-          if (!state.dragGesture) {
-            state.dragGesture = { x, y };
-          } else {
-            state.dragGesture.x = x;
-            state.dragGesture.y = y;
-          }
+          state.data[id] = data;
         });
+        return () => {
+          set((state) => {
+            delete state.data[id];
+          });
+        };
       },
     })),
   ),

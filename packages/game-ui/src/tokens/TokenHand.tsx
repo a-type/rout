@@ -96,7 +96,11 @@ const TokenHandPreview = memo(function TokenHandPreview({
 }) {
   // we show a preview when we have a candidate but haven't started dragging yet
   const candidate = useDndStore((state) =>
-    state.dragging ? null : state.candidate,
+    state.dragging
+      ? null
+      : state.candidate
+      ? state.data[state.candidate]
+      : null,
   );
   // const candidate = { data: values[0], id: values[0].id } as any;
   const previewPosition = useFollowPointer({ x: 0, y: -30 });
@@ -112,7 +116,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
       style={{ transform }}
     >
       <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
-        {renderDetailed(candidate.data as TokenDragData<any>)}
+        {renderDetailed(candidate as TokenDragData<any>)}
       </div>
     </motion.div>,
     document.body,

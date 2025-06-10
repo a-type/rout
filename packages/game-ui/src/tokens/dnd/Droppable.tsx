@@ -26,7 +26,7 @@ export function Droppable<T = any>({
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId) => {
       if (targetId === id) {
-        dropCb(dragged);
+        dropCb({ id: dragged, data: useDndStore.getState().data[dragged] });
       }
     });
   }, [id, dropCb]);

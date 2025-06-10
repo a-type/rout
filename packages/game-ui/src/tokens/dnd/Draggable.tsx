@@ -3,18 +3,27 @@ import {
   motion,
   MotionValue,
   useAnimationFrame,
-  useMotionValue,
+  useMotionTemplate,
+  useTransform,
 } from 'motion/react';
-import { createContext, HTMLAttributes, ReactNode, useContext } from 'react';
+import {
+  ComponentType,
+  createContext,
+  HTMLAttributes,
+  ReactNode,
+  Ref,
+  useContext,
+  useEffect,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../../hooks/useMergedRef';
-import { useDraggedObjectMotionValues } from './animation';
 import { useDndStore } from './dndStore';
 import { draggedBox } from './draggedBox';
 import { dropRegions } from './DropRegions';
 import {
   DragGestureActivationConstraint,
   useDragGesture,
+  useInitialDragGesture,
 } from './useDragGesture';
 
 export interface DraggableProps extends HTMLMotionProps<'div'> {
@@ -23,6 +32,7 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   disabled?: boolean;
   draggingPlaceholder?: ReactNode;
   children?: ReactNode;
+  DraggedContainer?: DraggedContainerComponent;
 }
 
 function DraggableRoot({
@@ -33,10 +43,12 @@ function DraggableRoot({
   draggingPlaceholder,
   ...rest
 }: DraggableProps) {
-  const isDragged = useDndStore((state) => state.dragging?.id === id);
+  const isDragged = useDndStore((state) => state.dragging === id);
+  const isCandidate = useDndStore((state) => state.candidate === id);
+  const gesture = useInitialDragGesture();
 
-  const localX = useMotionValue(0);
-  const localY = useMotionValue(0);
+  const bindData = useDndStore((state) => state.bindData);
+  useEffect(() => bindData(id, data), [id, data, bindData]);
 
   return (
     <DraggableContext.Provider
@@ -44,12 +56,13 @@ function DraggableRoot({
         id,
         data,
         isDragged,
-        localMovement: { x: localX, y: localY },
+        isCandidate,
+        gesture,
       }}
     >
       <DndOverlayPortal
         portaledFallback={draggingPlaceholder}
-        enabled={isDragged}
+        enabled={isDragged || isCandidate}
         {...rest}
       >
         {children}
@@ -58,18 +71,25 @@ function DraggableRoot({
   );
 }
 
-interface DraggableContextValue {
+export interface DragGestureContext {
+  initial: { x: number; y: number };
+  offset: { x: number; y: number };
+  current: { x: MotionValue<number>; y: MotionValue<number> };
+  delta: { x: MotionValue<number>; y: MotionValue<number> };
+  velocity: { x: MotionValue<number>; y: MotionValue<number> };
+  type: 'touch' | 'mouse' | 'none';
+}
+
+export interface DraggableContextValue {
   id: string;
   data: any;
   isDragged: boolean;
-  localMovement: {
-    x: MotionValue<number>;
-    y: MotionValue<number>;
-  };
+  isCandidate: boolean;
+  gesture: DragGestureContext;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
-function useDraggableContext() {
+export function useDraggableContext() {
   const context = useContext(DraggableContext);
   if (!context) {
     throw new Error(
@@ -88,15 +108,20 @@ function DraggableHandle({
   activationConstraint,
   allowStartFromDragIn = false,
 }: DraggableHandleProps) {
-  const draggable = useDraggableContext();
-
-  const { ref } = useDragGesture(draggable, {
+  const { ref, isCandidate } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
   });
 
   return (
-    <motion.div style={{ touchAction: 'none' }} ref={ref}>
+    <motion.div
+      style={{
+        touchAction: 'none',
+        pointerEvents: isCandidate ? 'none' : 'auto',
+      }}
+      onContextMenu={(e) => e.preventDefault()}
+      ref={ref}
+    >
       {children}
     </motion.div>
   );
@@ -107,8 +132,16 @@ export const Draggable = Object.assign(DraggableRoot, {
 });
 
 interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
+  children?: ReactNode;
   enabled?: boolean;
   portaledFallback?: ReactNode;
+  /**
+   * Override the component that implements the rendering of the dragged element.
+   * This lets you customize how dragged items animate and appear.
+   * Default just renders the contents snapped to the center of the cursor and
+   * makes adjustments on touch to avoid the user's finger.
+   */
+  DraggedContainer?: DraggedContainerComponent;
 }
 
 /**
@@ -119,10 +152,10 @@ function DndOverlayPortal({
   children,
   enabled,
   portaledFallback,
+  DraggedContainer,
   ...rest
 }: DndOverlayPortalProps) {
   const overlayEl = useDndStore((state) => state.overlayElement);
-  const draggable = useDraggableContext();
 
   const isPortaling = enabled && !!overlayEl;
 
@@ -130,15 +163,15 @@ function DndOverlayPortal({
     <>
       {isPortaling &&
         createPortal(
-          <DraggedRoot {...rest}>{children}</DraggedRoot>,
+          <DraggedRoot Container={DraggedContainer} {...rest}>
+            {children}
+          </DraggedRoot>,
           overlayEl,
         )}
       <div className="relative">
         <motion.div
           style={{
             position: 'relative',
-            // x: draggable.localMovement.x,
-            // y: draggable.localMovement.y,
             // we have to keep this element in the DOM while the gesture
             // is active or it breaks. so just hide it...
             opacity: isPortaling ? 0 : 1,
@@ -167,9 +200,13 @@ function DraggedRoot({
   children,
   ref,
   style,
+  Container: UserContainer,
   ...rest
-}: HTMLMotionProps<'div'>) {
-  const dragMovement = useDraggedObjectMotionValues();
+}: Omit<HTMLMotionProps<'div'>, 'draggable'> & {
+  Container?: DraggedContainerComponent;
+  children: ReactNode;
+}) {
+  const dragged = useDraggableContext();
 
   useAnimationFrame(() => {
     if (draggedBox.current) {
@@ -184,18 +221,45 @@ function DraggedRoot({
 
   const finalRef = useMergedRef<HTMLDivElement>(draggedBox.bind, ref);
 
+  const ContainerImpl = UserContainer || DefaultDraggedContainer;
+
+  return (
+    <ContainerImpl ref={finalRef} draggable={dragged} {...rest}>
+      {children}
+    </ContainerImpl>
+  );
+}
+
+export type DraggedContainerComponent = ComponentType<{
+  children?: ReactNode;
+  draggable: DraggableContextValue;
+  ref: Ref<HTMLDivElement>;
+}>;
+
+const DefaultDraggedContainer: DraggedContainerComponent = ({
+  children,
+  draggable,
+  ref,
+}) => {
+  const transform = useCenteredDragTransform(draggable);
   return (
     <motion.div
       style={{
-        ...style,
         position: 'absolute',
-        x: dragMovement.x,
-        y: dragMovement.y,
+        transform,
       }}
-      ref={finalRef}
-      {...rest}
+      ref={ref}
     >
       {children}
     </motion.div>
   );
+};
+
+export function useCenteredDragTransform(draggable: DraggableContextValue) {
+  const { x, y } = draggable.gesture.current;
+  const touchAdjustedY = useTransform(
+    () => y.get() + (draggable.gesture.type === 'touch' ? -40 : 0),
+  );
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0)`;
+  return transform;
 }
