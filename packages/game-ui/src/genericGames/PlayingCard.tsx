@@ -335,7 +335,7 @@ function getCardColor(suit: PlayingCardSuit): 'red' | 'black' {
   return suit === 'h' || suit === 'd' ? 'red' : 'black';
 }
 function toDisplayRank(rank: number): string {
-  if (rank === 1) return 'A';
+  if (rank === 1 || rank === 14) return 'A';
   if (rank === 11) return 'J';
   if (rank === 12) return 'Q';
   if (rank === 13) return 'K';
