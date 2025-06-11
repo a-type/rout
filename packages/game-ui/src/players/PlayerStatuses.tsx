@@ -9,8 +9,6 @@ export interface PlayerStatusesProps {
 
 export const PlayerStatuses = withGame<PlayerStatusesProps>(
   function PlayerStatuses({ gameSuite, className }) {
-    const { viewingRound } = gameSuite;
-
     const memberStatusList = gameSuite.members.map((member) => {
       return {
         player: gameSuite.players[member.id] ?? {
@@ -22,9 +20,11 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
           online: false,
           pendingTurn: false,
         },
-        hasPlayed: !!viewingRound?.turns.some(
-          (turn) => turn.playerId === member.id,
-        ),
+        hasPlayed:
+          gameSuite.gameStatus.status !== 'pending' &&
+          !!gameSuite.viewingRound?.turns.some(
+            (turn) => turn.playerId === member.id,
+          ),
       };
     });
 

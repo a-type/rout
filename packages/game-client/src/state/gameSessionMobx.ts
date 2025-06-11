@@ -93,12 +93,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   constructor(
     init: {
-      playerState: GetPlayerState<TGame>;
-      currentRound: GameRoundSummary<
-        GetTurnData<TGame>,
-        GetPublicTurnData<TGame>,
-        GetPlayerState<TGame>
-      >;
+      currentRoundIndex: number;
       playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
       gameId: string;
       gameVersion: string;
@@ -409,6 +404,44 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return this.rounds[roundIndex];
   };
 
+  /**
+   * Loads specific rounds by indexes and returns them.
+   */
+  getRounds = (indexes: number[]) => {
+    const missingRounds = indexes.filter((i) => !this.rounds[i]);
+    if (missingRounds.length > 0) {
+      // throw a meta-promise to load all rounds
+      throw Promise.allSettled(
+        missingRounds.map(this.#getOrCreateRoundLoadingPromise),
+      );
+    }
+    return indexes.map((i) => this.rounds[i]!);
+  };
+
+  /**
+   * Loads a range of rounds from game history and returns them.
+   */
+  getRoundRange = (from: number, to: number) => {
+    if (from < 0 || to < 0 || from > to) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Invalid round range: ${from} to ${to}`,
+      );
+    }
+    const rounds = this.getRounds(
+      Array.from({ length: to - from + 1 }, (_, i) => i + from),
+    );
+    return rounds;
+  };
+
+  /**
+   * Loads and returns the full game history. WARNING! This can be a
+   * lot of data and network requests! Please don't use it?
+   */
+  getAllRounds = () => {
+    return this.getRoundRange(0, this.latestRoundIndex);
+  };
+
   @action prepareTurn = (
     turn:
       | GetTurnData<TGame>
@@ -528,6 +561,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   private cachedLoadRoundPromises: Record<number, Promise<void>> = {};
   @action loadRound = (roundIndex: number) => {
+    if (this.gameStatus.status === 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Cannot load rounds while the game is pending. Wait for the game to start.',
+      );
+    }
+
     if (roundIndex < 0 || roundIndex > this.latestRoundIndex) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -536,24 +576,24 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
 
     if (this.rounds[roundIndex]) {
-      // NOTE: important not to return the promise here, since
-      // this returned value is used to decide whether to suspend
-      // the client
       return;
     }
 
-    if (!!this.cachedLoadRoundPromises[roundIndex]) {
-      // already loading this round, just throw the promise
-      throw this.cachedLoadRoundPromises[roundIndex];
-    }
+    // Suspends any calling component until the round is loaded
+    throw this.#getOrCreateRoundLoadingPromise(roundIndex);
+  };
 
+  #getOrCreateRoundLoadingPromise = (roundIndex: number) => {
+    if (!!this.cachedLoadRoundPromises[roundIndex]) {
+      return this.cachedLoadRoundPromises[roundIndex];
+    }
     const promise = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
       action((res) => {
         this.rounds[roundIndex] = res;
       }),
     );
     this.cachedLoadRoundPromises[roundIndex] = promise;
-    throw promise;
+    return promise;
   };
 
   @action showRound = async (roundIndex: number) => {
@@ -689,8 +729,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   };
 
   @action private applyGameData = (init: {
-    playerState: any;
-    currentRound: GameRoundSummary<any, any, any>;
     playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
     gameId: string;
     gameVersion: string;
@@ -699,11 +737,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     startedAt: string | null;
     timezone: string;
     nextRoundCheckAt?: string | null;
+    currentRoundIndex: number;
   }) => {
-    this.viewingRoundIndex = init.currentRound.roundIndex;
+    this.viewingRoundIndex = init.currentRoundIndex;
     this.localTurnData = null;
-    this.rounds = new Array(init.currentRound.roundIndex).fill(null);
-    this.rounds[init.currentRound.roundIndex] = init.currentRound;
+    this.rounds = new Array(init.currentRoundIndex + 1).fill(null);
     this.playerStatuses = init.playerStatuses;
     this.gameId = init.gameId;
     this.gameVersion = init.gameVersion;
