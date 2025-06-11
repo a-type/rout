@@ -39,7 +39,7 @@ export async function notifyUser(
         text: `${text}\n\n${link}\nCheers,\nThe Rout Team`,
         html: `<h1>${config.title(notification, 'email')}</h1>
 			<p>${text}</p>
-			<p><a href="${link}">Click here to open Rout!</a></p>
+			<p><a href="${bindings.UI_ORIGIN}${link}">Click here to open Rout!</a></p>
 			<p>Cheers,</p>
 			<p>The Rout Team</p>`,
       },
