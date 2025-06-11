@@ -165,15 +165,15 @@ function DetailedCardContent({ id }: { id: CardVal }) {
   const pattern = symbolPatterns[symbolCount - 1];
   return (
     <Box layout="center center" full d="col">
-      <Box d="col" p className="absolute top-0 left-0 h-25%">
+      <Box d="col" p className="absolute top-0 left-0 h-25% w-20%">
         <CardNumber id={id} />
         <CardSuitIcon id={id} />
       </Box>
-      <Box d="col" p className="absolute bottom-0 right-0 h-25%">
+      <Box d="col" p className="absolute bottom-0 right-0 h-25% w-20%">
         <CardSuitIcon id={id} className="rotate-180" />
         <CardNumber id={id} className="rotate-180" />
       </Box>
-      <Box className="flex-1 w-full h-full absolute">
+      <Box className="flex-1 inset-sm absolute">
         {pattern.map((pos, index) => (
           <CardSymbol
             key={index}
