@@ -17,7 +17,13 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       <Box full="width" d="col" gap p className="bg-wash overflow-hidden">
         <PlayerScores />
         <TurnError surface="attention" p showReset />
-        <Box className="sticky top-sm z-1 max-h-50vh" p="sm" surface="primary">
+        <Box
+          className="sticky top-sm z-1"
+          p="sm"
+          surface="primary"
+          justify="center"
+          items="center"
+        >
           {isDraftRound ? <PassZone /> : <CurrentTrick />}
         </Box>
         <Hand disabled={gameSuite.finalState.task === null} />

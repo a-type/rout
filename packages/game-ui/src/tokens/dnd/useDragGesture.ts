@@ -58,6 +58,12 @@ export function useDragGesture(options?: DragGestureOptions) {
     const xOffset = elPosition ? x - elPosition.left : 0;
     const yOffset = elPosition ? y - elPosition.top : 0;
     setVector(draggable.gesture.offset, xOffset, yOffset);
+    if (elPosition) {
+      draggable.gesture.initialBounds.x = elPosition.left;
+      draggable.gesture.initialBounds.y = elPosition.top;
+      draggable.gesture.initialBounds.width = elPosition.width;
+      draggable.gesture.initialBounds.height = elPosition.height;
+    }
 
     if (!options?.activationConstraint) {
       return activateDrag(ev);
@@ -215,8 +221,6 @@ function applySubtraction(a: VectorLike, b: VectorLike, target: VectorLike) {
 }
 
 export function useInitialDragGesture(): DragGestureContext {
-  const initialRef = useRef({ x: 0, y: 0 });
-  const offsetRef = useRef({ x: 0, y: 0 });
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const deltaX = useMotionValue(0);
@@ -224,8 +228,9 @@ export function useInitialDragGesture(): DragGestureContext {
   const velocityX = useMotionValue(0);
   const velocityY = useMotionValue(0);
   return useRef({
-    initial: initialRef.current,
-    offset: offsetRef.current,
+    initial: { x: 0, y: 0 },
+    initialBounds: { x: 0, y: 0, width: 0, height: 0 },
+    offset: { x: 0, y: 0 },
     current: { x, y },
     delta: { x: deltaX, y: deltaY },
     velocity: { x: velocityX, y: velocityY },

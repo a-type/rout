@@ -38,7 +38,9 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           return gameSuite.prepareTurn(null);
         }
       }}
-      renderDetailed={({ data: card }) => <Card id={card} className="h-full" />}
+      renderDetailed={({ data: card }) => (
+        <Card id={card} className="h-full" variant="detailed" />
+      )}
     >
       {[...hand]
         .sort((a, b) => {
@@ -48,7 +50,13 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           return getCardSuit(a).localeCompare(getCardSuit(b));
         })
         .map((card) => (
-          <Token key={card} id={card} data={card} disabled={disabled}>
+          <Token
+            key={card}
+            id={card}
+            data={card}
+            disabled={disabled}
+            className="rounded-lg"
+          >
             <Card id={card} />
           </Token>
         ))}

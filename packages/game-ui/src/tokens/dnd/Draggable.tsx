@@ -1,3 +1,4 @@
+import { clsx } from '@a-type/ui';
 import {
   AnimatePresence,
   HTMLMotionProps,
@@ -32,7 +33,6 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   id: string;
   data?: any;
   disabled?: boolean;
-  draggingPlaceholder?: ReactNode;
   children?: ReactNode;
   DraggedContainer?: DraggedContainerComponent;
 }
@@ -42,7 +42,6 @@ function DraggableRoot({
   data,
   disabled,
   children,
-  draggingPlaceholder,
   ...rest
 }: DraggableProps) {
   const isDragged = useDndStore((state) => state.dragging === id);
@@ -66,11 +65,7 @@ function DraggableRoot({
         gesture,
       }}
     >
-      <DndOverlayPortal
-        portaledFallback={draggingPlaceholder}
-        enabled={isDragged || isCandidate}
-        {...rest}
-      >
+      <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
         {children}
       </DndOverlayPortal>
     </DraggableContext.Provider>
@@ -79,6 +74,7 @@ function DraggableRoot({
 
 export interface DragGestureContext {
   initial: { x: number; y: number };
+  initialBounds: { x: number; y: number; width: number; height: number };
   offset: { x: number; y: number };
   current: { x: MotionValue<number>; y: MotionValue<number> };
   delta: { x: MotionValue<number>; y: MotionValue<number> };
@@ -114,7 +110,7 @@ function DraggableHandle({
   activationConstraint,
   allowStartFromDragIn = false,
 }: DraggableHandleProps) {
-  const { ref, isCandidate } = useDragGesture({
+  const { ref, isCandidate, isDragging } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
   });
@@ -140,7 +136,6 @@ export const Draggable = Object.assign(DraggableRoot, {
 interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   children?: ReactNode;
   enabled?: boolean;
-  portaledFallback?: ReactNode;
   /**
    * Override the component that implements the rendering of the dragged element.
    * This lets you customize how dragged items animate and appear.
@@ -159,7 +154,6 @@ const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
 function DndOverlayPortal({
   children,
   enabled,
-  portaledFallback,
   DraggedContainer,
   ...rest
 }: DndOverlayPortalProps) {
@@ -177,26 +171,20 @@ function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      <div className="relative">
-        <motion.div
-          style={{
-            position: 'relative',
-            // we have to keep this element in the DOM while the gesture
-            // is active or it breaks. so just hide it...
-            //visibility: isPortaling ? 'hidden' : 'visible',
-          }}
-          layoutId={draggable.id}
-          transition={flipTransition}
-          {...rest}
-        >
-          {children}
-        </motion.div>
-        {/* Show the fallback when main element is dragged if provided */}
-        {isPortaling && portaledFallback && (
-          <div className="absolute inset-0 pointer-events-none">
-            {portaledFallback}
-          </div>
-        )}
+      <div className={clsx('relative', isPortaling && 'invisible')}>
+        <AnimatePresence>
+          {/* {isPortaling ? (
+            <div className="invisible">{children}</div>
+          ) : ( */}
+          <motion.div
+            layoutId={draggable.id}
+            transition={flipTransition}
+            {...rest}
+          >
+            {children}
+          </motion.div>
+          {/* )} */}
+        </AnimatePresence>
       </div>
     </>
   );

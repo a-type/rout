@@ -65,14 +65,11 @@ const TokenInHandContainer: DraggedContainerComponent = ({
       return draggable.gesture.current.x.get();
     }
     return (
-      draggable.gesture.initial.x +
-      Math.pow(draggable.gesture.delta.x.get(), 0.5)
+      draggable.gesture.initialBounds.x +
+      draggable.gesture.initialBounds.width / 2
     );
   });
   const adjustedY = useTransform(() => {
-    if (!draggable.isCandidate) {
-      return draggable.gesture.current.y.get();
-    }
     return (
       draggable.gesture.current.y.get() +
       (draggable.gesture.type === 'touch' ? -40 : 0)
@@ -82,10 +79,9 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     useTransform(() => {
       if (!draggable.isCandidate) return 1;
       const dist = Math.sqrt(
-        draggable.gesture.delta.x.get() * draggable.gesture.delta.x.get() +
-          draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
+        draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
       );
-      return 1.2 + dist / 60;
+      return 1.2 + dist / 40;
     }),
   );
 

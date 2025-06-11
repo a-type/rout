@@ -1,14 +1,13 @@
 import { Box } from '@a-type/ui';
-import { frame, motion, useMotionTemplate, useSpring } from 'motion/react';
 import {
-  createContext,
-  memo,
-  ReactNode,
-  Ref,
-  useContext,
-  useEffect,
-} from 'react';
+  AnimatePresence,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from 'motion/react';
+import { createContext, memo, ReactNode, Ref, useContext } from 'react';
 import { createPortal } from 'react-dom';
+import { useWindowEvent } from '../hooks/useWindowEvent';
 import { useDndStore } from './dnd/dndStore';
 import { TokenSpace } from './TokenSpace';
 import { isToken, TokenDragData } from './types';
@@ -61,15 +60,17 @@ export function TokenHand<T = unknown>({
           type="hand"
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
         >
-          {children}
+          <AnimatePresence>{children}</AnimatePresence>
         </TokenSpace>
       </Box>
-      {renderDetailed && (
-        <TokenHandPreview
-          parentId={id || 'hand'}
-          renderDetailed={renderDetailed}
-        />
-      )}
+      <AnimatePresence>
+        {renderDetailed && (
+          <TokenHandPreview
+            parentId={id || 'hand'}
+            renderDetailed={renderDetailed}
+          />
+        )}
+      </AnimatePresence>
     </TokenHandContext.Provider>
   );
 }
@@ -108,6 +109,9 @@ const TokenHandPreview = memo(function TokenHandPreview({
     <motion.div
       className="pointer-events-none select-none w-50vmin h-50vmin overflow-hidden flex items-center justify-center absolute z-10000"
       style={{ transform }}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      exit={{ opacity: 0 }}
     >
       <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
         {renderDetailed(candidate as TokenDragData<any>)}
@@ -117,29 +121,16 @@ const TokenHandPreview = memo(function TokenHandPreview({
   );
 });
 
-const spring = {
-  bounce: 0.001,
-  damping: 12,
-  stiffness: 200,
-  restDelta: 0.01,
-  mass: 0.2,
-};
 function useFollowPointer(offset: { x: number; y: number } = { x: 0, y: 0 }) {
-  const x = useSpring(0, spring);
-  const y = useSpring(0, spring);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-  useEffect(() => {
-    const handlePointerMove = ({ clientX, clientY }: MouseEvent) => {
-      frame.read(() => {
-        x.set(clientX + offset.x);
-        y.set(clientY + offset.y);
-      });
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-
-    return () => window.removeEventListener('pointermove', handlePointerMove);
-  }, []);
+  useWindowEvent('pointermove', ({ clientX, clientY }) => {
+    // frame.read(() => {
+    x.set(clientX + offset.x);
+    y.set(clientY + offset.y);
+    // });
+  });
 
   return { x, y };
 }

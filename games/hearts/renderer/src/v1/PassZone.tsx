@@ -52,13 +52,19 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
             gameSuite.submitTurn();
           }
         }}
+        className="m-auto"
       >
         <CardGrid>
           {new Array(3).fill(null).map((_, i) => {
             if (passed[i]) {
               return (
-                <Token key={passed[i]} id={passed[i]} data={passed[i]}>
-                  <Card id={passed[i]} />
+                <Token
+                  key={passed[i]}
+                  id={passed[i]}
+                  data={passed[i]}
+                  className="rounded-lg"
+                >
+                  <Card id={passed[i]} variant="detailed" />
                 </Token>
               );
             } else {

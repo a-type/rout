@@ -39,7 +39,7 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
               key={card.card}
               id={card.card}
               playerId={card.playerId}
-              disabled
+              variant="detailed"
             />
           ))}
           {new Array(gameSuite.members.length - currentTrick.length)

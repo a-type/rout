@@ -1,5 +1,4 @@
 import { clsx } from '@a-type/ui';
-import { AnimatePresence } from 'motion/react';
 import { createContext, useContext } from 'react';
 import { Droppable, DroppableProps } from './dnd/Droppable';
 import { TokenDragData } from './types';
@@ -30,7 +29,7 @@ export function TokenSpace({
         onDrop={(droppable) => onDrop?.(droppable.data)}
         {...rest}
       >
-        <AnimatePresence initial={false}>{children}</AnimatePresence>
+        {children}
       </Droppable>
     </TokenSpaceContext.Provider>
   );
