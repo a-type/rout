@@ -1,188 +1,142 @@
-import { Box, clsx, useSize } from '@a-type/ui';
-import { useDroppable } from '@dnd-kit/core';
-import { AnimatePresence, motion } from 'motion/react';
-import { Children, ReactNode, Ref, useRef, useState } from 'react';
-import { useClickAway } from '../hooks/useClickAway';
-import { useMediaQuery } from '../hooks/useMediaQuery';
-import { useMergedRef } from '../hooks/useMergedRef';
+import { Box } from '@a-type/ui';
+import {
+  AnimatePresence,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from 'motion/react';
+import { createContext, memo, ReactNode, Ref, useContext } from 'react';
+import { createPortal } from 'react-dom';
+import { useWindowEvent } from '../hooks/useWindowEvent';
+import { useDndStore } from './dnd/dndStore';
+import { TokenSpace } from './TokenSpace';
+import { isToken, TokenDragData } from './types';
 
-export interface TokenHandProps {
-  children: ReactNode;
-  childIds: string[];
+/**
+ * A generic 'hand' of Token representations which the user can drag tokens
+ * out of. The sizing of the tokens is dynamic to fit in the available space
+ * without scrolling, but the representations in the hand must therefore be
+ * capable of being quite small and still legible.
+ *
+ * When the user either swipes (touch) or hovers (mouse) over the hand, the
+ * intersected token will show a large version above the cursor.
+ *
+ * When the user continues the gesture (either still touching, or clicking and holding
+ * from hover), and moves upward past a threshold, the selected token will be lifted from the hand
+ * and become a draggable, to be dropped elsewhere.
+ */
+
+export interface TokenHandProps<T> {
+  children?: ReactNode;
+  renderDetailed?: (value: TokenDragData<T>) => ReactNode;
   ref?: Ref<HTMLDivElement>;
   className?: string;
+  onDrop?: (value: TokenDragData<T>) => void;
+  /** Defaults to 'hand', use if you have multiple hands */
+  id?: string;
 }
 
-export function TokenHand({
-  children: rawChildren,
+export function TokenHand<T = unknown>({
+  renderDetailed,
   ref: userRef,
-  childIds,
   className,
-}: TokenHandProps) {
-  const children = Children.toArray(rawChildren);
-  const { setNodeRef, active } = useDroppable({
-    id: 'hand',
-  });
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [expandHand, setExpandHand] = useState(false);
-  const handRef = useRef<HTMLDivElement>(null);
-  useClickAway(() => {
-    setExpandHand(false);
-  }, handRef);
-
-  const isMedium = useMediaQuery('(min-width: 768px)');
-  const isLarge = useMediaQuery('(min-width: 1024px)');
-
-  const maxRotation = isLarge ? 30 : isMedium ? 25 : 20;
-
-  const [availableWidth, setAvailableWidth] = useState(0);
-  const sizeRef = useSize<HTMLDivElement>(({ width }) =>
-    setAvailableWidth(width),
-  );
-  const tokenSize = isLarge ? 200 : isMedium ? 200 : 120;
-  const overlapOffset = tokenSize * 0.05;
-
-  const totalWidth = (children.length - 1) * overlapOffset + tokenSize;
-  const centerOffset = (availableWidth - totalWidth) / 2;
-
-  const finalRef = useMergedRef<HTMLDivElement>(setNodeRef, sizeRef, userRef);
-
+  onDrop,
+  id,
+  children,
+  ...rest
+}: TokenHandProps<T>) {
   return (
-    <Box
-      ref={finalRef}
-      className={clsx('relative flex flex-row w-full', className)}
-      style={{ height: tokenSize * 0.5 }}
-    >
-      <motion.div
-        className="w-full z-50"
-        ref={handRef}
-        initial={{
-          y: 0,
-          scale: 0.8,
-        }}
-        onTapStart={() => setExpandHand(true)}
-        onTapCancel={() => setExpandHand(false)}
-        animate={expandHand ? { y: -25, scale: 1 } : {}}
-        whileHover={
-          isLarge || isMedium
-            ? {
-                y: isLarge ? -100 : isMedium ? -75 : -50,
-                scale: 1,
-                height: '300%',
-              }
-            : undefined
-        }
-        transition={{
-          type: 'spring',
-          duration: 0.4,
-          bounce: 0.25,
-        }}
+    <TokenHandContext.Provider value={true}>
+      <Box
+        ref={userRef}
+        d="row"
+        full="width"
+        className={className}
+        asChild
+        {...rest}
       >
-        <AnimatePresence>
-          {children.map((child, index) => {
-            const isHovered = hoveredIndex === index;
-            const isBeforeHovered =
-              hoveredIndex !== null && index < hoveredIndex;
-            const isAfterHovered =
-              hoveredIndex !== null && index > hoveredIndex;
-            const isBeingDragged = active && active.id === childIds[index];
-
-            const xOffset = (() => {
-              if (isHovered || isBeingDragged) {
-                return index * overlapOffset + centerOffset;
-              } else if (isBeforeHovered) {
-                return index * overlapOffset + centerOffset - overlapOffset / 2;
-              } else if (isAfterHovered) {
-                return index * overlapOffset + centerOffset + overlapOffset / 2;
-              } else {
-                return index * overlapOffset + centerOffset;
-              }
-            })();
-
-            // adjust rotation before and after hovered card
-            const rotationOffset = (() => {
-              if (isHovered) {
-                return 0;
-              } else if (isBeforeHovered) {
-                return -5;
-              } else if (isAfterHovered) {
-                return 5;
-              } else {
-                return 0;
-              }
-            })();
-
-            // each card takes up a fratction of the total rotation, with limits when you don't have many cards
-            // so it doesn't look too weird
-            const rotationFactor = Math.min(10, maxRotation / children.length);
-            const rotation =
-              rotationOffset +
-              rotationFactor * (index + 0.5 - children.length / 2);
-
-            // using manual rotation to avoid transform origin issues with dndkit
-            const { x, y } = rotatePointAroundAnotherPoint(
-              { x: 0, y: 0 },
-              { x: 0, y: tokenSize * 4 },
-              rotation,
-            );
-
-            return (
-              <motion.div
-                layout
-                key={childIds[index]}
-                className="absolute"
-                style={{
-                  width: `${tokenSize}px`,
-                  zIndex: isHovered ? 10 : index,
-                }}
-                animate={{
-                  x: x + xOffset,
-                  y: y + (isHovered ? -20 : 0),
-                  rotate: isBeingDragged ? 0 : rotation,
-                }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  type: 'spring',
-                  duration: 0.4,
-                  bounce: 0.25,
-                }}
-                onTouchStart={() => setHoveredIndex(index)}
-                onTouchCancel={() => setHoveredIndex(null)}
-                onPointerEnter={(ev) => {
-                  if (ev.pointerType === 'mouse') {
-                    setHoveredIndex(index);
-                  }
-                }}
-                onPointerLeave={(ev) => {
-                  if (ev.pointerType === 'mouse') {
-                    setHoveredIndex(null);
-                  }
-                }}
-              >
-                {child}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </motion.div>
-    </Box>
+        <TokenSpace
+          id={id || 'hand'}
+          type="hand"
+          onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
+          className="flex flex-row items-center justify-center gap-xs"
+        >
+          <AnimatePresence>{children}</AnimatePresence>
+        </TokenSpace>
+      </Box>
+      <AnimatePresence>
+        {renderDetailed && (
+          <TokenHandPreview
+            parentId={id || 'hand'}
+            renderDetailed={renderDetailed}
+          />
+        )}
+      </AnimatePresence>
+    </TokenHandContext.Provider>
   );
 }
 
-export function rotatePointAroundAnotherPoint(
-  point: { x: number; y: number },
-  center: { x: number; y: number },
-  angle: number,
-) {
-  const radians = (angle * Math.PI) / 180;
-  const cos = Math.cos(radians);
-  const sin = Math.sin(radians);
+const TokenHandPreview = memo(function TokenHandPreview({
+  renderDetailed,
+  parentId,
+}: {
+  renderDetailed: (value: TokenDragData<any>) => ReactNode;
+  parentId: string;
+}) {
+  // we show a preview when we have a candidate but haven't started dragging yet
+  const candidate = useDndStore((state) =>
+    state.dragging
+      ? null
+      : state.candidate
+      ? state.data[state.candidate]
+      : null,
+  );
+  const previewPosition = useFollowPointer({ x: 0, y: -80 });
+  const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;
 
-  const translatedX = point.x - center.x;
-  const translatedY = point.y - center.y;
+  if (!candidate || !isToken(candidate)) {
+    return null;
+  }
 
-  return {
-    x: translatedX * cos - translatedY * sin + center.x,
-    y: translatedX * sin + translatedY * cos + center.y,
-  };
+  if (
+    candidate.internal.space?.type !== 'hand' ||
+    candidate.internal.space.id !== parentId
+  ) {
+    // don't show previews for tokens not in this hand
+    return null;
+  }
+
+  return createPortal(
+    <motion.div
+      className="pointer-events-none select-none w-50vmin h-50vmin overflow-hidden flex items-center justify-center absolute z-10000"
+      style={{ transform }}
+      animate={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
+        {renderDetailed(candidate as TokenDragData<any>)}
+      </div>
+    </motion.div>,
+    document.body,
+  );
+});
+
+function useFollowPointer(offset: { x: number; y: number } = { x: 0, y: 0 }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  useWindowEvent('pointermove', ({ clientX, clientY }) => {
+    // frame.read(() => {
+    x.set(clientX + offset.x);
+    y.set(clientY + offset.y);
+    // });
+  });
+
+  return { x, y };
+}
+
+const TokenHandContext = createContext<boolean>(false);
+export function useIsTokenInHand() {
+  return useContext(TokenHandContext);
 }

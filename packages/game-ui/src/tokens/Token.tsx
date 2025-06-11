@@ -1,57 +1,95 @@
-import { clsx } from '@a-type/ui';
-import { useDraggable } from '@dnd-kit/core';
-import { CSSProperties, ReactNode, Ref } from 'react';
-import { useMergedRef } from '../hooks/useMergedRef';
-import { makeToken } from './types';
+import {
+  motion,
+  useMotionTemplate,
+  useSpring,
+  useTransform,
+} from 'motion/react';
+import { useMemo } from 'react';
+import {
+  DefaultDraggedContainer,
+  Draggable,
+  DraggableProps,
+  DraggedContainerComponent,
+} from './dnd/Draggable';
+import { DragGestureActivationConstraint } from './dnd/useDragGesture';
+import { useIsTokenInHand } from './TokenHand';
+import { useTokenData } from './types';
 
-export interface TokenProps<Data = unknown> {
-  children?: ReactNode;
-  id: string;
+export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
-  className?: string;
-  disabled?: boolean;
-  ref?: Ref<HTMLDivElement>;
-  style?: CSSProperties;
 }
 
-export function Token({
-  children,
-  id,
-  data,
-  className,
-  disabled,
-  ref,
-  style: userStyle,
-  ...rest
-}: TokenProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id,
-      data: makeToken(id, data),
-      disabled,
-    });
+export function Token({ children, data, ...rest }: TokenProps) {
+  const tokenData = useTokenData(rest.id, data);
+  const isInHand = tokenData.internal.space?.type === 'hand';
 
-  const style = transform
-    ? {
-        ...userStyle,
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : userStyle;
-
-  const finalRef = useMergedRef<HTMLDivElement>(ref, setNodeRef);
+  const activationConstraint = useMemo<DragGestureActivationConstraint>(
+    () =>
+      isInHand
+        ? (ctx) => {
+            return Math.abs(ctx.delta.y.get()) > 50;
+          }
+        : undefined,
+    [isInHand],
+  );
 
   return (
-    <div
-      {...rest}
-      ref={finalRef}
-      style={style}
-      className={clsx('[&[data-dragging=true]]:(z-10000)', className)}
-      data-disabled={disabled}
-      data-dragging={!!isDragging}
-      {...listeners}
-      {...attributes}
-    >
-      {children}
-    </div>
+    <Draggable {...rest} DraggedContainer={TokenContainer} data={tokenData}>
+      <Draggable.Handle
+        activationConstraint={activationConstraint}
+        allowStartFromDragIn={isInHand}
+      >
+        {children}
+      </Draggable.Handle>
+    </Draggable>
   );
 }
+
+const TokenContainer: DraggedContainerComponent = (props) => {
+  const isInHand = useIsTokenInHand();
+  if (isInHand) {
+    return <TokenInHandContainer {...props} />;
+  }
+  return <DefaultDraggedContainer {...props} />;
+};
+
+// controls the animation of local, non-activated drag gestures
+// according to how in-hand tokens should feel
+const TokenInHandContainer: DraggedContainerComponent = ({
+  children,
+  draggable,
+  ref,
+}) => {
+  const dampenedX = useTransform(() => {
+    if (!draggable.isCandidate) {
+      return draggable.gesture.current.x.get();
+    }
+    return (
+      draggable.gesture.initialBounds.x +
+      draggable.gesture.initialBounds.width / 2
+    );
+  });
+  const adjustedY = useTransform(() => {
+    return (
+      draggable.gesture.current.y.get() +
+      (draggable.gesture.type === 'touch' ? -40 : 0)
+    );
+  });
+  const distanceScale = useSpring(
+    useTransform(() => {
+      if (!draggable.isCandidate) return 1;
+      const dist = Math.sqrt(
+        draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
+      );
+      return 1.2 + dist / 40;
+    }),
+  );
+
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
+
+  return (
+    <motion.div style={{ position: 'absolute', transform }} ref={ref}>
+      {children}
+    </motion.div>
+  );
+};

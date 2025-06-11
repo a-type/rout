@@ -1,10 +1,10 @@
-import { DndContext } from '@dnd-kit/core';
 import { ReactNode } from 'react';
+import { DndRoot } from './dnd/DndRoot';
 
 export interface TokenRootProps {
   children?: ReactNode;
 }
 
 export function TokenRoot({ children }: TokenRootProps) {
-  return <DndContext>{children}</DndContext>;
+  return <DndRoot>{children}</DndRoot>;
 }

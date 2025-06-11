@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@a-type/react-space": "catalog:",
+    "@a-type/utils": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
@@ -40,9 +41,10 @@
     "three": "catalog:",
     "valtio": "catalog:",
     "react-flip-toolkit": "catalog:",
-    "@dnd-kit/core": "catalog:",
     "motion": "catalog:",
-    "@use-gesture/react": "catalog:"
+    "@use-gesture/react": "catalog:",
+    "zustand": "catalog:",
+    "immer": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

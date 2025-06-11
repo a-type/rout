@@ -1,49 +1,52 @@
 import { clsx } from '@a-type/ui';
-import { useDndMonitor, useDroppable } from '@dnd-kit/core';
-import { ReactNode } from 'react';
-import { isToken, TokenDragData } from './types';
+import { createContext, useContext } from 'react';
+import { Droppable, DroppableProps } from './dnd/Droppable';
+import { TokenDragData } from './types';
 
-export interface TokenSpaceProps {
-  id: string;
-  children?: ReactNode;
+export interface TokenSpaceProps extends Omit<DroppableProps, 'onDrop'> {
   onDrop?: (token: TokenDragData) => void;
-  disabled?: boolean;
   className?: string;
+  type?: string;
 }
 
 export function TokenSpace({
   id,
   children,
-  onDrop,
-  disabled,
   className,
+  onDrop,
+  type,
+  ...rest
 }: TokenSpaceProps) {
-  const { isOver, setNodeRef } = useDroppable({
-    id,
-    disabled,
-    data: {
-      type: 'token-space',
-    },
-  });
-
-  useDndMonitor({
-    onDragEnd(event) {
-      console.log(event);
-      if (event.over?.id === id && isToken(event.active.data.current)) {
-        const token = event.active.data.current;
-        onDrop?.(token);
-      }
-    },
-  });
-
   return (
-    <div
-      id={id}
-      className={clsx('relative', className)}
-      data-over={isOver}
-      ref={setNodeRef}
-    >
-      {children}
-    </div>
+    <TokenSpaceContext.Provider value={{ id, type }}>
+      <Droppable<TokenDragData>
+        id={id}
+        className={clsx(
+          'relative',
+          '[&[data-over=true]]:(ring-primary ring-2 ring-solid)',
+          className,
+        )}
+        onDrop={(droppable) => onDrop?.(droppable.data)}
+        {...rest}
+      >
+        {children}
+      </Droppable>
+    </TokenSpaceContext.Provider>
   );
+}
+
+export interface TokenSpaceData {
+  id: string;
+  type?: string;
+}
+
+export const TokenSpaceContext = createContext<TokenSpaceData | null>(null);
+export function useTokenSpaceContext() {
+  const context = useContext(TokenSpaceContext);
+  if (!context) {
+    throw new Error(
+      'useTokenSpaceContext must be used within a TokenSpace component',
+    );
+  }
+  return context;
 }

@@ -1,4 +1,4 @@
-import { Box, BoxProps, Button, Icon } from '@a-type/ui';
+import { Box, BoxProps, Button, CollapsibleSimple, Icon } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
 
 export interface TurnErrorProps extends BoxProps {
@@ -11,8 +11,8 @@ export const TurnError = withGame(function TurnError({
 }: TurnErrorProps) {
   const suite = useGameSuite();
 
-  if (suite.turnError) {
-    return (
+  return (
+    <CollapsibleSimple open={!!suite.turnError}>
       <Box items="center" {...props}>
         {suite.turnError}
         {showReset && (
@@ -25,8 +25,6 @@ export const TurnError = withGame(function TurnError({
           </Button>
         )}
       </Box>
-    );
-  }
-
-  return null;
+    </CollapsibleSimple>
+  );
 });

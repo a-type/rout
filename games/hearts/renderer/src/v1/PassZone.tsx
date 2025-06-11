@@ -1,6 +1,6 @@
 import { Box } from '@a-type/ui';
 import { isCard, isPassTurn } from '@long-game/game-hearts-definition/v1';
-import { TokenSpace } from '@long-game/game-ui';
+import { Token, TokenSpace } from '@long-game/game-ui';
 import { Card, CardPlaceholder } from './Card';
 import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
@@ -26,6 +26,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
           currentTurn.pass.length >= 3
         }
         onDrop={(card) => {
+          console.log('Dropped card in pass zone:', card);
           if (!isCard(card.id)) {
             return;
           }
@@ -34,7 +35,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
             if (t && isPassTurn(t) && t.pass.length < 3) {
               return {
                 ...t,
-                pass: [...t.pass, cardId],
+                pass: [...t.pass.filter((v) => v !== cardId), cardId],
               };
             }
 
@@ -51,11 +52,21 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
             gameSuite.submitTurn();
           }
         }}
+        className="m-auto"
       >
         <CardGrid>
           {new Array(3).fill(null).map((_, i) => {
             if (passed[i]) {
-              return <Card key={passed[i]} id={passed[i]} />;
+              return (
+                <Token
+                  key={passed[i]}
+                  id={passed[i]}
+                  data={passed[i]}
+                  className="rounded-lg"
+                >
+                  <Card id={passed[i]} variant="detailed" />
+                </Token>
+              );
             } else {
               return <CardPlaceholder key={i} />;
             }

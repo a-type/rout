@@ -13,14 +13,6 @@ const moduleMap = {
         return { default: () => null };
       }),
   },
-  territory: {
-    main: () => import('@long-game/game-territory-renderer'),
-    css: () =>
-      import('@long-game/game-territory-renderer/css.css').catch(() => {
-        console.warn('Failed to load css for territory');
-        return { default: () => null };
-      }),
-  },
   scribble: {
     main: () => import('@long-game/game-scribble-renderer'),
     css: () =>
