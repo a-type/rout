@@ -69,8 +69,9 @@ export function useDragGesture(options?: DragGestureOptions) {
       }
 
       if (!gesture.claimId) {
-        // no other element has claim, we can take it without further checks
-        beginDrag();
+        // drag-in gestures must always start from a valid, claimed gesture started
+        // with a standard pointer-down.
+        return;
       } else {
         // first, we only want to claim the drag if the gesture is mostly
         // horizontal.
