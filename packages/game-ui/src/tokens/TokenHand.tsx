@@ -59,6 +59,7 @@ export function TokenHand<T = unknown>({
           id={id || 'hand'}
           type="hand"
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
+          className="flex flex-row items-center justify-center gap-xs"
         >
           <AnimatePresence>{children}</AnimatePresence>
         </TokenSpace>

@@ -70,6 +70,9 @@ export function useDragGesture(options?: DragGestureOptions) {
     } else {
       setCandidate(draggable.id);
     }
+
+    // cancel any existing text selection and prevent text selection globally
+    document.body.style.userSelect = 'none';
   }
 
   function activateDrag(ev: InputEvent) {
@@ -106,6 +109,8 @@ export function useDragGesture(options?: DragGestureOptions) {
     console.debug('endDrag', draggable.id);
     // end the drag
     useDndStore.getState().endDrag();
+    // reset selection stuff
+    document.body.style.userSelect = '';
   }
 
   // we attach these to window so we don't lose them

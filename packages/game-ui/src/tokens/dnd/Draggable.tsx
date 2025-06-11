@@ -100,6 +100,10 @@ export function useDraggableContext() {
   }
   return context;
 }
+export function useIsDragging() {
+  const ctx = useContext(DraggableContext);
+  return ctx?.isDragged || ctx?.isCandidate || false;
+}
 
 export interface DraggableHandleProps extends HTMLAttributes<HTMLDivElement> {
   activationConstraint?: DragGestureActivationConstraint;

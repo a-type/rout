@@ -14,7 +14,8 @@ import {
   getCardRank,
   getCardSuit,
 } from '@long-game/game-hearts-definition/v1';
-import { PlayerAvatar } from '@long-game/game-ui';
+import { PlayerAvatar, useIsDragging } from '@long-game/game-ui';
+import { CSSProperties } from 'react';
 
 export interface CardProps {
   id: CardVal;
@@ -30,11 +31,19 @@ const suitToIcon: Record<string, IconName> = {
   s: 'suitSpade',
 };
 
-export function Card({ id, playerId, variant = 'simple', ...rest }: CardProps) {
+export function Card({
+  id,
+  playerId,
+  variant: baseVariant = 'simple',
+  ...rest
+}: CardProps) {
+  const isDragging = useIsDragging();
+  const variant = isDragging ? 'simple' : baseVariant;
   return (
     <CardRoot
       data-color={getCardColor(id)}
       data-suit={getCardSuit(id)}
+      data-variant={variant}
       {...rest}
     >
       {variant === 'simple' ? (
@@ -54,94 +63,100 @@ export function Card({ id, playerId, variant = 'simple', ...rest }: CardProps) {
 
 function SimpleCardContent({ id }: { id: CardVal }) {
   return (
-    <Box className="flex flex-col items-center justify-center h-full m-auto text-xl">
+    <Box d="col" layout="center center" full p="xs">
       <CardNumber id={id} />
-      <Icon
-        name={suitToIcon[getCardSuit(id)]}
-        className="flex-1 stroke-width-1px min-w-20px w-auto h-auto aspect-1 [vector-effect:non-scaling-stroke]"
-      />
+      <CardSuitIcon id={id} />
     </Box>
   );
 }
 
 const symbolPatterns = [
+  // 1
   [{ x: 0.5, y: 0.5 }],
+  // 2
   [
-    { x: 0.5, y: 0.2 },
-    { x: 0.5, y: 0.8 },
+    { x: 0.5, y: 0.25 },
+    { x: 0.5, y: 0.75 },
   ],
+  // 3
   [
     { x: 0.5, y: 0.5 },
-    { x: 0.5, y: 0.2 },
-    { x: 0.5, y: 0.8 },
+    { x: 0.5, y: 0.25 },
+    { x: 0.5, y: 0.75 },
   ],
+  // 4
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.8 },
-    { x: 0.8, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
   ],
+  // 5
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.8 },
-    { x: 0.8, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
     { x: 0.5, y: 0.5 },
   ],
+  // 6
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.5 },
-    { x: 0.8, y: 0.5 },
-    { x: 0.2, y: 0.8 },
-    { x: 0.8, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.5 },
+    { x: 0.75, y: 0.5 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
   ],
+  // 7
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.5 },
-    { x: 0.8, y: 0.5 },
-    { x: 0.2, y: 0.8 },
-    { x: 0.8, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.5 },
+    { x: 0.75, y: 0.5 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
     { x: 0.5, y: 0.35 },
   ],
+  // 8
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.5 },
-    { x: 0.8, y: 0.5 },
-    { x: 0.2, y: 0.8 },
-    { x: 0.8, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.5 },
+    { x: 0.75, y: 0.5 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
     { x: 0.5, y: 0.35 },
     { x: 0.5, y: 0.65 },
   ],
+  // 9
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.4 },
-    { x: 0.8, y: 0.4 },
-    { x: 0.2, y: 0.6 },
-    { x: 0.8, y: 0.6 },
-    { x: 0.5, y: 0.8 },
-    { x: 0.5, y: 0.8 },
+    { x: 0.25, y: 0.25 },
+    { x: 0.75, y: 0.25 },
+    { x: 0.25, y: 0.4 },
+    { x: 0.75, y: 0.4 },
+    { x: 0.25, y: 0.6 },
+    { x: 0.75, y: 0.6 },
+    { x: 0.25, y: 0.75 },
+    { x: 0.75, y: 0.75 },
     { x: 0.5, y: 0.5 },
   ],
+  // 10
   [
-    { x: 0.2, y: 0.2 },
-    { x: 0.8, y: 0.2 },
-    { x: 0.2, y: 0.4 },
-    { x: 0.8, y: 0.4 },
-    { x: 0.2, y: 0.6 },
-    { x: 0.8, y: 0.6 },
-    { x: 0.5, y: 0.8 },
-    { x: 0.5, y: 0.8 },
+    { x: 0.25, y: 0.2 },
+    { x: 0.75, y: 0.2 },
+    { x: 0.25, y: 0.4 },
+    { x: 0.75, y: 0.4 },
+    { x: 0.25, y: 0.6 },
+    { x: 0.75, y: 0.6 },
+    { x: 0.25, y: 0.8 },
+    { x: 0.75, y: 0.8 },
     { x: 0.5, y: 0.35 },
     { x: 0.5, y: 0.65 },
   ],
 ];
 
 function DetailedCardContent({ id }: { id: CardVal }) {
-  const suit = getCardSuit(id);
   let symbolCount = getCardRank(id);
   if (symbolCount > 10) {
     symbolCount = 1;
@@ -149,25 +164,27 @@ function DetailedCardContent({ id }: { id: CardVal }) {
 
   const pattern = symbolPatterns[symbolCount - 1];
   return (
-    <Box className="flex flex-col items-center justify-center h-full m-auto">
-      <Box d="col" className="absolute top-0 left-0">
-        <CardNumber id={id} className="" />
+    <Box layout="center center" full d="col">
+      <Box d="col" p className="absolute top-0 left-0 h-25%">
+        <CardNumber id={id} />
         <CardSuitIcon id={id} />
       </Box>
-      <Box d="col" className="absolute bottom-0 right-0">
-        <CardNumber id={id} className="rotate-180" />
+      <Box d="col" p className="absolute bottom-0 right-0 h-25%">
         <CardSuitIcon id={id} className="rotate-180" />
+        <CardNumber id={id} className="rotate-180" />
       </Box>
       <Box className="flex-1 w-full h-full absolute">
         {pattern.map((pos, index) => (
-          <Icon
+          <CardSymbol
             key={index}
-            name={suitToIcon[suit]}
-            className="absolute"
+            id={id}
+            className="absolute flex-grow-0"
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
               transform: 'translate(-50%, -50%)',
+              width: `${Math.max(15, 80 / symbolCount)}%`,
+              height: 'auto',
             }}
           />
         ))}
@@ -191,18 +208,30 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
 const CardRoot = withClassName(
   withProps(Box, { surface: 'default', container: 'reset', border: true }),
   'aspect-[3/4] flex-1 h-auto min-w-40px min-h-50px max-h-50vh select-none',
+  '[&[data-variant=detailed]]:(min-h-100px min-w-80px)',
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
   '[&[data-suit=h]]:(color-attention-ink)',
   '[&[data-suit=d]]:(color-attention color-darken-4)',
 );
 
-function CardNumber({ id, className }: { id: CardVal; className?: string }) {
+function ScalingText({
+  children,
+  className,
+  style,
+  ...rest
+}: {
+  children: React.ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
     <svg
       className={clsx('flex-1', className)}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
+      style={style}
+      {...rest}
     >
       <text
         x="50%"
@@ -210,25 +239,58 @@ function CardNumber({ id, className }: { id: CardVal; className?: string }) {
         dominantBaseline="middle"
         textAnchor="middle"
         className="font-bold"
-        fontSize="40"
+        fontSize="80"
         fill="currentColor"
       >
-        {getCardDisplayRank(id)}
+        {children}
       </text>
     </svg>
   );
 }
 
-function CardSuitIcon({ id, className }: { id: CardVal; className?: string }) {
-  const suit = getCardSuit(id);
+function CardNumber({ id, className }: { id: CardVal; className?: string }) {
+  return (
+    <ScalingText className={className}>{getCardDisplayRank(id)}</ScalingText>
+  );
+}
+
+function CardSuitIcon({
+  id,
+  className,
+  style,
+}: {
+  id: CardVal;
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
     <Icon
-      name={suitToIcon[suit]}
+      name={suitToIcon[getCardSuit(id)]}
       className={clsx(
-        'w-20px h-20px stroke-width-1px [vector-effect:non-scaling-stroke]',
+        'flex-1 stroke-width-1px min-w-20px w-auto h-auto aspect-1 [vector-effect:non-scaling-stroke] fill-[currentColor]',
         className,
       )}
-      style={{ color: getCardColor(id) }}
+      style={style}
     />
+  );
+}
+
+function CardSymbol({
+  id,
+  className,
+  style,
+}: {
+  id: CardVal;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  const rank = getCardRank(id);
+  if (rank <= 10) {
+    return <CardSuitIcon id={id} className={className} style={style} />;
+  }
+  return (
+    <ScalingText className={className} style={style}>
+      {getCardDisplayRank(id)}
+    </ScalingText>
   );
 }
