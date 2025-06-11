@@ -113,6 +113,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       exit={{ opacity: 0 }}
+      transition={{ delay: 0.5, duration: 0.2 }}
     >
       <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
         {renderDetailed(candidate as TokenDragData<any>)}

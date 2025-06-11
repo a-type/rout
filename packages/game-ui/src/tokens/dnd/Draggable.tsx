@@ -163,9 +163,6 @@ function DndOverlayPortal({
         )}
       <div className={clsx('relative', isPortaling && 'invisible')}>
         <AnimatePresence>
-          {/* {isPortaling ? (
-            <div className="invisible">{children}</div>
-          ) : ( */}
           <motion.div
             layoutId={draggable.id}
             transition={flipTransition}
@@ -173,7 +170,6 @@ function DndOverlayPortal({
           >
             {children}
           </motion.div>
-          {/* )} */}
         </AnimatePresence>
       </div>
     </>
