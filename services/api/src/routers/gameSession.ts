@@ -79,14 +79,12 @@ export const gameSessionRouter = new Hono<Env>()
   .get('/', async (ctx) => {
     const state = ctx.get('gameSessionState');
     const userId = ctx.get('session').userId;
-    const info = await state.getDetails(userId);
-    const body = wrapRpcData(info);
+    const info = await state.getDetails();
+    const body = wrapRpcData({
+      ...info,
+      playerId: userId,
+    });
     return ctx.json(body);
-  })
-  .get('/summary', async (ctx) => {
-    const state = ctx.get('gameSessionState');
-    const summary = await state.getSummary();
-    return ctx.json(wrapRpcData(summary));
   })
   .get('/members', async (ctx) => {
     const userStore = ctx.get('userStore');
@@ -115,7 +113,7 @@ export const gameSessionRouter = new Hono<Env>()
     const [members, invitations, summary] = await Promise.all([
       userStore.getGameSessionMembers(sessionId),
       userStore.getInvitationsToGameSession(sessionId),
-      state.getSummary(),
+      state.getDetails(),
     ]);
 
     // while in pregame, double check that vital data is
@@ -186,7 +184,7 @@ export const gameSessionRouter = new Hono<Env>()
       const { gameId } = ctx.req.valid('json');
       const state = ctx.get('gameSessionState');
       await state.updateGame(gameId, getLatestVersion(games[gameId]).version);
-      const summary = await state.getSummary();
+      const summary = await state.getDetails();
       return ctx.json({ session: summary });
     },
   )

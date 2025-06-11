@@ -170,6 +170,10 @@ export class GameSession extends DurableObject<ApiBindings> {
   async getId(): Promise<PrefixedId<'gs'>> {
     return (await this.#getSessionData()).id;
   }
+  async getHasGameStarted(): Promise<boolean> {
+    const sessionData = await this.#getSessionData();
+    return Boolean(sessionData.startedAt);
+  }
   async getGameDefinition() {
     const { gameId, gameVersion } = await this.#getSessionData();
     const gameModule = games[gameId];
@@ -521,7 +525,8 @@ export class GameSession extends DurableObject<ApiBindings> {
       members: await this.getMembers(),
     });
   }
-  async getSummary() {
+
+  async getDetails() {
     const sessionData = await this.#getSessionData();
     const roundData = await this.#getCurrentRoundState();
     return {
@@ -533,33 +538,8 @@ export class GameSession extends DurableObject<ApiBindings> {
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
-      nextRoundCheckAt: roundData.checkAgainAt ?? null,
-    };
-  }
-  async getDetails(userId: PrefixedId<'u'>): Promise<{
-    id: PrefixedId<'gs'>;
-    status: GameStatus;
-    gameId: string;
-    gameVersion: string;
-    members: GameSessionMember[];
-    startedAt: string | null;
-    timezone: string;
-    endedAt: string | null;
-    playerId: PrefixedId<'u'>;
-    playerState: {};
-    currentRound: GameRound<{ playerId: PrefixedId<'u'>; data: {} | null }> & {
-      initialPlayerState: {};
-      yourTurnData: {} | null;
-    };
-    playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
-  }> {
-    const summary = await this.getSummary();
-    const currentRoundIndex = await this.getCurrentRoundIndex();
-    return {
-      ...summary,
-      playerId: userId,
-      playerState: (await this.getPlayerState(userId)) as {},
-      currentRound: await this.getPublicRound(userId, currentRoundIndex),
+      nextRoundCheckAt: roundData.checkAgainAt?.toISOString() ?? null,
+      currentRoundIndex: roundData.roundIndex,
       playerStatuses: await this.getPlayerStatuses(),
     };
   }
@@ -846,6 +826,13 @@ export class GameSession extends DurableObject<ApiBindings> {
     playerId: PrefixedId<'u'>,
     upToAndIncludingRoundIndex?: number,
   ): Promise<unknown> {
+    // cannot compute player state before game has started - this results in errors
+    // since game logic depends on setup being correct, like # of players, etc.
+    if (!(await this.getHasGameStarted())) {
+      // TODO: throw?
+      return {};
+    }
+
     const resolvedRoundIndex =
       upToAndIncludingRoundIndex ?? (await this.getPublicRoundIndex());
     const globalState = await this.#getGlobalStateUnchecked(resolvedRoundIndex);
