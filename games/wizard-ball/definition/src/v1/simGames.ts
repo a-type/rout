@@ -40,6 +40,7 @@ import {
 import Logger from './logger';
 import { Weather, weather as weatherData } from './weatherData';
 import { Ballpark, ballparkData } from './ballparkData';
+import { Status, statusData, StatusType } from './statusData';
 
 const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -350,7 +351,10 @@ function getCurrentPitcher(gameState: LeagueGameState): string {
   return last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
 }
 
-type PerkInfo = { source: Weather | Ballpark | Perk; effect: PerkEffect };
+type PerkInfo = {
+  source: Weather | Ballpark | Perk | Status;
+  effect: PerkEffect;
+};
 
 function getActivePlayerPerks(
   playerId: string,
@@ -369,6 +373,7 @@ function getActivePlayerPerks(
     ...gameState.teamData[battingTeam].battingOrder,
     ...gameState.teamData[pitchingTeam].battingOrder,
   ].map((pid) => league.playerLookup[pid]);
+
   return [
     { source: weatherInfo, effect: weatherInfo.effect() },
     {
@@ -403,6 +408,34 @@ function getActivePlayerPerks(
           );
         })
         .map((p) => ({ source: p, effect: p.effect() })),
+    ),
+    ...players.flatMap((player) =>
+      Object.entries(player.statusIds)
+        .filter(([id]) => {
+          const s = statusData[id as StatusType];
+          return (
+            !s.condition ||
+            s.condition({
+              pitchKind,
+              gameState,
+              targetPlayer,
+              sourcePlayer: player,
+              weather: weatherId,
+              isMyTeam: playerTeam === player.teamId,
+              isMe: player.id === playerId,
+              isBatter: player.id === getCurrentBatter(gameState),
+              isPitcher: player.id === getCurrentPitcher(gameState),
+              isRunner:
+                gameState.bases[1] === player.id ||
+                gameState.bases[2] === player.id ||
+                gameState.bases[3] === player.id,
+            })
+          );
+        })
+        .map(([id, stacks]) => {
+          const s = statusData[id as StatusType];
+          return { source: s, effect: s.effect({ stacks }) };
+        }),
     ),
   ];
 }

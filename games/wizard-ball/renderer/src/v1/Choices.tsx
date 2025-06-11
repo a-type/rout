@@ -91,7 +91,7 @@ export function Choices() {
           Select one of the following options to improve your team.
         </span>
       </div>
-      <div className="flex flex-row gap-2 flex-wrap">
+      <div className="flex flex-col gap-2 flex-wrap items-start">
         {options.map((choice) => {
           return (
             <Button
@@ -100,7 +100,7 @@ export function Choices() {
               }}
               key={choice.id}
               className={clsx(
-                'flex flex-row md:flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
+                'flex flex-row gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
                 selection === choice.id
                   ? 'outline outline-4 outline-blue-500'
                   : '',
@@ -150,7 +150,7 @@ export function LevelupChoices({ id }: { id: string }) {
                 }}
                 key={choice.id}
                 className={clsx(
-                  'flex flex-col gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
+                  'flex flex-row gap-1 items-center justify-between bg-gray-800 px-2 py-1 rounded border-none',
                   selection[idx] === choice.id
                     ? 'outline outline-4 outline-blue-500'
                     : '',

@@ -3,7 +3,7 @@ import {
   Player,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { attributeToColor } from '../utils';
+import { attributeToColor, numberToLetter, staminaToText } from '../utils';
 
 const attributes = [
   { key: 'strength', label: 'STR' },
@@ -36,7 +36,7 @@ export function PlayerAttributesSummary({
         style={{ color: attributeToColor(overall, 120).text }}
       >
         <span className="font-bold">OVR:</span>
-        <span>{overall}</span>
+        <span>{numberToLetter(overall / 6)}</span>
       </div>
     );
   }
@@ -47,7 +47,7 @@ export function PlayerAttributesSummary({
         style={{ color: attributeToColor(player.stamina * 20).text }}
       >
         <span className="font-bold">STA:</span>
-        <span>{(player.stamina * 100).toFixed(0)}%</span>
+        <span>{staminaToText(player.stamina)}</span>
       </div>
     );
   }

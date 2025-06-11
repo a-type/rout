@@ -17,6 +17,8 @@ import {
 import { Link } from 'react-router';
 import { XpBar } from '../ratings/XpBar';
 import { LevelupChoices } from '../Choices';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
+import { AttributeSummary } from '../ratings/AttributeSummary';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -130,13 +132,14 @@ export function PlayerPage({ id }: { id: string }) {
           </div>
         </div>
       </div>
-      <Attributes
+      <AttributeSummary
         id={player.id}
         attributes={playerAttributes.baseAttributes}
         attributesModified={playerAttributes.attributeMod}
         stamina={player.stamina}
+        limit={6}
       />
-      <CompositeRatings
+      <CompositeRatingsSummary
         id={id}
         kind={
           player.positions.some((p) => isPitcher(p)) ? 'pitching' : 'batting'

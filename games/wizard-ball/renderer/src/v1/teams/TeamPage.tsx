@@ -6,7 +6,6 @@ import {
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { useState } from 'react';
-import { Attributes } from '../ratings/Attributes';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { TeamLineup } from './TeamLineup';
 import { TeamChart } from './TeamChart';
@@ -14,6 +13,7 @@ import { TeamItems } from './TeamItems';
 import { BallparkChip } from '../BallparkChip';
 import { Link } from 'react-router';
 import { TeamPlayers } from './TeamPlayers';
+import { TeamSummary } from './TeamSummary';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -86,7 +86,7 @@ export function TeamPage({ id }: { id: TeamId }) {
           ))}
         </Tabs.List>
         <Tabs.Content value="summary">
-          <Attributes attributes={teamAttributes} />
+          <TeamSummary id={id} />
         </Tabs.Content>
         <Tabs.Content value="battingOrder">
           <TeamLineup id={id} />

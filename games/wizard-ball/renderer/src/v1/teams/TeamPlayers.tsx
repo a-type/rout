@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { attributeToColor } from '../utils';
+import { attributeToColor, numberToLetter } from '../utils';
 import { hooks } from '../gameClient';
 import { clsx, Tabs } from '@a-type/ui';
 import { useState } from 'react';
@@ -76,7 +76,7 @@ export function TeamPlayers({ id }: { id: string }) {
         className="text-center"
         style={{ backgroundColor: bg, color: '#222' }}
       >
-        {value}
+        {numberToLetter((value * 20) / max)}
       </td>
     );
   };
@@ -214,7 +214,7 @@ export function TeamPlayers({ id }: { id: string }) {
                           ) : col.key === 'position' ? (
                             data.position
                           ) : (
-                            value
+                            numberToLetter(value)
                           )}
                         </td>
                       );

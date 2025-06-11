@@ -8,6 +8,7 @@ import { usePlayerAttributes } from '../ratings/useAttributes';
 import { PlayerLevel } from './PlayerLevel';
 import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
+import { AttributeSummary } from '../ratings/AttributeSummary';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -22,9 +23,15 @@ export function PlayerTooltipContent({ id }: { id: string }) {
       <h3 className="text-xl font-bold mb-0">
         {player.name} ({player.positions.join('/').toUpperCase()})
       </h3>
-      <span className="text-sm text-gray-400 capitalize mb-2">
+      <span className="text-sm text-gray-400 capitalize mb-2 flex flex-row items-center gap-2">
         <PlayerLevel id={id} /> <PlayerSpecies id={id} />{' '}
         <PlayerClass id={id} /> {player.species} {player.class}
+        {team && (
+          <div className="flex flex-row items-center gap-2 ml-auto">
+            <TeamIcon size={14} id={team} />
+            <TeamName id={team} />
+          </div>
+        )}
       </span>
       <span className="flex flex-row items-center gap-2 mb-2">
         {player.perkIds.map((p, idx) => (
@@ -35,13 +42,9 @@ export function PlayerTooltipContent({ id }: { id: string }) {
         ))}
       </span>
       <span></span>
-      {team && (
-        <div className="flex flex-row items-center gap-2 mb-2">
-          <TeamIcon id={team} />
-          <TeamName id={team} />
-        </div>
-      )}
-      <Attributes
+
+      <AttributeSummary
+        limit={3}
         id={player.id}
         attributes={attributes.baseAttributes}
         attributesModified={attributes.attributeMod}

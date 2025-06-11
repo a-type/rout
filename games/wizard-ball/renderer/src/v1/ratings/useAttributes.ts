@@ -22,7 +22,7 @@ function getActivePerks(player: Player, league: League) {
   ];
 }
 
-function getPlayerAttributes(player: Player, league: League) {
+export function getPlayerAttributes(player: Player, league: League) {
   const perkEffects = player ? getActivePerks(player, league) : [];
 
   const baseAttributes = {

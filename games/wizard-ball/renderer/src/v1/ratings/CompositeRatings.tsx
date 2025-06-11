@@ -3,13 +3,14 @@ import {
   BattingCompositeType,
   getPitchingCompositeRatings,
   PitchingCompositeRatings,
+  PitchingCompositeType,
 } from '@long-game/game-wizard-ball-definition';
 import { roundFloat } from '../utils';
 import { clsx, Tooltip } from '@a-type/ui';
 import { Bar } from './Bar';
 import { hooks } from '../gameClient';
 
-const battingRatingList: Array<{
+export const battingRatingList: Array<{
   value: BattingCompositeType;
   label: string;
   color: string;
@@ -78,8 +79,8 @@ const battingRatingList: Array<{
   },
 ];
 
-const pitchingRatingList: Array<{
-  value: keyof ReturnType<typeof getPitchingCompositeRatings>;
+export const pitchingRatingList: Array<{
+  value: PitchingCompositeType;
   label: string;
   color: string;
   tooltip?: string;
