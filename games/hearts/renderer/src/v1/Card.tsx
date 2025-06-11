@@ -14,14 +14,13 @@ import {
   getCardRank,
   getCardSuit,
 } from '@long-game/game-hearts-definition/v1';
-import { PlayerAvatar, useIsDragging } from '@long-game/game-ui';
+import { PlayerAvatar } from '@long-game/game-ui';
 import { CSSProperties } from 'react';
 
 export interface CardProps {
   id: CardVal;
   playerId?: PrefixedId<'u'>;
   className?: string;
-  variant?: 'simple' | 'detailed';
 }
 
 const suitToIcon: Record<string, IconName> = {
@@ -31,26 +30,15 @@ const suitToIcon: Record<string, IconName> = {
   s: 'suitSpade',
 };
 
-export function Card({
-  id,
-  playerId,
-  variant: baseVariant = 'simple',
-  ...rest
-}: CardProps) {
-  const isDragging = useIsDragging();
-  const variant = isDragging ? 'simple' : baseVariant;
+export function Card({ id, playerId, ...rest }: CardProps) {
   return (
     <CardRoot
       data-color={getCardColor(id)}
       data-suit={getCardSuit(id)}
-      data-variant={variant}
       {...rest}
     >
-      {variant === 'simple' ? (
-        <SimpleCardContent id={id} />
-      ) : (
-        <DetailedCardContent id={id} />
-      )}
+      <SimpleCardContent id={id} />
+      <DetailedCardContent id={id} />
       {playerId && (
         <PlayerAvatar
           playerId={playerId}
@@ -63,7 +51,13 @@ export function Card({
 
 function SimpleCardContent({ id }: { id: CardVal }) {
   return (
-    <Box d="col" layout="center center" full p="xs">
+    <Box
+      d="col"
+      layout="center center"
+      full
+      p="xs"
+      className="flex @[80px]:hidden"
+    >
       <CardNumber id={id} />
       <CardSuitIcon id={id} />
     </Box>
@@ -164,16 +158,16 @@ function DetailedCardContent({ id }: { id: CardVal }) {
 
   const pattern = symbolPatterns[symbolCount - 1];
   return (
-    <Box layout="center center" full d="col">
-      <Box d="col" p className="absolute top-0 left-0 h-25% w-20%">
+    <Box layout="center center" full d="col" className="hidden @[80px]:flex">
+      <NumberSuitStack className="top-0 left-0">
         <CardNumber id={id} />
         <CardSuitIcon id={id} />
-      </Box>
-      <Box d="col" p className="absolute bottom-0 right-0 h-25% w-20%">
+      </NumberSuitStack>
+      <NumberSuitStack className="bottom-0 right-0">
         <CardSuitIcon id={id} className="rotate-180" />
         <CardNumber id={id} className="rotate-180" />
-      </Box>
-      <Box className="flex-1 inset-sm absolute">
+      </NumberSuitStack>
+      <Box className="flex-1 inset-16px absolute">
         {pattern.map((pos, index) => (
           <CardSymbol
             key={index}
@@ -193,6 +187,11 @@ function DetailedCardContent({ id }: { id: CardVal }) {
   );
 }
 
+const NumberSuitStack = withClassName(
+  'div',
+  'p-sm flex flex-col items-center justify-center absolute h-25% w-20% min-h-50px min-w-40px',
+);
+
 export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
   return (
     <CardRoot
@@ -207,7 +206,7 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
 
 const CardRoot = withClassName(
   withProps(Box, { surface: 'default', container: 'reset', border: true }),
-  'aspect-[3/4] flex-1 h-auto min-w-40px min-h-50px max-h-50vh select-none',
+  'aspect-[3/4] flex-1 h-auto min-w-40px min-h-50px max-h-50vh select-none @container',
   '[&[data-variant=detailed]]:(min-h-100px min-w-80px)',
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',

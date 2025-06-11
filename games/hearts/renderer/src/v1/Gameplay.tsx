@@ -13,21 +13,23 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
 }) {
   const isDraftRound = gameSuite.finalState.task === 'draft';
   return (
-    <TokenRoot>
-      <Box full="width" d="col" gap p className="bg-wash overflow-hidden">
+    <Box full d="col" gap p className="bg-wash overflow-hidden flex-1" asChild>
+      <TokenRoot>
         <PlayerScores />
         <TurnError surface="attention" p showReset />
-        <Box
-          className="sticky top-sm z-1"
-          p="sm"
-          surface="primary"
-          justify="center"
-          items="center"
-        >
-          {isDraftRound ? <PassZone /> : <CurrentTrick />}
+        <Box className="flex-1" layout="center center">
+          <Box
+            className="sticky top-sm z-1 flex-1"
+            p="xs"
+            d="col"
+            justify="stretch"
+            items="stretch"
+          >
+            {isDraftRound ? <PassZone /> : <CurrentTrick />}
+          </Box>
         </Box>
         <Hand disabled={gameSuite.finalState.task === null} />
-      </Box>
-    </TokenRoot>
+      </TokenRoot>
+    </Box>
   );
 });

@@ -43,7 +43,6 @@ type GestureEvent = PointerEvent | MouseEvent | TouchEvent;
 
 export function useMonitorGlobalGesture() {
   function startGesture(event: GestureEvent) {
-    console.debug('startGesture');
     gesture.active = true;
     const coordinate = getEventCoordinates(event);
     gesture.type = isTouchEvent(event) ? 'touch' : 'mouse';
@@ -62,7 +61,6 @@ export function useMonitorGlobalGesture() {
 
   function moveGesture(event: GestureEvent) {
     if (!gesture.active) return;
-    console.debug('moveGesture');
 
     const coords = getEventCoordinates(event);
     applySubtraction(gesture.initial, coords, gesture.delta);
@@ -73,7 +71,6 @@ export function useMonitorGlobalGesture() {
   }
 
   function endGesture() {
-    console.debug('endGesture');
     gesture.active = false;
     useDndStore.getState().endDrag();
     document.body.style.userSelect = '';

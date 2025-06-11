@@ -1,11 +1,18 @@
-import { Box } from '@a-type/ui';
+import { Box, clsx, withClassName } from '@a-type/ui';
 import {
   AnimatePresence,
   motion,
   useMotionTemplate,
   useMotionValue,
 } from 'motion/react';
-import { createContext, memo, ReactNode, Ref, useContext } from 'react';
+import {
+  Children,
+  createContext,
+  memo,
+  ReactNode,
+  Ref,
+  useContext,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { useWindowEvent } from '../hooks/useWindowEvent';
 import { useDndStore } from './dnd/dndStore';
@@ -51,7 +58,7 @@ export function TokenHand<T = unknown>({
         ref={userRef}
         d="row"
         full="width"
-        className={className}
+        className={clsx(className)}
         asChild
         {...rest}
       >
@@ -59,9 +66,13 @@ export function TokenHand<T = unknown>({
           id={id || 'hand'}
           type="hand"
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
-          className="flex flex-row items-center justify-center gap-xs"
+          className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
         >
-          <AnimatePresence>{children}</AnimatePresence>
+          <AnimatePresence>
+            {Children.map(children, (child) => (
+              <HandItemWrapper>{child}</HandItemWrapper>
+            ))}
+          </AnimatePresence>
         </TokenSpace>
       </Box>
       <AnimatePresence>
@@ -93,6 +104,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
   );
   const previewPosition = useFollowPointer({ x: 0, y: -80 });
   const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;
+  const overlayEl = useDndStore((state) => state.overlayElement);
 
   if (!candidate || !isToken(candidate)) {
     return null;
@@ -119,9 +131,17 @@ const TokenHandPreview = memo(function TokenHandPreview({
         {renderDetailed(candidate as TokenDragData<any>)}
       </div>
     </motion.div>,
-    document.body,
+    overlayEl || document.body,
   );
 });
+
+// causes items to squeeze together if they overflow horizontally
+const HandItemWrapper = withClassName(
+  'div',
+  'min-w-12px flex-shrink-1 flex-basis-auto',
+  // we want the last child to not shrink so the end of the hand is not 'cut off'
+  'last:(flex-shrink-0 min-w-auto)',
+);
 
 function useFollowPointer(offset: { x: number; y: number } = { x: 0, y: 0 }) {
   const x = useMotionValue(0);

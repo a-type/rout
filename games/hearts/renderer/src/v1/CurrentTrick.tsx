@@ -23,7 +23,13 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
     const myTurn = myId === pendingPlayerId;
 
     return (
-      <CardGrid asChild className={className}>
+      <Box
+        asChild
+        className={className}
+        surface="primary"
+        p
+        layout="center center"
+      >
         <TokenSpace
           id="current-trick"
           onDrop={(card) => {
@@ -34,37 +40,34 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
             }
           }}
         >
-          {currentTrick.map((card) => (
-            <Card
-              key={card.card}
-              id={card.card}
-              playerId={card.playerId}
-              variant="detailed"
-            />
-          ))}
-          {new Array(gameSuite.members.length - currentTrick.length)
-            .fill(null)
-            .map((_, i) => (
-              <CardPlaceholder key={i}>
-                {i === 0 && (
-                  <Box gap layout="center center" d="col" full>
-                    <PlayerAvatar playerId={pendingPlayerId} size="60%" />
-                    <div>
-                      {myTurn ? (
-                        'Your turn!'
-                      ) : (
-                        <>
-                          <PlayerName playerId={pendingPlayerId} />
-                          's turn
-                        </>
-                      )}
-                    </div>
-                  </Box>
-                )}
-              </CardPlaceholder>
+          <CardGrid>
+            {currentTrick.map((card) => (
+              <Card key={card.card} id={card.card} playerId={card.playerId} />
             ))}
+            {new Array(gameSuite.members.length - currentTrick.length)
+              .fill(null)
+              .map((_, i) => (
+                <CardPlaceholder key={i}>
+                  {i === 0 && (
+                    <Box gap layout="center center" d="col" full>
+                      <PlayerAvatar playerId={pendingPlayerId} size="60%" />
+                      <div>
+                        {myTurn ? (
+                          'Your turn!'
+                        ) : (
+                          <>
+                            <PlayerName playerId={pendingPlayerId} />
+                            's turn
+                          </>
+                        )}
+                      </div>
+                    </Box>
+                  )}
+                </CardPlaceholder>
+              ))}
+          </CardGrid>
         </TokenSpace>
-      </CardGrid>
+      </Box>
     );
   },
 );

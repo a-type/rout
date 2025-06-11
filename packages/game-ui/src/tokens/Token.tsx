@@ -19,7 +19,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
 }
 
-export function Token({ children, data, ...rest }: TokenProps) {
+export function Token({ children, data, className, ...rest }: TokenProps) {
   const tokenData = useTokenData(rest.id, data);
   const isInHand = tokenData.internal.space?.type === 'hand';
 
@@ -34,7 +34,12 @@ export function Token({ children, data, ...rest }: TokenProps) {
   );
 
   return (
-    <Draggable {...rest} DraggedContainer={TokenContainer} data={tokenData}>
+    <Draggable
+      {...rest}
+      className={className}
+      DraggedContainer={TokenContainer}
+      data={tokenData}
+    >
       <Draggable.Handle
         activationConstraint={activationConstraint}
         allowStartFromDragIn={isInHand}
@@ -74,7 +79,7 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     useTransform(() => {
       if (!draggable.isCandidate) return 1;
       const dist = Math.sqrt(gesture.delta.y.get() * gesture.delta.y.get());
-      return 1.2 + dist / 40;
+      return 1.4 + dist / 50;
     }),
   );
 

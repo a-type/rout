@@ -17,7 +17,16 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
   const passed =
     (currentTurn && isPassTurn(currentTurn) && currentTurn.pass) || [];
   return (
-    <Box d="col" full layout="center center" className={className} asChild>
+    <Box
+      d="col"
+      full
+      layout="center center"
+      surface="primary"
+      gap
+      p
+      className={className}
+      asChild
+    >
       <TokenSpace
         id="pass-zone"
         disabled={
@@ -64,7 +73,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
                   data={passed[i]}
                   className="rounded-lg"
                 >
-                  <Card id={passed[i]} variant="detailed" />
+                  <Card id={passed[i]} />
                 </Token>
               );
             } else {

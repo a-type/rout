@@ -161,7 +161,7 @@ function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      <div className={clsx('relative', isPortaling && 'invisible')}>
+      <div className={clsx(isPortaling && 'invisible')}>
         <AnimatePresence>
           <motion.div
             layoutId={draggable.id}

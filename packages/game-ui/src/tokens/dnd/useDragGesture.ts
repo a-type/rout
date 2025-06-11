@@ -53,7 +53,6 @@ export function useDragGesture(options?: DragGestureOptions) {
         }
       }
     } else if (startFromDragIn && !hasDragging) {
-      console.debug('check drag-in', draggable.id);
       // else if this element is not related to the gesture,
       // let's see if we should claim it.
       // We use a heuristic to decide if a gesture which moves
@@ -120,7 +119,6 @@ export function useDragGesture(options?: DragGestureOptions) {
   }
 
   function activateDrag() {
-    console.debug('activateDrag', draggable.id);
     startDrag(draggable.id);
   }
 

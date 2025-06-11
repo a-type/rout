@@ -38,9 +38,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           return gameSuite.prepareTurn(null);
         }
       }}
-      renderDetailed={({ data: card }) => (
-        <Card id={card} className="h-full" variant="detailed" />
-      )}
+      renderDetailed={({ data: card }) => <Card id={card} className="h-full" />}
     >
       {[...hand]
         .sort((a, b) => {

@@ -7,11 +7,12 @@ import { dropRegions, REGION_ID_ATTR } from './DropRegions';
 
 export type DroppableProps<T = any> = Omit<
   HTMLProps<HTMLDivElement>,
-  'onDrop'
+  'onDrop' | 'accept'
 > & {
   id: string;
   onDrop?: (draggable: DraggableData<T>) => void;
   disabled?: boolean;
+  accept?: (draggable: DraggableData<T>) => boolean;
 };
 
 export function Droppable<T = any>({
@@ -20,18 +21,30 @@ export function Droppable<T = any>({
   onDrop,
   disabled,
   ref: userRef,
+  accept,
   ...rest
 }: DroppableProps<T>) {
   const dropCb = useStableCallback(onDrop);
+  const stableAccept = useStableCallback(accept);
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId) => {
       if (targetId === id) {
-        dropCb({ id: dragged, data: useDndStore.getState().data[dragged] });
+        const data = useDndStore.getState().data[dragged];
+        if (!stableAccept || stableAccept({ id: dragged, data })) {
+          dropCb({ id: dragged, data });
+        }
       }
     });
   }, [id, dropCb]);
 
-  const isOver = useDndStore((state) => state.overRegion === id);
+  const isOverRaw = useDndStore((state) => state.overRegion === id);
+  const draggedId = useDndStore((state) => state.dragging);
+  const draggedData = useDndStore((state) =>
+    draggedId ? state.data[draggedId] : undefined,
+  );
+  const rejected =
+    draggedId && accept && !accept({ id: draggedId, data: draggedData });
+  const isOver = isOverRaw && draggedId && !rejected;
 
   const finalRef = useMergedRef<HTMLDivElement>(dropRegions.register, userRef);
 
@@ -55,6 +68,7 @@ export function Droppable<T = any>({
       data-role="droppable"
       ref={finalRef}
       data-over={isOver}
+      data-over-rejected={rejected}
       {...rest}
     >
       {children}
