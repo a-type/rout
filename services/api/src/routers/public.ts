@@ -27,7 +27,7 @@ export const publicRouter = new Hono<Env>().get(
         'Game session not found.',
       );
     }
-    const summary = await sessionState.getSummary();
+    const summary = await sessionState.getDetails();
     return ctx.json({
       gameSessionId,
       gameId: summary.gameId,
