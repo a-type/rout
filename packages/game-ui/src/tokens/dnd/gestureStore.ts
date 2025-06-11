@@ -15,6 +15,7 @@ export const gesture = {
   active: false,
   type: 'none' as 'touch' | 'mouse' | 'none',
   initial: { x: 0, y: 0 },
+  claimId: null as string | null,
   initialBounds: { x: 0, y: 0, width: 0, height: 0 },
   offset: { x: 0, y: 0 },
   current: { x: motionValue(0), y: motionValue(0) },
@@ -25,6 +26,7 @@ export const gesture = {
 export function resetGesture() {
   gesture.active = false;
   gesture.type = 'none';
+  gesture.claimId = null;
   setVector(gesture.current, 0, 0);
   setVector(gesture.delta, 0, 0);
   setVector(gesture.velocity, 0, 0);
@@ -119,10 +121,11 @@ export function useGesture(
     return gestureEvents.subscribe('end', onEnd);
   }, [onEnd, options.disabled]);
 
-  const claim = useCallback((element: HTMLElement) => {
+  const claim = useCallback((id: string, element: HTMLElement) => {
     // cancel any existing text selection and prevent text selection globally
     document.body.style.userSelect = 'none';
 
+    gesture.claimId = id;
     const elPosition = element?.getBoundingClientRect();
     const { x, y } = getCurrentVector(gesture.current);
     const xOffset = elPosition ? x - elPosition.left : 0;

@@ -62,9 +62,43 @@ export function useDragGesture(options?: DragGestureOptions) {
         gesture.current.x.get(),
         gesture.current.y.get(),
       );
-      // TODO: utilize velocity too
-      if (containsGesture) {
+
+      if (!containsGesture) {
+        // our element does not contain the gesture,
+        // so we don't need to do anything.
+        return;
+      }
+
+      if (!gesture.claimId) {
+        // no other element has claim, we can take it without further checks
         beginDrag();
+      } else {
+        // first, we only want to claim the drag if the gesture is mostly
+        // horizontal.
+        const deltaX = gesture.delta.x.get();
+        const deltaY = gesture.delta.y.get();
+        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 2;
+        if (!isMostlyHorizontal) {
+          // if the gesture is not mostly horizontal, we don't claim it.
+          return;
+        }
+
+        // based on the captured bounds of the prior gesture candidate,
+        // we can decide if we are to the right or left of them, and only
+        // claim the drag if the user's gesture velocity matches the direction.
+        const velocityXSign = Math.sign(gesture.velocity.x.get());
+        // for 0 velocity, don't claim.
+        if (velocityXSign === 0) return;
+
+        const xCenterOfPriorClaim =
+          gesture.initialBounds.x + gesture.initialBounds.width / 2;
+        const directionRelatedToPriorClaim = Math.sign(
+          gesture.current.x.get() - xCenterOfPriorClaim,
+        );
+
+        if (directionRelatedToPriorClaim === velocityXSign) {
+          beginDrag();
+        }
       }
     }
   }
@@ -76,7 +110,7 @@ export function useDragGesture(options?: DragGestureOptions) {
   function beginDrag() {
     const el = ref.current;
     if (!el) return;
-    claim(el);
+    claim(draggable.id, el);
 
     if (!options?.activationConstraint) {
       return activateDrag();
