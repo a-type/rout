@@ -5,7 +5,7 @@ import {
   isPassTurn,
 } from '@long-game/game-hearts-definition/v1';
 import { Token, TokenHand } from '@long-game/game-ui';
-import { Card } from './Card';
+import { PlayingCard } from '@long-game/game-ui/genericGames';
 import { hooks } from './gameClient';
 
 export interface HandProps {
@@ -38,7 +38,13 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           return gameSuite.prepareTurn(null);
         }
       }}
-      renderDetailed={({ data: card }) => <Card id={card} className="h-full" />}
+      renderDetailed={({ data: card }) => (
+        <PlayingCard
+          cardSuit={getCardSuit(card)}
+          cardRank={getCardRank(card)}
+          className="h-full"
+        />
+      )}
     >
       {[...hand]
         .sort((a, b) => {
@@ -55,7 +61,10 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
             disabled={disabled}
             className="rounded-lg"
           >
-            <Card id={card} />
+            <PlayingCard
+              cardSuit={getCardSuit(card)}
+              cardRank={getCardRank(card)}
+            />
           </Token>
         ))}
     </TokenHand>

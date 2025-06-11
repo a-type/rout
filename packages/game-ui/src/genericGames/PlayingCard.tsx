@@ -7,38 +7,39 @@ import {
   withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import {
-  Card as CardVal,
-  getCardColor,
-  getCardDisplayRank,
-  getCardRank,
-  getCardSuit,
-} from '@long-game/game-hearts-definition/v1';
-import { PlayerAvatar } from '@long-game/game-ui';
 import { CSSProperties } from 'react';
+import { PlayerAvatar } from '../players/PlayerAvatar';
 
-export interface CardProps {
-  id: CardVal;
+export type PlayingCardSuit = 'h' | 'd' | 'c' | 's';
+
+export interface PlayingCardProps {
+  cardSuit: PlayingCardSuit;
+  cardRank: number;
   playerId?: PrefixedId<'u'>;
   className?: string;
 }
 
-const suitToIcon: Record<string, IconName> = {
+const suitToIcon: Record<PlayingCardSuit, IconName> = {
   h: 'suitHeart',
   d: 'suitDiamond',
   c: 'suitClub',
   s: 'suitSpade',
 };
 
-export function Card({ id, playerId, ...rest }: CardProps) {
+function PlayingCardRoot({
+  cardSuit,
+  cardRank,
+  playerId,
+  ...rest
+}: PlayingCardProps) {
   return (
     <CardRoot
-      data-color={getCardColor(id)}
-      data-suit={getCardSuit(id)}
+      data-color={getCardColor(cardSuit)}
+      data-suit={cardSuit}
       {...rest}
     >
-      <SimpleCardContent id={id} />
-      <DetailedCardContent id={id} />
+      <SimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
+      <DetailedCardContent cardSuit={cardSuit} cardRank={cardRank} />
       {playerId && (
         <PlayerAvatar
           playerId={playerId}
@@ -49,7 +50,13 @@ export function Card({ id, playerId, ...rest }: CardProps) {
   );
 }
 
-function SimpleCardContent({ id }: { id: CardVal }) {
+function SimpleCardContent({
+  cardSuit,
+  cardRank,
+}: {
+  cardSuit: PlayingCardSuit;
+  cardRank: number;
+}) {
   return (
     <Box
       d="col"
@@ -59,12 +66,12 @@ function SimpleCardContent({ id }: { id: CardVal }) {
       className="flex @[80px]:hidden"
     >
       <Box d="col" className="absolute left-2px top-2px">
-        <CardNumber id={id} className="mr-auto" />
-        <CardSuitIcon id={id} />
+        <CardNumber cardRank={cardRank} className="mr-auto" />
+        <CardSuitIcon cardSuit={cardSuit} />
       </Box>
       <Box d="col" className="absolute right-2px bottom-2px rotate-180">
-        <CardNumber id={id} className="ml-auto" />
-        <CardSuitIcon id={id} />
+        <CardNumber cardRank={cardRank} className="ml-auto" />
+        <CardSuitIcon cardSuit={cardSuit} />
       </Box>
     </Box>
   );
@@ -156,8 +163,14 @@ const symbolPatterns = [
   ],
 ];
 
-function DetailedCardContent({ id }: { id: CardVal }) {
-  let symbolCount = getCardRank(id);
+function DetailedCardContent({
+  cardSuit,
+  cardRank,
+}: {
+  cardSuit: PlayingCardSuit;
+  cardRank: number;
+}) {
+  let symbolCount = cardRank;
   if (symbolCount > 10) {
     symbolCount = 1;
   }
@@ -166,18 +179,19 @@ function DetailedCardContent({ id }: { id: CardVal }) {
   return (
     <Box layout="center center" full d="col" className="hidden @[80px]:flex">
       <NumberSuitStack className="top-0 left-0">
-        <CardNumber id={id} />
-        <CardSuitIcon id={id} />
+        <CardNumber cardRank={cardRank} />
+        <CardSuitIcon cardSuit={cardSuit} />
       </NumberSuitStack>
       <NumberSuitStack className="bottom-0 right-0">
-        <CardSuitIcon id={id} className="rotate-180" />
-        <CardNumber id={id} className="rotate-180" />
+        <CardSuitIcon cardSuit={cardSuit} className="rotate-180" />
+        <CardNumber cardRank={cardRank} className="rotate-180" />
       </NumberSuitStack>
       <Box className="flex-1 inset-16px absolute">
         {pattern.map((pos, index) => (
           <CardSymbol
             key={index}
-            id={id}
+            cardSuit={cardSuit}
+            cardRank={cardRank}
             className="absolute flex-grow-0"
             style={{
               left: `${pos.x * 100}%`,
@@ -198,7 +212,11 @@ const NumberSuitStack = withClassName(
   'p-sm flex flex-col items-center justify-center absolute h-25% w-20% min-h-50px min-w-40px',
 );
 
-export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
+export function PlayingCardPlaceholder({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   return (
     <CardRoot
       className="opacity-50 border-dashed"
@@ -209,6 +227,10 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
     </CardRoot>
   );
 }
+
+export const PlayingCard = Object.assign(PlayingCardRoot, {
+  Placeholder: PlayingCardPlaceholder,
+});
 
 const CardRoot = withClassName(
   withProps(Box, { surface: 'default', container: 'reset', border: true }),
@@ -253,24 +275,30 @@ function ScalingText({
   );
 }
 
-function CardNumber({ id, className }: { id: CardVal; className?: string }) {
+function CardNumber({
+  cardRank,
+  className,
+}: {
+  cardRank: number;
+  className?: string;
+}) {
   return (
-    <ScalingText className={className}>{getCardDisplayRank(id)}</ScalingText>
+    <ScalingText className={className}>{toDisplayRank(cardRank)}</ScalingText>
   );
 }
 
 function CardSuitIcon({
-  id,
+  cardSuit,
   className,
   style,
 }: {
-  id: CardVal;
+  cardSuit: PlayingCardSuit;
   className?: string;
   style?: CSSProperties;
 }) {
   return (
     <Icon
-      name={suitToIcon[getCardSuit(id)]}
+      name={suitToIcon[cardSuit]}
       className={clsx(
         'flex-1 stroke-width-1px min-w-20px w-auto h-auto aspect-1 [vector-effect:non-scaling-stroke] fill-[currentColor]',
         className,
@@ -281,21 +309,35 @@ function CardSuitIcon({
 }
 
 function CardSymbol({
-  id,
   className,
   style,
+  cardSuit,
+  cardRank,
 }: {
-  id: CardVal;
+  cardRank: number;
+  cardSuit: PlayingCardSuit;
   className?: string;
   style?: CSSProperties;
 }) {
-  const rank = getCardRank(id);
-  if (rank <= 10) {
-    return <CardSuitIcon id={id} className={className} style={style} />;
+  if (cardRank <= 10) {
+    return (
+      <CardSuitIcon cardSuit={cardSuit} className={className} style={style} />
+    );
   }
   return (
     <ScalingText className={className} style={style}>
-      {getCardDisplayRank(id)}
+      {toDisplayRank(cardRank)}
     </ScalingText>
   );
+}
+
+function getCardColor(suit: PlayingCardSuit): 'red' | 'black' {
+  return suit === 'h' || suit === 'd' ? 'red' : 'black';
+}
+function toDisplayRank(rank: number): string {
+  if (rank === 1) return 'A';
+  if (rank === 11) return 'J';
+  if (rank === 12) return 'Q';
+  if (rank === 13) return 'K';
+  return rank.toString();
 }

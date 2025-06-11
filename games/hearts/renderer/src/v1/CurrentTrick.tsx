@@ -1,8 +1,12 @@
 import { Box } from '@a-type/ui';
 import { assertPrefixedId, PrefixedId } from '@long-game/common';
-import { isCard } from '@long-game/game-hearts-definition/v1';
+import {
+  getCardRank,
+  getCardSuit,
+  isCard,
+} from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, TokenSpace } from '@long-game/game-ui';
-import { Card, CardPlaceholder } from './Card';
+import { PlayingCard } from '@long-game/game-ui/genericGames';
 import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
 
@@ -42,12 +46,17 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
         >
           <CardGrid>
             {currentTrick.map((card) => (
-              <Card key={card.card} id={card.card} playerId={card.playerId} />
+              <PlayingCard
+                key={card.card}
+                cardSuit={getCardSuit(card.card)}
+                cardRank={getCardRank(card.card)}
+                playerId={card.playerId}
+              />
             ))}
             {new Array(gameSuite.members.length - currentTrick.length)
               .fill(null)
               .map((_, i) => (
-                <CardPlaceholder key={i}>
+                <PlayingCard.Placeholder key={i}>
                   {i === 0 && (
                     <Box gap layout="center center" d="col" full>
                       <PlayerAvatar playerId={pendingPlayerId} size="60%" />
@@ -63,7 +72,7 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
                       </div>
                     </Box>
                   )}
-                </CardPlaceholder>
+                </PlayingCard.Placeholder>
               ))}
           </CardGrid>
         </TokenSpace>
