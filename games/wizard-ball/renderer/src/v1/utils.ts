@@ -162,3 +162,30 @@ export function useSendTurn() {
     return prepareTurn(fn);
   };
 }
+
+export function numberToLetter(num: number): string {
+  const v = Math.round(num);
+  if (v <= 2) return 'F-';
+  if (v <= 4) return 'F';
+  if (v <= 6) return 'D-';
+  if (v === 7) return 'D';
+  if (v === 8) return 'D+';
+  if (v === 9) return 'C-';
+  if (v === 10) return 'C';
+  if (v === 11) return 'C+';
+  if (v === 12) return 'B-';
+  if (v === 13) return 'B';
+  if (v === 14) return 'B+';
+  if (v === 15) return 'A-';
+  if (v === 16) return 'A';
+  if (v === 17) return 'A+';
+  return 'S';
+}
+
+export function staminaToText(stamina: number): string {
+  if (stamina < 0.2) return 'Exhausted';
+  if (stamina < 0.4) return 'Very tired';
+  if (stamina < 0.6) return 'Tired';
+  if (stamina < 0.8) return 'Good';
+  return 'Fresh';
+}

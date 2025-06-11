@@ -9,11 +9,19 @@ import {
   Position,
   Player,
   HitTable,
+  GameLogEvent,
+  League,
 } from './gameTypes';
 import type { PitchKind } from './pitchData';
 import type { SpeciesType } from './speciesData';
 import type { WeatherType } from './weatherData';
 import { capitalize } from './utils';
+import { GameRandom } from '@long-game/game-definition';
+import { PitchOutcome } from './simGames';
+
+export type TriggerEvent = {
+  kind: 'strikeout';
+};
 
 export type PerkEffect = {
   attributeBonus?: Partial<Record<AttributeType, number>>;
@@ -26,6 +34,13 @@ export type PerkEffect = {
   }>;
   // Flat bonus to quality
   qualityBonus?: number;
+  trigger?: (props: {
+    gameState: LeagueGameState;
+    league: League;
+    event: TriggerEvent;
+    random: GameRandom;
+    player: Player;
+  }) => LeagueGameState;
 };
 
 export type Perk = {
@@ -217,6 +232,23 @@ export const perks: Record<string, Perk> = {
         contact: 4,
         hitAngle: 4,
         hitPower: 4,
+      },
+    }),
+  },
+  rageTrigger: {
+    name: 'Rage Trigger',
+    description: 'Gets mad when swinging and missing a pitch.',
+    kind: 'batting',
+    rarity: 'common',
+    requirements: ({ classType, species }) =>
+      classType === 'barbarian' || species === 'lizard',
+    effect: () => ({
+      trigger: ({ gameState, event, player, random }) => {
+        if (event.kind !== 'strikeout') {
+          return gameState;
+        }
+        player.statusIds.enraged = (player.statusIds.enraged ?? 0) + 1;
+        return gameState;
       },
     }),
   },

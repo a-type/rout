@@ -5,6 +5,7 @@ import { PitchOutcome } from './simGames';
 import { WeatherType } from './weatherData';
 import { BallparkType } from './ballparkData';
 import { ActualPitch } from './pitchData';
+import { StatusType } from './statusData';
 
 export type TeamId = string;
 export type PlayerId = string;
@@ -80,6 +81,7 @@ export type Player = {
   species: SpeciesType;
   class: ClassType;
   perkIds: string[];
+  statusIds: Partial<Record<StatusType, number>>;
   itemIds: string[];
   attributes: PlayerAttributes;
   advantageTypes: CompositeType[];

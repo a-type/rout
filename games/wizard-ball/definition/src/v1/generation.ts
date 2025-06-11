@@ -345,6 +345,7 @@ function generatePlayer(
     xp: 0,
     advantageTypes: [shuffledTypes[0]],
     disadvantageTypes: [shuffledTypes[1]],
+    statusIds: {},
   };
   const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
   if (player.positions.length === 0) {
