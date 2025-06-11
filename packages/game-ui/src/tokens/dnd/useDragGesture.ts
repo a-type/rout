@@ -77,7 +77,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         // horizontal.
         const deltaX = gesture.delta.x.get();
         const deltaY = gesture.delta.y.get();
-        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 2;
+        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
           return;
