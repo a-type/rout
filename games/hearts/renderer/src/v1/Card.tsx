@@ -58,9 +58,14 @@ function SimpleCardContent({ id }: { id: CardVal }) {
       p="xs"
       className="flex @[80px]:hidden"
     >
-      <CardNumber id={id} className="mr-auto" />
-      <CardSuitIcon id={id} />
-      <CardNumber id={id} className="rotate-180 ml-auto" />
+      <Box d="col" className="absolute left-2px top-2px">
+        <CardNumber id={id} className="mr-auto" />
+        <CardSuitIcon id={id} />
+      </Box>
+      <Box d="col" className="absolute right-2px bottom-2px rotate-180">
+        <CardNumber id={id} className="ml-auto" />
+        <CardSuitIcon id={id} />
+      </Box>
     </Box>
   );
 }
