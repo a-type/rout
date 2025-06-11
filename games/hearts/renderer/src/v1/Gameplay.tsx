@@ -28,7 +28,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
             {isDraftRound ? <PassZone /> : <CurrentTrick />}
           </Box>
         </Box>
-        <Hand disabled={gameSuite.finalState.task === null} />
+        <Hand className="mb-lg" disabled={gameSuite.finalState.task === null} />
       </TokenRoot>
     </Box>
   );

@@ -58,8 +58,9 @@ function SimpleCardContent({ id }: { id: CardVal }) {
       p="xs"
       className="flex @[80px]:hidden"
     >
-      <CardNumber id={id} />
+      <CardNumber id={id} className="mr-auto" />
       <CardSuitIcon id={id} />
+      <CardNumber id={id} className="rotate-180 ml-auto" />
     </Box>
   );
 }
@@ -206,7 +207,7 @@ export function CardPlaceholder({ children }: { children?: React.ReactNode }) {
 
 const CardRoot = withClassName(
   withProps(Box, { surface: 'default', container: 'reset', border: true }),
-  'aspect-[3/4] flex-1 h-auto min-w-40px min-h-50px max-h-50vh select-none @container',
+  'aspect-[3/4] flex-1 h-auto min-w-50px min-h-60px max-h-50vh select-none @container',
   '[&[data-variant=detailed]]:(min-h-100px min-w-80px)',
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
