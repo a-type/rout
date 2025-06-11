@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useDndStore } from './dndStore';
+import { useMonitorGlobalGesture } from './gestureStore';
 
 export interface DndRootProps {
   children?: ReactNode;
@@ -7,6 +8,7 @@ export interface DndRootProps {
 
 export function DndRoot({ children }: DndRootProps) {
   const overlayRef = useDndStore((state) => state.overlayRef);
+  useMonitorGlobalGesture();
   return (
     <div data-role="dnd-root">
       <div

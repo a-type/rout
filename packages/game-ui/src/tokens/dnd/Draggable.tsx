@@ -3,7 +3,6 @@ import {
   AnimatePresence,
   HTMLMotionProps,
   motion,
-  MotionValue,
   Transition,
   useAnimationFrame,
   useMotionTemplate,
@@ -23,10 +22,10 @@ import { useMergedRef } from '../../hooks/useMergedRef';
 import { useDndStore } from './dndStore';
 import { draggedBox } from './draggedBox';
 import { dropRegions } from './DropRegions';
+import { DragGestureContext, gesture } from './gestureStore';
 import {
   DragGestureActivationConstraint,
   useDragGesture,
-  useInitialDragGesture,
 } from './useDragGesture';
 
 export interface DraggableProps extends HTMLMotionProps<'div'> {
@@ -46,7 +45,6 @@ function DraggableRoot({
 }: DraggableProps) {
   const isDragged = useDndStore((state) => state.dragging === id);
   const isCandidate = useDndStore((state) => state.candidate === id);
-  const gesture = useInitialDragGesture();
 
   const bindData = useDndStore((state) => state.bindData);
   // necessary for multiple concurrent draggables not to clobber...
@@ -62,7 +60,6 @@ function DraggableRoot({
         data,
         isDragged,
         isCandidate,
-        gesture,
       }}
     >
       <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
@@ -72,22 +69,11 @@ function DraggableRoot({
   );
 }
 
-export interface DragGestureContext {
-  initial: { x: number; y: number };
-  initialBounds: { x: number; y: number; width: number; height: number };
-  offset: { x: number; y: number };
-  current: { x: MotionValue<number>; y: MotionValue<number> };
-  delta: { x: MotionValue<number>; y: MotionValue<number> };
-  velocity: { x: MotionValue<number>; y: MotionValue<number> };
-  type: 'touch' | 'mouse' | 'none';
-}
-
 export interface DraggableContextValue {
   id: string;
   data: any;
   isDragged: boolean;
   isCandidate: boolean;
-  gesture: DragGestureContext;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -227,7 +213,12 @@ function DraggedRoot({
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
   return (
-    <ContainerImpl ref={finalRef} draggable={dragged} {...rest}>
+    <ContainerImpl
+      ref={finalRef}
+      draggable={dragged}
+      gesture={gesture}
+      {...rest}
+    >
       <AnimatePresence>
         <motion.div layoutId={dragged.id} transition={flipTransition}>
           {children}
@@ -240,15 +231,15 @@ function DraggedRoot({
 export type DraggedContainerComponent = ComponentType<{
   children?: ReactNode;
   draggable: DraggableContextValue;
+  gesture: DragGestureContext;
   ref: Ref<HTMLDivElement>;
 }>;
 
 export const DefaultDraggedContainer: DraggedContainerComponent = ({
   children,
-  draggable,
   ref,
 }) => {
-  const transform = useCenteredDragTransform(draggable);
+  const transform = useCenteredDragTransform(gesture);
   return (
     <motion.div
       style={{
@@ -262,11 +253,12 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
   );
 };
 
-export function useCenteredDragTransform(draggable: DraggableContextValue) {
-  const { x, y } = draggable.gesture.current;
-  const touchAdjustedY = useTransform(
-    () => y.get() + (draggable.gesture.type === 'touch' ? -40 : 0),
-  );
+export function useCenteredDragTransform(gesture: DragGestureContext) {
+  const { x, y } = gesture.current;
+  const touchAdjustedY = useTransform(() => {
+    console.log(y.get());
+    return y.get() + (gesture.type === 'touch' ? -40 : 0);
+  });
   const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0)`;
   return transform;
 }
