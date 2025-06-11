@@ -1,7 +1,9 @@
 import {
+  AnimatePresence,
   HTMLMotionProps,
   motion,
   MotionValue,
+  Transition,
   useAnimationFrame,
   useMotionTemplate,
   useTransform,
@@ -148,6 +150,8 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   DraggedContainer?: DraggedContainerComponent;
 }
 
+const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
+
 /**
  * Selectively portals the dragged element to the overlay layer if it is being dragged.
  * Applies local (relative) movement to non-portaled content if any.
@@ -159,6 +163,7 @@ function DndOverlayPortal({
   DraggedContainer,
   ...rest
 }: DndOverlayPortalProps) {
+  const draggable = useDraggableContext();
   const overlayEl = useDndStore((state) => state.overlayElement);
 
   const isPortaling = enabled && !!overlayEl;
@@ -178,8 +183,10 @@ function DndOverlayPortal({
             position: 'relative',
             // we have to keep this element in the DOM while the gesture
             // is active or it breaks. so just hide it...
-            opacity: isPortaling ? 0 : 1,
+            //visibility: isPortaling ? 'hidden' : 'visible',
           }}
+          layoutId={draggable.id}
+          transition={flipTransition}
           {...rest}
         >
           {children}
@@ -229,7 +236,11 @@ function DraggedRoot({
 
   return (
     <ContainerImpl ref={finalRef} draggable={dragged} {...rest}>
-      {children}
+      <AnimatePresence>
+        <motion.div layoutId={dragged.id} transition={flipTransition}>
+          {children}
+        </motion.div>
+      </AnimatePresence>
     </ContainerImpl>
   );
 }
@@ -240,7 +251,7 @@ export type DraggedContainerComponent = ComponentType<{
   ref: Ref<HTMLDivElement>;
 }>;
 
-const DefaultDraggedContainer: DraggedContainerComponent = ({
+export const DefaultDraggedContainer: DraggedContainerComponent = ({
   children,
   draggable,
   ref,

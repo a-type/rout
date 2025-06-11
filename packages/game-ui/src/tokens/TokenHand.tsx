@@ -1,11 +1,5 @@
 import { Box } from '@a-type/ui';
-import {
-  AnimatePresence,
-  frame,
-  motion,
-  useMotionTemplate,
-  useSpring,
-} from 'motion/react';
+import { frame, motion, useMotionTemplate, useSpring } from 'motion/react';
 import {
   createContext,
   memo,
@@ -16,9 +10,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useDndStore } from './dnd/dndStore';
-import { Token } from './Token';
 import { TokenSpace } from './TokenSpace';
-import { TokenDragData } from './types';
+import { isToken, TokenDragData } from './types';
 
 /**
  * A generic 'hand' of Token representations which the user can drag tokens
@@ -35,64 +28,58 @@ import { TokenDragData } from './types';
  */
 
 export interface TokenHandProps<T> {
-  values: TokenDragData<T>[];
-  render: (value: TokenDragData<T>) => ReactNode;
+  children?: ReactNode;
   renderDetailed?: (value: TokenDragData<T>) => ReactNode;
   ref?: Ref<HTMLDivElement>;
   className?: string;
   onDrop?: (value: TokenDragData<T>) => void;
+  /** Defaults to 'hand', use if you have multiple hands */
+  id?: string;
 }
 
 export function TokenHand<T = unknown>({
-  values,
-  render: renderCompact,
   renderDetailed,
   ref: userRef,
   className,
   onDrop,
+  id,
+  children,
+  ...rest
 }: TokenHandProps<T>) {
   return (
     <TokenHandContext.Provider value={true}>
-      <Box ref={userRef} d="row" full="width" className={className} asChild>
-        <TokenSpace id="hand" onDrop={(v) => onDrop?.(v as TokenDragData<T>)}>
-          <AnimatePresence>
-            {values.map((value, index) => {
-              return (
-                <TokenHandItem key={value.id} value={value}>
-                  {renderCompact(value)}
-                </TokenHandItem>
-              );
-            })}
-          </AnimatePresence>
+      <Box
+        ref={userRef}
+        d="row"
+        full="width"
+        className={className}
+        asChild
+        {...rest}
+      >
+        <TokenSpace
+          id={id || 'hand'}
+          type="hand"
+          onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
+        >
+          {children}
         </TokenSpace>
       </Box>
       {renderDetailed && (
-        <TokenHandPreview values={values} renderDetailed={renderDetailed} />
+        <TokenHandPreview
+          parentId={id || 'hand'}
+          renderDetailed={renderDetailed}
+        />
       )}
     </TokenHandContext.Provider>
   );
 }
 
-const TokenHandItem = memo(function TokenHandItem({
-  value,
-  children,
-}: {
-  value: TokenDragData;
-  children: ReactNode;
-}) {
-  return (
-    <Token id={value.id} data={value.data} exit={{ width: 0 }}>
-      {children}
-    </Token>
-  );
-});
-
 const TokenHandPreview = memo(function TokenHandPreview({
-  values,
   renderDetailed,
+  parentId,
 }: {
-  values: TokenDragData<any>[];
   renderDetailed: (value: TokenDragData<any>) => ReactNode;
+  parentId: string;
 }) {
   // we show a preview when we have a candidate but haven't started dragging yet
   const candidate = useDndStore((state) =>
@@ -102,11 +89,18 @@ const TokenHandPreview = memo(function TokenHandPreview({
       ? state.data[state.candidate]
       : null,
   );
-  // const candidate = { data: values[0], id: values[0].id } as any;
-  const previewPosition = useFollowPointer({ x: 0, y: -30 });
+  const previewPosition = useFollowPointer({ x: 0, y: -80 });
   const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;
 
-  if (!candidate || !values.some((v) => v.id === candidate.id)) {
+  if (!candidate || !isToken(candidate)) {
+    return null;
+  }
+
+  if (
+    candidate.internal.space?.type !== 'hand' ||
+    candidate.internal.space.id !== parentId
+  ) {
+    // don't show previews for tokens not in this hand
     return null;
   }
 

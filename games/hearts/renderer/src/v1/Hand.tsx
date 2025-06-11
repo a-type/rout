@@ -4,7 +4,7 @@ import {
   getCardSuit,
   isPassTurn,
 } from '@long-game/game-hearts-definition/v1';
-import { TokenHand } from '@long-game/game-ui';
+import { Token, TokenHand } from '@long-game/game-ui';
 import { Card } from './Card';
 import { hooks } from './gameClient';
 
@@ -38,16 +38,20 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           return gameSuite.prepareTurn(null);
         }
       }}
-      values={[...hand]
+      renderDetailed={({ data: card }) => <Card id={card} className="h-full" />}
+    >
+      {[...hand]
         .sort((a, b) => {
           if (getCardSuit(a) === getCardSuit(b)) {
             return getCardRank(a) - getCardRank(b);
           }
           return getCardSuit(a).localeCompare(getCardSuit(b));
         })
-        .map((card) => ({ id: card, data: card, type: 'token' }))}
-      render={({ data: card }) => <Card id={card} />}
-      renderDetailed={({ data: card }) => <Card id={card} className="h-full" />}
-    />
+        .map((card) => (
+          <Token key={card} id={card} data={card} disabled={disabled}>
+            <Card id={card} />
+          </Token>
+        ))}
+    </TokenHand>
   );
 });

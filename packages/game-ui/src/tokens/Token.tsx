@@ -6,21 +6,22 @@ import {
 } from 'motion/react';
 import { useMemo } from 'react';
 import {
+  DefaultDraggedContainer,
   Draggable,
   DraggableProps,
   DraggedContainerComponent,
-  useCenteredDragTransform,
 } from './dnd/Draggable';
 import { DragGestureActivationConstraint } from './dnd/useDragGesture';
 import { useIsTokenInHand } from './TokenHand';
-import { makeToken } from './types';
+import { useTokenData } from './types';
 
 export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
 }
 
 export function Token({ children, data, ...rest }: TokenProps) {
-  const isInHand = useIsTokenInHand();
+  const tokenData = useTokenData(rest.id, data);
+  const isInHand = tokenData.internal.space?.type === 'hand';
 
   const activationConstraint = useMemo<DragGestureActivationConstraint>(
     () =>
@@ -33,11 +34,7 @@ export function Token({ children, data, ...rest }: TokenProps) {
   );
 
   return (
-    <Draggable
-      {...rest}
-      DraggedContainer={isInHand ? TokenLocalGestureMovement : undefined}
-      data={makeToken(rest.id, data)}
-    >
+    <Draggable {...rest} DraggedContainer={TokenContainer} data={tokenData}>
       <Draggable.Handle
         activationConstraint={activationConstraint}
         allowStartFromDragIn={isInHand}
@@ -48,20 +45,34 @@ export function Token({ children, data, ...rest }: TokenProps) {
   );
 }
 
+const TokenContainer: DraggedContainerComponent = (props) => {
+  const isInHand = useIsTokenInHand();
+  if (isInHand) {
+    return <TokenInHandContainer {...props} />;
+  }
+  return <DefaultDraggedContainer {...props} />;
+};
+
 // controls the animation of local, non-activated drag gestures
 // according to how in-hand tokens should feel
-const TokenLocalGestureMovement: DraggedContainerComponent = ({
+const TokenInHandContainer: DraggedContainerComponent = ({
   children,
   draggable,
   ref,
 }) => {
-  const dampenedX = useTransform(
-    () =>
+  const dampenedX = useTransform(() => {
+    if (!draggable.isCandidate) {
+      return draggable.gesture.current.x.get();
+    }
+    return (
       draggable.gesture.initial.x +
-      Math.pow(draggable.gesture.delta.x.get(), 0.5),
-  );
+      Math.pow(draggable.gesture.delta.x.get(), 0.5)
+    );
+  });
   const adjustedY = useTransform(() => {
-    console.log(draggable.gesture.type);
+    if (!draggable.isCandidate) {
+      return draggable.gesture.current.y.get();
+    }
     return (
       draggable.gesture.current.y.get() +
       (draggable.gesture.type === 'touch' ? -40 : 0)
@@ -69,6 +80,7 @@ const TokenLocalGestureMovement: DraggedContainerComponent = ({
   });
   const distanceScale = useSpring(
     useTransform(() => {
+      if (!draggable.isCandidate) return 1;
       const dist = Math.sqrt(
         draggable.gesture.delta.x.get() * draggable.gesture.delta.x.get() +
           draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
@@ -77,11 +89,7 @@ const TokenLocalGestureMovement: DraggedContainerComponent = ({
     }),
   );
 
-  const dragFromHandTransform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
-  const defaultTransform = useCenteredDragTransform(draggable);
-  const transform = draggable.isCandidate
-    ? dragFromHandTransform
-    : defaultTransform;
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
 
   return (
     <motion.div style={{ position: 'absolute', transform }} ref={ref}>

@@ -123,7 +123,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         beginDrag(ev);
       }
     },
-    { disabled: !startFromDragIn || isCandidate || isDragging },
+    { disabled: !startFromDragIn || isCandidate || hasDragging },
   );
   // when using touch, events are locked to the initial touched element,
   // so we can't detect a drag-in from another element by attaching to
@@ -144,7 +144,7 @@ export function useDragGesture(options?: DragGestureOptions) {
       }
     },
     {
-      disabled: !startFromDragIn || isCandidate || isDragging,
+      disabled: !startFromDragIn || isCandidate || hasDragging,
     },
   );
 
