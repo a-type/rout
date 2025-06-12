@@ -296,7 +296,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @computed get turnError() {
     if (!this.localTurnData) return null;
-    return this.validateTurn(this.localTurnData);
+    return this.validateTurn(this.localTurnData) || null;
   }
 
   /**
