@@ -205,9 +205,13 @@ export function TeamPlayers({ id }: { id: string }) {
                         >
                           {col.key === 'name' ? (
                             <Link to={{ search: '?playerId=' + player.id }}>
+                              {player.statusIds.injured && (
+                                <span className="text-red-500">💔</span>
+                              )}
+
+                              {data.name}
                               <PlayerSpecies id={player.id} />
                               <PlayerClass id={player.id} />
-                              {data.name}
                             </Link>
                           ) : col.key === 'level' ? (
                             data.level

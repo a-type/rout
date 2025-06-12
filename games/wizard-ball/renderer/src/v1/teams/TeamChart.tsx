@@ -169,6 +169,9 @@ export function TeamChart({ id }: { id: string }) {
                         content={<PlayerTooltipContent id={player.id} />}
                       >
                         <span>
+                          {player.statusIds.injured && (
+                            <span className="text-red-500">💔</span>
+                          )}
                           {player.name}
                           <PlayerSpecies id={player.id} />
                           <PlayerClass id={player.id} />
@@ -214,7 +217,12 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>{player.name}</span>
+                      <span>
+                        {player.statusIds.injured && (
+                          <span className="text-red-500">💔</span>
+                        )}
+                        {player.name}
+                      </span>
                     </Tooltip>
                   </Draggable>
                   <PlayerAttributesSummary kind="overall" id={playerId} />
@@ -255,7 +263,12 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>{player.name}</span>
+                      <span>
+                        {player.statusIds.injured && (
+                          <span className="text-red-500">💔</span>
+                        )}
+                        {player.name}
+                      </span>
                     </Tooltip>
                   </Draggable>
                   <PlayerAttributesSummary kind="overall" id={playerId} />
@@ -291,7 +304,12 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>{player.name}</span>
+                      <span>
+                        {player.statusIds.injured && (
+                          <span className="text-red-500">💔</span>
+                        )}
+                        {player.name}
+                      </span>
                     </Tooltip>
                   </Draggable>
                   <PlayerAttributesSummary kind="overall" id={playerId} />

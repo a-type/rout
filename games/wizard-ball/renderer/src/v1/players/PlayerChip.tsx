@@ -43,6 +43,7 @@ export function PlayerChip({
           )}{' '}
           {includeSpecies && <PlayerSpecies id={player.id} />}
           {includeClass && <PlayerClass id={player.id} />}
+          {player.statusIds.injured && <span className="text-red-500">💔</span>}
           {player.name}{' '}
           {noPositions ? '' : <>({player.positions.join('/').toUpperCase()})</>}
         </span>

@@ -4,6 +4,7 @@ import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
 import { getTeamBench } from './utils';
+import { statusData, StatusType } from './statusData';
 
 export type GlobalState = {
   league: League;
@@ -277,6 +278,19 @@ export const gameDefinition: GameDefinition<
         });
       });
     }
+
+    // status stack counts
+    Object.values(globalState.league.playerLookup).forEach((player) => {
+      Object.entries(player.statusIds).forEach(([statusId, count]) => {
+        const status = statusData[statusId as StatusType];
+        if (!status) return;
+        player.statusIds[statusId] = status.round?.(count ?? 0) ?? count;
+        if (!player.statusIds[statusId] || player.statusIds[statusId] <= 0) {
+          delete player.statusIds[statusId];
+        }
+      });
+    });
+
     const nextLeague: League = {
       ...globalState.league,
       gameResults: [...globalState.league.gameResults, results],

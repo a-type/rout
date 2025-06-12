@@ -230,6 +230,10 @@ export type GameLogEvent =
       score: Record<TeamId, number>;
     }
   | {
+      kind: 'injury';
+      playerId: PlayerId;
+    }
+  | {
       kind: 'pitcherChange';
       teamId: TeamId;
       oldPitcherId: PlayerId;

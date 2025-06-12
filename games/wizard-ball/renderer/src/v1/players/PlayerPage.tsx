@@ -2,6 +2,8 @@ import {
   speciesIcons,
   perks,
   isPitcher,
+  statusData,
+  StatusType,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 import { clsx } from '@a-type/ui';
@@ -21,6 +23,7 @@ import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 import { AttributeSummary } from '../ratings/AttributeSummary';
 import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
+import { StatusChip } from '../perks/StatusChip';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -71,7 +74,10 @@ export function PlayerPage({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl font-bold mb-0">{playerName}</h1>
+        <h1 className="text-2xl font-bold mb-0">
+          {player.statusIds.injured && <span className="text-red-500">💔</span>}
+          {playerName}
+        </h1>
         <div className="flex flex-row gap-1 mb-1 items-center">
           <PlayerSpecies id={player.id} />
           <PlayerClass id={player.id} />
@@ -104,7 +110,7 @@ export function PlayerPage({ id }: { id: string }) {
         )}
       </div>
       <div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="col-span-1">
             <h2>Perks</h2>
             <div className="flex flex-col gap-2 items-start">
@@ -118,6 +124,24 @@ export function PlayerPage({ id }: { id: string }) {
                 })
               ) : (
                 <span className="text-gray-400">No perks</span>
+              )}
+            </div>
+          </div>
+          <div className="col-span-1">
+            <h2>Statuses</h2>
+            <div className="flex flex-col gap-2 items-start">
+              {Object.values(player.statusIds).some((v) => !!v && v > 0) ? (
+                Object.entries(player.statusIds).map(([statusId, stacks]) => {
+                  return (
+                    <StatusChip
+                      key={statusId}
+                      id={statusId as StatusType}
+                      stacks={stacks}
+                    />
+                  );
+                })
+              ) : (
+                <span className="text-gray-400">No statuses</span>
               )}
             </div>
           </div>

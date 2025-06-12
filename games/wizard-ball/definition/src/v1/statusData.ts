@@ -22,10 +22,28 @@ export type Status = {
     sourcePlayer: Player;
     weather: WeatherType;
   }) => boolean;
+  round?: (stacks: number) => number;
   effect: (props: { stacks?: number }) => PerkEffect;
 };
 
-export const statusData = {
+export const statusData: Record<string, Status> = {
+  injured: {
+    kind: 'debuff',
+    name: 'Injured',
+    description: 'Player is injured and plays worse.',
+    icon: '💔',
+    condition: ({ isMe }) => isMe,
+    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
+    effect: ({ stacks = 1 }) => ({
+      attributeBonus: {
+        strength: -stacks * 2,
+        agility: -stacks * 2,
+        intelligence: -stacks * 2,
+        charisma: -stacks * 2,
+        constitution: -stacks * 2,
+      },
+    }),
+  },
   enraged: {
     kind: 'buff',
     name: 'Enraged',

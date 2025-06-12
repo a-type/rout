@@ -7,10 +7,13 @@ import {
   League,
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
+  statusData,
+  StatusType,
 } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 
 function getActivePerks(player: Player, league: League) {
+  // TODO: Better handle perks and statuses with conditions
   return [
     ...player.itemIds
       .map((iid) => league.itemLookup[iid])
@@ -19,7 +22,12 @@ function getActivePerks(player: Player, league: League) {
       .map((pid) => perks[pid])
       .filter((perk) => !perk.condition)
       .map((perk) => perk.effect()),
-  ];
+    // ...Object.entries(player.statusIds).map(([statusId, stacks]) => {
+    //   const status = statusData[statusId as StatusType];
+    //   if (!status) return null;
+    //   return status.effect({ stacks }) as any;
+    // }),
+  ].filter((e) => !!e);
 }
 
 export function getPlayerAttributes(player: Player, league: League) {
