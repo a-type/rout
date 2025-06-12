@@ -33,7 +33,8 @@ export function TeamSummary({ id }: { id: string }) {
               className="flex flex-col items-center gap-2 p-3 bg-gray-800 rounded"
             >
               <span className="font-bold">
-                {player.positions.join('/').toUpperCase()} {player.name}
+                {!!player.statusIds.injured ? '💔 ' : ''}
+                {player.positions.join('/').toUpperCase()} {player.name}{' '}
               </span>
               <span className="text-sm text-gray-400">
                 <PlayerLevel id={player.id} /> <PlayerSpecies id={player.id} />{' '}

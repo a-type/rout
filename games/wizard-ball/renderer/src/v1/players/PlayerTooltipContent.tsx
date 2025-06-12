@@ -21,6 +21,7 @@ export function PlayerTooltipContent({ id }: { id: string }) {
   return (
     <div className="p-2 flex flex-col">
       <h3 className="text-xl font-bold mb-0">
+        {player.statusIds.injured && <span className="text-red-500">💔</span>}
         {player.name} ({player.positions.join('/').toUpperCase()})
       </h3>
       <span className="text-sm text-gray-400 capitalize mb-2 flex flex-row items-center gap-2">

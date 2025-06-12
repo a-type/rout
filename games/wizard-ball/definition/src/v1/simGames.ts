@@ -1564,6 +1564,42 @@ export function simulatePitch(
       scaleAttributePercent(batterComposite.durability, 1.006) -
       1.014,
   );
+  if (
+    random.float(0, 1) <
+    (isReliever ? 0.001 : 0.0005) /
+      scaleAttributePercent(pitcherComposite.durability, 4)
+  ) {
+    league.playerLookup[pitcherId].statusIds.injured =
+      (league.playerLookup[pitcherId].statusIds.injured ?? 0) +
+      Math.floor(random.float(2, 10));
+    gameState = logger.addToGameLog(
+      {
+        kind: 'injury',
+        playerId: pitcherId,
+      },
+      gameState,
+    );
+    const pid = considerSwapPitcher(gameState, league);
+    if (pid) {
+      gameState = swapPitcher(gameState, pid);
+    }
+  }
+  if (
+    random.float(0, 1) <
+    0.002 / scaleAttributePercent(batterComposite.durability, 4)
+  ) {
+    league.playerLookup[batterId].statusIds.injured =
+      (league.playerLookup[batterId].statusIds.injured ?? 0) +
+      Math.floor(random.float(2, 10));
+    gameState = logger.addToGameLog(
+      {
+        kind: 'injury',
+        playerId: batterId,
+      },
+      gameState,
+    );
+    // TODO: Swap batter if injured
+  }
 
   if (nextBatter) {
     gameState = incrementBatterIndex(gameState, gameState.battingTeam);
@@ -1597,16 +1633,18 @@ function considerSwapPitcher(
   gameState: LeagueGameState,
   league: League,
 ): PlayerId | null {
-  if (gameState.strikes !== 0 || gameState.balls !== 0) {
+  const pitcherId = getCurrentPitcher(gameState);
+  const pitcher = league.playerLookup[pitcherId];
+  const injured = !!pitcher.statusIds.injured;
+  if (!injured && (gameState.strikes !== 0 || gameState.balls !== 0)) {
     // Don't swap pitchers if the count is not reset
     return null;
   }
-  const pitcherId = getCurrentPitcher(gameState);
-  const pitcher = league.playerLookup[pitcherId];
+
   if (!pitcher) {
     throw new Error(`No pitcher found for team ${gameState.pitchingTeam}`);
   }
-  if (pitcher.stamina > 0.2) {
+  if (!injured && pitcher.stamina > 0.2) {
     return null;
   }
   const team = league.teamLookup[gameState.pitchingTeam];
@@ -1616,7 +1654,8 @@ function considerSwapPitcher(
       (p) =>
         !team.pitchingOrder.includes(p.id) &&
         p.positions.some((pos) => isPitcher(pos)) &&
-        p.stamina > 0.5,
+        p.stamina > 0.5 &&
+        !p.statusIds.injured,
     );
   if (alternatePitchers.length === 0) {
     return null;

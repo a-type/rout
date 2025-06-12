@@ -155,6 +155,19 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         </div>
       );
 
+    case 'injury':
+      return (
+        <div className="flex flex-col items-start">
+          <hr className="w-full h-1 border-none bg-gray-500" />
+          <div className="flex flex-col items-start gap-1">
+            <div>
+              <PlayerChip noPositions id={event.playerId} /> has been injured!
+            </div>
+          </div>
+          <hr className="w-full h-1 border-none bg-gray-500" />
+        </div>
+      );
+
     case 'strike':
       return (
         <>
