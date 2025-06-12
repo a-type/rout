@@ -11,6 +11,7 @@ export type DroppableProps<T = any> = Omit<
 > & {
   id: string;
   onDrop?: (draggable: DraggableData<T>) => void;
+  onReject?: (draggable: DraggableData<T>) => void;
   disabled?: boolean;
   accept?: (draggable: DraggableData<T>) => boolean;
 };
@@ -22,20 +23,24 @@ export function Droppable<T = any>({
   disabled,
   ref: userRef,
   accept,
+  onReject,
   ...rest
 }: DroppableProps<T>) {
   const dropCb = useStableCallback(onDrop);
   const stableAccept = useStableCallback(accept);
+  const stableOnReject = useStableCallback(onReject);
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId) => {
       if (targetId === id) {
         const data = useDndStore.getState().data[dragged];
         if (!stableAccept || stableAccept({ id: dragged, data })) {
           dropCb({ id: dragged, data });
+        } else if (stableOnReject) {
+          stableOnReject({ id: dragged, data });
         }
       }
     });
-  }, [id, dropCb]);
+  }, [id, dropCb, stableAccept, stableOnReject]);
 
   const isOverRaw = useDndStore((state) => state.overRegion === id);
   const draggedId = useDndStore((state) => state.dragging);

@@ -43,7 +43,7 @@ function PlayingCardRoot({
       {playerId && (
         <PlayerAvatar
           playerId={playerId}
-          className="absolute top-md right-md"
+          className="absolute top-sm right-sm"
         />
       )}
     </CardRoot>

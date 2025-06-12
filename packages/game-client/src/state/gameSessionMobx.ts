@@ -295,21 +295,35 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   }
 
   @computed get turnError() {
+    if (!this.localTurnData) return null;
+    return this.validateTurn(this.localTurnData);
+  }
+
+  /**
+   * Validate a potential turn without applying it to the client.
+   * You can derive your new turn from the existing data with a function parameter.
+   */
+  validateTurn = (
+    turnData:
+      | GetTurnData<TGame>
+      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
+  ) => {
     const baseState = this.latestRound.initialPlayerState;
     const roundIndex = this.latestRound.roundIndex;
-    if (!this.localTurnData) return null;
-    return (
-      this.gameDefinition.validateTurn({
-        members: this.members,
-        playerState: baseState,
-        roundIndex,
-        turn: {
-          playerId: this.playerId,
-          data: this.localTurnData,
-        },
-      }) || null
-    );
-  }
+    const dataToValidate =
+      typeof turnData === 'function'
+        ? (turnData as any)(this.localTurnData ?? null)
+        : turnData;
+    return this.gameDefinition.validateTurn({
+      members: this.members,
+      playerState: baseState,
+      roundIndex,
+      turn: {
+        playerId: this.playerId,
+        data: dataToValidate,
+      },
+    });
+  };
 
   @computed get combinedLog() {
     const chat = this.chat;

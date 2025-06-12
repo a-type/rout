@@ -4,23 +4,27 @@ import { DraggableData } from './dnd/dndStore';
 import { Droppable, DroppableProps } from './dnd/Droppable';
 import { isToken, TokenDragData } from './types';
 
-export interface TokenSpaceProps
-  extends Omit<DroppableProps, 'onDrop' | 'accept'> {
-  onDrop?: (token: TokenDragData) => void;
+export interface TokenSpaceProps<T = any>
+  extends Omit<DroppableProps, 'onDrop' | 'onReject' | 'accept'> {
+  onDrop?: (token: TokenDragData<T>) => void;
   className?: string;
   type?: string;
-  accept?: (data: TokenDragData) => boolean;
+  accept?: (data: TokenDragData<T>) => boolean;
+  onReject?: (data: TokenDragData<T>) => void;
+  onNonTokenReject?: (data: DraggableData) => void;
 }
 
-export function TokenSpace({
+export function TokenSpace<T = any>({
   id,
   children,
   className,
   onDrop,
   type,
   accept,
+  onReject,
+  onNonTokenReject,
   ...rest
-}: TokenSpaceProps) {
+}: TokenSpaceProps<T>) {
   const wrappedAccept = (data: DraggableData) => {
     // only accept tokens
     if (!isToken(data.data)) {
@@ -33,7 +37,18 @@ export function TokenSpace({
     }
 
     if (!accept) return true;
-    return accept(data.data);
+    return accept(data.data as TokenDragData<T>);
+  };
+
+  const wrappedOnReject = (data: DraggableData) => {
+    if (!isToken(data.data)) {
+      return onNonTokenReject?.(data);
+    }
+    if (data.data.internal.space?.id === id) {
+      // do not notify user of tokens already in this space
+      return;
+    }
+    return onReject?.(data.data as TokenDragData<T>);
   };
 
   return (
@@ -46,8 +61,9 @@ export function TokenSpace({
           'transition-transform',
           className,
         )}
-        onDrop={(droppable) => onDrop?.(droppable.data)}
+        onDrop={(droppable) => onDrop?.(droppable.data as TokenDragData<T>)}
         accept={wrappedAccept}
+        onReject={wrappedOnReject}
         {...rest}
       >
         {children}

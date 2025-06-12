@@ -1,6 +1,7 @@
-import { Box } from '@a-type/ui';
+import { Box, toast } from '@a-type/ui';
 import { assertPrefixedId, PrefixedId } from '@long-game/common';
 import {
+  Card as CardData,
   getCardRank,
   getCardSuit,
   isCard,
@@ -34,13 +35,38 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
         p
         layout="center center"
       >
-        <TokenSpace
+        <TokenSpace<CardData>
           id="current-trick"
           onDrop={(card) => {
             if (isCard(card.id)) {
               gameSuite.submitTurn({
-                card: card.id,
+                card: card.data,
               });
+            }
+          }}
+          accept={(card) => {
+            if (!isCard(card.id)) {
+              return false;
+            }
+            const error = gameSuite.validateTurn({
+              card: card.data,
+            });
+            if (error) {
+              return false;
+            }
+            return true;
+          }}
+          onReject={(card) => {
+            if (!isCard(card.id)) {
+              return;
+            }
+            const error = gameSuite.validateTurn({
+              card: card.data,
+            });
+            if (error) {
+              toast.error(error);
+            } else {
+              toast.error('You cannot play that card right now.');
             }
           }}
         >
