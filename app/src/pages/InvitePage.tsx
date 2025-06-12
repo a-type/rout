@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, H1, P, PageContent, PageRoot } from '@a-type/ui';
+import { Box, Button, H1, Icon, P, PageContent, PageRoot } from '@a-type/ui';
 import { APP_NAME } from '@long-game/common';
 import { FriendshipInvitationPublicInfo, Self } from '@long-game/game-client';
 import { Link, useParams } from '@verdant-web/react-router';
@@ -70,7 +70,7 @@ function LoggedOutInvite({
 }) {
   // instruct users on signing up
   return (
-    <Box direction="col">
+    <Box direction="col" items="start">
       <H1>
         Join {invite.inviterDisplayName} on {APP_NAME}
       </H1>
@@ -82,7 +82,13 @@ function LoggedOutInvite({
         <Link to="/login?tab=signup">Sign Up</Link>
       </Button>
       <Box className="text-gray-7">
-        Have an account already? <Link to="/login">Log in</Link>.
+        Have an account already?{' '}
+        <Button asChild className="inline-flex" size="small" color="ghost">
+          <Link to="/login">
+            Log in <Icon name="arrowRight" />
+          </Link>
+        </Button>
+        .
       </Box>
     </Box>
   );

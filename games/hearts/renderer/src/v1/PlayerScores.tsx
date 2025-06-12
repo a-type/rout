@@ -1,8 +1,12 @@
 import { Box, Tooltip } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { getScore } from '@long-game/game-hearts-definition/v1';
+import {
+  getCardRank,
+  getCardSuit,
+  getScore,
+} from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
-import { Card } from './Card';
+import { PlayingCard } from '@long-game/game-ui/genericGames';
 import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
 
@@ -50,7 +54,12 @@ const PlayerScoredCards = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
     return (
       <CardGrid className="max-w-70vw">
         {scoredCards.map((card) => (
-          <Card id={card} key={card} className="w-40px" />
+          <PlayingCard
+            cardSuit={getCardSuit(card)}
+            cardRank={getCardRank(card)}
+            key={card}
+            className="w-40px"
+          />
         ))}
       </CardGrid>
     );

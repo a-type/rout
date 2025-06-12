@@ -19,7 +19,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
 }
 
-export function Token({ children, data, ...rest }: TokenProps) {
+export function Token({ children, data, className, ...rest }: TokenProps) {
   const tokenData = useTokenData(rest.id, data);
   const isInHand = tokenData.internal.space?.type === 'hand';
 
@@ -34,7 +34,12 @@ export function Token({ children, data, ...rest }: TokenProps) {
   );
 
   return (
-    <Draggable {...rest} DraggedContainer={TokenContainer} data={tokenData}>
+    <Draggable
+      {...rest}
+      className={className}
+      DraggedContainer={TokenContainer}
+      data={tokenData}
+    >
       <Draggable.Handle
         activationConstraint={activationConstraint}
         allowStartFromDragIn={isInHand}
@@ -58,30 +63,23 @@ const TokenContainer: DraggedContainerComponent = (props) => {
 const TokenInHandContainer: DraggedContainerComponent = ({
   children,
   draggable,
+  gesture,
   ref,
 }) => {
   const dampenedX = useTransform(() => {
     if (!draggable.isCandidate) {
-      return draggable.gesture.current.x.get();
+      return gesture.current.x.get();
     }
-    return (
-      draggable.gesture.initialBounds.x +
-      draggable.gesture.initialBounds.width / 2
-    );
+    return gesture.initialBounds.x + gesture.initialBounds.width / 2;
   });
   const adjustedY = useTransform(() => {
-    return (
-      draggable.gesture.current.y.get() +
-      (draggable.gesture.type === 'touch' ? -40 : 0)
-    );
+    return gesture.current.y.get() + (gesture.type === 'touch' ? -40 : 0);
   });
   const distanceScale = useSpring(
     useTransform(() => {
       if (!draggable.isCandidate) return 1;
-      const dist = Math.sqrt(
-        draggable.gesture.delta.y.get() * draggable.gesture.delta.y.get(),
-      );
-      return 1.2 + dist / 40;
+      const dist = Math.sqrt(gesture.delta.y.get() * gesture.delta.y.get());
+      return 1.4 + dist / 50;
     }),
   );
 

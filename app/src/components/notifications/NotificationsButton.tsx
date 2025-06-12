@@ -91,7 +91,7 @@ export function NotificationsButton({
         ) : (
           <>
             {notifications?.length ? (
-              <ScrollArea className="max-h-800px flex-1">
+              <ScrollArea className="max-h-800px flex-[1-0-auto]">
                 {notifications.map((notification) => (
                   <NotificationItem
                     key={notification.id}

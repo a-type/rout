@@ -5,9 +5,13 @@
   "exports": {
     ".": {
       "production": "./dist/index.js",
-      "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./genericGames": {
+      "production": "./dist/genericGames/index.js",
+      "import": "./dist/genericGames/index.js",
+      "types": "./dist/genericGames/index.d.ts"
     },
     "./css.css": {
       "default": "./dist/uno.css"

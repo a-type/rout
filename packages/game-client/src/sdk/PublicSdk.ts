@@ -176,7 +176,7 @@ export class PublicSdk extends BaseSdk {
         output.session.status,
       );
       this.queryClient.invalidateQueries({
-        queryKey: ['getGameSessionSummary', { id: vars.id }],
+        queryKey: ['getGameSessionDetails', { id: vars.id }],
       });
       this.queryClient.invalidateQueries({
         queryKey: ['getGameSessionPregame', { id: vars.id }],
@@ -206,13 +206,6 @@ export class PublicSdk extends BaseSdk {
   getGameSessionDetails = this.sdkQuery(
     'getGameSessionDetails',
     this.apiRpc.gameSessions[':id'].$get,
-    {
-      transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
-    },
-  );
-  getGameSessionSummary = this.sdkQuery(
-    'getGameSessionSummary',
-    this.apiRpc.gameSessions[':id'].summary.$get,
     {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
@@ -449,9 +442,6 @@ export type FriendshipInvitationPublicInfo = InferReturnData<
 >;
 export type GameSessionPregame = InferReturnData<
   PublicSdk['getGameSessionPregame']
->;
-export type GameSessionSummary = InferReturnData<
-  PublicSdk['getGameSessionSummary']
 >;
 export type Notification = InferReturnData<
   PublicSdk['getNotifications']
