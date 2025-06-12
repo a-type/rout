@@ -72,7 +72,7 @@ export function useMonitorGlobalGesture() {
 
   function endGesture() {
     gesture.active = false;
-    useDndStore.getState().endDrag();
+    useDndStore.getState().endDrag(gesture);
     document.body.style.userSelect = '';
 
     gestureEvents.emit('end');

@@ -1,17 +1,24 @@
-import { clsx } from '@a-type/ui';
-import { createContext, useContext } from 'react';
+import { Box, clsx } from '@a-type/ui';
+import { createContext, useContext, useState } from 'react';
 import { DraggableData } from './dnd/dndStore';
 import { Droppable, DroppableProps } from './dnd/Droppable';
+import { DragGestureContext } from './dnd/gestureStore';
 import { isToken, TokenDragData } from './types';
 
 export interface TokenSpaceProps<T = any>
-  extends Omit<DroppableProps, 'onDrop' | 'onReject' | 'accept'> {
-  onDrop?: (token: TokenDragData<T>) => void;
+  extends Omit<DroppableProps, 'onDrop' | 'onReject' | 'onOver' | 'accept'> {
+  onDrop?: (token: TokenDragData<T>, gesture: DragGestureContext) => void;
   className?: string;
   type?: string;
-  accept?: (data: TokenDragData<T>) => boolean;
+  /**
+   * Validate dropping a token into this space. If you return true,
+   * the token is allowed. If you return a string, it will be shown as an error message.
+   * If you return false, the token is rejected without an error message.
+   */
+  accept?: (data: TokenDragData<T>) => boolean | string;
   onReject?: (data: TokenDragData<T>) => void;
   onNonTokenReject?: (data: DraggableData) => void;
+  onOver?: (data: TokenDragData<T> | null) => void;
 }
 
 export function TokenSpace<T = any>({
@@ -23,8 +30,11 @@ export function TokenSpace<T = any>({
   accept,
   onReject,
   onNonTokenReject,
+  onOver,
   ...rest
 }: TokenSpaceProps<T>) {
+  const [overError, setOverError] = useState<string | null>(null);
+
   const wrappedAccept = (data: DraggableData) => {
     // only accept tokens
     if (!isToken(data.data)) {
@@ -37,7 +47,7 @@ export function TokenSpace<T = any>({
     }
 
     if (!accept) return true;
-    return accept(data.data as TokenDragData<T>);
+    return accept(data.data as TokenDragData<T>) === true;
   };
 
   const wrappedOnReject = (data: DraggableData) => {
@@ -51,6 +61,23 @@ export function TokenSpace<T = any>({
     return onReject?.(data.data as TokenDragData<T>);
   };
 
+  const handleOver = (data: DraggableData | null) => {
+    if (data && isToken(data.data)) {
+      onOver?.(data.data as TokenDragData<T>);
+    }
+
+    if (!accept || !data || !isToken(data.data)) {
+      setOverError(null);
+      return;
+    }
+    const result = accept(data.data as TokenDragData<T>);
+    if (typeof result === 'string') {
+      setOverError(result);
+    } else {
+      setOverError(null);
+    }
+  };
+
   return (
     <TokenSpaceContext.Provider value={{ id, type }}>
       <Droppable<TokenDragData>
@@ -61,12 +88,16 @@ export function TokenSpace<T = any>({
           'transition-transform',
           className,
         )}
-        onDrop={(droppable) => onDrop?.(droppable.data as TokenDragData<T>)}
+        onDrop={(droppable, gesture) =>
+          onDrop?.(droppable.data as TokenDragData<T>, gesture)
+        }
         accept={wrappedAccept}
         onReject={wrappedOnReject}
+        onOver={handleOver}
         {...rest}
       >
         {children}
+        {overError && <TokenSpaceValidationMessage message={overError} />}
       </Droppable>
     </TokenSpaceContext.Provider>
   );
@@ -86,4 +117,19 @@ export function useTokenSpaceContext() {
     );
   }
   return context;
+}
+
+function TokenSpaceValidationMessage({ message }: { message: string }) {
+  if (!message) return null;
+  return (
+    <div className="absolute bottom-100% left-1/2 translate-[-50%,0.5rem] w-80% flex justify-center">
+      <Box
+        surface="attention"
+        p="lg"
+        className="text-wrap shadow-sm animate-pop-up animate-duration-200"
+      >
+        {message}
+      </Box>
+    </div>
+  );
 }

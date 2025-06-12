@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { dndEvents } from './dndEvents';
+import { DragGestureContext } from './gestureStore';
 
 export type DraggableData<T = any> = {
   id: string;
@@ -15,7 +16,7 @@ export type DndStoreValue = {
   dragging: string | null;
   setCandidate: (id: string) => void;
   startDrag: (id: string | null) => void;
-  endDrag: () => void;
+  endDrag: (gesture: DragGestureContext) => void;
 
   data: Record<string, any>;
   bindData: (id: string, data: any) => () => void;
@@ -63,11 +64,11 @@ export const useDndStore = create<DndStoreValue>()(
           dndEvents.emit('start', id);
         }
       },
-      endDrag: () => {
+      endDrag: (gesture: DragGestureContext) => {
         const { dragging, overRegion } = get();
         if (dragging) {
           if (overRegion) {
-            dndEvents.emit('drop', dragging, overRegion);
+            dndEvents.emit('drop', dragging, overRegion, gesture);
           } else {
             dndEvents.emit('cancel', dragging);
           }

@@ -1,16 +1,18 @@
 import { useStableCallback } from '@a-type/ui';
-import { HTMLProps, useEffect } from 'react';
+import { HTMLProps, useEffect, useMemo } from 'react';
 import { useMergedRef } from '../../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
 import { DraggableData, useDndStore } from './dndStore';
 import { dropRegions, REGION_ID_ATTR } from './DropRegions';
+import { DragGestureContext } from './gestureStore';
 
 export type DroppableProps<T = any> = Omit<
   HTMLProps<HTMLDivElement>,
   'onDrop' | 'accept'
 > & {
   id: string;
-  onDrop?: (draggable: DraggableData<T>) => void;
+  onDrop?: (draggable: DraggableData<T>, gesture: DragGestureContext) => void;
+  onOver?: (draggable: DraggableData<T> | null) => void;
   onReject?: (draggable: DraggableData<T>) => void;
   disabled?: boolean;
   accept?: (draggable: DraggableData<T>) => boolean;
@@ -20,6 +22,7 @@ export function Droppable<T = any>({
   id,
   children,
   onDrop,
+  onOver,
   disabled,
   ref: userRef,
   accept,
@@ -30,11 +33,11 @@ export function Droppable<T = any>({
   const stableAccept = useStableCallback(accept);
   const stableOnReject = useStableCallback(onReject);
   useEffect(() => {
-    return dndEvents.subscribe('drop', (dragged, targetId) => {
+    return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
         const data = useDndStore.getState().data[dragged];
         if (!stableAccept || stableAccept({ id: dragged, data })) {
-          dropCb({ id: dragged, data });
+          dropCb({ id: dragged, data }, gesture);
         } else if (stableOnReject) {
           stableOnReject({ id: dragged, data });
         }
@@ -47,9 +50,18 @@ export function Droppable<T = any>({
   const draggedData = useDndStore((state) =>
     draggedId ? state.data[draggedId] : undefined,
   );
-  const rejected =
-    draggedId && accept && !accept({ id: draggedId, data: draggedData });
-  const isOver = isOverRaw && draggedId && !rejected;
+  const unvalidatedOver = useMemo(
+    () =>
+      isOverRaw && draggedId ? { id: draggedId, data: draggedData } : null,
+    [draggedId, isOverRaw, draggedData],
+  );
+  const rejected = unvalidatedOver && accept && !accept(unvalidatedOver);
+  const isOver = isOverRaw && unvalidatedOver && !rejected;
+
+  const stableOnOver = useStableCallback(onOver);
+  useEffect(() => {
+    stableOnOver?.(unvalidatedOver);
+  }, [stableOnOver, unvalidatedOver]);
 
   const finalRef = useMergedRef<HTMLDivElement>(dropRegions.register, userRef);
 

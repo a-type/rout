@@ -15,7 +15,7 @@ export interface PlayerScoresProps {}
 export const PlayerScores = hooks.withGame<PlayerScoresProps>(
   function PlayerScores({ gameSuite }) {
     return (
-      <Box gap items="center" className="select-none">
+      <Box gap items="center" className="select-none" wrap>
         {gameSuite.members.map((member) => (
           <PlayerScore playerId={member.id} key={member.id} />
         ))}
@@ -44,7 +44,7 @@ const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
           )}
           style={style}
         >
-          <Box gap items="center">
+          <Box gap items="center" className="text-nowrap">
             <PlayerAvatar playerId={playerId} />
             <PlayerName playerId={playerId} />
           </Box>
