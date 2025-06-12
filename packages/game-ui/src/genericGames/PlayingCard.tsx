@@ -239,7 +239,7 @@ const CardRoot = withClassName(
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
   '[&[data-suit=h]]:(color-attention-ink)',
-  '[&[data-suit=d]]:(color-attention color-darken-4)',
+  '[&[data-suit=d]]:(color-attention-dark color-lighten-1)',
 );
 
 function ScalingText({

@@ -1,4 +1,4 @@
-import { Box, Tooltip } from '@a-type/ui';
+import { Box, clsx, Tooltip } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import {
   getCardRank,
@@ -33,13 +33,21 @@ const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
           key={playerId}
           gap
           surface="primary"
-          items="center"
           p="sm"
-          className={className}
+          d={{
+            default: 'col',
+            sm: 'row',
+          }}
+          className={clsx(
+            'flex-[1_1_auto] items-start sm:items-center',
+            className,
+          )}
           style={style}
         >
-          <PlayerAvatar playerId={playerId} />
-          <PlayerName playerId={playerId} />
+          <Box gap items="center">
+            <PlayerAvatar playerId={playerId} />
+            <PlayerName playerId={playerId} />
+          </Box>
           <PlayerScoreDisplay playerId={playerId} />
         </Box>
       </Tooltip>
