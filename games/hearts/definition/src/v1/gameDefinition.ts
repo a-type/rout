@@ -180,7 +180,7 @@ export const gameDefinition: GameDefinition<
     ) {
       const soughtCard = getDealStartCard(members.length);
       const soughtCardRank = getCardDisplayRank(soughtCard);
-      const soughtCardSuit = getCardSuit(soughtCard);
+      const soughtCardSuit = getCardDisplaySuit(soughtCard);
       if (playerState.hand.includes(soughtCard)) {
         if (turn.data.card !== soughtCard) {
           return `You must play the ${soughtCardRank} of ${soughtCardSuit} to begin the trick.`;
