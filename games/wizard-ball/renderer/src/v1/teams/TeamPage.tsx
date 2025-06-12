@@ -39,8 +39,6 @@ export function TeamPage({ id }: { id: TeamId }) {
     .flat()
     .filter((game) => game.winner === id || game.loser === id);
 
-  const teamAttributes = getTeamAvgAttributes(finalState.league, team.id);
-
   return (
     <Tabs value={view} onValueChange={(v) => setView(v as any)}>
       <div className="flex flex-col p-2">

@@ -44,18 +44,18 @@ export function PageContent() {
 
   if (league !== null || gameStatus.status === 'complete') {
     return (
-      <>
+      <div className="p-2 pt-4">
         <TeamStandings />
         {/* Two column layout */}
         <div className="flex flex-col md:flex-row gap-2">
           <LeagueLeaders kind="batting" />
           <LeagueLeaders kind="pitching" />
         </div>
-      </>
+      </div>
     );
   }
   return (
-    <div>
+    <div className="p-2 pt-4">
       <Choices />
       <Levelups />
       <RecentResults />

@@ -22,7 +22,7 @@ export function TeamSummary({ id }: { id: string }) {
     .slice(0, 3);
   return (
     <div className="flex flex-col gap-4">
-      <AttributeSummary attributes={teamAttributes} />
+      <AttributeSummary attributes={teamAttributes} limit={3} />
       <div className="flex flex-row gap-4 justify-center items-center flex-wrap">
         {topPlayers.map((player) => {
           const attr = getPlayerAttributes(player, finalState.league);
@@ -30,7 +30,7 @@ export function TeamSummary({ id }: { id: string }) {
             <Link
               to={{ search: `?playerId=${player.id}` }}
               key={player.id}
-              className="flex flex-col items-center gap-2 p-2 bg-gray-800 rounded"
+              className="flex flex-col items-center gap-2 p-3 bg-gray-800 rounded"
             >
               <span className="font-bold">
                 {player.positions.join('/').toUpperCase()} {player.name}

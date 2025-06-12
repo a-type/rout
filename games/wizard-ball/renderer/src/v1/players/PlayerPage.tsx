@@ -19,6 +19,8 @@ import { XpBar } from '../ratings/XpBar';
 import { LevelupChoices } from '../Choices';
 import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 import { AttributeSummary } from '../ratings/AttributeSummary';
+import { PlayerSpecies } from './PlayerSpecies';
+import { PlayerClass } from './PlayerClass';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -70,8 +72,9 @@ export function PlayerPage({ id }: { id: string }) {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-bold mb-0">{playerName}</h1>
-        <div className="flex flex-row gap-1 mb-4 items-center">
-          <span style={{ fontSize: 24 }}>{speciesIcons[player.species]}</span>
+        <div className="flex flex-row gap-1 mb-1 items-center">
+          <PlayerSpecies id={player.id} />
+          <PlayerClass id={player.id} />
           <span className="capitalize">{player.species}</span>
           <span className="capitalize">{player.class}</span>
         </div>
@@ -137,7 +140,7 @@ export function PlayerPage({ id }: { id: string }) {
         attributes={playerAttributes.baseAttributes}
         attributesModified={playerAttributes.attributeMod}
         stamina={player.stamina}
-        limit={6}
+        limit={3}
       />
       <CompositeRatingsSummary
         id={id}

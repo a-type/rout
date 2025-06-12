@@ -1,5 +1,5 @@
 import { Player } from '@long-game/game-wizard-ball-definition';
-import { numberToLetter } from '../utils';
+import { numberToLetter, shortAttribute } from '../utils';
 
 const attributeList: Array<{
   value: keyof Player['attributes'];
@@ -58,12 +58,14 @@ export function AttributeSummary({
     //   : []),
   ];
   return (
-    <div className="flex flex-row gap-4 justify-center items-center">
+    <div className="flex flex-row gap-6 justify-center items-center">
       {finalList.map(({ value, label, color, rating }) => {
         return (
           <div key={value} className="flex flex-col items-center gap-2">
             <span className="font-bold whitespace-nowrap" style={{ color }}>
-              {label}
+              {value === 'overall'
+                ? 'OVR'
+                : shortAttribute(value as any).toUpperCase()}
             </span>
             <span className="text-2xl font-bold">{numberToLetter(rating)}</span>
           </div>

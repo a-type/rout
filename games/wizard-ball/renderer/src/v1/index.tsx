@@ -72,7 +72,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         </NavLink>
         {gameSuite.turnError}
       </div>
-      <div className="p-4 mt-16">
+      <div className="p-4 mt-8">
         <PageContent />
       </div>
     </Box>

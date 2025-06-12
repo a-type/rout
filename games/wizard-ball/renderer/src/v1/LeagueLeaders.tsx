@@ -22,7 +22,7 @@ export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
     finalState.league.gameResults.flat(),
   );
 
-  const findTop = (stat: keyof AllStats, count: number = 10) => {
+  const findTop = (stat: keyof AllStats, count: number = 5) => {
     const isInverted = invertList.includes(stat);
     let list = Object.entries(playerStats)
       .filter(([, stats]) => {
