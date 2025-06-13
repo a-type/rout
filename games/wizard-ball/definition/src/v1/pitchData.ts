@@ -43,14 +43,14 @@ export const pitchTypes = {
     swingBallFactor: 1,
     hitModifierTable: {
       power: {
-        weak: 0.8,
+        weak: 0.9,
         normal: 1.0,
-        strong: 1.2,
+        strong: 1.1,
       },
       type: {
-        grounder: 0.75,
-        lineDrive: 1.25,
-        fly: 1.25,
+        grounder: 0.8,
+        lineDrive: 1.2,
+        fly: 1.2,
         popUp: 1,
       },
     },

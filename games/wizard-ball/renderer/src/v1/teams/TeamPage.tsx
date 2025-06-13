@@ -90,7 +90,7 @@ export function TeamPage({ id }: { id: TeamId }) {
           <TeamLineup id={id} />
         </Tabs.Content>
         <Tabs.Content value="depthChart">
-          <TeamChart id={id} />
+          <TeamChart id={id} key={id} />
         </Tabs.Content>
         <Tabs.Content value="items">
           <TeamItems id={id} />

@@ -72,6 +72,13 @@ export function PlayerPage({ id }: { id: string }) {
     player.positions.some((pos) => isPitcher(pos)) ? 'pitching' : 'batting',
   );
 
+  const statusItems = Object.entries(player.statusIds).filter(
+    ([statusId, stacks]) => {
+      // TODO: FIX HACK
+      return statusId !== 'streak' || Math.abs(stacks) >= 5;
+    },
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -131,8 +138,8 @@ export function PlayerPage({ id }: { id: string }) {
           <div className="col-span-1">
             <h2>Statuses</h2>
             <div className="flex flex-col gap-2 items-start">
-              {Object.values(player.statusIds).some((v) => !!v && v > 0) ? (
-                Object.entries(player.statusIds).map(([statusId, stacks]) => {
+              {statusItems.length > 0 ? (
+                statusItems.map(([statusId, stacks]) => {
                   return (
                     <StatusChip
                       key={statusId}

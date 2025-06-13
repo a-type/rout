@@ -7,34 +7,37 @@ export type StatusDuration = 'end-of-game';
 
 export type Status = {
   kind: 'buff' | 'debuff';
-  name: string;
-  description: string;
-  icon: string;
-  condition?: (props: {
-    stacks?: number;
-    gameState: LeagueGameState;
-    pitchKind?: PitchKind;
-    isMe: boolean;
-    isMyTeam: boolean;
-    isBatter: boolean;
-    isPitcher: boolean;
-    isRunner: boolean;
-    targetPlayer: Player;
-    sourcePlayer: Player;
-    weather: WeatherType;
-  }) => boolean;
+  name: string | ((stacks: number) => string);
+  description: string | ((stacks: number) => string);
+  icon: string | ((stacks: number) => string);
+  condition?: (
+    props: Partial<{
+      stacks?: number;
+      gameState: LeagueGameState;
+      pitchKind?: PitchKind;
+      isMe: boolean;
+      isMyTeam: boolean;
+      isBatter: boolean;
+      isPitcher: boolean;
+      isRunner: boolean;
+      targetPlayer: Player;
+      sourcePlayer: Player;
+      weather: WeatherType;
+    }>,
+  ) => boolean;
   round?: (stacks: number) => number;
   effect: (props: { stacks?: number }) => PerkEffect;
 };
 
-export const statusData: Record<string, Status> = {
+export const statusData = {
   injured: {
     kind: 'debuff',
     name: 'Injured',
     description: 'Player is injured and plays worse.',
     icon: '💔',
-    condition: ({ isMe }) => isMe,
-    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
+    condition: ({ isMe = false }) => isMe,
+    round: (stacks) =>
+      Math.max(0, Math.min(stacks - 1, Math.floor(stacks / 2))),
     effect: ({ stacks = 1 }) => ({
       attributeBonus: {
         strength: -stacks * 2,
@@ -45,46 +48,41 @@ export const statusData: Record<string, Status> = {
       },
     }),
   },
-  hot: {
+  streak: {
     kind: 'buff',
-    name: 'Hot',
-    description: 'Player is on fire and plays better.',
-    icon: '🔥',
-    condition: ({ isMe, stacks = 0 }) => isMe && stacks >= 3,
-    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
-    effect: ({ stacks = 1 }) => ({
-      attributeBonus: {
-        strength: stacks,
-        agility: stacks,
-        intelligence: stacks,
-        charisma: stacks,
-        constitution: stacks,
-      },
-    }),
-  },
-  cold: {
-    kind: 'debuff',
-    name: 'Cold',
-    description: 'Player is cold and plays worse.',
-    icon: '❄️',
-    condition: ({ isMe, stacks = 0 }) => isMe && stacks >= 3,
-    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
-    effect: ({ stacks = 1 }) => ({
-      attributeBonus: {
-        strength: -stacks,
-        agility: -stacks,
-        intelligence: -stacks,
-        charisma: -stacks,
-        constitution: -stacks,
-      },
-    }),
+    name: (stacks) => (stacks > 0 ? 'Hot' : 'Cold'),
+    description: (stacks) =>
+      stacks > 0
+        ? 'Player is on fire and plays better.'
+        : 'Player is cold and plays worse.',
+    icon: (stacks) => (stacks > 0 ? '🔥' : '❄️'),
+    condition: ({ isMe = false, stacks = 0 }) => isMe && Math.abs(stacks) >= 5,
+    round: (stacks) =>
+      stacks > 0
+        ? Math.min(stacks - 1, Math.floor(stacks * 0.75))
+        : stacks < 0
+        ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
+        : 0,
+    effect: ({ stacks = 1 }) => {
+      const mod = Math.sign(stacks) * 2;
+      return {
+        attributeBonus: {
+          strength: mod,
+          agility: mod,
+          intelligence: mod,
+          charisma: mod,
+          wisdom: mod,
+          constitution: mod,
+        },
+      };
+    },
   },
   enraged: {
     kind: 'buff',
     name: 'Enraged',
     description: 'Really freaking angry.',
     icon: '😡',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: ({ stacks = 1 }) => ({
       attributeBonus: {
         strength: stacks * 2,

@@ -1,3 +1,4 @@
+import { statusData } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
 
 export function PlayerStatus({ id }: { id: string }) {
@@ -8,14 +9,16 @@ export function PlayerStatus({ id }: { id: string }) {
   }
 
   const {
-    statusIds: { injured, hot, cold },
+    statusIds: { injured, streak: streakStacks },
   } = player;
 
   return (
     <div className="flex flex-row items-center gap-2">
-      {injured && <span className="text-red-500">💔</span>}
-      {hot && <span className="text-yellow-500">🔥</span>}
-      {cold && <span className="text-blue-500">❄️</span>}
+      {injured && <span>{statusData.injured.icon}</span>}
+      {streakStacks &&
+        statusData.streak.condition({ isMe: true, stacks: streakStacks }) && (
+          <span>{statusData.streak.icon(streakStacks)}</span>
+        )}
     </div>
   );
 }

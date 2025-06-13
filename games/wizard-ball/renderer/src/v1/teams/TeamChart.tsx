@@ -51,6 +51,9 @@ export function TeamChart({ id }: { id: string }) {
   );
   const [pitchingOrder, setPitchingOrder] = useState(team?.pitchingOrder);
   useEffect(() => {
+    if (currentUserId !== team.ownerId) {
+      return;
+    }
     prepareTurn((current) => ({
       ...current,
       nextPositionChart: depthChart,
@@ -58,6 +61,9 @@ export function TeamChart({ id }: { id: string }) {
   }, [depthChart]);
 
   useEffect(() => {
+    if (currentUserId !== team.ownerId) {
+      return;
+    }
     prepareTurn((current) => ({
       ...current,
       nextPitchingOrder: pitchingOrder,

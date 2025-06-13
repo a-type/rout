@@ -12,7 +12,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A powerful two-handed axe that deals massive damage',
     icon: '🪓',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         strength: 2,
@@ -24,7 +24,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "These shoes enhance the wearer's agility",
     icon: '👟',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         agility: 2,
@@ -36,7 +36,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A sturdy shield that improves the wearer's constitution",
     icon: '🛡️',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         constitution: 2,
@@ -48,7 +48,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'These glasses grant the wearer enhanced wisdom',
     icon: '🕶️',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         wisdom: 2,
@@ -60,7 +60,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A ring that boosts the wearer's intelligence",
     icon: '💍',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         intelligence: 2,
@@ -72,7 +72,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A cloak that enhances the wearer's charisma",
     icon: '🧥',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         charisma: 2,
@@ -85,7 +85,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A legendary bat that dramatically increases the wearers hitting power and launch angle',
     icon: '🏏',
     rarity: 'legendary',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
@@ -101,7 +101,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A mystical glove that enhances the wearers fielding abilities',
     icon: '🧤',
     rarity: 'rare',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
@@ -114,7 +114,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A mask that boosts the wearers stealing ability',
     icon: '🎭',
     rarity: 'rare',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
@@ -127,7 +127,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A legendary cap that enhances the wearers pitching abilities',
     icon: '🧢',
     rarity: 'legendary',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
@@ -142,7 +142,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'Boots that allow the wearer to get extra bases',
     icon: '👢',
     rarity: 'uncommon',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
@@ -155,7 +155,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A pendant that improves the wearers plate discipline',
     icon: '📿',
     rarity: 'rare',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {
@@ -168,7 +168,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A dagger that enhances the wearer's dueling skills",
     icon: '🗡️',
     rarity: 'epic',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
         dueling: 5,
@@ -183,7 +183,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'An amulet that boosts all attributes slightly',
     icon: '🔮',
     rarity: 'epic',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
         strength: 1,
@@ -200,7 +200,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A wand that enhances velocity at the cost of accuracy',
     icon: '🔥',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
@@ -214,7 +214,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A wand that enhances movement at the cost of velocity',
     icon: '❄️',
     rarity: 'common',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
@@ -228,7 +228,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A mystical orb that enhances strikeouts and accuracy',
     icon: '⚡',
     rarity: 'uncommon',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
@@ -242,7 +242,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A hat that enhances composure',
     icon: '🎩',
     rarity: 'rare',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       pitchingCompositeBonus: {
@@ -255,7 +255,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A belt that boosts durability',
     icon: '👖',
     rarity: 'epic',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
         durability: 5,
@@ -271,7 +271,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A ball of wadded up cash that helps you get on base at the cost of power',
     icon: '💰',
     rarity: 'uncommon',
-    condition: ({ isMe }) => isMe,
+    condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
       battingCompositeBonus: {

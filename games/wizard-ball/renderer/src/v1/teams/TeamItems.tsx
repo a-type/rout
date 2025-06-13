@@ -46,7 +46,12 @@ function DroppablePlayerArea({
 }
 
 export function TeamItems({ id }: { id: string }) {
-  const { finalState, prepareTurn } = hooks.useGameSuite();
+  const {
+    finalState,
+    prepareTurn,
+    playerId: currentUserId,
+  } = hooks.useGameSuite();
+  const team = finalState.league.teamLookup[id];
   const teamItems = Object.entries(finalState.league.itemLookup).filter(
     ([, i]) => i.teamId === id,
   );
@@ -62,6 +67,9 @@ export function TeamItems({ id }: { id: string }) {
 
   const [itemAssignments, setItemAssignments] = useState(playerToItems);
   useEffect(() => {
+    if (currentUserId !== team.ownerId) {
+      return;
+    }
     prepareTurn((turn) => ({
       ...turn,
       nextItemAssignments: itemAssignments,

@@ -19,7 +19,15 @@ export function TeamSummary({ id }: { id: string }) {
     .map((pid) => {
       return finalState.league.playerLookup[pid];
     })
-    .sort((a, b) => getPlayerOverall(b) - getPlayerOverall(a))
+    .sort((a, b) => {
+      const attrA = getPlayerAttributes(a, finalState.league);
+      const attrB = getPlayerAttributes(b, finalState.league);
+      return (
+        attrB.baseAttributes.overall +
+        attrB.attributeMod.overall -
+        (attrA.baseAttributes.overall + attrA.attributeMod.overall)
+      );
+    })
     .slice(0, 3);
   return (
     <div className="flex flex-col gap-4">

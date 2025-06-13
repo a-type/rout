@@ -77,6 +77,13 @@ export const gameDefinition: GameDefinition<
         return 'You must select unique players for your batting order';
       }
     }
+    if (!!turn.data.nextPositionChart) {
+      const positionChart = turn.data.nextPositionChart;
+      if (Object.values(positionChart).filter((v) => !!v).length !== 8) {
+        // Position chart doesn't include pitcher
+        return 'You must select exactly 9 positions for your position chart';
+      }
+    }
     if (turn.data.levelupChoices) {
       for (const [playerId, choices] of Object.entries(
         turn.data.levelupChoices,
@@ -265,6 +272,7 @@ export const gameDefinition: GameDefinition<
         : 0.4;
       player.stamina = Math.min(1, player.stamina + recovery);
     });
+    const pitcherList: string[] = [];
     for (const result of results) {
       const winner = globalState.league.teamLookup[result.winner];
       const loser = globalState.league.teamLookup[result.loser];
@@ -275,29 +283,16 @@ export const gameDefinition: GameDefinition<
       loser.runDifferential -=
         result.score[result.winner] - result.score[result.loser];
 
+      Object.entries(result.playerStats).forEach(([playerId, stats]) => {
+        if (stats.outsPitched && stats.outsPitched > 0) {
+          pitcherList.push(playerId);
+        }
+      });
+
       [winner, loser].forEach((team) => {
         const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
-          const pitcher = hasPitcherPosition(player.positions);
-          const playerStats = result.playerStats[playerId];
-          const hotCold = playerStatsToHotCold(
-            pitcher ? 'pitching' : 'batting',
-            playerStats,
-          );
-          if (hotCold > 0) {
-            if (player.statusIds.cold) {
-              delete player.statusIds.cold;
-            } else {
-              player.statusIds.hot = (player.statusIds.hot ?? 0) + hotCold;
-            }
-          } else if (hotCold < 0) {
-            if (player.statusIds.hot) {
-              delete player.statusIds.hot;
-            } else {
-              player.statusIds.cold = (player.statusIds.cold ?? 0) - hotCold;
-            }
-          }
           const isBenchPlayer = teamBench.some((p) => p.id === playerId);
           globalState = applyXp(
             random,
@@ -312,11 +307,22 @@ export const gameDefinition: GameDefinition<
     // status stack counts
     Object.values(globalState.league.playerLookup).forEach((player) => {
       Object.entries(player.statusIds).forEach(([statusId, count]) => {
+        // TODO: Fix hack!
+        if (
+          statusId === 'streak' &&
+          hasPitcherPosition(player.positions) &&
+          !pitcherList.includes(player.id)
+        ) {
+          return;
+        }
         const status = statusData[statusId as StatusType];
-        if (!status) return;
-        player.statusIds[statusId] = status.round?.(count ?? 0) ?? count;
-        if (!player.statusIds[statusId] || player.statusIds[statusId] <= 0) {
-          delete player.statusIds[statusId];
+        if (!status || !('round' in status)) return;
+        player.statusIds[statusId as StatusType] = status.round(count ?? 0);
+        if (
+          !player.statusIds[statusId as StatusType] ||
+          player.statusIds[statusId as StatusType]! === 0
+        ) {
+          delete player.statusIds[statusId as StatusType];
         }
       });
     });

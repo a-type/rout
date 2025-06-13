@@ -121,12 +121,11 @@ export const ballparkData = {
     },
     effect: ({ isHome } = {}) => ({
       battingCompositeBonus: {
-        fielding: isHome ? 4 : 2,
+        fielding: isHome ? 3 : 1,
       },
       pitchingCompositeBonus: {
         velocity: isHome ? 2 : 1,
         accuracy: isHome ? 2 : 1,
-        dueling: isHome ? 5 : 3,
       },
     }),
   },
