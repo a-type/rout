@@ -6,7 +6,7 @@
     "sourceMap": true,
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "lib": ["ESNext", "ES2022.Array"],
+    "lib": ["ESNext", "ES2023.Array"],
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
