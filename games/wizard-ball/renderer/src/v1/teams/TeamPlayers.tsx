@@ -13,6 +13,7 @@ import {
 } from '@long-game/game-wizard-ball-definition';
 import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerStatus } from '../players/PlayerStatus';
 
 const columns = {
   attributes: [
@@ -204,11 +205,11 @@ export function TeamPlayers({ id }: { id: string }) {
                           )}
                         >
                           {col.key === 'name' ? (
-                            <Link to={{ search: '?playerId=' + player.id }}>
-                              {player.statusIds.injured && (
-                                <span className="text-red-500">💔</span>
-                              )}
-
+                            <Link
+                              to={{ search: '?playerId=' + player.id }}
+                              className="flex flex-row items-center gap-2"
+                            >
+                              <PlayerStatus id={player.id} />
                               {data.name}
                               <PlayerSpecies id={player.id} />
                               <PlayerClass id={player.id} />

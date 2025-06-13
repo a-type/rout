@@ -5,6 +5,7 @@ import { PlayerTooltipContent } from './PlayerTooltipContent';
 import { Link } from 'react-router';
 import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
+import { PlayerStatus } from './PlayerStatus';
 
 export function PlayerChip({
   id,
@@ -43,7 +44,7 @@ export function PlayerChip({
           )}{' '}
           {includeSpecies && <PlayerSpecies id={player.id} />}
           {includeClass && <PlayerClass id={player.id} />}
-          {player.statusIds.injured && <span className="text-red-500">💔</span>}
+          <PlayerStatus id={player.id} />
           {player.name}{' '}
           {noPositions ? '' : <>({player.positions.join('/').toUpperCase()})</>}
         </span>

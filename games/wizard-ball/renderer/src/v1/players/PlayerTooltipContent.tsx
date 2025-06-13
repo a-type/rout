@@ -9,6 +9,7 @@ import { PlayerLevel } from './PlayerLevel';
 import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
 import { AttributeSummary } from '../ratings/AttributeSummary';
+import { PlayerStatus } from './PlayerStatus';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -20,8 +21,8 @@ export function PlayerTooltipContent({ id }: { id: string }) {
   const attributes = usePlayerAttributes(id);
   return (
     <div className="p-2 flex flex-col">
-      <h3 className="text-xl font-bold mb-0">
-        {player.statusIds.injured && <span className="text-red-500">💔</span>}
+      <h3 className="text-xl font-bold mb-0 flex flex-row items-center gap-2">
+        <PlayerStatus id={player.id} />
         {player.name} ({player.positions.join('/').toUpperCase()})
       </h3>
       <span className="text-sm text-gray-400 capitalize mb-2 flex flex-row items-center gap-2">

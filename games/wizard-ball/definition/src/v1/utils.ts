@@ -1,4 +1,10 @@
-import type { League, Player, Position, PositionChartKey } from './gameTypes';
+import type {
+  League,
+  Player,
+  PlayerStats,
+  Position,
+  PositionChartKey,
+} from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,
@@ -123,4 +129,51 @@ export function canAssignToPosition(
     return true;
   }
   return positions.includes(position);
+}
+
+export function playerStatsToHotCold(
+  kind: 'batting' | 'pitching',
+  stats: PlayerStats,
+): number {
+  if (!stats) {
+    return 0;
+  }
+  if (kind === 'pitching') {
+    const {
+      outsPitched = 0,
+      strikeouts = 0,
+      hitsAllowed = 0,
+      homeRunsAllowed = 0,
+      earnedRuns = 0,
+      walks = 0,
+    } = stats;
+    return Math.round(
+      outsPitched -
+        hitsAllowed -
+        homeRunsAllowed * 3 -
+        earnedRuns * 2 +
+        strikeouts * 2 -
+        walks,
+    );
+  }
+  const {
+    hits = 0,
+    homeRuns = 0,
+    doubles = 0,
+    triples = 0,
+    stolenBases = 0,
+    runs = 0,
+    runsBattedIn = 0,
+    atBats = 0,
+  } = stats;
+  return Math.round(
+    -atBats +
+      hits * 2 +
+      homeRuns * 5 +
+      doubles * 3 +
+      triples * 4 +
+      stolenBases +
+      runs +
+      runsBattedIn * 2,
+  );
 }

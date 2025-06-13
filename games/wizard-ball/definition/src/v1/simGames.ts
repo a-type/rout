@@ -107,7 +107,11 @@ export function setupGame(
           return pitcher;
         }
         if (!team.positionChart[pos as PositionChartKey]) {
-          throw new Error(`No player for position ${pos}`);
+          throw new Error(
+            `No player for position ${pos} ${JSON.stringify(
+              team.positionChart,
+            )}`,
+          );
         }
         return team.positionChart[pos as PositionChartKey]!;
       }),
@@ -412,11 +416,12 @@ function getActivePlayerPerks(
     ),
     ...players.flatMap((player) =>
       Object.entries(player.statusIds)
-        .filter(([id]) => {
+        .filter(([id, stacks]) => {
           const s = statusData[id as StatusType];
           return (
             !s.condition ||
             s.condition({
+              stacks,
               pitchKind,
               gameState,
               targetPlayer,

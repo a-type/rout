@@ -26,6 +26,7 @@ import { Draggable } from './Draggable';
 import { Droppable } from './Droppable';
 import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerStatus } from '../players/PlayerStatus';
 
 const positions = [
   'c',
@@ -169,10 +170,8 @@ export function TeamChart({ id }: { id: string }) {
                         className="bg-gray-700 text-gray-100"
                         content={<PlayerTooltipContent id={player.id} />}
                       >
-                        <span>
-                          {player.statusIds.injured && (
-                            <span className="text-red-500">💔</span>
-                          )}
+                        <span className="flex items-center gap-1">
+                          <PlayerStatus id={player.id} />
                           {player.name}
                           <PlayerSpecies id={player.id} />
                           <PlayerClass id={player.id} />
@@ -218,10 +217,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>
@@ -264,10 +261,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>
@@ -305,10 +300,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>

@@ -10,7 +10,11 @@ import {
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
-import { getTeamBench } from './utils';
+import {
+  getTeamBench,
+  hasPitcherPosition,
+  playerStatsToHotCold,
+} from './utils';
 import { statusData, StatusType } from './statusData';
 
 export type GlobalState = {
@@ -275,6 +279,25 @@ export const gameDefinition: GameDefinition<
         const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
+          const pitcher = hasPitcherPosition(player.positions);
+          const playerStats = result.playerStats[playerId];
+          const hotCold = playerStatsToHotCold(
+            pitcher ? 'pitching' : 'batting',
+            playerStats,
+          );
+          if (hotCold > 0) {
+            if (player.statusIds.cold) {
+              delete player.statusIds.cold;
+            } else {
+              player.statusIds.hot = (player.statusIds.hot ?? 0) + hotCold;
+            }
+          } else if (hotCold < 0) {
+            if (player.statusIds.hot) {
+              delete player.statusIds.hot;
+            } else {
+              player.statusIds.cold = (player.statusIds.cold ?? 0) - hotCold;
+            }
+          }
           const isBenchPlayer = teamBench.some((p) => p.id === playerId);
           globalState = applyXp(
             random,

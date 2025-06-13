@@ -11,6 +11,7 @@ export type Status = {
   description: string;
   icon: string;
   condition?: (props: {
+    stacks?: number;
     gameState: LeagueGameState;
     pitchKind?: PitchKind;
     isMe: boolean;
@@ -41,6 +42,40 @@ export const statusData: Record<string, Status> = {
         intelligence: -stacks * 2,
         charisma: -stacks * 2,
         constitution: -stacks * 2,
+      },
+    }),
+  },
+  hot: {
+    kind: 'buff',
+    name: 'Hot',
+    description: 'Player is on fire and plays better.',
+    icon: '🔥',
+    condition: ({ isMe, stacks = 0 }) => isMe && stacks >= 3,
+    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
+    effect: ({ stacks = 1 }) => ({
+      attributeBonus: {
+        strength: stacks,
+        agility: stacks,
+        intelligence: stacks,
+        charisma: stacks,
+        constitution: stacks,
+      },
+    }),
+  },
+  cold: {
+    kind: 'debuff',
+    name: 'Cold',
+    description: 'Player is cold and plays worse.',
+    icon: '❄️',
+    condition: ({ isMe, stacks = 0 }) => isMe && stacks >= 3,
+    round: (stacks) => Math.min(stacks - 1, Math.floor(stacks / 2)),
+    effect: ({ stacks = 1 }) => ({
+      attributeBonus: {
+        strength: -stacks,
+        agility: -stacks,
+        intelligence: -stacks,
+        charisma: -stacks,
+        constitution: -stacks,
       },
     }),
   },
