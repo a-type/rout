@@ -23,7 +23,7 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     gameSessionId,
   );
   const unsubRootMessages = websocket.onMessage((message) => {
-    console.debug('Received message', message);
+    // console.debug('Received message', message); // too noisy
   });
   const unsubErrors = websocket.onError(console.error);
 
@@ -151,7 +151,10 @@ class ReconnectingWebsocket {
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private abortReconnect = false;
 
-  constructor(private url: string, private gameSessionId: string) {}
+  constructor(
+    private url: string,
+    private gameSessionId: string,
+  ) {}
 
   send = (message: string) => {
     if (this.#status === 'closed') {

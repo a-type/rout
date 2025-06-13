@@ -574,7 +574,18 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   };
 
   private cachedLoadRoundPromises: Record<number, Promise<void>> = {};
+
+  /**
+   * Suspends the caller component until round is loaded
+   */
   @action loadRound = (roundIndex: number) => {
+    throw this.preloadRound(roundIndex);
+  };
+
+  /**
+   * Loads a round, but does not suspend the caller component.
+   */
+  preloadRound = (roundIndex: number) => {
     if (this.gameStatus.status === 'pending') {
       throw new LongGameError(
         LongGameError.Code.Unknown,
@@ -592,29 +603,35 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     if (this.rounds[roundIndex]) {
       return;
     }
-
-    // Suspends any calling component until the round is loaded
-    throw this.#getOrCreateRoundLoadingPromise(roundIndex);
+    return this.#getOrCreateRoundLoadingPromise(roundIndex);
   };
 
   #getOrCreateRoundLoadingPromise = (roundIndex: number) => {
     if (!!this.cachedLoadRoundPromises[roundIndex]) {
       return this.cachedLoadRoundPromises[roundIndex];
     }
-    const promise = getPublicRound<TGame>(this.gameSessionId, roundIndex).then(
-      action((res) => {
-        this.rounds[roundIndex] = res;
-      }),
-    );
+    const promise = getPublicRound<TGame>(this.gameSessionId, roundIndex)
+      .then(
+        action((res) => {
+          this.rounds[roundIndex] = res;
+        }),
+      )
+      .catch((err) => {
+        console.error('Error loading round', roundIndex, err);
+        this.#events.emit(
+          'error',
+          new LongGameError(LongGameError.Code.Unknown, err.message),
+        );
+        throw new LongGameError(LongGameError.Code.Unknown, err.message);
+      })
+      .finally(() => {
+        console.log('loaded round', roundIndex);
+      });
     this.cachedLoadRoundPromises[roundIndex] = promise;
     return promise;
   };
 
-  @action showRound = async (roundIndex: number) => {
-    if (!this.rounds[roundIndex]) {
-      await this.loadRound(roundIndex);
-    }
-
+  @action showRound = (roundIndex: number) => {
     this.viewingRoundIndex = roundIndex;
   };
 
