@@ -100,6 +100,7 @@ export type GlobalState = {
   playerOrder: PrefixedId<'u'>[];
   scores: Record<PrefixedId<'u'>, number>;
   lastCompletedTrick?: TakenTrick;
+  isFirstTrickOfDeal: boolean;
 };
 
 export type PlayerState = Pick<
@@ -109,6 +110,7 @@ export type PlayerState = Pick<
   | 'lastCompletedTrick'
   | 'playerOrder'
   | 'scores'
+  | 'isFirstTrickOfDeal'
 > & {
   hand: Card[];
   leadPlayerId: PrefixedId<'u'>;
@@ -295,6 +297,7 @@ export const gameDefinition: GameDefinition<
         leadPlayerId: members[0].id,
         scores: {},
         lastCompletedTrick: undefined,
+        isFirstTrickOfDeal: true,
       };
     }
     const hands = shuffleHands({ members, random });
@@ -309,6 +312,7 @@ export const gameDefinition: GameDefinition<
         (acc, member) => ({ ...acc, [member.id]: 0 }),
         {} as Record<PrefixedId<'u'>, number>,
       ),
+      isFirstTrickOfDeal: true,
     };
     return globalState;
   },
@@ -337,6 +341,7 @@ export const gameDefinition: GameDefinition<
       scores: globalState.scores,
       lastCompletedTrick: globalState.lastCompletedTrick,
       task,
+      isFirstTrickOfDeal: globalState.isFirstTrickOfDeal,
     };
   },
 
@@ -444,11 +449,16 @@ export const gameDefinition: GameDefinition<
         return {
           currentTrick: [],
           hands: newHands,
-          leadPlayerId: getTrickLeader({ hands: newHands, currentTrick: [] }),
+          leadPlayerId: getTrickLeader({
+            hands: newHands,
+            currentTrick: [],
+            isFirstTrickOfDeal: true,
+          }),
           playerOrder: globalState.playerOrder,
           scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
           scores,
           lastCompletedTrick: completedTrick,
+          isFirstTrickOfDeal: true,
         };
       }
 
@@ -467,6 +477,7 @@ export const gameDefinition: GameDefinition<
         lastCompletedTrick: completedTrick,
         hands: newHands,
         scoredCards: newScoredCards,
+        isFirstTrickOfDeal: false,
       };
     } else {
       // no, so we just need to update the current trick
