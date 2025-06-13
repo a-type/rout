@@ -28,12 +28,19 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
             justify="stretch"
             items="stretch"
           >
-            {isDraftRound ? <PassZone /> : <CurrentTrick />}
+            {isDraftRound && gameSuite.isViewingCurrentRound ? (
+              <PassZone />
+            ) : (
+              <CurrentTrick />
+            )}
           </Box>
         </Box>
         <Hand
           className="mb-lg sticky bottom-md flex-shrink-0 z-10"
-          disabled={gameSuite.finalState.task === null}
+          disabled={
+            gameSuite.finalState.task === null ||
+            !gameSuite.isViewingCurrentRound
+          }
         />
       </TokenRoot>
     </Box>

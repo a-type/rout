@@ -89,7 +89,7 @@ type PlayedCard = {
 
 type TakenTrick = {
   playerId: PrefixedId<'u'>;
-  cards: Card[];
+  cards: PlayedCard[];
 };
 
 export type GlobalState = {
@@ -416,7 +416,7 @@ export const gameDefinition: GameDefinition<
         return prev;
       });
       const winningPlayerId = winningCard.playerId;
-      const winningCards = currentTrickWithPlay.map(({ card }) => card);
+      const winningCards = currentTrickWithPlay;
       const completedTrick: TakenTrick = {
         playerId: winningPlayerId,
         cards: winningCards,
@@ -448,7 +448,7 @@ export const gameDefinition: GameDefinition<
           playerOrder: globalState.playerOrder,
           scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
           scores,
-          lastCompletedTrick: undefined,
+          lastCompletedTrick: completedTrick,
         };
       }
 
@@ -552,7 +552,9 @@ export const gameDefinition: GameDefinition<
       }
 
       const lastTrickHadScoring =
-        data.globalState.lastCompletedTrick?.cards.some(isScoringCard);
+        data.globalState.lastCompletedTrick?.cards.some(({ card }) =>
+          isScoringCard(card),
+        );
       const currentTrickEmpty = data.globalState.currentTrick.length === 0;
       const playerWithAllScoringCards = Object.entries(
         data.globalState.scoredCards,

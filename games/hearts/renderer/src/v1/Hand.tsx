@@ -68,6 +68,8 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
             />
           </Token>
         ))}
+      {/* Always keep hand space in layout */}
+      {!hand.length && <PlayingCard.Placeholder className="w-52px invisible" />}
     </TokenHand>
   );
 });
