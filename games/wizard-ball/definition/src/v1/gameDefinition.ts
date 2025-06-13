@@ -1,5 +1,12 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
+import {
+  Choice,
+  League,
+  PlayerId,
+  Position,
+  PositionChart,
+  Team,
+} from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
@@ -21,7 +28,7 @@ export type PlayerState = {
 export type TurnData = {
   choiceId?: string;
   levelupChoices?: Record<PlayerId, string[]>;
-  nextBattingOrder?: Position[];
+  nextBattingOrder?: Team['battingOrder'];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
   nextItemAssignments?: Record<PlayerId, string[]>;

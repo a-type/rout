@@ -18,6 +18,7 @@ import type {
   PlayerStats,
   Position,
   PositionChart,
+  PositionChartKey,
   RoundResult,
 } from './gameTypes';
 import {
@@ -105,10 +106,10 @@ export function setupGame(
         if (isPitcher(pos)) {
           return pitcher;
         }
-        if (!team.positionChart[pos]) {
+        if (!team.positionChart[pos as PositionChartKey]) {
           throw new Error(`No player for position ${pos}`);
         }
-        return team.positionChart[pos];
+        return team.positionChart[pos as PositionChartKey]!;
       }),
     };
     gameState.currentBatterIndex[teamId] = 0;

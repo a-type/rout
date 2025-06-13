@@ -7,6 +7,7 @@ import {
   Player,
   PlayerAttributes,
   Position,
+  PositionChartKey,
   Team,
   TeamId,
 } from './gameTypes';
@@ -18,7 +19,7 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getLevelFromXp, getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
-import { isPitcher } from './utils';
+import { canAssignToPosition, isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 import { applyXpAuto } from './boosts';
@@ -121,8 +122,11 @@ export function generateLeague(
       'rp',
       'rp',
       'rp',
+      'c',
+      'if',
+      'of',
     ];
-    team.battingOrder = forcedPositions.slice(0, 9);
+    team.battingOrder = forcedPositions.slice(0, 9) as Team['battingOrder'];
     for (let i = 0; i < playersPerTeam; i++) {
       const player = generatePlayer(random, {
         position: forcedPositions[i],
@@ -144,7 +148,12 @@ export function generateLeague(
       const position = player.positions[0];
       player.teamId = team.id;
       team.playerIds.push(player.id);
-      if (!isPitcher(position) && team.positionChart[position] === null) {
+      if (
+        !isPitcher(position) &&
+        position !== 'if' &&
+        position !== 'of' &&
+        team.positionChart[position] === null
+      ) {
         team.positionChart[position] = player.id;
       }
       if (forcedPositions[i] === 'sp') {
@@ -170,8 +179,18 @@ export function generateLeague(
           !Object.values(team.positionChart).includes(player.id),
       )
       .forEach((player) => {
-        for (const pos of player.positions) {
-          if (!isPitcher(pos) && team.positionChart[pos] !== null) {
+        if (player.positions.some((pos) => isPitcher(pos))) {
+          // If the player is a pitcher, they should not be in the position chart
+          return;
+        }
+
+        for (const pos of Object.keys(
+          team.positionChart,
+        ) as PositionChartKey[]) {
+          if (
+            canAssignToPosition(player.positions, pos) &&
+            team.positionChart[pos] !== null
+          ) {
             const currentPlayerId = team.positionChart[pos];
             const currentPlayer = league.playerLookup[currentPlayerId];
             if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
@@ -347,7 +366,18 @@ function generatePlayer(
     disadvantageTypes: [shuffledTypes[1]],
     statusIds: {},
   };
-  const positions: Position[] = ['c', '1b', '2b', '3b', 'ss', 'lf', 'cf', 'rf'];
+  const positions: Position[] = [
+    'c',
+    '1b',
+    '2b',
+    '3b',
+    'ss',
+    'lf',
+    'cf',
+    'rf',
+    'if',
+    'of',
+  ];
   if (player.positions.length === 0) {
     player.positions.push(random.item(positions));
   }
@@ -358,6 +388,16 @@ function generatePlayer(
     if (!player.positions.includes(position)) {
       player.positions.push(position);
     }
+  }
+  if (player.positions.includes('if')) {
+    player.positions = player.positions.filter(
+      (p) => !['1b', '2b', '3b', 'ss'].includes(p),
+    );
+  }
+  if (player.positions.includes('of')) {
+    player.positions = player.positions.filter(
+      (p) => !['lf', 'cf', 'rf'].includes(p),
+    );
   }
 
   if (!options.skipPerks) {

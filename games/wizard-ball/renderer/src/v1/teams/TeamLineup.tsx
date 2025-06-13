@@ -28,7 +28,11 @@ import {
 import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
-import { Position, isPitcher } from '@long-game/game-wizard-ball-definition';
+import {
+  Position,
+  Team,
+  isPitcher,
+} from '@long-game/game-wizard-ball-definition';
 import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
@@ -81,7 +85,7 @@ export function TeamLineup({ id }: { id: string }) {
   const team = finalState.league.teamLookup[id];
   const lineup = team.battingOrder;
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [items, setItems] = useState<Position[]>(lineup);
+  const [items, setItems] = useState<Team['battingOrder']>(lineup);
   useEffect(() => {
     sendTurn((turn) => ({
       ...turn,
@@ -100,8 +104,8 @@ export function TeamLineup({ id }: { id: string }) {
 
     if (over && active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = items.indexOf(active.id as Position);
-        const newIndex = items.indexOf(over.id as Position);
+        const oldIndex = items.indexOf(active.id as any);
+        const newIndex = items.indexOf(over.id as any);
 
         return arrayMove(items, oldIndex, newIndex);
       });

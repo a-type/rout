@@ -1,4 +1,4 @@
-import type { League, Player, Position } from './gameTypes';
+import type { League, Player, Position, PositionChartKey } from './gameTypes';
 
 export function scaleAttribute(
   attribute: number,
@@ -110,4 +110,17 @@ export function getTeamBench(league: League, teamId: string): Player[] {
         !team.pitchingOrder.includes(p.id) &&
         !p.positions.some((pos) => pos === 'rp'),
     );
+}
+
+export function canAssignToPosition(
+  positions: Position[],
+  position: PositionChartKey,
+): boolean {
+  if (positions.includes('if') && ['1b', '2b', '3b', 'ss'].includes(position)) {
+    return true;
+  }
+  if (positions.includes('of') && ['lf', 'cf', 'rf'].includes(position)) {
+    return true;
+  }
+  return positions.includes(position);
 }

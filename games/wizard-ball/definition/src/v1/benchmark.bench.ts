@@ -13,12 +13,12 @@ describe('benchmark', () => {
   const random = new GameRandom('test');
   describe('generate league', () => {
     bench('generate league', () => {
-      generateLeague(random, [], { numTeams: 20 });
+      generateLeague(random, [], { numTeams: 8 });
     });
   });
 
   describe('sim round', () => {
-    const league = generateLeague(random, [], { numTeams: 10, numRounds: 10 });
+    const league = generateLeague(random, [], { numTeams: 8, numRounds: 10 });
     bench('sim round', () => {
       simulateRound(random, league, league.schedule[league.currentWeek]);
     });

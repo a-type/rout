@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import {
   Position,
   PositionChart,
+  canAssignToPosition,
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { clsx, Tooltip } from '@a-type/ui';
@@ -158,7 +159,7 @@ export function TeamChart({ id }: { id: string }) {
                       disabled={currentUserId !== team.ownerId}
                       id={player.id}
                       className={clsx(
-                        player.positions.includes(position)
+                        canAssignToPosition(player.positions, position)
                           ? 'bg-gray-700'
                           : 'bg-red-500',
                         'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',

@@ -11,10 +11,9 @@ export type TeamId = string;
 export type PlayerId = string;
 export type GameId = string;
 
-export type PositionChart = Record<
-  Exclude<Position, 'sp' | 'rp'>,
-  PlayerId | null
->;
+export type PositionChartKey = Exclude<Position, 'sp' | 'rp' | 'if' | 'of'>;
+
+export type PositionChart = Record<PositionChartKey, PlayerId | null>;
 
 export type Team = {
   icon: string;
@@ -22,7 +21,7 @@ export type Team = {
   ownerId: PrefixedId<'u'> | null;
   id: TeamId;
   playerIds: PlayerId[];
-  battingOrder: Position[];
+  battingOrder: (PositionChartKey | 'sp')[];
   pitchingOrder: PlayerId[];
   positionChart: PositionChart;
   nextPitcherIndex: number;
@@ -100,7 +99,9 @@ export type Position =
   | 'cf'
   | 'rf'
   | 'sp'
-  | 'rp';
+  | 'rp'
+  | 'if'
+  | 'of';
 
 export type Base = 1 | 2 | 3;
 
