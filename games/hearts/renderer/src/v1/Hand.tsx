@@ -14,7 +14,6 @@ export interface HandProps {
 }
 
 export const Hand = hooks.withGame<HandProps>(function Hand({
-  className,
   gameSuite,
   disabled,
   ...rest
@@ -45,6 +44,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           className="h-full"
         />
       )}
+      {...rest}
     >
       {[...hand]
         .sort((a, b) => {
@@ -64,6 +64,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
             <PlayingCard
               cardSuit={getCardSuit(card)}
               cardRank={getCardRank(card)}
+              className="w-52px"
             />
           </Token>
         ))}

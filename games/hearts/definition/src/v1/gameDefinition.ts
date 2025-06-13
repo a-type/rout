@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { isPrefixedId, PrefixedId } from '@long-game/common';
 import { GameDefinition, SystemChatMessage } from '@long-game/game-definition';
 import { shuffleHands } from './deck';
 import { getDraftingRound, getRoundIndex } from './rounds';
@@ -547,6 +547,28 @@ export const gameDefinition: GameDefinition<
           metadata: {
             type: 'qs-played',
             playerId: qsPlayedTurn.playerId,
+          },
+        });
+      }
+
+      const lastTrickHadScoring =
+        data.globalState.lastCompletedTrick?.cards.some(isScoringCard);
+      const currentTrickEmpty = data.globalState.currentTrick.length === 0;
+      const playerWithAllScoringCards = Object.entries(
+        data.globalState.scoredCards,
+      ).find(([_, cards]) => cards.filter(isScoringCard).length === 26);
+      const playerShotMoon =
+        lastTrickHadScoring &&
+        currentTrickEmpty &&
+        playerWithAllScoringCards?.[0];
+      if (playerShotMoon && isPrefixedId(playerShotMoon, 'u')) {
+        const indexInOrder =
+          data.globalState.playerOrder.indexOf(playerShotMoon);
+        messages.push({
+          content: `Player ${indexInOrder + 1} has shot the moon!`,
+          metadata: {
+            type: 'shot-moon',
+            playerId: playerWithAllScoringCards[0],
           },
         });
       }

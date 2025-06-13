@@ -1,5 +1,6 @@
 import {
   Box,
+  BoxProps,
   clsx,
   Icon,
   IconName,
@@ -38,6 +39,7 @@ function PlayingCardRoot({
       data-suit={cardSuit}
       {...rest}
     >
+      <ExtremelySimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <SimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <DetailedCardContent cardSuit={cardSuit} cardRank={cardRank} />
       {playerId && (
@@ -47,6 +49,29 @@ function PlayingCardRoot({
         />
       )}
     </CardRoot>
+  );
+}
+
+function ExtremelySimpleCardContent({
+  cardSuit,
+  cardRank,
+}: {
+  cardSuit: PlayingCardSuit;
+  cardRank: number;
+}) {
+  return (
+    <Box
+      d="col"
+      layout="center center"
+      full
+      p="xs"
+      className="flex @[40px]:hidden rounded-xs"
+      surface="default"
+      border
+    >
+      <CardNumber cardRank={cardRank} />
+      <CardSuitIcon cardSuit={cardSuit} />
+    </Box>
   );
 }
 
@@ -63,7 +88,9 @@ function SimpleCardContent({
       layout="center center"
       full
       p="xs"
-      className="flex @[80px]:hidden"
+      className="hidden @[40px]:flex @[80px]:hidden rounded-sm"
+      surface="default"
+      border
     >
       <Box d="col" className="absolute left-2px top-2px">
         <CardNumber cardRank={cardRank} className="mr-auto" />
@@ -177,7 +204,14 @@ function DetailedCardContent({
 
   const pattern = symbolPatterns[symbolCount - 1];
   return (
-    <Box layout="center center" full d="col" className="hidden @[80px]:flex">
+    <Box
+      layout="center center"
+      full
+      d="col"
+      surface="default"
+      border
+      className="hidden @[80px]:flex"
+    >
       <NumberSuitStack className="top-0 left-0">
         <CardNumber cardRank={cardRank} />
         <CardSuitIcon cardSuit={cardSuit} />
@@ -214,16 +248,23 @@ const NumberSuitStack = withClassName(
 
 export function PlayingCardPlaceholder({
   children,
-}: {
-  children?: React.ReactNode;
-}) {
+  className,
+  ...rest
+}: BoxProps) {
   return (
     <CardRoot
-      className="opacity-50 border-dashed"
+      className={clsx('opacity-50', className)}
       container="reset"
       data-disabled
+      {...rest}
     >
-      {children}
+      <Box
+        border
+        full
+        className="border-dashed @[40px]:rounded-sm @[80px]:rounded-lg rounded-xs"
+      >
+        {children}
+      </Box>
     </CardRoot>
   );
 }
@@ -233,9 +274,8 @@ export const PlayingCard = Object.assign(PlayingCardRoot, {
 });
 
 const CardRoot = withClassName(
-  withProps(Box, { surface: 'default', container: 'reset', border: true }),
-  'aspect-[3/4] flex-1 h-auto min-w-50px min-h-60px max-h-50vh select-none @container',
-  '[&[data-variant=detailed]]:(min-h-100px min-w-80px)',
+  withProps(Box, { container: 'reset' }),
+  'aspect-[3/4] flex-1 h-auto min-w-24px min-h-32px max-h-50vh select-none @container',
   '[&[data-suit=s]]:(color-black)',
   '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
   '[&[data-suit=h]]:(color-attention-ink)',

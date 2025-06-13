@@ -103,9 +103,14 @@ export function useDragGesture(options?: DragGestureOptions) {
     }
   }
 
-  const { claim } = useGesture({
-    onMove: moveDrag,
-  });
+  const { claim } = useGesture(
+    {
+      onMove: moveDrag,
+    },
+    {
+      disabled: draggable.disabled,
+    },
+  );
 
   function beginDrag() {
     const el = ref.current;
@@ -125,12 +130,15 @@ export function useDragGesture(options?: DragGestureOptions) {
 
   // when pointer down starts on our element, that marks it as the active
   // drag candidate
-  useElementEvent(ref, 'pointerdown', beginDrag, { disabled: isCandidate });
+  useElementEvent(ref, 'pointerdown', beginDrag, {
+    disabled: isCandidate || draggable.disabled,
+  });
 
   return {
     ref,
     isCandidate,
     isDragging,
+    disabled: draggable.disabled,
   };
 }
 

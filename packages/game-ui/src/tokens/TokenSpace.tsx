@@ -118,6 +118,9 @@ export function useTokenSpaceContext() {
   }
   return context;
 }
+export function useMaybeTokenSpaceContext() {
+  return useContext(TokenSpaceContext);
+}
 
 function TokenSpaceValidationMessage({ message }: { message: string }) {
   if (!message) return null;

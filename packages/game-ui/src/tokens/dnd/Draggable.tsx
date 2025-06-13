@@ -39,7 +39,7 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
 function DraggableRoot({
   id,
   data,
-  disabled,
+  disabled = false,
   children,
   ...rest
 }: DraggableProps) {
@@ -60,6 +60,7 @@ function DraggableRoot({
         data,
         isDragged,
         isCandidate,
+        disabled,
       }}
     >
       <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
@@ -74,6 +75,7 @@ export interface DraggableContextValue {
   data: any;
   isDragged: boolean;
   isCandidate: boolean;
+  disabled: boolean;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -100,7 +102,7 @@ function DraggableHandle({
   activationConstraint,
   allowStartFromDragIn = false,
 }: DraggableHandleProps) {
-  const { ref, isCandidate, isDragging } = useDragGesture({
+  const { ref, isCandidate, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
   });
@@ -108,7 +110,7 @@ function DraggableHandle({
   return (
     <motion.div
       style={{
-        touchAction: 'none',
+        touchAction: disabled ? 'initial' : 'none',
         pointerEvents: isCandidate ? 'none' : 'auto',
       }}
       onContextMenu={(e) => e.preventDefault()}
@@ -241,6 +243,7 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
       style={{
         position: 'absolute',
         transform,
+        zIndex: 1000000,
       }}
       ref={ref}
     >
