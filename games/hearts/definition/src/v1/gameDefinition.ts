@@ -320,8 +320,8 @@ export const gameDefinition: GameDefinition<
       .passOffset
       ? 'draft'
       : getCurrentPlayer(globalState) === playerId
-      ? 'play'
-      : null;
+        ? 'play'
+        : null;
     return {
       playerOrder: globalState.playerOrder,
       currentTrick: globalState.currentTrick,
@@ -435,7 +435,8 @@ export const gameDefinition: GameDefinition<
           (acc, member) => ({
             ...acc,
             [member.id]:
-              acc[member.id] + getScore(globalState.scoredCards[member.id]),
+              (acc[member.id] || 0) +
+              getScore(globalState.scoredCards[member.id]),
           }),
           {} as Record<PrefixedId<'u'>, number>,
         );
