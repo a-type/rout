@@ -14,6 +14,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
+  GameRandom,
   getGameState,
   getLatestVersion,
   RoundIndexResult,
@@ -529,18 +530,21 @@ export class GameSession extends DurableObject<ApiBindings> {
   async getDetails() {
     const sessionData = await this.#getSessionData();
     const roundData = await this.#getCurrentRoundState();
+    const status = await this.getStatus();
+    const members = await this.getMembers();
+    const playerStatuses = await this.getPlayerStatuses();
     return {
       id: sessionData.id,
-      status: await this.getStatus(),
+      status,
       gameId: sessionData.gameId,
       gameVersion: sessionData.gameVersion,
-      members: await this.getMembers(),
+      members,
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
       nextRoundCheckAt: roundData.checkAgainAt?.toISOString() ?? null,
       currentRoundIndex: roundData.roundIndex,
-      playerStatuses: await this.getPlayerStatuses(),
+      playerStatuses,
     };
   }
   async resetGame() {
@@ -815,9 +819,9 @@ export class GameSession extends DurableObject<ApiBindings> {
     const gameDefinition = await this.getGameDefinition();
     const members = await this.getMembers();
     const sessionData = await this.#getSessionData();
-    const computed = getGameState(gameDefinition, {
-      rounds,
-      randomSeed: sessionData.randomSeed,
+    const random = new GameRandom(sessionData.randomSeed);
+    const computed = getGameState(gameDefinition, rounds, {
+      random,
       members,
     });
     return computed;
@@ -878,9 +882,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const gameTimeZone = sessionData.timezone;
     // TODO: we already have turns in scope, we could compute this without
     // dipping back.
-    const globalState = await this.#getGlobalStateUnchecked(
-      latestRoundFromTurns,
-    );
+    const globalState =
+      await this.#getGlobalStateUnchecked(latestRoundFromTurns);
     return gameDefinition.getRoundIndex({
       turns,
       members,

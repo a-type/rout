@@ -68,8 +68,8 @@ export const gameDefinition: GameDefinition<
     }
   },
 
-  getState: ({ initialState }) => {
-    return initialState;
+  applyRoundToGlobalState: ({ globalState }) => {
+    return globalState;
   },
 
   getPublicTurn: ({ turn, globalState, viewerId }) => {

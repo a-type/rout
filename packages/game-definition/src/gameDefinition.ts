@@ -4,7 +4,7 @@ import {
   GameStatus,
   PrefixedId,
 } from '@long-game/common';
-import { GameRandom } from './random.js';
+import { GameRandom, GameRandomState } from './random.js';
 import { RoundIndexDecider } from './rounds.js';
 
 export type BaseTurnData = Record<string, unknown>;
@@ -97,27 +97,14 @@ export type GameDefinition<
     roundIndex: number;
   }) => PlayerState;
 
-  applyRoundToGlobalState?: (data: {
+  applyRoundToGlobalState: (data: {
     globalState: GlobalState;
     round: GameRound<Turn<TurnData>>;
     random: GameRandom;
     members: GameMember[];
-    initialState: GlobalState;
-    /** Prior rounds */
-    rounds: GameRound<Turn<TurnData>>[];
     roundIndex: number;
   }) => GlobalState;
 
-  /**
-   * Allows overriding all the underlying logic of computing the
-   * game state as an alternative to applyRoundToGlobalState.
-   */
-  getState?: (data: {
-    initialState: GlobalState;
-    rounds: GameRound<Turn<TurnData>>[];
-    random: GameRandom;
-    members: { id: string }[];
-  }) => GlobalState;
   /**
    * This is the public view of a turn, visible to all players
    * after the turn has been played. The public info can also
@@ -163,38 +150,52 @@ export type GameDefinition<
 };
 
 export function validateGameDefinition(game: GameDefinition) {
-  if (!game.getState && !game.applyRoundToGlobalState) {
-    throw new Error(
-      `Game ${game.version} must define either getState or applyRoundToGlobalState`,
-    );
-  }
+  // no-op, for now
 }
 
+/**
+ * Computes game state from the initial state and rounds.
+ */
 export function getGameState(
   game: GameDefinition,
-  data: {
-    rounds: GameRound<any>[];
-    randomSeed: string;
+  rounds: GameRound<any>[],
+  ctx: {
+    random: GameRandom;
     members: GameMember[];
   },
 ) {
-  const random = new GameRandom(data.randomSeed);
-  const initialState = game.getInitialGlobalState({
-    random,
-    members: data.members,
-  });
-  if (game.getState) {
-    return game.getState({ ...data, initialState, random });
-  } else {
-    return data.rounds.reduce((state, round, i) => {
-      return game.applyRoundToGlobalState!({
-        ...data,
-        initialState,
-        globalState: state,
-        round,
-        random,
-        roundIndex: i,
-      });
-    }, initialState);
-  }
+  const initialState = game.getInitialGlobalState(ctx);
+
+  return rounds.reduce((state, round, i) => {
+    return game.applyRoundToGlobalState({
+      ...ctx,
+      globalState: state,
+      round,
+      roundIndex: i,
+    });
+  }, initialState);
+}
+
+export function getGameStateFromCheckpoint(
+  game: GameDefinition,
+  checkpoint: {
+    // we must restore the seed random state to ensure determinism
+    randomState: GameRandomState;
+    state: any;
+    roundIndex: number;
+  },
+  rounds: GameRound<any>[],
+  ctx: {
+    random: GameRandom;
+    members: GameMember[];
+  },
+) {
+  return rounds.reduce((state, round, i) => {
+    return game.applyRoundToGlobalState({
+      ...ctx,
+      globalState: state,
+      round,
+      roundIndex: checkpoint.roundIndex + i,
+    });
+  }, checkpoint.state);
 }

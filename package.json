@@ -28,6 +28,7 @@
     "unocss": "catalog:",
     "web-push": "catalog:",
     "wrangler": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "prettier": "3.5.3"
   }
 }

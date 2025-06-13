@@ -71,7 +71,11 @@ const openGameSessionMiddleware = createMiddleware<{
   }
   ctx.set('gameSessionState', sessionState as any);
   ctx.set('gameSessionId', id);
-  return next();
+  try {
+    return await next();
+  } finally {
+    userStore[Symbol.dispose]();
+  }
 });
 
 export const gameSessionRouter = new Hono<Env>()
@@ -110,16 +114,14 @@ export const gameSessionRouter = new Hono<Env>()
     const sessionId = ctx.get('gameSessionId');
     const userStore = ctx.get('userStore');
     const myInvitation = ctx.get('myInvitation');
-    const [members, invitations, summary] = await Promise.all([
-      userStore.getGameSessionMembers(sessionId),
-      userStore.getInvitationsToGameSession(sessionId),
-      state.getDetails(),
-    ]);
+    using members = await userStore.getGameSessionMembers(sessionId);
+    using invitations = await userStore.getInvitationsToGameSession(sessionId);
+    using summary = await state.getDetails();
 
     // while in pregame, double check that vital data is
     // synced to the DO...
     if (summary.status.status === 'pending') {
-      state.updateMembers(members);
+      await state.updateMembers(members);
     }
 
     return ctx.json({
@@ -199,9 +201,8 @@ export const gameSessionRouter = new Hono<Env>()
   .get('/inviteLink', async (ctx) => {
     const userStore = ctx.get('userStore');
     const gameSessionId = ctx.get('gameSessionId');
-    const code = await userStore.getGameSessionInvitationLinkCode(
-      gameSessionId,
-    );
+    const code =
+      await userStore.getGameSessionInvitationLinkCode(gameSessionId);
     const link = new URL(`/gameInvite/${code}`, ctx.env.UI_ORIGIN);
     return ctx.json({ link: link.toString() });
   })
