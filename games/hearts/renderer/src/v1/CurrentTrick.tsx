@@ -86,7 +86,7 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
                   {i === 0 && (
                     <Box gap layout="center center" d="col" full>
                       <PlayerAvatar playerId={pendingPlayerId} size="60%" />
-                      <div>
+                      <div className="p-sm text-center">
                         {myTurn ? (
                           'Your turn!'
                         ) : (

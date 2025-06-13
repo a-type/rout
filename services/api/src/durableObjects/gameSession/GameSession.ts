@@ -14,8 +14,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
-  GameRandom,
-  getGameState,
+  GameStateCache,
   getLatestVersion,
   RoundIndexResult,
   Turn,
@@ -67,6 +66,7 @@ interface GameSessionRoundState {
 export class GameSession extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #socketHandler: GameSessionSocketHandler;
+  #stateCache: GameStateCache | undefined;
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
@@ -115,6 +115,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async #setSessionData(data: GameSessionBaseData) {
     await this.ctx.storage.put('sessionData', data);
+    // invalidate state cache -- if members or random seed change,
+    // it's no longer valid and must be recomputed
+    this.#stateCache = undefined;
     return data;
   }
   async #updateSessionData(updates: Partial<GameSessionBaseData>) {
@@ -200,6 +203,24 @@ export class GameSession extends DurableObject<ApiBindings> {
     return (await this.#getSessionData()).members.sort((a, b) =>
       a.id.localeCompare(b.id),
     );
+  }
+
+  async #getStateCache(): Promise<GameStateCache> {
+    if (this.#stateCache) return this.#stateCache;
+    const sessionData = await this.#getSessionData();
+    const gameDefinition = await this.getGameDefinition();
+    if (!sessionData || !gameDefinition) {
+      throw new LongGameError(
+        LongGameError.Code.InternalServerError,
+        `Cannot get game state before session is initialized`,
+      );
+    }
+    const cache = new GameStateCache(gameDefinition, {
+      randomSeed: sessionData.randomSeed,
+      members: sessionData.members,
+    });
+    this.#stateCache = cache;
+    return cache;
   }
 
   async delete() {
@@ -816,15 +837,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const rounds = await this.#getRoundsUnchecked({
       upToAndIncluding: roundIndex,
     });
-    const gameDefinition = await this.getGameDefinition();
-    const members = await this.getMembers();
-    const sessionData = await this.#getSessionData();
-    const random = new GameRandom(sessionData.randomSeed);
-    const computed = getGameState(gameDefinition, rounds, {
-      random,
-      members,
-    });
-    return computed;
+    const cache = await this.#getStateCache();
+    return cache.getState(rounds);
   }
   async #getPlayerStateUnchecked(
     playerId: PrefixedId<'u'>,
