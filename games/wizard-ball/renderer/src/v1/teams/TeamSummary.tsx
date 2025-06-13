@@ -10,6 +10,7 @@ import { PlayerClass } from '../players/PlayerClass';
 import { Link } from 'react-router';
 import { PlayerLevel } from '../players/PlayerLevel';
 import { capitalize } from '../utils';
+import { PlayerStatus } from '../players/PlayerStatus';
 
 export function TeamSummary({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -32,8 +33,8 @@ export function TeamSummary({ id }: { id: string }) {
               key={player.id}
               className="flex flex-col items-center gap-2 p-3 bg-gray-800 rounded"
             >
-              <span className="font-bold">
-                {!!player.statusIds.injured ? '💔 ' : ''}
+              <span className="font-bold text-lg flex flex-row items-center gap-2">
+                <PlayerStatus id={player.id} />
                 {player.positions.join('/').toUpperCase()} {player.name}{' '}
               </span>
               <span className="text-sm text-gray-400">

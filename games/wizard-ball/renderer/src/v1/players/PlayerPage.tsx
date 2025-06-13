@@ -24,6 +24,7 @@ import { AttributeSummary } from '../ratings/AttributeSummary';
 import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
 import { StatusChip } from '../perks/StatusChip';
+import { PlayerStatus } from './PlayerStatus';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -74,8 +75,8 @@ export function PlayerPage({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl font-bold mb-0">
-          {player.statusIds.injured && <span className="text-red-500">💔</span>}
+        <h1 className="text-2xl font-bold mb-0 flex flex-row items-center gap-2">
+          <PlayerStatus id={player.id} />
           {playerName}
         </h1>
         <div className="flex flex-row gap-1 mb-1 items-center">
@@ -245,68 +246,70 @@ export function PlayerPage({ id }: { id: string }) {
             <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
             <div className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold mb-2">Pitching Stats</h2>
-              <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
-                <thead>
-                  <tr className="font-medium">
-                    <th className="px-3 py-2 border-b">Game</th>
-                    {pitchingStats.map((stat) => (
-                      <th
-                        key={stat.value}
-                        className="px-3 py-2 border-b text-center"
-                      >
-                        {stat.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {games.map((game, index) => {
-                    const stats = calculatePlayerStats(
-                      finalState.league.gameResults.flat(),
-                      {
-                        gameIds: [game.id],
-                        playerIds: [id],
-                      },
-                    )[id];
-                    return (
-                      <tr
-                        key={index}
-                        className={clsx(
-                          index % 2 === 0 && 'bg-gray-500/30',
-                          'cursor-pointer hover:bg-gray-500/50',
-                        )}
-                      >
-                        <td className="px-3 py-2 border-b whitespace-nowrap">
-                          <Link to={{ search: `?gameId=${game.id}` }}>
-                            {renderGameName(game.id)}
-                          </Link>
-                        </td>
-                        {pitchingStats.map((stat) => (
-                          <td
-                            key={stat.value}
-                            className="px-3 py-2 border-b text-center"
-                          >
-                            {stats[stat.value] ?? 0}
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
+                  <thead>
+                    <tr className="font-medium">
+                      <th className="px-3 py-2 border-b">Game</th>
+                      {pitchingStats.map((stat) => (
+                        <th
+                          key={stat.value}
+                          className="px-3 py-2 border-b text-center"
+                        >
+                          {stat.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {games.map((game, index) => {
+                      const stats = calculatePlayerStats(
+                        finalState.league.gameResults.flat(),
+                        {
+                          gameIds: [game.id],
+                          playerIds: [id],
+                        },
+                      )[id];
+                      return (
+                        <tr
+                          key={index}
+                          className={clsx(
+                            index % 2 === 0 && 'bg-gray-500/30',
+                            'cursor-pointer hover:bg-gray-500/50',
+                          )}
+                        >
+                          <td className="px-3 py-2 border-b whitespace-nowrap">
+                            <Link to={{ search: `?gameId=${game.id}` }}>
+                              {renderGameName(game.id)}
+                            </Link>
                           </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="font-semibold">
-                    <td className="px-3 py-2 border-t">Total</td>
-                    {pitchingStats.map((stat) => (
-                      <td
-                        key={stat.value}
-                        className="px-3 py-2 border-t text-center"
-                      >
-                        {totalPlayerStats[id]?.[stat.value] ?? 0}
-                      </td>
-                    ))}
-                  </tr>
-                </tfoot>
-              </table>
+                          {pitchingStats.map((stat) => (
+                            <td
+                              key={stat.value}
+                              className="px-3 py-2 border-b text-center"
+                            >
+                              {stats[stat.value] ?? 0}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="font-semibold">
+                      <td className="px-3 py-2 border-t">Total</td>
+                      {pitchingStats.map((stat) => (
+                        <td
+                          key={stat.value}
+                          className="px-3 py-2 border-t text-center"
+                        >
+                          {totalPlayerStats[id]?.[stat.value] ?? 0}
+                        </td>
+                      ))}
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </>
         )}

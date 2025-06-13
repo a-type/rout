@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import {
   Position,
   PositionChart,
+  canAssignToPosition,
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { clsx, Tooltip } from '@a-type/ui';
@@ -25,6 +26,7 @@ import { Draggable } from './Draggable';
 import { Droppable } from './Droppable';
 import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerStatus } from '../players/PlayerStatus';
 
 const positions = [
   'c',
@@ -158,7 +160,7 @@ export function TeamChart({ id }: { id: string }) {
                       disabled={currentUserId !== team.ownerId}
                       id={player.id}
                       className={clsx(
-                        player.positions.includes(position)
+                        canAssignToPosition(player.positions, position)
                           ? 'bg-gray-700'
                           : 'bg-red-500',
                         'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',
@@ -168,10 +170,8 @@ export function TeamChart({ id }: { id: string }) {
                         className="bg-gray-700 text-gray-100"
                         content={<PlayerTooltipContent id={player.id} />}
                       >
-                        <span>
-                          {player.statusIds.injured && (
-                            <span className="text-red-500">💔</span>
-                          )}
+                        <span className="flex items-center gap-1">
+                          <PlayerStatus id={player.id} />
                           {player.name}
                           <PlayerSpecies id={player.id} />
                           <PlayerClass id={player.id} />
@@ -217,10 +217,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>
@@ -263,10 +261,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>
@@ -304,10 +300,8 @@ export function TeamChart({ id }: { id: string }) {
                       className="bg-gray-700 text-gray-100"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
-                      <span>
-                        {player.statusIds.injured && (
-                          <span className="text-red-500">💔</span>
-                        )}
+                      <span className="flex items-center gap-1">
+                        <PlayerStatus id={player.id} />
                         {player.name}
                       </span>
                     </Tooltip>

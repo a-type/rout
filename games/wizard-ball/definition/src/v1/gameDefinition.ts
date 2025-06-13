@@ -1,9 +1,20 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { Choice, League, PlayerId, Position, PositionChart } from './gameTypes';
+import {
+  Choice,
+  League,
+  PlayerId,
+  Position,
+  PositionChart,
+  Team,
+} from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
-import { getTeamBench } from './utils';
+import {
+  getTeamBench,
+  hasPitcherPosition,
+  playerStatsToHotCold,
+} from './utils';
 import { statusData, StatusType } from './statusData';
 
 export type GlobalState = {
@@ -21,7 +32,7 @@ export type PlayerState = {
 export type TurnData = {
   choiceId?: string;
   levelupChoices?: Record<PlayerId, string[]>;
-  nextBattingOrder?: Position[];
+  nextBattingOrder?: Team['battingOrder'];
   nextPitchingOrder?: PlayerId[];
   nextPositionChart?: PositionChart;
   nextItemAssignments?: Record<PlayerId, string[]>;
@@ -268,6 +279,25 @@ export const gameDefinition: GameDefinition<
         const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
+          const pitcher = hasPitcherPosition(player.positions);
+          const playerStats = result.playerStats[playerId];
+          const hotCold = playerStatsToHotCold(
+            pitcher ? 'pitching' : 'batting',
+            playerStats,
+          );
+          if (hotCold > 0) {
+            if (player.statusIds.cold) {
+              delete player.statusIds.cold;
+            } else {
+              player.statusIds.hot = (player.statusIds.hot ?? 0) + hotCold;
+            }
+          } else if (hotCold < 0) {
+            if (player.statusIds.hot) {
+              delete player.statusIds.hot;
+            } else {
+              player.statusIds.cold = (player.statusIds.cold ?? 0) - hotCold;
+            }
+          }
           const isBenchPlayer = teamBench.some((p) => p.id === playerId);
           globalState = applyXp(
             random,
