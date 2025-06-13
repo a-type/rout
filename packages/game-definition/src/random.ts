@@ -1,13 +1,17 @@
-import seedrandom, { PRNG } from 'seedrandom';
+import seedrandom, { State } from 'seedrandom';
+
+export type GameRandomState = State.Arc4;
 
 export class GameRandom {
   private seed: string;
-  private random: PRNG;
+  private random;
   private idCounter = 0;
 
-  constructor(seed: string) {
+  constructor(seed: string, restoreState?: GameRandomState) {
     this.seed = seed;
-    this.random = seedrandom(seed);
+    this.random = seedrandom(seed, {
+      state: restoreState || true,
+    });
   }
 
   float(min = 0, max = 1) {
@@ -56,9 +60,7 @@ export class GameRandom {
     return copy;
   }
 
-  __advance = (count = 1) => {
-    for (let i = 0; i < count; i++) {
-      this.random();
-    }
-  };
+  getState() {
+    return this.random.state();
+  }
 }

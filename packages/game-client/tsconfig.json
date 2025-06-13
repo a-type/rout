@@ -4,7 +4,7 @@
     "jsx": "preserve",
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": ["es2017", "dom", "dom.iterable", "ES2021"],
+    "lib": ["dom", "dom.iterable", "ESNext"],
     "useDefineForClassFields": true,
     "experimentalDecorators": false,
     "declarationDir": "./dist",

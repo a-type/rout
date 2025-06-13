@@ -86,7 +86,10 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
 
   return (
-    <motion.div style={{ position: 'absolute', transform }} ref={ref}>
+    <motion.div
+      style={{ position: 'absolute', transform, zIndex: 1000000 }}
+      ref={ref}
+    >
       {children}
     </motion.div>
   );

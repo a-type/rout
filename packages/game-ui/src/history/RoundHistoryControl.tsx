@@ -1,4 +1,4 @@
-import { Box, Button, Icon, Select } from '@a-type/ui';
+import { Box, Button, Icon, Select, Spinner } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
 import { useTransition } from 'react';
 
@@ -15,14 +15,15 @@ export const RoundHistoryControl = withGame(
     const [transitioning, startTransition] = useTransition();
 
     const loadRound = (index: number) => {
-      startTransition(() => {
+      startTransition(async () => {
+        await suite.preloadRound(index);
         suite.showRound(index);
         // preload adjacent rounds if any
         if (index > 0) {
-          suite.loadRound(index - 1);
+          suite.preloadRound(index - 1);
         }
         if (index < latestRoundIndex) {
-          suite.loadRound(index + 1);
+          suite.preloadRound(index + 1);
         }
       });
     };
@@ -47,7 +48,10 @@ export const RoundHistoryControl = withGame(
             loadRound(asInt);
           }}
         >
-          <Select.Trigger size="small" className="px-md" />
+          <Select.Trigger size="small" className="px-md">
+            <Select.Value />
+            {transitioning ? <Spinner size={12} /> : <Select.Icon />}
+          </Select.Trigger>
           <Select.Content>
             {/* Note: specifically skipping latest index, which === current */}
             {Array.from({ length: latestRoundIndex + 1 }).map((_, i) => (

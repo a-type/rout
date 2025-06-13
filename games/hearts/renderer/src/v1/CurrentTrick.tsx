@@ -17,7 +17,7 @@ export interface CurrentTrickProps {
 
 export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
   function CurrentTrick({ gameSuite, className }) {
-    const { currentTrick } = gameSuite.finalState;
+    const { currentTrick, lastCompletedTrick } = gameSuite.finalState;
     const pendingPlayerId = Object.keys(gameSuite.playerStatuses).find(
       (playerId) => {
         assertPrefixedId(playerId, 'u');
@@ -26,6 +26,16 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
     ) as PrefixedId<'u'>;
     const myId = gameSuite.playerId;
     const myTurn = myId === pendingPlayerId;
+
+    // UX: for the current round, we show the current trick, even if it's empty.
+    // for prior rounds, we show the last completed trick if the current trick is empty,
+    // because we're showing the result of that trick.
+
+    const trickToShow = gameSuite.isViewingCurrentRound
+      ? currentTrick
+      : !lastCompletedTrick || currentTrick.length > 0
+        ? currentTrick
+        : lastCompletedTrick?.cards || [];
 
     return (
       <Box
@@ -71,7 +81,7 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
           }}
         >
           <CardGrid>
-            {currentTrick.map((card) => (
+            {trickToShow.map((card) => (
               <PlayingCard
                 key={card.card}
                 cardSuit={getCardSuit(card.card)}
@@ -79,14 +89,14 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
                 playerId={card.playerId}
               />
             ))}
-            {new Array(gameSuite.members.length - currentTrick.length)
+            {new Array(gameSuite.members.length - trickToShow.length)
               .fill(null)
               .map((_, i) => (
                 <PlayingCard.Placeholder key={i}>
                   {i === 0 && (
                     <Box gap layout="center center" d="col" full>
                       <PlayerAvatar playerId={pendingPlayerId} size="60%" />
-                      <div>
+                      <div className="p-sm text-center">
                         {myTurn ? (
                           'Your turn!'
                         ) : (

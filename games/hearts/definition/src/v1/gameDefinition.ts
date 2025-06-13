@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { isPrefixedId, PrefixedId } from '@long-game/common';
 import { GameDefinition, SystemChatMessage } from '@long-game/game-definition';
 import { shuffleHands } from './deck';
 import { getDraftingRound, getRoundIndex } from './rounds';
@@ -89,7 +89,7 @@ type PlayedCard = {
 
 type TakenTrick = {
   playerId: PrefixedId<'u'>;
-  cards: Card[];
+  cards: PlayedCard[];
 };
 
 export type GlobalState = {
@@ -100,6 +100,7 @@ export type GlobalState = {
   playerOrder: PrefixedId<'u'>[];
   scores: Record<PrefixedId<'u'>, number>;
   lastCompletedTrick?: TakenTrick;
+  isFirstTrickOfDeal: boolean;
 };
 
 export type PlayerState = Pick<
@@ -109,6 +110,7 @@ export type PlayerState = Pick<
   | 'lastCompletedTrick'
   | 'playerOrder'
   | 'scores'
+  | 'isFirstTrickOfDeal'
 > & {
   hand: Card[];
   leadPlayerId: PrefixedId<'u'>;
@@ -295,6 +297,7 @@ export const gameDefinition: GameDefinition<
         leadPlayerId: members[0].id,
         scores: {},
         lastCompletedTrick: undefined,
+        isFirstTrickOfDeal: true,
       };
     }
     const hands = shuffleHands({ members, random });
@@ -309,6 +312,7 @@ export const gameDefinition: GameDefinition<
         (acc, member) => ({ ...acc, [member.id]: 0 }),
         {} as Record<PrefixedId<'u'>, number>,
       ),
+      isFirstTrickOfDeal: true,
     };
     return globalState;
   },
@@ -320,8 +324,8 @@ export const gameDefinition: GameDefinition<
       .passOffset
       ? 'draft'
       : getCurrentPlayer(globalState) === playerId
-      ? 'play'
-      : null;
+        ? 'play'
+        : null;
     return {
       playerOrder: globalState.playerOrder,
       currentTrick: globalState.currentTrick,
@@ -337,6 +341,7 @@ export const gameDefinition: GameDefinition<
       scores: globalState.scores,
       lastCompletedTrick: globalState.lastCompletedTrick,
       task,
+      isFirstTrickOfDeal: globalState.isFirstTrickOfDeal,
     };
   },
 
@@ -416,7 +421,7 @@ export const gameDefinition: GameDefinition<
         return prev;
       });
       const winningPlayerId = winningCard.playerId;
-      const winningCards = currentTrickWithPlay.map(({ card }) => card);
+      const winningCards = currentTrickWithPlay;
       const completedTrick: TakenTrick = {
         playerId: winningPlayerId,
         cards: winningCards,
@@ -435,7 +440,8 @@ export const gameDefinition: GameDefinition<
           (acc, member) => ({
             ...acc,
             [member.id]:
-              acc[member.id] + getScore(globalState.scoredCards[member.id]),
+              (acc[member.id] || 0) +
+              getScore(globalState.scoredCards[member.id]),
           }),
           {} as Record<PrefixedId<'u'>, number>,
         );
@@ -443,11 +449,16 @@ export const gameDefinition: GameDefinition<
         return {
           currentTrick: [],
           hands: newHands,
-          leadPlayerId: getTrickLeader({ hands: newHands, currentTrick: [] }),
+          leadPlayerId: getTrickLeader({
+            hands: newHands,
+            currentTrick: [],
+            isFirstTrickOfDeal: true,
+          }),
           playerOrder: globalState.playerOrder,
           scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
           scores,
-          lastCompletedTrick: undefined,
+          lastCompletedTrick: completedTrick,
+          isFirstTrickOfDeal: true,
         };
       }
 
@@ -466,6 +477,7 @@ export const gameDefinition: GameDefinition<
         lastCompletedTrick: completedTrick,
         hands: newHands,
         scoredCards: newScoredCards,
+        isFirstTrickOfDeal: false,
       };
     } else {
       // no, so we just need to update the current trick
@@ -546,6 +558,30 @@ export const gameDefinition: GameDefinition<
           metadata: {
             type: 'qs-played',
             playerId: qsPlayedTurn.playerId,
+          },
+        });
+      }
+
+      const lastTrickHadScoring =
+        data.globalState.lastCompletedTrick?.cards.some(({ card }) =>
+          isScoringCard(card),
+        );
+      const currentTrickEmpty = data.globalState.currentTrick.length === 0;
+      const playerWithAllScoringCards = Object.entries(
+        data.globalState.scoredCards,
+      ).find(([_, cards]) => cards.filter(isScoringCard).length === 26);
+      const playerShotMoon =
+        lastTrickHadScoring &&
+        currentTrickEmpty &&
+        playerWithAllScoringCards?.[0];
+      if (playerShotMoon && isPrefixedId(playerShotMoon, 'u')) {
+        const indexInOrder =
+          data.globalState.playerOrder.indexOf(playerShotMoon);
+        messages.push({
+          content: `Player ${indexInOrder + 1} has shot the moon!`,
+          metadata: {
+            type: 'shot-moon',
+            playerId: playerWithAllScoringCards[0],
           },
         });
       }

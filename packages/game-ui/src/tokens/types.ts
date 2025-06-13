@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TokenSpaceData, useTokenSpaceContext } from './TokenSpace';
+import { TokenSpaceData, useMaybeTokenSpaceContext } from './TokenSpace';
 
 export type TokenDragData<Data = unknown> = {
   id: string;
@@ -22,13 +22,13 @@ export function useTokenData<Data = unknown>(
   id: string,
   data: Data,
 ): TokenDragData<Data> {
-  const spaceCtx = useTokenSpaceContext();
+  const spaceCtx = useMaybeTokenSpaceContext();
   return useMemo(
     () => ({
       id,
       type: 'token',
       data,
-      internal: { space: spaceCtx },
+      internal: { space: spaceCtx ?? undefined },
     }),
     [id, data, spaceCtx],
   );

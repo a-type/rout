@@ -14,7 +14,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
-  getGameState,
+  GameStateCache,
   getLatestVersion,
   RoundIndexResult,
   Turn,
@@ -66,6 +66,7 @@ interface GameSessionRoundState {
 export class GameSession extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #socketHandler: GameSessionSocketHandler;
+  #stateCache: GameStateCache | undefined;
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
@@ -114,6 +115,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async #setSessionData(data: GameSessionBaseData) {
     await this.ctx.storage.put('sessionData', data);
+    // invalidate state cache -- if members or random seed change,
+    // it's no longer valid and must be recomputed
+    this.#stateCache = undefined;
     return data;
   }
   async #updateSessionData(updates: Partial<GameSessionBaseData>) {
@@ -199,6 +203,24 @@ export class GameSession extends DurableObject<ApiBindings> {
     return (await this.#getSessionData()).members.sort((a, b) =>
       a.id.localeCompare(b.id),
     );
+  }
+
+  async #getStateCache(): Promise<GameStateCache> {
+    if (this.#stateCache) return this.#stateCache;
+    const sessionData = await this.#getSessionData();
+    const gameDefinition = await this.getGameDefinition();
+    if (!sessionData || !gameDefinition) {
+      throw new LongGameError(
+        LongGameError.Code.InternalServerError,
+        `Cannot get game state before session is initialized`,
+      );
+    }
+    const cache = new GameStateCache(gameDefinition, {
+      randomSeed: sessionData.randomSeed,
+      members: sessionData.members,
+    });
+    this.#stateCache = cache;
+    return cache;
   }
 
   async delete() {
@@ -529,18 +551,21 @@ export class GameSession extends DurableObject<ApiBindings> {
   async getDetails() {
     const sessionData = await this.#getSessionData();
     const roundData = await this.#getCurrentRoundState();
+    const status = await this.getStatus();
+    const members = await this.getMembers();
+    const playerStatuses = await this.getPlayerStatuses();
     return {
       id: sessionData.id,
-      status: await this.getStatus(),
+      status,
       gameId: sessionData.gameId,
       gameVersion: sessionData.gameVersion,
-      members: await this.getMembers(),
+      members,
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
       nextRoundCheckAt: roundData.checkAgainAt?.toISOString() ?? null,
       currentRoundIndex: roundData.roundIndex,
-      playerStatuses: await this.getPlayerStatuses(),
+      playerStatuses,
     };
   }
   async resetGame() {
@@ -812,15 +837,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const rounds = await this.#getRoundsUnchecked({
       upToAndIncluding: roundIndex,
     });
-    const gameDefinition = await this.getGameDefinition();
-    const members = await this.getMembers();
-    const sessionData = await this.#getSessionData();
-    const computed = getGameState(gameDefinition, {
-      rounds,
-      randomSeed: sessionData.randomSeed,
-      members,
-    });
-    return computed;
+    const cache = await this.#getStateCache();
+    return cache.getState(rounds);
   }
   async #getPlayerStateUnchecked(
     playerId: PrefixedId<'u'>,
@@ -878,9 +896,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const gameTimeZone = sessionData.timezone;
     // TODO: we already have turns in scope, we could compute this without
     // dipping back.
-    const globalState = await this.#getGlobalStateUnchecked(
-      latestRoundFromTurns,
-    );
+    const globalState =
+      await this.#getGlobalStateUnchecked(latestRoundFromTurns);
     return gameDefinition.getRoundIndex({
       turns,
       members,

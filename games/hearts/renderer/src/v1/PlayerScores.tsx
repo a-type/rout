@@ -1,25 +1,25 @@
-import { Box, clsx, Tooltip } from '@a-type/ui';
+import { Box, clsx, HorizontalList, ScrollArea } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import {
-  getCardRank,
-  getCardSuit,
-  getScore,
-} from '@long-game/game-hearts-definition/v1';
+import { getScore } from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
-import { PlayingCard } from '@long-game/game-ui/genericGames';
-import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
+import { PlayerScoredCards } from './PlayerScoredCards';
 
-export interface PlayerScoresProps {}
+export interface PlayerScoresProps {
+  className?: string;
+}
 
 export const PlayerScores = hooks.withGame<PlayerScoresProps>(
-  function PlayerScores({ gameSuite }) {
+  function PlayerScores({ gameSuite, className }) {
     return (
-      <Box gap items="center" className="select-none" wrap>
-        {gameSuite.members.map((member) => (
-          <PlayerScore playerId={member.id} key={member.id} />
-        ))}
-      </Box>
+      <ScrollArea className={clsx('select-none', className)}>
+        <div className="text-xs text-bold color-gray-dark mb-sm">Scores</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-sm">
+          {gameSuite.finalState.playerOrder.map((playerId) => (
+            <PlayerScore playerId={playerId} key={playerId} />
+          ))}
+        </div>
+      </ScrollArea>
     );
   },
 );
@@ -27,66 +27,49 @@ export const PlayerScores = hooks.withGame<PlayerScoresProps>(
 const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
   function PlayerScore({ gameSuite, playerId }) {
     const { className, style } = usePlayerThemed(playerId);
+    const isMe = gameSuite.playerId === playerId;
     return (
-      <Tooltip content={<PlayerScoredCards playerId={playerId} />}>
+      <Box
+        surface="primary"
+        p="none"
+        className={clsx(className)}
+        style={style}
+        border={isMe}
+      >
         <Box
-          key={playerId}
-          gap
-          surface="primary"
-          p="sm"
-          d={{
-            default: 'col',
-            sm: 'row',
-          }}
-          className={clsx(
-            'flex-[1_1_auto] items-start sm:items-center',
-            className,
-          )}
-          style={style}
+          gap="sm"
+          items="center"
+          className="text-nowrap text-xxs absolute top-sm left-md z-1"
         >
-          <Box gap items="center" className="text-nowrap">
-            <PlayerAvatar playerId={playerId} />
-            <PlayerName playerId={playerId} />
-          </Box>
-          <PlayerScoreDisplay playerId={playerId} />
+          <PlayerAvatar playerId={playerId} size={16} />
+          <PlayerName playerId={playerId} />
         </Box>
-      </Tooltip>
-    );
-  },
-);
-
-const PlayerScoredCards = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
-  function PlayerScoredCards({ gameSuite, playerId }) {
-    const scoredCards =
-      gameSuite.viewingRound.initialPlayerState.scoredCards[playerId] ?? [];
-    return (
-      <CardGrid className="max-w-70vw">
-        {scoredCards.map((card) => (
-          <PlayingCard
-            cardSuit={getCardSuit(card)}
-            cardRank={getCardRank(card)}
-            key={card}
-            className="w-40px"
+        <HorizontalList className="rounded-lg mt-sm mb-0">
+          <PlayerScoreDisplay
+            playerId={playerId}
+            className="sticky left-0 my-auto z-1 bg-inherit"
           />
-        ))}
-      </CardGrid>
-    );
-  },
-);
-
-const PlayerScoreDisplay = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
-  function PlayerScoreDisplay({ gameSuite, playerId }) {
-    const playerBaseScore =
-      gameSuite.viewingRound.initialPlayerState.scores[playerId];
-    const playerRoundScore = getScore(
-      gameSuite.viewingRound.initialPlayerState.scoredCards[playerId] ?? [],
-    );
-    return (
-      <Box className="font-bold">
-        {playerBaseScore}
-        {` + `}
-        {playerRoundScore}
+          <PlayerScoredCards playerId={playerId} />
+        </HorizontalList>
       </Box>
     );
   },
 );
+
+const PlayerScoreDisplay = hooks.withGame<{
+  playerId: PrefixedId<'u'>;
+  className?: string;
+}>(function PlayerScoreDisplay({ gameSuite, playerId, className, ...rest }) {
+  const playerBaseScore =
+    gameSuite.viewingRound.initialPlayerState.scores[playerId];
+  const playerRoundScore = getScore(
+    gameSuite.viewingRound.initialPlayerState.scoredCards[playerId] ?? [],
+  );
+  return (
+    <Box className={clsx('font-bold text-nowrap', className)} {...rest}>
+      {playerBaseScore}
+      {` + `}
+      {playerRoundScore}
+    </Box>
+  );
+});
