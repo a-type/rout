@@ -3,7 +3,7 @@ import { getPlayerOverall } from '../attributes';
 import type { Player, LeagueGameState, League } from '../gameTypes';
 import { ActualPitch, pitchTypes, PitchKind } from '../pitchData';
 import { scaleAttributePercent, scaleAttribute, clamp } from '../utils';
-import { runnersOnBases } from './simGames';
+import { runnersOnBases } from './runners';
 import { getCountAdvantage } from './utils';
 import {
   getModifiedCompositeBattingRatings,

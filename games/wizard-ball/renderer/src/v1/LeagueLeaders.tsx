@@ -10,7 +10,12 @@ import {
 } from './stats';
 import { PlayerChip } from './players/PlayerChip';
 
-const invertList = ['era', 'whip', 'bbPerNine'];
+const invertList: Array<keyof AllStats> = [
+  'era',
+  'whip',
+  'bbPerNine',
+  'fieldingIndependentPitching',
+];
 
 export function LeagueLeaders({ kind }: { kind: 'batting' | 'pitching' }) {
   const [tabValue, setTabValue] = useState<keyof AllStats>(

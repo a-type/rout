@@ -212,6 +212,28 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         </>
       );
 
+    case 'doublePlay':
+      return (
+        <>
+          <PlayerChip noPositions id={event.batterId} /> hit a{' '}
+          <PitchChip pitchData={event.pitchData} /> into a double play! Defended
+          by
+          {event.defenderId ? (
+            <>
+              {' '}
+              by <PlayerChip noPositions id={event.defenderId} /> (
+              {event.defender?.toUpperCase()}) on a{' '}
+              {event.power === 'normal' ? '' : event.power}{' '}
+              {hitTypeToString(event.type)} to{' '}
+              {hitDirectionToString(event.direction)}
+            </>
+          ) : null}
+          !
+          <ContactInfoTooltip contactChance={event.pitchData.contactChance} />
+          <HitTableInfo event={event} />
+        </>
+      );
+
     case 'hit':
       return (
         <>

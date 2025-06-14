@@ -8,7 +8,8 @@ type HeatOutcome =
   | 'rbi'
   | 'win'
   | 'loss'
-  | 'save';
+  | 'save'
+  | 'doublePlay';
 const heatLookup = {
   strikeout: -3,
   walk: 1,
@@ -24,6 +25,7 @@ const heatLookup = {
   win: -2,
   loss: 2,
   save: -5,
+  doublePlay: -2,
 } satisfies Record<HeatOutcome, number>;
 
 export function updatePlayerHeat(

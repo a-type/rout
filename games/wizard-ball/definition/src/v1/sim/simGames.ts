@@ -1,19 +1,16 @@
 import { GameRandom } from '@long-game/game-definition';
 import type {
-  Base,
   GameResult,
+  HitGameLogEvent,
   League,
   LeagueGame,
   LeagueGameState,
   LeagueRound,
   PitchOutcome,
-  Player,
-  PlayerId,
   PositionChartKey,
   RoundResult,
 } from '../gameTypes';
 import { isPitcher, last, scaleAttributePercent } from '../utils';
-import { ActualPitch } from '../pitchData';
 import Logger from '../logger';
 import { determinePitchType } from './pitchType';
 import { type HitResult, determineHitResult } from './hitResult';
@@ -32,9 +29,10 @@ import {
   getCurrentPitcher,
   incrementBatterIndex,
   logsPitchData,
-  randomByWeight,
   resetCount,
 } from './utils';
+import { advanceRunnerForced, advanceAllRunners } from './runners';
+import { determineSwing, determineContact } from './swing';
 
 export const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -225,99 +223,6 @@ export function initialGameState(game: LeagueGame): LeagueGameState {
   };
 }
 
-export function runnersOnBases(gameState: LeagueGameState): number {
-  return Object.values(gameState.bases).filter((playerId) => playerId !== null)
-    .length;
-}
-
-function advanceRunnerForced(
-  gameState: LeagueGameState,
-  league: League,
-  base: Base,
-  sourcePlayerId: PlayerId,
-  pitchingPlayerId: PlayerId,
-): LeagueGameState {
-  if (base < 1 || base > 3) {
-    throw new Error('Base must be between 1 and 3');
-  }
-  const currentPlayerId = gameState.bases[base];
-  const pitcherId = getCurrentPitcher(gameState);
-  if (currentPlayerId === null) {
-    // No one on this base, so we can stop
-    return gameState;
-  }
-  if (base === 3) {
-    gameState.bases[base] = null;
-    gameState = addToPlayerStats(gameState, sourcePlayerId, {
-      runsBattedIn: 1,
-    });
-    gameState = addToPlayerStats(gameState, currentPlayerId, {
-      runs: 1,
-    });
-    gameState = addToPlayerStats(gameState, pitchingPlayerId, {
-      earnedRuns: 1,
-    });
-    league = updatePlayerHeat('batting', currentPlayerId, league, 'run');
-    league = updatePlayerHeat('batting', sourcePlayerId, league, 'rbi');
-    league = updatePlayerHeat('pitching', pitcherId, league, 'run');
-    gameState.teamData[gameState.battingTeam].score += 1;
-    return gameState;
-  }
-  advanceRunnerForced(
-    gameState,
-    league,
-    (base + 1) as Base,
-    sourcePlayerId,
-    pitchingPlayerId,
-  );
-  gameState.bases[(base + 1) as Base] = gameState.bases[base];
-  gameState.bases[base] = null;
-
-  return gameState;
-}
-
-function advanceAllRunners(
-  gameState: LeagueGameState,
-  league: League,
-  sourcePlayerId: PlayerId,
-  pitchingPlayerId: PlayerId,
-  count: number = 1,
-): LeagueGameState {
-  const currentBatter = getCurrentBatter(gameState);
-  const currentPitcher = getCurrentPitcher(gameState);
-  if (count > 1) {
-    gameState = advanceAllRunners(
-      gameState,
-      league,
-      sourcePlayerId,
-      pitchingPlayerId,
-      count - 1,
-    );
-  }
-  gameState = advanceRunnerForced(
-    gameState,
-    league,
-    3,
-    currentBatter,
-    currentPitcher,
-  );
-  gameState = advanceRunnerForced(
-    gameState,
-    league,
-    2,
-    currentBatter,
-    currentPitcher,
-  );
-  gameState = advanceRunnerForced(
-    gameState,
-    league,
-    1,
-    currentBatter,
-    currentPitcher,
-  );
-  return gameState;
-}
-
 function applyWalk(
   gameState: LeagueGameState,
   league: League,
@@ -388,109 +293,6 @@ function applyHit(
       break;
   }
   return gameState;
-}
-
-function determineSwing(
-  random: GameRandom,
-  isStrike: boolean,
-  batter: Player,
-  league: League,
-  game: LeagueGameState,
-  pitchData: ActualPitch,
-): boolean {
-  const baseSwingChance = isStrike ? 0.68 : 0.25;
-  const activePerks = getActivePlayerPerks(
-    batter.id,
-    league,
-    game,
-    pitchData.kind,
-  );
-  const batterComposite = getModifiedCompositeBattingRatings(
-    batter.id,
-    league,
-    game,
-    activePerks,
-  );
-  const count = 2 * game.strikes - game.balls;
-  // const countWeight = 2 ** (batterComposite.plateDiscipline / 5) - 1;
-  // const swingModifier = scaleAttributePercent(
-  //   valueByWeights([
-  //     { value: count, weight: countWeight },
-
-  //     // TODO: Decide how to handle this (used to be agility)
-  //     // Maybe simplify a bit?
-  //     {
-  //       value: isStrike
-  //         ? batterComposite.plateDiscipline
-  //         : 20 - batterComposite.plateDiscipline,
-  //       weight: 3,
-  //     },
-  //   ]),
-  //   2,
-  // );
-  // let swingChance = isStrike
-  //   ? 0.68 ** (1 / swingModifier)
-  //   : 0.25 ** (1 / swingModifier);
-  const pitchSwingFactor = pitchData.swingFactor;
-  const plateDisciplineFactor =
-    scaleAttributePercent(batterComposite.plateDiscipline, 3) **
-    (isStrike ? 1 : -1);
-  const swing = randomByWeight<boolean>(random, [
-    {
-      value: true,
-      weight: baseSwingChance * pitchSwingFactor * plateDisciplineFactor,
-    },
-    { value: false, weight: 1 - baseSwingChance },
-  ]);
-  return swing;
-}
-
-function determineContact(
-  random: GameRandom,
-  isStrike: boolean,
-  batter: Player,
-  league: League,
-  gameState: LeagueGameState,
-  pitchData: ActualPitch,
-): boolean {
-  const activePerks = getActivePlayerPerks(
-    batter.id,
-    league,
-    gameState,
-    pitchData.kind,
-  );
-  const batterComposite = getModifiedCompositeBattingRatings(
-    batter.id,
-    league,
-    gameState,
-    activePerks,
-  );
-  let baseContactChance = isStrike ? 0.8 : 0.6;
-
-  const batterContactFactor = scaleAttributePercent(batterComposite.contact, 4);
-  const pitchContactFactor = pitchData.contactFactor;
-
-  const weights = [
-    {
-      value: true,
-      weight: baseContactChance * pitchContactFactor * batterContactFactor,
-    },
-    {
-      value: false,
-      weight: 1 - baseContactChance,
-    },
-  ];
-
-  const contact = randomByWeight<boolean>(random, weights);
-  // pitchData.contactChance = {
-  //   raw: baseContactChance,
-  //   pitcherFactor: pitchContactFactor,
-  //   batterFactor: batterContactFactor,
-  //   batterRating: batterComposite.contact,
-  //   activePerks: activePerks.map((p) => p.source.name),
-  //   adjusted: weights[0].weight / sum(...weights.map((w) => w.weight)),
-  // };
-  return contact;
 }
 
 export function simulatePitch(
@@ -650,12 +452,15 @@ export function simulatePitch(
       break;
     case 'out':
       // TODO: Handle sacrifice hits
-      // Increment out count
-      gameState.outs += 1;
+      if (!hitResult) {
+        throw new Error('Hit result is undefined');
+      }
 
+      let outCount = 1;
+      let result: HitGameLogEvent['kind'] = 'out';
       if (gameState.outs < 3) {
         // Check for sacrifice fly
-        if (hitResult?.hitType === 'fly' && hitResult?.hitPower !== 'weak') {
+        if (hitResult.hitType === 'fly' && hitResult.hitPower !== 'weak') {
           gameState = advanceRunnerForced(
             gameState,
             league,
@@ -672,18 +477,78 @@ export function simulatePitch(
               pitcherId,
             );
           }
+        } else if (hitResult.hitType === 'grounder') {
+          // Check for double play
+          // TODO: Handle this in a more sophisticated way
+          if (
+            gameState.bases[1] &&
+            hitResult.defender &&
+            hitResult.defenderId
+          ) {
+            const defenderRating = hitResult.defenderRating;
+            const baseChance =
+              hitResult.defender === 'ss' || hitResult.defender === '2b'
+                ? 0.25
+                : 0.12;
+            const difficultyModifer = hitResult.hitPower !== 'normal' ? -5 : 0;
+            const modifiedChance =
+              baseChance *
+              scaleAttributePercent(defenderRating + difficultyModifer, 2);
+            if (random.float(0, 1) < modifiedChance) {
+              // const otherDefender = hitResult.defender === 'ss' ? '2b' : 'ss';
+              // const team = league.teamLookup[gameState.pitchingTeam];
+              // const otherDefenderId = team.positionChart[otherDefender];
+              // if (!otherDefenderId) {
+              //   throw new Error(
+              //     `No player found for defender position: ${otherDefender}`,
+              //   );
+              // }
+              gameState.bases[1] = null; // Force out at first base
+              outCount = 2; // Double play
+              gameState = addToPlayerStats(gameState, hitResult.defenderId, {
+                doublePlays: 1,
+              });
+              // gameState = addToPlayerStats(gameState, otherDefenderId, {
+              //   doublePlays: 1,
+              // });
+              league = updatePlayerHeat(
+                'pitching',
+                hitResult.defenderId,
+                league,
+                'doublePlay',
+              );
+              // league = updatePlayerHeat(
+              //   'pitching',
+              //   otherDefenderId,
+              //   league,
+              //   'doublePlay',
+              // );
+              league = updatePlayerHeat(
+                'pitching',
+                pitcherId,
+                league,
+                'doublePlay',
+              );
+              league = updatePlayerHeat(
+                'batting',
+                batterId,
+                league,
+                'doublePlay',
+              );
+              result = 'doublePlay';
+            }
+          }
         }
       }
+      gameState.outs += outCount;
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1 });
       gameState = addToPlayerStats(gameState, pitcherId, {
-        outsPitched: 1,
+        outsPitched: outCount,
       });
-      if (!hitResult) {
-        throw new Error('Hit result is undefined');
-      }
+
       gameState = logger.addToGameLog(
         {
-          kind: 'out',
+          kind: result,
           batterId,
           pitcherId,
           type: hitResult.hitType,

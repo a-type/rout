@@ -65,8 +65,8 @@ export const statusData = {
           : stacks < 0
             ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
             : 0,
-        -15,
-        15,
+        -20,
+        20,
       ),
     effect: ({ stacks = 1 }) => {
       const mod = Math.sign(stacks) * 2;
