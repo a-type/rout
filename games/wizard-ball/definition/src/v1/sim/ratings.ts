@@ -55,6 +55,13 @@ export function getActivePlayerPerks(
         .map((id) => perks[id])
         .filter(Boolean)
         .filter((p: Perk) => {
+          const currentBatter = getCurrentBatter(gameState);
+          const currentPitcher = getCurrentPitcher(gameState);
+          const isBatter = currentBatter === player.id;
+          const isPitcher = currentPitcher === player.id;
+          if (p.name === 'Curse Trigger') {
+            // console.log('HEY');
+          }
           return (
             !p.condition ||
             p.condition({
@@ -65,8 +72,8 @@ export function getActivePlayerPerks(
               weather: weatherId,
               isMyTeam: playerTeam === player.teamId,
               isMe: player.id === playerId,
-              isBatter: player.id === getCurrentBatter(gameState),
-              isPitcher: player.id === getCurrentPitcher(gameState),
+              isBatter,
+              isPitcher,
               isRunner:
                 gameState.bases[1] === player.id ||
                 gameState.bases[2] === player.id ||

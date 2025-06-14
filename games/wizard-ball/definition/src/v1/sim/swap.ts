@@ -65,7 +65,11 @@ export function swapPitcher(
     },
     gameState,
   );
-  gameState.teamData[gameState.pitchingTeam].pitchers.push(newPitcherId);
+  const team = gameState.teamData[gameState.pitchingTeam];
+  team.pitchers.push(newPitcherId);
+  team.battingOrder = team.battingOrder.map((pid) =>
+    pid === oldPitcherId ? newPitcherId : pid,
+  );
   // determine save elligibility
   const rd =
     gameState.teamData[gameState.pitchingTeam].score -

@@ -413,6 +413,24 @@ export function simulatePitch(
           },
           gameState,
         );
+
+        getActivePlayerPerks(
+          batterId,
+          league,
+          gameState,
+          pitchData.kind,
+        ).forEach((perk) => {
+          if ('trigger' in perk.effect && perk.effect.trigger) {
+            gameState = perk.effect.trigger({
+              event: { kind: 'strikeout', isPitcher: false },
+              random,
+              gameState,
+              league,
+              player: batter,
+            });
+          }
+        });
+
         league = updatePlayerHeat('batting', batterId, league, 'strikeout');
         league = updatePlayerHeat('pitching', pitcherId, league, 'strikeout');
         nextBatter = true;
@@ -458,6 +476,23 @@ export function simulatePitch(
 
       let outCount = 1;
       let result: HitGameLogEvent['kind'] = 'out';
+      getActivePlayerPerks(
+        hitResult.defenderId!,
+        league,
+        gameState,
+        pitchData.kind,
+      ).forEach((perk) => {
+        if ('trigger' in perk.effect && perk.effect.trigger) {
+          gameState = perk.effect.trigger({
+            event: { kind: 'defenderOut' },
+            random,
+            gameState,
+            league,
+            player: league.playerLookup[hitResult.defenderId!],
+          });
+        }
+      });
+
       if (gameState.outs < 3) {
         // Check for sacrifice fly
         if (hitResult.hitType === 'fly' && hitResult.hitPower !== 'weak') {
