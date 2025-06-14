@@ -8,7 +8,7 @@ import {
   Team,
 } from './gameTypes';
 import { generateLeague } from './generation';
-import { simulateRound } from './simGames';
+import { simulateRound } from './sim/simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
 import {
   getTeamBench,
@@ -268,8 +268,8 @@ export const gameDefinition: GameDefinition<
       const recovery = player.positions.some((p) => p === 'sp')
         ? 0.25
         : player.positions.some((p) => p === 'rp')
-        ? 0.25
-        : 0.4;
+          ? 0.25
+          : 0.4;
       player.stamina = Math.min(1, player.stamina + recovery);
     });
     const pitcherList: string[] = [];

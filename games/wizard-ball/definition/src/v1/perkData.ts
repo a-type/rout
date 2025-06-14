@@ -16,9 +16,14 @@ import type { SpeciesType } from './speciesData';
 import type { WeatherType } from './weatherData';
 import { capitalize } from './utils';
 import { GameRandom } from '@long-game/game-definition';
+import { StatusType } from './statusData';
 
 export type TriggerEvent = {
   kind: 'strikeout';
+};
+
+export type TriggerResult = {
+  statusIds?: Partial<Record<StatusType, number>>;
 };
 
 export type PerkEffect = {
@@ -90,8 +95,9 @@ export const perks: Record<string, Perk> = {
     description: 'Hits doubles way more often.',
     kind: 'batting',
     rarity: 'rare',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.agility >= 14 &&
+      level >= 5 &&
       (classType === 'rogue' || species === 'rabbit'),
     condition: ({ isBatter = false }) => isBatter,
     effect: () => ({
@@ -119,8 +125,9 @@ export const perks: Record<string, Perk> = {
     description: 'Hits triples way more often.',
     kind: 'batting',
     rarity: 'epic',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.agility >= 14 &&
+      level >= 5 &&
       (classType === 'rogue' || species === 'rabbit'),
     condition: ({ isBatter = false }) => isBatter,
     effect: () => ({
@@ -152,8 +159,9 @@ export const perks: Record<string, Perk> = {
     description: 'Hits home runs way more often.',
     kind: 'batting',
     rarity: 'epic',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.strength >= 14 &&
+      level >= 5 &&
       (species === 'badger' ||
         classType === 'barbarian' ||
         classType === 'fighter'),
@@ -222,8 +230,9 @@ export const perks: Record<string, Perk> = {
     description: 'Increases chance to hit with runners in scoring position.',
     kind: 'batting',
     rarity: 'rare',
-    requirements: ({ species, classType, attributes }) =>
+    requirements: ({ species, classType, attributes, level }) =>
       attributes.charisma >= 14 &&
+      level >= 5 &&
       (['fox', 'turtle', 'badger'].includes(species) || classType === 'bard'),
     condition: ({ gameState, isBatter = false }) =>
       isBatter && !!gameState && (!!gameState.bases[2] || !!gameState.bases[3]),
@@ -275,8 +284,8 @@ export const perks: Record<string, Perk> = {
       'Significantly increases chance to hit on contact with 2 strikes.',
     kind: 'batting',
     rarity: 'epic',
-    requirements: ({ classType, species }) =>
-      classType === 'barbarian' || species === 'lizard',
+    requirements: ({ classType, species, level }) =>
+      level >= 5 && (classType === 'barbarian' || species === 'lizard'),
     condition: ({ gameState, isBatter = false }) =>
       isBatter && gameState?.strikes === 2,
     effect: () => ({
@@ -307,8 +316,9 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly increased stealing ability.',
     kind: 'batting',
     rarity: 'epic',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.agility >= 14 &&
+      level >= 5 &&
       (classType === 'rogue' || ['rabbit', 'fox'].includes(species)),
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
@@ -334,8 +344,9 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly owers pitch quality when on the base paths.',
     kind: 'batting',
     rarity: 'rare',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.charisma >= 14 &&
+      level >= 5 &&
       (classType === 'bard' || ['rabbit', 'fox'].includes(species)),
     condition: ({ isRunner = false }) => isRunner,
     effect: () => ({
@@ -359,8 +370,9 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves pitch quality.',
     kind: 'pitching',
     rarity: 'rare',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.intelligence >= 14 &&
+      level >= 5 &&
       (classType === 'wizard' || species === 'owl'),
     condition: ({ isPitcher = false }) => isPitcher,
     effect: () => ({
@@ -406,8 +418,9 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly increases quality on 2 strike counts.',
     kind: 'pitching',
     rarity: 'uncommon',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.strength >= 14 &&
+      level >= 5 &&
       (classType === 'barbarian' || species === 'lizard'),
     condition: ({ gameState, isPitcher = false }) =>
       isPitcher && gameState?.strikes === 2,
@@ -436,8 +449,9 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly higher chance of making strong contact.',
     kind: 'batting',
     rarity: 'rare',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.strength >= 14 &&
+      level >= 5 &&
       (classType === 'barbarian' ||
         classType === 'fighter' ||
         species === 'badger'),
@@ -469,8 +483,9 @@ export const perks: Record<string, Perk> = {
     description: 'Higher chance of batter making weak contact.',
     kind: 'pitching',
     rarity: 'rare',
-    requirements: ({ classType, species, attributes }) =>
+    requirements: ({ classType, species, attributes, level }) =>
       attributes.constitution >= 14 &&
+      level >= 5 &&
       (classType === 'cleric' || species === 'turtle'),
     condition: ({ isPitcher = false }) => isPitcher,
     effect: () => ({
@@ -502,8 +517,8 @@ export const perks: Record<string, Perk> = {
     description: 'Increases chance of ground balls.',
     kind: 'pitching',
     rarity: 'rare',
-    requirements: ({ classType, species }) =>
-      classType === 'wizard' || species === 'turtle',
+    requirements: ({ classType, species, level }) =>
+      level >= 5 && (classType === 'wizard' || species === 'turtle'),
     condition: ({ isPitcher = false }) => isPitcher,
     effect: () => ({
       hitModifierTable: {
@@ -529,6 +544,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves fastball performance.',
     kind: 'pitching',
     rarity: 'rare',
+    requirements: ({ level }) => level >= 5,
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'fastball',
     effect: () => ({
@@ -551,6 +567,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves curveball performance.',
     kind: 'pitching',
     rarity: 'rare',
+    requirements: ({ level }) => level >= 5,
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'curveball',
     effect: () => ({
@@ -573,6 +590,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves changeup performance.',
     kind: 'pitching',
     rarity: 'rare',
+    requirements: ({ level }) => level >= 5,
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'changeup',
     effect: () => ({
@@ -595,6 +613,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves slider performance.',
     kind: 'pitching',
     rarity: 'rare',
+    requirements: ({ level }) => level >= 5,
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'slider',
     effect: () => ({
@@ -617,6 +636,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves sinker performance.',
     kind: 'pitching',
     rarity: 'rare',
+    requirements: ({ level }) => level >= 5,
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'sinker',
     effect: () => ({
@@ -646,7 +666,7 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves stats in the first three innings.',
     kind: 'any',
     rarity: 'rare',
-    requirements: ({ species }) => species === 'beaver',
+    requirements: ({ species, level }) => level >= 5 && species === 'beaver',
     condition: ({ gameState }) => !!gameState && gameState.currentInning <= 6,
     effect: () => ({
       attributeBonus: {
@@ -702,8 +722,8 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves stats in the 8th inning or later.',
     kind: 'any',
     rarity: 'rare',
-    requirements: ({ species, classType }) =>
-      species === 'owl' || classType === 'cleric',
+    requirements: ({ species, classType, level }) =>
+      level >= 5 && (species === 'owl' || classType === 'cleric'),
     condition: ({ gameState }) => !!gameState && gameState.currentInning >= 15,
     effect: () => ({
       attributeBonus: {
@@ -779,8 +799,9 @@ export const perks: Record<string, Perk> = {
       'Significantly improves pitching with runners in scoring position.',
     kind: 'pitching',
     rarity: 'rare',
-    requirements: ({ species, classType }) =>
-      ['fox', 'turtle', 'badger'].includes(species) || classType === 'bard',
+    requirements: ({ species, classType, level }) =>
+      level >= 5 &&
+      (['fox', 'turtle', 'badger'].includes(species) || classType === 'bard'),
     condition: ({ gameState, isPitcher = false }) =>
       isPitcher &&
       !!gameState &&
@@ -818,8 +839,10 @@ export const perks: Record<string, Perk> = {
     description: 'Significantly improves pitching in the 9th inning or later.',
     kind: 'pitching',
     rarity: 'rare',
-    requirements: ({ species, classType, positions }) =>
-      positions.includes('rp') && (species === 'fox' || classType === 'bard'),
+    requirements: ({ species, classType, positions, level }) =>
+      level >= 5 &&
+      positions.includes('rp') &&
+      (species === 'fox' || classType === 'bard'),
     condition: ({ gameState, isPitcher = false }) =>
       isPitcher && !!gameState && gameState.currentInning >= 17,
     effect: () => ({
@@ -838,6 +861,7 @@ export const perks: Record<string, Perk> = {
     description: 'Improves all stats significantly.',
     kind: 'any',
     rarity: 'legendary',
+    requirements: ({ level }) => level >= 10,
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
