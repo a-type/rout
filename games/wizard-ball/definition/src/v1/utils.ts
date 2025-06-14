@@ -14,8 +14,12 @@ export function scaleAttribute(
   return Math.tanh((attribute - center) / scale);
 }
 
-export function scaleAttributePercent(attribute: number, max: number): number {
-  return Math.pow(max, scaleAttribute(attribute));
+export function scaleAttributePercent(
+  attribute: number,
+  max: number,
+  scale?: number,
+): number {
+  return Math.pow(max, scaleAttribute(attribute, 10, scale));
 }
 
 export function lerp(start: number, end: number, t: number): number {
@@ -28,6 +32,10 @@ export function sum(...values: number[]): number {
 
 export function avg(...values: number[]): number {
   return sum(...values) / values.length;
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
 export function deepClone<T>(obj: T): T {

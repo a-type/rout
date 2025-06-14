@@ -1,6 +1,7 @@
 import { LeagueGameState, Player } from './gameTypes';
 import { PerkEffect } from './perkData';
 import { PitchKind } from './pitchData';
+import { clamp } from './utils';
 import { WeatherType } from './weatherData';
 
 export type StatusDuration = 'end-of-game';
@@ -58,11 +59,15 @@ export const statusData = {
     icon: (stacks) => (stacks > 0 ? '🔥' : '❄️'),
     condition: ({ isMe = false, stacks = 0 }) => isMe && Math.abs(stacks) >= 5,
     round: (stacks) =>
-      stacks > 0
-        ? Math.min(stacks - 1, Math.floor(stacks * 0.75))
-        : stacks < 0
-        ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
-        : 0,
+      clamp(
+        stacks > 0
+          ? Math.min(stacks - 1, Math.floor(stacks * 0.75))
+          : stacks < 0
+            ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
+            : 0,
+        -15,
+        15,
+      ),
     effect: ({ stacks = 1 }) => {
       const mod = Math.sign(stacks) * 2;
       return {

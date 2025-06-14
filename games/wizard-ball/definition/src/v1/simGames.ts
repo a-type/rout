@@ -24,6 +24,7 @@ import type {
   RoundResult,
 } from './gameTypes';
 import {
+  clamp,
   getInningInfo,
   isPitcher,
   last,
@@ -491,29 +492,31 @@ function getModifiedAttributes(
   const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
   const stamina = Math.min(1, Math.max(0, player.stamina));
-  const staminaFactor = Math.max(0, (0.8 - stamina) * 5);
-  const reduction = staminaFactor;
-  const baseStats = sumObjects(
+  const staminaFactor = Math.max(0, (0.8 - stamina) * 2) + 1;
+  const reduction = 1.0 / staminaFactor;
+  let baseStats = sumObjects(
     player.attributes,
     ...(activePerks.map((p) => p.attributeBonus).filter(Boolean) as Partial<
       Player['attributes']
     >[]),
-    {
-      strength: -reduction,
-      agility: -reduction,
-      constitution: -reduction,
-      wisdom: -reduction,
-      intelligence: -reduction,
-      charisma: -reduction,
-    },
   );
+
   const clutchMod = clutchFactor * scaleAttribute(baseStats.charisma, 10);
-  return sumObjects(baseStats, {
+  baseStats = sumObjects(baseStats, {
     strength: clutchMod,
     agility: clutchMod,
     constitution: clutchMod,
     wisdom: clutchMod,
     intelligence: clutchMod,
+  });
+
+  return multiplyObjects(baseStats, {
+    strength: reduction,
+    agility: reduction,
+    constitution: reduction,
+    wisdom: reduction,
+    intelligence: reduction,
+    charisma: reduction,
   });
 }
 function getModifiedCompositeBattingRatings(
@@ -900,8 +903,16 @@ function determinePitchType(
 
   const isStrike = isAccurate ? strikeDesire : random.float(0, 1) < 0.3;
 
-  const modifiedMovement = pitcherComposite.movement + qualityModifier;
-  const modifiedVelocity = pitcherComposite.velocity + qualityModifier;
+  const modifiedMovement = clamp(
+    pitcherComposite.movement + qualityModifier,
+    0,
+    20,
+  );
+  const modifiedVelocity = clamp(
+    pitcherComposite.velocity + qualityModifier,
+    0,
+    20,
+  );
   let quality = scaleAttributePercent(attributeTotal, 2);
   const basePitchData = pitchTypes[pitchKind]({
     quality,
@@ -922,9 +933,9 @@ function determinePitchType(
       })}`,
     );
   }
-  // if (quality > 1.9) {
+  // if (modifiedMovement > 30 || modifiedMovement < -10) {
   //   console.log(
-  //     `High pitch quality: ${quality} for ${pitchKind} by ${pitcher.name} ${JSON.stringify(
+  //     `Extreme pitch: ${quality} for ${pitchKind} by ${pitcher.name} ${JSON.stringify(
   //       {
   //         pitcher,
   //         pitcherComposite,
@@ -1187,9 +1198,9 @@ function determineHitResult(
         double: 1 * scaleAttributePercent(batterCompositeRatings.extraBases, 4),
         out: 15,
         triple:
-          0.2 * scaleAttributePercent(batterCompositeRatings.extraBases, 8),
+          0.3 * scaleAttributePercent(batterCompositeRatings.extraBases, 8),
         homeRun:
-          0.1 * scaleAttributePercent(batterCompositeRatings.homeRuns, 3),
+          0.5 * scaleAttributePercent(batterCompositeRatings.homeRuns, 4),
       };
     } else if (hitPower === 'strong') {
       baseHitTable = {
@@ -1664,8 +1675,8 @@ export function simulatePitch(
   let pitcherStaminaChange =
     scaleAttributePercent(
       pitcherComposite.durability,
-      isReliever ? 1.015 : 1.002,
-    ) - (isReliever ? 1.04 : 1.008);
+      isReliever ? 1.004 : 1.0015,
+    ) - (isReliever ? 1.016 : 1.006);
   pitcherStaminaChange *=
     {
       strike: 1,
@@ -1681,12 +1692,12 @@ export function simulatePitch(
   batter.stamina = Math.max(
     -0.25,
     batter.stamina +
-      scaleAttributePercent(batterComposite.durability, 1.006) -
-      1.014,
+      scaleAttributePercent(batterComposite.durability, 1.005) -
+      1.02,
   );
   if (
     random.float(0, 1) <
-    (isReliever ? 0.001 : 0.0005) /
+    (isReliever ? 0.0005 : 0.00025) /
       scaleAttributePercent(pitcherComposite.durability, 4)
   ) {
     league.playerLookup[pitcherId].statusIds.injured =
@@ -1774,10 +1785,11 @@ function considerSwapPitcher(
       (p) =>
         !team.pitchingOrder.includes(p.id) &&
         p.positions.some((pos) => isPitcher(pos)) &&
-        p.stamina > 0.5 &&
+        p.stamina > 0.3 &&
         !p.statusIds.injured,
     );
   if (alternatePitchers.length === 0) {
+    // console.log(`No alternate pitchers available for swap`);
     return null;
   }
   // Sort by overall
@@ -1849,8 +1861,8 @@ const heatLookup = {
   out: -1,
   hit: 2,
   double: 3,
-  triple: 5,
-  homeRun: 6,
+  triple: 4,
+  homeRun: 5,
   steal: 2,
   caughtStealing: -2,
   run: 1,
