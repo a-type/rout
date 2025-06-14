@@ -106,7 +106,7 @@ export class GameStateCache {
       return this.gameDefinition.applyRoundToGlobalState({
         globalState: state,
         round,
-        roundIndex: i,
+        roundIndex: startFrom + i,
         random,
         members,
       });

@@ -11,6 +11,7 @@ type GlobalState = {
   randomValues: number[];
   turnValues: string[];
   initialRandomValue: number;
+  playedRounds: number[];
 };
 type TurnData = { value: string };
 
@@ -25,6 +26,7 @@ function createCache() {
       randomValues: [],
       turnValues: [],
       initialRandomValue: random.int(0, 100),
+      playedRounds: [],
     })),
     getPlayerState({ globalState }) {
       return {};
@@ -32,6 +34,7 @@ function createCache() {
     applyRoundToGlobalState: vi.fn(
       ({ globalState, round, random, members, roundIndex }) => {
         const newState = { ...globalState };
+        newState.playedRounds.push(roundIndex);
         for (const turn of round.turns) {
           newState.randomValues.push(random.int(0, 100));
           newState.turnValues.push(turn.data.value);
@@ -71,6 +74,7 @@ describe('StateCache', () => {
       randomValues: [],
       turnValues: [],
       initialRandomValue,
+      playedRounds: [],
     });
   });
 
@@ -106,6 +110,7 @@ describe('StateCache', () => {
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     // check that the state is cached - it doesn't get computed again
@@ -150,6 +155,7 @@ describe('StateCache', () => {
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     (game.getInitialGlobalState as Mock).mockClear();
@@ -190,6 +196,7 @@ describe('StateCache', () => {
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     expect(game.getInitialGlobalState).not.toHaveBeenCalled();
@@ -228,6 +235,7 @@ describe('StateCache', () => {
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     (game.getInitialGlobalState as Mock).mockClear();
@@ -274,6 +282,7 @@ describe('StateCache', () => {
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
+      playedRounds: [0, 1, 2],
     });
 
     expect(game.getInitialGlobalState).not.toHaveBeenCalled();
@@ -317,6 +326,7 @@ describe('StateCache', () => {
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     (game.getInitialGlobalState as Mock).mockClear();
@@ -357,6 +367,7 @@ describe('StateCache', () => {
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
+      playedRounds: [0, 1],
     });
 
     expect(game.getInitialGlobalState).not.toHaveBeenCalled();

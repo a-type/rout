@@ -346,15 +346,11 @@ export const gameDefinition: GameDefinition<
   },
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
-    if (round.turns.every((t) => isPassTurn(t.data))) {
+    const draftInfo = getDraftingRound(members.length, round.roundIndex);
+    if (draftInfo.isNewDeal && draftInfo.passOffset !== null) {
       // this is a drafting round. for each player, we pass
       // the provided cards to the target player. target player
       // changes based on which draft round this is.
-      const draftInfo = getDraftingRound(members.length, round.roundIndex);
-      if (!draftInfo.passOffset) {
-        // something is wrong...
-        throw new Error('Received pass turns for a non-pass round');
-      }
 
       const newHands = { ...globalState.hands };
       // which player you pass to is based on the drafting round,
@@ -395,7 +391,18 @@ export const gameDefinition: GameDefinition<
     const playerId = turn.playerId;
     const playerHand = globalState.hands[playerId];
     const cardPlayed = turnData.card;
+    if (!playerHand.includes(cardPlayed)) {
+      throw new Error(
+        `Player ${playerId} tried to play a card that was not in their hand: ${cardPlayed}`,
+      );
+    }
     const newPlayerHand = playerHand.filter((card) => card !== cardPlayed);
+    // sanity check
+    if (playerHand.length !== newPlayerHand.length + 1) {
+      throw new Error(
+        `Player ${playerId} played card ${cardPlayed} which must have been in their hand multiple times, because their hand was ${playerHand.length} cards and now is ${newPlayerHand.length} cards.`,
+      );
+    }
     let newHands: Record<PrefixedId<'u'>, Card[]> = {
       ...globalState.hands,
       [playerId]: newPlayerHand,

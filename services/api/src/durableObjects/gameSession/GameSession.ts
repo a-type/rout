@@ -811,23 +811,16 @@ export class GameSession extends DurableObject<ApiBindings> {
     upToAndIncluding: number;
   }): Promise<GameRound<GameSessionTurn>[]> {
     const turns = await this.#listTurns({ roundLte: upToAndIncluding });
-    return turns.reduce<GameRound<GameSessionTurn>[]>(
-      (acc, turn) => {
-        const round = acc[turn.roundIndex] ?? {
-          roundIndex: turn.roundIndex,
-          turns: [],
-        };
-        round.turns.push(turn);
-        acc[turn.roundIndex] = round;
-        return acc;
-      },
-      new Array(Math.max(upToAndIncluding, 0))
-        .fill(null)
-        .map<GameRound<GameSessionTurn>>(() => ({
-          roundIndex: 0,
-          turns: [],
-        })),
-    );
+    return turns.reduce<GameRound<GameSessionTurn>[]>((acc, turn) => {
+      const round = acc[turn.roundIndex] ?? {
+        roundIndex: turn.roundIndex,
+        turns: [],
+      };
+      round.roundIndex = turn.roundIndex;
+      round.turns.push(turn);
+      acc[turn.roundIndex] = round;
+      return acc;
+    }, []);
   }
   async #getGlobalStateUnchecked(
     upToAndIncludingRoundIndex?: number,
