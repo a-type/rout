@@ -3,9 +3,16 @@ import { statusData, StatusType } from '@long-game/game-wizard-ball-definition';
 import { TooltipPlus } from '../TooltipPlus';
 import { PerkEffect } from '../items/PerkEffect';
 
+function strOrFn(
+  x: string | ((stacks: number) => string),
+  stacks: number,
+): string {
+  return typeof x === 'function' ? x(stacks) : x;
+}
+
 export function StatusChip({
   id,
-  stacks,
+  stacks = 0,
 }: {
   id: StatusType;
   stacks?: number;
@@ -20,7 +27,7 @@ export function StatusChip({
       content={
         <div className="flex flex-col gap-1">
           <span className="flex flex-col gap-1">
-            {description}
+            {strOrFn(description, stacks)}
             <PerkEffect effect={effect({ stacks })} />
           </span>
         </div>
@@ -31,10 +38,11 @@ export function StatusChip({
         className={clsx(
           'flex flex-row items-center bg-gray-800 border-solid border-1',
           'p-1 rounded cursor-pointer hover:bg-gray-700',
-          kind === 'buff' ? 'text-green-400' : 'text-red-400',
+          (kind === 'buff') === stacks > 0 ? 'text-green-400' : 'text-red-400',
         )}
       >
-        {icon} {name} {stacks ? `(x${stacks})` : ''}
+        {strOrFn(icon, stacks)} {strOrFn(name, stacks)}{' '}
+        {stacks ? `(x${Math.abs(stacks)})` : ''}
       </span>
     </TooltipPlus>
   );

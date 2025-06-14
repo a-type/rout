@@ -64,7 +64,6 @@ export const teamNouns: Array<{ text: string; icon: string }> = [
   { text: 'Mushrooms', icon: '🍄' },
   { text: 'Dew', icon: '💦' },
   { text: 'Shadows', icon: '🌑' },
-  { text: 'Embers', icon: '🔥' },
   { text: 'Valleys', icon: '🏞️' },
   { text: 'Mountains', icon: '⛰️' },
   { text: 'Groves', icon: '🌴' },

@@ -1,7 +1,6 @@
 import { PrefixedId } from '@long-game/common';
 import { SpeciesType } from './speciesData';
 import { ClassType } from './classData';
-import { PitchOutcome } from './simGames';
 import { WeatherType } from './weatherData';
 import { BallparkType } from './ballparkData';
 import { ActualPitch } from './pitchData';
@@ -331,3 +330,22 @@ export type Choice =
     };
 
 export type ChoiceKind = Choice['kind'];
+
+export type PitchOutcome =
+  | 'ball'
+  | 'strike'
+  | 'hit'
+  | 'out'
+  | 'double'
+  | 'triple'
+  | 'homeRun'
+  | 'foul';
+
+export type AtBatOutcome =
+  | 'strikeout'
+  | 'walk'
+  | 'hit'
+  | 'out'
+  | 'double'
+  | 'triple'
+  | 'homeRun';

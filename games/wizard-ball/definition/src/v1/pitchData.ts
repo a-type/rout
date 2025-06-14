@@ -1,4 +1,5 @@
 import { HitPower, HitType } from './gameTypes';
+import { scaleAttributePercent } from './utils';
 
 export type PitchData = {
   accuracyBonus: number;
@@ -35,32 +36,44 @@ export type ActualPitch = Omit<
   };
 };
 export const pitchTypes = {
-  fastball: ({ quality, velocity, movement }) => ({
+  fastball: ({
+    quality = 1,
+    velocity = 10,
+    movement = 10,
+    accuracy = 10,
+    isInaccurate = false,
+  } = {}) => ({
     accuracyBonus: 0,
-    contactStrikeFactor: 1,
-    contactBallFactor: 1,
-    swingStrikeFactor: 1,
-    swingBallFactor: 1,
+    contactStrikeFactor: 1 / scaleAttributePercent(velocity, 2),
+    contactBallFactor: 1 / scaleAttributePercent(accuracy, 2),
+    swingStrikeFactor: 1 / scaleAttributePercent(velocity, 2),
+    swingBallFactor: 1 * scaleAttributePercent(accuracy, 2),
     hitModifierTable: {
       power: {
-        weak: 0.8,
+        weak: 0.9,
         normal: 1.0,
-        strong: 1.2,
+        strong: 1.1,
       },
       type: {
-        grounder: 0.75,
-        lineDrive: 1.25,
-        fly: 1.25,
+        grounder: 0.8,
+        lineDrive: 1.2,
+        fly: 1.2,
         popUp: 1,
       },
     },
   }),
-  curveball: ({ quality, velocity, movement }) => ({
+  curveball: ({
+    quality = 1,
+    velocity = 10,
+    movement = 10,
+    accuracy = 10,
+    isInaccurate = false,
+  } = {}) => ({
     accuracyBonus: -5,
-    contactStrikeFactor: 0.8,
-    contactBallFactor: 0.6,
-    swingStrikeFactor: 0.8,
-    swingBallFactor: 0.6,
+    contactStrikeFactor: 0.8 / scaleAttributePercent(movement, 2),
+    contactBallFactor: 0.6 / scaleAttributePercent(movement, 2),
+    swingStrikeFactor: 0.8 / scaleAttributePercent(accuracy, 2),
+    swingBallFactor: 0.6 * scaleAttributePercent(accuracy, 2),
     hitModifierTable: {
       power: {
         weak: 1.2,
@@ -75,12 +88,18 @@ export const pitchTypes = {
       },
     },
   }),
-  changeup: ({ quality, velocity, movement }) => ({
+  changeup: ({
+    quality = 1,
+    velocity = 10,
+    movement = 10,
+    accuracy = 10,
+    isInaccurate = false,
+  } = {}) => ({
     accuracyBonus: -3,
-    contactStrikeFactor: 0.9,
-    contactBallFactor: 0.7,
-    swingStrikeFactor: 1.1,
-    swingBallFactor: 1.2,
+    contactStrikeFactor: 0.9 / scaleAttributePercent(velocity, 2),
+    contactBallFactor: 0.7 / scaleAttributePercent(velocity, 2),
+    swingStrikeFactor: 1.1 / scaleAttributePercent(velocity, 2),
+    swingBallFactor: 1.2 * scaleAttributePercent(accuracy, 2),
     hitModifierTable: {
       power: {
         weak: 1.1,
@@ -95,12 +114,18 @@ export const pitchTypes = {
       },
     },
   }),
-  slider: ({ quality, velocity, movement }) => ({
+  slider: ({
+    quality = 1,
+    velocity = 10,
+    movement = 10,
+    accuracy = 10,
+    isInaccurate = false,
+  } = {}) => ({
     accuracyBonus: -3,
-    contactStrikeFactor: 0.8,
-    contactBallFactor: 0.5,
-    swingStrikeFactor: 1.2,
-    swingBallFactor: 1.35,
+    contactStrikeFactor: 0.8 / scaleAttributePercent(velocity, 2),
+    contactBallFactor: 0.5 / scaleAttributePercent(movement, 2),
+    swingStrikeFactor: 1.2 / scaleAttributePercent(velocity, 2),
+    swingBallFactor: 1.35 * scaleAttributePercent(movement, 2),
     hitModifierTable: {
       power: {
         weak: 1.1,
@@ -115,22 +140,28 @@ export const pitchTypes = {
       },
     },
   }),
-  sinker: ({ quality, velocity, movement }) => ({
+  sinker: ({
+    quality = 1,
+    velocity = 10,
+    movement = 10,
+    accuracy = 10,
+    isInaccurate = false,
+  } = {}) => ({
     accuracyBonus: -2,
     contactStrikeFactor: 1.1,
-    contactBallFactor: 1.1,
+    contactBallFactor: 1.1 / scaleAttributePercent(accuracy, 2),
     swingStrikeFactor: 0.9,
-    swingBallFactor: 1.0,
+    swingBallFactor: 1.0 * scaleAttributePercent(accuracy, 2),
     hitModifierTable: {
       power: {
-        weak: 1.1,
+        weak: 1.1 * scaleAttributePercent(movement, 1.25),
         normal: 1.0,
-        strong: 0.9,
+        strong: 0.9 / scaleAttributePercent(movement, 1.25),
       },
       type: {
-        grounder: 1.35,
+        grounder: 1.2 * scaleAttributePercent(movement, 1.25),
         lineDrive: 1,
-        fly: 0.75,
+        fly: 0.75 / scaleAttributePercent(movement, 1.25),
         popUp: 1.0,
       },
     },
@@ -168,6 +199,14 @@ export const pitchTypes = {
   // },
 } satisfies Record<
   string,
-  (props: { quality: number; velocity: number; movement: number }) => PitchData
+  (
+    props?: Partial<{
+      quality: number;
+      velocity: number;
+      movement: number;
+      accuracy: number;
+      isInaccurate: boolean;
+    }>,
+  ) => PitchData
 >;
 export type PitchKind = keyof typeof pitchTypes;

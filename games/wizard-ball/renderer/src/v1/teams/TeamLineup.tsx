@@ -88,6 +88,9 @@ export function TeamLineup({ id }: { id: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Team['battingOrder']>(lineup);
   useEffect(() => {
+    if (currentUserId !== team.ownerId) {
+      return;
+    }
     sendTurn((turn) => ({
       ...turn,
       nextBattingOrder: items,

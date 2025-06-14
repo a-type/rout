@@ -45,17 +45,6 @@ export function AttributeSummary({
       rating: overall / 6,
     },
     ...listWithRatings.slice(0, limit),
-    // ...(limit && limit < 6
-    //   ? [
-    //       listWithRatings.slice(limit).reduce(
-    //         (acc, curr) => {
-    //           acc.rating += curr.rating / (listWithRatings.length - limit);
-    //           return acc;
-    //         },
-    //         { value: 'average', label: 'Other', color: '#808080', rating: 0 },
-    //       ),
-    //     ]
-    //   : []),
   ];
   return (
     <div className="flex flex-row gap-6 justify-center items-center">

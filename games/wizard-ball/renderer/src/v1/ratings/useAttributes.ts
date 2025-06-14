@@ -20,7 +20,7 @@ function getActivePerks(player: Player, league: League) {
       .map((item) => itemData[item.itemDef].effect()),
     ...player.perkIds
       .map((pid) => perks[pid])
-      .filter((perk) => !perk.condition)
+      .filter((perk) => !perk.condition || perk.condition({ isMe: true }))
       .map((perk) => perk.effect()),
     // ...Object.entries(player.statusIds).map(([statusId, stacks]) => {
     //   const status = statusData[statusId as StatusType];

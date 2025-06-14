@@ -60,7 +60,7 @@ export function generateLeague(
     skipPerks?: boolean;
   } = {},
 ): League {
-  const playersPerTeam = options.numPlayers ?? 19;
+  const playersPerTeam = options.numPlayers ?? 20;
   const roundCount = options.numRounds ?? 20;
   const teamCount = options.numTeams ?? 4;
   let league: League = {
@@ -122,14 +122,16 @@ export function generateLeague(
       'rp',
       'rp',
       'rp',
+      'rp',
       'c',
       'if',
       'of',
     ];
     team.battingOrder = forcedPositions.slice(0, 9) as Team['battingOrder'];
     for (let i = 0; i < playersPerTeam; i++) {
+      const forcedPosition = forcedPositions[i];
       const player = generatePlayer(random, {
-        position: forcedPositions[i],
+        position: forcedPosition,
         skipPerks: options.skipPerks,
       });
       plusAttributes.forEach((plusAttribute) => {
@@ -145,18 +147,18 @@ export function generateLeague(
           Math.max(1, player.attributes[attribute]),
         );
       });
-      const position = player.positions[0];
+
       player.teamId = team.id;
       team.playerIds.push(player.id);
       if (
-        !isPitcher(position) &&
-        position !== 'if' &&
-        position !== 'of' &&
-        team.positionChart[position] === null
+        !isPitcher(forcedPosition) &&
+        forcedPosition !== 'if' &&
+        forcedPosition !== 'of' &&
+        team.positionChart[forcedPosition] === null
       ) {
-        team.positionChart[position] = player.id;
+        team.positionChart[forcedPosition] = player.id;
       }
-      if (forcedPositions[i] === 'sp') {
+      if (forcedPosition === 'sp') {
         team.pitchingOrder.push(player.id);
       }
       league.playerLookup[player.id] = player;
