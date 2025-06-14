@@ -171,6 +171,8 @@ export type PlayerStats = Partial<{
   runs: number;
   walks: number;
   strikeouts: number;
+  // fielding stats
+  doublePlays: number;
   // baserunning stats
   stolenBases: number;
   caughtStealing: number;
@@ -279,7 +281,7 @@ export type GameLogEvent =
     };
 
 export type HitGameLogEvent = {
-  kind: Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'>;
+  kind: Exclude<PitchOutcome, 'strike' | 'ball' | 'foul'> | 'doublePlay';
   batterId: PlayerId;
   pitcherId: PlayerId;
   direction: HitArea;

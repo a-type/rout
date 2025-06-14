@@ -7,7 +7,7 @@ import {
   simulateGame,
   simulatePitch,
   simulateRound,
-} from './simGames';
+} from './sim/simGames';
 
 describe('benchmark', () => {
   const random = new GameRandom('test');

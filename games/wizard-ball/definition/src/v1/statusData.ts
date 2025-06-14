@@ -1,6 +1,7 @@
 import { LeagueGameState, Player } from './gameTypes';
 import { PerkEffect } from './perkData';
 import { PitchKind } from './pitchData';
+import { clamp } from './utils';
 import { WeatherType } from './weatherData';
 
 export type StatusDuration = 'end-of-game';
@@ -45,6 +46,7 @@ export const statusData = {
         intelligence: -stacks * 2,
         charisma: -stacks * 2,
         constitution: -stacks * 2,
+        wisdom: -stacks * 2,
       },
     }),
   },
@@ -58,11 +60,15 @@ export const statusData = {
     icon: (stacks) => (stacks > 0 ? '🔥' : '❄️'),
     condition: ({ isMe = false, stacks = 0 }) => isMe && Math.abs(stacks) >= 5,
     round: (stacks) =>
-      stacks > 0
-        ? Math.min(stacks - 1, Math.floor(stacks * 0.75))
-        : stacks < 0
-        ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
-        : 0,
+      clamp(
+        stacks > 0
+          ? Math.min(stacks - 1, Math.floor(stacks * 0.75))
+          : stacks < 0
+            ? Math.max(stacks + 1, Math.ceil(stacks * 0.75))
+            : 0,
+        -20,
+        20,
+      ),
     effect: ({ stacks = 1 }) => {
       const mod = Math.sign(stacks) * 2;
       return {
@@ -82,12 +88,54 @@ export const statusData = {
     name: 'Enraged',
     description: 'Really freaking angry.',
     icon: '😡',
+    round: (stacks) =>
+      Math.max(0, Math.min(stacks - 1, Math.floor(stacks / 2))),
     condition: ({ isMe = false }) => isMe,
     effect: ({ stacks = 1 }) => ({
       attributeBonus: {
         strength: stacks * 2,
       },
     }),
+  },
+  cursed: {
+    kind: 'debuff',
+    name: 'Cursed',
+    description: 'Player is cursed and plays worse.',
+    icon: '😈',
+    round: (stacks) => Math.max(0, stacks - 1),
+    condition: ({ isMe = false }) => isMe,
+    effect: ({ stacks = 1 }) => ({
+      attributeBonus: {
+        strength: -2,
+        agility: -2,
+        intelligence: -2,
+        charisma: -2,
+        constitution: -2,
+        wisdom: -2,
+      },
+    }),
+  },
+  blessing: {
+    kind: 'buff',
+    name: 'Blessed',
+    description: 'Player is blessed and plays better.',
+    icon: '😇',
+    round: (stacks) =>
+      Math.max(0, Math.min(stacks - 1, Math.floor(stacks / 2))),
+    condition: ({ isMe = false }) => isMe,
+    effect: ({ stacks = 1 }) => {
+      const factor = Math.min(stacks, 5);
+      return {
+        attributeBonus: {
+          strength: 1 * factor,
+          agility: 1 * factor,
+          intelligence: 1 * factor,
+          charisma: 1 * factor,
+          constitution: 1 * factor,
+          wisdom: 1 * factor,
+        },
+      };
+    },
   },
 } as const satisfies Record<string, Status>;
 export type StatusType = keyof typeof statusData;

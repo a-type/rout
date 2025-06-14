@@ -3,7 +3,7 @@ import { statusData, StatusType } from '@long-game/game-wizard-ball-definition';
 import { TooltipPlus } from '../TooltipPlus';
 import { PerkEffect } from '../items/PerkEffect';
 
-function strOrFn(
+export function strOrFn(
   x: string | ((stacks: number) => string),
   stacks: number,
 ): string {

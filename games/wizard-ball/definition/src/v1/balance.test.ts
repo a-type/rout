@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generateLeague } from './generation';
-import { simulateRound } from './simGames';
+import { simulateRound } from './sim/simGames';
 import { GameRandom } from '@long-game/game-definition';
 import { getTeamAvgAttributes } from './attributes';
 

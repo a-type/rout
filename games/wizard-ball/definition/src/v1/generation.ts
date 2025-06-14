@@ -403,12 +403,10 @@ function generatePlayer(
   }
 
   if (!options.skipPerks) {
-    // const perkCount =
-    //   random.float(0, 1) < 0.33 ? (random.float(0, 1) < 0.2 ? 3 : 2) : 1;
     const perkCount = random.float(0, 1) < 0.25 ? 1 : 0;
     const { level } = getLevelFromXp(player.xp);
     for (let i = 0; i < perkCount; i++) {
-      const perkOptions = Object.keys(perks).filter((p) => {
+      let perkOptions = Object.keys(perks).filter((p) => {
         const perk = perks[p as keyof typeof perks];
         return (
           (perk.kind === 'any' ||
@@ -427,6 +425,20 @@ function generatePlayer(
           !player.perkIds.includes(p)
         );
       });
+      const rarity = random.table({
+        common:
+          16 * (perkOptions.some((p) => perks[p].rarity === 'common') ? 1 : 0),
+        uncommon:
+          8 * (perkOptions.some((p) => perks[p].rarity === 'uncommon') ? 1 : 0),
+        rare: 4 * (perkOptions.some((p) => perks[p].rarity === 'rare') ? 1 : 0),
+        epic: 2 * (perkOptions.some((p) => perks[p].rarity === 'epic') ? 1 : 0),
+        legendary:
+          1 *
+          (perkOptions.some((p) => perks[p].rarity === 'legendary') ? 1 : 0),
+      });
+      perkOptions = perkOptions.filter(
+        (p) => perks[p as keyof typeof perks].rarity === rarity,
+      );
       if (perkOptions.length === 0) continue;
       const chosenPerk = random.item(perkOptions);
       player.perkIds.push(chosenPerk);
@@ -458,10 +470,13 @@ function generateAttributes(
       ])
       .filter((i) => i !== bestAttribute),
   ];
-  const attr = attributes.reduce((acc, key) => {
-    acc[key as keyof typeof acc] = results.pop() ?? 0;
-    return acc;
-  }, {} as Player['attributes']);
+  const attr = attributes.reduce(
+    (acc, key) => {
+      acc[key as keyof typeof acc] = results.pop() ?? 0;
+      return acc;
+    },
+    {} as Player['attributes'],
+  );
   for (const [key, value] of Object.entries(speciesData[race])) {
     attr[key as keyof typeof attr] = Math.max(
       1,
