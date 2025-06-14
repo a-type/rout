@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "pnpm run --filter @long-game/service-db --parallel \"/^dev:.*/\"",
-    "dev:db": "wrangler dev -c wrangler.toml --port 3111 --ip 127.0.0.1",
+    "dev:db": "wrangler dev -c wrangler.toml --port 3111 --inspector-port 9230 --ip 127.0.0.1",
     "dev:types": "tsc -p tsconfig.json --watch",
     "migrations:create": "wrangler d1 migrations create prod-long-game-core -c wrangler.toml",
     "migrations:apply:local": "cross-env CI=true wrangler d1 migrations apply prod-long-game-core --local -c wrangler.toml",

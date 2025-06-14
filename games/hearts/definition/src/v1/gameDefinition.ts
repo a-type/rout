@@ -178,7 +178,7 @@ export const gameDefinition: GameDefinition<
     // the player with 2 of clubs must play the 2 of clubs
     if (
       playerState.currentTrick.length === 0 &&
-      !playerState.lastCompletedTrick
+      playerState.isFirstTrickOfDeal
     ) {
       const soughtCard = getDealStartCard(members.length);
       const soughtCardRank = getCardDisplayRank(soughtCard);
@@ -214,7 +214,7 @@ export const gameDefinition: GameDefinition<
 
     // on the first trick, if a player has no clubs, they cannot
     // play the queen of spades or a heart.
-    if (roundIndex < members.length) {
+    if (playerState.isFirstTrickOfDeal) {
       if (turn.data.card.endsWith('h') || turn.data.card === 'qs') {
         return 'You cannot play a heart or the queen of spades on the first trick.';
       }

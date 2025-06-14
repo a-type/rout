@@ -1,6 +1,21 @@
-import { Box, withClassName, withProps } from '@a-type/ui';
+import { Box, BoxProps, clsx } from '@a-type/ui';
+import { TokenPresence } from '@long-game/game-ui';
 
-export const CardGrid = withClassName(
-  withProps(Box, { gap: true, full: true, layout: 'center center' }),
-  'grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] [grid-auto-rows:auto]',
-);
+export interface CardGridProps extends BoxProps {}
+
+export function CardGrid({ children, className, ...rest }: CardGridProps) {
+  return (
+    <Box
+      gap
+      full
+      layout="center center"
+      className={clsx(
+        'grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] [grid-auto-rows:auto]',
+        className,
+      )}
+      {...rest}
+    >
+      <TokenPresence>{children}</TokenPresence>
+    </Box>
+  );
+}
