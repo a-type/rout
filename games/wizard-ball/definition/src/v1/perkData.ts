@@ -521,7 +521,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'fastball',
     effect: () => ({
-      qualityBonus: 2,
+      qualityBonus: 1,
     }),
   },
   fastballerPlus: {
@@ -532,7 +532,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'fastball',
     effect: () => ({
-      qualityBonus: 4,
+      qualityBonus: 2,
     }),
   },
   curveballer: {
@@ -543,7 +543,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'curveball',
     effect: () => ({
-      qualityBonus: 2,
+      qualityBonus: 1,
     }),
   },
   curveballerPlus: {
@@ -554,7 +554,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'curveball',
     effect: () => ({
-      qualityBonus: 4,
+      qualityBonus: 2,
     }),
   },
   changeupArtist: {
@@ -565,7 +565,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'changeup',
     effect: () => ({
-      qualityBonus: 2,
+      qualityBonus: 1,
     }),
   },
   changeupArtistPlus: {
@@ -576,7 +576,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'changeup',
     effect: () => ({
-      qualityBonus: 4,
+      qualityBonus: 2,
     }),
   },
   sliderArtist: {
@@ -587,7 +587,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'slider',
     effect: () => ({
-      qualityBonus: 2,
+      qualityBonus: 1,
     }),
   },
   sliderArtistPlus: {
@@ -598,7 +598,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'slider',
     effect: () => ({
-      qualityBonus: 4,
+      qualityBonus: 2,
     }),
   },
   sinkerArtist: {
@@ -609,7 +609,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'sinker',
     effect: () => ({
-      qualityBonus: 2,
+      qualityBonus: 1,
     }),
   },
   sinkerArtistPlus: {
@@ -620,7 +620,7 @@ export const perks: Record<string, Perk> = {
     condition: ({ pitchKind, isPitcher = false }) =>
       isPitcher && pitchKind === 'sinker',
     effect: () => ({
-      qualityBonus: 4,
+      qualityBonus: 2,
     }),
   },
   eagerBeaver: {
@@ -787,9 +787,9 @@ export const perks: Record<string, Perk> = {
       (!!gameState.bases[2] || !!gameState.bases[3]),
     effect: () => ({
       pitchingCompositeBonus: {
-        movement: 6,
-        contact: 6,
-        composure: 6,
+        movement: 5,
+        contact: 5,
+        composure: 5,
       },
     }),
   },
@@ -801,15 +801,15 @@ export const perks: Record<string, Perk> = {
     requirements: ({ species, classType, positions }) =>
       positions.includes('rp') && (species === 'fox' || classType === 'bard'),
     condition: ({ gameState, isPitcher = false }) =>
-      isPitcher && !!gameState && gameState.currentInning >= 18,
+      isPitcher && !!gameState && gameState.currentInning >= 17,
     effect: () => ({
       attributeBonus: {
-        strength: 4,
-        agility: 4,
-        intelligence: 4,
-        wisdom: 4,
-        charisma: 4,
-        constitution: 4,
+        strength: 3,
+        agility: 3,
+        intelligence: 3,
+        wisdom: 3,
+        charisma: 3,
+        constitution: 3,
       },
     }),
   },
@@ -821,15 +821,15 @@ export const perks: Record<string, Perk> = {
     requirements: ({ species, classType, positions }) =>
       positions.includes('rp') && (species === 'fox' || classType === 'bard'),
     condition: ({ gameState, isPitcher = false }) =>
-      isPitcher && !!gameState && gameState.currentInning >= 18,
+      isPitcher && !!gameState && gameState.currentInning >= 17,
     effect: () => ({
       attributeBonus: {
-        strength: 6,
-        agility: 6,
-        intelligence: 6,
-        wisdom: 6,
-        charisma: 6,
-        constitution: 6,
+        strength: 5,
+        agility: 5,
+        intelligence: 5,
+        wisdom: 5,
+        charisma: 5,
+        constitution: 5,
       },
     }),
   },

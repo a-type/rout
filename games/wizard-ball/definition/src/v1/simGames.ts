@@ -147,11 +147,23 @@ export function simulateGame(
     gameState = addToPlayerStats(gameState, gameState.winningPitcherId, {
       wins: 1,
     });
+    league = updatePlayerHeat(
+      'pitching',
+      gameState.winningPitcherId!,
+      league,
+      'win',
+    );
   }
   if (gameState.losingPitcherId) {
     gameState = addToPlayerStats(gameState, gameState.losingPitcherId, {
       losses: 1,
     });
+    league = updatePlayerHeat(
+      'pitching',
+      gameState.losingPitcherId!,
+      league,
+      'loss',
+    );
   }
   const lastPitcherForWinner = last(gameState.teamData[winner].pitchers);
   if (
@@ -167,6 +179,12 @@ export function simulateGame(
     gameState = addToPlayerStats(gameState, gameState.saveElligiblePitcherId, {
       saves: 1,
     });
+    league = updatePlayerHeat(
+      'pitching',
+      gameState.saveElligiblePitcherId!,
+      league,
+      'save',
+    );
   }
 
   const score = {
@@ -801,59 +819,55 @@ function determinePitchType(
   let attributeTotal = 10 + randomMod;
   const duelingFactor =
     0.5 * (pitcherComposite.dueling - batterComposite.dueling);
-  attributeTotal +=
-    0.2 * Math.pow(Math.abs(duelingFactor), 1.5) * Math.sign(duelingFactor);
-  attributeTotal += 0.15 * (pitcherComposite.strikeout - 10) * game.strikes;
-  attributeTotal +=
-    (0.15 * (pitcherComposite.composure - 10) * game.balls * 2) / 3;
-  // attributeTotal +=
-  //   (0.2 * (pitcherComposite.dependable - 10) * game.balls * 2) / 3;
+  const duelingAmount =
+    0.2 * Math.pow(Math.abs(duelingFactor), 2) * Math.sign(duelingFactor);
+  const strikeoutAmount =
+    0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
+  const composureAmount =
+    (0.2 * (pitcherComposite.composure - 10) * game.balls * 2) / 3;
 
-  // switch (pitchKind) {
-  //   case 'fastball':
-  //     attributeTotal += (pitcherAttributes.strength - 10) * 0.4;
-  //   case 'curveball':
-  //     attributeTotal += (pitcherAttributes.agility - 10) * 0.4;
-  //     break;
-  //   case 'changeup':
-  //     attributeTotal += (pitcherAttributes.wisdom - 10) * 0.4;
-  //     break;
-  //   case 'slider':
-  //     attributeTotal += (pitcherAttributes.intelligence - 10) * 0.4;
-  //     break;
-  //   case 'sinker':
-  //     attributeTotal += (pitcherAttributes.constitution - 10) * 0.4;
-  //     break;
-  //   default:
-  //     throw new Error(`Unknown pitch kind: ${pitchKind}`);
-  // }
+  const pitchFactor = 0.4;
+  let pitchAmount = 0;
+
+  switch (pitchKind) {
+    case 'fastball':
+      pitchAmount = pitchFactor * (pitcherComposite.velocity - 10);
+    case 'curveball':
+      pitchAmount = pitchFactor * (pitcherComposite.movement - 10);
+      break;
+    case 'changeup':
+      pitchAmount =
+        pitchFactor * 0.7 * (pitcherComposite.velocity - 10) +
+        pitchFactor * 0.3 * (pitcherComposite.accuracy - 10);
+      break;
+    case 'slider':
+      pitchAmount =
+        pitchFactor * 0.5 * (pitcherComposite.velocity - 10) +
+        pitchFactor * 0.5 * (pitcherComposite.movement - 10);
+      break;
+    case 'sinker':
+      pitchAmount =
+        pitchFactor * 0.7 * (pitcherComposite.movement - 10) +
+        pitchFactor * 0.3 * (pitcherComposite.accuracy - 10);
+      break;
+    default:
+      throw new Error(`Unknown pitch kind: ${pitchKind}`);
+  }
+  let perkAmount = 0;
   activePerks.forEach((perk) => {
     const qb = perk.effect.qualityBonus;
     if (qb) {
-      attributeTotal += qb;
+      perkAmount += qb;
     }
   });
+  attributeTotal +=
+    duelingAmount +
+    strikeoutAmount +
+    composureAmount +
+    pitchAmount +
+    perkAmount;
 
   const qualityModifier = attributeTotal - 10;
-  // console.log({
-  //   qualityModifier,
-  //   attributeTotal,
-  //   randomMod,
-  //   perks: activePerks.map((p) => ({
-  //     name: p.name,
-  //     qb: p.effect().qualityBonus,
-  //   })),
-  //   dueling: 0.2 * (pitcherComposite.dueling - batterComposite.dueling),
-  //   strikeout: 0.2 * (pitcherComposite.strikeout - 10) * game.strikes,
-  // });
-  const modifiedMovement = pitcherComposite.movement + qualityModifier;
-  const modifiedVelocity = pitcherComposite.velocity + qualityModifier;
-  let quality = scaleAttributePercent(attributeTotal, 2);
-  const basePitchData = pitchTypes[pitchKind]({
-    quality,
-    movement: modifiedMovement,
-    velocity: modifiedVelocity,
-  });
 
   const countAdvantage = getCountAdvantage(game.balls, game.strikes);
   const countFactor =
@@ -873,18 +887,28 @@ function determinePitchType(
     );
   const strikeDesire = random.float(0, 1) < strikeDesireChance;
 
+  const modifiedAccuracy = pitcherComposite.accuracy + qualityModifier;
+
   const strikeFactor =
     0.55 +
     scaleAttribute(
-      pitcherComposite.accuracy + basePitchData.accuracyBonus,
+      modifiedAccuracy + pitchTypes[pitchKind]().accuracyBonus,
       0.4,
     );
 
-  const isStrike =
-    random.float(0, 1) < strikeFactor ? strikeDesire : !strikeDesire;
-  if (isStrike !== strikeDesire) {
-    quality -= 0.2;
-  }
+  const isAccurate = random.float(0, 1) < strikeFactor;
+
+  const isStrike = isAccurate ? strikeDesire : random.float(0, 1) < 0.3;
+
+  const modifiedMovement = pitcherComposite.movement + qualityModifier;
+  const modifiedVelocity = pitcherComposite.velocity + qualityModifier;
+  let quality = scaleAttributePercent(attributeTotal, 2);
+  const basePitchData = pitchTypes[pitchKind]({
+    quality,
+    accuracy: modifiedAccuracy,
+    movement: modifiedMovement,
+    velocity: modifiedVelocity,
+  });
 
   if (!quality) {
     throw new Error(
@@ -895,10 +919,30 @@ function determinePitchType(
         qualityModifier,
         attributeTotal,
         basePitchData,
-        // duel: 0.2 * Math.pow(duelingFactor, 1.5) * Math.sign(duelingFactor),
       })}`,
     );
   }
+  // if (quality > 1.9) {
+  //   console.log(
+  //     `High pitch quality: ${quality} for ${pitchKind} by ${pitcher.name} ${JSON.stringify(
+  //       {
+  //         pitcher,
+  //         pitcherComposite,
+  //         strikeDesire,
+  //         duelingFactor,
+  //         duelingAmount,
+  //         strikeoutAmount,
+  //         composureAmount,
+  //         pitchAmount,
+  //         perkAmount,
+  //         randomMod,
+  //         qualityModifier,
+  //         attributeTotal,
+  //         basePitchData,
+  //       },
+  //     )}`,
+  //   );
+  // }
 
   const {
     contactStrikeFactor,
@@ -927,33 +971,33 @@ function determinePitchType(
   // INT = deception = higher pitch quality
   // CHA = higher pitch quality in clutch situations
 
-  if (isStrike) {
-    pitchData.swingFactor *=
-      1 /
-      scaleAttributePercent(modifiedVelocity, 2) /
-      scaleAttributePercent(pitcherComposite.accuracy, 1.5);
-    pitchData.contactFactor *= 1 / scaleAttributePercent(modifiedVelocity, 2);
-  } else {
-    pitchData.swingFactor *=
-      scaleAttributePercent(modifiedMovement, 2) *
-      scaleAttributePercent(pitcherComposite.accuracy, 1.5);
-    pitchData.contactFactor *= 1 / scaleAttributePercent(modifiedMovement, 2);
-  }
+  // if (isStrike) {
+  //   pitchData.swingFactor *=
+  //     1 /
+  //     scaleAttributePercent(modifiedVelocity, 2) /
+  //     scaleAttributePercent(pitcherComposite.accuracy, 1.5);
+  //   pitchData.contactFactor *= 1 / scaleAttributePercent(modifiedVelocity, 2);
+  // } else {
+  //   pitchData.swingFactor *=
+  //     scaleAttributePercent(modifiedMovement, 2) *
+  //     scaleAttributePercent(pitcherComposite.accuracy, 1.5);
+  //   pitchData.contactFactor *= 1 / scaleAttributePercent(modifiedMovement, 2);
+  // }
 
-  Object.keys(pitchData.hitModifierTable.power).forEach((key) => {
-    if (!key || !pitchData.hitModifierTable.power[key as HitPower]) {
-      return;
-    }
-    pitchData.hitModifierTable.power[key as HitPower] =
-      (pitchData.hitModifierTable.power[key as HitPower] ?? 1) ** quality;
-  });
-  Object.keys(pitchData.hitModifierTable.type).forEach((key) => {
-    if (!key || !pitchData.hitModifierTable.type[key as HitType]) {
-      return;
-    }
-    pitchData.hitModifierTable.type[key as HitType] =
-      (pitchData.hitModifierTable.type[key as HitType] ?? 1) ** quality;
-  });
+  // Object.keys(pitchData.hitModifierTable.power).forEach((key) => {
+  //   if (!key || !pitchData.hitModifierTable.power[key as HitPower]) {
+  //     return;
+  //   }
+  //   pitchData.hitModifierTable.power[key as HitPower] =
+  //     (pitchData.hitModifierTable.power[key as HitPower] ?? 1) ** quality;
+  // });
+  // Object.keys(pitchData.hitModifierTable.type).forEach((key) => {
+  //   if (!key || !pitchData.hitModifierTable.type[key as HitType]) {
+  //     return;
+  //   }
+  //   pitchData.hitModifierTable.type[key as HitType] =
+  //     (pitchData.hitModifierTable.type[key as HitType] ?? 1) ** quality;
+  // });
 
   pitchData.hitModifierTable.type.grounder =
     (pitchData.hitModifierTable.type.grounder ?? 1) *
@@ -961,10 +1005,6 @@ function determinePitchType(
   pitchData.hitModifierTable.power.strong =
     (pitchData.hitModifierTable.power.strong ?? 1) /
     scaleAttributePercent(pitcherComposite.hitPower, 2);
-  // pitchData.hitModifierTable.type.lineDrive =
-  //   (pitchData.hitModifierTable.type.lineDrive ?? 1) /
-  //   scaleAttributePercent(pitcherComposite.extraBases, 1.5);
-  // console.log('modified pitch data', pitchData);
 
   return pitchData;
 }
@@ -1666,7 +1706,7 @@ export function simulatePitch(
   }
   if (
     random.float(0, 1) <
-    0.002 / scaleAttributePercent(batterComposite.durability, 4)
+    0.001 / scaleAttributePercent(batterComposite.durability, 4)
   ) {
     league.playerLookup[batterId].statusIds.injured =
       (league.playerLookup[batterId].statusIds.injured ?? 0) +
@@ -1793,35 +1833,50 @@ function swapPitcher(
   return gameState;
 }
 
+type HeatOutcome =
+  | AtBatOutcome
+  | 'steal'
+  | 'caughtStealing'
+  | 'run'
+  | 'rbi'
+  | 'win'
+  | 'loss'
+  | 'save';
+
 const heatLookup = {
   strikeout: -3,
   walk: 1,
   out: -1,
   hit: 2,
   double: 3,
-  triple: 4,
-  homeRun: 5,
+  triple: 5,
+  homeRun: 6,
   steal: 2,
   caughtStealing: -2,
   run: 1,
   rbi: 2,
-} satisfies Record<
-  AtBatOutcome | 'steal' | 'caughtStealing' | 'run' | 'rbi',
-  number
->;
+  win: -2,
+  loss: 2,
+  save: -5,
+} satisfies Record<HeatOutcome, number>;
 
 function updatePlayerHeat(
   kind: 'batting' | 'pitching',
   playerId: PlayerId,
   league: League,
-  outcome: AtBatOutcome | 'steal' | 'caughtStealing' | 'run' | 'rbi',
+  outcome: HeatOutcome,
 ): League {
   const player = league.playerLookup[playerId];
   if (!player) {
     throw new Error(`Player with ID ${playerId} not found in league`);
   }
 
-  const count = 0.5 * (kind === 'batting' ? 1 : -1) * heatLookup[outcome];
+  const isReliever =
+    kind === 'pitching' && player.positions.some((pos) => pos === 'rp');
+
+  const factor = kind === 'batting' ? 1 : isReliever ? -1 : -0.5;
+
+  const count = factor * heatLookup[outcome];
   player.statusIds.streak = (player.statusIds.streak ?? 0) + count;
   return league;
 }

@@ -51,11 +51,11 @@ export const weather = {
     effect: () => ({
       battingCompositeBonus: {
         homeRuns: 2,
-        durability: -3,
+        durability: -2,
       },
       pitchingCompositeBonus: {
         velocity: 2,
-        durability: -3,
+        durability: -2,
       },
     }),
   },
@@ -63,15 +63,14 @@ export const weather = {
     name: 'Snow',
     icon: '❄️',
     color: '#90caf9',
-    description:
-      'Snow drastically reduces speed (especially when stealing) and reduces hitting power.',
+    description: 'Snow drastically reduces speed and reduces hitting power.',
     effect: () => ({
       attributeBonus: {
         agility: -2,
       },
       battingCompositeBonus: {
-        stealing: -3,
-        hitPower: -3,
+        stealing: -2,
+        hitPower: -2,
       },
     }),
   },
@@ -83,11 +82,11 @@ export const weather = {
       'A dangerous storm that increases strikeout rate and frequency of big hits while reducing the chance of making contact.',
     effect: () => ({
       battingCompositeBonus: {
-        hitPower: 4,
-        contact: -4,
+        hitPower: 3,
+        contact: -3,
       },
       pitchingCompositeBonus: {
-        strikeout: 3,
+        strikeout: 2,
       },
     }),
   },
@@ -99,11 +98,11 @@ export const weather = {
       'Fog reduces visibility, making pitching, hitting, and fielding all suffer from lower accuracy.',
     effect: () => ({
       battingCompositeBonus: {
-        contact: -4,
-        fielding: -4,
+        contact: -3,
+        fielding: -3,
       },
       pitchingCompositeBonus: {
-        accuracy: -4,
+        accuracy: -3,
       },
     }),
   },
@@ -115,10 +114,10 @@ export const weather = {
       'Windy conditions increase the chance of fly balls and improve pitching movement.',
     effect: () => ({
       battingCompositeBonus: {
-        hitAngle: 4,
+        hitAngle: 3,
       },
       pitchingCompositeBonus: {
-        movement: 4,
+        movement: 3,
       },
       hitModifierTable: {
         type: {
