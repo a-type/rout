@@ -18,11 +18,18 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
   disabled,
   ...rest
 }) {
-  const { hand } = gameSuite.finalState;
+  const { hand, task } = gameSuite.finalState;
+
+  const canPlayCard = (card: CardType) => {
+    return (
+      gameSuite.isViewingCurrentRound &&
+      (task === 'draft' || !gameSuite.validateTurn({ card }))
+    );
+  };
+
   return (
     <TokenHand<CardType>
       onDrop={(card) => {
-        console.log('Dropped card:', card);
         if (!gameSuite.currentTurn) {
           return;
         }
@@ -54,21 +61,25 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           }
           return getCardSuit(a).localeCompare(getCardSuit(b));
         })
-        .map((card) => (
-          <Token
-            key={card}
-            id={card}
-            data={card}
-            disabled={disabled}
-            className="rounded-lg"
-          >
-            <PlayingCard
-              cardSuit={getCardSuit(card)}
-              cardRank={getCardRank(card)}
-              className="w-52px"
-            />
-          </Token>
-        ))}
+        .map((card) => {
+          const cardDisabled = disabled || !canPlayCard(card);
+          return (
+            <Token
+              key={card}
+              id={card}
+              data={card}
+              disabled={cardDisabled}
+              className="rounded-lg"
+            >
+              <PlayingCard
+                cardSuit={getCardSuit(card)}
+                cardRank={getCardRank(card)}
+                className="w-52px"
+                disabled={cardDisabled}
+              />
+            </Token>
+          );
+        })}
     </TokenHand>
   );
 });

@@ -15,7 +15,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   return (
     <Box full d="col" gap p className="bg-wash flex-1" asChild>
       <TokenRoot>
-        <PlayerScores className="flex-[0_1_auto]" />
+        <PlayerScores className="flex-[0_1_auto] min-h-80px" />
         <TurnError surface="attention" p showReset />
         <Box className="flex-[1_0_auto] overflow-hidden" layout="center center">
           <Box

@@ -10,7 +10,7 @@ import {
 import { withGame } from '@long-game/game-client';
 import { ChatRenderer } from '@long-game/game-renderer';
 import { ChatForm, PlayerAvatar, useMediaQuery } from '@long-game/game-ui';
-import { useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
 
 const localState = proxy({
@@ -90,11 +90,20 @@ const GameLogCollapsed = withGame(({ gameSuite }) => {
   return null;
 });
 
-function RoundBoundary({ roundIndex }: { roundIndex: number }) {
+function RoundBoundary({
+  startIndex,
+  endIndex,
+}: {
+  startIndex: number;
+  endIndex: number;
+}) {
   return (
     <div className="w-full items-center flex flex-row text-xxs color-gray-dark">
       <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
-      <div className="px-md py-xs">Round {roundIndex + 1}</div>
+      <div className="px-md py-xs">
+        Round{startIndex !== endIndex ? 's' : ''} {startIndex + 1}
+        {endIndex !== startIndex ? ` - ${endIndex + 1}` : ''}
+      </div>
       <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
     </div>
   );
@@ -102,6 +111,42 @@ function RoundBoundary({ roundIndex }: { roundIndex: number }) {
 
 const GameLogFull = withGame(({ gameSuite, ...props }) => {
   const { combinedLog: log } = gameSuite;
+  const items: ReactNode[] = [];
+  let startRoundIndex = -1;
+  for (let i = 0; i < log.length; i++) {
+    const entry = log[i];
+    if (entry.type === 'chat') {
+      startRoundIndex = -1; // Reset round index when encountering a chat message
+      const next = log[i + 1];
+      const previous = log[i - 1];
+      const nextMessage = next?.type === 'chat' ? next.chatMessage : null;
+      const previousMessage =
+        previous?.type === 'chat' ? previous.chatMessage : null;
+      items.push(
+        <ChatRenderer
+          message={entry.chatMessage}
+          key={entry.chatMessage.id}
+          nextMessage={nextMessage}
+          previousMessage={previousMessage}
+          compact={false}
+        />,
+      );
+    } else {
+      if (startRoundIndex === -1) {
+        startRoundIndex = entry.roundIndex;
+      }
+      if (log[i + 1]?.type === 'round') {
+        continue;
+      }
+      items.push(
+        <RoundBoundary
+          startIndex={startRoundIndex}
+          endIndex={entry.roundIndex}
+          key={`round-${entry.roundIndex}`}
+        />,
+      );
+    }
+  }
 
   return (
     <GameLogRoot {...props}>
@@ -109,34 +154,7 @@ const GameLogFull = withGame(({ gameSuite, ...props }) => {
         className="flex flex-col min-h-0 overflow-y-auto flex-1 px-sm"
         stickToBottom
       >
-        <GameLogListRoot>
-          {log.map((entry, i) => {
-            if (entry.type === 'chat') {
-              const next = log[i + 1];
-              const previous = log[i - 1];
-              const nextMessage =
-                next?.type === 'chat' ? next.chatMessage : null;
-              const previousMessage =
-                previous?.type === 'chat' ? previous.chatMessage : null;
-              return (
-                <ChatRenderer
-                  message={entry.chatMessage}
-                  key={entry.chatMessage.id}
-                  nextMessage={nextMessage}
-                  previousMessage={previousMessage}
-                  compact={false}
-                />
-              );
-            } else {
-              return (
-                <RoundBoundary
-                  roundIndex={entry.roundIndex}
-                  key={`round-${entry.roundIndex}`}
-                />
-              );
-            }
-          })}
-        </GameLogListRoot>
+        <GameLogListRoot>{items}</GameLogListRoot>
       </ScrollArea>
       <GameLogChatInput />
     </GameLogRoot>

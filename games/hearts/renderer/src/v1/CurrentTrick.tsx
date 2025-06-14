@@ -6,7 +6,12 @@ import {
   getCardSuit,
   isCard,
 } from '@long-game/game-hearts-definition/v1';
-import { PlayerAvatar, PlayerName, TokenSpace } from '@long-game/game-ui';
+import {
+  PlayerAvatar,
+  PlayerName,
+  Token,
+  TokenSpace,
+} from '@long-game/game-ui';
 import { PlayingCard } from '@long-game/game-ui/genericGames';
 import { CardGrid } from './CardGrid';
 import { hooks } from './gameClient';
@@ -82,12 +87,13 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
         >
           <CardGrid>
             {trickToShow.map((card) => (
-              <PlayingCard
-                key={card.card}
-                cardSuit={getCardSuit(card.card)}
-                cardRank={getCardRank(card.card)}
-                playerId={card.playerId}
-              />
+              <Token key={card.card} id={card.card} data={card.card} disabled>
+                <PlayingCard
+                  cardSuit={getCardSuit(card.card)}
+                  cardRank={getCardRank(card.card)}
+                  playerId={card.playerId}
+                />
+              </Token>
             ))}
             {new Array(gameSuite.members.length - trickToShow.length)
               .fill(null)

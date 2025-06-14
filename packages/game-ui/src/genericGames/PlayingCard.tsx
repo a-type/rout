@@ -18,6 +18,8 @@ export interface PlayingCardProps {
   cardRank: number;
   playerId?: PrefixedId<'u'>;
   className?: string;
+  /** Doesn't do anything to events, but styles the card to appear disabled. */
+  disabled?: boolean;
 }
 
 const suitToIcon: Record<PlayingCardSuit, IconName> = {
@@ -30,13 +32,17 @@ const suitToIcon: Record<PlayingCardSuit, IconName> = {
 function PlayingCardRoot({
   cardSuit,
   cardRank,
+  disabled,
   playerId,
+  className,
   ...rest
 }: PlayingCardProps) {
   return (
     <CardRoot
       data-color={getCardColor(cardSuit)}
       data-suit={cardSuit}
+      data-disabled={disabled}
+      className={clsx('playing-card', className)}
       {...rest}
     >
       <ExtremelySimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
@@ -323,7 +329,14 @@ function CardNumber({
   className?: string;
 }) {
   return (
-    <ScalingText className={className}>{toDisplayRank(cardRank)}</ScalingText>
+    <ScalingText
+      className={clsx(
+        '[.playing-card[data-disabled=true]_&]:opacity-50',
+        className,
+      )}
+    >
+      {toDisplayRank(cardRank)}
+    </ScalingText>
   );
 }
 
@@ -341,6 +354,7 @@ function CardSuitIcon({
       name={suitToIcon[cardSuit]}
       className={clsx(
         'flex-1 stroke-width-1px min-w-20px w-auto h-auto aspect-1 [vector-effect:non-scaling-stroke] fill-[currentColor]',
+        '[.playing-card[data-disabled=true]_&]:opacity-50',
         className,
       )}
       style={style}
@@ -365,7 +379,13 @@ function CardSymbol({
     );
   }
   return (
-    <ScalingText className={className} style={style}>
+    <ScalingText
+      className={clsx(
+        '[.playing-card[data-disabled=true]_&]:opacity-50',
+        className,
+      )}
+      style={style}
+    >
       {toDisplayRank(cardRank)}
     </ScalingText>
   );

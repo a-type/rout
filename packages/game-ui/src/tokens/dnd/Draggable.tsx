@@ -168,6 +168,8 @@ function DndOverlayPortal({
           <motion.div
             layoutId={draggable.id}
             transition={flipTransition}
+            data-disabled={draggable.disabled}
+            data-draggable={draggable.id}
             {...rest}
           >
             {children}
@@ -218,7 +220,11 @@ function DraggedRoot({
       {...rest}
     >
       <AnimatePresence>
-        <motion.div layoutId={dragged.id} transition={flipTransition}>
+        <motion.div
+          layoutId={dragged.id}
+          transition={flipTransition}
+          data-draggable-preview={dragged.id}
+        >
           {children}
         </motion.div>
       </AnimatePresence>
