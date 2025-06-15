@@ -18,6 +18,11 @@ export class DropRegions {
     if (!id) {
       return;
     }
+    if (this.elements.get(id) === element) {
+      return () => {
+        this.unregister(id);
+      };
+    }
     console.debug('Registering drop region', id);
     element.setAttribute(REGION_ID_ATTR, id);
     this.elements.set(id, element);

@@ -12,10 +12,12 @@ import {
   ComponentType,
   createContext,
   HTMLAttributes,
+  memo,
   ReactNode,
   Ref,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
@@ -57,17 +59,20 @@ function DraggableRoot({
 
   const box = useState(() => new DraggedBox())[0];
 
+  const ctxValue = useMemo(
+    () => ({
+      id,
+      data,
+      isDragged,
+      isCandidate,
+      disabled,
+      box,
+    }),
+    [id, isDragged, isCandidate, disabled, box],
+  );
+
   return (
-    <DraggableContext.Provider
-      value={{
-        id,
-        data,
-        isDragged,
-        isCandidate,
-        disabled,
-        box,
-      }}
-    >
+    <DraggableContext.Provider value={ctxValue}>
       <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
         {children}
       </DndOverlayPortal>
@@ -77,7 +82,6 @@ function DraggableRoot({
 
 export interface DraggableContextValue {
   id: string;
-  data: any;
   isDragged: boolean;
   isCandidate: boolean;
   disabled: boolean;
@@ -149,7 +153,7 @@ const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
  * Selectively portals the dragged element to the overlay layer if it is being dragged.
  * Applies local (relative) movement to non-portaled content if any.
  */
-function DndOverlayPortal({
+const DndOverlayPortal = memo(function DndOverlayPortal({
   children,
   enabled,
   DraggedContainer,
@@ -184,14 +188,14 @@ function DndOverlayPortal({
       </div>
     </>
   );
-}
+});
 
 /**
  * Animates the movement of the dragged object according to drag gesture.
  * Updates the position of the dragged box and checks for overlapping drop regions.
  * Applies primary overlapped region to the DnD store.
  */
-function DraggedRoot({
+const DraggedRoot = memo(function DraggedRoot({
   children,
   ref,
   style,
@@ -237,7 +241,7 @@ function DraggedRoot({
       </AnimatePresence>
     </ContainerImpl>
   );
-}
+});
 
 export type DraggedContainerComponent = ComponentType<{
   children?: ReactNode;

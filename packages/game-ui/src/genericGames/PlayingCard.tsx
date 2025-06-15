@@ -8,7 +8,7 @@ import {
   withProps,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { CSSProperties } from 'react';
+import { CSSProperties, memo } from 'react';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 
 export type PlayingCardSuit = 'h' | 'd' | 'c' | 's';
@@ -29,7 +29,7 @@ const suitToIcon: Record<PlayingCardSuit, IconName> = {
   s: 'suitSpade',
 };
 
-function PlayingCardRoot({
+const PlayingCardRoot = memo(function PlayingCardRoot({
   cardSuit,
   cardRank,
   disabled,
@@ -56,7 +56,7 @@ function PlayingCardRoot({
       )}
     </CardRoot>
   );
-}
+});
 
 function ExtremelySimpleCardContent({
   cardSuit,
