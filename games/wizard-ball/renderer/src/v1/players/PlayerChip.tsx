@@ -39,9 +39,12 @@ export function PlayerChip({
             'inline-flex flex-row items-center gap-1 rounded cursor-pointer ',
           )}
         >
-          {player.teamId && !noTeamIcon && (
-            <TeamIcon id={player.teamId} size={16} />
-          )}{' '}
+          {!noTeamIcon &&
+            (player.teamId ? (
+              <TeamIcon id={player.teamId} size={16} />
+            ) : (
+              <span className="text-gray-500">FA</span>
+            ))}{' '}
           {includeSpecies && <PlayerSpecies id={player.id} />}
           {includeClass && <PlayerClass id={player.id} />}
           <PlayerStatus id={player.id} />

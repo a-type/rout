@@ -165,7 +165,30 @@ export function generateLeague(
       league = applyXpAuto(random, player, league, random.int(0, 200));
     }
 
-    // ensure pc plays good players and hase a sane batting order
+    // Add free agents
+    for (let i = 0; i < 20; i++) {
+      const player = generatePlayer(random, {
+        position: random.item([
+          'c',
+          '1b',
+          '2b',
+          '3b',
+          'ss',
+          'lf',
+          'cf',
+          'rf',
+          'sp',
+          'rp',
+          'if',
+          'of',
+        ]),
+        skipPerks: options.skipPerks,
+      });
+      league.playerLookup[player.id] = player;
+      league = applyXpAuto(random, player, league, random.int(0, 200));
+    }
+
+    // ensure pc plays good players and has a sane batting order
     // for each bench player, swap them if they are better than the current player
 
     // TODO: Fix this!

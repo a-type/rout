@@ -54,6 +54,7 @@ function generateChoice(
     buff: 1,
     xp: 2,
     extraPosition: 0.5,
+    newPlayer: 10,
   };
   const kind = random.table(kindOptions);
   switch (kind) {
@@ -77,6 +78,20 @@ function generateChoice(
         kind: 'xp',
         playerId,
         amount: random.int(5, 11) * 10,
+        id: random.id(),
+      };
+    }
+    case 'newPlayer': {
+      const validPlayerOptions = Object.values(league.playerLookup).filter(
+        (p) => !p.teamId,
+      );
+      if (validPlayerOptions.length === 0) {
+        return generateChoice(random, id, league, team);
+      }
+      const playerId = random.item(validPlayerOptions).id;
+      return {
+        kind: 'newPlayer',
+        playerId,
         id: random.id(),
       };
     }
@@ -263,6 +278,18 @@ export function applyChoice(
       throw new Error(`Could not find player with ID ${choice.playerId}`);
     }
     addPositionToPlayer(player, choice.position);
+  }
+
+  if (choice.kind === 'newPlayer') {
+    const player = league.playerLookup[choice.playerId];
+    if (!player) {
+      throw new Error(`Could not find player with ID ${choice.playerId}`);
+    }
+    if (player.teamId) {
+      throw new Error(`Player with ID ${choice.playerId} is already on a team`);
+    }
+    player.teamId = team.id;
+    team.playerIds.push(player.id);
   }
   if (choice.kind === 'attributeBoost') {
     const player = league.playerLookup[choice.playerId];

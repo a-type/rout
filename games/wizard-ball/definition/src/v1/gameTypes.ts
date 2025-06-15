@@ -347,6 +347,11 @@ export type Choice =
       kind: 'extraPosition';
       playerId: PlayerId;
       position: Position;
+    }
+  | {
+      id: string;
+      kind: 'newPlayer';
+      playerId: PlayerId;
     };
 
 export type ChoiceKind = Choice['kind'];

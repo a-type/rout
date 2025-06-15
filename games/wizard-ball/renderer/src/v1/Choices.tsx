@@ -45,6 +45,16 @@ export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
       </>
     );
   }
+  if (choice.kind === 'newPlayer') {
+    return (
+      <>
+        <span className="text-sm font-semibold">Gain </span>
+        <span className="text-sm font-normal">
+          <PlayerChip id={choice.playerId} />
+        </span>
+      </>
+    );
+  }
   if (choice.kind === 'extraPosition') {
     if (id && choice.playerId === id) {
       return (
