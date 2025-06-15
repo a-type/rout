@@ -1,10 +1,23 @@
 import { GameRandom } from '@long-game/game-definition';
-import { League, Choice, ChoiceKind, Team, Player } from './gameTypes';
+import {
+  League,
+  Choice,
+  ChoiceKind,
+  Team,
+  Player,
+  Position,
+  PositionChartKey,
+} from './gameTypes';
 import { generateItem, pickRandomItemDef } from './generation';
 import { perks } from './perkData';
 import { applyLevelup, getLevelFromXp } from './attributes';
 import { GlobalState } from './gameDefinition';
-import { isPitcher } from './utils';
+import {
+  addPositionToPlayer,
+  canAssignToPosition,
+  hasPitcherPosition,
+  isPitcher,
+} from './utils';
 
 export function generateChoices(
   random: GameRandom,
@@ -39,7 +52,8 @@ function generateChoice(
     teamBoost: 0.25,
     perk: 1,
     buff: 1,
-    xp: 5,
+    xp: 2,
+    extraPosition: 0.5,
   };
   const kind = random.table(kindOptions);
   switch (kind) {
@@ -66,6 +80,47 @@ function generateChoice(
         id: random.id(),
       };
     }
+    case 'extraPosition': {
+      const validPlayerOptions = team.playerIds.filter((playerId) => {
+        const player = league.playerLookup[playerId];
+        return (
+          !hasPitcherPosition(player.positions) && player.positions.length < 3
+        );
+      });
+      const playerId = random.item(validPlayerOptions);
+      const player = league.playerLookup[playerId];
+      const positions: (PositionChartKey | 'if' | 'of')[] = [
+        'c',
+        '1b',
+        '2b',
+        '3b',
+        'ss',
+        'lf',
+        'cf',
+        'rf',
+        'if',
+        'of',
+      ];
+      const validPositions = positions.filter((pos) => {
+        if (pos === 'if') {
+          return !player.positions.includes('if');
+        }
+        if (pos === 'of') {
+          return !player.positions.includes('of');
+        }
+        return !canAssignToPosition(player.positions, pos);
+      });
+      if (validPositions.length === 0) {
+        return generateChoice(random, id, league, team);
+      }
+      return {
+        kind: 'extraPosition',
+        playerId,
+        position: random.item(validPositions),
+        id: random.id(),
+      };
+    }
+
     case 'perk':
       const playerId = random.item(team.playerIds);
       const player = league.playerLookup[playerId];
@@ -201,6 +256,13 @@ export function applyChoice(
     }
     //TODO: Make this not apply levelups automatically
     league = applyXpAuto(random, player, league, choice.amount);
+  }
+  if (choice.kind === 'extraPosition') {
+    const player = league.playerLookup[choice.playerId];
+    if (!player) {
+      throw new Error(`Could not find player with ID ${choice.playerId}`);
+    }
+    addPositionToPlayer(player, choice.position);
   }
   if (choice.kind === 'attributeBoost') {
     const player = league.playerLookup[choice.playerId];

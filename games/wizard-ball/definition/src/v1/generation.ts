@@ -19,7 +19,7 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getLevelFromXp, getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
-import { canAssignToPosition, isPitcher } from './utils';
+import { addPositionToPlayer, canAssignToPosition, isPitcher } from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 import { applyXpAuto } from './boosts';
@@ -387,19 +387,7 @@ function generatePlayer(
     forcedPosition && isPitcher(forcedPosition) ? 0 : random.int(0, 2);
   for (let i = 0; i < extraPositions; i++) {
     const position = random.item(positions);
-    if (!player.positions.includes(position)) {
-      player.positions.push(position);
-    }
-  }
-  if (player.positions.includes('if')) {
-    player.positions = player.positions.filter(
-      (p) => !['1b', '2b', '3b', 'ss'].includes(p),
-    );
-  }
-  if (player.positions.includes('of')) {
-    player.positions = player.positions.filter(
-      (p) => !['lf', 'cf', 'rf'].includes(p),
-    );
+    addPositionToPlayer(player, position);
   }
 
   if (!options.skipPerks) {

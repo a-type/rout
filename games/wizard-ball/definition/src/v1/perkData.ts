@@ -16,7 +16,6 @@ import type { SpeciesType } from './speciesData';
 import type { WeatherType } from './weatherData';
 import { capitalize } from './utils';
 import { GameRandom } from '@long-game/game-definition';
-import { StatusType } from './statusData';
 
 export type TriggerEvent =
   | {

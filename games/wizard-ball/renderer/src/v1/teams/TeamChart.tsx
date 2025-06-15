@@ -20,13 +20,14 @@ import {
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { clsx, Tooltip } from '@a-type/ui';
-import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { Draggable } from './Draggable';
 import { Droppable } from './Droppable';
 import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
 import { PlayerStatus } from '../players/PlayerStatus';
+import { PlayerOverall } from '../ratings/PlayerOverall';
+import { PlayerStamina } from '../ratings/PlayerStamina';
 
 const positions = [
   'c',
@@ -187,8 +188,8 @@ export function TeamChart({ id }: { id: string }) {
                         {player.positions.join('/')}
                       </span>
                     </Draggable>
-                    <PlayerAttributesSummary kind="overall" id={player.id} />
-                    <PlayerAttributesSummary kind="stamina" id={player.id} />
+                    <PlayerOverall id={player.id} />
+                    <PlayerStamina id={player.id} />
                   </>
                 ) : (
                   <span className="text-gray-500 p-1">Empty</span>
@@ -229,8 +230,8 @@ export function TeamChart({ id }: { id: string }) {
                       </span>
                     </Tooltip>
                   </Draggable>
-                  <PlayerAttributesSummary kind="overall" id={playerId} />
-                  <PlayerAttributesSummary kind="stamina" id={playerId} />
+                  <PlayerOverall id={player.id} />
+                  <PlayerStamina id={player.id} />
                 </div>
               );
             })}
@@ -273,8 +274,8 @@ export function TeamChart({ id }: { id: string }) {
                       </span>
                     </Tooltip>
                   </Draggable>
-                  <PlayerAttributesSummary kind="overall" id={playerId} />
-                  <PlayerAttributesSummary kind="stamina" id={playerId} />
+                  <PlayerOverall id={player.id} />
+                  <PlayerStamina id={player.id} />
                 </div>
               </Droppable>
             );
@@ -312,8 +313,8 @@ export function TeamChart({ id }: { id: string }) {
                       </span>
                     </Tooltip>
                   </Draggable>
-                  <PlayerAttributesSummary kind="overall" id={playerId} />
-                  <PlayerAttributesSummary kind="stamina" id={playerId} />
+                  <PlayerOverall id={player.id} />
+                  <PlayerStamina id={player.id} />
                 </div>
               );
             })}

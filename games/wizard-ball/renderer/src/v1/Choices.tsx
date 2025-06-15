@@ -45,6 +45,28 @@ export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
       </>
     );
   }
+  if (choice.kind === 'extraPosition') {
+    if (id && choice.playerId === id) {
+      return (
+        <>
+          <span className="text-sm font-semibold">Gain </span>
+          <span className="text-sm font-normal">
+            {choice.position.toUpperCase()} position
+          </span>
+        </>
+      );
+    }
+    return (
+      <>
+        <span className="text-sm font-semibold">
+          <PlayerChip id={choice.playerId} />
+        </span>
+        <span className="text-sm font-normal">
+          gains {choice.position.toUpperCase()} position
+        </span>
+      </>
+    );
+  }
   if (choice.kind === 'perk') {
     if (id && choice.playerId === id) {
       return (
@@ -157,7 +179,7 @@ export function Choices() {
             )}
           </Button>
         </Dialog.Trigger>
-        <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg">
+        <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
           <Dialog.Title>Choose a boon</Dialog.Title>
           <Dialog.Description>
             <div className="flex flex-col gap-4 flex-wrap items-start">
@@ -222,7 +244,7 @@ export function LevelupChoices({ id }: { id: string }) {
               )}
             </Button>
           </Dialog.Trigger>
-          <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg">
+          <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
             <Dialog.Title>Choose a boon</Dialog.Title>
             <Dialog.Description>
               <div className="flex flex-col gap-4 flex-wrap items-start">

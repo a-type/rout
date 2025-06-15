@@ -1,6 +1,5 @@
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
   arrayMove,
@@ -12,9 +11,7 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  KeyboardSensor,
   MouseSensor,
-  PointerSensor,
   TouchSensor,
   UniqueIdentifier,
   useSensor,
@@ -28,18 +25,15 @@ import {
 import { forwardRef, useEffect, useState } from 'react';
 
 import { PropsWithChildren, HTMLAttributes } from 'react';
-import {
-  Position,
-  Team,
-  isPitcher,
-} from '@long-game/game-wizard-ball-definition';
-import { PlayerAttributesSummary } from '../ratings/PlayerAttributesSummary';
+import { Team, isPitcher } from '@long-game/game-wizard-ball-definition';
+import { PlayerOverall } from '../ratings/PlayerOverall';
 import { Tooltip } from '@a-type/ui';
 import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { useSendTurn } from '../utils';
 import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
 import { PlayerStatus } from '../players/PlayerStatus';
+import { PlayerStamina } from '../ratings/PlayerStamina';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -160,8 +154,8 @@ export function TeamLineup({ id }: { id: string }) {
                   </Tooltip>
                 </SortableItem>
 
-                <PlayerAttributesSummary kind="overall" id={playerId} />
-                <PlayerAttributesSummary kind="stamina" id={playerId} />
+                <PlayerOverall id={playerId} />
+                <PlayerStamina id={playerId} />
               </div>
             );
           })}

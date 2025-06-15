@@ -139,6 +139,34 @@ export function canAssignToPosition(
   return positions.includes(position);
 }
 
+export function addPositionToPlayer(
+  player: Player,
+  position: Position,
+): Player {
+  if (player.positions.includes(position)) {
+    return player;
+  }
+  player.positions.push(position);
+  if (player.positions.includes('if')) {
+    player.positions = player.positions.filter((p) => !isInfieldPosition(p));
+  }
+  if (player.positions.includes('of')) {
+    player.positions = player.positions.filter((p) => !isOutfieldPosition(p));
+  }
+  return player;
+}
+
+export function isInfieldPosition(
+  position: Position,
+): position is '1b' | '2b' | '3b' | 'ss' {
+  return ['1b', '2b', '3b', 'ss'].includes(position);
+}
+export function isOutfieldPosition(
+  position: Position,
+): position is 'lf' | 'cf' | 'rf' {
+  return ['lf', 'cf', 'rf'].includes(position);
+}
+
 export function playerStatsToHotCold(
   kind: 'batting' | 'pitching',
   stats: PlayerStats,
