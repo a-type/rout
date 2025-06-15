@@ -173,12 +173,6 @@ export function Choices() {
 
   return (
     <div className="mb-4">
-      <div className="mb-2">
-        <h2 className="text-lg font-bold mb-0">Choose a boon!</h2>
-        <span className="text-sm text-gray-500">
-          Select one of the following options to improve your team.
-        </span>
-      </div>
       <Dialog>
         <Dialog.Trigger asChild>
           <Button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded">
@@ -190,9 +184,12 @@ export function Choices() {
           </Button>
         </Dialog.Trigger>
         <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
-          <Dialog.Title>Choose a boon</Dialog.Title>
-          <Dialog.Description>
-            <div className="flex flex-col gap-4 flex-wrap items-start">
+          <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
+          <Dialog.Description className="mt-0">
+            <span className="text-sm text-gray-500">
+              Select one of the following options to improve your team.
+            </span>
+            <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
               {options.map((choice) => {
                 return (
                   <Dialog.Close key={choice.id} asChild>
@@ -255,9 +252,12 @@ export function LevelupChoices({ id }: { id: string }) {
             </Button>
           </Dialog.Trigger>
           <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
-            <Dialog.Title>Choose a boon</Dialog.Title>
-            <Dialog.Description>
-              <div className="flex flex-col gap-4 flex-wrap items-start">
+            <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
+            <Dialog.Description className="mt-0">
+              <span className="text-sm text-gray-500">
+                Select one of the following options to improve your player.
+              </span>
+              <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
                 {options.map((choice) => {
                   return (
                     <Dialog.Close key={choice.id} asChild>
