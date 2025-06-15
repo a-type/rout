@@ -33,13 +33,15 @@ function generateChoice(
   league: League,
   team: Team,
 ): Choice {
-  const kindOptions: ChoiceKind[] = [
-    'item',
-    'attributeBoost',
-    'teamBoost',
-    'perk',
-  ];
-  const kind = random.item(kindOptions);
+  const kindOptions: Record<ChoiceKind, number> = {
+    item: 1,
+    attributeBoost: 1,
+    teamBoost: 0.25,
+    perk: 1,
+    buff: 1,
+    xp: 5,
+  };
+  const kind = random.table(kindOptions);
   switch (kind) {
     case 'item':
       return {
@@ -47,6 +49,23 @@ function generateChoice(
         itemDefId: pickRandomItemDef(random),
         id: random.id(),
       };
+    case 'buff':
+      return {
+        kind: 'buff',
+        statusId: random.item(['blessing', 'enraged']),
+        id: random.id(),
+        stacks: random.int(1, 4),
+      };
+
+    case 'xp': {
+      const playerId = random.item(team.playerIds);
+      return {
+        kind: 'xp',
+        playerId,
+        amount: random.int(5, 11) * 10,
+        id: random.id(),
+      };
+    }
     case 'perk':
       const playerId = random.item(team.playerIds);
       const player = league.playerLookup[playerId];
@@ -98,7 +117,6 @@ function generateChoice(
         amount: random.int(1, 4),
         id: random.id(),
       };
-      break;
     case 'teamBoost':
       return {
         kind: 'teamBoost',
@@ -176,6 +194,14 @@ export function applyChoice(
       teamId: team.id,
     };
   }
+  if (choice.kind === 'xp') {
+    const player = league.playerLookup[choice.playerId];
+    if (!player) {
+      throw new Error(`Could not find player with ID ${choice.playerId}`);
+    }
+    //TODO: Make this not apply levelups automatically
+    league = applyXpAuto(random, player, league, choice.amount);
+  }
   if (choice.kind === 'attributeBoost') {
     const player = league.playerLookup[choice.playerId];
     if (!player) {
@@ -203,6 +229,18 @@ export function applyChoice(
       throw new Error(`Could not find player with ID ${choice.playerId}`);
     }
     player.perkIds.push(choice.perkId);
+  }
+  if (choice.kind === 'buff') {
+    team.playerIds.forEach((playerId) => {
+      const player = league.playerLookup[playerId];
+      if (!player) {
+        throw new Error(`Could not find player with ID ${playerId}`);
+      }
+      if (!player.statusIds[choice.statusId]) {
+        player.statusIds[choice.statusId] = 0;
+      }
+      player.statusIds[choice.statusId]! += choice.stacks;
+    });
   }
   return league;
 }

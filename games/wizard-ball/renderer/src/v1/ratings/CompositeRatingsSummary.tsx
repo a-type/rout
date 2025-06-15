@@ -7,17 +7,17 @@ import { numberToLetter } from '../utils';
 import { TooltipPlus } from '../TooltipPlus';
 
 export function CompositeRatingsSummary({
-  id,
   compositeRatings,
   compositeMod,
   kind,
   limit = 3,
+  hideOther = false,
 }: {
-  id?: string;
   compositeRatings: PitchingCompositeRatings | BattingCompositeRatings;
   compositeMod?: PitchingCompositeRatings | BattingCompositeRatings;
   kind: 'batting' | 'pitching';
   limit?: number;
+  hideOther?: boolean;
 }) {
   const list = kind === 'batting' ? battingRatingList : pitchingRatingList;
   const listWithRatings = list
@@ -31,7 +31,7 @@ export function CompositeRatingsSummary({
     .sort((a, b) => Math.abs(b.rating - 10) - Math.abs(a.rating - 10));
   const finalList = [
     ...listWithRatings.slice(0, limit),
-    ...(limit && limit < 10
+    ...(limit && limit < 10 && !hideOther
       ? [
           listWithRatings.slice(limit).reduce(
             (acc, curr) => {

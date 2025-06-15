@@ -329,6 +329,18 @@ export type Choice =
       kind: 'perk';
       perkId: string;
       playerId: PlayerId;
+    }
+  | {
+      id: string;
+      kind: 'buff';
+      statusId: StatusType;
+      stacks: number;
+    }
+  | {
+      id: string;
+      kind: 'xp';
+      playerId: PlayerId;
+      amount: number;
     };
 
 export type ChoiceKind = Choice['kind'];

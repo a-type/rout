@@ -10,7 +10,12 @@ import type {
   PositionChartKey,
   RoundResult,
 } from '../gameTypes';
-import { isPitcher, last, scaleAttributePercent } from '../utils';
+import {
+  getInningInfo,
+  isPitcher,
+  last,
+  scaleAttributePercent,
+} from '../utils';
 import Logger from '../logger';
 import { determinePitchType } from './pitchType';
 import { type HitResult, determineHitResult } from './hitResult';
@@ -68,8 +73,16 @@ function checkGameOver(
   if (gameState.currentInning > 50) {
     return true;
   }
-  // TODO: Fix this to handle home vs away properly
-  if (gameState.currentInning >= 18 && battingScore > pitchingScore) {
+  const { half, inning } = getInningInfo(gameState.currentInning);
+
+  if (inning < 9) {
+    return false;
+  }
+
+  if (half === 'bottom' && battingScore !== pitchingScore) {
+    return true;
+  }
+  if (half === 'top' && pitchingScore > battingScore) {
     return true;
   }
   return false;
@@ -119,7 +132,7 @@ export function simulateGame(
 ): GameResult {
   let gameState = initialGameState(game);
   gameState = setupGame(league, game, gameState);
-  while (!checkGameOver(gameState, game)) {
+  while (true) {
     gameState = simulateInning(random, gameState, league);
     if (checkGameOver(gameState, game)) {
       break;

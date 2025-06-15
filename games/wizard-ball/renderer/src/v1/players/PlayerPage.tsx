@@ -168,14 +168,12 @@ export function PlayerPage({ id }: { id: string }) {
         </div>
       </div>
       <AttributeSummary
-        id={player.id}
         attributes={playerAttributes.baseAttributes}
         attributesModified={playerAttributes.attributeMod}
         stamina={player.stamina}
         limit={3}
       />
       <CompositeRatingsSummary
-        id={id}
         kind={
           player.positions.some((p) => isPitcher(p)) ? 'pitching' : 'batting'
         }

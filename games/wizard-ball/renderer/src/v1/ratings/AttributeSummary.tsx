@@ -15,12 +15,10 @@ const attributeList: Array<{
 ];
 
 export function AttributeSummary({
-  id,
   attributes,
   attributesModified,
   limit = 6,
 }: {
-  id?: string;
   attributes: Player['attributes'] & { overall: number };
   attributesModified?: Player['attributes'] & { overall: number };
   stamina?: number;

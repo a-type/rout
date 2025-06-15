@@ -6,6 +6,7 @@ import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { PlayerChip } from './players/PlayerChip';
 import { useSendTurn, shortAttribute } from './utils';
 import { PerkChip } from './perks/PerkChip';
+import { StatusChip } from './perks/StatusChip';
 
 export function Choice({ choice }: { choice: ChoiceType }) {
   if (choice.kind === 'item') {
@@ -13,6 +14,26 @@ export function Choice({ choice }: { choice: ChoiceType }) {
       <>
         <span className="text-sm font-semibold">Gain </span>
         <ItemDefChip id={choice.itemDefId} />
+      </>
+    );
+  }
+  if (choice.kind === 'buff') {
+    return (
+      <>
+        <span className="text-sm font-semibold">Team gains </span>
+        <span className="font-normal">
+          <StatusChip id={choice.statusId} stacks={choice.stacks} />
+        </span>
+      </>
+    );
+  }
+  if (choice.kind === 'xp') {
+    return (
+      <>
+        <span className="text-sm font-semibold">
+          <PlayerChip id={choice.playerId} />
+        </span>
+        <span className="text-sm font-normal">gains {choice.amount}XP</span>
       </>
     );
   }

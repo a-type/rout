@@ -61,7 +61,7 @@ export function getPlayerAttributes(player: Player, league: League) {
   };
 }
 
-function getPlayerComposite(
+export function getPlayerComposite(
   kind: 'batting' | 'pitching',
   player: Player,
   league: League,
