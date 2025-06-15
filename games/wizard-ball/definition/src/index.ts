@@ -11,6 +11,7 @@ export {
   sum,
   isPitcher,
   canAssignToPosition,
+  hasPitcherPosition,
 } from './v1/utils';
 export { itemData } from './v1/itemData';
 export { weather, type WeatherType } from './v1/weatherData';
@@ -20,9 +21,11 @@ export type { PitchData, ActualPitch } from './v1/pitchData';
 
 export default {
   id: 'wizard-ball',
-  title: 'wizard-ball',
+  title: 'Wizard Ball',
+  description:
+    'A baseball simulation game set in a fantasy world where woodland creatures play baseball.',
   versions: [v1],
-  tags: [],
+  tags: ['simulation', 'sports', 'competitive'],
   creators: [
     {
       name: 'Zack',

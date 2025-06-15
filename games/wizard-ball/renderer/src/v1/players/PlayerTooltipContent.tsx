@@ -13,9 +13,11 @@ import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
 import { AttributeSummary } from '../ratings/AttributeSummary';
 import { PlayerStatus } from './PlayerStatus';
-import { isPitcher } from '@long-game/game-wizard-ball-definition';
+import {
+  isPitcher,
+  hasPitcherPosition,
+} from '@long-game/game-wizard-ball-definition';
 import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
-import { hasPitcherPosition } from '../../../../definition/src/v1/utils';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
