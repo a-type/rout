@@ -52,9 +52,9 @@ function generateChoice(
     teamBoost: 0.25,
     perk: 1,
     buff: 1,
-    xp: 2,
+    xp: 1,
     extraPosition: 0.5,
-    newPlayer: 10,
+    newPlayer: 0.5,
   };
   const kind = random.table(kindOptions);
   switch (kind) {
