@@ -1,10 +1,13 @@
 import { HTMLProps } from 'react';
+import { DebugView } from './DebugView';
 import { useDndStore } from './dndStore';
 import { useMonitorGlobalGesture } from './gestureStore';
 
-export interface DndRootProps extends HTMLProps<HTMLDivElement> {}
+export interface DndRootProps extends HTMLProps<HTMLDivElement> {
+  debug?: boolean;
+}
 
-export function DndRoot({ children, ...rest }: DndRootProps) {
+export function DndRoot({ children, debug, ...rest }: DndRootProps) {
   const overlayRef = useDndStore((state) => state.overlayRef);
   useMonitorGlobalGesture();
   return (
@@ -15,7 +18,7 @@ export function DndRoot({ children, ...rest }: DndRootProps) {
         className="fixed inset-0 z-50 pointer-events-none overflow-hidden"
       />
       {children}
-      {/* <DebugView /> */}
+      {debug && <DebugView />}
     </div>
   );
 }

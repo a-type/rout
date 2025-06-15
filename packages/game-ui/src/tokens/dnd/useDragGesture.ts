@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useElementEvent } from '../../hooks/useWindowEvent';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';
-import { DraggedBox } from './draggedBox';
 import { DragGestureContext, useGesture } from './gestureStore';
 
 export interface DragGestureOptions {
@@ -33,16 +32,17 @@ export function useDragGesture(options?: DragGestureOptions) {
     useShallow((state) => [state.dragging === draggable.id, state.startDrag]),
   );
 
+  // turn on box monitoring when we are interacting
+  useEffect(() => {
+    if (isDragging || isCandidate) {
+      return draggable.box.start();
+    }
+  }, [isDragging, isCandidate, draggable.box]);
+
   // when using touch, events are locked to the initial touched element,
   // so we can't detect a drag-in from another element by attaching to
   // the target element. we then have to manually hittest against this
   // element, unfortunately.
-  const box = useState(() => new DraggedBox())[0];
-  useEffect(() => {
-    if (!startFromDragIn) return;
-    return box.bind(ref.current);
-  }, [ref, startFromDragIn, box]);
-
   function moveDrag(gesture: DragGestureContext) {
     // if this element is the dragging candidate
     if (isCandidate) {
@@ -53,11 +53,12 @@ export function useDragGesture(options?: DragGestureOptions) {
         }
       }
     } else if (startFromDragIn && !hasDragging) {
+      draggable.box.update();
       // else if this element is not related to the gesture,
       // let's see if we should claim it.
       // We use a heuristic to decide if a gesture which moves
       // over this element should start a drag.
-      const containsGesture = box.contains(
+      const containsGesture = draggable.box.contains(
         gesture.current.x.get(),
         gesture.current.y.get(),
       );

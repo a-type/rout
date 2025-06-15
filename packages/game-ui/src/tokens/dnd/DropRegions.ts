@@ -1,15 +1,12 @@
+import { gestureEvents } from './gestureStore';
+
 export const REGION_ID_ATTR = 'data-droppable-id';
 
 export class DropRegions {
   elements: Map<string, HTMLElement> = new Map();
   regions: Map<string, DOMRect> = new Map();
 
-  // TODO: remove all Observer stuff, using rafs now
-  #regionResizeObserver: ResizeObserver;
-  #rafId: number | null = null;
-
   constructor() {
-    this.#regionResizeObserver = new ResizeObserver(this.#onRegionResize);
     this.#bind();
   }
 
@@ -25,10 +22,6 @@ export class DropRegions {
     element.setAttribute(REGION_ID_ATTR, id);
     this.elements.set(id, element);
     this.regions.set(id, element.getBoundingClientRect());
-    this.#regionResizeObserver.observe(element);
-    if (this.regions.size === 1) {
-      this.#start();
-    }
 
     return () => {
       this.unregister(id);
@@ -41,10 +34,6 @@ export class DropRegions {
     this.elements.delete(id);
     this.regions.delete(id);
     element.removeAttribute(REGION_ID_ATTR);
-    this.#regionResizeObserver.unobserve(element);
-    if (this.elements.size === 0) {
-      this.#stop();
-    }
   };
 
   getOverlappingRegions = (rect: DOMRect, areaThreshold = 0) => {
@@ -59,26 +48,8 @@ export class DropRegions {
   };
 
   #bind = () => {
-    window.addEventListener('resize', this.#onWindowResize);
-    window.addEventListener('orientationchange', this.#onWindowResize);
-    window.addEventListener('scroll', this.#onWindowResize, { passive: true });
-  };
-
-  #onRegionResize = (entries: ResizeObserverEntry[]) => {
-    for (const entry of entries) {
-      const id = entry.target.getAttribute(REGION_ID_ATTR);
-      if (!id) continue;
-      const element = this.elements.get(id);
-      if (!element) continue;
-      this.regions.set(id, element.getBoundingClientRect());
-    }
-  };
-
-  #onWindowResize = () => {
-    this.regions.clear();
-    for (const [id, element] of this.elements) {
-      this.regions.set(id, element.getBoundingClientRect());
-    }
+    gestureEvents.subscribe('start', this.#onGestureChange);
+    gestureEvents.subscribe('move', this.#onGestureChange);
   };
 
   #calculateOverlappedArea = (rect1: DOMRect, rect2: DOMRect) => {
@@ -93,21 +64,12 @@ export class DropRegions {
     return xOverlap * yOverlap;
   };
 
-  #start = () => {
-    if (this.#rafId) return; // Already started
-    this.#frame();
-  };
-  #frame = () => {
-    for (const [id, element] of this.elements) {
-      this.regions.set(id, element.getBoundingClientRect());
-    }
-    this.#rafId = requestAnimationFrame(this.#frame);
-  };
-  #stop = () => {
-    if (this.#rafId) {
-      cancelAnimationFrame(this.#rafId);
-      this.#rafId = null;
-    }
+  #onGestureChange = () => {
+    requestAnimationFrame(() => {
+      for (const [id, element] of this.elements) {
+        this.regions.set(id, element.getBoundingClientRect());
+      }
+    });
   };
 }
 

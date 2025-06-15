@@ -1,10 +1,15 @@
+import { gestureEvents } from './gestureStore';
+
 export class DraggedBox {
   current: DOMRect | null = null;
 
   #element: HTMLElement | null = null;
-  #rafId: number | null = null;
+  #on = false;
 
-  constructor() {}
+  constructor() {
+    gestureEvents.subscribe('move', this.#onGestureChange);
+    gestureEvents.subscribe('start', this.#onGestureChange);
+  }
 
   bind = (element: HTMLElement | null) => {
     this.#element = element;
@@ -14,33 +19,29 @@ export class DraggedBox {
     }
     this.current = element.getBoundingClientRect();
 
-    this.start();
-
     return () => {
       this.#element = null;
       this.current = null;
-      this.stop();
     };
   };
 
   start = () => {
-    this.frame();
-  };
-  frame = () => {
-    this.update();
-    this.#rafId = requestAnimationFrame(this.frame);
+    this.#on = true;
+    this.#onResize();
   };
   stop = () => {
-    if (this.#rafId) {
-      cancelAnimationFrame(this.#rafId);
-      this.#rafId = null;
-    }
+    this.#on = false;
   };
 
   #onResize = () => {
     if (this.#element) {
       this.current = this.#element.getBoundingClientRect();
     }
+  };
+
+  #onGestureChange = () => {
+    if (!this.#on) return;
+    requestAnimationFrame(this.#onResize);
   };
 
   update = () => {
@@ -57,5 +58,3 @@ export class DraggedBox {
     );
   };
 }
-
-export const draggedBox = new DraggedBox();

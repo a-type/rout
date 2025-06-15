@@ -5,7 +5,7 @@ import { useCallback, useEffect } from 'react';
 import { useWindowEvent } from '../../hooks/useWindowEvent';
 import { useDndStore } from './dndStore';
 
-const gestureEvents = new EventSubscriber<{
+export const gestureEvents = new EventSubscriber<{
   start: () => void;
   move: () => void;
   end: () => void;

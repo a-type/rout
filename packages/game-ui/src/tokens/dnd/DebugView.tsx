@@ -1,12 +1,15 @@
 import { useAnimationFrame } from '@a-type/ui';
-import { useRef } from 'react';
+import { createRef, useRef } from 'react';
+import { DraggableContextValue } from './Draggable';
 import { dropRegions } from './DropRegions';
-import { draggedBox } from './draggedBox';
 
 export interface DebugViewProps {}
 
+export const activeDragRef = createRef<DraggableContextValue>();
+
 export function DebugView({}: DebugViewProps) {
   const ref = useRef<HTMLCanvasElement>(null);
+
   useAnimationFrame(() => {
     const ctx = ref.current?.getContext('2d')!;
 
@@ -22,15 +25,16 @@ export function DebugView({}: DebugViewProps) {
       ctx.fillText(id, region.x + 5, region.y + 15);
     }
 
-    if (draggedBox.current) {
+    const activeDragBox = activeDragRef.current?.box.current;
+    if (activeDragBox) {
       ctx.strokeStyle = 'blue';
       ctx.fillStyle = 'transparent';
       ctx.lineWidth = 1;
       ctx.strokeRect(
-        draggedBox.current.x,
-        draggedBox.current.y,
-        draggedBox.current.width,
-        draggedBox.current.height,
+        activeDragBox.x,
+        activeDragBox.y,
+        activeDragBox.width,
+        activeDragBox.height,
       );
     }
   });

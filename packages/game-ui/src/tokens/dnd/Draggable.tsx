@@ -16,11 +16,13 @@ import {
   Ref,
   useContext,
   useEffect,
+  useState,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../../hooks/useMergedRef';
+import { activeDragRef } from './DebugView';
 import { useDndStore } from './dndStore';
-import { draggedBox } from './draggedBox';
+import { DraggedBox } from './draggedBox';
 import { dropRegions } from './DropRegions';
 import { DragGestureContext, gesture } from './gestureStore';
 import {
@@ -53,6 +55,8 @@ function DraggableRoot({
   const needsRebind = !!data && !hasBoundData;
   useEffect(() => bindData(id, data), [id, data, bindData, needsRebind]);
 
+  const box = useState(() => new DraggedBox())[0];
+
   return (
     <DraggableContext.Provider
       value={{
@@ -61,6 +65,7 @@ function DraggableRoot({
         isDragged,
         isCandidate,
         disabled,
+        box,
       }}
     >
       <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
@@ -76,6 +81,7 @@ export interface DraggableContextValue {
   isDragged: boolean;
   isCandidate: boolean;
   disabled: boolean;
+  box: DraggedBox;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -198,8 +204,9 @@ function DraggedRoot({
   const dragged = useDraggableContext();
 
   useAnimationFrame(() => {
-    if (draggedBox.current) {
-      const overlapped = dropRegions.getOverlappingRegions(draggedBox.current);
+    if (dragged.isDragged && dragged.box.current) {
+      activeDragRef.current = dragged;
+      const overlapped = dropRegions.getOverlappingRegions(dragged.box.current);
       if (overlapped.length > 0) {
         useDndStore.getState().setOverRegion(overlapped[0].id);
       } else {
@@ -208,7 +215,7 @@ function DraggedRoot({
     }
   });
 
-  const finalRef = useMergedRef<HTMLDivElement>(draggedBox.bind, ref);
+  const finalRef = useMergedRef<HTMLDivElement>(dragged.box.bind, ref);
 
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
