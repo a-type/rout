@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { hooks } from './gameClient';
 import { ItemDefChip } from './items/ItemChip';
-import { clsx, Button } from '@a-type/ui';
+import { clsx, Button, Dialog } from '@a-type/ui';
 import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { PlayerChip } from './players/PlayerChip';
 import { useSendTurn, shortAttribute } from './utils';
 import { PerkChip } from './perks/PerkChip';
 import { StatusChip } from './perks/StatusChip';
 
-export function Choice({ choice }: { choice: ChoiceType }) {
+export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
   if (choice.kind === 'item') {
     return (
       <>
@@ -28,6 +28,14 @@ export function Choice({ choice }: { choice: ChoiceType }) {
     );
   }
   if (choice.kind === 'xp') {
+    if (id && choice.playerId === id) {
+      return (
+        <>
+          <span className="text-sm font-semibold">Gain </span>
+          <span className="text-sm font-normal">{choice.amount}XP</span>
+        </>
+      );
+    }
     return (
       <>
         <span className="text-sm font-semibold">
@@ -38,6 +46,15 @@ export function Choice({ choice }: { choice: ChoiceType }) {
     );
   }
   if (choice.kind === 'perk') {
+    if (id && choice.playerId === id) {
+      return (
+        <>
+          <span className="text-sm font-semibold">Gain </span>
+          <PerkChip id={choice.perkId} />
+        </>
+      );
+    }
+
     return (
       <>
         <span className="text-sm font-semibold">
@@ -50,6 +67,22 @@ export function Choice({ choice }: { choice: ChoiceType }) {
   }
   if (choice.kind === 'attributeBoost') {
     const { amount, attribute } = choice;
+    if (id && choice.playerId === id) {
+      return (
+        <>
+          <span className="text-sm font-semibold">Gain </span>
+          <span
+            className={clsx(
+              'text-sm uppercase',
+              amount > 0 ? 'text-green-500' : 'text-red-500',
+            )}
+          >
+            {amount > 0 ? '+' : ''}
+            {amount} {shortAttribute(attribute)}
+          </span>
+        </>
+      );
+    }
     return (
       <>
         <span className="text-sm font-semibold">
@@ -104,6 +137,8 @@ export function Choices() {
   if (!options || options.length === 0) {
     return <div className="text-gray-500">No choices available.</div>;
   }
+  const selectedOption = options.find((choice) => choice.id === selection);
+
   return (
     <div className="mb-4">
       <div className="mb-2">
@@ -112,26 +147,43 @@ export function Choices() {
           Select one of the following options to improve your team.
         </span>
       </div>
-      <div className="flex flex-col gap-2 flex-wrap items-start">
-        {options.map((choice) => {
-          return (
-            <Button
-              onClick={() => {
-                setSelection(choice.id);
-              }}
-              key={choice.id}
-              className={clsx(
-                'flex flex-row gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded border-none',
-                selection === choice.id
-                  ? 'outline outline-4 outline-blue-500'
-                  : '',
-              )}
-            >
-              <Choice choice={choice} />
-            </Button>
-          );
-        })}
-      </div>
+      <Dialog>
+        <Dialog.Trigger asChild>
+          <Button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded">
+            {selectedOption ? (
+              <Choice choice={selectedOption} />
+            ) : (
+              <span>Choose a boon!</span>
+            )}
+          </Button>
+        </Dialog.Trigger>
+        <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg">
+          <Dialog.Title>Choose a boon</Dialog.Title>
+          <Dialog.Description>
+            <div className="flex flex-col gap-4 flex-wrap items-start">
+              {options.map((choice) => {
+                return (
+                  <Dialog.Close key={choice.id} asChild>
+                    <Button
+                      onClick={() => {
+                        setSelection(choice.id);
+                      }}
+                      className={clsx(
+                        'flex flex-row gap-2 items-center justify-between bg-gray-700 px-2 py-4 rounded border-none',
+                        selection === choice.id
+                          ? 'outline outline-4 outline-blue-500'
+                          : '',
+                      )}
+                    >
+                      <Choice choice={choice} />
+                    </Button>
+                  </Dialog.Close>
+                );
+              })}
+            </div>
+          </Dialog.Description>
+        </Dialog.Content>
+      </Dialog>
     </div>
   );
 }
@@ -155,33 +207,57 @@ export function LevelupChoices({ id }: { id: string }) {
     return <div className="text-gray-500">No choices available.</div>;
   }
   return (
-    <div className="my-4 flex flex-col gap-4">
+    <div className="my-4 flex flex-col gap-4 items-start">
       {optionsGroups.map((options, idx) => (
-        <div className="flex flex-row gap-2 flex-wrap" key={idx}>
-          {options.map((choice) => {
-            return (
-              <Button
-                onClick={() => {
-                  setSelection((v) =>
-                    // update choice with index
-                    v[idx] === choice.id
-                      ? v.filter((c) => c !== choice.id)
-                      : [...v.slice(0, idx), choice.id, ...v.slice(idx + 1)],
+        <Dialog key={idx}>
+          <Dialog.Trigger asChild>
+            <Button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded">
+              {selection[idx] ? (
+                <Choice
+                  choice={options.find((c) => c.id === selection[idx])!}
+                  id={id}
+                />
+              ) : (
+                <span>Choose a boon!</span>
+              )}
+            </Button>
+          </Dialog.Trigger>
+          <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg">
+            <Dialog.Title>Choose a boon</Dialog.Title>
+            <Dialog.Description>
+              <div className="flex flex-col gap-4 flex-wrap items-start">
+                {options.map((choice) => {
+                  return (
+                    <Dialog.Close key={choice.id} asChild>
+                      <Button
+                        onClick={() => {
+                          setSelection((v) =>
+                            // update choice with index
+                            v[idx] === choice.id
+                              ? v.filter((c) => c !== choice.id)
+                              : [
+                                  ...v.slice(0, idx),
+                                  choice.id,
+                                  ...v.slice(idx + 1),
+                                ],
+                          );
+                        }}
+                        className={clsx(
+                          'flex flex-row gap-2 items-center justify-between bg-gray-700 px-2 py-4 rounded border-none',
+                          selection[idx] === choice.id
+                            ? 'outline outline-4 outline-blue-500'
+                            : '',
+                        )}
+                      >
+                        <Choice choice={choice} id={id} />
+                      </Button>
+                    </Dialog.Close>
                   );
-                }}
-                key={choice.id}
-                className={clsx(
-                  'flex flex-row gap-1 items-center justify-between bg-gray-800 px-2 py-1 rounded border-none',
-                  selection[idx] === choice.id
-                    ? 'outline outline-4 outline-blue-500'
-                    : '',
-                )}
-              >
-                <Choice choice={choice} />
-              </Button>
-            );
-          })}
-        </div>
+                })}
+              </div>
+            </Dialog.Description>
+          </Dialog.Content>
+        </Dialog>
       ))}
     </div>
   );

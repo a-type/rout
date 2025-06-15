@@ -29,13 +29,15 @@ export function TooltipPlus({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onTouchStart={() => setActive(true)}
+        // Experimental - may be annoying
+        onClick={(ev) => ev.stopPropagation()}
       >
         {children}
       </Popover.Trigger>
       <Popover.Content
         className={clsx(
           className,
-          'bg-gray-700 text-gray-100 max-w-[400px] p-2 rounded border-gray-600',
+          'bg-gray-700 text-gray-100 max-w-[400px] p-2 rounded border-gray-600 z-9999',
         )}
       >
         {content}
