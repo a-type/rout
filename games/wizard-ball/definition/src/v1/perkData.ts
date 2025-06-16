@@ -22,7 +22,16 @@ export type TriggerEvent =
       kind: 'strikeout';
       isPitcher: boolean;
     }
-  | { kind: 'defenderOut' };
+  | { kind: 'defenderOut' }
+  | {
+      kind: 'steal';
+      success: boolean;
+    }
+  | {
+      kind: 'hit';
+      outcome: 'hit' | 'double' | 'triple' | 'homeRun';
+      isPitcher: boolean;
+    };
 
 export type PerkEffect = {
   attributeBonus?: Partial<Record<AttributeType, number>>;
@@ -385,7 +394,7 @@ export const perks: Record<string, Perk> = {
   },
   distractionPlus: {
     name: 'Distraction+',
-    description: 'Significantly owers pitch quality when on the base paths.',
+    description: 'Significantly lowers pitch quality when on the base paths.',
     kind: 'batting',
     rarity: 'rare',
     requirements: ({ classType, species, attributes, level }) =>

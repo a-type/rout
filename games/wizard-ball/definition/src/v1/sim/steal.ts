@@ -8,12 +8,15 @@ import {
 import { getCurrentPitcher } from './utils';
 import { addToPlayerStats } from './stats';
 import { updatePlayerHeat } from './streak';
+import { checkTriggerEvent } from './trigger';
+import { ActualPitch } from '../pitchData';
 
 function attemptSteal(
   random: GameRandom,
   gameState: LeagueGameState,
   fromBase: Base,
   league: League,
+  pitchData: ActualPitch,
 ): LeagueGameState {
   const playerId = gameState.bases[fromBase];
   if (!playerId) {
@@ -42,7 +45,8 @@ function attemptSteal(
   );
   const baseFactor = fromBase === 2 ? 0.8 : 0.7;
   const stealSuccessChance = baseFactor * agilityFactor;
-  if (random.float(0, 1) < stealSuccessChance) {
+  const isSuccessful = random.float(0, 1) < stealSuccessChance;
+  if (isSuccessful) {
     gameState.bases[fromBase] = null;
     if (fromBase === 3) {
       gameState.teamData[gameState.battingTeam].score += 1;
@@ -72,12 +76,26 @@ function attemptSteal(
       outsPitched: 1,
     });
   }
+
+  checkTriggerEvent(
+    {
+      kind: 'steal',
+      success: isSuccessful,
+    },
+    playerId,
+    gameState,
+    league,
+    random,
+    pitchData,
+  );
+
   return gameState;
 }
 export function determineSteal(
   random: GameRandom,
   gameState: LeagueGameState,
   league: League,
+  pitchData: ActualPitch,
 ): LeagueGameState {
   const catcherId = league.teamLookup[gameState.pitchingTeam].positionChart.c;
   if (!catcherId) {
@@ -105,7 +123,7 @@ export function determineSteal(
     );
     const stealAttemptChance = 0.04 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
-      gameState = attemptSteal(random, gameState, 1, league);
+      gameState = attemptSteal(random, gameState, 1, league, pitchData);
     }
   }
   if (playerOnSecond !== null && playerOnThird === null) {
@@ -121,7 +139,7 @@ export function determineSteal(
     );
     const stealAttemptChance = 0.01 * agilityFactor;
     if (random.float(0, 1) < stealAttemptChance) {
-      gameState = attemptSteal(random, gameState, 2, league);
+      gameState = attemptSteal(random, gameState, 2, league, pitchData);
     }
   }
   // TODO: Implement stealing home

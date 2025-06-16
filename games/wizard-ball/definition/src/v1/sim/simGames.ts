@@ -38,6 +38,7 @@ import {
 } from './utils';
 import { advanceRunnerForced, advanceAllRunners } from './runners';
 import { determineSwing, determineContact } from './swing';
+import { checkTriggerEvent } from './trigger';
 
 export const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -400,7 +401,7 @@ export function simulatePitch(
           },
           gameState,
         );
-        gameState = determineSteal(random, gameState, league);
+        gameState = determineSteal(random, gameState, league, pitchData);
       }
       break;
     case 'strike':
@@ -427,22 +428,28 @@ export function simulatePitch(
           gameState,
         );
 
-        getActivePlayerPerks(
+        checkTriggerEvent(
+          {
+            kind: 'strikeout',
+            isPitcher: false,
+          },
           batterId,
-          league,
           gameState,
-          pitchData.kind,
-        ).forEach((perk) => {
-          if ('trigger' in perk.effect && perk.effect.trigger) {
-            gameState = perk.effect.trigger({
-              event: { kind: 'strikeout', isPitcher: false },
-              random,
-              gameState,
-              league,
-              player: batter,
-            });
-          }
-        });
+          league,
+          random,
+          pitchData,
+        );
+        checkTriggerEvent(
+          {
+            kind: 'strikeout',
+            isPitcher: true,
+          },
+          pitcherId,
+          gameState,
+          league,
+          random,
+          pitchData,
+        );
 
         league = updatePlayerHeat('batting', batterId, league, 'strikeout');
         league = updatePlayerHeat('pitching', pitcherId, league, 'strikeout');
@@ -461,7 +468,7 @@ export function simulatePitch(
           },
           gameState,
         );
-        gameState = determineSteal(random, gameState, league);
+        gameState = determineSteal(random, gameState, league, pitchData);
       }
       break;
     case 'foul':
@@ -489,22 +496,16 @@ export function simulatePitch(
 
       let outCount = 1;
       let result: HitGameLogEvent['kind'] = 'out';
-      getActivePlayerPerks(
+      checkTriggerEvent(
+        {
+          kind: 'defenderOut',
+        },
         hitResult.defenderId!,
-        league,
         gameState,
-        pitchData.kind,
-      ).forEach((perk) => {
-        if ('trigger' in perk.effect && perk.effect.trigger) {
-          gameState = perk.effect.trigger({
-            event: { kind: 'defenderOut' },
-            random,
-            gameState,
-            league,
-            player: league.playerLookup[hitResult.defenderId!],
-          });
-        }
-      });
+        league,
+        random,
+        pitchData,
+      );
 
       if (gameState.outs < 3) {
         // Check for sacrifice fly
@@ -616,6 +617,30 @@ export function simulatePitch(
     case 'double':
     case 'triple':
     case 'homeRun':
+      checkTriggerEvent(
+        {
+          kind: 'hit',
+          outcome,
+          isPitcher: false,
+        },
+        batterId,
+        gameState,
+        league,
+        random,
+        pitchData,
+      );
+      checkTriggerEvent(
+        {
+          kind: 'hit',
+          outcome,
+          isPitcher: true,
+        },
+        pitcherId,
+        gameState,
+        league,
+        random,
+        pitchData,
+      );
       // Apply hit to the game state
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1, hits: 1 });
       gameState = addToPlayerStats(gameState, pitcherId, {

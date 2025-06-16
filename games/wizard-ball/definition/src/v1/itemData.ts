@@ -1,9 +1,8 @@
 import { Perk } from './perkData';
 import { isPitcher } from './utils';
 
-export type ItemInfo = Omit<Perk, 'kind'> & {
+export type ItemInfo = Perk & {
   icon: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 };
 
 export const itemData: Record<string, ItemInfo> = {
@@ -11,6 +10,7 @@ export const itemData: Record<string, ItemInfo> = {
     name: 'Greataxe',
     description: 'A powerful two-handed axe that deals massive damage',
     icon: '🪓',
+    kind: 'any',
     rarity: 'common',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
@@ -24,6 +24,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "These shoes enhance the wearer's agility",
     icon: '👟',
     rarity: 'common',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -36,6 +37,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A sturdy shield that improves the wearer's constitution",
     icon: '🛡️',
     rarity: 'common',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -48,6 +50,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'These glasses grant the wearer enhanced wisdom',
     icon: '🕶️',
     rarity: 'common',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -60,6 +63,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A ring that boosts the wearer's intelligence",
     icon: '💍',
     rarity: 'common',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -72,6 +76,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A cloak that enhances the wearer's charisma",
     icon: '🧥',
     rarity: 'common',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -85,6 +90,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A legendary bat that dramatically increases the wearers hitting power and launch angle',
     icon: '🏏',
     rarity: 'legendary',
+    kind: 'batting',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -101,6 +107,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A mystical glove that enhances the wearers fielding abilities',
     icon: '🧤',
     rarity: 'rare',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -114,6 +121,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A mask that boosts the wearers stealing ability',
     icon: '🎭',
     rarity: 'rare',
+    kind: 'batting',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -127,6 +135,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A legendary cap that enhances the wearers pitching abilities',
     icon: '🧢',
     rarity: 'legendary',
+    kind: 'pitching',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -142,6 +151,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'Boots that allow the wearer to get extra bases',
     icon: '👢',
     rarity: 'uncommon',
+    kind: 'batting',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -155,6 +165,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A pendant that improves the wearers plate discipline',
     icon: '📿',
     rarity: 'rare',
+    kind: 'batting',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -168,6 +179,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: "A dagger that enhances the wearer's dueling skills",
     icon: '🗡️',
     rarity: 'epic',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       battingCompositeBonus: {
@@ -183,6 +195,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'An amulet that boosts all attributes slightly',
     icon: '🔮',
     rarity: 'epic',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       attributeBonus: {
@@ -200,6 +213,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A wand that enhances velocity at the cost of accuracy',
     icon: '🔥',
     rarity: 'common',
+    kind: 'pitching',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -214,6 +228,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A wand that enhances movement at the cost of velocity',
     icon: '❄️',
     rarity: 'common',
+    kind: 'pitching',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -228,6 +243,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A mystical orb that enhances strikeouts and accuracy',
     icon: '⚡',
     rarity: 'uncommon',
+    kind: 'pitching',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -242,6 +258,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A hat that enhances composure',
     icon: '🎩',
     rarity: 'rare',
+    kind: 'pitching',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -255,6 +272,7 @@ export const itemData: Record<string, ItemInfo> = {
     description: 'A belt that boosts durability',
     icon: '👖',
     rarity: 'epic',
+    kind: 'any',
     condition: ({ isMe = false }) => isMe,
     effect: () => ({
       pitchingCompositeBonus: {
@@ -271,6 +289,7 @@ export const itemData: Record<string, ItemInfo> = {
       'A ball of wadded up cash that helps you get on base at the cost of power',
     icon: '💰',
     rarity: 'uncommon',
+    kind: 'batting',
     condition: ({ isMe = false }) => isMe,
     requirements: ({ positions }) => !positions.some((pos) => isPitcher(pos)),
     effect: () => ({
@@ -278,6 +297,74 @@ export const itemData: Record<string, ItemInfo> = {
         contact: 3,
         homeRuns: -2,
         plateDiscipline: 3,
+      },
+    }),
+  },
+  stealLearner: {
+    name: 'Training Shoes',
+    description: 'Gain bonus XP when stealing a base.',
+    rarity: 'common',
+    icon: '👟',
+    kind: 'batting',
+    condition: ({ isRunner = false, isMe = false }) => isMe && isRunner,
+    effect: () => ({
+      trigger: ({ gameState, event, player }) => {
+        if (event.kind !== 'steal' || !event.success) {
+          return gameState;
+        }
+        player.xp += 10;
+        return gameState;
+      },
+    }),
+  },
+  defensiveLearner: {
+    name: 'Training Glove',
+    description: 'Gain bonus XP when making a defensive out.',
+    rarity: 'common',
+    icon: '🧤',
+    kind: 'any',
+    condition: ({ isMe = false }) => isMe,
+    effect: () => ({
+      trigger: ({ gameState, event, player }) => {
+        if (event.kind !== 'defenderOut') {
+          return gameState;
+        }
+        player.xp += 10;
+        return gameState;
+      },
+    }),
+  },
+  strikeoutLearner: {
+    name: 'Training Cap',
+    description: 'Gain bonus XP when striking out a batter.',
+    icon: '🧢',
+    rarity: 'common',
+    kind: 'pitching',
+    condition: ({ isPitcher = false, isMe = false }) => isMe && isPitcher,
+    effect: () => ({
+      trigger: ({ gameState, event, player }) => {
+        if (event.kind !== 'strikeout' || !event.isPitcher) {
+          return gameState;
+        }
+        player.xp += 10;
+        return gameState;
+      },
+    }),
+  },
+  homerunLearner: {
+    name: 'Training Bat',
+    description: 'Gain bonus XP when getting a hit.',
+    icon: '🏏',
+    rarity: 'common',
+    kind: 'batting',
+    condition: ({ isBatter = false, isMe = false }) => isBatter && isMe,
+    effect: () => ({
+      trigger: ({ gameState, event, player }) => {
+        if (event.kind !== 'hit') {
+          return gameState;
+        }
+        player.xp += 2;
+        return gameState;
       },
     }),
   },

@@ -259,10 +259,18 @@ export function generateLeague(
     for (let i = 0; i < 5; i++) {
       const { instanceId, ...item } = generateItem(random);
       league.itemLookup[instanceId] = { ...item, teamId: team.id };
-      for (const player of random.shuffle(team.playerIds)) {
+      const playerOrder = random.shuffle(team.playerIds);
+      for (const player of playerOrder) {
         const playerObj = league.playerLookup[player];
+        const isPitcher = hasPitcherPosition(playerObj.positions);
         const { level } = getLevelFromXp(playerObj.xp);
         const i = itemData[item.itemDef];
+        if (
+          i.kind !== 'any' &&
+          i.kind !== (isPitcher ? 'pitching' : 'batting')
+        ) {
+          continue; // Skip items that don't match the player's kind
+        }
         if (
           !i.requirements ||
           i.requirements?.({
