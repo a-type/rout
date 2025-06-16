@@ -36,6 +36,20 @@ registerRoute(
   }),
 );
 
+// cache remote fonts
+registerRoute(
+  ({ request }) => request.destination === 'font',
+  new StaleWhileRevalidate({
+    cacheName: 'fonts',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 20,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+    ],
+  }),
+);
+
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener('message', (event) => {
