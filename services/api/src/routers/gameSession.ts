@@ -226,4 +226,9 @@ export const gameSessionRouter = new Hono<Env>()
     const userStore = ctx.get('userStore');
     await userStore.deleteAllGameSessionInvitations(ctx.get('gameSessionId'));
     return ctx.json({ success: true });
+  })
+  .get('/playerStatuses', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    const playerStatuses = await state.getPlayerStatuses();
+    return ctx.json(wrapRpcData(playerStatuses));
   });

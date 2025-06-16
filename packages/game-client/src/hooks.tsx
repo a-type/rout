@@ -3,6 +3,8 @@ import {
   useMutation,
   UseMutationOptions,
   UseMutationResult,
+  useQuery,
+  UseQueryResult,
   UseSuspenseInfiniteQueryResult,
   useSuspenseQuery,
   UseSuspenseQueryResult,
@@ -25,9 +27,17 @@ type SdkHooks<Sdk extends BaseSdk> = {
   >}`]: Sdk[K] extends QueryFactory<infer O, infer I>
     ? (...args: EraseEmptyArg<I>) => UseSuspenseQueryResult<O>
     : Sdk[K] extends QueryFactoryInfinite<infer O, infer I>
-    ? (...args: EraseEmptyArg<I>) => UseSuspenseInfiniteQueryResult<O>
-    : Sdk[K] extends UseMutationOptions<infer O, infer E, infer V>
-    ? () => UseMutationResult<O, E, V>
+      ? (...args: EraseEmptyArg<I>) => UseSuspenseInfiniteQueryResult<O>
+      : Sdk[K] extends UseMutationOptions<infer O, infer E, infer V>
+        ? () => UseMutationResult<O, E, V>
+        : never;
+} & {
+  // Lazy versions of queries
+  [K2 in keyof Sdk as `use${Capitalize<string & K2>}Lazy`]: Sdk[K2] extends QueryFactory<
+    infer O,
+    infer I
+  >
+    ? (...args: EraseEmptyArg<I>) => UseQueryResult<O>
     : never;
 };
 
@@ -40,8 +50,12 @@ function makeHookProxy<Sdk extends BaseSdk>(): any {
         if (!methodName) {
           throw new Error(`Invalid hook name: ${prop.toString()}`);
         }
-        const correctedMethodName =
+        const isLazy = methodName.endsWith('Lazy');
+        let correctedMethodName =
           methodName.charAt(0).toLowerCase() + methodName.slice(1);
+        if (isLazy) {
+          correctedMethodName = correctedMethodName.slice(0, -4);
+        }
         // queries
         if (
           correctedMethodName.startsWith('get') ||
@@ -53,6 +67,9 @@ function makeHookProxy<Sdk extends BaseSdk>(): any {
               | QueryFactory<any, any>
               | QueryFactoryInfinite<any, any>;
             if (isQueryFactory(method)) {
+              if (isLazy) {
+                return useQuery(method(args));
+              }
               return useSuspenseQuery(method(args));
             } else if (isInfiniteQueryFactory(method)) {
               return useSuspenseQuery(method(args));
