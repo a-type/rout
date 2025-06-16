@@ -55,7 +55,10 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
           onDrop={(card) => {
             if (isCard(card.id)) {
               gameSuite.submitTurn({
-                card: card.data,
+                data: {
+                  card: card.data,
+                },
+                delay: 5_000,
               });
             }
           }}

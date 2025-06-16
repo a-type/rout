@@ -17,7 +17,11 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
-import { TopographyProvider, usePlayerThemed } from '@long-game/game-ui';
+import {
+  DelayedSubmitUndo,
+  TopographyProvider,
+  usePlayerThemed,
+} from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 
@@ -94,6 +98,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
           </Suspense>
         </GameLayout.Main>
         <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
+        <DelayedSubmitUndo />
       </GameLayout>
     </TopographyProvider>
   );

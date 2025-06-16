@@ -1,5 +1,6 @@
 import { Box } from '@a-type/ui';
 import { TokenRoot, TurnError } from '@long-game/game-ui';
+import { useEffect } from 'react';
 import { CurrentTrick } from './CurrentTrick';
 import { hooks } from './gameClient';
 import { Hand } from './Hand';
@@ -12,6 +13,16 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   gameSuite,
 }) {
   const isDraftRound = gameSuite.finalState.task === 'draft';
+
+  // when canceling submit in this game, we reset the turn.
+  useEffect(
+    () =>
+      gameSuite.subscribe('turnSubmitCancelled', () => {
+        gameSuite.prepareTurn(null);
+      }),
+    [gameSuite],
+  );
+
   return (
     <Box full d="col" gap p className="bg-wash flex-1" asChild>
       <TokenRoot>

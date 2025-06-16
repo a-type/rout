@@ -49,6 +49,8 @@ type GameSessionSuiteEvents = {
   turnPlayed: () => void;
   turnPrepared: () => void;
   turnValidationFailed: (error: BaseTurnError) => void;
+  turnSubmitDelayed: (delayTime: number) => void;
+  turnSubmitCancelled: () => void;
   error: (error: LongGameError) => void;
   roundChanged: () => void;
   membersChanged: () => void;
@@ -93,6 +95,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   // non-reactive
   #chatNextToken: string | null = null;
+  #turnSubmitTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     init: {
@@ -485,36 +488,61 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     this.#events.emit('turnPrepared');
   };
 
-  @action submitTurn = async (override?: GetTurnData<TGame> | null) => {
+  @action submitTurn = async ({
+    data: override,
+    delay,
+  }: {
+    data?: GetTurnData<TGame> | null;
+    delay?: number;
+  } = {}): Promise<BaseTurnError | void> => {
     if (override) {
       this.prepareTurn(override);
     }
     const localTurnData = this.localTurnData;
     if (!localTurnData) {
-      return 'Play a turn first!';
+      return simpleError('Play a turn first!');
     }
     const error = this.turnError;
     if (error) {
       this.#events.emit('turnValidationFailed', error);
       return error;
     }
+    if (this.#turnSubmitTimeout) {
+      clearTimeout(this.#turnSubmitTimeout);
+    }
+    if (delay) {
+      this.#events.emit('turnSubmitDelayed', delay);
+      return new Promise<BaseTurnError | void>((resolve) => {
+        this.#turnSubmitTimeout = setTimeout(
+          () => this.#actuallySubmitTurn(localTurnData).then(resolve),
+          delay,
+        );
+      });
+    } else {
+      return this.#actuallySubmitTurn(localTurnData);
+    }
+  };
+
+  #actuallySubmitTurn = async (
+    data: GetTurnData<TGame>,
+  ): Promise<BaseTurnError | void> => {
     const submittingToRound = this.latestRoundIndex;
     try {
       const response = await this.ctx.socket.request({
         type: 'submitTurn',
-        turnData: localTurnData,
+        turnData: data,
       });
       if (response.type === 'error') {
         this.#events.emit(
           'error',
           new LongGameError(LongGameError.Code.Unknown, response.message),
         );
-        return response.message;
+        return simpleError(response.message);
       } else {
         // locally update the submitted round with our turn and
         // reset local turn data
         runInAction(() => {
-          this.rounds[submittingToRound].yourTurnData = localTurnData;
+          this.rounds[submittingToRound].yourTurnData = data;
           this.localTurnData = null;
         });
         this.#events.emit('turnPlayed');
@@ -525,7 +553,15 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         'error',
         new LongGameError(LongGameError.Code.Unknown, msg),
       );
-      return 'Error submitting turn. Try again?';
+      return simpleError('Error submitting turn. Try again?');
+    }
+  };
+
+  cancelSubmit = () => {
+    if (this.#turnSubmitTimeout) {
+      clearTimeout(this.#turnSubmitTimeout);
+      this.#turnSubmitTimeout = null;
+      this.#events.emit('turnSubmitCancelled');
     }
   };
 

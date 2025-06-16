@@ -206,6 +206,7 @@ const DraggedRoot = memo(function DraggedRoot({
   const dragged = useDraggableContext();
 
   useEffect(() => {
+    // this is really just for debugging.
     if (dragged.isDragged) {
       activeDragRef.current = dragged;
       return () => {
