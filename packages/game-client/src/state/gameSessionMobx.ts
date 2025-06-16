@@ -757,7 +757,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   };
 
   @action private onTurnPlayed = (msg: ServerTurnPlayedMessage) => {
-    console.log('turn played', msg);
     // update the round with the new turn data
     const round = this.rounds[msg.roundIndex];
     if (round) {
@@ -776,7 +775,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @action private onNextRoundScheduled = (
     msg: ServerNextRoundScheduledMessage,
   ) => {
-    console.log('next round scheduled', msg);
     this.nextRoundCheckAt = new Date(msg.nextRoundCheckAt);
   };
 
