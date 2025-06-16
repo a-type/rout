@@ -87,10 +87,12 @@ export const gamesRouter = new Hono<Env>()
   .post(
     '/products/:productId/purchase',
     zValidator('param', z.object({ productId: idShapes.GameProduct })),
+    zValidator('form', z.object({ returnTo: z.string().optional() })),
     userStoreMiddleware,
     async (ctx) => {
       const userId = ctx.get('session').userId;
       const { productId } = ctx.req.valid('param');
+      const { returnTo } = ctx.req.valid('form');
 
       const user = await ctx.get('userStore').getMe();
       if (!user) {
@@ -133,8 +135,8 @@ export const gamesRouter = new Hono<Env>()
         ],
         customer: user.stripeCustomerId ?? undefined,
         customer_creation: 'always',
-        success_url: `${ctx.env.UI_ORIGIN}/library`,
-        cancel_url: `${ctx.env.UI_ORIGIN}/library?productId=${product.id}cancelled=true`,
+        success_url: returnTo ?? `${ctx.env.UI_ORIGIN}/library`,
+        cancel_url: `${returnTo ?? `${ctx.env.UI_ORIGIN}/library`}?productId=${product.id}cancelled=true`,
         customer_email: user.email,
         allow_promotion_codes: true,
         billing_address_collection: 'auto',

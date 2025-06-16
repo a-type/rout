@@ -58,6 +58,7 @@ export function LoginPage({}: LoginPageProps) {
                   <EmailSigninForm
                     endpoint={`${API_ORIGIN}/auth/email-login`}
                     resetPasswordEndpoint={`${API_ORIGIN}/auth/begin-reset-password`}
+                    returnTo={returnTo}
                   />
                 </Box>
               </Box>
@@ -75,6 +76,7 @@ export function LoginPage({}: LoginPageProps) {
                   <H2>Sign up with email</H2>
                   <EmailSignupForm
                     endpoint={`${API_ORIGIN}/auth/begin-email-signup`}
+                    returnTo={returnTo}
                   />
                 </Box>
               </Box>

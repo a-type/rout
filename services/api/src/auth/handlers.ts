@@ -68,7 +68,7 @@ export const authHandlers = createHandlers<Context<Env>>({
     updateUser(userId, user) {
       return ctx.env.ADMIN_STORE.updateUser(userId, user);
     },
-    consumeVerificationCode(code) {
+    consumeVerificationCode(email, code) {
       return ctx.env.ADMIN_STORE.consumeVerificationCode(code);
     },
     async getUserByEmailAndPassword(email, password) {

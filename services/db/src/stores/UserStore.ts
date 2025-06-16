@@ -261,13 +261,23 @@ export class UserStore extends RpcTarget {
   }: {
     email?: string;
     userId?: PrefixedId<'u'>;
-  }) {
+  }): Promise<
+    | {
+        created: true;
+        invite: { id: PrefixedId<'fi'>; email: string };
+      }
+    | {
+        created: false;
+        invite?: { id: PrefixedId<'fi'>; email: string };
+      }
+  > {
     if (!(providedEmail || userId)) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Either email or userId must be provided',
       );
     }
+
     const email =
       providedEmail ||
       (
@@ -277,6 +287,42 @@ export class UserStore extends RpcTarget {
           .select('email')
           .executeTakeFirstOrThrow()
       ).email;
+    const otherUserId =
+      userId ||
+      ((
+        await this.#db
+          .selectFrom('User')
+          .where('email', '=', email)
+          .select('id')
+          .executeTakeFirst()
+      )?.id ??
+        null);
+
+    if (otherUserId) {
+      const ownEmail = (
+        await this.#db
+          .selectFrom('User')
+          .where('id', '=', this.#userId)
+          .select('email')
+          .executeTakeFirstOrThrow()
+      ).email;
+      // check for opposite-direction friendship invite -- if one
+      // already exists, we can go ahead and make them friends!
+      const oppositeInvite = await this.#db
+        .selectFrom('FriendshipInvitation')
+        .where('FriendshipInvitation.inviterId', '=', otherUserId)
+        .where('FriendshipInvitation.email', '=', ownEmail)
+        .where('FriendshipInvitation.status', '=', 'pending')
+        .selectAll()
+        .executeTakeFirst();
+
+      if (oppositeInvite) {
+        await this.respondToFriendshipInvite(oppositeInvite.id, 'accepted');
+        return {
+          created: false,
+        };
+      }
+    }
 
     const existing = await this.#db
       .selectFrom('FriendshipInvitation')
