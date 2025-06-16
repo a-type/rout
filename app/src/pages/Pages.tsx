@@ -82,6 +82,10 @@ const routes = makeRoutes([
         path: 'sessions',
         component: lazy(() => import('./admin/AdminGameSessionsPage.jsx')),
       },
+      {
+        path: 'users',
+        component: lazy(() => import('./admin/AdminUsersPage.jsx')),
+      },
     ],
   },
   {

@@ -1,0 +1,41 @@
+import { sdkHooks } from '@/services/publicSdk';
+import { Box, Button, ConfirmedButton } from '@a-type/ui';
+
+export interface AdminManageUsersProps {}
+
+export function AdminManageUsers({}: AdminManageUsersProps) {
+  const {
+    data: { results, pageInfo },
+    fetchNextPage,
+  } = sdkHooks.useAdminGetUsers({});
+  const deleteUser = sdkHooks.useAdminDeleteUser();
+
+  return (
+    <Box col gap>
+      {results.map((user) => (
+        <Box surface key={user.id} p border gap items="center">
+          <Box col gap className="flex-1">
+            <Box>{user.displayName}</Box>
+            <Box>{user.email}</Box>
+          </Box>
+          <ConfirmedButton
+            color="destructive"
+            confirmText="Are you sure you want to delete this user?"
+            onConfirm={async () => {
+              return deleteUser.mutateAsync({ userId: user.id });
+            }}
+          >
+            Delete
+          </ConfirmedButton>
+        </Box>
+      ))}
+      {pageInfo.hasNextPage && (
+        <Box layout="center center" p full="width">
+          <Button color="ghost" onClick={() => fetchNextPage()}>
+            Load more
+          </Button>
+        </Box>
+      )}
+    </Box>
+  );
+}

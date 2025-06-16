@@ -15,7 +15,7 @@
     "dev:types": "tsc -p tsconfig.json --watch",
     "migrations:create": "wrangler d1 migrations create prod-long-game-core -c wrangler.toml",
     "migrations:apply:local": "cross-env CI=true wrangler d1 migrations apply prod-long-game-core --local -c wrangler.toml",
-    "migrations:apply:remote": "cross-env CI=true wrangler d1 migrations apply prod-long-game-core --remote -c wrangler.toml",
+    "migrations:apply:remote": "cross-env CI=true env-cmd wrangler d1 migrations apply prod-long-game-core --remote -c wrangler.toml",
     "db:run:local": "wrangler d1 execute prod-long-game-core -c wrangler.toml --local --command",
     "build": "pnpm run --filter @long-game/service-db --parallel \"/^build:.*/\"",
     "build:db": "wrangler deploy --dry-run --outdir dist/worker --config wrangler.toml",
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "cross-env": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "env-cmd": "catalog:"
   }
 }

@@ -10,6 +10,7 @@ const AdminPage = () => {
         <Box gap>
           <Link to="/admin/products">Products</Link>
           <Link to="/admin/sessions">Sessions</Link>
+          <Link to="/admin/users">Users</Link>
         </Box>
         <Outlet />
       </PageContent>

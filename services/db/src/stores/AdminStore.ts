@@ -22,9 +22,8 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
   }
 
   async healthCheck() {
-    const result = await this.env.D1.prepare(
-      'SELECT 1 AS alive;',
-    ).first<number>('alive');
+    const result =
+      await this.env.D1.prepare('SELECT 1 AS alive;').first<number>('alive');
     return result === 1;
   }
 
@@ -125,6 +124,59 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
     return userResult;
   }
 
+  async deleteUser(id: PrefixedId<'u'>) {
+    assertPrefixedId(id, 'u');
+
+    // cascades should handle related records
+    await this.#db.deleteFrom('User').where('id', '=', id).execute();
+  }
+
+  async listUsers({
+    first,
+    before,
+  }: {
+    first?: number;
+    before?: string;
+  } = {}): Promise<{
+    results: {
+      id: PrefixedId<'u'>;
+      displayName: string;
+      email: string;
+      createdAt: string;
+    }[];
+    pageInfo: {
+      endCursor: string | null;
+      hasNextPage: boolean;
+    };
+  }> {
+    let query = this.#db
+      .selectFrom('User')
+      .select(['id', 'displayName', 'email', 'createdAt'])
+      .orderBy('createdAt', 'desc');
+    if (first) {
+      query = query.limit(first + 1);
+    }
+    if (before) {
+      query = query.where('createdAt', '<', before);
+    }
+    const results = await query.execute();
+    const hasNextPage = !!(first && results.length > first);
+    if (hasNextPage) {
+      results.pop();
+    }
+
+    const endCursor = results.length
+      ? results[results.length - 1].createdAt
+      : null;
+    return {
+      results,
+      pageInfo: {
+        endCursor,
+        hasNextPage,
+      },
+    };
+  }
+
   async applyFreeGames(userId: PrefixedId<'u'>) {
     // find all free game products
     const freeGameProducts = await this.#db
@@ -194,11 +246,10 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .executeTakeFirst();
   }
 
-  async consumeVerificationCode(id: string) {
-    assertPrefixedId(id, 'vc');
+  async consumeVerificationCode(code: string) {
     await this.#db
       .deleteFrom('VerificationCode')
-      .where('id', '=', id)
+      .where('code', '=', code)
       .execute();
   }
 

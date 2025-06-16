@@ -40,7 +40,10 @@ export function assertPrefixedId<
   Prefix extends ResourceIdPrefix = ResourceIdPrefix,
 >(id: string, prefix?: Prefix): asserts id is PrefixedId<Prefix> {
   if (!isPrefixedId(id, prefix)) {
-    throw new LongGameError(LongGameError.Code.BadRequest, `Invalid id: ${id}`);
+    throw new LongGameError(
+      LongGameError.Code.BadRequest,
+      `Invalid ${prefix ?? ''} id: ${id}`,
+    );
   }
 }
 

@@ -452,6 +452,38 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+
+  adminGetUsers = this.sdkInfiniteQuery(
+    'adminGetUsers',
+    (input, cursor) =>
+      this.apiRpc.admin.users.$get({
+        query: {
+          before: cursor,
+          first: `${input.first ?? 20}`,
+        },
+      }),
+    {
+      transformInput: (input: { first?: number }) => ({
+        first: input.first,
+      }),
+      getKey: (input) => {
+        const key: string[] = [];
+        if (input.first) {
+          key.push(input.first.toString());
+        }
+        return key;
+      },
+    },
+  );
+  adminDeleteUser = this.sdkMutation(
+    this.apiRpc.admin.users[':userId'].$delete,
+    {
+      transformInput: (input: { userId: PrefixedId<'u'> }) => ({
+        param: { userId: input.userId },
+      }),
+      invalidate: [['adminGetUsers']],
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
