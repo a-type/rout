@@ -100,7 +100,8 @@ export type Position =
   | 'sp'
   | 'rp'
   | 'if'
-  | 'of';
+  | 'of'
+  | 'dh';
 
 export type Base = 1 | 2 | 3;
 
