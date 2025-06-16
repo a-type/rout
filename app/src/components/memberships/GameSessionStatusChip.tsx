@@ -10,10 +10,10 @@ export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
     <Chip
       color={
         status === 'active'
-          ? 'accent'
+          ? 'neutral'
           : status === 'complete'
-          ? 'primary'
-          : 'neutral'
+            ? 'primary'
+            : 'neutral'
       }
     >
       <Icon
@@ -21,15 +21,15 @@ export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
           status === 'active'
             ? 'gamePiece'
             : status === 'complete'
-            ? 'flag'
-            : 'clock'
+              ? 'flag'
+              : 'clock'
         }
       />
       {status === 'active'
         ? 'Live'
         : status === 'complete'
-        ? 'Finished'
-        : 'Setup'}
+          ? 'Finished'
+          : 'Setup'}
     </Chip>
   );
 }
