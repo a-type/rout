@@ -24,8 +24,8 @@ export const SubmitTurn = withSuspense(
     const icon = turnError
       ? 'warning'
       : nextRoundCheckAt
-      ? 'clock'
-      : 'arrowRight';
+        ? 'clock'
+        : 'arrowRight';
 
     return (
       <Tooltip
@@ -34,7 +34,7 @@ export const SubmitTurn = withSuspense(
         content={
           nextRoundCheckAt
             ? `The next round starts at ${nextRoundCheckAt.toLocaleTimeString()} ${nextRoundCheckAt.toLocaleDateString()}`
-            : turnError
+            : turnError?.message
         }
       >
         <Box className={className}>

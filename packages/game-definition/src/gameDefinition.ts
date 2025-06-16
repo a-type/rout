@@ -26,11 +26,18 @@ export type GameMember = {
   id: PrefixedId<'u'>;
 };
 
+export type BaseTurnError = {
+  code: string;
+  message: string;
+  data?: Record<string, unknown>;
+};
+
 export type GameDefinition<
   GlobalState = any,
   PlayerState = any,
   TurnData extends BaseTurnData = any,
   PublicTurnData extends BaseTurnData = TurnData,
+  TurnError extends BaseTurnError = BaseTurnError,
 > = {
   version: `v${number}.${number}`;
   minimumPlayers: number;
@@ -46,7 +53,7 @@ export type GameDefinition<
     turn: LocalTurn<TurnData>;
     roundIndex: number;
     members: GameMember[];
-  }) => string | void;
+  }) => TurnError | string | void;
   /**
    * Returns the player state as it would be if the player made the move.
    * This may not be the same as the final computed player state, since

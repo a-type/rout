@@ -1,10 +1,8 @@
 import { Box, Button } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
+import { BrowserRouter, NavLink } from 'react-router';
 import { hooks } from './gameClient';
 import { PageContent } from './PageContent';
-import { BrowserRouter, Link, NavLink, useSearchParams } from 'react-router';
-import { TeamStandings } from './teams/TeamStandings';
-import { LeagueLeaders } from './LeagueLeaders';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -70,7 +68,7 @@ const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
         >
           Debug
         </NavLink>
-        {gameSuite.turnError}
+        {gameSuite.turnError?.message}
       </div>
       <div className="p-4 mt-8">
         <PageContent />

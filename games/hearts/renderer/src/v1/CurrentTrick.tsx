@@ -67,7 +67,7 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
               card: card.data,
             });
             if (error) {
-              return error;
+              return error.message;
             }
             return true;
           }}

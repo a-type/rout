@@ -17,11 +17,14 @@ import {
   ServerTurnPlayedMessage,
 } from '@long-game/common';
 import {
+  BaseTurnError,
   GameDefinition,
   GetGlobalState,
   GetPlayerState,
   GetPublicTurnData,
   GetTurnData,
+  GetTurnError,
+  simpleError,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
@@ -45,7 +48,7 @@ export type PlayerInfo = {
 type GameSessionSuiteEvents = {
   turnPlayed: () => void;
   turnPrepared: () => void;
-  turnValidationFailed: (error: string) => void;
+  turnValidationFailed: (error: BaseTurnError) => void;
   error: (error: LongGameError) => void;
   roundChanged: () => void;
   membersChanged: () => void;
@@ -294,9 +297,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return !!this.localTurnData;
   }
 
-  @computed get turnError() {
+  @computed get turnError(): GetTurnError<TGame> | null {
     if (!this.localTurnData) return null;
-    return this.validateTurn(this.localTurnData) || null;
+    const err = this.validateTurn(this.localTurnData) || null;
+    if (typeof err === 'string') {
+      return simpleError(err) as GetTurnError<TGame>;
+    }
+    return err as GetTurnError<TGame>;
   }
 
   /**
@@ -307,14 +314,14 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     turnData:
       | GetTurnData<TGame>
       | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
-  ) => {
+  ): GetTurnError<TGame> | null => {
     const baseState = this.latestRound.initialPlayerState;
     const roundIndex = this.latestRound.roundIndex;
     const dataToValidate =
       typeof turnData === 'function'
         ? (turnData as any)(this.localTurnData ?? null)
         : turnData;
-    return this.gameDefinition.validateTurn({
+    const err = this.gameDefinition.validateTurn({
       members: this.members,
       playerState: baseState,
       roundIndex,
@@ -323,6 +330,14 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         data: dataToValidate,
       },
     });
+
+    if (err) {
+      if (typeof err === 'string') {
+        return simpleError(err) as GetTurnError<TGame>;
+      }
+      return err as GetTurnError<TGame>;
+    }
+    return null;
   };
 
   @computed get combinedLog() {

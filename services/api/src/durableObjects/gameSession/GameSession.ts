@@ -492,7 +492,11 @@ export class GameSession extends DurableObject<ApiBindings> {
       members,
     });
     if (validationError) {
-      throw new LongGameError(LongGameError.Code.BadRequest, validationError);
+      const msg =
+        typeof validationError === 'string'
+          ? validationError
+          : validationError.message;
+      throw new LongGameError(LongGameError.Code.BadRequest, msg);
     }
 
     console.log(

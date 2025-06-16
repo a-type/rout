@@ -16,3 +16,6 @@ export type GetPublicTurnData<G extends GameDefinition> =
 export type GetRound<G extends GameDefinition> = GameRound<
   Turn<GetTurnData<G>>
 >;
+
+export type GetTurnError<G extends GameDefinition> =
+  G extends GameDefinition<any, any, any, any, infer T> ? T : never;
