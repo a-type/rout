@@ -44,6 +44,7 @@ export type PerkEffect = {
   }>;
   // Flat bonus to quality
   qualityBonus?: number;
+  bonusRoundXp?: number;
   trigger?: (props: {
     gameState: LeagueGameState;
     league: League;

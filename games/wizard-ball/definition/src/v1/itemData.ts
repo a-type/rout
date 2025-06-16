@@ -335,9 +335,9 @@ export const itemData: Record<string, ItemInfo> = {
     }),
   },
   strikeoutLearner: {
-    name: 'Training Cap',
+    name: 'Training Ball',
     description: 'Gain bonus XP when striking out a batter.',
-    icon: '🧢',
+    icon: '⚾',
     rarity: 'common',
     kind: 'pitching',
     condition: ({ isPitcher = false, isMe = false }) => isMe && isPitcher,
@@ -366,6 +366,34 @@ export const itemData: Record<string, ItemInfo> = {
         player.xp += 2;
         return gameState;
       },
+    }),
+  },
+  badPitcherLearner: {
+    name: 'Training Cap',
+    description: 'Gain bonus XP when giving up a hit.',
+    icon: '🧢',
+    rarity: 'common',
+    kind: 'pitching',
+    condition: ({ isPitcher = false, isMe = false }) => isPitcher && isMe,
+    effect: () => ({
+      trigger: ({ gameState, event, player }) => {
+        if (event.kind !== 'hit' || !event.isPitcher) {
+          return gameState;
+        }
+        player.xp += 2;
+        return gameState;
+      },
+    }),
+  },
+  trainingOrb: {
+    name: 'Training Orb',
+    description: 'Gain bonus XP at the end of each game.',
+    icon: '🔮',
+    rarity: 'common',
+    kind: 'any',
+    condition: ({ isMe = false }) => isMe,
+    effect: () => ({
+      bonusRoundXp: 10,
     }),
   },
 };

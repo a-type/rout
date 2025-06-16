@@ -169,4 +169,74 @@ export const ballparkData = {
       },
     }),
   },
+  theKeep: {
+    name: 'The Keep',
+    description:
+      'A fortified castle with high walls, making it harder to hit home runs.',
+    icon: '🏰',
+    color: '#616161',
+    weather: {
+      fog: 3,
+      rain: 2,
+    },
+    effect: ({ isHome } = {}) => ({
+      battingCompositeBonus: {
+        homeRuns: isHome ? -3 : -5,
+        fielding: isHome ? 2 : 0,
+      },
+    }),
+  },
+  wizardsTower: {
+    name: "Wizard's Tower",
+    description:
+      'A mystical tower where magic enhances the game, boosting intelligence and wisdom.',
+    icon: '🧙‍♂️',
+    color: '#009688',
+    weather: {
+      lightningStorm: 3,
+      fog: 2,
+    },
+    effect: ({ isHome } = {}) => ({
+      attributeBonus: {
+        intelligence: isHome ? 4 : 2,
+        wisdom: isHome ? 4 : 2,
+      },
+    }),
+  },
+  cursedGrounds: {
+    name: 'Cursed Graveyard',
+    description:
+      'A haunted field where the spirits of past players linger, cursing the away team when they get hits.',
+    icon: '👻',
+    color: '#9C27B0',
+    weather: {
+      fog: 4,
+    },
+    effect: ({ isHome } = {}) => ({
+      trigger: ({ event, player, gameState }) => {
+        if (event.kind !== 'hit' || isHome) {
+          return gameState;
+        }
+        player.statusIds.cursed = (player.statusIds.cursed || 1) + 1;
+        return gameState;
+      },
+    }),
+  },
+  trainingGrounds: {
+    name: 'Training Grounds',
+    description:
+      'A field designed for practice, where players bonus experience for hits.',
+    icon: '🏋️‍♂️',
+    color: '#FFCDD2',
+    weather: {},
+    effect: ({ isHome } = {}) => ({
+      trigger: ({ event, player, gameState }) => {
+        if (event.kind !== 'hit') {
+          return gameState;
+        }
+        player.xp += isHome ? 4 : 2;
+        return gameState;
+      },
+    }),
+  },
 } satisfies Record<string, Ballpark>;

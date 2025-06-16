@@ -14,8 +14,10 @@ import {
   getTeamBench,
   hasPitcherPosition,
   playerStatsToHotCold,
+  sum,
 } from './utils';
 import { statusData, StatusType } from './statusData';
+import { itemData } from './itemData';
 
 export type GlobalState = {
   league: League;
@@ -292,12 +294,18 @@ export const gameDefinition: GameDefinition<
         const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {
           const player = globalState.league.playerLookup[playerId];
+          const items = player.itemIds.map(
+            (itemId) => itemData[globalState.league.itemLookup[itemId].itemDef],
+          );
+          const bonusXp = sum(
+            ...items.map((i) => i.effect().bonusRoundXp ?? 0),
+          );
           const isBenchPlayer = teamBench.some((p) => p.id === playerId);
           globalState = applyXp(
             random,
             player,
             globalState,
-            isBenchPlayer ? 20 : 10,
+            (isBenchPlayer ? 20 : 10) + bonusXp,
           );
         });
       });

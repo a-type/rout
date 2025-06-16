@@ -29,12 +29,15 @@ export function getTeamAvgAttributes(
     (playerId) => league.playerLookup[playerId],
   );
 
-  const totalAttributes = players.reduce((acc, player) => {
-    return sumObjects(acc, {
-      ...player.attributes,
-      overall: getPlayerOverall(player),
-    });
-  }, {} as Record<string, number>);
+  const totalAttributes = players.reduce(
+    (acc, player) => {
+      return sumObjects(acc, {
+        ...player.attributes,
+        overall: getPlayerOverall(player),
+      });
+    },
+    {} as Record<string, number>,
+  );
   const avgAttributes = Object.entries(totalAttributes).reduce(
     (acc, [key, value]) => {
       acc[key] = value / players.length;
@@ -130,7 +133,7 @@ export function getPitchingCompositeRatings(
 }
 
 export function getXpForLevel(level: number): number {
-  return 10 + level ** 2;
+  return 20 + Math.floor((level + 5) ** 1.5);
 }
 
 export function getLevelFromXp(xp: number): { level: number; xp: number } {
@@ -149,10 +152,13 @@ export function applyLevelup(
 ): Player {
   const newAttributes: PlayerAttributes = { ...player.attributes };
   for (let i = 0; i < count; i++) {
-    const attr = random.item(
-      Object.keys(newAttributes),
-    ) as keyof PlayerAttributes;
-    newAttributes[attr] += 1;
+    const times = random.int(1, 3); // Randomly choose how many attributes to increase
+    for (let j = 0; j < times; j++) {
+      const attr = random.item(
+        Object.keys(newAttributes),
+      ) as keyof PlayerAttributes;
+      newAttributes[attr] += 1;
+    }
   }
   return {
     ...player,
