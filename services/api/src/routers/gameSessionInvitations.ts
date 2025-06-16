@@ -47,11 +47,11 @@ export const gameSessionInvitationsRouter = new Hono()
       const { id } = ctx.req.valid('param');
       const { response } = ctx.req.valid('json');
       const userStore = ctx.get('userStore');
+      const invite = await userStore.respondToGameSessionInvitation(
+        id,
+        response,
+      );
       try {
-        const invite = await userStore.respondToGameSessionInvitation(
-          id,
-          response,
-        );
         // go ahead and update the session now
         await updateGameSessionMembers(
           ctx.env,
