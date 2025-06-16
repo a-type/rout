@@ -19,7 +19,12 @@ import { classData, ClassType } from './classData';
 import { perks } from './perkData';
 import { getLevelFromXp, getPlayerOverall } from './attributes';
 import { itemData } from './itemData';
-import { addPositionToPlayer, canAssignToPosition, isPitcher } from './utils';
+import {
+  addPositionToPlayer,
+  canAssignToPosition,
+  hasPitcherPosition,
+  isPitcher,
+} from './utils';
 import { weather as weatherData, WeatherType } from './weatherData';
 import { ballparkData, BallparkType } from './ballparkData';
 import { applyXpAuto } from './boosts';
@@ -127,7 +132,10 @@ export function generateLeague(
       'if',
       'of',
     ];
-    team.battingOrder = forcedPositions.slice(0, 9) as Team['battingOrder'];
+    team.battingOrder = [
+      ...forcedPositions.slice(0, 8),
+      'dh',
+    ] as Team['battingOrder'];
     for (let i = 0; i < playersPerTeam; i++) {
       const forcedPosition = forcedPositions[i];
       const player = generatePlayer(random, {
@@ -153,37 +161,17 @@ export function generateLeague(
       if (
         !isPitcher(forcedPosition) &&
         forcedPosition !== 'if' &&
-        forcedPosition !== 'of' &&
-        team.positionChart[forcedPosition] === null
+        forcedPosition !== 'of'
       ) {
-        team.positionChart[forcedPosition] = player.id;
+        if (team.positionChart[forcedPosition] === null) {
+          team.positionChart[forcedPosition] = player.id;
+        } else if (team.positionChart.dh === null) {
+          team.positionChart.dh = player.id;
+        }
       }
       if (forcedPosition === 'sp') {
         team.pitchingOrder.push(player.id);
       }
-      league.playerLookup[player.id] = player;
-      league = applyXpAuto(random, player, league, random.int(0, 200));
-    }
-
-    // Add free agents
-    for (let i = 0; i < 20; i++) {
-      const player = generatePlayer(random, {
-        position: random.item([
-          'c',
-          '1b',
-          '2b',
-          '3b',
-          'ss',
-          'lf',
-          'cf',
-          'rf',
-          'sp',
-          'rp',
-          'if',
-          'of',
-        ]),
-        skipPerks: options.skipPerks,
-      });
       league.playerLookup[player.id] = player;
       league = applyXpAuto(random, player, league, random.int(0, 200));
     }
@@ -200,22 +188,18 @@ export function generateLeague(
       })
       .filter(
         (player) =>
-          player.positions.every((pos) => !isPitcher(pos)) &&
+          !hasPitcherPosition(player.positions) &&
           !Object.values(team.positionChart).includes(player.id),
       )
       .forEach((player) => {
-        if (player.positions.some((pos) => isPitcher(pos))) {
-          // If the player is a pitcher, they should not be in the position chart
-          return;
-        }
-
         for (const pos of Object.keys(
           team.positionChart,
         ) as PositionChartKey[]) {
-          if (
-            canAssignToPosition(player.positions, pos) &&
-            team.positionChart[pos] !== null
-          ) {
+          if (canAssignToPosition(player.positions, pos)) {
+            if (team.positionChart[pos] === null) {
+              team.positionChart[pos] = player.id;
+              return;
+            }
             const currentPlayerId = team.positionChart[pos];
             const currentPlayer = league.playerLookup[currentPlayerId];
             if (getPlayerOverall(player) > getPlayerOverall(currentPlayer)) {
@@ -247,6 +231,29 @@ export function generateLeague(
       const overallB = getPlayerOverall(playerB);
       return overallB - overallA; // Sort in descending order
     });
+
+    // Add free agents
+    for (let i = 0; i < 20; i++) {
+      const player = generatePlayer(random, {
+        position: random.item([
+          'c',
+          '1b',
+          '2b',
+          '3b',
+          'ss',
+          'lf',
+          'cf',
+          'rf',
+          'sp',
+          'rp',
+          'if',
+          'of',
+        ]),
+        skipPerks: options.skipPerks,
+      });
+      league.playerLookup[player.id] = player;
+      league = applyXpAuto(random, player, league, random.int(0, 200));
+    }
 
     // Generate a few items for each team
     for (let i = 0; i < 5; i++) {
@@ -351,6 +358,7 @@ function generateTeam(random: GameRandom, ballpark: BallparkType): Team {
       lf: null,
       cf: null,
       rf: null,
+      dh: null,
     },
     nextPitcherIndex: 0,
     wins: 0,

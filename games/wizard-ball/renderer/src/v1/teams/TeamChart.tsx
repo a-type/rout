@@ -38,6 +38,7 @@ const positions = [
   'lf',
   'cf',
   'rf',
+  'dh',
 ] as const satisfies Position[];
 
 export function TeamChart({ id }: { id: string }) {

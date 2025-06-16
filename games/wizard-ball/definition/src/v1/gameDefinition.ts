@@ -79,8 +79,7 @@ export const gameDefinition: GameDefinition<
     }
     if (!!turn.data.nextPositionChart) {
       const positionChart = turn.data.nextPositionChart;
-      if (Object.values(positionChart).filter((v) => !!v).length !== 8) {
-        // Position chart doesn't include pitcher
+      if (Object.values(positionChart).filter((v) => !!v).length !== 9) {
         return 'You must select exactly 9 positions for your position chart';
       }
     }

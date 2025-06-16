@@ -130,6 +130,9 @@ export function canAssignToPosition(
   positions: Position[],
   position: PositionChartKey,
 ): boolean {
+  if (position === 'dh') {
+    return true;
+  }
   if (positions.includes('if') && ['1b', '2b', '3b', 'ss'].includes(position)) {
     return true;
   }

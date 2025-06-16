@@ -8,6 +8,7 @@ import {
   getLevelFromXp,
   getPitchingCompositeRatings,
   getPlayerOverall,
+  hasPitcherPosition,
   isPitcher,
   PITCHER_BATTING_PENALTY,
 } from '@long-game/game-wizard-ball-definition';
@@ -134,12 +135,14 @@ export function TeamPlayers({ id }: { id: string }) {
           <tbody>
             {team.playerIds
               .filter((pid) => {
-                return (
-                  tab !== 'pitchingComposite' ||
-                  finalState.league.playerLookup[pid].positions.some((p) =>
-                    isPitcher(p),
-                  )
-                );
+                const player = finalState.league.playerLookup[pid];
+                if (tab === 'pitchingComposite') {
+                  return hasPitcherPosition(player.positions);
+                }
+                if (tab === 'battingComposite') {
+                  return !hasPitcherPosition(player.positions);
+                }
+                return true;
               })
               .map((playerId) => {
                 const player = finalState.league.playerLookup[playerId];
