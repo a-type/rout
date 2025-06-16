@@ -10,16 +10,21 @@ import type {
   BattingCompositeRatings,
   PitchingCompositeRatings,
 } from '../gameTypes';
+import { itemData, ItemInfo } from '../itemData';
 import { Perk, PerkEffect, perks } from '../perkData';
 import { PitchKind } from '../pitchData';
 import { Status, statusData, StatusType } from '../statusData';
 import { sumObjects, scaleAttribute, multiplyObjects } from '../utils';
 import { Weather, weather as weatherData } from '../weatherData';
 import { determineClutchFactor } from './clutch';
-import { getCurrentBatter, getCurrentPitcher } from './utils';
+import {
+  getCurrentBatter,
+  getCurrentPitcher,
+  getPitcherForTeam,
+} from './utils';
 
 export type PerkInfo = {
-  source: Weather | Ballpark | Perk | Status;
+  source: Weather | Ballpark | Perk | Status | ItemInfo;
   effect: PerkEffect;
 };
 
@@ -36,9 +41,12 @@ export function getActivePlayerPerks(
   const weatherInfo = weatherData[weatherId];
   const ballparkId = gameState.ballpark;
   const ballparkInfo = ballparkData[ballparkId];
+  // TODO: Maybe ensure this list is unique?
   const players = [
     ...gameState.teamData[battingTeam].battingOrder,
     ...gameState.teamData[pitchingTeam].battingOrder,
+    getPitcherForTeam(gameState, pitchingTeam),
+    getPitcherForTeam(gameState, battingTeam),
   ].map((pid) => league.playerLookup[pid]);
 
   return [
@@ -50,6 +58,35 @@ export function getActivePlayerPerks(
         isHome: gameState.leagueGame.homeTeamId === playerTeam,
       }),
     },
+    // TODO: Consider applying all items instead of just the target player's
+    ...targetPlayer.itemIds
+      .map((id) => league.itemLookup[id])
+      .filter(Boolean)
+      .filter((item) => {
+        const itemDef = itemData[item.itemDef];
+        return (
+          !itemDef.condition ||
+          itemDef.condition({
+            pitchKind,
+            gameState,
+            targetPlayer,
+            sourcePlayer: targetPlayer,
+            weather: weatherId,
+            isMyTeam: playerTeam === item.teamId,
+            isMe: playerId === targetPlayer.id,
+            isBatter: targetPlayer.id === getCurrentBatter(gameState),
+            isPitcher: targetPlayer.id === getCurrentPitcher(gameState),
+            isRunner:
+              gameState.bases[1] === targetPlayer.id ||
+              gameState.bases[2] === targetPlayer.id ||
+              gameState.bases[3] === targetPlayer.id,
+          })
+        );
+      })
+      .map((item) => ({
+        source: itemData[item.itemDef],
+        effect: itemData[item.itemDef].effect(),
+      })),
     ...players.flatMap((player) =>
       player.perkIds
         .map((id) => perks[id])
@@ -59,9 +96,6 @@ export function getActivePlayerPerks(
           const currentPitcher = getCurrentPitcher(gameState);
           const isBatter = currentBatter === player.id;
           const isPitcher = currentPitcher === player.id;
-          if (p.name === 'Curse Trigger') {
-            // console.log('HEY');
-          }
           return (
             !p.condition ||
             p.condition({

@@ -52,8 +52,19 @@ export function getCurrentBatter(gameState: LeagueGameState): string {
   ];
 }
 
+export function getPitcherForTeam(
+  gameState: LeagueGameState,
+  teamId: string,
+): string {
+  const pitchers = gameState.teamData[teamId].pitchers;
+  if (pitchers.length === 0) {
+    throw new Error(`No pitchers available for team ${teamId}`);
+  }
+  return last(pitchers)!;
+}
+
 export function getCurrentPitcher(gameState: LeagueGameState): string {
-  return last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
+  return getPitcherForTeam(gameState, gameState.pitchingTeam);
 }
 export function multiplyHitTables(
   hitTableA: HitTable,

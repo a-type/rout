@@ -67,7 +67,7 @@ export function generateLeague(
 ): League {
   const playersPerTeam = options.numPlayers ?? 20;
   const roundCount = options.numRounds ?? 20;
-  const teamCount = options.numTeams ?? 4;
+  const teamCount = options.numTeams ?? 8;
   let league: League = {
     name: 'League name',
     teamIds: [],
@@ -178,9 +178,6 @@ export function generateLeague(
 
     // ensure pc plays good players and has a sane batting order
     // for each bench player, swap them if they are better than the current player
-
-    // TODO: Fix this!
-
     team.playerIds
       .map((playerId) => {
         const player = league.playerLookup[playerId];
@@ -257,12 +254,24 @@ export function generateLeague(
 
     // Generate a few items for each team
     for (let i = 0; i < 5; i++) {
-      const { instanceId, ...item } = generateItem(random);
+      // Ensure each team gets at least one training orb
+      const { instanceId, ...item } = generateItem(
+        random,
+        i === 0 ? 'trainingOrb' : undefined,
+      );
       league.itemLookup[instanceId] = { ...item, teamId: team.id };
-      for (const player of random.shuffle(team.playerIds)) {
+      const playerOrder = random.shuffle(team.playerIds);
+      for (const player of playerOrder) {
         const playerObj = league.playerLookup[player];
+        const isPitcher = hasPitcherPosition(playerObj.positions);
         const { level } = getLevelFromXp(playerObj.xp);
         const i = itemData[item.itemDef];
+        if (
+          i.kind !== 'any' &&
+          i.kind !== (isPitcher ? 'pitching' : 'batting')
+        ) {
+          continue; // Skip items that don't match the player's kind
+        }
         if (
           !i.requirements ||
           i.requirements?.({
@@ -472,7 +481,7 @@ function generateAttributes(
   classType: ClassType,
 ): Player['attributes'] {
   const pool = Array.from({ length: 8 }, (_, i) => i + 1)
-    .map(() => random.int(3, 16))
+    .map(() => random.int(3, 15))
     .sort((a, b) => a - b);
   const bestAttribute = classData[classType];
   const results = pool.slice(1, -1);
