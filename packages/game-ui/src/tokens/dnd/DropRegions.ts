@@ -52,6 +52,16 @@ export class DropRegions {
     return overlaps.sort((a, b) => b.overlappedArea - a.overlappedArea);
   };
 
+  getContainingRegions = (point: { x: number; y: number }) => {
+    const containing: { id: string }[] = [];
+    for (const [id, region] of this.regions) {
+      if (this.#calculateContains(region, point)) {
+        containing.push({ id });
+      }
+    }
+    return containing;
+  };
+
   #bind = () => {
     gestureEvents.subscribe('start', this.#onGestureChange);
     gestureEvents.subscribe('move', this.#onGestureChange);
@@ -67,6 +77,15 @@ export class DropRegions {
       Math.min(rect1.bottom, rect2.bottom) - Math.max(rect1.top, rect2.top),
     );
     return xOverlap * yOverlap;
+  };
+
+  #calculateContains = (rect: DOMRect, point: { x: number; y: number }) => {
+    return (
+      point.x >= rect.left &&
+      point.x <= rect.right &&
+      point.y >= rect.top &&
+      point.y <= rect.bottom
+    );
   };
 
   #onGestureChange = () => {

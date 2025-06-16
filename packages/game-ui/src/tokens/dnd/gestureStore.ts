@@ -4,6 +4,7 @@ import { MotionValue, motionValue } from 'motion/react';
 import { useCallback, useEffect } from 'react';
 import { useWindowEvent } from '../../hooks/useWindowEvent';
 import { useDndStore } from './dndStore';
+import { dropRegions } from './DropRegions';
 
 export const gestureEvents = new EventSubscriber<{
   start: () => void;
@@ -66,6 +67,14 @@ export function useMonitorGlobalGesture() {
     applySubtraction(gesture.initial, coords, gesture.delta);
     applySubtraction(gesture.current, coords, gesture.velocity);
     setVector(gesture.current, coords.x, coords.y);
+
+    // track overlapping regions
+    const overlapped = dropRegions.getContainingRegions(coords);
+    if (overlapped.length > 0) {
+      useDndStore.getState().setOverRegion(overlapped[0].id);
+    } else {
+      useDndStore.getState().setOverRegion(null);
+    }
 
     gestureEvents.emit('move');
   }

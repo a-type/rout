@@ -4,7 +4,6 @@ import {
   HTMLMotionProps,
   motion,
   Transition,
-  useAnimationFrame,
   useMotionTemplate,
   useTransform,
 } from 'motion/react';
@@ -25,7 +24,6 @@ import { useMergedRef } from '../../hooks/useMergedRef';
 import { activeDragRef } from './DebugView';
 import { useDndStore } from './dndStore';
 import { DraggedBox } from './draggedBox';
-import { dropRegions } from './DropRegions';
 import { DragGestureContext, gesture } from './gestureStore';
 import {
   DragGestureActivationConstraint,
@@ -207,17 +205,14 @@ const DraggedRoot = memo(function DraggedRoot({
 }) {
   const dragged = useDraggableContext();
 
-  useAnimationFrame(() => {
-    if (dragged.isDragged && dragged.box.current) {
+  useEffect(() => {
+    if (dragged.isDragged) {
       activeDragRef.current = dragged;
-      const overlapped = dropRegions.getOverlappingRegions(dragged.box.current);
-      if (overlapped.length > 0) {
-        useDndStore.getState().setOverRegion(overlapped[0].id);
-      } else {
-        useDndStore.getState().setOverRegion(null);
-      }
+      return () => {
+        activeDragRef.current = null;
+      };
     }
-  });
+  }, [dragged.isDragged, dragged]);
 
   const finalRef = useMergedRef<HTMLDivElement>(dragged.box.bind, ref);
 
