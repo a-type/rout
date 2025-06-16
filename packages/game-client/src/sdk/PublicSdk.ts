@@ -224,6 +224,19 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
+  getGameSessionPlayerStatuses = this.sdkQuery(
+    'getGameSessionPlayerStatuses',
+    this.apiRpc.gameSessions[':id'].playerStatuses.$get,
+    {
+      transformInput: (input: { id: string; enabled?: boolean }) => ({
+        param: { id: input.id },
+      }),
+      getKey: (input) => {
+        return ['getGameSessionPlayerStatuses', input.id];
+      },
+      enabled: (input) => input.enabled !== false,
+    },
+  );
   getAvailableGames = this.sdkQuery(
     'getAvailableGames',
     this.apiRpc.gameSessions[':id'].availableGames.$get,
