@@ -1,9 +1,10 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
+import { withSuspense } from '@long-game/game-ui';
 import { CreateGame } from '../games/CreateGame';
 import { GameSummaryCard } from './GameSummaryCard';
 
-export function MembershipsList({
+export const MembershipsList = withSuspense(function MembershipsList({
   statusFilter,
   invitationStatus,
 }: {
@@ -45,4 +46,4 @@ export function MembershipsList({
       )}
     </Box>
   );
-}
+});

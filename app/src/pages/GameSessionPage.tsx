@@ -40,7 +40,14 @@ export function GameSessionPage() {
 
   return (
     <ErrorBoundary fallback={<div>Ooops, something went wrong 😥.</div>}>
-      <GameSessionProvider gameSessionId={sessionId}>
+      <GameSessionProvider
+        gameSessionId={sessionId}
+        fallback={
+          <Box full layout="center center">
+            <Spinner />
+          </Box>
+        }
+      >
         <GameSessionRenderer />
       </GameSessionProvider>
     </ErrorBoundary>
@@ -57,8 +64,8 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const titleColor = !palette
     ? backupColor
     : getResolvedColorMode() === 'dark'
-    ? palette.range[10]
-    : palette.range[1];
+      ? palette.range[10]
+      : palette.range[1];
   useTitleBarColor(titleColor);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>

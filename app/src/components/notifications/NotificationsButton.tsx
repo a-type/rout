@@ -12,7 +12,7 @@ import {
   ScrollArea,
 } from '@a-type/ui';
 import { Notification } from '@long-game/game-client';
-import { useMediaQuery } from '@long-game/game-ui';
+import { useMediaQuery, withSuspense } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode, Suspense, useState } from 'react';
@@ -24,7 +24,7 @@ export interface NotificationsButtonProps
   children?: (details: { hasUnread: boolean }) => ReactNode;
 }
 
-export function NotificationsButton({
+export const NotificationsButton = withSuspense(function NotificationsButton({
   className,
   children,
   ...rest
@@ -35,8 +35,13 @@ export function NotificationsButton({
   const isMobile = useMediaQuery('(max-width: 768px)');
   const PopoverImpl = isMobile ? Dialog : Popover;
 
+  const [showRead, setShowRead] = useState(false);
+
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    sdkHooks.useGetNotifications({ refetchOnWindowFocus: true });
+    sdkHooks.useGetNotifications(
+      { status: showRead ? undefined : 'unread' },
+      { refetchOnWindowFocus: true },
+    );
   const { results: notifications } = data || { results: [] };
   const hasUnread = notifications?.some((n) => !n.readAt);
   const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
@@ -121,6 +126,13 @@ export function NotificationsButton({
                 <span>Nothing to see here!</span>
               </Box>
             )}
+            {!showRead && (
+              <Box p layout="center center">
+                <Button color="ghost" onClick={() => setShowRead(true)}>
+                  Show Read
+                </Button>
+              </Box>
+            )}
           </>
         )}
         {isMobile && (
@@ -131,7 +143,7 @@ export function NotificationsButton({
       </PopoverImpl.Content>
     </PopoverImpl>
   );
-}
+});
 
 function NotificationItem({
   notification,

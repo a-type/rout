@@ -15,6 +15,7 @@ export const notificationsRouter = new Hono<Env>()
       z.object({
         first: z.coerce.number().int().positive().optional(),
         after: z.string().optional(),
+        status: z.enum(['unread', 'read']).optional(),
       }),
     ),
     async (ctx) => {
@@ -23,6 +24,7 @@ export const notificationsRouter = new Hono<Env>()
       const notifications = await userStore.getNotifications({
         first: query.first,
         after: query.after,
+        status: query.status,
       });
       return ctx.json<{
         results: {

@@ -33,9 +33,11 @@ export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
 export function GameSessionProvider({
   gameSessionId,
   children,
+  fallback,
 }: {
   gameSessionId: PrefixedId<'gs'>;
   children: ReactNode;
+  fallback?: ReactNode;
 }) {
   const sdk = useSdk() as PublicSdk;
   const { data: details } = useSuspenseQuery(
@@ -59,7 +61,7 @@ export function GameSessionProvider({
 
   return (
     <GameSessionContext.Provider value={gameSuite}>
-      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+      <Suspense fallback={fallback}>{children}</Suspense>
     </GameSessionContext.Provider>
   );
 }

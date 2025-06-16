@@ -917,9 +917,11 @@ export class UserStore extends RpcTarget {
   async getNotifications({
     first = 10,
     after,
+    status,
   }: {
     first?: number;
     after?: string;
+    status?: 'unread' | 'read';
   } = {}) {
     let builder = this.#db
       .selectFrom('Notification')
@@ -934,6 +936,14 @@ export class UserStore extends RpcTarget {
 
     if (first) {
       builder = builder.limit(first + 1);
+    }
+
+    if (status) {
+      if (status === 'unread') {
+        builder = builder.where('Notification.readAt', 'is', null);
+      } else if (status === 'read') {
+        builder = builder.where('Notification.readAt', 'is not', null);
+      }
     }
 
     const results = await builder.execute();

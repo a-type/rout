@@ -16,6 +16,7 @@ import {
 } from '@a-type/ui';
 import { TopographyBackground } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
+import { Suspense } from 'react';
 
 export interface HomePageProps {}
 
@@ -61,7 +62,9 @@ export function HomePage({}: HomePageProps) {
         <PageNowPlaying unstyled className="items-center justify-center">
           <CreateGame />
         </PageNowPlaying>
-        <CompleteProfileDialog />
+        <Suspense>
+          <CompleteProfileDialog />
+        </Suspense>
       </PageContent>
       <PageNav>
         <MainNav />

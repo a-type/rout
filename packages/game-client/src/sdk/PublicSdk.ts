@@ -252,12 +252,27 @@ export class PublicSdk extends BaseSdk {
     },
   );
 
-  getNotifications = this.sdkInfiniteQuery('getNotifications', (_, cursor) =>
-    this.apiRpc.notifications.$get({
-      query: {
-        after: cursor,
+  getNotifications = this.sdkInfiniteQuery(
+    'getNotifications',
+    ({ status }, cursor) =>
+      this.apiRpc.notifications.$get({
+        query: {
+          after: cursor,
+          status,
+        },
+      }),
+    {
+      transformInput: (input: { status?: 'unread' | 'read' }) => ({
+        status: input.status,
+      }),
+      getKey: (input) => {
+        const key: string[] = [];
+        if (input.status) {
+          key.push(input.status);
+        }
+        return key;
       },
-    }),
+    },
   );
   markNotificationAsRead = this.sdkMutation(
     this.apiRpc.notifications[':id'].$put,
