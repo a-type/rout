@@ -19,6 +19,7 @@ import {
 import {
   BaseTurnError,
   GameDefinition,
+  GameMember,
   GetGlobalState,
   GetPlayerState,
   GetPublicTurnData,
@@ -89,7 +90,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   // static
   gameSessionId: PrefixedId<'gs'>;
-  members!: { id: PrefixedId<'u'> }[];
+  members!: GameMember[];
   playerId: PrefixedId<'u'>;
   startedAt: Date | null = null;
   timezone!: string;
@@ -105,7 +106,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       gameId: string;
       gameVersion: string;
       id: PrefixedId<'gs'>;
-      members: { id: PrefixedId<'u'> }[];
+      members: GameMember[];
       status: GameStatus;
       playerId: PrefixedId<'u'>;
       startedAt: string | null;
@@ -822,7 +823,14 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     const members = await getPlayers(this.gameSessionId);
     members.forEach(
       action((member: any) => {
-        this.players[member.id] = member;
+        if (!this.players[member.id]) {
+          this.players[member.id] = member;
+        } else {
+          // selectively override from API - we want to keep player colors intact,
+          // particularly.
+          this.players[member.id].imageUrl ||= member.imageUrl ?? null;
+          this.players[member.id].displayName ||= member.displayName;
+        }
       }),
     );
   };
@@ -848,7 +856,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     gameId: string;
     gameVersion: string;
     status: GameStatus;
-    members: { id: PrefixedId<'u'> }[];
+    members: GameMember[];
     startedAt: string | null;
     timezone: string;
     nextRoundCheckAt?: string | null;
@@ -868,9 +876,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       (acc, member) => {
         acc[member.id] = {
           id: member.id,
-          displayName: 'Loading...',
+          displayName: member.displayName,
           imageUrl: null,
-          color: 'gray',
+          color: member.color,
         };
         return acc;
       },
@@ -888,9 +896,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       (acc, member) => {
         acc[member.id] = this.players[member.id] ?? {
           id: member.id,
-          displayName: 'Loading...',
+          displayName: member.displayName,
           imageUrl: null,
-          color: 'gray',
+          color: member.color,
         };
         return acc;
       },

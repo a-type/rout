@@ -9,6 +9,13 @@
       "workerd": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/typings/index.d.ts"
+    },
+    "./test": {
+      "production": "./dist/esm/test.js",
+      "development": "./src/test.ts",
+      "workerd": "./src/test.ts",
+      "import": "./dist/esm/test.js",
+      "types": "./dist/typings/test.d.ts"
     }
   },
   "type": "module",

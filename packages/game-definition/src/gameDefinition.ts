@@ -2,6 +2,7 @@ import {
   GameRound,
   GameSessionChatInit,
   GameStatus,
+  PlayerColorName,
   PrefixedId,
 } from '@long-game/common';
 import { GameRandom, GameRandomState } from './random.js';
@@ -24,6 +25,8 @@ export type SystemChatMessage = Omit<GameSessionChatInit, 'roundIndex'>;
 
 export type GameMember = {
   id: PrefixedId<'u'>;
+  displayName: string;
+  color: PlayerColorName;
 };
 
 export type BaseTurnError = {

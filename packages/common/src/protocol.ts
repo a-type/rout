@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { gameSessionChatInitShape, gameSessionChatMessageShape } from './chat';
+import { colorNames } from './colors';
 import { idShapes, PrefixedId } from './ids';
 import { gameRoundSummaryShape } from './rounds';
 import {
@@ -85,7 +86,13 @@ export type ServerGameChangeMessage = z.infer<
 export const serverGameMembersChangeMessageShape =
   baseServerMessageShape.extend({
     type: z.literal('membersChange'),
-    members: z.array(z.object({ id: idShapes.User })),
+    members: z.array(
+      z.object({
+        id: idShapes.User,
+        displayName: z.string(),
+        color: z.enum(colorNames),
+      }),
+    ),
   });
 export type ServerGameMembersChangeMessage = z.infer<
   typeof serverGameMembersChangeMessageShape

@@ -280,3 +280,25 @@ export const colorNames = Object.keys(colors) as [
   PlayerColorName,
   ...PlayerColorName[],
 ];
+
+export function deduplicatePlayerColors<P extends { color: PlayerColorName }>(
+  players: P[],
+): P[] {
+  const usedColors = new Set<PlayerColorName>();
+  const unusedColors = new Set<PlayerColorName>(colorNames);
+  for (const player of players) {
+    unusedColors.delete(player.color);
+  }
+  for (const player of players) {
+    if (usedColors.has(player.color)) {
+      // find the first unused color
+      const newColor = unusedColors.values().next().value;
+      if (newColor) {
+        player.color = newColor;
+        unusedColors.delete(player.color);
+      }
+    }
+    usedColors.add(player.color);
+  }
+  return players;
+}

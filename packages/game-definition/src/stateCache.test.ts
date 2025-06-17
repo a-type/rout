@@ -4,6 +4,7 @@ import { GameDefinition, Turn } from './gameDefinition';
 import { GameRandom } from './random';
 import { roundFormat } from './rounds';
 import { GameStateCache } from './stateCache';
+import { testPlayer } from './test';
 
 const randomSeed = '1234567890abcdef';
 
@@ -58,7 +59,7 @@ function createCache() {
   return {
     cache: new GameStateCache(game, {
       randomSeed,
-      members: [{ id: 'u-1' }, { id: 'u-2' }],
+      members: [testPlayer(1), testPlayer(2)],
     }),
     game,
   };

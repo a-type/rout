@@ -1,6 +1,7 @@
 import {
   chatPositionShape,
   chatReactionsShape,
+  deduplicatePlayerColors,
   GameRound,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
@@ -14,6 +15,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
+  GameMember,
   GameStateCache,
   getLatestVersion,
   RoundIndexResult,
@@ -47,9 +49,7 @@ export type GameSessionTurn = Turn<{}>;
  * the core database when needed.
  * These are objects to allow future extension if necessary.
  */
-export type GameSessionMember = {
-  id: PrefixedId<'u'>;
-};
+export type GameSessionMember = GameMember;
 
 interface GameSessionRoundState {
   /**
@@ -200,9 +200,16 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   /** Guarantees stable ordering once game is underway */
   async getMembers(): Promise<GameSessionMember[]> {
-    return (await this.#getSessionData()).members.sort((a, b) =>
-      a.id.localeCompare(b.id),
-    );
+    return (await this.#getSessionData()).members
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(
+        (member: { id: PrefixedId<'u'> }): GameSessionMember => ({
+          // back-compat -- fill in missing data
+          displayName: `Player ${member.id}`,
+          color: 'gray', // default color, can be overridden by game definition
+          ...member,
+        }),
+      );
   }
 
   async #getStateCache(): Promise<GameStateCache> {
@@ -266,12 +273,33 @@ export class GameSession extends DurableObject<ApiBindings> {
   async updateMembers(members: GameSessionMember[]): Promise<void> {
     const sessionData = await this.#getSessionData();
     if (sessionData.startedAt) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'Cannot update members after game has started',
-      );
+      // once game has started, we can only update metadata for existing members, not
+      // add new ones or remove existing ones.
+      const existingMemberIds = new Set(sessionData.members.map((m) => m.id));
+      for (const member of members) {
+        if (!existingMemberIds.has(member.id)) {
+          throw new LongGameError(
+            LongGameError.Code.BadRequest,
+            `Cannot add new member ${member.id} after game has started`,
+          );
+        } else {
+          existingMemberIds.delete(member.id);
+        }
+      }
+      // we should have removed every member during our iteration
+      if (existingMemberIds.size > 0) {
+        throw new LongGameError(
+          LongGameError.Code.BadRequest,
+          `Cannot remove members after game has started: ${Array.from(
+            existingMemberIds,
+          ).join(', ')}`,
+        );
+      }
     }
+    // deduplicate colors - if a color has been used, reassign a random unused one.
+    members = deduplicatePlayerColors(members);
     await this.#updateSessionData({ members });
+
     this.#socketHandler.send({
       type: 'membersChange',
       members: await this.getMembers(),
