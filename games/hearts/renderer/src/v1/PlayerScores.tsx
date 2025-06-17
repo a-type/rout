@@ -14,7 +14,7 @@ export const PlayerScores = hooks.withGame<PlayerScoresProps>(
     return (
       <ScrollArea className={clsx('select-none', className)}>
         <div className="text-xs text-bold color-gray-dark mb-sm">Scores</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-sm">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-sm">
           {gameSuite.finalState.playerOrder.map((playerId) => (
             <PlayerScore playerId={playerId} key={playerId} />
           ))}
@@ -44,10 +44,13 @@ const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
           <PlayerAvatar playerId={playerId} size={16} />
           <PlayerName playerId={playerId} />
         </Box>
-        <HorizontalList className="rounded-lg mt-sm mb-0">
+        <HorizontalList
+          className="rounded-lg mt-sm mb-0"
+          contentClassName="gap-xs"
+        >
           <PlayerScoreDisplay
             playerId={playerId}
-            className="sticky left-0 my-auto z-1 bg-inherit"
+            className="sticky left-0 my-auto mr-md z-1 bg-inherit"
           />
           <PlayerScoredCards playerId={playerId} />
         </HorizontalList>
