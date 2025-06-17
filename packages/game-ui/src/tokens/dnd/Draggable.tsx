@@ -133,8 +133,8 @@ function DraggableHandle({
       data-candidate={isCandidate}
       data-dragging={isDragging}
       className={clsx(
-        'cursor-grab',
-        '[body.cursor-grabbing_&]:cursor-grabbing',
+        !disabled && 'cursor-grab',
+        !disabled && '[body.cursor-grabbing_&]:cursor-grabbing',
         className,
       )}
       {...rest}

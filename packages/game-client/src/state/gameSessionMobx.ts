@@ -84,6 +84,8 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   @observable accessor gameId!: string;
   @observable accessor gameVersion!: string;
   @observable accessor nextRoundCheckAt: Date | null = null;
+  @observable accessor turnSubmitTimeout: ReturnType<typeof setTimeout> | null =
+    null;
 
   // static
   gameSessionId: PrefixedId<'gs'>;
@@ -95,7 +97,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   // non-reactive
   #chatNextToken: string | null = null;
-  #turnSubmitTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     init: {
@@ -289,6 +290,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
 
   @computed get turnWasSubmitted() {
     return !!this.latestRound.yourTurnData;
+  }
+
+  @computed get isTurnSubmitDelayed() {
+    return !!this.turnSubmitTimeout;
   }
 
   /**
@@ -507,17 +512,17 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       this.#events.emit('turnValidationFailed', error);
       return error;
     }
-    if (this.#turnSubmitTimeout) {
-      clearTimeout(this.#turnSubmitTimeout);
+    if (this.turnSubmitTimeout) {
+      clearTimeout(this.turnSubmitTimeout);
     }
     if (delay) {
       this.#events.emit('turnSubmitDelayed', delay);
       return new Promise<BaseTurnError | void>((resolve) => {
         // if the user closes the window before the timeout, force the submit.
         const beforeUnload = async () => {
-          if (this.#turnSubmitTimeout) {
-            clearTimeout(this.#turnSubmitTimeout);
-            this.#turnSubmitTimeout = null;
+          if (this.turnSubmitTimeout) {
+            clearTimeout(this.turnSubmitTimeout);
+            this.turnSubmitTimeout = null;
             await this.#actuallySubmitTurn(localTurnData);
             resolve();
           }
@@ -534,24 +539,26 @@ export class GameSessionSuite<TGame extends GameDefinition> {
           once: true,
         });
 
-        this.#turnSubmitTimeout = setTimeout(async () => {
-          window.removeEventListener('beforeunload', beforeUnload);
-          document.removeEventListener('visibilitychange', visibilityChange);
-          await this.#actuallySubmitTurn(localTurnData);
-          resolve();
-        }, delay);
+        runInAction(() => {
+          this.turnSubmitTimeout = setTimeout(async () => {
+            window.removeEventListener('beforeunload', beforeUnload);
+            document.removeEventListener('visibilitychange', visibilityChange);
+            await this.#actuallySubmitTurn(localTurnData);
+            resolve();
+          }, delay);
+        });
       });
     } else {
       return this.#actuallySubmitTurn(localTurnData);
     }
   };
 
-  #actuallySubmitTurn = async (
+  @action #actuallySubmitTurn = async (
     data: GetTurnData<TGame>,
   ): Promise<BaseTurnError | void> => {
-    if (this.#turnSubmitTimeout) {
-      clearTimeout(this.#turnSubmitTimeout);
-      this.#turnSubmitTimeout = null;
+    if (this.turnSubmitTimeout) {
+      clearTimeout(this.turnSubmitTimeout);
+      this.turnSubmitTimeout = null;
     }
 
     const submittingToRound = this.latestRoundIndex;
@@ -585,10 +592,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     }
   };
 
-  cancelSubmit = () => {
-    if (this.#turnSubmitTimeout) {
-      clearTimeout(this.#turnSubmitTimeout);
-      this.#turnSubmitTimeout = null;
+  @action cancelSubmit = () => {
+    if (this.turnSubmitTimeout) {
+      clearTimeout(this.turnSubmitTimeout);
+      this.turnSubmitTimeout = null;
       this.#events.emit('turnSubmitCancelled');
     }
   };
