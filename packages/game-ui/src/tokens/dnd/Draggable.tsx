@@ -125,6 +125,8 @@ function DraggableHandle({
       onContextMenu={(e) => e.preventDefault()}
       ref={ref}
       role="button"
+      aria-roledescription="draggable"
+      aria-describedby="dnd-instructions"
       tabIndex={0}
       data-draggable-handle
       data-disabled={disabled}

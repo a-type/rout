@@ -1,5 +1,6 @@
 import { HTMLProps } from 'react';
 import { DebugView } from './DebugView';
+import { DndAlly } from './DndAlly';
 import { useDndStore } from './dndStore';
 import { useMonitorGlobalGesture } from './gestureStore';
 
@@ -19,6 +20,7 @@ export function DndRoot({ children, debug, ...rest }: DndRootProps) {
       />
       {children}
       {debug && <DebugView />}
+      <DndAlly />
     </div>
   );
 }
