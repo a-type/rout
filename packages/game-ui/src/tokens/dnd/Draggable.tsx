@@ -19,7 +19,6 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useMergedRef } from '../../hooks/useMergedRef';
 import { activeDragRef } from './DebugView';
 import { useDndStore } from './dndStore';
 import { DraggedBox } from './draggedBox';
@@ -193,6 +192,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
             transition={flipTransition}
             data-disabled={draggable.disabled}
             data-draggable={draggable.id}
+            ref={draggable.disabled ? undefined : draggable.box.bind}
             {...rest}
           >
             {children}
@@ -230,17 +230,12 @@ const DraggedRoot = memo(function DraggedRoot({
     }
   }, [dragged.isDragged, dragged]);
 
-  const finalRef = useMergedRef<HTMLDivElement>(dragged.box.bind, ref);
+  // const finalRef = useMergedRef<HTMLDivElement>(dragged.box.bind, ref);
 
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
   return (
-    <ContainerImpl
-      ref={finalRef}
-      draggable={dragged}
-      gesture={gesture}
-      {...rest}
-    >
+    <ContainerImpl ref={ref} draggable={dragged} gesture={gesture} {...rest}>
       <AnimatePresence>
         <motion.div
           layoutId={dragged.id}
@@ -258,7 +253,7 @@ export type DraggedContainerComponent = ComponentType<{
   children?: ReactNode;
   draggable: DraggableContextValue;
   gesture: DragGestureContext;
-  ref: Ref<HTMLDivElement>;
+  ref: Ref<HTMLDivElement> | undefined;
 }>;
 
 export const DefaultDraggedContainer: DraggedContainerComponent = ({

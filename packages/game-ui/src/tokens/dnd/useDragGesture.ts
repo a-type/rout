@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useElementEvent } from '../../hooks/useWindowEvent';
+import { otherDragBoxRefs } from './DebugView';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';
 import { DragGestureContext, useGesture } from './gestureStore';
@@ -36,12 +37,12 @@ export function useDragGesture(options?: DragGestureOptions) {
     ]),
   );
 
-  // turn on box monitoring when we are interacting
   useEffect(() => {
-    if (isDragging || isCandidate) {
-      return draggable.box.start();
-    }
-  }, [isDragging, isCandidate, draggable.box]);
+    otherDragBoxRefs.add(draggable);
+    return () => {
+      otherDragBoxRefs.delete(draggable);
+    };
+  }, [draggable]);
 
   // when using touch, events are locked to the initial touched element,
   // so we can't detect a drag-in from another element by attaching to
@@ -120,6 +121,7 @@ export function useDragGesture(options?: DragGestureOptions) {
           }, 100);
         }
         document.body.classList.remove('cursor-grabbing');
+        draggable.box.update();
       },
       onEnd: (gesture) => {
         if (gesture.type === 'keyboard') {
@@ -134,6 +136,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         }
         document.body.classList.remove('cursor-grabbing');
         cancelDrag();
+        draggable.box.update();
       },
     },
     {

@@ -6,6 +6,7 @@ import { dropRegions } from './DropRegions';
 export interface DebugViewProps {}
 
 export const activeDragRef = createRef<DraggableContextValue>();
+export const otherDragBoxRefs = new Set<DraggableContextValue>();
 
 export function DebugView({}: DebugViewProps) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -36,6 +37,16 @@ export function DebugView({}: DebugViewProps) {
         activeDragBox.width,
         activeDragBox.height,
       );
+    }
+
+    for (const dragBox of otherDragBoxRefs) {
+      const box = dragBox.box.current;
+      if (box) {
+        ctx.strokeStyle = 'green';
+        ctx.fillStyle = 'transparent';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+      }
     }
   });
 

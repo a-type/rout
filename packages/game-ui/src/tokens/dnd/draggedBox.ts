@@ -1,3 +1,4 @@
+import { throttle } from '@a-type/utils';
 import { gestureEvents } from './gestureStore';
 
 export class DraggedBox {
@@ -6,23 +7,24 @@ export class DraggedBox {
   #element: HTMLElement | null = null;
   #on = false;
 
+  get hasElement() {
+    return this.#element !== null;
+  }
+
   constructor() {
     gestureEvents.subscribe('move', this.#onGestureChange);
     gestureEvents.subscribe('start', this.#onGestureChange);
   }
 
   bind = (element: HTMLElement | null) => {
-    this.#element = element;
-    if (!element) {
-      this.current = null;
-      return;
+    if (this.#element !== element) {
+      this.#element = element;
+      if (!element) {
+        this.current = null;
+      } else {
+        this.current = element.getBoundingClientRect();
+      }
     }
-    this.current = element.getBoundingClientRect();
-
-    return () => {
-      this.#element = null;
-      this.current = null;
-    };
   };
 
   start = () => {
@@ -33,15 +35,17 @@ export class DraggedBox {
     this.#on = false;
   };
 
-  #onResize = () => {
-    if (this.#element) {
-      this.current = this.#element.getBoundingClientRect();
-    }
-  };
+  #onResize = throttle(() => {
+    requestAnimationFrame(() => {
+      if (this.#element) {
+        this.current = this.#element.getBoundingClientRect();
+      }
+    });
+  }, 150);
 
   #onGestureChange = () => {
     if (!this.#on) return;
-    requestAnimationFrame(this.#onResize);
+    this.#onResize();
   };
 
   update = () => {

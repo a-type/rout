@@ -6,5 +6,9 @@ export interface TokenRootProps extends HTMLProps<HTMLDivElement> {
 }
 
 export function TokenRoot({ children, ...rest }: TokenRootProps) {
-  return <DndRoot {...rest}>{children}</DndRoot>;
+  return (
+    <DndRoot debug {...rest}>
+      {children}
+    </DndRoot>
+  );
 }
