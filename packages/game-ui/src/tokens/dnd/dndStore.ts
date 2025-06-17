@@ -17,6 +17,7 @@ export type DndStoreValue = {
   setCandidate: (id: string) => void;
   startDrag: (id: string | null) => void;
   endDrag: (gesture: DragGestureContext) => void;
+  cancelDrag: () => void;
 
   data: Record<string, any>;
   bindData: (id: string, data: any) => () => void;
@@ -77,6 +78,17 @@ export const useDndStore = create<DndStoreValue>()(
           dragging: null,
           overRegion: null,
           candidate: null,
+        });
+      },
+      cancelDrag: () => {
+        const { dragging } = get();
+        if (dragging) {
+          dndEvents.emit('cancel', dragging);
+        }
+        set({
+          dragging: null,
+          candidate: null,
+          overRegion: null,
         });
       },
       setOverRegion: (regionId: string | null) => {

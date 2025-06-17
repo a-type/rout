@@ -77,7 +77,14 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   });
   const distanceScale = useSpring(
     useTransform(() => {
-      if (!draggable.isCandidate) return 1;
+      if (!draggable.isCandidate) {
+        if (gesture.type === 'keyboard') {
+          // when dragging with the keyboard, we want to scale up a bit
+          // to indicate drag
+          return 1.1;
+        }
+        return 1;
+      }
       const dist = Math.sqrt(gesture.delta.y.get() * gesture.delta.y.get());
       return 1.4 + dist / 50;
     }),

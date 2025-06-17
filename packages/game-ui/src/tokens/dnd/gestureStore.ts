@@ -1,7 +1,7 @@
-import { useStableCallback } from '@a-type/ui';
+import { useAnimationFrame, useStableCallback } from '@a-type/ui';
 import { EventSubscriber } from '@a-type/utils';
 import { MotionValue, motionValue } from 'motion/react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useWindowEvent } from '../../hooks/useWindowEvent';
 import { useDndStore } from './dndStore';
 import { dropRegions } from './DropRegions';
@@ -10,11 +10,12 @@ export const gestureEvents = new EventSubscriber<{
   start: () => void;
   move: () => void;
   end: () => void;
+  cancel: () => void;
 }>();
 
 export const gesture = {
   active: false,
-  type: 'none' as 'touch' | 'mouse' | 'none',
+  type: 'none' as 'touch' | 'mouse' | 'keyboard' | 'none',
   initial: { x: 0, y: 0 },
   claimId: null as string | null,
   initialBounds: { x: 0, y: 0, width: 0, height: 0 },
@@ -23,6 +24,8 @@ export const gesture = {
   delta: { x: motionValue(0), y: motionValue(0) },
   velocity: { x: motionValue(0), y: motionValue(0) },
 };
+
+(window as any).gesture = gesture; // for debugging
 
 export function resetGesture() {
   gesture.active = false;
@@ -61,8 +64,6 @@ export function useMonitorGlobalGesture() {
   }
 
   function moveGesture(event: GestureEvent) {
-    if (!gesture.active) return;
-
     const coords = getEventCoordinates(event);
     applySubtraction(gesture.initial, coords, gesture.delta);
     applySubtraction(gesture.current, coords, gesture.velocity);
@@ -88,6 +89,15 @@ export function useMonitorGlobalGesture() {
     resetGesture();
   }
 
+  function cancelGesture() {
+    gesture.active = false;
+    useDndStore.getState().cancelDrag();
+    document.body.style.userSelect = '';
+
+    gestureEvents.emit('cancel');
+    resetGesture();
+  }
+
   useWindowEvent(
     'pointerdown',
     (event) => {
@@ -96,16 +106,89 @@ export function useMonitorGlobalGesture() {
     },
     { capture: true },
   );
-  useWindowEvent('pointermove', moveGesture, { capture: true });
-  useWindowEvent('pointerup', endGesture, { capture: true });
-  useWindowEvent('pointercancel', endGesture, { capture: true });
+  useWindowEvent(
+    'pointermove',
+    (ev) => {
+      if (gesture.active && gesture.type !== 'keyboard') {
+        moveGesture(ev);
+      }
+    },
+    { capture: true },
+  );
+  useWindowEvent(
+    'pointerup',
+    () => {
+      if (gesture.type !== 'keyboard') {
+        endGesture();
+      }
+    },
+    { capture: true },
+  );
+  useWindowEvent(
+    'pointercancel',
+    () => {
+      if (gesture.type !== 'keyboard') {
+        cancelGesture();
+      }
+    },
+    { capture: true },
+  );
+
+  // keyboard controls
+  useWindowEvent('keydown', (event) => {
+    if (event.key === 'Escape') {
+      cancelGesture();
+    }
+    if (gesture.active && gesture.type === 'keyboard') {
+      if (event.key === 'Enter' || event.key === ' ') {
+        endGesture();
+      }
+    }
+  });
+
+  const keyboardState = useState(() => new KeyboardState())[0];
+  useEffect(() => keyboardState.bind(), [keyboardState]);
+  useAnimationFrame(() => {
+    for (const key of Object.keys(keyboardVectors)) {
+      if (keyboardState.isPressed(key)) {
+        const velocity = keyboardVectors[key as keyof typeof keyboardVectors];
+        if (velocity) {
+          const coord = getCurrentVector(gesture.current);
+          coord.x += velocity.x;
+          coord.y += velocity.y;
+          setVector(gesture.velocity, velocity.x, velocity.y);
+          setVector(gesture.current, coord.x, coord.y);
+          applySubtraction(gesture.initial, gesture.current, gesture.delta);
+
+          // track overlapping regions
+          const overlapped = dropRegions.getContainingRegions(coord);
+          if (overlapped.length > 0) {
+            useDndStore.getState().setOverRegion(overlapped[0].id);
+          } else {
+            useDndStore.getState().setOverRegion(null);
+          }
+
+          gestureEvents.emit('move');
+        }
+      }
+    }
+  });
 }
+
+const keyboardVelocity = 10;
+const keyboardVectors = {
+  ArrowUp: { x: 0, y: -keyboardVelocity },
+  ArrowDown: { x: 0, y: keyboardVelocity },
+  ArrowLeft: { x: -keyboardVelocity, y: 0 },
+  ArrowRight: { x: keyboardVelocity, y: 0 },
+};
 
 export function useGesture(
   callbacks: {
     onStart?: (gesture: DragGestureContext) => void;
     onMove?: (gesture: DragGestureContext) => void;
     onEnd?: (gesture: DragGestureContext) => void;
+    onCancel?: (gesture: DragGestureContext) => void;
   },
   options: {
     disabled?: boolean;
@@ -114,6 +197,7 @@ export function useGesture(
   const onStart = useStableCallback(() => callbacks.onStart?.(gesture));
   const onMove = useStableCallback(() => callbacks.onMove?.(gesture));
   const onEnd = useStableCallback(() => callbacks.onEnd?.(gesture));
+  const onCancel = useStableCallback(() => callbacks.onCancel?.(gesture));
   useEffect(() => {
     if (options.disabled) return;
     return gestureEvents.subscribe('start', onStart);
@@ -126,6 +210,10 @@ export function useGesture(
     if (options.disabled) return;
     return gestureEvents.subscribe('end', onEnd);
   }, [onEnd, options.disabled]);
+  useEffect(() => {
+    if (options.disabled) return;
+    return gestureEvents.subscribe('cancel', onCancel);
+  }, [onCancel, options.disabled]);
 
   const claim = useCallback((id: string, element: HTMLElement) => {
     // cancel any existing text selection and prevent text selection globally
@@ -144,8 +232,46 @@ export function useGesture(
       gesture.initialBounds.height = elPosition.height;
     }
   }, []);
+
+  const startKeyboardDrag = useCallback(
+    (id: string, element: HTMLElement) => {
+      gesture.claimId = id;
+      setVector(gesture.offset, 0, 0);
+      const elPosition = element?.getBoundingClientRect();
+      if (elPosition) {
+        gesture.initialBounds.x = elPosition.left;
+        gesture.initialBounds.y = elPosition.top;
+        gesture.initialBounds.width = elPosition.width;
+        gesture.initialBounds.height = elPosition.height;
+
+        setVector(
+          gesture.current,
+          elPosition.left + elPosition.width / 2,
+          elPosition.top + elPosition.height / 2,
+        );
+        setVector(gesture.delta, 0, 0);
+        setVector(gesture.velocity, 0, 0);
+        gesture.initial.x = elPosition.left;
+        gesture.initial.y = elPosition.top;
+      }
+      gesture.active = true;
+      gesture.type = 'keyboard';
+      document.body.style.userSelect = 'none';
+      gestureEvents.emit('start');
+    },
+    [claim],
+  );
+
+  const cancelKeyboardDrag = useCallback(() => {
+    document.body.style.userSelect = '';
+    gestureEvents.emit('cancel');
+    resetGesture();
+  }, []);
+
   return {
     claim,
+    startKeyboardDrag,
+    cancelKeyboardDrag,
   };
 }
 
@@ -201,4 +327,29 @@ function isTouchEvent(event: GestureEvent): event is TouchEvent {
     event instanceof TouchEvent ||
     (event as PointerEvent).pointerType === 'touch'
   );
+}
+
+class KeyboardState {
+  private keys: Set<string> = new Set();
+
+  bind() {
+    window.addEventListener('keydown', this.#onKeyDown);
+    window.addEventListener('keyup', this.#onKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', this.#onKeyDown);
+      window.removeEventListener('keyup', this.#onKeyUp);
+    };
+  }
+
+  #onKeyDown = (event: KeyboardEvent) => {
+    this.keys.add(event.key);
+  };
+  #onKeyUp = (event: KeyboardEvent) => {
+    this.keys.delete(event.key);
+  };
+
+  isPressed(key: string): boolean {
+    return this.keys.has(key);
+  }
 }

@@ -28,8 +28,12 @@ export function useDragGesture(options?: DragGestureOptions) {
       state.setCandidate,
     ]),
   );
-  const [isDragging, startDrag] = useDndStore(
-    useShallow((state) => [state.dragging === draggable.id, state.startDrag]),
+  const [isDragging, startDrag, cancelDrag] = useDndStore(
+    useShallow((state) => [
+      state.dragging === draggable.id,
+      state.startDrag,
+      state.cancelDrag,
+    ]),
   );
 
   // turn on box monitoring when we are interacting
@@ -104,9 +108,33 @@ export function useDragGesture(options?: DragGestureOptions) {
     }
   }
 
-  const { claim } = useGesture(
+  const { claim, startKeyboardDrag } = useGesture(
     {
       onMove: moveDrag,
+      onCancel: (gesture) => {
+        if (gesture.type === 'keyboard' && isDragging) {
+          // when we cancel a drag with the keyboard,
+          // return focus to the element once it's back in place.
+          setTimeout(() => {
+            ref.current?.focus();
+          }, 100);
+        }
+        document.body.classList.remove('cursor-grabbing');
+      },
+      onEnd: (gesture) => {
+        if (gesture.type === 'keyboard') {
+          // when we end a drag with the keyboard,
+          // return focus to the element once it's back in place.
+          setTimeout(() => {
+            const el = ref.current;
+            if (el && el.tabIndex >= 0) {
+              el.focus();
+            }
+          }, 100);
+        }
+        document.body.classList.remove('cursor-grabbing');
+        cancelDrag();
+      },
     },
     {
       disabled: draggable.disabled,
@@ -117,6 +145,7 @@ export function useDragGesture(options?: DragGestureOptions) {
     const el = ref.current;
     if (!el) return;
     claim(draggable.id, el);
+    document.body.classList.add('cursor-grabbing');
 
     if (!options?.activationConstraint) {
       return activateDrag();
@@ -135,29 +164,28 @@ export function useDragGesture(options?: DragGestureOptions) {
     disabled: isCandidate || draggable.disabled,
   });
 
+  // detect keyboard drag from Enter/Space key
+  useElementEvent(
+    ref,
+    'keypress',
+    (ev: KeyboardEvent) => {
+      if (!ref.current) return;
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        ev.stopPropagation();
+        startKeyboardDrag(draggable.id, ref.current);
+        activateDrag();
+      }
+    },
+    {
+      disabled: isCandidate || isDragging || draggable.disabled,
+    },
+  );
+
   return {
     ref,
     isCandidate,
     isDragging,
     disabled: draggable.disabled,
   };
-}
-
-type InputEvent = PointerEvent | MouseEvent | TouchEvent;
-
-function getEventCoordinates(ev: InputEvent): { x: number; y: number } {
-  if (ev instanceof PointerEvent) {
-    return { x: ev.clientX, y: ev.clientY };
-  } else if (ev instanceof MouseEvent) {
-    return { x: ev.clientX, y: ev.clientY };
-  } else if (ev instanceof TouchEvent) {
-    if (ev.touches.length > 0) {
-      const touch = ev.touches[0];
-      return { x: touch.clientX, y: touch.clientY };
-    } else if (ev.changedTouches.length > 0) {
-      const touch = ev.changedTouches[0];
-      return { x: touch.clientX, y: touch.clientY };
-    }
-  }
-  return { x: 0, y: 0 };
 }

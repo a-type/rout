@@ -10,7 +10,6 @@ import {
 import {
   ComponentType,
   createContext,
-  HTMLAttributes,
   memo,
   ReactNode,
   Ref,
@@ -101,7 +100,7 @@ export function useIsDragging() {
   return ctx?.isDragged || ctx?.isCandidate || false;
 }
 
-export interface DraggableHandleProps extends HTMLAttributes<HTMLDivElement> {
+export interface DraggableHandleProps extends HTMLMotionProps<'div'> {
   activationConstraint?: DragGestureActivationConstraint;
   allowStartFromDragIn?: boolean;
 }
@@ -109,8 +108,10 @@ function DraggableHandle({
   children,
   activationConstraint,
   allowStartFromDragIn = false,
+  className,
+  ...rest
 }: DraggableHandleProps) {
-  const { ref, isCandidate, disabled } = useDragGesture({
+  const { ref, isCandidate, isDragging, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
   });
@@ -123,6 +124,18 @@ function DraggableHandle({
       }}
       onContextMenu={(e) => e.preventDefault()}
       ref={ref}
+      role="button"
+      tabIndex={0}
+      data-draggable-handle
+      data-disabled={disabled}
+      data-candidate={isCandidate}
+      data-dragging={isDragging}
+      className={clsx(
+        'cursor-grab',
+        '[body.cursor-grabbing_&]:cursor-grabbing',
+        className,
+      )}
+      {...rest}
     >
       {children}
     </motion.div>
@@ -268,9 +281,11 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
 export function useCenteredDragTransform(gesture: DragGestureContext) {
   const { x, y } = gesture.current;
   const touchAdjustedY = useTransform(() => {
-    console.log(y.get());
     return y.get() + (gesture.type === 'touch' ? -40 : 0);
   });
-  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0)`;
+  const scale = useTransform(() => {
+    return gesture.type === 'keyboard' ? 1.1 : 1;
+  });
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0) scale(${scale})`;
   return transform;
 }
