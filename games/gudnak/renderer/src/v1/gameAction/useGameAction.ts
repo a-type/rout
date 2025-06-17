@@ -1,19 +1,19 @@
+import { toast } from '@a-type/ui';
+import { boardHelpers } from '@long-game/game-gudnak-definition';
 import {
   abilityDefinitions,
   cardDefinitions,
+  CardTarget,
+  Card as CardType,
+  Coordinate,
+  CoordinateTarget,
+  Target,
   ValidAbilityId,
   ValidCardId,
-  Card as CardType,
-  CoordinateTarget,
-  Coordinate,
-  Target,
-  CardTarget,
 } from '@long-game/game-gudnak-definition/v1';
-import { boardHelpers } from '@long-game/game-gudnak-definition';
 import { hooks } from '../gameClient';
 import { useSelect } from './useSelect';
 import { useTargeting } from './useTargeting';
-import { toast } from '@a-type/ui';
 
 export function useGameAction() {
   const { submitTurn, finalState, localTurnData, turnError, playerId } =
@@ -31,19 +31,23 @@ export function useGameAction() {
         targeting.begin(targetInputs);
         targeting.onTargetsComplete((targets) => {
           submitTurn({
-            action: {
-              type: 'tactic',
-              card,
-              input: { targets },
+            data: {
+              action: {
+                type: 'tactic',
+                card,
+                input: { targets },
+              },
             },
           });
         });
       } else {
         submitTurn({
-          action: {
-            type: 'tactic',
-            card,
-            input: { targets: targeting.chosen },
+          data: {
+            action: {
+              type: 'tactic',
+              card,
+              input: { targets: targeting.chosen },
+            },
           },
         });
       }
@@ -60,10 +64,12 @@ export function useGameAction() {
         selection.clear();
         const coordinate = targets[0] as CoordinateTarget;
         submitTurn({
-          action: {
-            type: 'deploy',
-            card,
-            target: { x: coordinate.x, y: coordinate.y },
+          data: {
+            action: {
+              type: 'deploy',
+              card,
+              target: { x: coordinate.x, y: coordinate.y },
+            },
           },
         });
       });
@@ -104,9 +110,11 @@ export function useGameAction() {
     targeting.onTargetsComplete((targets) => {
       selection.clear();
       submitTurn({
-        action: {
-          type: 'defend',
-          targets: targets as CardTarget[],
+        data: {
+          action: {
+            type: 'defend',
+            targets: targets as CardTarget[],
+          },
         },
       });
     });
@@ -134,11 +142,13 @@ export function useGameAction() {
       }
       const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
-        action: {
-          type: actionType,
-          cardInstanceId: cardInstanceId,
-          source,
-          target: { x: coordinate.x, y: coordinate.y },
+        data: {
+          action: {
+            type: actionType,
+            cardInstanceId: cardInstanceId,
+            source,
+            target: { x: coordinate.x, y: coordinate.y },
+          },
         },
       });
     });
@@ -159,10 +169,12 @@ export function useGameAction() {
     );
     if (fromHand) {
       submitTurn({
-        action: {
-          type: 'deploy',
-          card,
-          target,
+        data: {
+          action: {
+            type: 'deploy',
+            card,
+            target,
+          },
         },
       });
     } else {
@@ -181,11 +193,13 @@ export function useGameAction() {
       const targetStack = finalState.board[target.y][target.x];
       const actionType = targetStack.length > 0 ? 'attack' : 'move';
       submitTurn({
-        action: {
-          type: actionType,
-          cardInstanceId: cardInstanceId,
-          source,
-          target,
+        data: {
+          action: {
+            type: actionType,
+            cardInstanceId: cardInstanceId,
+            source,
+            target,
+          },
         },
       });
     }
@@ -213,23 +227,27 @@ export function useGameAction() {
       targeting.onTargetsComplete((targets) => {
         selection.clear();
         submitTurn({
-          action: {
-            type: 'useAbility',
-            abilityId: cardDef.abilities[0].id,
-            cardInstanceId: card.instanceId,
-            targets,
-            source,
+          data: {
+            action: {
+              type: 'useAbility',
+              abilityId: cardDef.abilities[0].id,
+              cardInstanceId: card.instanceId,
+              targets,
+              source,
+            },
           },
         });
       });
     } else {
       submitTurn({
-        action: {
-          type: 'useAbility',
-          abilityId: card.cardId as ValidAbilityId,
-          cardInstanceId: card.instanceId,
-          targets: [],
-          source,
+        data: {
+          action: {
+            type: 'useAbility',
+            abilityId: card.cardId as ValidAbilityId,
+            cardInstanceId: card.instanceId,
+            targets: [],
+            source,
+          },
         },
       });
     }
@@ -241,19 +259,19 @@ export function useGameAction() {
     targeting.active || !validTurn
       ? targeting.chosen
       : localTurnData?.action.type === 'useAbility'
-      ? localTurnData.action.targets
-      : localTurnData?.action.type === 'tactic'
-      ? localTurnData.action.input.targets
-      : localTurnData?.action.type === 'deploy' ||
-        localTurnData?.action.type == 'move'
-      ? [
-          {
-            kind: 'coordinate',
-            x: localTurnData.action.target.x,
-            y: localTurnData.action.target.y,
-          },
-        ]
-      : [];
+        ? localTurnData.action.targets
+        : localTurnData?.action.type === 'tactic'
+          ? localTurnData.action.input.targets
+          : localTurnData?.action.type === 'deploy' ||
+              localTurnData?.action.type == 'move'
+            ? [
+                {
+                  kind: 'coordinate',
+                  x: localTurnData.action.target.x,
+                  y: localTurnData.action.target.y,
+                },
+              ]
+            : [];
 
   return {
     playCard,

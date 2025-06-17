@@ -7,6 +7,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { PrefixedId } from '@long-game/common';
 import {
   cardDefinitions,
   type Coordinate,
@@ -14,16 +15,15 @@ import {
 } from '@long-game/game-gudnak-definition/v1';
 import { useEffect } from 'react';
 import { Flipper } from 'react-flip-toolkit';
-import { Board } from './zones/Board';
-import { CardViewer } from './views/CardViewer';
-import { hooks } from './gameClient';
-import { Hand } from './zones/Hand';
-import { useGameAction } from './gameAction/useGameAction';
-import { useManageCardFlipState } from './useManageCardFlipState';
-import { ViewStateProvider } from './views/useViewState';
-import { DiscardViewer } from './views/DiscardViewer';
 import { CustomChatMessage } from './chat/ChatMessage';
-import { PrefixedId } from '@long-game/common';
+import { useGameAction } from './gameAction/useGameAction';
+import { hooks } from './gameClient';
+import { useManageCardFlipState } from './useManageCardFlipState';
+import { CardViewer } from './views/CardViewer';
+import { DiscardViewer } from './views/DiscardViewer';
+import { ViewStateProvider } from './views/useViewState';
+import { Board } from './zones/Board';
+import { Hand } from './zones/Hand';
 
 export function Client() {
   return (
@@ -138,7 +138,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                     size="small"
                     disabled={actions <= 0}
                     onClick={() => {
-                      submitTurn({ action: { type: 'draw' } });
+                      submitTurn({ data: { action: { type: 'draw' } } });
                     }}
                   >
                     Draw
@@ -157,7 +157,7 @@ const GameState = hooks.withGame(function LocalGuess({ gameSuite }) {
                       size="small"
                       disabled={actions > 0}
                       onClick={() => {
-                        submitTurn({ action: { type: 'endTurn' } });
+                        submitTurn({ data: { action: { type: 'endTurn' } } });
                       }}
                     >
                       End
