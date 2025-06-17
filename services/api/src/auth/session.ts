@@ -1,4 +1,4 @@
-import { SessionManager } from '@a-type/auth';
+import { honoAdapter, SessionManager } from '@a-type/auth';
 import { assertPrefixedId, LongGameError } from '@long-game/common';
 import { Context } from 'hono';
 import { Env } from '../config/ctx.js';
@@ -14,17 +14,13 @@ declare module '@a-type/auth' {
 export const sessions = new SessionManager<Context>({
   getSessionConfig(baseCtx) {
     const ctx = baseCtx as Context<Env>;
-    const apiDomain = new URL(ctx.env.API_ORIGIN).hostname;
-    let topLevelDomain = apiDomain.split('.').slice(-2).join('.');
-    if (!topLevelDomain.includes('localhost')) {
-      // if not local dev, increase cookie scope to subdomains
-      topLevelDomain = '.' + topLevelDomain;
-    }
+    const apiUrl = new URL(ctx.env.API_ORIGIN);
+    const refreshPath = apiUrl.pathname.replace(/\/$/, '') + '/auth/refresh';
     return {
       cookieName: 'lg-session',
       cookieOptions: {
         sameSite: 'lax',
-        domain: topLevelDomain,
+        domain: getRootDomain(ctx.env.API_ORIGIN),
       },
       expiration: ctx.env.NODE_ENV === 'production' ? '1d' : '1m',
       async createSession(userId) {
@@ -50,10 +46,9 @@ export const sessions = new SessionManager<Context>({
       audience: ctx.env.UI_ORIGIN,
       issuer: ctx.env.API_ORIGIN,
       mode: 'production',
-      refreshPath: ctx.env.API_ORIGIN.includes('localhost:3100')
-        ? '/public-api/auth/refresh'
-        : '/auth/refresh',
+      refreshPath,
       refreshTokenCookieName: 'lg-refresh',
+      refreshTokenDurationMinutes: 60 * 24 * 30, // 30 days
     };
   },
   shortNames: {
@@ -61,9 +56,14 @@ export const sessions = new SessionManager<Context>({
     name: 'name',
     isProductAdmin: 'pad',
   },
-  adapter: {
-    getRawRequest(ctx) {
-      return ctx.req.raw;
-    },
-  },
+  adapter: honoAdapter,
 });
+
+export function getRootDomain(url: string) {
+  const parsed = new URL(url);
+  const domainParts = parsed.hostname.split('.');
+  if (domainParts.length > 2) {
+    return domainParts.slice(-2).join('.');
+  }
+  return parsed.hostname;
+}

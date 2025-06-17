@@ -1,4 +1,8 @@
-import { createHandlers, GoogleCloudflareProvider } from '@a-type/auth';
+import {
+  createHandlers,
+  GoogleCloudflareProvider,
+  honoAdapter,
+} from '@a-type/auth';
 import { Context } from 'hono';
 import { Env } from '../config/ctx.js';
 import { email } from '../services/email.js';
@@ -6,11 +10,7 @@ import { sessions } from './session.js';
 
 export const authHandlers = createHandlers<Context<Env>>({
   sessions,
-  adapter: {
-    getRawRequest(ctx) {
-      return ctx.req.raw;
-    },
-  },
+  adapter: honoAdapter,
   getRedirectConfig: (ctx) => ({
     defaultReturnToOrigin: ctx.env.UI_ORIGIN,
     allowedReturnToOrigin(origin) {
