@@ -6,4 +6,6 @@ export const dndEvents = new EventSubscriber<{
   start: (id: string) => void;
   drop: (id: string, targetId: string, gesture: DragGestureContext) => void;
   cancel: (id: string) => void;
+  over: (droppableId: string) => void;
+  out: () => void;
 }>();

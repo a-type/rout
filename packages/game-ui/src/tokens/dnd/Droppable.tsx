@@ -1,5 +1,5 @@
 import { useStableCallback } from '@a-type/ui';
-import { HTMLProps, useEffect, useMemo } from 'react';
+import { HTMLProps, useEffect, useMemo, useRef } from 'react';
 import { useMergedRef } from '../../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
 import { DraggableData, useDndStore } from './dndStore';
@@ -57,6 +57,17 @@ export function Droppable<T = any>({
   );
   const rejected = unvalidatedOver && accept && !accept(unvalidatedOver);
   const isOver = isOverRaw && unvalidatedOver && !rejected;
+
+  const wasOverRef = useRef(false);
+  useEffect(() => {
+    if (isOver && !wasOverRef.current) {
+      dndEvents.emit('over', id);
+      wasOverRef.current = true;
+    } else if (!isOver && wasOverRef.current) {
+      dndEvents.emit('out');
+      wasOverRef.current = false;
+    }
+  }, [isOver, id]);
 
   const stableOnOver = useStableCallback(onOver);
   useEffect(() => {

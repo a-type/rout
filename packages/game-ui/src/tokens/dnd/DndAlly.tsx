@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { dndEvents } from './dndEvents';
 import { useDndStore } from './dndStore';
 
 export interface DndAllyProps {}
 
-export function DndAlly({}: DndAllyProps) {
+export const DndAlly = memo(function DndAlly({}: DndAllyProps) {
   const [announcement, setAnnouncement] = useState('');
   useEffect(() => {
     const unsubs = [
@@ -17,20 +17,21 @@ export function DndAlly({}: DndAllyProps) {
       dndEvents.subscribe('cancel', (id) => {
         setAnnouncement(`Cancelled dragging ${id}`);
       }),
-      useDndStore.subscribe(
-        (state) => state.overRegion,
-        (overRegion) => {
-          if (overRegion) {
-            setAnnouncement(
-              `Draggable item ${useDndStore.getState().dragging} dragged over   droppable region ${overRegion}`,
-            );
-          } else {
-            setAnnouncement(
-              `Draggable item ${useDndStore.getState().dragging} is no longer over a droppable region`,
-            );
-          }
-        },
-      ),
+      dndEvents.subscribe('over', (overRegion) => {
+        const dragged =
+          useDndStore.getState().dragging || useDndStore.getState().candidate;
+        setAnnouncement(
+          `Draggable item ${dragged} dragged over droppable region ${overRegion}`,
+        );
+      }),
+      dndEvents.subscribe('out', () => {
+        const dragged =
+          useDndStore.getState().dragging || useDndStore.getState().candidate;
+        if (!dragged) return;
+        setAnnouncement(
+          `Draggable item ${dragged} is no longer over a droppable region`,
+        );
+      }),
     ];
     return () => {
       unsubs.forEach((unsub) => unsub());
@@ -50,4 +51,4 @@ export function DndAlly({}: DndAllyProps) {
       </div>
     </>
   );
-}
+});
