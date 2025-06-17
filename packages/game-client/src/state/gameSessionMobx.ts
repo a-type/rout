@@ -513,10 +513,33 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     if (delay) {
       this.#events.emit('turnSubmitDelayed', delay);
       return new Promise<BaseTurnError | void>((resolve) => {
-        this.#turnSubmitTimeout = setTimeout(
-          () => this.#actuallySubmitTurn(localTurnData).then(resolve),
-          delay,
-        );
+        // if the user closes the window before the timeout, force the submit.
+        const beforeUnload = async () => {
+          if (this.#turnSubmitTimeout) {
+            clearTimeout(this.#turnSubmitTimeout);
+            this.#turnSubmitTimeout = null;
+            await this.#actuallySubmitTurn(localTurnData);
+            resolve();
+          }
+        };
+        window.addEventListener('beforeunload', beforeUnload, {
+          once: true,
+        });
+        const visibilityChange = () => {
+          if (document.visibilityState === 'hidden') {
+            beforeUnload();
+          }
+        };
+        document.addEventListener('visibilitychange', visibilityChange, {
+          once: true,
+        });
+
+        this.#turnSubmitTimeout = setTimeout(async () => {
+          window.removeEventListener('beforeunload', beforeUnload);
+          document.removeEventListener('visibilitychange', visibilityChange);
+          await this.#actuallySubmitTurn(localTurnData);
+          resolve();
+        }, delay);
       });
     } else {
       return this.#actuallySubmitTurn(localTurnData);
@@ -526,6 +549,11 @@ export class GameSessionSuite<TGame extends GameDefinition> {
   #actuallySubmitTurn = async (
     data: GetTurnData<TGame>,
   ): Promise<BaseTurnError | void> => {
+    if (this.#turnSubmitTimeout) {
+      clearTimeout(this.#turnSubmitTimeout);
+      this.#turnSubmitTimeout = null;
+    }
+
     const submittingToRound = this.latestRoundIndex;
     try {
       const response = await this.ctx.socket.request({
