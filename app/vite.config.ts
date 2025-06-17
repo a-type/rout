@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
         short_name: 'Rout!',
         description: 'Never lose touch',
         theme_color: '#6466bd',
-        background_color: '#19181a',
+        background_color: '#6466bd',
         scope: 'https://play.rout.games/',
         icons,
         start_url: '/?utm_source=homescreen',
