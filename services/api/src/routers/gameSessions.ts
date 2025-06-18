@@ -20,15 +20,18 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
           .enum(['pending', 'accepted', 'declined', 'expired'])
           .optional(),
         status: z
-          .preprocess((val) => {
-            if (Array.isArray(val)) {
-              return val;
-            }
-            if (typeof val === 'string') {
-              return [val];
-            }
-            return undefined;
-          }, z.enum(['active', 'complete', 'pending']).array())
+          .preprocess(
+            (val) => {
+              if (Array.isArray(val)) {
+                return val;
+              }
+              if (typeof val === 'string') {
+                return [val];
+              }
+              return undefined;
+            },
+            z.enum(['active', 'complete', 'pending']).array(),
+          )
           .optional(),
         first: z.coerce.number().int().positive().optional(),
         before: z.string().optional(),
@@ -79,7 +82,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       const durableObjectId = ctx.env.GAME_SESSION.idFromName(gameSession.id);
       const sessionState = await ctx.env.GAME_SESSION.get(durableObjectId);
       const randomSeed = crypto.randomUUID();
-      const userId = ctx.get('session').userId;
+      const me = await userStore.getMe();
       await sessionState.initialize({
         id: gameSession.id,
         randomSeed,
@@ -87,7 +90,9 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
         gameVersion: gameDefinition.version,
         members: [
           {
-            id: userId,
+            id: me.id,
+            displayName: me.displayName,
+            color: me.color,
           },
         ],
         // TODO: configurable / automatic detection
