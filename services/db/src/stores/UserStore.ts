@@ -62,13 +62,14 @@ export class UserStore extends RpcTarget {
       .select([
         'User.id',
         'User.color',
-        'User.imageUrl',
         'User.displayName',
         'User.email',
         'User.subscriptionEntitlements',
         'User.stripeCustomerId',
         'User.isProductAdmin',
+        'User.imageUrl',
       ])
+      .select((eb) => eb('User.imageUrl', 'is not', null).as('hasAvatar'))
       .executeTakeFirst();
 
     if (!user) {
@@ -106,7 +107,8 @@ export class UserStore extends RpcTarget {
           eb('f2.friendId', '=', this.#userId),
         ]),
       )
-      .selectAll('u');
+      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl'])
+      .select((eb) => eb('u.imageUrl', 'is not', null).as('hasAvatar'));
     const user = await query.executeTakeFirst();
 
     return this.#fillUserDefaults({

@@ -7,30 +7,44 @@ export interface UserAvatarProps extends AvatarProps {
   userId: PrefixedId<'u'>;
 }
 
-export const UserAvatar = withSuspense(function UserAvatar({
-  userId,
-  ...rest
-}: UserAvatarProps) {
-  const { data: user } = sdkHooks.useGetUser({ id: userId });
+export const UserAvatar = withSuspense(
+  function UserAvatar({ userId, ...rest }: UserAvatarProps) {
+    const { data: user } = sdkHooks.useGetUser({ id: userId });
 
-  return (
-    <Avatar
-      {...rest}
-      imageSrc={user.imageUrl ?? undefined}
-      name={user.displayName}
-    />
-  );
-},
-<Avatar />);
+    if (!user) {
+      return <Avatar {...rest} name="Anonymous" />;
+    }
 
-export const MyAvatar = withSuspense(function MyAvatar(props: AvatarProps) {
-  const { data: user } = sdkHooks.useGetMe();
+    return (
+      <Avatar
+        {...rest}
+        imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
+        name={user.displayName}
+        crossOrigin="use-credentials"
+        className="aspect-1 overflow-hidden"
+      />
+    );
+  },
+  <Avatar />,
+);
 
-  return (
-    <Avatar
-      {...props}
-      imageSrc={user?.imageUrl ?? undefined}
-      name={user?.displayName}
-    />
-  );
-}, <Avatar />);
+export const MyAvatar = withSuspense(
+  function MyAvatar(props: AvatarProps) {
+    const { data: user } = sdkHooks.useGetMe();
+
+    if (!user) {
+      return <Avatar {...props} name="Anonymous" />;
+    }
+
+    return (
+      <Avatar
+        {...props}
+        imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
+        name={user?.displayName}
+        crossOrigin="use-credentials"
+        className="aspect-1 overflow-hidden"
+      />
+    );
+  },
+  <Avatar />,
+);

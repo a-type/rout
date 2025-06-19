@@ -1,6 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk.js';
 import {
-  Avatar,
   Box,
   Button,
   clsx,
@@ -18,6 +17,7 @@ import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { useState } from 'react';
 import { PublicInviteLink } from '../memberships/PublicInviteLink.js';
+import { UserAvatar } from '../users/UserAvatar.js';
 import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
@@ -79,9 +79,15 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
 
 type GameSetupInviteEntryData = {
   id: string;
+  userId: PrefixedId<'u'>;
   displayName: string;
-  imageUrl: string | null;
-  status: 'accepted' | 'pending' | 'declined' | 'expired' | 'uninvited';
+  status:
+    | 'accepted'
+    | 'pending'
+    | 'declined'
+    | 'expired'
+    | 'uninvited'
+    | 'abandoned';
 };
 
 const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
@@ -105,14 +111,14 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
   const entries: GameSetupInviteEntryData[] = [
     ...pregame.invitations.map((invitation) => ({
       id: invitation.id,
+      userId: invitation.user!.id,
       displayName: invitation.user!.displayName,
-      imageUrl: invitation.user!.imageUrl,
       status: invitation.status,
     })),
     ...friendsNotInvited.map((friendship) => ({
       id: friendship.id,
+      userId: friendship.id,
       displayName: friendship.displayName,
-      imageUrl: friendship.imageUrl,
       status: 'uninvited' as const,
     })),
   ];
@@ -140,9 +146,10 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
                   });
                 }}
               >
-                <Avatar
+                <UserAvatar
+                  userId={entry.userId}
+                  name={entry.displayName}
                   className="w-full h-auto aspect-1 opacity-50"
-                  imageSrc={entry.imageUrl ?? undefined}
                 />
                 <span>{entry.displayName}</span>
                 <Box
@@ -188,7 +195,6 @@ function GameSetupMemberItem({
   member: {
     id: PrefixedId<'u'>;
     displayName: string;
-    imageUrl?: string | null;
   };
 }) {
   const [inviteSent, setInviteSent] = useState(false);
@@ -199,7 +205,11 @@ function GameSetupMemberItem({
 
   return (
     <PeopleGridItem key={member.id}>
-      <Avatar className="w-full h-auto aspect-1" imageSrc={member.imageUrl} />
+      <UserAvatar
+        className="w-full h-auto aspect-1"
+        userId={member.id}
+        name={member.displayName}
+      />
       {!otherUser.isFriend && !otherUser.isMe && (
         <Button
           className={clsx(

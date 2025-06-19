@@ -1,11 +1,13 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   ENTITLEMENT_NAMES,
+  idShapes,
   isPrefixedId,
   LongGameError,
   wrapRpcData,
 } from '@long-game/common';
 import { Hono } from 'hono';
+import { proxy } from 'hono/proxy';
 import { z } from 'zod';
 import { sessions } from '../auth/session';
 import { Env } from '../config/ctx';
@@ -27,7 +29,7 @@ export const usersRouter = new Hono<Env>()
         id: user.id,
         displayName: user.displayName,
         color: user.color,
-        imageUrl: user.imageUrl,
+        hasAvatar: user.hasAvatar,
         email: user.email,
         isGoldMember:
           !!user.subscriptionEntitlements?.[
@@ -67,6 +69,33 @@ export const usersRouter = new Hono<Env>()
       const body = ctx.req.valid('json');
       const updated = await ctx.get('userStore').updateMe(body);
       return ctx.json(wrapRpcData(updated));
+    },
+  )
+  .put(
+    '/me/avatar',
+    userStoreMiddleware,
+    zValidator('form', z.object({ file: z.instanceof(File) })),
+    async (ctx) => {
+      const file = ctx.req.valid('form').file;
+      const filestream = file.stream();
+      const userId = ctx.get('session').userId;
+      const fileType = file.name.split('.').pop();
+      const path = `/${userId}/${crypto.randomUUID()}/avatar.${fileType}`;
+      // list any old avatars
+      const oldAvatars = await ctx.env.AVATARS_BUCKET.list({
+        prefix: `/${userId}/`,
+      });
+      // delete old avatars
+      for (const oldFile of oldAvatars.objects) {
+        await ctx.env.AVATARS_BUCKET.delete(oldFile.key);
+      }
+      await ctx.env.AVATARS_BUCKET.put(path, filestream);
+      const userStore = ctx.get('userStore');
+      const updated = await userStore.updateMe({
+        // using a special URL protocol to indicate it's in our bucket
+        imageUrl: `bucket://${path}`,
+      });
+      return ctx.json({ ok: true });
     },
   )
   .get('/me/notificationSettings', userStoreMiddleware, async (ctx) => {
@@ -132,6 +161,51 @@ export const usersRouter = new Hono<Env>()
           'User not found',
         );
       }
-      return ctx.json(user);
+      // remove imageUrl, it's not helpful to the client - they should use the /users/:id/avatar API
+      const { imageUrl, ...rest } = wrapRpcData(user);
+      return ctx.json(rest);
+    },
+  )
+  .get(
+    '/:id/avatar',
+    userStoreMiddleware,
+    zValidator(
+      'param',
+      z.object({
+        id: idShapes.User,
+      }),
+    ),
+    async (ctx) => {
+      const user = await ctx
+        .get('userStore')
+        .getUser(ctx.req.valid('param').id);
+      if (!user) {
+        throw new LongGameError(LongGameError.Code.NotFound, 'User not found');
+      }
+      if (!user.imageUrl) {
+        throw new LongGameError(
+          LongGameError.Code.NotFound,
+          'User does not have an avatar',
+        );
+      }
+      // if the imageUrl is a bucket URL, we need to fetch it from the bucket
+      if (user.imageUrl.startsWith('bucket://')) {
+        const path = user.imageUrl.replace('bucket://', '');
+        const avatar = await ctx.env.AVATARS_BUCKET.get(path);
+        if (!avatar) {
+          throw new LongGameError(
+            LongGameError.Code.NotFound,
+            'Avatar not found in bucket',
+          );
+        }
+        return ctx.body(avatar.body, 200, {
+          'Content-Type': avatar.httpMetadata?.contentType ?? 'image/png',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          ETag: avatar.httpEtag,
+          Date: avatar.uploaded.toUTCString(),
+        });
+      }
+      // otherwise, it's a regular URL, so we can just proxy to it
+      return proxy(user.imageUrl);
     },
   );

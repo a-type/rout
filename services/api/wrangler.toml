@@ -28,6 +28,10 @@ binding = "ADMIN_STORE"
 service = "prod-long-game-db-service"
 entrypoint = "AdminStore"
 
+[[r2_buckets]]
+binding = "AVATARS_BUCKET"
+bucket_name = "prod-long-game-avatars"
+
 [[durable_objects.bindings]]
 name = "GAME_SESSION"
 class_name = "GameSession"

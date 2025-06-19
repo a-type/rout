@@ -42,7 +42,6 @@ import { GameSocket } from './socket.js';
 export type PlayerInfo = {
   id: PrefixedId<'u'>;
   displayName: string;
-  imageUrl: string | null;
   color: PlayerColorName;
 };
 
@@ -827,8 +826,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
           this.players[member.id] = member;
         } else {
           // selectively override from API - we want to keep player colors intact,
-          // particularly.
-          this.players[member.id].imageUrl ||= member.imageUrl ?? null;
+          // particularly. but we can show the latest display name.
           this.players[member.id].displayName ||= member.displayName;
         }
       }),
@@ -877,7 +875,6 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         acc[member.id] = {
           id: member.id,
           displayName: member.displayName,
-          imageUrl: null,
           color: member.color,
         };
         return acc;

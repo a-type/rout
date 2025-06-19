@@ -1,6 +1,7 @@
-import { Avatar, Box, Chip, clsx, Icon } from '@a-type/ui';
+import { Box, Chip, clsx, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { PlayerAvatar } from './PlayerAvatar';
 import { usePlayerThemed } from './usePlayerThemed';
 
 export interface PlayerInfoProps {
@@ -24,12 +25,13 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
   return (
     <Box d="col" gap className={clsx(themeClass, className)} style={style}>
       <Box gap items="center">
-        <Avatar
-          name={player?.displayName ?? 'Anonymous'}
-          imageSrc={player?.imageUrl}
-          className="flex-shrink-0 aspect-1 w-12 h-12"
-          popIn={false}
-        />
+        {player ? (
+          <PlayerAvatar
+            playerId={player.id}
+            className="flex-shrink-0 aspect-1"
+            size={64}
+          />
+        ) : null}
         <div className="text-lg font-bold">
           {player?.displayName ?? 'Anonymous'}
         </div>

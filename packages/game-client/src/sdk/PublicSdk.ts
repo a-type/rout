@@ -12,6 +12,12 @@ export class PublicSdk extends BaseSdk {
     }) => ({ json: input }),
     invalidate: [['getMe']],
   });
+  setAvatar = this.sdkMutation(this.apiRpc.users.me.avatar.$put, {
+    transformInput: (input: { image: File }) => {
+      return { form: { file: input.image } };
+    },
+    invalidate: [['getMe']],
+  });
   getUser = this.sdkQuery('getUser', this.apiRpc.users[':id'].$get, {
     transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
   });

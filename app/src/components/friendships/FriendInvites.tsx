@@ -1,6 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Avatar, Box, Button, H2, toast } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
+import { UserAvatar } from '../users/UserAvatar';
 
 export function FriendInvites() {
   return (
@@ -37,10 +38,14 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   return (
     <Box d="col" surface="wash" gap p>
       <Box items="center" gap>
-        <Avatar
-          imageSrc={invite.otherUser?.imageUrl ?? ''}
-          name={invite.otherUser?.displayName}
-        />
+        {invite.otherUser ? (
+          <UserAvatar
+            userId={invite.otherUser.id}
+            name={invite.otherUser.displayName}
+          />
+        ) : (
+          <Avatar name="Anonymous" />
+        )}
         {invite.otherUser?.displayName ?? 'Someone'} invited you to be friends
       </Box>
       <Box items="center" justify="end" gap>
@@ -103,10 +108,14 @@ function OutgoingInvite({ invite }: { invite: FriendshipInvitation }) {
 
   return (
     <Box items="center" surface="wash" gap p>
-      <Avatar
-        imageSrc={invite.otherUser?.imageUrl ?? ''}
-        name={invite.otherUser?.displayName}
-      />
+      {invite.otherUser ? (
+        <UserAvatar
+          userId={invite.otherUser.id}
+          name={invite.otherUser?.displayName}
+        />
+      ) : (
+        <Avatar name="Anonymous" />
+      )}
       You invited {invite.email}
       <Button
         onClick={async () => {

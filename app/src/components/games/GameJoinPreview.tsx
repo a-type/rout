@@ -1,13 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import {
-  AvatarList,
-  AvatarListItem,
-  Box,
-  Button,
-  H1,
-  P,
-  toast,
-} from '@a-type/ui';
+import { AvatarList, Box, Button, H1, P, toast } from '@a-type/ui';
 import {
   ENTITLEMENT_NAMES,
   MAX_ACTIVE_GAMES_BY_ENTITLEMENT,
@@ -19,6 +11,7 @@ import {
 import games from '@long-game/games';
 import { Link, useNavigate } from '@verdant-web/react-router';
 import { GoldUpgrade } from '../subscription/GoldUpgrade';
+import { UserAvatar } from '../users/UserAvatar';
 
 export interface GameJoinPreviewProps {
   myInvite: GameSessionInvitation;
@@ -84,12 +77,9 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
       <Box gap p="lg">
         <AvatarList count={pregame.members.length}>
           {pregame.members.map((member, i) => (
-            <AvatarListItem
-              key={member.id}
-              imageSrc={member.imageUrl}
-              name={member.displayName}
-              index={i}
-            />
+            <AvatarList.ItemRoot key={member.id} index={i}>
+              <UserAvatar userId={member.id} name={member.displayName} />
+            </AvatarList.ItemRoot>
           ))}
         </AvatarList>
         <span>

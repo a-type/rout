@@ -26,8 +26,17 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
   const player = onlyPlayerId ? gameSuite.getPlayer(onlyPlayerId) : null;
   const { className: themeClass, style } = usePlayerThemed(onlyPlayerId);
   const status = onlyPlayerId
-    ? gameSuite.playerStatuses[onlyPlayerId] ?? null
+    ? (gameSuite.playerStatuses[onlyPlayerId] ?? null)
     : null;
+
+  let imageUrl: string;
+  if (playerId === SYSTEM_CHAT_AUTHOR_ID) {
+    imageUrl = '/icon.png';
+  } else {
+    const urlRaw = new URL((import.meta as any).env.VITE_PUBLIC_API_ORIGIN);
+    urlRaw.pathname = `/users/${playerId}/avatar`;
+    imageUrl = urlRaw.toString();
+  }
 
   return (
     <Tooltip
@@ -47,23 +56,22 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
         name={
           playerId === SYSTEM_CHAT_AUTHOR_ID
             ? 'Game'
-            : player?.displayName ?? 'Anonymous'
+            : (player?.displayName ?? 'Anonymous')
         }
-        imageSrc={
-          playerId === SYSTEM_CHAT_AUTHOR_ID ? '/icon.png' : player?.imageUrl
-        }
+        imageSrc={imageUrl}
         style={{
           ...style,
           width: size ?? 24,
         }}
         className={clsx(
-          'flex-shrink-0 aspect-1',
+          'flex-shrink-0 aspect-1 overflow-hidden',
           'border-solid border-2px',
           status?.online ? 'border-primary-dark' : 'border-gray',
           themeClass,
           className,
         )}
         popIn={false}
+        crossOrigin="use-credentials"
       />
     </Tooltip>
   );

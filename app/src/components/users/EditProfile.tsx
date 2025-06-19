@@ -8,6 +8,7 @@ import {
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
+import { UploadAvatar } from './UploadAvatar';
 
 export interface EditProfileProps {
   onSave?: () => void;
@@ -31,6 +32,7 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
         onSave?.();
       }}
     >
+      <UploadAvatar />
       <TextField
         required
         name="displayName"

@@ -19,4 +19,5 @@ interface ApiBindings {
   GAME_SESSION: DurableObjectNamespace<import('./index').GameSession>;
   PUBLIC_STORE: Service<import('@long-game/service-db').PublicStore>;
   ADMIN_STORE: Service<import('@long-game/service-db').AdminStore>;
+  AVATARS_BUCKET: R2Bucket;
 }
