@@ -12,7 +12,8 @@ import { Levelups } from './Levelups';
 import { YourGameInfo } from './YourGameInfo';
 
 export function PageContent() {
-  const { gameStatus, turnWasSubmitted, currentTurn } = hooks.useGameSuite();
+  const { gameStatus, turnWasSubmitted, currentTurn, turnError } =
+    hooks.useGameSuite();
   const [params] = useSearchParams();
   const teamId = params.get('teamId');
   const playerId = params.get('playerId');
@@ -36,6 +37,8 @@ export function PageContent() {
         <h2 className="text-lg font-bold mb-2">Debug Information</h2>
         <pre className="bg-gray-800 p-4 rounded">
           {turnWasSubmitted ? 'sent turn' : 'no turn sent'}
+          <br />
+          Error: {JSON.stringify(turnError)}
           <br />
           {JSON.stringify(currentTurn, null, 2)}
         </pre>

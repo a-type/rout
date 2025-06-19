@@ -6,6 +6,7 @@ import { GameBoxScore } from './GameBoxScore';
 import { useGameResults } from '../useGameResults';
 import { WeatherChip } from '../WeatherChip';
 import { BallparkChip } from '../BallparkChip';
+import { ScheduledGamePage } from './ScheduledGamePage';
 
 export function GamePage({ id }: { id: string }) {
   const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
@@ -13,7 +14,13 @@ export function GamePage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
   const game = useGameResults({ id });
   if (!game) {
-    return <div>Game not found</div>;
+    const scheduledGame = finalState.league.schedule
+      .flat()
+      .find((g) => g.id === id);
+    if (!scheduledGame) {
+      return <div>Game not found</div>;
+    }
+    return <ScheduledGamePage id={scheduledGame.id} />;
   }
   const homeTeam = finalState.league.teamLookup[game.homeTeamId];
   const awayTeam = finalState.league.teamLookup[game.awayTeamId];

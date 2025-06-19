@@ -239,4 +239,20 @@ export const ballparkData = {
       },
     }),
   },
+  hallowedGrounds: {
+    name: 'Hallowed Grounds',
+    description:
+      'A sacred field where players defend well and where lucky weather is more common.',
+    icon: '🙏',
+    color: '#E0F7FA',
+    weather: {
+      clear: 2,
+      blessedRain: 4,
+    },
+    effect: ({ isHome } = {}) => ({
+      battingCompositeBonus: {
+        fielding: isHome ? 3 : 1,
+      },
+    }),
+  },
 } satisfies Record<string, Ballpark>;
