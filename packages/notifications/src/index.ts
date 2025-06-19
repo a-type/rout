@@ -2,6 +2,10 @@ import {
   friendInviteNotification,
   FriendInviteNotification,
 } from './friendInvite';
+import {
+  gameAbandonedNotification,
+  GameAbandonedNotification,
+} from './gameAbandoned';
 import { gameInviteNotification, GameInviteNotification } from './gameInvite';
 import { newGameNotification, NewGameNotification } from './newGame';
 import { turnReadyNotification, TurnReadyNotification } from './turnReady';
@@ -11,7 +15,8 @@ export type AnyNotification =
   | TurnReadyNotification
   | GameInviteNotification
   | FriendInviteNotification
-  | NewGameNotification;
+  | NewGameNotification
+  | GameAbandonedNotification;
 
 export function getNotificationConfig(
   notification: AnyNotification,
@@ -25,6 +30,8 @@ export function getNotificationConfig(
       return turnReadyNotification;
     case 'new-game':
       return newGameNotification;
+    case 'game-abandoned':
+      return gameAbandonedNotification;
     default:
       throw new Error(
         `Unknown notification type: ${(notification as any).type}`,
@@ -37,6 +44,7 @@ export const notificationTypes = [
   'friend-invite',
   'turn-ready',
   'new-game',
+  'game-abandoned',
 ] as const;
 
 export * from './turnReady';

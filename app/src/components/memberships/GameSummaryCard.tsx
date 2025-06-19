@@ -7,6 +7,7 @@ import {
   clsx,
   DropdownMenu,
   Icon,
+  toast,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSession } from '@long-game/game-client';
@@ -30,6 +31,7 @@ export const GameSummaryCard = withSuspense(
   }: GameSummaryCardProps) {
     const game = summary.gameId ? games[summary.gameId] : null;
     const deleteSession = sdkHooks.useDeleteGameSession();
+    const abandonSession = sdkHooks.useAbandonGameSession();
     const { data: me } = sdkHooks.useGetMe();
     const { data: playerStatuses } =
       sdkHooks.useGetGameSessionPlayerStatusesLazy({
@@ -38,6 +40,9 @@ export const GameSummaryCard = withSuspense(
       });
 
     const isMyTurn = !!me?.id && !!playerStatuses?.[me.id]?.pendingTurn;
+    const canDelete = summary.status === 'pending' && summary.canDelete;
+    const canAbandon = summary.status === 'active';
+    const showMenu = canDelete || canAbandon;
 
     return (
       <Card
@@ -68,7 +73,7 @@ export const GameSummaryCard = withSuspense(
             </Card.Content>
           </Link>
         </Card.Main>
-        {summary.status === 'pending' && summary.canDelete && (
+        {showMenu && (
           <Card.Footer>
             <DropdownMenu>
               <DropdownMenu.Trigger asChild>
@@ -77,17 +82,37 @@ export const GameSummaryCard = withSuspense(
                 </Button>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
-                <DropdownMenu.Item
-                  onClick={() => {
-                    deleteSession.mutate({ id: summary.id });
-                  }}
-                  color="destructive"
-                >
-                  Delete
-                  <DropdownMenu.ItemRightSlot>
-                    <Icon name="trash" />
-                  </DropdownMenu.ItemRightSlot>
-                </DropdownMenu.Item>
+                {canDelete && (
+                  <DropdownMenu.Item
+                    onClick={() => {
+                      deleteSession.mutate({ id: summary.id });
+                    }}
+                    color="destructive"
+                  >
+                    Delete
+                    <DropdownMenu.ItemRightSlot>
+                      <Icon name="trash" />
+                    </DropdownMenu.ItemRightSlot>
+                  </DropdownMenu.Item>
+                )}
+                {canAbandon && (
+                  <DropdownMenu.Item
+                    onClick={async () => {
+                      const confirmed = confirm(
+                        'This will end the game for everyone. Other players will be notified the game is over. Are you sure you want to abandon this game?',
+                      );
+                      if (!confirmed) return;
+                      await abandonSession.mutateAsync({ id: summary.id });
+                      toast(`You abandoned this game.`);
+                    }}
+                    color="destructive"
+                  >
+                    Abandon
+                    <DropdownMenu.ItemRightSlot>
+                      <Icon name="flag" />
+                    </DropdownMenu.ItemRightSlot>
+                  </DropdownMenu.Item>
+                )}
               </DropdownMenu.Content>
             </DropdownMenu>
           </Card.Footer>

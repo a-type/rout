@@ -84,7 +84,7 @@ export function TokenSpace<T = any>({
         id={id}
         className={clsx(
           'relative',
-          '[&[data-over=true]]:(scale-105)',
+          '[&[data-over=true]]:(scale-102)',
           'transition-transform',
           className,
         )}

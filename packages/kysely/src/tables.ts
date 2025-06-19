@@ -107,7 +107,13 @@ export interface GameSessionInvitationTable {
   userId: PrefixedId<'u'>;
   expiresAt: DateColumnRequired;
   claimedAt: DateColumnOptional;
-  status: 'pending' | 'accepted' | 'declined' | 'expired' | 'uninvited';
+  status:
+    | 'pending'
+    | 'accepted'
+    | 'declined'
+    | 'expired'
+    | 'uninvited'
+    | 'abandoned';
   role: 'player' | 'spectator';
 }
 export type GameSessionInvitation = Selectable<GameSessionInvitationTable>;
@@ -215,7 +221,7 @@ export interface GameSessionTable {
   id: PrefixedId<'gs'>;
   createdAt: DateColumnGenerated;
   updatedAt: DateColumnGenerated;
-  status: 'pending' | 'active' | 'complete';
+  status: 'pending' | 'active' | 'complete' | 'abandoned';
   gameId: string | null;
   gameVersion: string | null;
   winnerIdsJson: PrefixedId<'u'>[] | null;

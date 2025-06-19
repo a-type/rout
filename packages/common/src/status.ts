@@ -26,6 +26,9 @@ export const gameStatusShape = z.discriminatedUnion('status', [
     status: z.literal('complete'),
     winnerIds: z.array(idShapes.User),
   }),
+  z.object({
+    status: z.literal('abandoned'),
+  }),
 ]);
 export type GameStatus = z.infer<typeof gameStatusShape>;
 

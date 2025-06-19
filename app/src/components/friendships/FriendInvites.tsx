@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, Box, Button, H2 } from '@a-type/ui';
+import { Avatar, Box, Button, H2, toast } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
 
 export function FriendInvites() {
@@ -51,6 +51,9 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
               id: invite.id,
               response: 'declined',
             });
+            toast(
+              `You have rejected the friendship invite from ${invite.otherUser?.displayName ?? 'this user'}.`,
+            );
           }}
         >
           Reject
@@ -62,6 +65,9 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
               id: invite.id,
               response: 'accepted',
             });
+            toast.success(
+              `You are now friends with ${invite.otherUser?.displayName ?? 'this user'}.`,
+            );
           }}
         >
           Accept

@@ -1,3 +1,4 @@
+import { GameAbandonedNotice } from '@/components/games/GameAbandonedNotice';
 import { GameControls } from '@/components/games/GameControls';
 import { GameJoinPreview } from '@/components/games/GameJoinPreview';
 import { GameLayout } from '@/components/games/GameLayout';
@@ -81,6 +82,13 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
           </ScrollTicker>
         </Box>
       )}
+      {gameSuite.gameStatus.status === 'abandoned' && (
+        <Box surface="attention" className="rounded-none flex-shrink-0 py-xs">
+          <ScrollTicker>
+            <span>Game Abandoned 😢</span>
+          </ScrollTicker>
+        </Box>
+      )}
       <GameLayout className={className} style={style}>
         <GameLayout.Main>
           <Suspense
@@ -99,6 +107,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
         </GameLayout.Main>
         <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
         <DelayedSubmitUndo />
+        {gameSuite.gameStatus.status === 'abandoned' && <GameAbandonedNotice />}
       </GameLayout>
     </TopographyProvider>
   );

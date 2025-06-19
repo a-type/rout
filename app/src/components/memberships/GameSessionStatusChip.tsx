@@ -7,29 +7,25 @@ export interface GameSessionStatusChipProps extends ChipProps {
 
 export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
   return (
-    <Chip
-      color={
-        status === 'active'
-          ? 'neutral'
-          : status === 'complete'
-            ? 'primary'
-            : 'neutral'
-      }
-    >
+    <Chip color={status === 'complete' ? 'primary' : 'neutral'}>
       <Icon
         name={
           status === 'active'
             ? 'gamePiece'
             : status === 'complete'
               ? 'flag'
-              : 'clock'
+              : status === 'abandoned'
+                ? 'x'
+                : 'clock'
         }
       />
       {status === 'active'
         ? 'Live'
         : status === 'complete'
           ? 'Finished'
-          : 'Setup'}
+          : status === 'abandoned'
+            ? 'Abandoned'
+            : 'Setup'}
     </Chip>
   );
 }

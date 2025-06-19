@@ -34,6 +34,7 @@ export interface GameSessionBaseData {
   createdAt: string;
   startedAt: string | null;
   endedAt: string | null;
+  abandonedAt?: string | null;
   gameId: string;
   gameVersion: string;
   timezone: string;
@@ -347,6 +348,20 @@ export class GameSession extends DurableObject<ApiBindings> {
 
     await this.#checkForRoundChange();
   }
+  async abandonGame(abandoningPlayerId: PrefixedId<'u'>) {
+    // abandoning an in-progress game ends it.
+    // abandoning a pregame just causes the player to leave.
+    const sessionData = await this.#getSessionData();
+    if (sessionData.startedAt) {
+      this.#updateStatus('abandoned');
+    } else {
+      const members = await this.getMembers();
+      await this.updateMembers(
+        members.filter((member) => member.id !== abandoningPlayerId),
+      );
+      // that's all we have to do.
+    }
+  }
 
   // Game state and status
   /**
@@ -567,6 +582,9 @@ export class GameSession extends DurableObject<ApiBindings> {
     const sessionData = await this.#getSessionData();
     if (!sessionData.startedAt) {
       return { status: 'pending' };
+    }
+    if (sessionData.abandonedAt) {
+      return { status: 'abandoned' };
     }
 
     const gameDefinition = await this.getGameDefinition();
@@ -807,7 +825,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   // private state
-  async #updateStatus(status: 'pending' | 'active' | 'complete') {
+  async #updateStatus(status: 'pending' | 'active' | 'complete' | 'abandoned') {
     const currentData = await this.#getSessionData();
     if (status === 'active') {
       if (!currentData.startedAt) {
@@ -815,11 +833,28 @@ export class GameSession extends DurableObject<ApiBindings> {
           startedAt: new Date().toISOString(),
         });
       }
-    } else if (status === 'complete') {
+    } else if (status === 'complete' || status === 'abandoned') {
       if (!currentData.endedAt) {
         await this.#updateSessionData({
           endedAt: new Date().toISOString(),
+          abandonedAt: status === 'abandoned' ? new Date().toISOString() : null,
         });
+
+        if (status === 'abandoned') {
+          // notify all players that the game was abandoned
+          const members = await this.getMembers();
+          for (const member of members) {
+            await notifyUser(
+              member.id,
+              {
+                type: 'game-abandoned',
+                gameSessionId: currentData.id,
+                id: id('no'),
+              },
+              this.env,
+            );
+          }
+        }
       }
     }
     // this updates in local state, but also writes to the entry in D1 for this session,

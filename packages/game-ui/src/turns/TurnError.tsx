@@ -1,5 +1,5 @@
 import { Box, BoxProps, Button, CollapsibleSimple, Icon } from '@a-type/ui';
-import { useGameSuite, withGame } from '@long-game/game-client';
+import { useGameSuite } from '@long-game/game-client';
 import { BaseTurnError } from '@long-game/game-definition';
 
 export interface TurnErrorProps<TErr> extends BoxProps {
@@ -7,18 +7,18 @@ export interface TurnErrorProps<TErr> extends BoxProps {
   renderError?: (error: TErr) => React.ReactNode;
 }
 
-export const TurnError = withGame(function TurnError({
+export function TurnError<TErr extends BaseTurnError = BaseTurnError>({
   showReset,
-  renderError = (error: BaseTurnError) => error.message,
+  renderError = (error: TErr) => error.message,
   ...props
-}: TurnErrorProps<BaseTurnError>) {
+}: TurnErrorProps<TErr>) {
   const suite = useGameSuite();
   const err = suite.turnError;
 
   return (
     <CollapsibleSimple open={!!err}>
       <Box items="center" {...props}>
-        {err && renderError(err)}
+        {err && renderError(err as TErr)}
         {showReset && (
           <Button
             color="ghostDestructive"
@@ -31,4 +31,4 @@ export const TurnError = withGame(function TurnError({
       </Box>
     </CollapsibleSimple>
   );
-});
+}

@@ -151,6 +151,10 @@ export class UserStore extends RpcTarget {
             push: false,
             email: sendEmailUpdates ?? false,
           },
+          'game-abandoned': {
+            push: false,
+            email: sendEmailUpdates ?? false,
+          },
         },
       })
       .where('id', '=', this.#userId)
@@ -344,9 +348,15 @@ export class UserStore extends RpcTarget {
         inviterId: this.#userId,
         status: 'pending',
         email,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        // invites expire after 30 days
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
       })
-      .onConflict((b) => b.columns(['inviterId', 'email']).doNothing())
+      .onConflict((b) =>
+        b.columns(['inviterId', 'email']).doUpdateSet({
+          // refresh expiration on duplicate
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        }),
+      )
       .executeTakeFirstOrThrow();
 
     const friendship = await this.#db
@@ -471,7 +481,7 @@ export class UserStore extends RpcTarget {
 
   async getGameSessions(
     filter: {
-      status?: ('pending' | 'active' | 'complete')[];
+      status?: ('pending' | 'active' | 'complete' | 'abandoned')[];
       invitationStatus?: 'pending' | 'accepted' | 'declined' | 'expired';
       first?: number;
       before?: string;
@@ -566,7 +576,9 @@ export class UserStore extends RpcTarget {
       .selectFrom('GameSessionInvitation')
       .innerJoin('User', 'GameSessionInvitation.userId', 'User.id')
       .where('gameSessionId', '=', gameSessionId)
-      .where('status', '=', 'accepted')
+      .where((eb) =>
+        eb.or([eb('status', '=', 'accepted'), eb('status', '=', 'abandoned')]),
+      )
       .select(['User.id', 'User.color', 'User.displayName', 'User.imageUrl'])
       .execute();
 
@@ -834,6 +846,36 @@ export class UserStore extends RpcTarget {
       .updateTable('GameSessionInvitation')
       .set({ status: response })
       .where('id', '=', inviteId)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return updated;
+  }
+
+  /**
+   * Updates the user's invitation to 'abandoned' status.
+   * Does not remove them from the game state (this must be done
+   * on the Durable Object side).
+   */
+  async abandonGameSession(gameSessionId: PrefixedId<'gs'>) {
+    const membership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirstOrThrow();
+
+    if (membership.status !== 'accepted') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'You can only abandon accepted game sessions',
+      );
+    }
+
+    const updated = await this.#db
+      .updateTable('GameSessionInvitation')
+      .set({ status: 'abandoned' })
+      .where('id', '=', membership.id)
       .returningAll()
       .executeTakeFirstOrThrow();
 

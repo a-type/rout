@@ -229,4 +229,14 @@ export const gameSessionRouter = new Hono<Env>()
     const state = ctx.get('gameSessionState');
     const playerStatuses = await state.getPlayerStatuses();
     return ctx.json(wrapRpcData(playerStatuses));
+  })
+  .post('/abandon', async (ctx) => {
+    const state = ctx.get('gameSessionState');
+    const userStore = ctx.get('userStore');
+    const sessionId = ctx.get('gameSessionId');
+    const playerId = ctx.get('session').userId;
+    await state.abandonGame(playerId);
+    // update the user's invitation
+    await userStore.abandonGameSession(sessionId);
+    return ctx.json({ success: true });
   });

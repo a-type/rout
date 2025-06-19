@@ -196,6 +196,19 @@ export class PublicSdk extends BaseSdk {
       ],
     },
   );
+  abandonGameSession = this.sdkMutation(
+    this.apiRpc.gameSessions[':id'].abandon.$post,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'> }) => ({
+        param: { id: input.id },
+      }),
+      invalidate: [
+        ['getGameSessions'],
+        ['getGameSessionStatus'],
+        ['getGameSessionPregame'],
+      ],
+    },
+  );
   getGameSessionStatus = this.sdkQuery(
     'getGameSessionStatus',
     this.apiRpc.gameSessions[':id'].status.$get,
