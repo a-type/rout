@@ -152,6 +152,9 @@ importers:
       '@unocss/transformer-variant-group':
         specifier: ^65.4.2
         version: 65.4.2
+      change-case:
+        specifier: 5.4.4
+        version: 5.4.4
       cp-tpl:
         specifier: 1.0.9
         version: 1.0.9
@@ -270,6 +273,62 @@ importers:
       wrangler:
         specifier: ^3.99.0
         version: 3.99.0(@cloudflare/workers-types@4.20250124.3)
+
+  games/chess-arena/definition:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/chess-arena/renderer:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-chess-arena-definition':
+        specifier: workspace:*
+        version: link:../definition
+      '@long-game/game-client':
+        specifier: workspace:*
+        version: link:../../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../../../packages/game-ui
+      react:
+        specifier: 'catalog:'
+        version: 19.1.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@long-game/scripts':
+        specifier: workspace:*
+        version: link:../../../packages/scripts
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.1.8
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.1.6(@types/react@19.1.8)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
 
   games/gudnak/definition:
     dependencies:
@@ -518,6 +577,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/wizard-ball: {}
 
   games/wizard-ball/definition:
     dependencies:
@@ -905,6 +966,9 @@ importers:
 
   packages/games:
     dependencies:
+      '@long-game/game-chess-arena-definition':
+        specifier: workspace:*
+        version: link:../../games/chess-arena/definition
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition

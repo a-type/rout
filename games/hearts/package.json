@@ -1,0 +1,7 @@
+{
+  "name": "@long-game/game-hearts",
+  "scripts": {
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev",
+    "build": "pnpm --filter \"./*\" build"
+  }
+}

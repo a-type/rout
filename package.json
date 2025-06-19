@@ -5,7 +5,7 @@
   "main": "index.js",
   "packageManager": "pnpm@9.7.1",
   "scripts": {
-    "dev": "turbo run dev --concurrency 30",
+    "dev": "pnpm --filter \"!./games/**\" -r --parallel --stream dev",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",
@@ -29,6 +29,7 @@
     "web-push": "catalog:",
     "wrangler": "catalog:",
     "vitest": "catalog:",
-    "prettier": "3.5.3"
+    "prettier": "3.5.3",
+    "change-case": "5.4.4"
   }
 }

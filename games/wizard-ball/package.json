@@ -1,0 +1,7 @@
+{
+  "name": "@long-game/game-wizard-ball",
+  "scripts": {
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev",
+    "build": "pnpm --filter \"./*\" build"
+  }
+}

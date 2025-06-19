@@ -7,6 +7,54 @@
       "problemMatcher": [],
       "label": "Dev",
       "detail": "turbo run dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/chess-arena",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "♟️ Chess Arena Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/gudnak",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "🃏 Gudnak Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/number-guess",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "🔢 Number Guess Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/hearts",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "♥️ Hearts Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/scribble",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "✏️ Scribble Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/wizard-ball",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "⚾ Wizard Ball Dev",
+      "detail": "pnpm --filter \"./*\" dev"
     }
   ]
 }

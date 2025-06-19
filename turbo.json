@@ -13,10 +13,6 @@
     "bench": {
       "outputs": [],
       "inputs": ["**/*.bench.ts"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
     }
   }
 }

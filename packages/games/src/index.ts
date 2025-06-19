@@ -1,3 +1,4 @@
+import chessArena from '@long-game/game-chess-arena-definition';
 import { GameModule } from '@long-game/game-definition';
 import gudnak from '@long-game/game-gudnak-definition';
 import hearts from '@long-game/game-hearts-definition';
@@ -11,6 +12,7 @@ const games: Record<string, GameModule> = {
   [scribble.id]: scribble,
   [hearts.id]: hearts,
   [wizardBall.id]: wizardBall,
+  [chessArena.id]: chessArena,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 

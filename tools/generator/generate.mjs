@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { intro, isCancel, outro, select, spinner, text } from '@clack/prompts';
+import { camelCase, capitalCase } from 'change-case';
 import { exec } from 'child_process';
 import { cpTpl } from 'cp-tpl';
 import * as fs from 'fs/promises';
@@ -38,6 +39,8 @@ const name = await text({
     }
   },
 });
+const camelName = camelCase(name);
+const titleName = capitalCase(name);
 
 if (isCancel(name)) {
   outro('Bye!');
@@ -72,6 +75,8 @@ const dontCopy = [
 const copyConfig = {
   replace: {
     '{{name}}': name,
+    '{{titleName}}': titleName,
+    '{{camelName}}': camelName,
   },
   gitingore: true,
   exclude: dontCopy,
@@ -86,7 +91,7 @@ await cpTpl(
 if (template === 'games') {
   // add to packages/games as a dependency and
   // to the game map.
-  await addGameToGamesPackage(name);
+  await addGameToGamesPackage();
 }
 
 copySpinner.stop('Copying complete');
@@ -107,16 +112,15 @@ outro('Done!');
 
 // helpers
 
-async function addGameToGamesPackage(gameName) {
+async function addGameToGamesPackage() {
   const gamesPackage = path.resolve(__dirname, '../../packages/games');
   const gamesPackageJson = path.resolve(gamesPackage, 'package.json');
 
   const gamesPackageJsonContent = await fs.readFile(gamesPackageJson, 'utf-8');
   const gamesPackageJsonParsed = JSON.parse(gamesPackageJsonContent);
 
-  gamesPackageJsonParsed.dependencies[
-    `@long-game/game-${gameName}-definition`
-  ] = 'workspace:*';
+  gamesPackageJsonParsed.dependencies[`@long-game/game-${name}-definition`] =
+    'workspace:*';
 
   await fs.writeFile(
     gamesPackageJson,
@@ -132,12 +136,33 @@ async function addGameToGamesPackage(gameName) {
   const generatedLine = gamesIndexLines.findIndex((line) =>
     line.includes('// GENERATED - DO NOT REMOVE THIS LINE'),
   );
-  gamesIndexLines.splice(generatedLine, 0, `  [${gameName}.id]: ${gameName},`);
+  gamesIndexLines.splice(
+    generatedLine,
+    0,
+    `  [${camelName}.id]: ${camelName},`,
+  );
 
   // add the import to the top
   gamesIndexLines.unshift(
-    `import ${gameName} from '@long-game/game-${gameName}-definition';`,
+    `import ${camelName} from '@long-game/game-${name}-definition';`,
   );
 
   await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));
+}
+
+async function addGameDevTask() {
+  const tasksFilePath = path.resolve(__dirname, '../../.vscode/tasks.json');
+  const tasksFileContent = await fs.readFile(tasksFilePath, 'utf-8');
+  const tasksFileJson = JSON.parse(tasksFileContent);
+  const newTask = {
+    type: 'npm',
+    script: 'dev',
+    path: `games/${name}`,
+    problemMatcher: ['$tsc-watch'],
+    label: `🕹️ ${titleName} Dev`,
+    detail: 'pnpm --filter "./*" dev',
+  };
+  tasksFileJson.tasks.push(newTask);
+  await fs.writeFile(tasksFilePath, JSON.stringify(tasksFileJson, null, 2));
+  console.log(`Added dev task for ${name} to .vscode/tasks.json`);
 }

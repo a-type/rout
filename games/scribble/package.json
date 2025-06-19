@@ -1,0 +1,7 @@
+{
+  "name": "@long-game/game-scribble",
+  "scripts": {
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev",
+    "build": "pnpm --filter \"./*\" build"
+  }
+}
