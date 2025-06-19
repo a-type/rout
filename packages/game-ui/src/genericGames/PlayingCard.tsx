@@ -48,6 +48,7 @@ const PlayingCardRoot = memo(function PlayingCardRoot({
       <ExtremelySimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <SimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <DetailedCardContent cardSuit={cardSuit} cardRank={cardRank} />
+      {disabled && <Slash />}
       {playerId && (
         <PlayerAvatar
           playerId={playerId}
@@ -388,6 +389,22 @@ function CardSymbol({
     >
       {toDisplayRank(cardRank)}
     </ScalingText>
+  );
+}
+
+function Slash() {
+  return (
+    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 100 100">
+      <line
+        x1="10"
+        y1="-10"
+        x2="90"
+        y2="110"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
+        className="stroke-black"
+      />
+    </svg>
   );
 }
 
