@@ -26,6 +26,7 @@ import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerClass } from './PlayerClass';
 import { StatusChip } from '../perks/StatusChip';
 import { PlayerStatus } from './PlayerStatus';
+import { TeamChip } from '../teams/TeamChip';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -94,18 +95,7 @@ export function PlayerPage({ id }: { id: string }) {
           <span className="capitalize">{player.class}</span>
         </div>
         <div className="mb-1 text-md">
-          {team ? (
-            <Link
-              to={{
-                search: `?teamId=${team.id}`,
-              }}
-              className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
-            >
-              {team.icon} {team.name} ({team.wins} - {team.losses})
-            </Link>
-          ) : (
-            'Free Agent'
-          )}
+          {team ? <TeamChip id={team.id} /> : 'Free Agent'}
         </div>
         <div className="mb-2 text-md">
           Positions: {playerPositions.toUpperCase()}

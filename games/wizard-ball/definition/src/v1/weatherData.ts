@@ -129,4 +129,36 @@ export const weather = {
       },
     }),
   },
+  blessedRain: {
+    name: 'Blessed Rain',
+    icon: '✨',
+    color: '#eca334',
+    description:
+      'A mystical rain that blesses players when they make defensive plays.',
+    effect: () => ({
+      trigger: ({ event, player, gameState }) => {
+        if (event.kind !== 'defenderOut') {
+          return gameState;
+        }
+        player.statusIds.blessing = (player.statusIds.blessing ?? 0) + 1;
+        return gameState;
+      },
+    }),
+  },
+  bloodRain: {
+    name: 'Blood Rain',
+    icon: '🩸',
+    color: '#f44336',
+    description:
+      'A sinister rain that causes players to become injured when they get hits.',
+    effect: () => ({
+      trigger: ({ event, player, gameState }) => {
+        if (event.kind !== 'hit') {
+          return gameState;
+        }
+        player.statusIds.injured = (player.statusIds.injured ?? 0) + 1;
+        return gameState;
+      },
+    }),
+  },
 } satisfies Record<string, Weather>;
