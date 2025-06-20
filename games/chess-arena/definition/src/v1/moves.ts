@@ -181,9 +181,7 @@ export function isValidBishopMove(details: MoveDetails) {
       ) {
         // can't move onto or past own piece
         return false;
-      } else if (
-        details.board.cells[serializePosition({ x, y })]?.piece?.playerId
-      ) {
+      } else if (details.board.cells[serializePosition({ x, y })]?.piece) {
         // can't move past an opponent
         if (hasSeenOpponent) {
           return false;
