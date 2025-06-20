@@ -34,6 +34,7 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   disabled?: boolean;
   children?: ReactNode;
   DraggedContainer?: DraggedContainerComponent;
+  draggedClassName?: string;
 }
 
 function DraggableRoot({
@@ -121,7 +122,10 @@ function DraggableHandle({
         touchAction: disabled ? 'initial' : 'none',
         pointerEvents: isCandidate ? 'none' : 'auto',
       }}
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       ref={ref}
       role="button"
       aria-roledescription="draggable"
@@ -157,6 +161,10 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
    * makes adjustments on touch to avoid the user's finger.
    */
   DraggedContainer?: DraggedContainerComponent;
+  /**
+   * Only applied to the dragged preview element
+   */
+  draggedClassName?: string;
 }
 
 const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
@@ -169,6 +177,8 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   children,
   enabled,
   DraggedContainer,
+  draggedClassName,
+  className,
   ...rest
 }: DndOverlayPortalProps) {
   const draggable = useDraggableContext();
@@ -180,25 +190,30 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
     <>
       {isPortaling &&
         createPortal(
-          <DraggedRoot Container={DraggedContainer} {...rest}>
+          <DraggedRoot
+            Container={DraggedContainer}
+            {...rest}
+            className={clsx('pointer-events-none', className, draggedClassName)}
+          >
             {children}
           </DraggedRoot>,
           overlayEl,
         )}
-      <div className={clsx(isPortaling && 'invisible')}>
-        <AnimatePresence>
-          <motion.div
-            layoutId={draggable.id}
-            transition={flipTransition}
-            data-disabled={draggable.disabled}
-            data-draggable={draggable.id}
-            ref={draggable.disabled ? undefined : draggable.box.bind}
-            {...rest}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      {/* <div className={clsx(isPortaling && 'invisible')}> */}
+      <AnimatePresence>
+        <motion.div
+          layoutId={draggable.id}
+          transition={flipTransition}
+          data-disabled={draggable.disabled}
+          data-draggable={draggable.id}
+          ref={draggable.disabled ? undefined : draggable.box.bind}
+          className={className}
+          {...rest}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+      {/* </div> */}
     </>
   );
 });
@@ -230,8 +245,6 @@ const DraggedRoot = memo(function DraggedRoot({
     }
   }, [dragged.isDragged, dragged]);
 
-  // const finalRef = useMergedRef<HTMLDivElement>(dragged.box.bind, ref);
-
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
   return (
@@ -241,6 +254,9 @@ const DraggedRoot = memo(function DraggedRoot({
           layoutId={dragged.id}
           transition={flipTransition}
           data-draggable-preview={dragged.id}
+          data-dragging={dragged.isDragged}
+          data-candidate={dragged.isCandidate}
+          data-disabled={dragged.disabled}
         >
           {children}
         </motion.div>
@@ -254,11 +270,13 @@ export type DraggedContainerComponent = ComponentType<{
   draggable: DraggableContextValue;
   gesture: DragGestureContext;
   ref: Ref<HTMLDivElement> | undefined;
+  className?: string;
 }>;
 
 export const DefaultDraggedContainer: DraggedContainerComponent = ({
   children,
   ref,
+  className,
 }) => {
   const transform = useCenteredDragTransform(gesture);
   return (
@@ -269,6 +287,7 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
         zIndex: 1000000,
       }}
       ref={ref}
+      className={className}
     >
       {children}
     </motion.div>

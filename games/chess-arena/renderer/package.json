@@ -18,10 +18,12 @@
     "build": "pnpm build:ts && pnpm build:css && pnpm build:uno",
     "build:ts": "tsc",
     "build:css": "scripts css ./dist",
+    "build:images": "scripts images ./dist",
     "build:uno": "scripts uno ./dist",
     "dev": "pnpm run --filter @long-game/game-chess-arena-renderer --parallel \"/^dev:.*/\"",
     "dev:ts": "tsc -w --preserveWatchOutput",
     "dev:uno": "scripts uno ./dist -w",
+    "dev:images": "scripts images ./dist",
     "test": "vitest"
   },
   "dependencies": {

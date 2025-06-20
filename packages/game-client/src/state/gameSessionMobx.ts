@@ -240,7 +240,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       if (!currentTurn) return viewingRound.initialPlayerState;
 
       return this.gameDefinition.getProspectivePlayerState({
-        playerState: viewingRound.initialPlayerState,
+        playerState: toJS(viewingRound.initialPlayerState),
         prospectiveTurn: {
           data: currentTurn,
           playerId: this.playerId,
@@ -314,6 +314,38 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return err as GetTurnError<TGame>;
   }
 
+  validatePartialTurn = (
+    turnData:
+      | GetTurnData<TGame>
+      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
+  ) => {
+    if (!this.gameDefinition.validatePartialTurn)
+      return this.validateTurn(turnData);
+
+    const baseState = this.latestRound.initialPlayerState;
+    const roundIndex = this.latestRound.roundIndex;
+    const dataToValidate =
+      typeof turnData === 'function'
+        ? (turnData as any)(this.localTurnData ?? null)
+        : turnData;
+    const err = this.gameDefinition.validatePartialTurn({
+      members: this.members,
+      playerState: baseState,
+      roundIndex,
+      turn: {
+        playerId: this.playerId,
+        data: dataToValidate,
+      },
+    });
+
+    if (err) {
+      if (typeof err === 'string') {
+        return simpleError(err) as GetTurnError<TGame>;
+      }
+      return err as GetTurnError<TGame>;
+    }
+    return null;
+  };
   /**
    * Validate a potential turn without applying it to the client.
    * You can derive your new turn from the existing data with a function parameter.
@@ -329,7 +361,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
       typeof turnData === 'function'
         ? (turnData as any)(this.localTurnData ?? null)
         : turnData;
-    const err = this.gameDefinition.validateTurn({
+    const params = {
       members: this.members,
       playerState: baseState,
       roundIndex,
@@ -337,7 +369,10 @@ export class GameSessionSuite<TGame extends GameDefinition> {
         playerId: this.playerId,
         data: dataToValidate,
       },
-    });
+    };
+    const err =
+      this.gameDefinition.validatePartialTurn?.(params) ||
+      this.gameDefinition.validateTurn(params);
 
     if (err) {
       if (typeof err === 'string') {

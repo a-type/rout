@@ -274,6 +274,8 @@ importers:
         specifier: ^3.99.0
         version: 3.99.0(@cloudflare/workers-types@4.20250124.3)
 
+  games/chess-arena: {}
+
   games/chess-arena/definition:
     dependencies:
       '@long-game/common':
@@ -329,6 +331,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/gudnak: {}
 
   games/gudnak/definition:
     dependencies:
@@ -410,6 +414,8 @@ importers:
         specifier: 'catalog:'
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
 
+  games/hearts: {}
+
   games/hearts/definition:
     dependencies:
       '@long-game/common':
@@ -466,6 +472,8 @@ importers:
         specifier: 'catalog:'
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
 
+  games/number-guess: {}
+
   games/number-guess/definition:
     dependencies:
       '@long-game/game-definition':
@@ -515,6 +523,8 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.8.3
+
+  games/scribble: {}
 
   games/scribble/definition:
     dependencies:
@@ -856,6 +866,9 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
+      '@long-game/game-chess-arena-renderer':
+        specifier: workspace:*
+        version: link:../../games/chess-arena/renderer
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../game-client

@@ -125,7 +125,7 @@ export function useMaybeTokenSpaceContext() {
 function TokenSpaceValidationMessage({ message }: { message: string }) {
   if (!message) return null;
   return (
-    <div className="absolute bottom-100% left-1/2 translate-[-50%,0.5rem] w-80% flex justify-center">
+    <div className="absolute bottom-100% left-1/2 translate-[-50%,0.5rem] w-600px flex justify-center">
       <Box
         surface="attention"
         p="lg"

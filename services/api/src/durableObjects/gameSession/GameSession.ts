@@ -525,7 +525,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       currentRoundIndex - 1,
     );
 
-    const validationError = gameDefinition.validateTurn({
+    const params = {
       turn: {
         data: turn,
         playerId,
@@ -533,7 +533,10 @@ export class GameSession extends DurableObject<ApiBindings> {
       playerState,
       roundIndex: currentRoundIndex,
       members,
-    });
+    };
+    const validationError =
+      gameDefinition.validatePartialTurn?.(params) ||
+      gameDefinition.validateTurn(params);
     if (validationError) {
       const msg =
         typeof validationError === 'string'

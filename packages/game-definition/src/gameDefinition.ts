@@ -58,6 +58,28 @@ export type GameDefinition<
     members: GameMember[];
   }) => TurnError | string | void;
   /**
+   * Like `validateTurn`, but for incomplete turns. If a player's
+   * turn includes multiple steps or moves, this can be used to
+   * do a more lenient validation to decide if a particular step
+   * or move is a valid next step in the turn.
+   *
+   * When `validatePartialTurn` is provided, it will always be called
+   * before `validateTurn`, so you don't have to duplicate validation
+   * rules between the two.
+   *
+   * Unlike the name implies, the turn data must still conform to the
+   * full TurnData type. If you want to support partial validation, you
+   * should design your TurnData such that a partial turn satisfies it.
+   * For example, explicitly marking fields as optional and validating
+   * they exist in `validateTurn`. Or storing multiple moves in an array.
+   */
+  validatePartialTurn?: (data: {
+    playerState: PlayerState;
+    turn: LocalTurn<TurnData>;
+    roundIndex: number;
+    members: GameMember[];
+  }) => TurnError | string | void;
+  /**
    * Returns the player state as it would be if the player made the move.
    * This may not be the same as the final computed player state, since
    * we may not want to reveal information about the global state. But,

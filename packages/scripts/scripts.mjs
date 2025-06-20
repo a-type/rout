@@ -80,7 +80,7 @@ const commands = {
     },
   },
   images: {
-    // copies all CSS files from src/ to dist/ with the same
+    // copies all png files from src/ to dist/ with the same
     // folder structure
     run: async () => {
       const cwd = process.cwd();

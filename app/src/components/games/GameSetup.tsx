@@ -135,7 +135,7 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
           return (
             <PeopleGridItem asChild key={entry.id}>
               <button
-                className="b-none color-inherit text-sm cursor-pointer hover:bg-gray-2 focus-visible:focus-shadow"
+                className="b-none color-inherit text-sm cursor-pointer hover:bg-gray-wash focus-visible:focus-shadow"
                 disabled={
                   entry.status !== 'declined' && entry.status !== 'uninvited'
                 }

@@ -65,6 +65,7 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   draggable,
   gesture,
   ref,
+  ...rest
 }) => {
   const dampenedX = useTransform(() => {
     if (!draggable.isCandidate) {
@@ -96,6 +97,7 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     <motion.div
       style={{ position: 'absolute', transform, zIndex: 1000000 }}
       ref={ref}
+      {...rest}
     >
       {children}
     </motion.div>
