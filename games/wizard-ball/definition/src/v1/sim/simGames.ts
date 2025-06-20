@@ -39,6 +39,7 @@ import {
 import { advanceRunnerForced, advanceAllRunners } from './runners';
 import { determineSwing, determineContact } from './swing';
 import { checkTriggerEvent } from './trigger';
+import { determineClutchFactor } from './clutch';
 
 export const logger = new Logger('state');
 // const logger = new Logger('console');
@@ -319,6 +320,8 @@ export function simulatePitch(
   const pitcherId = getCurrentPitcher(gameState);
   const pitcher = league.playerLookup[pitcherId];
   let nextBatter = false;
+  const initialRuns = gameState.teamData[gameState.battingTeam].score;
+  const initialClutchFactor = determineClutchFactor(gameState);
 
   const pitchData = determinePitchType(
     random,
@@ -366,7 +369,7 @@ export function simulatePitch(
 
   // Update the game state based on the outcome
   switch (outcome) {
-    case 'ball':
+    case 'ball': {
       // Increment ball count
       gameState.balls += 1;
       if (gameState.balls >= 4) {
@@ -377,12 +380,16 @@ export function simulatePitch(
         gameState = addToPlayerStats(gameState, pitcherId, {
           pWalks: 1,
         });
+        const runsScored =
+          gameState.teamData[gameState.battingTeam].score - initialRuns;
         gameState = logger.addToGameLog(
           {
             kind: 'walk',
             batterId,
             pitcherId,
             pitchData: logsPitchData(pitchData),
+            runsScored,
+            important: runsScored > 0,
           },
           gameState,
         );
@@ -404,6 +411,7 @@ export function simulatePitch(
         gameState = determineSteal(random, gameState, league, pitchData);
       }
       break;
+    }
     case 'strike':
       // Increment strike count
       gameState.strikes += 1;
@@ -424,11 +432,13 @@ export function simulatePitch(
             pitcherId,
             swung: batterSwung,
             pitchData: logsPitchData(pitchData),
+            // TODO: Revisit later
+            important: false, //true,
           },
           gameState,
         );
 
-        checkTriggerEvent(
+        gameState = checkTriggerEvent(
           {
             kind: 'strikeout',
             isPitcher: false,
@@ -439,7 +449,7 @@ export function simulatePitch(
           random,
           pitchData,
         );
-        checkTriggerEvent(
+        gameState = checkTriggerEvent(
           {
             kind: 'strikeout',
             isPitcher: true,
@@ -488,7 +498,7 @@ export function simulatePitch(
         gameState,
       );
       break;
-    case 'out':
+    case 'out': {
       // TODO: Handle sacrifice hits
       if (!hitResult) {
         throw new Error('Hit result is undefined');
@@ -496,7 +506,7 @@ export function simulatePitch(
 
       let outCount = 1;
       let result: HitGameLogEvent['kind'] = 'out';
-      checkTriggerEvent(
+      gameState = checkTriggerEvent(
         {
           kind: 'defenderOut',
         },
@@ -595,6 +605,9 @@ export function simulatePitch(
         outsPitched: outCount,
       });
 
+      const runsScored =
+        gameState.teamData[gameState.battingTeam].score - initialRuns;
+
       gameState = logger.addToGameLog(
         {
           kind: result,
@@ -608,39 +621,18 @@ export function simulatePitch(
           hitTable: hitResult.hitTable,
           defenderRating: hitResult.defenderRating,
           pitchData: logsPitchData(pitchData),
+          runsScored,
+          important: runsScored > 0,
         },
         gameState,
       );
       nextBatter = true;
       break;
+    }
     case 'hit':
     case 'double':
     case 'triple':
     case 'homeRun':
-      checkTriggerEvent(
-        {
-          kind: 'hit',
-          outcome,
-          isPitcher: false,
-        },
-        batterId,
-        gameState,
-        league,
-        random,
-        pitchData,
-      );
-      checkTriggerEvent(
-        {
-          kind: 'hit',
-          outcome,
-          isPitcher: true,
-        },
-        pitcherId,
-        gameState,
-        league,
-        random,
-        pitchData,
-      );
       // Apply hit to the game state
       gameState = addToPlayerStats(gameState, batterId, { atBats: 1, hits: 1 });
       gameState = addToPlayerStats(gameState, pitcherId, {
@@ -649,22 +641,6 @@ export function simulatePitch(
       if (!hitResult) {
         throw new Error('Hit result is undefined');
       }
-      gameState = logger.addToGameLog(
-        {
-          kind: outcome,
-          batterId,
-          pitcherId,
-          type: hitResult.hitType,
-          direction: hitResult.hitArea,
-          power: hitResult.hitPower,
-          defender: hitResult.defender,
-          defenderId: hitResult.defenderId,
-          hitTable: hitResult.hitTable,
-          defenderRating: hitResult.defenderRating,
-          pitchData: logsPitchData(pitchData),
-        },
-        gameState,
-      );
       if (outcome === 'double') {
         gameState = addToPlayerStats(gameState, batterId, { doubles: 1 });
       } else if (outcome === 'triple') {
@@ -681,6 +657,51 @@ export function simulatePitch(
         });
       }
       gameState = applyHit(gameState, league, outcome);
+      const runsScored =
+        gameState.teamData[gameState.battingTeam].score - initialRuns;
+      gameState = logger.addToGameLog(
+        {
+          kind: outcome,
+          batterId,
+          pitcherId,
+          type: hitResult.hitType,
+          direction: hitResult.hitArea,
+          power: hitResult.hitPower,
+          defender: hitResult.defender,
+          defenderId: hitResult.defenderId,
+          hitTable: hitResult.hitTable,
+          defenderRating: hitResult.defenderRating,
+          pitchData: logsPitchData(pitchData),
+          runsScored,
+
+          important: runsScored > 0,
+        },
+        gameState,
+      );
+      gameState = checkTriggerEvent(
+        {
+          kind: 'hit',
+          outcome,
+          isPitcher: false,
+        },
+        batterId,
+        gameState,
+        league,
+        random,
+        pitchData,
+      );
+      gameState = checkTriggerEvent(
+        {
+          kind: 'hit',
+          outcome,
+          isPitcher: true,
+        },
+        pitcherId,
+        gameState,
+        league,
+        random,
+        pitchData,
+      );
       league = updatePlayerHeat('batting', batterId, league, outcome);
       league = updatePlayerHeat('pitching', pitcherId, league, outcome);
       nextBatter = true;

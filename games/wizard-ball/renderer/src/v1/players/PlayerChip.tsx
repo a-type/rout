@@ -36,7 +36,7 @@ export function PlayerChip({
         <span
           className={clsx(
             noBackground ? '' : 'p-1 bg-gray-800 hover:bg-gray-700',
-            'inline-flex flex-row items-center gap-1 rounded cursor-pointer ',
+            'inline-flex flex-row items-center gap-0 rounded cursor-pointer ',
           )}
         >
           {!noTeamIcon &&

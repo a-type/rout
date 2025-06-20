@@ -3,6 +3,7 @@ import type {
   GameLogEvent,
   HitGameLogEvent,
   LogsPitchData,
+  TriggerSource,
 } from '@long-game/game-wizard-ball-definition';
 import { TeamName } from '../teams/TeamName';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
@@ -11,6 +12,7 @@ import {
   hitDirectionToString,
   hitTypeToString,
   nthToString,
+  numberToWord,
   pitchQualityToString,
   roundFloat,
   toPercentage,
@@ -18,6 +20,10 @@ import {
 import { useGameResults } from '../useGameResults';
 import { PlayerChip } from '../players/PlayerChip';
 import { TooltipPlus } from '../TooltipPlus';
+import { WeatherChip } from '../WeatherChip';
+import { BallparkChip } from '../BallparkChip';
+import { PerkChip } from '../perks/PerkChip';
+import { ItemChip, ItemDefChip } from '../items/ItemChip';
 
 export function ContactInfoTooltip({
   contactChance,
@@ -56,6 +62,12 @@ export function ContactInfoTooltip({
       </span>
     </TooltipPlus>
   );
+}
+
+export function runsScoredToString(runs: number) {
+  return runs > 0
+    ? `${capitalize(numberToWord(runs))} run${runs > 1 ? 's' : ''} scored!`
+    : null;
 }
 
 export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
@@ -104,6 +116,24 @@ export function PitchChip({ pitchData }: { pitchData: LogsPitchData }) {
       </span>
     </TooltipPlus>
   );
+}
+
+export function SourceChip({ source }: { source: TriggerSource }) {
+  if (source.kind === 'weather') {
+    // @ts-expect-error
+    return <WeatherChip id={source.id} />;
+  }
+  if (source.kind === 'ballpark') {
+    // @ts-expect-error
+    return <BallparkChip id={source.id} />;
+  }
+  if (source.kind === 'perk') {
+    return <PerkChip id={source.id} />;
+  }
+  if (source.kind === 'item') {
+    return <ItemDefChip id={source.id} />;
+  }
+  return <span className="text-gray-300">{source.id}</span>;
 }
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
@@ -165,6 +195,22 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
             </div>
           </div>
           <hr className="w-full h-1 border-none bg-gray-500" />
+        </div>
+      );
+
+    case 'trigger':
+      return (
+        <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start gap-1">
+            <div>
+              <PlayerChip noPositions id={event.playerId} /> triggered an effect
+              from
+              <div className="inline-flex mx-1">
+                <SourceChip source={event.source} />
+              </div>
+              : {event.description}
+            </div>
+          </div>
         </div>
       );
 
@@ -243,7 +289,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
           <PitchChip pitchData={event.pitchData} /> to{' '}
           {hitDirectionToString(event.direction)} (
           {event.defender?.toUpperCase()})!{' '}
-          <PlayerChip noPositions id={event.pitcherId} /> gives up a hit.
+          {runsScoredToString(event.runsScored)}
+          <PlayerChip noPositions id={event.pitcherId} /> gives up the hit.
           <ContactInfoTooltip contactChance={event.pitchData.contactChance} />
           <HitTableInfo event={event} />
         </>
@@ -256,6 +303,7 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
           {hitTypeToString(event.type)} home run on a{' '}
           <PitchChip pitchData={event.pitchData} /> to{' '}
           {hitDirectionToString(event.direction)} !{' '}
+          {runsScoredToString(event.runsScored)}
           <PlayerChip noPositions id={event.pitcherId} /> gives up a home run.
           <ContactInfoTooltip contactChance={event.pitchData.contactChance} />
           <HitTableInfo event={event} />
@@ -270,7 +318,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
           {hitTypeToString(event.type)} triple on a{' '}
           <PitchChip pitchData={event.pitchData} /> to{' '}
           {hitDirectionToString(event.direction)} (
-          {event.defender?.toUpperCase()}) !{' '}
+          {event.defender?.toUpperCase()})!{' '}
+          {runsScoredToString(event.runsScored)}
           <PlayerChip noPositions id={event.pitcherId} /> gives up a triple.
           <ContactInfoTooltip contactChance={event.pitchData.contactChance} />
           <HitTableInfo event={event} />
@@ -285,7 +334,8 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
           {hitTypeToString(event.type)} double on a{' '}
           <PitchChip pitchData={event.pitchData} /> to{' '}
           {hitDirectionToString(event.direction)} (
-          {event.defender?.toUpperCase()}) !{' '}
+          {event.defender?.toUpperCase()})!{' '}
+          {runsScoredToString(event.runsScored)}
           <PlayerChip noPositions id={event.pitcherId} /> gives up a double.
           <ContactInfoTooltip contactChance={event.pitchData.contactChance} />
           <HitTableInfo event={event} />
@@ -296,6 +346,7 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
         <>
           <PlayerChip noPositions id={event.batterId} /> walks on a{' '}
           <PitchChip pitchData={event.pitchData} />!{' '}
+          {runsScoredToString(event.runsScored)}
           <PlayerChip noPositions id={event.pitcherId} /> gives up a walk.
         </>
       );

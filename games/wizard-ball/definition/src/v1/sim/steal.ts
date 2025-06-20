@@ -77,7 +77,7 @@ function attemptSteal(
     });
   }
 
-  checkTriggerEvent(
+  gameState = checkTriggerEvent(
     {
       kind: 'steal',
       success: isSuccessful,

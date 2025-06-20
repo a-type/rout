@@ -1,15 +1,17 @@
 import { hooks } from '../gameClient';
-import { Tabs } from '@a-type/ui';
-import { useState, useTransition } from 'react';
+import { Tabs, TabsContent } from '@a-type/ui';
+import { useTransition } from 'react';
 import { GameLog } from './GameLog';
 import { GameBoxScore } from './GameBoxScore';
 import { useGameResults } from '../useGameResults';
 import { WeatherChip } from '../WeatherChip';
 import { BallparkChip } from '../BallparkChip';
 import { ScheduledGamePage } from './ScheduledGamePage';
+import { useSearchParams } from 'react-router';
+import { GameSummary } from './GameSummary';
 
 export function GamePage({ id }: { id: string }) {
-  const [tab, setTab] = useState<'boxScore' | 'gameLog'>('boxScore');
+  const [params, setParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { finalState } = hooks.useGameSuite();
   const game = useGameResults({ id });
@@ -28,10 +30,14 @@ export function GamePage({ id }: { id: string }) {
   const awayTeamScore = game.score[game.awayTeamId];
   return (
     <Tabs
-      value={tab}
+      value={params.get('view') || 'summary'}
       onValueChange={(tab) => {
         startTransition(() => {
-          setTab(tab as any);
+          setParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set('view', tab);
+            return newParams;
+          });
         });
       }}
     >
@@ -49,6 +55,9 @@ export function GamePage({ id }: { id: string }) {
         </h1>
         <div className="flex flex-row gap-2 items-center mb-2">
           <Tabs.List className="mb-0">
+            <Tabs.Trigger value="summary" className="p-1">
+              Summary
+            </Tabs.Trigger>
             <Tabs.Trigger value="boxScore" className="p-1">
               Box Score
             </Tabs.Trigger>
@@ -63,11 +72,19 @@ export function GamePage({ id }: { id: string }) {
         </div>
         {isPending ? (
           <div className="text-gray-500">Loading...</div>
-        ) : tab === 'boxScore' ? (
-          <GameBoxScore id={id} />
-        ) : tab === 'gameLog' ? (
-          <GameLog id={id} />
-        ) : null}
+        ) : (
+          <>
+            <TabsContent value="summary">
+              <GameSummary id={id} />
+            </TabsContent>
+            <TabsContent value="boxScore">
+              <GameBoxScore id={id} />
+            </TabsContent>
+            <TabsContent value="gameLog">
+              <GameLog id={id} />
+            </TabsContent>
+          </>
+        )}
       </div>
     </Tabs>
   );
