@@ -94,29 +94,41 @@ export class UserStore extends RpcTarget {
       };
     }
 
-    const query = this.#db
-      .selectFrom('User as u')
-      .leftJoin('Friendship as f1', 'u.id', 'f1.userId')
-      .leftJoin('Friendship as f2', 'u.id', 'f2.friendId')
-      .where('u.id', '=', id)
+    const user = await this.getPublicUserProfile(id);
+
+    const friendship = await this.#db
+      .selectFrom('Friendship')
       .where((eb) =>
         eb.or([
-          eb('f1.userId', '=', this.#userId),
-          eb('f1.friendId', '=', this.#userId),
-          eb('f2.userId', '=', this.#userId),
-          eb('f2.friendId', '=', this.#userId),
+          eb('Friendship.userId', '=', this.#userId),
+          eb('Friendship.friendId', '=', this.#userId),
         ]),
       )
-      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl'])
-      .select((eb) => eb('u.imageUrl', 'is not', null).as('hasAvatar'));
-    const user = await query.executeTakeFirst();
+      .where((eb) =>
+        eb.or([
+          eb('Friendship.userId', '=', id),
+          eb('Friendship.friendId', '=', id),
+        ]),
+      )
+      .selectAll()
+      .executeTakeFirst();
 
     return this.#fillUserDefaults({
       id,
-      isFriend: !!user,
+      isFriend: !!friendship,
       isMe: false,
       ...user,
     });
+  }
+
+  async getPublicUserProfile(id: PrefixedId<'u'>) {
+    const query = this.#db
+      .selectFrom('User as u')
+      .where('u.id', '=', id)
+      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl'])
+      .select((eb) => eb('u.imageUrl', 'is not', null).as('hasAvatar'));
+    const user = await query.executeTakeFirst();
+    return user;
   }
 
   async updateMe({

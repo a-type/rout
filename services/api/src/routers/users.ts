@@ -178,7 +178,7 @@ export const usersRouter = new Hono<Env>()
     async (ctx) => {
       const user = await ctx
         .get('userStore')
-        .getUser(ctx.req.valid('param').id);
+        .getPublicUserProfile(ctx.req.valid('param').id);
       if (!user) {
         throw new LongGameError(LongGameError.Code.NotFound, 'User not found');
       }
