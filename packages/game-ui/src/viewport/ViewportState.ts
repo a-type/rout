@@ -697,7 +697,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       x: bounds.x + width / 2,
       y: bounds.y + height / 2,
     };
-    this.rawMove(center, zoom, { origin });
+    this.move(center, zoom, { origin });
   };
 
   fitEverythingOnScreen = (options?: {
@@ -711,8 +711,8 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
 
     return this.fitOnScreen(
       {
-        x: panLimits.min.x,
-        y: panLimits.min.y,
+        x: panLimits.min.x - this.contentOffset.x,
+        y: panLimits.min.y - this.contentOffset.y,
         width: panLimits.max.x - panLimits.min.x,
         height: panLimits.max.y - panLimits.min.y,
       },
