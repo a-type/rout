@@ -32,7 +32,6 @@
     "react-dom": "catalog:"
   },
   "dependencies": {
-    "@a-type/react-space": "catalog:",
     "@a-type/utils": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",

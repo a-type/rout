@@ -29,5 +29,5 @@
     "customConditions": ["development"]
   },
   "include": ["src"],
-  "references": [{ "path": "../services" }]
+  "references": [{ "path": "../services/api" }]
 }

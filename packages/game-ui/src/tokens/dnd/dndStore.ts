@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/shallow';
 import { dndEvents } from './dndEvents';
 import { DragGestureContext } from './gestureStore';
 
@@ -92,6 +93,7 @@ export const useDndStore = create<DndStoreValue>()(
         });
       },
       setOverRegion: (regionId: string | null) => {
+        if (get().overRegion === regionId) return;
         set((state) => {
           state.overRegion = regionId;
         });
@@ -112,3 +114,16 @@ export const useDndStore = create<DndStoreValue>()(
 );
 
 (window as any).dndStore = useDndStore; // For debugging in browser console
+
+export function useDraggedData() {
+  return useDndStore(
+    useShallow((state) => {
+      const dragging = state.dragging;
+      if (!dragging) return null;
+      return {
+        id: dragging,
+        data: state.data[dragging],
+      };
+    }),
+  );
+}

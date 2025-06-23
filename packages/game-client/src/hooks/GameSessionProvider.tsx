@@ -85,7 +85,9 @@ export function useChat() {
   };
 }
 
-export function typedHooks<TGame extends GameDefinition>() {
+export function typedHooks<
+  TGame extends GameDefinition<any, any, any, any, any, any>,
+>() {
   function useGameSuiteTyped() {
     return useGameSuite<TGame>();
   }

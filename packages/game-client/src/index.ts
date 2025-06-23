@@ -1,3 +1,4 @@
+export { toJS } from 'mobx';
 export * from './fetch';
 export * from './hooks';
 export * from './hooks/GameSessionProvider';

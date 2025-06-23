@@ -18,7 +18,11 @@ export class GameRandom {
     return min + this.random() * (max - min);
   }
 
-  int(min = 0, max = 1) {
+  /**
+   * @param min - Inclusive lower bound
+   * @param max - Exclusive upper bound
+   */
+  int(min = 0, max = 10) {
     return Math.floor(this.float(min, max));
   }
 

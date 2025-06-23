@@ -1,5 +1,5 @@
 import { Box, BoxProps, Button, CollapsibleSimple, Icon } from '@a-type/ui';
-import { useGameSuite } from '@long-game/game-client';
+import { withGame } from '@long-game/game-client';
 import { BaseTurnError } from '@long-game/game-definition';
 
 export interface TurnErrorProps<TErr> extends BoxProps {
@@ -7,28 +7,30 @@ export interface TurnErrorProps<TErr> extends BoxProps {
   renderError?: (error: TErr) => React.ReactNode;
 }
 
-export function TurnError<TErr extends BaseTurnError = BaseTurnError>({
-  showReset,
-  renderError = (error: TErr) => error.message,
-  ...props
-}: TurnErrorProps<TErr>) {
-  const suite = useGameSuite();
-  const err = suite.turnError;
+export const TurnError = withGame<TurnErrorProps<BaseTurnError>>(
+  function TurnError({
+    showReset,
+    renderError = (error: BaseTurnError) => error.message,
+    gameSuite: suite,
+    ...props
+  }) {
+    const err = suite.turnError;
 
-  return (
-    <CollapsibleSimple open={!!err}>
-      <Box items="center" {...props}>
-        {err && renderError(err as TErr)}
-        {showReset && (
-          <Button
-            color="ghostDestructive"
-            onClick={() => suite.prepareTurn(null)}
-            className="ml-auto"
-          >
-            <Icon name="refresh" /> Reset
-          </Button>
-        )}
-      </Box>
-    </CollapsibleSimple>
-  );
-}
+    return (
+      <CollapsibleSimple open={!!err}>
+        <Box items="center" {...props}>
+          {err && renderError(err)}
+          {showReset && (
+            <Button
+              color="ghostDestructive"
+              onClick={() => suite.prepareTurn(null)}
+              className="ml-auto"
+            >
+              <Icon name="refresh" /> Reset
+            </Button>
+          )}
+        </Box>
+      </CollapsibleSimple>
+    );
+  },
+);

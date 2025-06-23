@@ -1,3 +1,4 @@
+export * from './assert.js';
 export * from './board.js';
 export * from './brand.js';
 export * from './chat.js';

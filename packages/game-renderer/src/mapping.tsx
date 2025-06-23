@@ -45,6 +45,22 @@ const moduleMap = {
         return { default: () => null };
       }),
   },
+  ['chess-arena']: {
+    main: () => import('@long-game/game-chess-arena-renderer'),
+    css: () =>
+      import('@long-game/game-chess-arena-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for chess-arena');
+        return { default: () => null };
+      }),
+  },
+  ['gunboats']: {
+    main: () => import('@long-game/game-gunboats-renderer'),
+    css: () =>
+      import('@long-game/game-gunboats-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for gunboats');
+        return { default: () => null };
+      }),
+  },
 };
 
 const packageCache: Record<string, Promise<GameRendererModule>> = {};

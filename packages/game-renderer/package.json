@@ -21,9 +21,11 @@
     "@long-game/game-scribble-renderer": "workspace:*",
     "@long-game/game-hearts-renderer": "workspace:*",
     "@long-game/game-wizard-ball-renderer": "workspace:*",
+    "@long-game/game-chess-arena-renderer": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
-    "@long-game/game-definition": "workspace:*"
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/game-gunboats-renderer": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:"

@@ -1,6 +1,7 @@
-import { Box } from '@a-type/ui';
 import { DefaultChatMessage } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
+import { Gameplay } from './Gameplay.js';
+import { GameRecap } from './GameRecap.js';
 
 // note: withGame can take a generic <Props> which adds more accepted
 // props to your wrapped component. withGame always provides gameSuite,
@@ -16,14 +17,3 @@ export const Client = hooks.withGame(function Client({ gameSuite }) {
 });
 
 export const ChatMessage = DefaultChatMessage;
-
-// perhaps you'll want to move these to other modules.
-
-const Gameplay = hooks.withGame(function Gameplay({ gameSuite }) {
-  const { initialState } = gameSuite;
-  return <Box>{JSON.stringify(initialState)}</Box>;
-});
-
-const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
-  return <Box>Game over!</Box>;
-});

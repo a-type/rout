@@ -23,7 +23,6 @@ export class DropRegions {
         this.unregister(id);
       };
     }
-    console.debug('Registering drop region', id);
     element.setAttribute(REGION_ID_ATTR, id);
     this.elements.set(id, element);
     this.regions.set(id, element.getBoundingClientRect());

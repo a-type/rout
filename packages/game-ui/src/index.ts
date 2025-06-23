@@ -1,6 +1,3 @@
-export * from './board/GameBoard';
-export * from './board/GamePiece';
-export * from './board/GamePlacement';
 export * from './chat/ChatForm';
 export * from './chat/DefaultChatMessage';
 export * from './chat/SpatialChat';
@@ -16,9 +13,9 @@ export * from './tokens/index';
 export * from './turns/DelayedSubmitUndo';
 export * from './turns/SubmitTurn';
 export * from './turns/TurnError';
+export * from './viewport/Viewport';
 export * from './withSuspense';
 
-export * from '@a-type/react-space';
 export * from '@long-game/visual-components';
 
 import '@long-game/visual-components/css.css';

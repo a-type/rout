@@ -1,8 +1,8 @@
 import { useStableCallback } from '@a-type/ui';
-import { HTMLProps, useEffect, useMemo, useRef } from 'react';
+import { HTMLProps, useEffect, useRef } from 'react';
 import { useMergedRef } from '../../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
-import { DraggableData, useDndStore } from './dndStore';
+import { DraggableData, useDndStore, useDraggedData } from './dndStore';
 import { dropRegions, REGION_ID_ATTR } from './DropRegions';
 import { DragGestureContext } from './gestureStore';
 
@@ -45,18 +45,12 @@ export function Droppable<T = any>({
     });
   }, [id, dropCb, stableAccept, stableOnReject]);
 
-  const isOverRaw = useDndStore((state) => state.overRegion === id);
-  const draggedId = useDndStore((state) => state.dragging);
-  const draggedData = useDndStore((state) =>
-    draggedId ? state.data[draggedId] : undefined,
+  const isDraggedOverThisRegion = useDndStore(
+    (state) => state.overRegion === id,
   );
-  const unvalidatedOver = useMemo(
-    () =>
-      isOverRaw && draggedId ? { id: draggedId, data: draggedData } : null,
-    [draggedId, isOverRaw, draggedData],
-  );
-  const rejected = unvalidatedOver && accept && !accept(unvalidatedOver);
-  const isOver = isOverRaw && unvalidatedOver && !rejected;
+  const draggedData = useDraggedData();
+  const rejected = accept && draggedData && !accept(draggedData);
+  const isOver = isDraggedOverThisRegion && !rejected;
 
   const wasOverRef = useRef(false);
   useEffect(() => {
@@ -70,7 +64,10 @@ export function Droppable<T = any>({
   }, [isOver, id]);
 
   const stableOnOver = useStableCallback(onOver);
+  const unvalidatedOver = isDraggedOverThisRegion ? draggedData : null;
   useEffect(() => {
+    console.log(`Droppable ${id} onOver`, unvalidatedOver);
+    // Call the stable callback with
     stableOnOver?.(unvalidatedOver);
   }, [stableOnOver, unvalidatedOver]);
 
@@ -96,7 +93,9 @@ export function Droppable<T = any>({
       data-role="droppable"
       ref={finalRef}
       data-over={isOver}
-      data-over-rejected={rejected}
+      data-over-rejected={rejected && isDraggedOverThisRegion}
+      data-dragged-rejected={rejected}
+      data-dragged-accepted={!!draggedData && !rejected}
       {...rest}
     >
       {children}

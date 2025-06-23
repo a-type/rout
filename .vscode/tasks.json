@@ -5,7 +5,7 @@
       "type": "npm",
       "script": "dev",
       "problemMatcher": [],
-      "label": "Dev",
+      "label": "💽 Core Dev",
       "detail": "turbo run dev"
     },
     {
@@ -54,6 +54,14 @@
       "path": "games/wizard-ball",
       "problemMatcher": ["$tsc-watch"],
       "label": "⚾ Wizard Ball Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/gunboats",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "🚢 Gunboats Dev",
       "detail": "pnpm --filter \"./*\" dev"
     }
   ]

@@ -30,7 +30,7 @@
 
     "composite": true
   },
-  "include": ["src", "../packages/game-ui/src/push"],
+  "include": ["src"],
   "references": [
     {
       "path": "../packages/game-ui"

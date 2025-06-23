@@ -92,6 +92,8 @@ if (template === 'games') {
   // add to packages/games as a dependency and
   // to the game map.
   await addGameToGamesPackage();
+  await addGameToRendererPackage();
+  await addGameDevTask();
 }
 
 copySpinner.stop('Copying complete');
@@ -148,6 +150,34 @@ async function addGameToGamesPackage() {
   );
 
   await fs.writeFile(gamesIndex, gamesIndexLines.join('\n'));
+}
+
+async function addGameToRendererPackage() {
+  const gameRendererPackage = path.resolve(
+    __dirname,
+    '../../packages/game-renderer',
+  );
+  const gameRendererPackageJson = path.resolve(
+    gameRendererPackage,
+    'package.json',
+  );
+
+  const gameRendererPackageJsonContent = await fs.readFile(
+    gameRendererPackageJson,
+    'utf-8',
+  );
+  const gameRendererPackageJsonParsed = JSON.parse(
+    gameRendererPackageJsonContent,
+  );
+
+  gameRendererPackageJsonParsed.dependencies[
+    `@long-game/game-${name}-renderer`
+  ] = 'workspace:*';
+
+  await fs.writeFile(
+    gameRendererPackageJson,
+    JSON.stringify(gameRendererPackageJsonParsed, null, 2),
+  );
 }
 
 async function addGameDevTask() {

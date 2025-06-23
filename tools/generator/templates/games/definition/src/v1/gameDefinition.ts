@@ -1,4 +1,8 @@
-import { GameDefinition, roundFormat } from '@long-game/game-definition';
+import {
+  GameDefinition,
+  roundFormat,
+  type BaseTurnError,
+} from '@long-game/game-definition';
 
 export type GlobalState = {
   // TODO: internal state the server manages
@@ -12,11 +16,15 @@ export type TurnData = {
   // TODO: what data can players submit in their moves?
 };
 
+// optional: extend the validation error type with your own metadata
+export type TurnError = BaseTurnError;
+
 export const gameDefinition: GameDefinition<
   GlobalState,
   PlayerState,
   TurnData,
-  TurnData
+  TurnData,
+  TurnError
 > = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -33,20 +41,24 @@ export const gameDefinition: GameDefinition<
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
+    return {};
   },
 
   // run on server
 
   getInitialGlobalState: ({ members }) => {
     // TODO: return the initial global state. possibly randomizing initial conditions.
+    return {};
   },
 
   getPlayerState: ({ globalState, playerId }) => {
     // TODO: compute the player state from the global state
+    return {};
   },
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
     // TODO: how does the round affect the global state?
+    return globalState;
   },
 
   getPublicTurn: ({ turn }) => {
@@ -57,5 +69,8 @@ export const gameDefinition: GameDefinition<
 
   getStatus: ({ globalState, rounds }) => {
     // TODO: when is the game over? who won?
+    return {
+      status: 'active',
+    };
   },
 };

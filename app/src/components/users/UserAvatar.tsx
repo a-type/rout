@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, AvatarProps } from '@a-type/ui';
+import { Avatar, AvatarProps, clsx } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withSuspense } from '@long-game/game-ui';
 
@@ -21,7 +21,7 @@ export const UserAvatar = withSuspense(
         imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
         name={user.displayName}
         crossOrigin="use-credentials"
-        className="aspect-1 overflow-hidden"
+        className={clsx('aspect-1 overflow-hidden', rest.className)}
       />
     );
   },
@@ -42,7 +42,7 @@ export const MyAvatar = withSuspense(
         imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
         name={user?.displayName}
         crossOrigin="use-credentials"
-        className="aspect-1 overflow-hidden"
+        className={clsx('aspect-1 overflow-hidden', props.className)}
       />
     );
   },
