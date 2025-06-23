@@ -53,7 +53,6 @@ export function ViewportContent({
   useEffect(
     () =>
       viewport.subscribe('zoomChanged', (zoomValue, origin) => {
-        console.log('Zoom changed:', zoomValue, origin);
         if (origin === 'direct') {
           zoom.jump(zoomValue);
         } else {
