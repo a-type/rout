@@ -17,7 +17,7 @@ export class LocalTurnStorage {
   }
 
   get = (roundIndex: number) => {
-    if (this.#value === null) {
+    if (this.#value === undefined) {
       const stored = localStorage.getItem(
         `long-game:game-session:${this.#gameSessionId}:local-turn`,
       );
@@ -35,7 +35,7 @@ export class LocalTurnStorage {
     }
     if (this.#value?.roundIndex !== roundIndex) {
       this.clear();
-      return null;
+      return undefined;
     }
     return this.#value;
   };

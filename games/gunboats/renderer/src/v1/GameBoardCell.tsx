@@ -31,12 +31,16 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
 
     const viewport = useViewport();
 
+    const invalid =
+      (cell.shipPart || cell.placedShipPart) && placingPartInThisCell;
+
     return (
       <TokenSpace<Action | ShipMove | ShipFire>
         id={serializePosition(position)}
         key={serializePosition(position)}
         className={clsx(
-          'border border-default border-solid border-gray bg-primary-wash',
+          'border border-default border-solid bg-primary-wash',
+          invalid ? 'border-attention' : 'border-gray',
           'relative flex items-center justify-center',
           'w-[var(--cell-size)] h-[var(--cell-size)]',
         )}
@@ -52,8 +56,6 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
               actionState.shipId = cell.shipPart.shipId;
             }
             const fitBoxSize = 8 * CELL_SIZE;
-            const halfSize = (gameSuite.finalState.board.size * CELL_SIZE) / 2;
-            console.log('halfSize', halfSize);
             const fitBox = {
               x: (position.x + 0.5) * CELL_SIZE - fitBoxSize / 2,
               y: (position.y + 0.5) * CELL_SIZE - fitBoxSize / 2,
@@ -91,13 +93,13 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
         }}
       >
         {cell?.shipPart && !cell.movedAway && (
-          <div className="w-full h-full bg-black" />
+          <div className="w-full h-full bg-primary" />
         )}
         {cell?.placedShipPart && (
-          <div className="w-full h-full bg-black opacity-50" />
+          <div className="w-full h-full bg-primary opacity-50" />
         )}
         {placingPartInThisCell && (
-          <div className="w-full h-full bg-accent opacity-50" />
+          <div className="w-full h-full bg-primary opacity-50" />
         )}
       </TokenSpace>
     );

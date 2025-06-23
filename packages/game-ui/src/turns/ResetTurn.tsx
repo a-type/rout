@@ -11,7 +11,7 @@ export const ResetTurn = withGame<ResetTurnProps>(function ResetTurn({
   return (
     <Button
       onClick={() => gameSuite.prepareTurn(null)}
-      disabled={!gameSuite.hasLocalTurn}
+      disabled={!gameSuite.hasLocalTurn && !gameSuite.turnWasSubmitted}
       {...rest}
     >
       {children || (

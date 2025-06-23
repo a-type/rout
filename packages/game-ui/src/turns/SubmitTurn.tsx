@@ -8,10 +8,15 @@ import { withSuspense } from '../withSuspense';
 export interface SubmitTurnProps {
   className?: string;
   children?: ReactNode;
+  delay?: number;
 }
 
 export const SubmitTurn = withSuspense(
-  withGame(function SubmitTurn({ className, children }: SubmitTurnProps) {
+  withGame(function SubmitTurn({
+    className,
+    children,
+    delay,
+  }: SubmitTurnProps) {
     const {
       turnError,
       hasLocalTurn,
@@ -42,7 +47,11 @@ export const SubmitTurn = withSuspense(
             className="items-center justify-center w-full h-full"
             color={turnError ? 'destructive' : 'primary'}
             disabled={isDisabled}
-            onClick={() => submitTurn()}
+            onClick={() =>
+              submitTurn({
+                delay,
+              })
+            }
           >
             {children ??
               (!hasLocalTurn && turnWasSubmitted && nextRoundCheckAt ? (

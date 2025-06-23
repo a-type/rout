@@ -62,7 +62,7 @@ export class GameSessionSuite<
   TGame extends GameDefinition<any, any, any, any, any, any>,
 > {
   #instanceId = Math.random().toString(36).slice(2);
-  @observable accessor localTurnData!: GetTurnData<TGame> | null;
+  @observable accessor localTurnData!: GetTurnData<TGame> | null | undefined;
   @observable accessor playerStatuses!: Record<
     PrefixedId<'u'>,
     GameSessionPlayerStatus
@@ -270,6 +270,11 @@ export class GameSessionSuite<
     const remoteTurn = latestRound.yourTurnData;
 
     if (localTurn) return localTurn;
+    if (localTurn === null) {
+      // if localTurnData is null, it means the user has explicitly cleared
+      // their turn data, so we should not return the remote turn.
+      return this.gameDefinition.getInitialTurn?.() ?? (null as any);
+    }
     if (remoteTurn) return remoteTurn;
     return this.gameDefinition.getInitialTurn?.() ?? (null as any);
   }
@@ -314,7 +319,21 @@ export class GameSessionSuite<
   }
 
   @computed get turnError(): GetTurnError<TGame> | null {
-    if (!this.localTurnData) return null;
+    if (this.localTurnData === undefined) return null;
+    if (this.localTurnData === null) {
+      // user has manually reset turn. if no turn was submitted,
+      // we're still in an 'initial' state and no error is needed.
+      if (!this.turnWasSubmitted) {
+        return null;
+      }
+      // otherwise we should validate the reset turn.
+      const toValidate = this.gameDefinition.getInitialTurn?.() ?? null;
+      const err = this.validateTurn(toValidate);
+      if (typeof err === 'string') {
+        return simpleError(err) as GetTurnError<TGame>;
+      }
+      return err;
+    }
     const err = this.validateTurn(this.localTurnData) || null;
     if (typeof err === 'string') {
       return simpleError(err) as GetTurnError<TGame>;
@@ -616,7 +635,7 @@ export class GameSessionSuite<
         // reset local turn data
         runInAction(() => {
           this.rounds[submittingToRound].yourTurnData = data;
-          this.localTurnData = null;
+          this.localTurnData = undefined;
         });
         this.#events.emit('turnPlayed');
       }
@@ -899,7 +918,7 @@ export class GameSessionSuite<
     currentRoundIndex: number;
   }) => {
     this.viewingRoundIndex = init.currentRoundIndex;
-    this.localTurnData = null;
+    this.localTurnData = undefined;
     this.rounds = new Array(init.currentRoundIndex + 1).fill(null);
     this.playerStatuses = init.playerStatuses;
     this.gameId = init.gameId;

@@ -1,4 +1,5 @@
 import { Box, Button, clsx, CollapsibleSimple } from '@a-type/ui';
+import { ResetTurn, SubmitTurn } from '@long-game/game-ui';
 import {
   resetActionState,
   useActionTaken,
@@ -35,10 +36,6 @@ export const ActiveActionHud = hooks.withGame<ActiveActionHudProps>(
         })
       : null;
 
-    if (!action) {
-      return null;
-    }
-
     return (
       <Box
         col
@@ -47,36 +44,61 @@ export const ActiveActionHud = hooks.withGame<ActiveActionHudProps>(
         surface={error ? 'attention' : 'accent'}
         p
       >
-        <Box gap items="center">
-          {action.type === 'ship' ? (
-            <>
-              <strong>Ship Action:</strong> {action.shipLength}
-            </>
-          ) : action.type === 'move' ? (
-            <>
-              <strong>Move Action</strong>
-            </>
-          ) : action.type === 'fire' ? (
-            <>
-              <strong>Fire Action</strong>
-            </>
-          ) : (
-            <strong>Unknown Action</strong>
-          )}
-          <Button onClick={completeAction} color="primary" disabled={!!error}>
-            Done
-          </Button>
-          <Button onClick={() => resetActionState()} color="default">
-            Cancel
-          </Button>
-        </Box>
-        <CollapsibleSimple
-          open={!!error}
-          className={clsx(error ? 'mt-md' : 'mt-0', 'transition-margin')}
-        >
-          {error?.message}
-        </CollapsibleSimple>
+        {!!action ? (
+          <>
+            <div>
+              {action.type === 'ship' ? (
+                <>
+                  <strong>Ship Action:</strong> {action.shipLength}
+                </>
+              ) : action.type === 'move' ? (
+                <>
+                  <strong>Move Action</strong>
+                </>
+              ) : action.type === 'fire' ? (
+                <>
+                  <strong>Fire Action</strong>
+                </>
+              ) : (
+                <strong>Unknown Action</strong>
+              )}
+            </div>
+            <Box gap items="center">
+              <Button onClick={() => resetActionState()} color="default">
+                Cancel
+              </Button>
+              <Button
+                onClick={completeAction}
+                color="primary"
+                disabled={!!error}
+                className="flex-1 justify-center"
+              >
+                Done
+              </Button>
+            </Box>
+            <CollapsibleSimple
+              open={!!error}
+              className={clsx(error ? 'mt-md' : 'mt-0', 'transition-margin')}
+            >
+              {error?.message}
+            </CollapsibleSimple>
+          </>
+        ) : (
+          <SubmitControls />
+        )}
       </Box>
     );
   },
 );
+
+const SubmitControls = hooks.withGame(function SubmitControls({ gameSuite }) {
+  if (!gameSuite.canSubmitTurn && !gameSuite.turnWasSubmitted) {
+    return null;
+  }
+  return (
+    <Box gap items="center">
+      <ResetTurn />
+      <SubmitTurn delay={5000} className="flex-1" />
+    </Box>
+  );
+});
