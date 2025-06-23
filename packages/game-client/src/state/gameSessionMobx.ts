@@ -893,11 +893,15 @@ export class GameSessionSuite<
   @action private setupLocalTurnStorage = () => {
     const key = `game-session-${this.gameSessionId}-local-turn-${this.playerId}`;
     const localTurn = localStorage.getItem(key);
-    if (localTurn) {
+    if (localTurn && localTurn !== 'undefined') {
       this.localTurnData = JSON.parse(localTurn);
     }
     autorun(() => {
-      localStorage.setItem(key, JSON.stringify(this.localTurnData));
+      if (this.localTurnData === undefined) {
+        localStorage.removeItem(key);
+      } else {
+        localStorage.setItem(key, JSON.stringify(this.localTurnData));
+      }
     });
   };
 

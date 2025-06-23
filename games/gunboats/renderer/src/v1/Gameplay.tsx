@@ -17,7 +17,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
         <Box className="absolute bottom-lg" full="width" layout="center center">
           <ActionHand />
         </Box>
-        <ActiveActionHud className="absolute top-lg left-lg right-lg shadow-lg" />
+        <ActiveActionHud className="absolute top-lg left-1/2 translate-x--1/2 shadow-lg" />
       </TokenRoot>
     </Box>
   );

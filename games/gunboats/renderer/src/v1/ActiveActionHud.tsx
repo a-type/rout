@@ -36,11 +36,18 @@ export const ActiveActionHud = hooks.withGame<ActiveActionHudProps>(
         })
       : null;
 
+    const show =
+      !!action || gameSuite.canSubmitTurn || gameSuite.turnWasSubmitted;
+
+    if (!show) {
+      return null;
+    }
+
     return (
       <Box
         col
         border
-        className={className}
+        className={clsx('max-w-600px w-80vw', className)}
         surface={error ? 'attention' : 'accent'}
         p
       >
@@ -92,9 +99,6 @@ export const ActiveActionHud = hooks.withGame<ActiveActionHudProps>(
 );
 
 const SubmitControls = hooks.withGame(function SubmitControls({ gameSuite }) {
-  if (!gameSuite.canSubmitTurn && !gameSuite.turnWasSubmitted) {
-    return null;
-  }
   return (
     <Box gap items="center">
       <ResetTurn />
