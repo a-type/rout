@@ -70,7 +70,13 @@ function DraggableRoot({
 
   return (
     <DraggableContext.Provider value={ctxValue}>
-      <DndOverlayPortal enabled={isDragged || isCandidate} {...rest}>
+      <DndOverlayPortal
+        enabled={isDragged || isCandidate}
+        dragDisabled={disabled}
+        box={box}
+        id={id}
+        {...rest}
+      >
         {children}
       </DndOverlayPortal>
     </DraggableContext.Provider>
@@ -165,6 +171,9 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
    * Only applied to the dragged preview element
    */
   draggedClassName?: string;
+  id: string;
+  dragDisabled: boolean;
+  box: DraggedBox;
 }
 
 const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
@@ -179,9 +188,11 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   DraggedContainer,
   draggedClassName,
   className,
+  id,
+  dragDisabled,
+  box,
   ...rest
 }: DndOverlayPortalProps) {
-  const draggable = useDraggableContext();
   const overlayEl = useDndStore((state) => state.overlayElement);
 
   const isPortaling = enabled && !!overlayEl;
@@ -199,21 +210,19 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      {/* <div className={clsx(isPortaling && 'invisible')}> */}
       <AnimatePresence>
         <motion.div
-          layoutId={draggable.id}
+          layoutId={id}
           transition={flipTransition}
-          data-disabled={draggable.disabled}
-          data-draggable={draggable.id}
-          ref={draggable.disabled ? undefined : draggable.box.bind}
+          data-disabled={dragDisabled}
+          data-draggable={id}
+          ref={dragDisabled ? undefined : box.bind}
           className={className}
           {...rest}
         >
           {children}
         </motion.div>
       </AnimatePresence>
-      {/* </div> */}
     </>
   );
 });
