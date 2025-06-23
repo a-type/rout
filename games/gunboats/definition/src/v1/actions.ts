@@ -10,6 +10,7 @@ import {
   serializePosition,
 } from './board';
 import {
+  getAllPlayerOwnedShipParts,
   getShipCenter,
   placeShip,
   placeShipOnBoard,
@@ -48,7 +49,6 @@ export type ActionTaken =
   | {
       id: string;
       type: 'fire';
-      shipId: string;
       target: Position;
     };
 
@@ -169,12 +169,24 @@ export function validateAction({
           message: 'Action type mismatch: expected fire action.',
         };
       }
-      const { shipId, target } = taken;
-      const { position: center } = getShipCenter(shipId, board);
-      const distance = Math.sqrt(
-        Math.pow(target.x - center.x, 2) + Math.pow(target.y - center.y, 2),
-      );
-      if (distance > 8) {
+      const { target } = taken;
+      const allShipParts = getAllPlayerOwnedShipParts(board, playerId);
+
+      // TODO: clean this up.
+      let closestPartDistance = Infinity;
+      for (const { position } of allShipParts) {
+        const distance = Math.sqrt(
+          Math.pow(target.x - position.x, 2) +
+            Math.pow(target.y - position.y, 2),
+        );
+        if (distance < closestPartDistance) {
+          closestPartDistance = distance;
+        }
+        if (distance <= 8) {
+          break;
+        }
+      }
+      if (closestPartDistance > 8) {
         return {
           code: 'fire-out-of-range',
           message: 'The requested shot is out of range of that ship',
@@ -248,8 +260,12 @@ export function applyActionTaken({
       break;
     case 'fire':
       assert(actionTaken.type === 'fire', 'Action does not match');
-      const cell = newBoard.cells[serializePosition(actionTaken.target)];
-      if (!cell.shipPart) break;
+      let cell = newBoard.cells[serializePosition(actionTaken.target)];
+      if (!cell) {
+        cell = newBoard.cells[serializePosition(actionTaken.target)] = {};
+      }
+      cell.firedOn = true;
+      if (!cell?.shipPart) break;
       cell.shipPart.hit = true;
       break;
     case 'move':

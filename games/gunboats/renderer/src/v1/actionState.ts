@@ -12,7 +12,6 @@ export const actionState = proxy({
   action: null as Action | null,
   position: null as Position | null,
   orientation: 0 as Orientation,
-  target: null as Position | null,
   distance: 0,
   shipId: null as string | null,
 });
@@ -23,11 +22,6 @@ subscribe(actionState, () => {
 
 export type ShipMove = {
   type: 'shipMove';
-  shipId: string;
-};
-
-export type ShipFire = {
-  type: 'shipFire';
   shipId: string;
 };
 
@@ -54,6 +48,14 @@ export function useActiveActionShipTarget() {
 
 export function useActiveActionPosition() {
   return useSnapshot(actionState).position;
+}
+
+export function useFiringOnLocation() {
+  const { position, action } = useSnapshot(actionState);
+  if (action?.type !== 'fire') {
+    return null;
+  }
+  return position;
 }
 
 export function useActionState() {
@@ -83,13 +85,11 @@ export function getActionTaken(state = actionState): ActionTaken {
         distance: state.distance,
       };
     case 'fire':
-      assert(!!state.target, 'Target must be set for fire action');
-      assert(!!state.shipId, 'Ship ID must be set for fire action');
+      assert(!!state.position, 'Target must be set for fire action');
       return {
         type: 'fire',
         id: state.action.id,
-        shipId: state.shipId,
-        target: state.target,
+        target: state.position,
       };
     default:
       throw new Error(`Unknown action type: ${(state.action as any).type}`);
@@ -105,7 +105,6 @@ export function resetActionState() {
   actionState.action = null;
   actionState.position = null;
   actionState.orientation = 0;
-  actionState.target = null;
   actionState.distance = 0;
   actionState.shipId = null;
 }

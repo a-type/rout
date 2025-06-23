@@ -7,6 +7,7 @@ export type BoardCell = {
   shipPart?: ShipPartData;
   placedShipPart?: ShipPartData;
   movedAway?: boolean;
+  firedOn?: boolean;
 };
 
 // multiply by 90 degrees for rotation, beginning from right (0)
@@ -57,7 +58,7 @@ export function getPlayerBoardView(board: Board, playerId: PrefixedId<'u'>) {
 export function clearTemporaryBoardState(board: Board) {
   const newBoard: Board = { ...board, cells: {} };
   for (const [key, cell] of Object.entries(board.cells)) {
-    const { placedShipPart, movedAway, ...rest } = cell;
+    const { placedShipPart, movedAway, firedOn, ...rest } = cell;
     newBoard.cells[key as SerializedPosition] = rest;
   }
   return newBoard;

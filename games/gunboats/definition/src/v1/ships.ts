@@ -27,6 +27,18 @@ export function getAllShipParts(shipId: string, board: Board) {
     }));
 }
 
+export function getAllPlayerOwnedShipParts(
+  board: Board,
+  playerId: PrefixedId<'u'>,
+) {
+  return Object.entries(board.cells)
+    .filter((entry) => entry[1].shipPart?.playerId === playerId)
+    .map(([sCoord, cell]) => ({
+      position: deserializePosition(sCoord as SerializedPosition),
+      part: cell.shipPart!,
+    }));
+}
+
 export function getShipCenter(shipId: string, board: Board) {
   const found = Object.entries(board.cells).find(
     (entry) =>

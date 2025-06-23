@@ -1,4 +1,4 @@
-import { clsx } from '@a-type/ui';
+import { clsx, Icon } from '@a-type/ui';
 import {
   Action,
   isAction,
@@ -7,8 +7,8 @@ import {
 import { TokenSpace, useViewport } from '@long-game/game-ui';
 import {
   actionState,
-  ShipFire,
   ShipMove,
+  useFiringOnLocation,
   usePlacingShipParts,
 } from './actionState';
 import { CELL_SIZE } from './constants';
@@ -28,6 +28,17 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
       (part) =>
         part.position.x === position.x && part.position.y === position.y,
     );
+    const firingOnLocation = useFiringOnLocation();
+    const firingOnThisCell =
+      cell?.firedOn ||
+      (firingOnLocation?.x === position.x &&
+        firingOnLocation?.y === position.y) ||
+      gameSuite.currentTurn.actions.some(
+        (action) =>
+          action.type === 'fire' &&
+          action.target.x === position.x &&
+          action.target.y === position.y,
+      );
 
     const viewport = useViewport();
 
@@ -35,7 +46,7 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
       (cell.shipPart || cell.placedShipPart) && placingPartInThisCell;
 
     return (
-      <TokenSpace<Action | ShipMove | ShipFire>
+      <TokenSpace<Action | ShipMove>
         id={serializePosition(position)}
         key={serializePosition(position)}
         className={clsx(
@@ -51,7 +62,6 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
             actionState.action = action;
             actionState.position = position;
             actionState.orientation = 0;
-            actionState.target = null;
             if (cell?.shipPart) {
               actionState.shipId = cell.shipPart.shipId;
             }
@@ -81,14 +91,6 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
               Math.abs(position.x - sourcePosition.x) +
               Math.abs(position.y - sourcePosition.y);
             actionState.distance = distance;
-          } else if (data.type === 'shipFire') {
-            // User targeted this space with a torpedo
-            const action = actionState.action;
-            if (!action) {
-              // Invalid state
-              return;
-            }
-            actionState.target = position;
           }
         }}
       >
@@ -100,6 +102,12 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
         )}
         {placingPartInThisCell && (
           <div className="w-full h-full bg-primary opacity-50" />
+        )}
+        {firingOnThisCell && (
+          <Icon
+            name="locate"
+            className="absolute top-sm left-sm color-attention w-1/4 h-1/4"
+          />
         )}
       </TokenSpace>
     );
