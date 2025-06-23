@@ -1,7 +1,6 @@
 {
   "name": "@long-game/game-gunboats",
   "scripts": {
-    "dev": "pnpm --filter \"./*\" --parallel --stream dev",
-    "build": "pnpm --filter \"./*\" build"
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
   }
 }
