@@ -17,8 +17,8 @@ export interface ViewportContentProps
 }
 
 const PAN_SPRING_CONFIG: SpringOptions = {
-  mass: 1,
-  bounce: 0.1,
+  mass: 0.2,
+  bounce: 0.05,
 };
 const ZOOM_SPRING_CONFIG: SpringOptions = {
   mass: 0.5,
@@ -53,6 +53,7 @@ export function ViewportContent({
   useEffect(
     () =>
       viewport.subscribe('zoomChanged', (zoomValue, origin) => {
+        console.log('Zoom changed:', zoomValue, origin);
         if (origin === 'direct') {
           zoom.jump(zoomValue);
         } else {

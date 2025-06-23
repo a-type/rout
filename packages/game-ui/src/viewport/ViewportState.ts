@@ -136,6 +136,8 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     this.resetCenter();
 
     this.bindRoot(boundElement ?? null);
+    document.addEventListener('gesturestart', preventDefault);
+    document.addEventListener('gesturechange', preventDefault);
   }
 
   private setBoundElementSize = (size: Size, offset?: Vector2) => {
@@ -201,6 +203,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       // already bound to this element
       return;
     }
+    console.log('bind root', element);
     if (this._boundRoot && this._boundRoot !== element) {
       this._boundElementResizeObserver.unobserve(this._boundRoot);
       this._boundRoot.removeAttribute('data-viewport');
@@ -212,32 +215,25 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
         width: 2400,
         height: 2400,
       });
-    } else {
-      this._boundRoot = element ?? document.documentElement;
+    } else if (element) {
+      this._boundRoot = element;
       this._boundRoot.setAttribute('data-viewport', 'true');
       this._boundElementResizeObserver.observe(this._boundRoot);
-      if (element) {
-        const box = element.getBoundingClientRect();
-        this.setBoundElementSize(
-          {
-            width: element.clientWidth,
-            height: element.clientHeight,
-          },
-          {
-            x: box.left,
-            y: box.top,
-          },
-        );
-      } else {
-        this.setBoundElementSize({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
+      const box = element.getBoundingClientRect();
+      this.setBoundElementSize(
+        {
+          width: element.clientWidth,
+          height: element.clientHeight,
+        },
+        {
+          x: box.left,
+          y: box.top,
+        },
+      );
+      if (this._boundContent) {
+        this.fitEverythingOnScreen({ origin: 'animation' });
       }
     }
-
-    document.addEventListener('gesturestart', preventDefault);
-    document.addEventListener('gesturechange', preventDefault);
   };
 
   bindContent = (element: HTMLElement | null) => {
@@ -257,7 +253,9 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
         width: this._boundContent.clientWidth,
         height: this._boundContent.clientHeight,
       });
-      this.fitEverythingOnScreen({ origin: 'animation' });
+      if (this._boundRoot) {
+        this.fitEverythingOnScreen({ origin: 'animation' });
+      }
     }
   };
 
@@ -573,7 +571,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       this._zoom = clamp(zoom, this.zoomMin, this.zoomMax);
       // apply a pan with the current pan position to recalculate pan
       // boundaries from the new zoom and enforce them
-      this.pan(this.center, { origin, gestureComplete });
+      this.rawPan(this.center, { origin, gestureComplete });
     }
     this.emit('zoomChanged', this.zoom, origin);
     if (gestureComplete) {
@@ -604,7 +602,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
    *
    * @param {Vector2} worldPosition the position in world coordinates to pan to
    */
-  pan = (
+  private rawPan = (
     worldPosition: Vector2,
     {
       origin = 'direct',
@@ -625,6 +623,18 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     }
   };
 
+  pan = (
+    worldPosition: Vector2,
+    details?: {
+      origin?: ViewportEventOrigin;
+      gestureComplete?: boolean;
+    },
+  ) => {
+    worldPosition.x += this.contentOffset.x;
+    worldPosition.y += this.contentOffset.y;
+    this.rawPan(worldPosition, details);
+  };
+
   /**
    * Pans the camera around the canvas using displacement relative to the current
    * center position, in "world" units. To convert a displacement from screen pixels
@@ -636,7 +646,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     worldDelta: Vector2,
     details?: { origin?: ViewportEventOrigin; gestureComplete?: boolean },
   ) => {
-    this.pan(addVectors(this.center, worldDelta), details);
+    this.rawPan(addVectors(this.center, worldDelta), details);
   };
 
   /**
@@ -654,8 +664,17 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     this.pan(worldPosition, info);
   };
 
+  private rawMove = (
+    worldPosition: Vector2,
+    zoom: number,
+    info: { origin?: ViewportEventOrigin; gestureComplete?: boolean } = {},
+  ) => {
+    this.setZoom(zoom, info);
+    this.rawPan(worldPosition, info);
+  };
+
   private reconstrainPosition = (info?: { origin?: ViewportEventOrigin }) =>
-    this.move(this.center, this.zoom, info);
+    this.rawMove(this.center, this.zoom, info);
 
   /**
    * Does the best it can to fit the provided area onscreen.
@@ -678,7 +697,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       x: bounds.x + width / 2,
       y: bounds.y + height / 2,
     };
-    this.move(center, zoom, { origin });
+    this.rawMove(center, zoom, { origin });
   };
 
   fitEverythingOnScreen = (options?: {

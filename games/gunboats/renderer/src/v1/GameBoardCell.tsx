@@ -55,8 +55,8 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
             const halfSize = (gameSuite.finalState.board.size * CELL_SIZE) / 2;
             console.log('halfSize', halfSize);
             const fitBox = {
-              x: (position.x + 0.5) * CELL_SIZE - fitBoxSize / 2 - halfSize,
-              y: (position.y + 0.5) * CELL_SIZE - fitBoxSize / 2 - halfSize,
+              x: (position.x + 0.5) * CELL_SIZE - fitBoxSize / 2,
+              y: (position.y + 0.5) * CELL_SIZE - fitBoxSize / 2,
               width: fitBoxSize,
               height: fitBoxSize,
             };
