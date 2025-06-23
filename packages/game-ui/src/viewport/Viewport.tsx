@@ -25,6 +25,7 @@ export function Viewport({ children, className }: ViewportProps) {
           max: 3,
         },
         defaultZoom: 0.5,
+        panLimitBuffer: 100,
       }),
   )[0];
 

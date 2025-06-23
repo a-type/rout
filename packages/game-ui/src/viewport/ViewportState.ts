@@ -21,6 +21,7 @@ export interface ViewportConfig {
    * Default is "center"
    */
   panLimitMode?: 'center' | 'viewport';
+  panLimitBuffer?: number;
   /**
    * Restrict zooming to certain boundaries. Default min is 'fit', max 2.
    * "min" has a special value, 'fit', which will ensure that at least
@@ -165,12 +166,19 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     }
     return {
       min: {
-        x: this._boundContentSize.width / -2,
-        y: this._boundContentSize.height / -2,
+        x:
+          this._boundContentSize.width / -2 -
+          (this._config.panLimitBuffer ?? 0),
+        y:
+          this._boundContentSize.height / -2 -
+          (this._config.panLimitBuffer ?? 0),
       },
       max: {
-        x: this._boundContentSize.width / 2,
-        y: this._boundContentSize.height / 2,
+        x:
+          this._boundContentSize.width / 2 + (this._config.panLimitBuffer ?? 0),
+        y:
+          this._boundContentSize.height / 2 +
+          (this._config.panLimitBuffer ?? 0),
       },
     };
   }
