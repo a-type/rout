@@ -4,7 +4,7 @@ import { Box, RectLimits, Size, Vector2 } from './types';
 
 const MIN_POSSIBLE_ZOOM = 0.000001;
 
-export interface DefaultCenter {
+export interface PositionOrPercentage {
   x: number | `${number}%`;
   y: number | `${number}%`;
 }
@@ -13,7 +13,7 @@ export interface ViewportConfig {
   /** Supply a starting zoom value. Default 1 */
   defaultZoom?: number;
   /** Supply a starting center position. Default is the middle of the pan limits or 0,0 */
-  defaultCenter?: DefaultCenter;
+  defaultCenter?: PositionOrPercentage;
   /**
    * There are two ways to limit pan position:
    * "center" simply clamps the center of the screen to the provided panLimits boundary
@@ -136,9 +136,6 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     this.resetCenter();
 
     this.bindRoot(boundElement ?? null);
-
-    // @ts-ignore for debugging
-    window.viewport = this;
   }
 
   private setBoundElementSize = (size: Size, offset?: Vector2) => {
@@ -200,6 +197,10 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   };
 
   bindRoot = (element: HTMLElement | null) => {
+    if (this._boundRoot === element) {
+      // already bound to this element
+      return;
+    }
     if (this._boundRoot && this._boundRoot !== element) {
       this._boundElementResizeObserver.unobserve(this._boundRoot);
       this._boundRoot.removeAttribute('data-viewport');
@@ -240,6 +241,10 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   };
 
   bindContent = (element: HTMLElement | null) => {
+    if (this._boundContent === element) {
+      // already bound to this element
+      return;
+    }
     if (this._boundContent && this._boundContent !== element) {
       this._contentElementResizeObserver.unobserve(this._boundContent);
       this._boundContent.removeAttribute('data-viewport-content');
@@ -606,6 +611,10 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       gestureComplete = true,
     }: { origin?: ViewportEventOrigin; gestureComplete?: boolean } = {},
   ) => {
+    if (isNaN(worldPosition.x) || isNaN(worldPosition.y)) {
+      console.trace('Invalid world position for pan', worldPosition);
+      return;
+    }
     this._center = this.clampPanPosition(worldPosition);
     this.emit('centerChanged', this.center, origin);
     if (gestureComplete) {
@@ -633,7 +642,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   /**
    * Pans and zooms at the same time - a convenience shortcut to
    * zoom while moving the camera to a certain point. Both values
-   * are absolute - see .doZoom and .doPan for more details on behavior
+   * are absolute - see .setZoom and .pan for more details on behavior
    * and parameters.
    */
   move = (

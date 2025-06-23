@@ -58,7 +58,9 @@ type GameSessionSuiteEvents = {
   membersChanged: () => void;
 };
 
-export class GameSessionSuite<TGame extends GameDefinition> {
+export class GameSessionSuite<
+  TGame extends GameDefinition<any, any, any, any, any, any>,
+> {
   #instanceId = Math.random().toString(36).slice(2);
   @observable accessor localTurnData!: GetTurnData<TGame> | null;
   @observable accessor playerStatuses!: Record<
@@ -308,7 +310,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    * need to resubmit to the server.
    */
   @computed get canSubmitTurn() {
-    return !!this.localTurnData;
+    return !!this.localTurnData && !this.turnError;
   }
 
   @computed get turnError(): GetTurnError<TGame> | null {
@@ -518,14 +520,9 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return this.getRoundRange(0, this.latestRoundIndex);
   };
 
-  @action prepareTurn = (
-    turn:
-      | GetTurnData<TGame>
-      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>)
-      | null,
-  ) => {
+  @action prepareTurn = (turn: TurnUpdater<TGame> | null) => {
     if (typeof turn === 'function') {
-      this.localTurnData = (turn as any)(this.localTurnData ?? null);
+      this.localTurnData = (turn as any)(this.getPreviousTurnForUpdater());
     } else {
       this.localTurnData = turn;
     }

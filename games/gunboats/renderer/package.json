@@ -31,7 +31,8 @@
     "@long-game/game-client": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "valtio": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

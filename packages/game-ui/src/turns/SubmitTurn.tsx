@@ -14,13 +14,13 @@ export const SubmitTurn = withSuspense(
   withGame(function SubmitTurn({ className, children }: SubmitTurnProps) {
     const {
       turnError,
-      canSubmitTurn,
+      hasLocalTurn,
       submitTurn,
       turnWasSubmitted,
       nextRoundCheckAt,
     } = useGameSuite();
 
-    const isDisabled = !!turnError || !canSubmitTurn;
+    const isDisabled = !!turnError || !hasLocalTurn;
     const icon = turnError
       ? 'warning'
       : nextRoundCheckAt
@@ -45,7 +45,7 @@ export const SubmitTurn = withSuspense(
             onClick={() => submitTurn()}
           >
             {children ??
-              (!canSubmitTurn && turnWasSubmitted && nextRoundCheckAt ? (
+              (!hasLocalTurn && turnWasSubmitted && nextRoundCheckAt ? (
                 <>
                   <span>Next:</span>
                   <RelativeTime
@@ -57,7 +57,7 @@ export const SubmitTurn = withSuspense(
               ) : turnError ? (
                 "Can't submit"
               ) : turnWasSubmitted ? (
-                canSubmitTurn ? (
+                hasLocalTurn ? (
                   `Update turn`
                 ) : (
                   'Ready for next!'

@@ -11,7 +11,8 @@ import {
   drawRandomActions,
   validateAction,
 } from './actions';
-import { Board, getPlayerBoardView } from './board';
+import { Board, getPlayerBoardView, serializePosition } from './board';
+import { getAllShipParts, placeShip } from './ships';
 
 export type GlobalState = {
   board: Board;
@@ -84,10 +85,61 @@ export const gameDefinition: GameDefinition<
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  getProspectivePlayerState: ({ playerState, playerId, prospectiveTurn }) => {
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
-    return playerState;
+    const newState = structuredClone(playerState);
+    const movedShips = prospectiveTurn.data.actions
+      .filter((action) => action.type === 'move')
+      .map((action) => action.shipId);
+    const placedShipParts = prospectiveTurn.data.actions
+      .filter((action) => action.type === 'ship')
+      .map((taken) => {
+        const action = playerState.draftOptions.find((a) => a.id === taken.id);
+        if (!action || action.type !== 'ship') {
+          throw new Error(`Action with id ${taken.id} is not a ship action`);
+        }
+        return placeShip({
+          orientation: taken.orientation,
+          position: taken.position,
+          shipLength: action.shipLength,
+        }).map((part) => ({
+          ...part,
+          shipId: `pending-place-${taken.id}`,
+          shipLength: action.shipLength,
+        }));
+      })
+      .flat();
+
+    for (const moved of movedShips) {
+      const allParts = getAllShipParts(moved, newState.board);
+      for (const part of allParts) {
+        const key = serializePosition(part.position);
+        if (newState.board.cells[key]) {
+          newState.board.cells[key].movedAway = true;
+        }
+      }
+    }
+
+    for (const part of placedShipParts) {
+      const key = serializePosition(part.position);
+      if (!newState.board.cells[key]) {
+        newState.board.cells[key] = {};
+      }
+      newState.board.cells[key]!.placedShipPart = {
+        hit: false,
+        isCenter: part.isCenter,
+        partIndex: part.partIndex,
+        shipId: part.shipId,
+        totalLength: part.shipLength,
+        playerId,
+      };
+    }
+
+    return {
+      ...newState,
+      board: newState.board,
+    };
   },
 
   // run on server

@@ -13,12 +13,22 @@ export const ActionCard = hooks.withGame<ActionCardProps>(function ActionCard({
   return (
     <Box
       container="reset"
-      className="@container min-h-[40px] min-w-[30px] aspect-3/4"
-      surface="default"
-      border
-      layout="center center"
+      className="@container min-h-[60px] min-w-[40px] aspect-3/4"
     >
-      <div>{action.type}</div>
+      <Box
+        full
+        surface="default"
+        border
+        layout="center center"
+        className="rounded-sm @md:rounded-lg"
+      >
+        <div className="text-xs absolute top-xs left-xs">{action.type}</div>
+        {action.type === 'ship' && (
+          <div className="text-xs absolute bottom-xs right-xs">
+            {action.shipLength}
+          </div>
+        )}
+      </Box>
     </Box>
   );
 });

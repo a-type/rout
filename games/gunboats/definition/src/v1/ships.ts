@@ -3,6 +3,7 @@ import {
   Board,
   deserializePosition,
   Orientation,
+  orientationToVector,
   Position,
   SerializedPosition,
   serializePosition,
@@ -57,10 +58,11 @@ export function placeShip({
     partIndex: number;
     isCenter: boolean;
   }[] = [];
+  const orientationVector = orientationToVector(orientation);
   for (let i = 0; i < shipLength; i++) {
-    const partIndex = orientation % 2 === 0 ? i : centerIndex - i;
-    const x = position.x + (orientation === 1 ? partIndex : 0);
-    const y = position.y + (orientation === 2 ? partIndex : 0);
+    const partIndex = i;
+    const x = position.x + orientationVector.x * (partIndex - centerIndex);
+    const y = position.y + orientationVector.y * (partIndex - centerIndex);
     shipParts.push({
       partIndex,
       isCenter: partIndex === centerIndex,

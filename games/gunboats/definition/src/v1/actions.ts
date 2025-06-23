@@ -278,3 +278,13 @@ export function applyActionTaken({
 
   return newBoard;
 }
+
+export function isAction(obj: any): obj is Action {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    'type' in obj &&
+    (obj.type === 'ship' || obj.type === 'move' || obj.type === 'fire') &&
+    'id' in obj
+  );
+}

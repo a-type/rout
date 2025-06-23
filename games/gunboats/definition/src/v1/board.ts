@@ -5,6 +5,8 @@ export type Position = { x: number; y: number };
 export type SerializedPosition = `${number},${number}`;
 export type BoardCell = {
   shipPart?: ShipPartData;
+  placedShipPart?: ShipPartData;
+  movedAway?: boolean;
 };
 
 // multiply by 90 degrees for rotation, beginning from right (0)

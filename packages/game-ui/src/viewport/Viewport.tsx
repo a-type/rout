@@ -1,9 +1,9 @@
 import { Box, Button, clsx, Icon, useSizeCssVars } from '@a-type/ui';
-import { ReactNode, useRef, useState } from 'react';
+import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { ViewportContent } from './ViewportContent';
 import { ViewportProvider } from './ViewportContext';
-import { ViewportState } from './ViewportState';
+import { PositionOrPercentage, ViewportState } from './ViewportState';
 import { useDndAutoPan } from './useDndAutoPan';
 import {
   useKeyboardControls,
@@ -13,9 +13,16 @@ import {
 export interface ViewportProps {
   children?: ReactNode;
   className?: string;
+  style?: CSSProperties;
+  defaultCenter?: PositionOrPercentage;
 }
 
-export function Viewport({ children, className }: ViewportProps) {
+export function Viewport({
+  children,
+  className,
+  style,
+  defaultCenter,
+}: ViewportProps) {
   const viewport = useState(
     () =>
       new ViewportState({
@@ -26,6 +33,7 @@ export function Viewport({ children, className }: ViewportProps) {
         },
         defaultZoom: 0.5,
         panLimitBuffer: 100,
+        defaultCenter,
       }),
   )[0];
 
@@ -44,9 +52,13 @@ export function Viewport({ children, className }: ViewportProps) {
   const keyboardProps = useKeyboardControls(viewport);
   useDndAutoPan(viewport);
 
+  useEffect(() => {
+    (window as any).viewport = viewport; // For debugging purposes
+  }, [viewport]);
+
   return (
     <ViewportProvider value={viewport}>
-      <Box className={className}>
+      <Box className={className} style={style}>
         <div
           className={clsx(
             'w-full h-full flex-1 relative touch-none contain-strict select-none overflow-hidden',

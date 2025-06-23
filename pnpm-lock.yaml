@@ -452,6 +452,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.1.0(react@19.1.0)
+      valtio:
+        specifier: 'catalog:'
+        version: 2.1.5(@types/react@19.1.8)(react@19.1.0)
     devDependencies:
       '@long-game/scripts':
         specifier: workspace:*
