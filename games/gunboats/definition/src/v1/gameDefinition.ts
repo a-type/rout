@@ -11,7 +11,12 @@ import {
   drawRandomActions,
   validateAction,
 } from './actions';
-import { Board, getPlayerBoardView, serializePosition } from './board';
+import {
+  Board,
+  clearTemporaryBoardState,
+  getPlayerBoardView,
+  serializePosition,
+} from './board';
 import { getAllShipParts, placeShip } from './ships';
 
 export type GlobalState = {
@@ -228,6 +233,8 @@ export const gameDefinition: GameDefinition<
         playerId,
       });
     }
+
+    newBoard = clearTemporaryBoardState(newBoard);
     return {
       ...globalState,
       board: newBoard,

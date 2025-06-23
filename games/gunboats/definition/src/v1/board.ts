@@ -46,10 +46,19 @@ export function getPlayerBoardView(board: Board, playerId: PrefixedId<'u'>) {
     ...board,
     cells: Object.fromEntries(
       Object.entries(board.cells).filter(([key, cell]) => {
-        if (!cell.shipPart) return cell;
-        if (cell.shipPart.playerId === playerId) return cell;
-        return {};
+        if (!cell.shipPart) return true;
+        if (cell.shipPart.playerId === playerId) return true;
+        return false;
       }),
     ),
   };
+}
+
+export function clearTemporaryBoardState(board: Board) {
+  const newBoard: Board = { ...board, cells: {} };
+  for (const [key, cell] of Object.entries(board.cells)) {
+    const { placedShipPart, movedAway, ...rest } = cell;
+    newBoard.cells[key as SerializedPosition] = rest;
+  }
+  return newBoard;
 }

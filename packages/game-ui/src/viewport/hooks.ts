@@ -22,5 +22,5 @@ export function usePan(config: { instant?: boolean } = {}) {
       setPan,
     );
   }, [viewport]);
-  return [pan, viewport.rawPan] as const;
+  return [pan, viewport.pan] as const;
 }
