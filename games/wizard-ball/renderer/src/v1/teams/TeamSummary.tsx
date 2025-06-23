@@ -16,6 +16,7 @@ import { PlayerLevel } from '../players/PlayerLevel';
 import { capitalize } from '../utils';
 import { PlayerStatus } from '../players/PlayerStatus';
 import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
+import { clsx } from '@a-type/ui';
 
 export function TeamSummary({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -50,7 +51,11 @@ export function TeamSummary({ id }: { id: string }) {
             <Link
               to={{ search: `?playerId=${player.id}` }}
               key={player.id}
-              className="flex flex-col items-center gap-1 p-3 bg-gray-800 rounded"
+              className={clsx(
+                'flex-col',
+                'hover:bg-gray-700 transition-colors hover:outline outline-2 outline-gray-400',
+                'flex gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded',
+              )}
             >
               <span className="font-bold text-lg flex flex-row items-center gap-2">
                 <PlayerStatus id={player.id} />
