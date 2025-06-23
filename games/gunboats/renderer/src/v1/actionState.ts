@@ -60,42 +60,45 @@ export function useActionState() {
   return useSnapshot(actionState);
 }
 
-export function getActionTaken(): ActionTaken {
-  if (!actionState.action) {
+export function getActionTaken(state = actionState): ActionTaken {
+  if (!state.action) {
     throw new Error('No active action');
   }
-  switch (actionState.action.type) {
+  switch (state.action.type) {
     case 'ship':
-      assert(!!actionState.position, 'Position must be set for ship action');
+      assert(!!state.position, 'Position must be set for ship action');
       return {
         type: 'ship',
-        id: actionState.action.id,
-        position: actionState.position,
-        orientation: actionState.orientation,
+        id: state.action.id,
+        position: state.position,
+        orientation: state.orientation,
       };
     case 'move':
-      assert(!!actionState.shipId, 'Ship ID must be set for move action');
+      assert(!!state.shipId, 'Ship ID must be set for move action');
       return {
         type: 'move',
-        id: actionState.action.id,
-        shipId: actionState.shipId,
-        orientation: actionState.orientation,
-        distance: actionState.distance,
+        id: state.action.id,
+        shipId: state.shipId,
+        orientation: state.orientation,
+        distance: state.distance,
       };
     case 'fire':
-      assert(!!actionState.target, 'Target must be set for fire action');
-      assert(!!actionState.shipId, 'Ship ID must be set for fire action');
+      assert(!!state.target, 'Target must be set for fire action');
+      assert(!!state.shipId, 'Ship ID must be set for fire action');
       return {
         type: 'fire',
-        id: actionState.action.id,
-        shipId: actionState.shipId,
-        target: actionState.target,
+        id: state.action.id,
+        shipId: state.shipId,
+        target: state.target,
       };
     default:
-      throw new Error(
-        `Unknown action type: ${(actionState.action as any).type}`,
-      );
+      throw new Error(`Unknown action type: ${(state.action as any).type}`);
   }
+}
+
+export function useActionTaken() {
+  const snap = useSnapshot(actionState);
+  return snap.action ? getActionTaken(snap) : null;
 }
 
 export function resetActionState() {

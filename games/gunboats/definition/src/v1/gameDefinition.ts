@@ -56,6 +56,7 @@ export const gameDefinition: GameDefinition<
     }
   },
   validatePartialTurn: ({ playerState, turn }) => {
+    const newState = structuredClone(playerState);
     for (const actionTaken of turn.data.actions) {
       const { id } = actionTaken;
       const action = playerState.draftOptions.find((a) => a.id === id);
@@ -69,14 +70,17 @@ export const gameDefinition: GameDefinition<
         playerId: turn.playerId,
         action,
         taken: actionTaken,
-        board: playerState.board,
+        board: newState.board,
       });
       if (err) {
-        return {
-          code: 'invalid-action',
-          message: `Action with id ${id} is invalid: ${err.message}`,
-        };
+        return err;
       }
+      newState.board = applyActionTaken({
+        action,
+        actionTaken,
+        board: newState.board,
+        playerId: turn.playerId,
+      });
     }
   },
   getInitialTurn: () => ({
@@ -206,7 +210,6 @@ export const gameDefinition: GameDefinition<
         actionTaken,
         board: newBoard,
         playerId,
-        random,
       });
     }
     for (const { actionTaken, action, playerId } of groupedActions.move) {
@@ -215,7 +218,6 @@ export const gameDefinition: GameDefinition<
         actionTaken,
         board: newBoard,
         playerId,
-        random,
       });
     }
     for (const { actionTaken, action, playerId } of groupedActions.fire) {
@@ -224,7 +226,6 @@ export const gameDefinition: GameDefinition<
         actionTaken,
         board: newBoard,
         playerId,
-        random,
       });
     }
     return {

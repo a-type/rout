@@ -72,7 +72,10 @@ function validateShipPosition({
   });
   for (const placement of placements) {
     const serializedPosition = serializePosition(placement.position);
-    if (board.cells[serializedPosition]?.shipPart?.playerId === playerId) {
+    if (
+      board.cells[serializedPosition]?.shipPart?.playerId === playerId ||
+      board.cells[serializedPosition]?.placedShipPart?.playerId === playerId
+    ) {
       // only checking own ships -- player cannot see others
       return {
         code: 'space-occupied',
@@ -223,19 +226,17 @@ export function applyActionTaken({
   actionTaken,
   board,
   playerId,
-  random,
 }: {
   action: Action;
   actionTaken: ActionTaken;
   board: Board;
   playerId: PrefixedId<'u'>;
-  random: GameRandom;
 }) {
   let newBoard = structuredClone(board);
   switch (action.type) {
     case 'ship':
       assert(actionTaken.type === 'ship', 'Action does not match');
-      const shipId = random.id();
+      const shipId = `s-${action.id}`;
       newBoard = placeShipOnBoard({
         shipId,
         shipLength: action.shipLength,

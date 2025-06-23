@@ -324,15 +324,17 @@ export class GameSessionSuite<
 
   private getPreviousTurnForUpdater = (): GetTurnDataOrInitial<TGame> => {
     if (!this.gameDefinition.getInitialTurn) {
-      return this.localTurnData ?? (null as any);
+      return this.localTurnData ? toJS(this.localTurnData) : (null as any);
     }
-    return this.localTurnData || (this.gameDefinition.getInitialTurn() as any);
+    return (
+      toJS(this.localTurnData) || (this.gameDefinition.getInitialTurn() as any)
+    );
   };
   validatePartialTurn = (turnData: TurnUpdater<TGame>) => {
     if (!this.gameDefinition.validatePartialTurn)
       return this.validateTurn(turnData);
 
-    const baseState = this.latestRound.initialPlayerState;
+    const baseState = toJS(this.latestRound.initialPlayerState);
     const roundIndex = this.latestRound.roundIndex;
     const dataToValidate =
       typeof turnData === 'function'
@@ -361,7 +363,7 @@ export class GameSessionSuite<
    * You can derive your new turn from the existing data with a function parameter.
    */
   validateTurn = (turnData: TurnUpdater<TGame>): GetTurnError<TGame> | null => {
-    const baseState = this.latestRound.initialPlayerState;
+    const baseState = toJS(this.latestRound.initialPlayerState);
     const roundIndex = this.latestRound.roundIndex;
     const dataToValidate =
       typeof turnData === 'function'

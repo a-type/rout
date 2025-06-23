@@ -28,7 +28,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
             <SubmitTurn className="flex-1" />
           </Box>
         )}
-        <ActiveActionHud className="absolute top-lg left-lg shadow-lg" />
+        <ActiveActionHud className="absolute top-lg left-lg right-lg shadow-lg" />
       </TokenRoot>
     </Box>
   );
