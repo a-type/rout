@@ -66,6 +66,8 @@ export function Droppable<T = any>({
   const stableOnOver = useStableCallback(onOver);
   const unvalidatedOver = isDraggedOverThisRegion ? draggedData : null;
   useEffect(() => {
+    console.log(`Droppable ${id} onOver`, unvalidatedOver);
+    // Call the stable callback with
     stableOnOver?.(unvalidatedOver);
   }, [stableOnOver, unvalidatedOver]);
 

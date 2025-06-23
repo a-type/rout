@@ -93,6 +93,7 @@ export const useDndStore = create<DndStoreValue>()(
         });
       },
       setOverRegion: (regionId: string | null) => {
+        if (get().overRegion === regionId) return;
         set((state) => {
           state.overRegion = regionId;
         });

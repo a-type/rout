@@ -41,6 +41,7 @@ export type GameDefinition<
   TurnData extends BaseTurnData = any,
   PublicTurnData extends BaseTurnData = TurnData,
   TurnError extends BaseTurnError = BaseTurnError,
+  InitialTurnData extends BaseTurnData | null = null,
 > = {
   version: `v${number}.${number}`;
   minimumPlayers: number;
@@ -79,6 +80,15 @@ export type GameDefinition<
     roundIndex: number;
     members: GameMember[];
   }) => TurnError | string | void;
+
+  /**
+   * Provide an empty/default turn object that conforms to your
+   * turn schema. This is used to initialize the turn on the client,
+   * providing the convenience of not always having to check if the
+   * turn data is empty and initializing it yourself.
+   */
+  getInitialTurn?: () => InitialTurnData;
+
   /**
    * Returns the player state as it would be if the player made the move.
    * This may not be the same as the final computed player state, since

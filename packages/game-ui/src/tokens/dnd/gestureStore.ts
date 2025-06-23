@@ -11,6 +11,7 @@ export const gestureEvents = new EventSubscriber<{
   move: () => void;
   end: () => void;
   cancel: () => void;
+  claim: (id: string) => void;
 }>();
 
 export const gesture = {
@@ -21,6 +22,7 @@ export const gesture = {
   initialBounds: { x: 0, y: 0, width: 0, height: 0 },
   offset: { x: 0, y: 0 },
   current: { x: motionValue(0), y: motionValue(0) },
+  currentRaw: { x: 0, y: 0 },
   delta: { x: motionValue(0), y: motionValue(0) },
   velocity: { x: motionValue(0), y: motionValue(0) },
 };
@@ -32,6 +34,7 @@ export function resetGesture() {
   gesture.type = 'none';
   gesture.claimId = null;
   setVector(gesture.current, 0, 0);
+  setVector(gesture.currentRaw, 0, 0);
   setVector(gesture.delta, 0, 0);
   setVector(gesture.velocity, 0, 0);
   setVector(gesture.offset, 0, 0);
@@ -52,6 +55,7 @@ export function useMonitorGlobalGesture() {
     gesture.type = isTouchEvent(event) ? 'touch' : 'mouse';
     setVector(gesture.initial, coordinate.x, coordinate.y);
     setVector(gesture.current, coordinate.x, coordinate.y);
+    setVector(gesture.currentRaw, coordinate.x, coordinate.y);
     setVector(gesture.delta, 0, 0);
     setVector(gesture.velocity, 0, 0);
     setVector(gesture.offset, 0, 0);
@@ -68,6 +72,7 @@ export function useMonitorGlobalGesture() {
     applySubtraction(gesture.initial, coords, gesture.delta);
     applySubtraction(gesture.current, coords, gesture.velocity);
     setVector(gesture.current, coords.x, coords.y);
+    setVector(gesture.currentRaw, coords.x, coords.y);
 
     // track overlapping regions
     const overlapped = dropRegions.getContainingRegions(coords);
@@ -189,6 +194,7 @@ export function useGesture(
     onMove?: (gesture: DragGestureContext) => void;
     onEnd?: (gesture: DragGestureContext) => void;
     onCancel?: (gesture: DragGestureContext) => void;
+    onClaim?: (id: string, gesture: DragGestureContext) => void;
   },
   options: {
     disabled?: boolean;
@@ -198,6 +204,9 @@ export function useGesture(
   const onMove = useStableCallback(() => callbacks.onMove?.(gesture));
   const onEnd = useStableCallback(() => callbacks.onEnd?.(gesture));
   const onCancel = useStableCallback(() => callbacks.onCancel?.(gesture));
+  const onClaim = useStableCallback((id: string) =>
+    callbacks.onClaim?.(id, gesture),
+  );
   useEffect(() => {
     if (options.disabled) return;
     return gestureEvents.subscribe('start', onStart);
@@ -214,6 +223,10 @@ export function useGesture(
     if (options.disabled) return;
     return gestureEvents.subscribe('cancel', onCancel);
   }, [onCancel, options.disabled]);
+  useEffect(() => {
+    if (options.disabled) return;
+    return gestureEvents.subscribe('claim', onClaim);
+  }, [onClaim, options.disabled]);
 
   const claim = useCallback((id: string, element: HTMLElement) => {
     // cancel any existing text selection and prevent text selection globally
@@ -231,6 +244,7 @@ export function useGesture(
       gesture.initialBounds.width = elPosition.width;
       gesture.initialBounds.height = elPosition.height;
     }
+    gestureEvents.emit('claim', id);
   }, []);
 
   const startKeyboardDrag = useCallback(

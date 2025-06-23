@@ -15,6 +15,7 @@ import {
 import { cardDefinitions, ValidCardId } from './definitions/cardDefinition';
 import { deckDefinitions } from './definitions/decks';
 import { applyTurn } from './gameState/applyTurn';
+import { getCardDefinitionFromInstanceId } from './gameState/card';
 import { findMatchingFreeAction } from './gameState/freeAction';
 import { checkFatigue } from './gameState/gameStateHelpers';
 import { generateInitialGameState } from './gameState/generate';
@@ -25,7 +26,6 @@ import {
   validateMove,
   validateTargets,
 } from './gameState/validation';
-import { getCardDefinitionFromInstanceId } from './gameState/card';
 
 // re-export definitions used by renderer
 export * from './definitions/abilityDefinition';

@@ -55,6 +55,14 @@
       "problemMatcher": ["$tsc-watch"],
       "label": "⚾ Wizard Ball Dev",
       "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/gunboats",
+      "problemMatcher": ["$tsc-watch"],
+      "label": "🚢 Gunboats Dev",
+      "detail": "pnpm --filter \"./*\" dev"
     }
   ]
 }

@@ -24,8 +24,10 @@ import {
   GetPlayerState,
   GetPublicTurnData,
   GetTurnData,
+  GetTurnDataOrInitial,
   GetTurnError,
   simpleError,
+  TurnUpdater,
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
@@ -261,13 +263,17 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return nextRound.initialPlayerState;
   }
 
-  @computed get currentTurn() {
+  @computed get currentTurn(): GetTurnDataOrInitial<TGame> {
     const { localTurnData: localTurn, latestRound } = this;
     const remoteTurn = latestRound.yourTurnData;
 
     if (localTurn) return localTurn;
     if (remoteTurn) return remoteTurn;
-    return null;
+    return this.gameDefinition.getInitialTurn?.() ?? (null as any);
+  }
+
+  @computed get hasLocalTurn(): boolean {
+    return !!this.localTurnData;
   }
 
   /**
@@ -314,11 +320,13 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     return err as GetTurnError<TGame>;
   }
 
-  validatePartialTurn = (
-    turnData:
-      | GetTurnData<TGame>
-      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
-  ) => {
+  private getPreviousTurnForUpdater = (): GetTurnDataOrInitial<TGame> => {
+    if (!this.gameDefinition.getInitialTurn) {
+      return this.localTurnData ?? (null as any);
+    }
+    return this.localTurnData || (this.gameDefinition.getInitialTurn() as any);
+  };
+  validatePartialTurn = (turnData: TurnUpdater<TGame>) => {
     if (!this.gameDefinition.validatePartialTurn)
       return this.validateTurn(turnData);
 
@@ -326,7 +334,7 @@ export class GameSessionSuite<TGame extends GameDefinition> {
     const roundIndex = this.latestRound.roundIndex;
     const dataToValidate =
       typeof turnData === 'function'
-        ? (turnData as any)(this.localTurnData ?? null)
+        ? (turnData as any)(this.getPreviousTurnForUpdater())
         : turnData;
     const err = this.gameDefinition.validatePartialTurn({
       members: this.members,
@@ -350,16 +358,12 @@ export class GameSessionSuite<TGame extends GameDefinition> {
    * Validate a potential turn without applying it to the client.
    * You can derive your new turn from the existing data with a function parameter.
    */
-  validateTurn = (
-    turnData:
-      | GetTurnData<TGame>
-      | ((current: GetTurnData<TGame> | null) => GetTurnData<TGame>),
-  ): GetTurnError<TGame> | null => {
+  validateTurn = (turnData: TurnUpdater<TGame>): GetTurnError<TGame> | null => {
     const baseState = this.latestRound.initialPlayerState;
     const roundIndex = this.latestRound.roundIndex;
     const dataToValidate =
       typeof turnData === 'function'
-        ? (turnData as any)(this.localTurnData ?? null)
+        ? (turnData as any)(this.getPreviousTurnForUpdater())
         : turnData;
     const params = {
       members: this.members,
