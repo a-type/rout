@@ -13,7 +13,9 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
     <Box col gap full asChild>
       <TokenRoot>
         <GameBoard className="flex-1" />
-        <ActionHand />
+        <Box className="absolute bottom-lg" full="width" layout="center center">
+          <ActionHand />
+        </Box>
       </TokenRoot>
     </Box>
   );
