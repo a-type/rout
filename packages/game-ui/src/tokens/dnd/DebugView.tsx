@@ -2,6 +2,7 @@ import { useAnimationFrame } from '@a-type/ui';
 import { createRef, useRef } from 'react';
 import { DraggableContextValue } from './Draggable';
 import { dropRegions } from './DropRegions';
+import { gesture } from './gestureStore';
 
 export interface DebugViewProps {}
 
@@ -47,6 +48,11 @@ export function DebugView({}: DebugViewProps) {
         ctx.lineWidth = 1;
         ctx.strokeRect(box.x, box.y, box.width, box.height);
       }
+    }
+
+    if (gesture.active) {
+      ctx.fillStyle = 'orange';
+      ctx.fillRect(gesture.currentRaw.x - 5, gesture.currentRaw.y - 5, 10, 10);
     }
   });
 

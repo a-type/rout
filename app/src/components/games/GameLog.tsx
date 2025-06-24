@@ -1,15 +1,20 @@
 import {
   Box,
   Button,
-  Collapsible,
-  Icon,
+  clsx,
+  Dialog,
   RelativeTime,
   ScrollArea,
   withClassName,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { ChatRenderer } from '@long-game/game-renderer';
-import { ChatForm, PlayerAvatar, useMediaQuery } from '@long-game/game-ui';
+import {
+  ChatForm,
+  PlayerAvatar,
+  useMediaQuery,
+  usePlayerThemed,
+} from '@long-game/game-ui';
 import { ReactNode, useEffect, useRef } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
 
@@ -58,7 +63,7 @@ export function GameLogChatInput() {
   return <ChatForm toolsRef={toolsRef} />;
 }
 
-const GameLogCollapsed = withGame(({ gameSuite }) => {
+const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   const log = gameSuite.combinedLog;
   const latestMessage = log.filter((m) => m.type === 'chat').pop();
   const selfId = gameSuite.playerId;
@@ -167,6 +172,9 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
 }) {
   const open = useSnapshot(localState).open;
   const isLarge = useMediaQuery('(min-width: 1024px)');
+  const { className: themeClass, style: themeStyle } = usePlayerThemed(
+    gameSuite.playerId,
+  );
 
   if (isLarge) {
     return (
@@ -178,42 +186,35 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
 
   return (
     <Box direction="col" gap="none" p="none" items="stretch" {...props}>
-      <Collapsible open={open} onOpenChange={(o) => (localState.open = o)}>
-        <Collapsible.Trigger asChild>
-          {open ? (
-            <Button size="small" className="mx-auto">
-              <Icon name="x" />
-              Close
-            </Button>
-          ) : (
-            <Button
-              color="ghost"
-              size="small"
-              onClick={() => {
-                localState.open = true;
-                if (gameSuite.combinedLog.length === 0) {
-                  setTimeout(() => {
-                    localState.focusChat = true;
-                  }, 50);
-                }
-              }}
-              className="w-full font-normal h-32px rounded-xs"
-            >
-              <GameLogCollapsed />
-            </Button>
-          )}
-        </Collapsible.Trigger>
-        <Collapsible.Content className="overflow-hidden">
+      <Dialog open={open} onOpenChange={(o) => (localState.open = o)}>
+        <Dialog.Trigger asChild>
+          <Button
+            color="ghost"
+            size="small"
+            onClick={() => {
+              localState.open = true;
+              if (gameSuite.combinedLog.length === 0) {
+                setTimeout(() => {
+                  localState.focusChat = true;
+                }, 50);
+              }
+            }}
+            className="w-full font-normal h-32px rounded-xs"
+          >
+            <GameLogCollapsedTriggerContent />
+          </Button>
+        </Dialog.Trigger>
+        <Dialog.Content className={clsx('px-sm')} width="md">
           <Box
-            p="sm"
             layout="stretch stretch"
-            className="w-full h-70vh"
+            className={clsx('w-full h-70vh', themeClass)}
             d="col"
+            style={themeStyle}
           >
             <GameLogFull />
           </Box>
-        </Collapsible.Content>
-      </Collapsible>
+        </Dialog.Content>
+      </Dialog>
     </Box>
   );
 });

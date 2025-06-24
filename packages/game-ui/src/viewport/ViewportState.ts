@@ -203,7 +203,6 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       // already bound to this element
       return;
     }
-    console.log('bind root', element);
     if (this._boundRoot && this._boundRoot !== element) {
       this._boundElementResizeObserver.unobserve(this._boundRoot);
       this._boundRoot.removeAttribute('data-viewport');
@@ -230,9 +229,6 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
           y: box.top,
         },
       );
-      if (this._boundContent) {
-        this.fitEverythingOnScreen({ origin: 'animation' });
-      }
     }
   };
 
@@ -254,7 +250,9 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
         height: this._boundContent.clientHeight,
       });
       if (this._boundRoot) {
-        this.fitEverythingOnScreen({ origin: 'animation' });
+        requestAnimationFrame(() => {
+          this.fitEverythingOnScreen({ origin: 'animation' });
+        });
       }
     }
   };
@@ -539,7 +537,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   setZoom = (
     zoom: number,
     {
-      origin = 'direct',
+      origin = 'animation',
       centroid,
       gestureComplete = true,
     }: {
@@ -605,7 +603,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   private rawPan = (
     worldPosition: Vector2,
     {
-      origin = 'direct',
+      origin = 'animation',
       gestureComplete = true,
     }: { origin?: ViewportEventOrigin; gestureComplete?: boolean } = {},
   ) => {
@@ -683,7 +681,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   fitOnScreen = (
     bounds: Box,
     {
-      origin = 'control',
+      origin = 'animation',
       margin = 10,
     }: { origin?: ViewportEventOrigin; margin?: number } = {},
   ) => {

@@ -189,7 +189,7 @@ export function validateAction({
       if (closestPartDistance > 8) {
         return {
           code: 'fire-out-of-range',
-          message: 'The requested shot is out of range of that ship',
+          message: 'The requested shot is out of range of any of your ships.',
         };
       }
       break;

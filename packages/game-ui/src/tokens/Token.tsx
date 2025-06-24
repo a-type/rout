@@ -65,7 +65,6 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   draggable,
   gesture,
   ref,
-  options,
   ...rest
 }) => {
   const dampenedX = useTransform(() => {
@@ -73,12 +72,6 @@ const TokenInHandContainer: DraggedContainerComponent = ({
       return gesture.current.x.get();
     }
     return gesture.initialBounds.x + gesture.initialBounds.width / 2;
-  });
-  const adjustedY = useTransform(() => {
-    return (
-      gesture.current.y.get() +
-      (gesture.type === 'touch' ? (options.touchOffset ?? 0) : 0)
-    );
   });
   const distanceScale = useSpring(
     useTransform(() => {
@@ -95,11 +88,15 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     }),
   );
 
-  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${gesture.current.y}px, 0) scale(${distanceScale})`;
 
   return (
     <motion.div
-      style={{ position: 'absolute', transform, zIndex: 1000000 }}
+      style={{
+        position: 'absolute',
+        transform,
+        zIndex: 1000000,
+      }}
       ref={ref}
       {...rest}
     >

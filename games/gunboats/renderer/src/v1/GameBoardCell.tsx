@@ -13,6 +13,7 @@ import {
 } from './actionState';
 import { CELL_SIZE } from './constants';
 import { hooks } from './gameClient';
+import { ShipPart } from './ShipPart';
 
 export interface GameBoardCellProps {
   position: { x: number; y: number };
@@ -50,11 +51,33 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
         id={serializePosition(position)}
         key={serializePosition(position)}
         className={clsx(
-          'border border-default border-solid bg-primary-wash',
+          'border border-default border-solid bg-accent-wash',
           invalid ? 'border-attention' : 'border-gray',
           'relative flex items-center justify-center',
           'w-[var(--cell-size)] h-[var(--cell-size)]',
+          '[&[data-dragged-rejected=true]]:bg-gray-wash',
         )}
+        accept={({ data }) => {
+          if (isAction(data)) {
+            if (data.type === 'fire') {
+              // validate firing range
+              const error = gameSuite.validatePartialTurn((cur) => ({
+                ...cur,
+                actions: [
+                  ...cur.actions,
+                  {
+                    id: data.id,
+                    type: 'fire',
+                    target: position,
+                  },
+                ],
+              }));
+              if (error) return error.message;
+            }
+          }
+
+          return true;
+        }}
         onDrop={({ data }) => {
           if (isAction(data)) {
             // User dropped an action token here
@@ -95,18 +118,28 @@ export const GameBoardCell = hooks.withGame<GameBoardCellProps>(
         }}
       >
         {cell?.shipPart && !cell.movedAway && (
-          <div className="w-full h-full bg-primary" />
+          <ShipPart data={cell.shipPart} className="bg-primary" />
         )}
         {cell?.placedShipPart && (
-          <div className="w-full h-full bg-primary opacity-50" />
+          <ShipPart data={cell.placedShipPart} className="opacity-50" />
         )}
         {placingPartInThisCell && (
-          <div className="w-full h-full bg-primary opacity-50" />
+          <ShipPart
+            data={{
+              playerId: gameSuite.playerId,
+              shipId: 'temp',
+              hit: false,
+              isCenter: placingPartInThisCell.isCenter,
+              partIndex: placingPartInThisCell.partIndex,
+              totalLength: placingParts.length,
+            }}
+            className="w-full h-full bg-primary opacity-50"
+          />
         )}
         {firingOnThisCell && (
           <Icon
             name="locate"
-            className="absolute top-sm left-sm color-attention w-1/4 h-1/4"
+            className="absolute top-sm left-sm color-attention w-1/2 h-1/2"
           />
         )}
       </TokenSpace>

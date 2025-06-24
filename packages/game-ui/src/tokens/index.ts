@@ -3,8 +3,8 @@ export {
   useIsDragPreview,
   type DraggableContextValue,
   type DraggableProps,
-  type DraggedContainerOptions,
 } from './dnd/Draggable';
+export { useGesture } from './dnd/gestureStore';
 export * from './Token';
 export * from './TokenHand';
 export * from './TokenPresence';

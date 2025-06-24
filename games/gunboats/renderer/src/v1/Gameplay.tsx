@@ -14,7 +14,10 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
     <Box col gap full asChild>
       <TokenRoot>
         <GameBoard className="flex-1" />
-        <Box className="absolute bottom-lg" full="width" layout="center center">
+        <Box
+          className="absolute bottom-lg left-1/2 translate-x--1/2"
+          layout="center center"
+        >
           <ActionHand />
         </Box>
         <ActiveActionHud className="absolute top-lg left-1/2 translate-x--1/2 shadow-lg" />

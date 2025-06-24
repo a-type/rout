@@ -1,12 +1,12 @@
+import { Box, clsx, useSizeCssVars, useStableCallback } from '@a-type/ui';
 import {
-  Box,
-  Button,
-  clsx,
-  Icon,
-  useSizeCssVars,
-  useStableCallback,
-} from '@a-type/ui';
-import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
+  CSSProperties,
+  ReactNode,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { ViewportContent } from './ViewportContent';
 import { ViewportProvider } from './ViewportContext';
@@ -24,6 +24,9 @@ export interface ViewportProps {
   defaultCenter?: PositionOrPercentage;
   onZoomChange?: (zoom: number) => void;
   onCenterChange?: (center: { x: number; y: number }) => void;
+  /** Get access to the viewport from outside this component */
+  viewportRef?: RefObject<ViewportState | null>;
+  controlContent?: ReactNode;
 }
 
 export function Viewport({
@@ -33,6 +36,8 @@ export function Viewport({
   defaultCenter,
   onZoomChange,
   onCenterChange,
+  viewportRef,
+  controlContent,
 }: ViewportProps) {
   const viewport = useState(
     () =>
@@ -47,6 +52,11 @@ export function Viewport({
         defaultCenter,
       }),
   )[0];
+  if (viewportRef) {
+    // If a viewportRef is provided, we use it to expose the viewport state
+    // This allows parent components to access the viewport state directly
+    viewportRef.current = viewport;
+  }
 
   const innerRef = useRef<HTMLDivElement>(null);
   const sizeRef = useSizeCssVars<HTMLDivElement>(300, undefined, {
@@ -92,37 +102,8 @@ export function Viewport({
         >
           <ViewportContent viewport={viewport}>{children}</ViewportContent>
         </div>
-        <ZoomControls viewport={viewport} />
       </Box>
+      {controlContent}
     </ViewportProvider>
-  );
-}
-
-function ZoomControls({ viewport }: { viewport: ViewportState }) {
-  const zoomIn = () => {
-    viewport.setZoom(viewport.zoom * 1.3, {
-      origin: 'control',
-    });
-  };
-  const zoomOut = () => {
-    viewport.setZoom(viewport.zoom / 1.3, {
-      origin: 'control',
-    });
-  };
-  const reset = () => {
-    viewport.fitEverythingOnScreen({ origin: 'control' });
-  };
-  return (
-    <Box surface gap className="absolute bottom-sm right-sm">
-      <Button color="ghost" size="icon-small" onClick={reset}>
-        <Icon name="maximize" />
-      </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomIn}>
-        <Icon name="zoomIn" />
-      </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomOut}>
-        <Icon name="zoomOut" />
-      </Button>
-    </Box>
   );
 }

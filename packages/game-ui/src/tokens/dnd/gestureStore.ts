@@ -20,11 +20,21 @@ export const gesture = {
   initial: { x: 0, y: 0 },
   claimId: null as string | null,
   initialBounds: { x: 0, y: 0, width: 0, height: 0 },
+  /**
+   * An offset to apply to the gesture position before doing any hit-testing or rendering --
+   * Used to offset for touch events so the dragged element isn't obscured by the user's finger.
+   */
   offset: { x: 0, y: 0 },
   current: { x: motionValue(0), y: motionValue(0) },
   currentRaw: { x: 0, y: 0 },
   delta: { x: motionValue(0), y: motionValue(0) },
   velocity: { x: motionValue(0), y: motionValue(0) },
+  /**
+   * Records the position relative to the grabbed element where the gesture began; can be
+   * used to keep the grabbed element in the same position relative to the cursor
+   * when dragging.
+   */
+  activationPosition: { x: 0, y: 0 },
 };
 
 (window as any).gesture = gesture; // for debugging
@@ -38,6 +48,7 @@ export function resetGesture() {
   setVector(gesture.delta, 0, 0);
   setVector(gesture.velocity, 0, 0);
   setVector(gesture.offset, 0, 0);
+  setVector(gesture.activationPosition, 0, 0);
   gesture.initialBounds.x = 0;
   gesture.initialBounds.y = 0;
   gesture.initialBounds.width = 0;
@@ -53,12 +64,15 @@ export function useMonitorGlobalGesture() {
     gesture.active = true;
     const coordinate = getEventCoordinates(event);
     gesture.type = isTouchEvent(event) ? 'touch' : 'mouse';
+    setVector(gesture.offset, 0, gesture.type === 'touch' ? -40 : 0);
+    coordinate.x += gesture.offset.x;
+    coordinate.y += gesture.offset.y;
     setVector(gesture.initial, coordinate.x, coordinate.y);
     setVector(gesture.current, coordinate.x, coordinate.y);
     setVector(gesture.currentRaw, coordinate.x, coordinate.y);
     setVector(gesture.delta, 0, 0);
     setVector(gesture.velocity, 0, 0);
-    setVector(gesture.offset, 0, 0);
+    setVector(gesture.activationPosition, 0, 0);
     gesture.initialBounds.x = 0;
     gesture.initialBounds.y = 0;
     gesture.initialBounds.width = 0;
@@ -67,20 +81,25 @@ export function useMonitorGlobalGesture() {
     gestureEvents.emit('start');
   }
 
-  function moveGesture(event: GestureEvent) {
-    const coords = getEventCoordinates(event);
-    applySubtraction(gesture.initial, coords, gesture.delta);
-    applySubtraction(gesture.current, coords, gesture.velocity);
-    setVector(gesture.current, coords.x, coords.y);
-    setVector(gesture.currentRaw, coords.x, coords.y);
-
-    // track overlapping regions
-    const overlapped = dropRegions.getContainingRegions(coords);
+  const updateOver = () => {
+    const overlapped = dropRegions.getContainingRegions(gesture.currentRaw);
     if (overlapped.length > 0) {
       useDndStore.getState().setOverRegion(overlapped[0].id);
     } else {
       useDndStore.getState().setOverRegion(null);
     }
+  };
+
+  function moveGesture(event: GestureEvent) {
+    const coords = getEventCoordinates(event);
+    applySubtraction(gesture.initial, coords, gesture.delta);
+    coords.x += gesture.offset.x;
+    coords.y += gesture.offset.y;
+    applySubtraction(gesture.current, coords, gesture.velocity);
+    setVector(gesture.current, coords.x, coords.y);
+    setVector(gesture.currentRaw, coords.x, coords.y);
+
+    updateOver();
 
     gestureEvents.emit('move');
   }
@@ -122,7 +141,7 @@ export function useMonitorGlobalGesture() {
   );
   useWindowEvent(
     'pointerup',
-    () => {
+    (ev) => {
       if (gesture.type !== 'keyboard') {
         endGesture();
       }
@@ -161,9 +180,12 @@ export function useMonitorGlobalGesture() {
           const coord = getCurrentVector(gesture.current);
           coord.x += velocity.x;
           coord.y += velocity.y;
+          applySubtraction(gesture.initial, coord, gesture.delta);
+          coord.x += gesture.offset.x;
+          coord.y += gesture.offset.y;
           setVector(gesture.velocity, velocity.x, velocity.y);
           setVector(gesture.current, coord.x, coord.y);
-          applySubtraction(gesture.initial, gesture.current, gesture.delta);
+          setVector(gesture.currentRaw, coord.x, coord.y);
 
           // track overlapping regions
           const overlapped = dropRegions.getContainingRegions(coord);
@@ -237,7 +259,7 @@ export function useGesture(
     const { x, y } = getCurrentVector(gesture.current);
     const xOffset = elPosition ? x - elPosition.left : 0;
     const yOffset = elPosition ? y - elPosition.top : 0;
-    setVector(gesture.offset, xOffset, yOffset);
+    setVector(gesture.activationPosition, xOffset, yOffset);
     if (elPosition) {
       gesture.initialBounds.x = elPosition.left;
       gesture.initialBounds.y = elPosition.top;

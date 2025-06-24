@@ -28,11 +28,6 @@ import {
   useDragGesture,
 } from './useDragGesture';
 
-export interface DraggedContainerOptions {
-  /** Pixel offset for touch drag -- moves the preview out from under the user's finger */
-  touchOffset?: number;
-}
-
 export interface DraggableProps extends HTMLMotionProps<'div'> {
   id: string;
   data?: any;
@@ -40,7 +35,6 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   children?: ReactNode;
   DraggedContainer?: DraggedContainerComponent;
   draggedClassName?: string;
-  draggedContainerOptions?: DraggedContainerOptions;
 }
 
 function DraggableRoot({
@@ -169,7 +163,6 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
    * makes adjustments on touch to avoid the user's finger.
    */
   DraggedContainer?: DraggedContainerComponent;
-  draggedContainerOptions?: DraggedContainerOptions;
   /**
    * Only applied to the dragged preview element
    */
@@ -194,7 +187,6 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   id,
   dragDisabled,
   box,
-  draggedContainerOptions,
   ...rest
 }: DndOverlayPortalProps) {
   const overlayEl = useDndStore((state) => state.overlayElement);
@@ -207,7 +199,6 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
         createPortal(
           <DraggedRoot
             Container={DraggedContainer}
-            options={draggedContainerOptions}
             {...rest}
             className={clsx('pointer-events-none', className, draggedClassName)}
           >
@@ -237,10 +228,6 @@ export function useIsDragPreview() {
   return useContext(DraggedRootContext);
 }
 
-const defaultOptions: DraggedContainerOptions = {
-  touchOffset: -40, // default offset for touch drag to avoid finger
-};
-
 /**
  * Animates the movement of the dragged object according to drag gesture.
  * Updates the position of the dragged box and checks for overlapping drop regions.
@@ -251,12 +238,10 @@ const DraggedRoot = memo(function DraggedRoot({
   ref,
   style,
   Container: UserContainer,
-  options = defaultOptions,
   ...rest
 }: Omit<HTMLMotionProps<'div'>, 'draggable'> & {
   Container?: DraggedContainerComponent;
   children: ReactNode;
-  options?: DraggedContainerOptions;
 }) {
   const dragged = useDraggableContext();
 
@@ -274,13 +259,7 @@ const DraggedRoot = memo(function DraggedRoot({
 
   return (
     <DraggedRootContext.Provider value={true}>
-      <ContainerImpl
-        ref={ref}
-        draggable={dragged}
-        gesture={gesture}
-        options={options}
-        {...rest}
-      >
+      <ContainerImpl ref={ref} draggable={dragged} gesture={gesture} {...rest}>
         <AnimatePresence>
           <motion.div
             layoutId={dragged.id}
@@ -304,16 +283,14 @@ export type DraggedContainerComponent = ComponentType<{
   gesture: DragGestureContext;
   ref: Ref<HTMLDivElement> | undefined;
   className?: string;
-  options: DraggedContainerOptions;
 }>;
 
 export const DefaultDraggedContainer: DraggedContainerComponent = ({
   children,
   ref,
   className,
-  options,
 }) => {
-  const transform = useCenteredDragTransform(gesture, options);
+  const transform = useCenteredDragTransform(gesture);
   return (
     <motion.div
       style={{
@@ -329,19 +306,11 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
   );
 };
 
-export function useCenteredDragTransform(
-  gesture: DragGestureContext,
-  options: DraggedContainerOptions,
-) {
+export function useCenteredDragTransform(gesture: DragGestureContext) {
   const { x, y } = gesture.current;
-  const touchAdjustedY = useTransform(() => {
-    return (
-      y.get() + (gesture.type === 'touch' ? (options.touchOffset ?? 0) : 0)
-    );
-  });
   const scale = useTransform(() => {
     return gesture.type === 'keyboard' ? 1.1 : 1;
   });
-  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0) scale(${scale})`;
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
   return transform;
 }
