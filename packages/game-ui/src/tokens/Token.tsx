@@ -65,6 +65,7 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   draggable,
   gesture,
   ref,
+  options,
   ...rest
 }) => {
   const dampenedX = useTransform(() => {
@@ -74,7 +75,10 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     return gesture.initialBounds.x + gesture.initialBounds.width / 2;
   });
   const adjustedY = useTransform(() => {
-    return gesture.current.y.get() + (gesture.type === 'touch' ? -40 : 0);
+    return (
+      gesture.current.y.get() +
+      (gesture.type === 'touch' ? (options.touchOffset ?? 0) : 0)
+    );
   });
   const distanceScale = useSpring(
     useTransform(() => {

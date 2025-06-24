@@ -1,4 +1,11 @@
-import { Box, Button, clsx, Icon, useSizeCssVars } from '@a-type/ui';
+import {
+  Box,
+  Button,
+  clsx,
+  Icon,
+  useSizeCssVars,
+  useStableCallback,
+} from '@a-type/ui';
 import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { ViewportContent } from './ViewportContent';
@@ -15,6 +22,8 @@ export interface ViewportProps {
   className?: string;
   style?: CSSProperties;
   defaultCenter?: PositionOrPercentage;
+  onZoomChange?: (zoom: number) => void;
+  onCenterChange?: (center: { x: number; y: number }) => void;
 }
 
 export function Viewport({
@@ -22,6 +31,8 @@ export function Viewport({
   className,
   style,
   defaultCenter,
+  onZoomChange,
+  onCenterChange,
 }: ViewportProps) {
   const viewport = useState(
     () =>
@@ -55,6 +66,17 @@ export function Viewport({
   useEffect(() => {
     (window as any).viewport = viewport; // For debugging purposes
   }, [viewport]);
+
+  const stableOnZoomChange = useStableCallback(onZoomChange);
+  const stableOnCenterChange = useStableCallback(onCenterChange);
+  useEffect(() => {
+    stableOnZoomChange(viewport.zoom);
+    return viewport.subscribe('zoomChanged', stableOnZoomChange);
+  }, [viewport, stableOnZoomChange]);
+  useEffect(() => {
+    stableOnCenterChange(viewport.center);
+    return viewport.subscribe('centerChanged', stableOnCenterChange);
+  }, [viewport, stableOnCenterChange]);
 
   return (
     <ViewportProvider value={viewport}>

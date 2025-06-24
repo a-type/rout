@@ -1,9 +1,12 @@
 import { Box, Icon } from '@a-type/ui';
 import { assert } from '@long-game/common';
 import { Action } from '@long-game/game-gunboats-definition/v1';
-import { useIsDragging } from '@long-game/game-ui';
+import { useIsDragPreview } from '@long-game/game-ui';
+import { motion } from 'motion/react';
+import { ReactNode } from 'react';
 import { CELL_SIZE } from './constants';
 import { hooks } from './gameClient';
+import { zoomGlobal } from './viewportGlobals';
 
 export interface ActionCardProps {
   action: Action;
@@ -13,7 +16,7 @@ export const ActionCard = hooks.withGame<ActionCardProps>(function ActionCard({
   gameSuite,
   action,
 }) {
-  const isDragging = useIsDragging();
+  const isDragging = useIsDragPreview();
 
   if (isDragging) {
     return <DraggingContent action={action} />;
@@ -43,14 +46,29 @@ export const ActionCard = hooks.withGame<ActionCardProps>(function ActionCard({
 });
 
 function DraggingContent({ action }: { action: Action }) {
+  let content: ReactNode;
   switch (action.type) {
     case 'ship':
-      return <DraggingShipContent action={action} />;
+      content = <DraggingShipContent action={action} />;
+      break;
     case 'fire':
-      return <DraggingFireContent action={action} />;
+      content = <DraggingFireContent action={action} />;
+      break;
     default:
-      return null;
+      content = null;
+      break;
   }
+
+  // scales the drop preview down to match the size of the board.
+  return (
+    <motion.div
+      style={{
+        scale: zoomGlobal,
+      }}
+    >
+      {content}
+    </motion.div>
+  );
 }
 
 function DraggingShipContent({ action }: { action: Action }) {

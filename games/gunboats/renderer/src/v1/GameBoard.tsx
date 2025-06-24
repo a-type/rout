@@ -5,6 +5,7 @@ import { ActionOrientationControl } from './ActionOrientationControl';
 import { CELL_SIZE } from './constants';
 import { GameBoardCell } from './GameBoardCell';
 import { hooks } from './gameClient';
+import { zoomGlobal } from './viewportGlobals';
 
 export interface GameBoardProps {
   className?: string;
@@ -20,6 +21,7 @@ export const GameBoard = hooks.withGame<GameBoardProps>(function GameBoard({
     <Viewport
       className={className}
       style={{ '--size': boardSize, '--cell-size': CELL_SIZE + 'px' } as any}
+      onZoomChange={(zoom) => zoomGlobal.set(zoom)}
     >
       <div
         className={clsx(

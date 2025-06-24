@@ -1,5 +1,5 @@
 import { Action } from '@long-game/game-gunboats-definition/v1';
-import { Token, TokenHand } from '@long-game/game-ui';
+import { DraggedContainerOptions, Token, TokenHand } from '@long-game/game-ui';
 import { ActionCard } from './ActionCard';
 import { useActiveAction } from './actionState';
 import { hooks } from './gameClient';
@@ -30,12 +30,18 @@ export interface ActionHandItemProps {
   action: Action;
 }
 
-export const ActionHandItem = hooks.withGame<ActionHandItemProps>(
-  function ActionHandItem({ gameSuite, action }) {
-    return (
-      <Token id={action.id} data={action}>
-        <ActionCard action={action} />
-      </Token>
-    );
-  },
-);
+const containerOptions: DraggedContainerOptions = {
+  touchOffset: -40,
+};
+
+function ActionHandItem({ action }: { action: Action }) {
+  return (
+    <Token
+      id={action.id}
+      data={action}
+      draggedContainerOptions={containerOptions}
+    >
+      <ActionCard action={action} />
+    </Token>
+  );
+}
