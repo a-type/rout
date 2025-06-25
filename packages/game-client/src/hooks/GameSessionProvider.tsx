@@ -59,6 +59,16 @@ export function GameSessionProvider({
   // for debugging
   (window as any).gameSuite = gameSuite;
 
+  // submit turn on dismount
+  useEffect(
+    () => () => {
+      if (gameSuite.isTurnSubmitDelayed) {
+        gameSuite.submitTurn();
+      }
+    },
+    [gameSuite],
+  );
+
   return (
     <GameSessionContext.Provider value={gameSuite}>
       <Suspense fallback={fallback}>{children}</Suspense>
