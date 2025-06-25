@@ -13,6 +13,7 @@ export default {
       url: 'https://rout.games',
     },
   ],
+  prerelease: true,
 } satisfies GameModule;
 
 export { v1 };

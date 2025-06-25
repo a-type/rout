@@ -11,6 +11,7 @@ export default {
     },
   ],
   tags: ['solo', 'casual', 'testing'],
+  prerelease: true,
 } satisfies GameModule;
 
 export { v1 };

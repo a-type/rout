@@ -15,6 +15,7 @@ export interface GameModule {
   description?: string;
   tags: string[];
   creators: { name: string; role?: string; url?: string }[];
+  prerelease?: boolean;
 }
 
 export function getLatestVersion(game: GameModule): GameDefinition {
