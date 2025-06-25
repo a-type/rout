@@ -25,7 +25,7 @@ export function HomePage({}: HomePageProps) {
   return (
     <PageRoot>
       <TopographyBackground />
-      <PageContent scrollable={false}>
+      <PageContent>
         <Box d="row" gap layout="center end" full="width">
           <Button size="small" color="ghost" asChild>
             <Link to="/settings">
