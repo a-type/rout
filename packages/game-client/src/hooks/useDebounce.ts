@@ -21,15 +21,29 @@ export function useDebounced<T>(value: T, delay: number, immediate = false) {
 export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
-): (...args: Parameters<T>) => void {
+): {
+  (...args: Parameters<T>): void;
+  immediate: (...args: Parameters<T>) => void;
+  cancel: () => void;
+} {
+  const stableCallback = useRef(callback);
+  stableCallback.current = callback;
   const [debouncedCallback] = useState(() => {
     let timeout: ReturnType<typeof setTimeout>;
-    return (...args: Parameters<T>) => {
+    function debounced(...args: Parameters<T>) {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        callback(...args);
+        stableCallback.current(...args);
       }, delay);
+    }
+    debounced.immediate = (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      stableCallback.current(...args);
     };
+    debounced.cancel = () => {
+      clearTimeout(timeout);
+    };
+    return debounced;
   });
 
   return debouncedCallback;

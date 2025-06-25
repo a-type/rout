@@ -11,9 +11,13 @@ export * from './players/PlayerStatuses';
 export * from './players/usePlayerThemed';
 export * from './tokens/index';
 export * from './turns/DelayedSubmitUndo';
+export * from './turns/ResetTurn';
 export * from './turns/SubmitTurn';
 export * from './turns/TurnError';
 export * from './viewport/Viewport';
+export { useViewport } from './viewport/ViewportContext';
+export type { ViewportState } from './viewport/ViewportState';
+export * from './viewport/ViewportZoomControls';
 export * from './withSuspense';
 
 export * from '@long-game/visual-components';

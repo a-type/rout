@@ -7,6 +7,7 @@ export default {
   versions: [v1],
   tags: [],
   creators: [],
+  prerelease: true,
 } satisfies GameModule;
 
 export { v1 };

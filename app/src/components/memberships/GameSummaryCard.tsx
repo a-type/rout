@@ -15,6 +15,7 @@ import { withSuspense } from '@long-game/game-ui';
 import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
 import { Suspense } from 'react';
+import { GameIcon } from '../games/GameIcon';
 import { UserAvatar } from '../users/UserAvatar';
 import { GameSessionStatusChip } from './GameSessionStatusChip';
 
@@ -46,9 +47,22 @@ export const GameSummaryCard = withSuspense(
 
     return (
       <Card
-        className={clsx(isMyTurn && 'border-accent-dark', className)}
+        className={clsx(
+          isMyTurn ? 'border-accent-dark' : 'border-gray-dark',
+          'aspect-1',
+          className,
+        )}
         {...rest}
       >
+        {summary.gameId && (
+          <Card.Image>
+            <GameIcon
+              gameId={summary.gameId}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-dark/50 to-transparent opacity-50" />
+          </Card.Image>
+        )}
         <Card.Main asChild>
           <Link to={`/session/${summary.id}`}>
             <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
@@ -75,46 +89,48 @@ export const GameSummaryCard = withSuspense(
         </Card.Main>
         {showMenu && (
           <Card.Footer>
-            <DropdownMenu>
-              <DropdownMenu.Trigger asChild>
-                <Button size="icon-small" color="ghost">
-                  <Icon name="dots" />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content>
-                {canDelete && (
-                  <DropdownMenu.Item
-                    onClick={() => {
-                      deleteSession.mutate({ id: summary.id });
-                    }}
-                    color="destructive"
-                  >
-                    Delete
-                    <DropdownMenu.ItemRightSlot>
-                      <Icon name="trash" />
-                    </DropdownMenu.ItemRightSlot>
-                  </DropdownMenu.Item>
-                )}
-                {canAbandon && (
-                  <DropdownMenu.Item
-                    onClick={async () => {
-                      const confirmed = confirm(
-                        'This will end the game for everyone. Other players will be notified the game is over. Are you sure you want to abandon this game?',
-                      );
-                      if (!confirmed) return;
-                      await abandonSession.mutateAsync({ id: summary.id });
-                      toast(`You abandoned this game.`);
-                    }}
-                    color="destructive"
-                  >
-                    Abandon
-                    <DropdownMenu.ItemRightSlot>
-                      <Icon name="flag" />
-                    </DropdownMenu.ItemRightSlot>
-                  </DropdownMenu.Item>
-                )}
-              </DropdownMenu.Content>
-            </DropdownMenu>
+            <Card.Menu>
+              <DropdownMenu>
+                <DropdownMenu.Trigger asChild>
+                  <Button size="icon-small" color="default">
+                    <Icon name="dots" />
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content>
+                  {canDelete && (
+                    <DropdownMenu.Item
+                      onClick={() => {
+                        deleteSession.mutate({ id: summary.id });
+                      }}
+                      color="destructive"
+                    >
+                      Delete
+                      <DropdownMenu.ItemRightSlot>
+                        <Icon name="trash" />
+                      </DropdownMenu.ItemRightSlot>
+                    </DropdownMenu.Item>
+                  )}
+                  {canAbandon && (
+                    <DropdownMenu.Item
+                      onClick={async () => {
+                        const confirmed = confirm(
+                          'This will end the game for everyone. Other players will be notified the game is over. Are you sure you want to abandon this game?',
+                        );
+                        if (!confirmed) return;
+                        await abandonSession.mutateAsync({ id: summary.id });
+                        toast(`You abandoned this game.`);
+                      }}
+                      color="destructive"
+                    >
+                      Abandon
+                      <DropdownMenu.ItemRightSlot>
+                        <Icon name="flag" />
+                      </DropdownMenu.ItemRightSlot>
+                    </DropdownMenu.Item>
+                  )}
+                </DropdownMenu.Content>
+              </DropdownMenu>
+            </Card.Menu>
           </Card.Footer>
         )}
       </Card>

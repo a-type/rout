@@ -59,12 +59,12 @@ export function HomePage({}: HomePageProps) {
             </Link>
           </Button>
         </Box>
-        <PageNowPlaying unstyled className="items-center justify-center">
-          <CreateGame />
-        </PageNowPlaying>
         <Suspense>
           <CompleteProfileDialog />
         </Suspense>
+        <PageNowPlaying unstyled className="items-center justify-center">
+          <CreateGame />
+        </PageNowPlaying>
       </PageContent>
       <PageNav>
         <MainNav />

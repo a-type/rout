@@ -73,9 +73,6 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     }
     return gesture.initialBounds.x + gesture.initialBounds.width / 2;
   });
-  const adjustedY = useTransform(() => {
-    return gesture.current.y.get() + (gesture.type === 'touch' ? -40 : 0);
-  });
   const distanceScale = useSpring(
     useTransform(() => {
       if (!draggable.isCandidate) {
@@ -91,11 +88,15 @@ const TokenInHandContainer: DraggedContainerComponent = ({
     }),
   );
 
-  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${adjustedY}px, 0) scale(${distanceScale})`;
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${dampenedX}px, ${gesture.current.y}px, 0) scale(${distanceScale})`;
 
   return (
     <motion.div
-      style={{ position: 'absolute', transform, zIndex: 1000000 }}
+      style={{
+        position: 'absolute',
+        transform,
+        zIndex: 1000000,
+      }}
       ref={ref}
       {...rest}
     >

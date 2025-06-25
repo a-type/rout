@@ -1,9 +1,16 @@
-import { Box, Button, clsx, Icon, useSizeCssVars } from '@a-type/ui';
-import { ReactNode, useRef, useState } from 'react';
+import { Box, clsx, useSizeCssVars, useStableCallback } from '@a-type/ui';
+import {
+  CSSProperties,
+  ReactNode,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { ViewportContent } from './ViewportContent';
 import { ViewportProvider } from './ViewportContext';
-import { ViewportState } from './ViewportState';
+import { PositionOrPercentage, ViewportState } from './ViewportState';
 import { useDndAutoPan } from './useDndAutoPan';
 import {
   useKeyboardControls,
@@ -13,9 +20,25 @@ import {
 export interface ViewportProps {
   children?: ReactNode;
   className?: string;
+  style?: CSSProperties;
+  defaultCenter?: PositionOrPercentage;
+  onZoomChange?: (zoom: number) => void;
+  onCenterChange?: (center: { x: number; y: number }) => void;
+  /** Get access to the viewport from outside this component */
+  viewportRef?: RefObject<ViewportState | null>;
+  controlContent?: ReactNode;
 }
 
-export function Viewport({ children, className }: ViewportProps) {
+export function Viewport({
+  children,
+  className,
+  style,
+  defaultCenter,
+  onZoomChange,
+  onCenterChange,
+  viewportRef,
+  controlContent,
+}: ViewportProps) {
   const viewport = useState(
     () =>
       new ViewportState({
@@ -26,8 +49,14 @@ export function Viewport({ children, className }: ViewportProps) {
         },
         defaultZoom: 0.5,
         panLimitBuffer: 100,
+        defaultCenter,
       }),
   )[0];
+  if (viewportRef) {
+    // If a viewportRef is provided, we use it to expose the viewport state
+    // This allows parent components to access the viewport state directly
+    viewportRef.current = viewport;
+  }
 
   const innerRef = useRef<HTMLDivElement>(null);
   const sizeRef = useSizeCssVars<HTMLDivElement>(300, undefined, {
@@ -44,9 +73,24 @@ export function Viewport({ children, className }: ViewportProps) {
   const keyboardProps = useKeyboardControls(viewport);
   useDndAutoPan(viewport);
 
+  useEffect(() => {
+    (window as any).viewport = viewport; // For debugging purposes
+  }, [viewport]);
+
+  const stableOnZoomChange = useStableCallback(onZoomChange);
+  const stableOnCenterChange = useStableCallback(onCenterChange);
+  useEffect(() => {
+    stableOnZoomChange(viewport.zoom);
+    return viewport.subscribe('zoomChanged', stableOnZoomChange);
+  }, [viewport, stableOnZoomChange]);
+  useEffect(() => {
+    stableOnCenterChange(viewport.center);
+    return viewport.subscribe('centerChanged', stableOnCenterChange);
+  }, [viewport, stableOnCenterChange]);
+
   return (
     <ViewportProvider value={viewport}>
-      <Box className={className}>
+      <Box className={className} style={style}>
         <div
           className={clsx(
             'w-full h-full flex-1 relative touch-none contain-strict select-none overflow-hidden',
@@ -58,37 +102,8 @@ export function Viewport({ children, className }: ViewportProps) {
         >
           <ViewportContent viewport={viewport}>{children}</ViewportContent>
         </div>
-        <ZoomControls viewport={viewport} />
       </Box>
+      {controlContent}
     </ViewportProvider>
-  );
-}
-
-function ZoomControls({ viewport }: { viewport: ViewportState }) {
-  const zoomIn = () => {
-    viewport.setZoom(viewport.zoom * 1.3, {
-      origin: 'control',
-    });
-  };
-  const zoomOut = () => {
-    viewport.setZoom(viewport.zoom / 1.3, {
-      origin: 'control',
-    });
-  };
-  const reset = () => {
-    viewport.fitEverythingOnScreen({ origin: 'control' });
-  };
-  return (
-    <Box surface gap className="absolute bottom-sm right-sm">
-      <Button color="ghost" size="icon-small" onClick={reset}>
-        <Icon name="maximize" />
-      </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomIn}>
-        <Icon name="zoomIn" />
-      </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomOut}>
-        <Icon name="zoomOut" />
-      </Button>
-    </Box>
   );
 }

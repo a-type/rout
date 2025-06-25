@@ -128,7 +128,9 @@ export const Pages = () => {
       }
     >
       <Router routes={routes} onNavigate={handleNavigate}>
-        <Outlet />
+        <Box full className="flex-1" col>
+          <Outlet />
+        </Box>
         <QuickBuyPopup />
       </Router>
     </ErrorBoundary>

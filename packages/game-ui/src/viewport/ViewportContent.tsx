@@ -17,8 +17,8 @@ export interface ViewportContentProps
 }
 
 const PAN_SPRING_CONFIG: SpringOptions = {
-  mass: 1,
-  bounce: 0.1,
+  mass: 0.2,
+  bounce: 0.05,
 };
 const ZOOM_SPRING_CONFIG: SpringOptions = {
   mass: 0.5,

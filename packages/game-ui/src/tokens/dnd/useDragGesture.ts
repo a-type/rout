@@ -64,8 +64,8 @@ export function useDragGesture(options?: DragGestureOptions) {
       // We use a heuristic to decide if a gesture which moves
       // over this element should start a drag.
       const containsGesture = draggable.box.contains(
-        gesture.current.x.get(),
-        gesture.current.y.get(),
+        gesture.currentRaw.x,
+        gesture.currentRaw.y,
       );
 
       if (!containsGesture) {
@@ -83,7 +83,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         // horizontal.
         const deltaX = gesture.delta.x.get();
         const deltaY = gesture.delta.y.get();
-        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
           return;
@@ -94,7 +94,9 @@ export function useDragGesture(options?: DragGestureOptions) {
         // claim the drag if the user's gesture velocity matches the direction.
         const velocityXSign = Math.sign(gesture.velocity.x.get());
         // for 0 velocity, don't claim.
-        if (velocityXSign === 0) return;
+        if (velocityXSign === 0) {
+          return;
+        }
 
         const xCenterOfPriorClaim =
           gesture.initialBounds.x + gesture.initialBounds.width / 2;

@@ -14,6 +14,7 @@ export default {
     },
   ],
   tags: ['card', 'strategy', 'board', 'competitive'],
+  prerelease: true,
 } satisfies GameModule;
 
 export type { FighterCard, TacticCard } from './v1/definitions/cardDefinition';

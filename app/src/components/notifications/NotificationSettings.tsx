@@ -106,21 +106,23 @@ function NotificationSettingsRow({
     <Box d="row" gap items="center" justify="between">
       <Box>{sentenceCase(label)}</Box>
       <Box items="center" gap>
-        <Box d="col" gap="sm" layout="center center">
-          <Tooltip
-            disabled={!!canPush}
-            content="Push notifications are not supported on this device"
-            color="contrast"
-          >
-            <Switch
-              checked={value.push && subscribedToPush}
-              onCheckedChange={togglePush}
-              disabled={isSubscribingToPush || !canPush}
-              className={!canPush ? 'opacity-50' : 'cursor-pointer'}
-            />
-          </Tooltip>
-          <span className="text-xs">Push</span>
-        </Box>
+        {canPush && (
+          <Box d="col" gap="sm" layout="center center">
+            <Tooltip
+              disabled={!!canPush}
+              content="Push notifications are not supported on this device"
+              color="contrast"
+            >
+              <Switch
+                checked={value.push && subscribedToPush}
+                onCheckedChange={togglePush}
+                disabled={isSubscribingToPush || !canPush}
+                className={!canPush ? 'opacity-50' : 'cursor-pointer'}
+              />
+            </Tooltip>
+            <span className="text-xs">Push</span>
+          </Box>
+        )}
         <Box d="col" gap="sm" layout="center center">
           <Switch
             checked={value.email}

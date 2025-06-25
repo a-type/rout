@@ -53,26 +53,27 @@ export function GamePicker({
     }));
   };
 
+  const { data: me } = sdkHooks.useGetMe();
+  const isAdmin = me?.isProductAdmin;
+
   const { data: availableGames } = sdkHooks.useGetAvailableGames({
     id: gameSessionId,
   });
 
-  const filteredGamesIncludingUnowned = Object.entries(games).filter(
-    ([gameId, game]) => {
+  const filteredGamesIncludingUnowned = Object.entries(games)
+    .filter(([_, game]) => isAdmin || !game.prerelease)
+    .filter(([_, game]) => {
       if (filters.tags.length > 0) {
         return filters.tags.some((tag) => game.tags.includes(tag));
       }
       return true;
-    },
-  );
-  const filteredGames = filteredGamesIncludingUnowned.filter(
-    ([gameId, game]) => {
-      if (filters.owned && !availableGames.includes(gameId)) {
-        return false;
-      }
-      return true;
-    },
-  );
+    });
+  const filteredGames = filteredGamesIncludingUnowned.filter(([gameId]) => {
+    if (filters.owned && !availableGames.includes(gameId)) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Box d="col" gap items="stretch" className={clsx(className)} {...rest}>
@@ -121,7 +122,7 @@ export function GamePicker({
         </Select>
       </Box>
       <Box className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md p-md">
-        {filteredGames.map(([gameId, game]) => (
+        {filteredGames.map(([gameId]) => (
           <GameCard
             gameId={gameId}
             onClick={

@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button } from '@a-type/ui';
+import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
 import { useNavigate } from '@verdant-web/react-router';
 import { GameCard } from './GameCard';
 
@@ -30,7 +30,7 @@ export function OwnedGameList({ className }: OwnedGameListProps) {
   }
 
   return (
-    <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
+    <Card.Grid columns={cardGridColumns.small}>
       {ownedGameIds.map((gameId) => (
         <GameCard
           key={gameId}
@@ -42,6 +42,6 @@ export function OwnedGameList({ className }: OwnedGameListProps) {
           }}
         />
       ))}
-    </Box>
+    </Card.Grid>
   );
 }

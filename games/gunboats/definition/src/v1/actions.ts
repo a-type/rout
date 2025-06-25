@@ -10,6 +10,7 @@ import {
   serializePosition,
 } from './board';
 import {
+  getAllPlayerOwnedShipParts,
   getShipCenter,
   placeShip,
   placeShipOnBoard,
@@ -48,7 +49,6 @@ export type ActionTaken =
   | {
       id: string;
       type: 'fire';
-      shipId: string;
       target: Position;
     };
 
@@ -72,7 +72,10 @@ function validateShipPosition({
   });
   for (const placement of placements) {
     const serializedPosition = serializePosition(placement.position);
-    if (board.cells[serializedPosition]?.shipPart?.playerId === playerId) {
+    if (
+      board.cells[serializedPosition]?.shipPart?.playerId === playerId ||
+      board.cells[serializedPosition]?.placedShipPart?.playerId === playerId
+    ) {
       // only checking own ships -- player cannot see others
       return {
         code: 'space-occupied',
@@ -166,15 +169,27 @@ export function validateAction({
           message: 'Action type mismatch: expected fire action.',
         };
       }
-      const { shipId, target } = taken;
-      const { position: center } = getShipCenter(shipId, board);
-      const distance = Math.sqrt(
-        Math.pow(target.x - center.x, 2) + Math.pow(target.y - center.y, 2),
-      );
-      if (distance > 8) {
+      const { target } = taken;
+      const allShipParts = getAllPlayerOwnedShipParts(board, playerId);
+
+      // TODO: clean this up.
+      let closestPartDistance = Infinity;
+      for (const { position } of allShipParts) {
+        const distance = Math.sqrt(
+          Math.pow(target.x - position.x, 2) +
+            Math.pow(target.y - position.y, 2),
+        );
+        if (distance < closestPartDistance) {
+          closestPartDistance = distance;
+        }
+        if (distance <= 8) {
+          break;
+        }
+      }
+      if (closestPartDistance > 8) {
         return {
           code: 'fire-out-of-range',
-          message: 'The requested shot is out of range of that ship',
+          message: 'The requested shot is out of range of any of your ships.',
         };
       }
       break;
@@ -223,19 +238,17 @@ export function applyActionTaken({
   actionTaken,
   board,
   playerId,
-  random,
 }: {
   action: Action;
   actionTaken: ActionTaken;
   board: Board;
   playerId: PrefixedId<'u'>;
-  random: GameRandom;
 }) {
   let newBoard = structuredClone(board);
   switch (action.type) {
     case 'ship':
       assert(actionTaken.type === 'ship', 'Action does not match');
-      const shipId = random.id();
+      const shipId = `s-${action.id}`;
       newBoard = placeShipOnBoard({
         shipId,
         shipLength: action.shipLength,
@@ -247,8 +260,12 @@ export function applyActionTaken({
       break;
     case 'fire':
       assert(actionTaken.type === 'fire', 'Action does not match');
-      const cell = newBoard.cells[serializePosition(actionTaken.target)];
-      if (!cell.shipPart) break;
+      let cell = newBoard.cells[serializePosition(actionTaken.target)];
+      if (!cell) {
+        cell = newBoard.cells[serializePosition(actionTaken.target)] = {};
+      }
+      cell.firedOn = true;
+      if (!cell?.shipPart) break;
       cell.shipPart.hit = true;
       break;
     case 'move':
@@ -277,4 +294,14 @@ export function applyActionTaken({
   }
 
   return newBoard;
+}
+
+export function isAction(obj: any): obj is Action {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    'type' in obj &&
+    (obj.type === 'ship' || obj.type === 'move' || obj.type === 'fire') &&
+    'id' in obj
+  );
 }

@@ -18,10 +18,12 @@ export class AutoPan extends EventSubscriber<{
 }> {
   private cursorPosition: Vector2 | null = null;
   // percentage of window dimensions which will trigger auto-pan behavior
-  private threshold = 0.05;
+  private threshold = 0.15;
   // slows down the pan speed
   private panSpeedMultiplier = 0.25;
   private rafHandle: number | undefined;
+  private delay = 500; // delay before starting the auto-pan loop
+  private startedAt: number | undefined;
 
   constructor(private viewport: ViewportState) {
     super();
@@ -32,6 +34,7 @@ export class AutoPan extends EventSubscriber<{
    * should be called at the start of a drag
    */
   start = (cursorPosition: Vector2 | GestureVector2) => {
+    this.startedAt = performance.now();
     if (Array.isArray(cursorPosition)) {
       this.cursorPosition = { x: cursorPosition[0], y: cursorPosition[1] };
     } else {
@@ -104,6 +107,17 @@ export class AutoPan extends EventSubscriber<{
   };
 
   private loop = () => {
+    if (!this.startedAt) {
+      // if we haven't started yet, don't do anything
+      return;
+    }
+    const now = performance.now();
+    if (now - this.startedAt < this.delay) {
+      // if we haven't waited long enough, don't do anything
+      this.rafHandle = requestAnimationFrame(this.loop);
+      return;
+    }
+
     const autoPan = this.getAutoPan();
 
     if (vectorLength(autoPan)) {

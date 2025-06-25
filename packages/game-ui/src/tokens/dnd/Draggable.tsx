@@ -101,10 +101,6 @@ export function useDraggableContext() {
   }
   return context;
 }
-export function useIsDragging() {
-  const ctx = useContext(DraggableContext);
-  return ctx?.isDragged || ctx?.isCandidate || false;
-}
 
 export interface DraggableHandleProps extends HTMLMotionProps<'div'> {
   activationConstraint?: DragGestureActivationConstraint;
@@ -227,6 +223,11 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   );
 });
 
+const DraggedRootContext = createContext(false);
+export function useIsDragPreview() {
+  return useContext(DraggedRootContext);
+}
+
 /**
  * Animates the movement of the dragged object according to drag gesture.
  * Updates the position of the dragged box and checks for overlapping drop regions.
@@ -257,20 +258,22 @@ const DraggedRoot = memo(function DraggedRoot({
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
   return (
-    <ContainerImpl ref={ref} draggable={dragged} gesture={gesture} {...rest}>
-      <AnimatePresence>
-        <motion.div
-          layoutId={dragged.id}
-          transition={flipTransition}
-          data-draggable-preview={dragged.id}
-          data-dragging={dragged.isDragged}
-          data-candidate={dragged.isCandidate}
-          data-disabled={dragged.disabled}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
-    </ContainerImpl>
+    <DraggedRootContext.Provider value={true}>
+      <ContainerImpl ref={ref} draggable={dragged} gesture={gesture} {...rest}>
+        <AnimatePresence>
+          <motion.div
+            layoutId={dragged.id}
+            transition={flipTransition}
+            data-draggable-preview={dragged.id}
+            data-dragging={dragged.isDragged}
+            data-candidate={dragged.isCandidate}
+            data-disabled={dragged.disabled}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </ContainerImpl>
+    </DraggedRootContext.Provider>
   );
 });
 
@@ -305,12 +308,9 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
 
 export function useCenteredDragTransform(gesture: DragGestureContext) {
   const { x, y } = gesture.current;
-  const touchAdjustedY = useTransform(() => {
-    return y.get() + (gesture.type === 'touch' ? -40 : 0);
-  });
   const scale = useTransform(() => {
     return gesture.type === 'keyboard' ? 1.1 : 1;
   });
-  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${touchAdjustedY}px, 0) scale(${scale})`;
+  const transform = useMotionTemplate`translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
   return transform;
 }

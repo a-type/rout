@@ -10,21 +10,13 @@ export interface ProceedOrSubmitProps {
 
 export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
   function ProceedOrSubmit({ gameSuite, taskIndex: index }) {
-    const {
-      canSubmitTurn,
-      submitTurn,
-      currentTurn,
-      turnWasSubmitted,
-      turnError,
-    } = gameSuite;
+    const { hasLocalTurn, currentTurn, turnError } = gameSuite;
     const tasksCompleted = (currentTurn?.taskCompletions ?? []).map(Boolean);
     const otherTask = index === 0 ? 1 : 0;
     const hasBothTasks = currentTurn?.taskCompletions.length === 2;
     const showSubmit = hasBothTasks || tasksCompleted[otherTask];
-    const willSubmit = showSubmit && canSubmitTurn;
-    const submitted = turnWasSubmitted && !canSubmitTurn;
     const actionableError =
-      canSubmitTurn && tasksCompleted[0] && tasksCompleted[1]
+      hasLocalTurn && tasksCompleted[0] && tasksCompleted[1]
         ? turnError
         : undefined;
 

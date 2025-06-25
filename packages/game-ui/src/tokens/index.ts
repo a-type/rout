@@ -1,4 +1,10 @@
-export { useIsDragging } from './dnd/Draggable';
+export {
+  useDraggableContext,
+  useIsDragPreview,
+  type DraggableContextValue,
+  type DraggableProps,
+} from './dnd/Draggable';
+export { useGesture } from './dnd/gestureStore';
 export * from './Token';
 export * from './TokenHand';
 export * from './TokenPresence';

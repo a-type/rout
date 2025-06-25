@@ -4,7 +4,7 @@ import { Box, RectLimits, Size, Vector2 } from './types';
 
 const MIN_POSSIBLE_ZOOM = 0.000001;
 
-export interface DefaultCenter {
+export interface PositionOrPercentage {
   x: number | `${number}%`;
   y: number | `${number}%`;
 }
@@ -13,7 +13,7 @@ export interface ViewportConfig {
   /** Supply a starting zoom value. Default 1 */
   defaultZoom?: number;
   /** Supply a starting center position. Default is the middle of the pan limits or 0,0 */
-  defaultCenter?: DefaultCenter;
+  defaultCenter?: PositionOrPercentage;
   /**
    * There are two ways to limit pan position:
    * "center" simply clamps the center of the screen to the provided panLimits boundary
@@ -136,9 +136,8 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     this.resetCenter();
 
     this.bindRoot(boundElement ?? null);
-
-    // @ts-ignore for debugging
-    window.viewport = this;
+    document.addEventListener('gesturestart', preventDefault);
+    document.addEventListener('gesturechange', preventDefault);
   }
 
   private setBoundElementSize = (size: Size, offset?: Vector2) => {
@@ -200,6 +199,10 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   };
 
   bindRoot = (element: HTMLElement | null) => {
+    if (this._boundRoot === element) {
+      // already bound to this element
+      return;
+    }
     if (this._boundRoot && this._boundRoot !== element) {
       this._boundElementResizeObserver.unobserve(this._boundRoot);
       this._boundRoot.removeAttribute('data-viewport');
@@ -211,35 +214,29 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
         width: 2400,
         height: 2400,
       });
-    } else {
-      this._boundRoot = element ?? document.documentElement;
+    } else if (element) {
+      this._boundRoot = element;
       this._boundRoot.setAttribute('data-viewport', 'true');
       this._boundElementResizeObserver.observe(this._boundRoot);
-      if (element) {
-        const box = element.getBoundingClientRect();
-        this.setBoundElementSize(
-          {
-            width: element.clientWidth,
-            height: element.clientHeight,
-          },
-          {
-            x: box.left,
-            y: box.top,
-          },
-        );
-      } else {
-        this.setBoundElementSize({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      }
+      const box = element.getBoundingClientRect();
+      this.setBoundElementSize(
+        {
+          width: element.clientWidth,
+          height: element.clientHeight,
+        },
+        {
+          x: box.left,
+          y: box.top,
+        },
+      );
     }
-
-    document.addEventListener('gesturestart', preventDefault);
-    document.addEventListener('gesturechange', preventDefault);
   };
 
   bindContent = (element: HTMLElement | null) => {
+    if (this._boundContent === element) {
+      // already bound to this element
+      return;
+    }
     if (this._boundContent && this._boundContent !== element) {
       this._contentElementResizeObserver.unobserve(this._boundContent);
       this._boundContent.removeAttribute('data-viewport-content');
@@ -252,7 +249,11 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
         width: this._boundContent.clientWidth,
         height: this._boundContent.clientHeight,
       });
-      this.fitEverythingOnScreen({ origin: 'animation' });
+      if (this._boundRoot) {
+        requestAnimationFrame(() => {
+          this.fitEverythingOnScreen({ origin: 'animation' });
+        });
+      }
     }
   };
 
@@ -536,7 +537,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   setZoom = (
     zoom: number,
     {
-      origin = 'direct',
+      origin = 'animation',
       centroid,
       gestureComplete = true,
     }: {
@@ -568,7 +569,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
       this._zoom = clamp(zoom, this.zoomMin, this.zoomMax);
       // apply a pan with the current pan position to recalculate pan
       // boundaries from the new zoom and enforce them
-      this.pan(this.center, { origin, gestureComplete });
+      this.rawPan(this.center, { origin, gestureComplete });
     }
     this.emit('zoomChanged', this.zoom, origin);
     if (gestureComplete) {
@@ -599,13 +600,17 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
    *
    * @param {Vector2} worldPosition the position in world coordinates to pan to
    */
-  pan = (
+  private rawPan = (
     worldPosition: Vector2,
     {
-      origin = 'direct',
+      origin = 'animation',
       gestureComplete = true,
     }: { origin?: ViewportEventOrigin; gestureComplete?: boolean } = {},
   ) => {
+    if (isNaN(worldPosition.x) || isNaN(worldPosition.y)) {
+      console.trace('Invalid world position for pan', worldPosition);
+      return;
+    }
     this._center = this.clampPanPosition(worldPosition);
     this.emit('centerChanged', this.center, origin);
     if (gestureComplete) {
@@ -614,6 +619,18 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     if (origin === 'direct' || origin === 'control') {
       this._hasGesturePanned = true;
     }
+  };
+
+  pan = (
+    worldPosition: Vector2,
+    details?: {
+      origin?: ViewportEventOrigin;
+      gestureComplete?: boolean;
+    },
+  ) => {
+    worldPosition.x += this.contentOffset.x;
+    worldPosition.y += this.contentOffset.y;
+    this.rawPan(worldPosition, details);
   };
 
   /**
@@ -627,13 +644,13 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     worldDelta: Vector2,
     details?: { origin?: ViewportEventOrigin; gestureComplete?: boolean },
   ) => {
-    this.pan(addVectors(this.center, worldDelta), details);
+    this.rawPan(addVectors(this.center, worldDelta), details);
   };
 
   /**
    * Pans and zooms at the same time - a convenience shortcut to
    * zoom while moving the camera to a certain point. Both values
-   * are absolute - see .doZoom and .doPan for more details on behavior
+   * are absolute - see .setZoom and .pan for more details on behavior
    * and parameters.
    */
   move = (
@@ -645,8 +662,17 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
     this.pan(worldPosition, info);
   };
 
+  private rawMove = (
+    worldPosition: Vector2,
+    zoom: number,
+    info: { origin?: ViewportEventOrigin; gestureComplete?: boolean } = {},
+  ) => {
+    this.setZoom(zoom, info);
+    this.rawPan(worldPosition, info);
+  };
+
   private reconstrainPosition = (info?: { origin?: ViewportEventOrigin }) =>
-    this.move(this.center, this.zoom, info);
+    this.rawMove(this.center, this.zoom, info);
 
   /**
    * Does the best it can to fit the provided area onscreen.
@@ -655,7 +681,7 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
   fitOnScreen = (
     bounds: Box,
     {
-      origin = 'control',
+      origin = 'animation',
       margin = 10,
     }: { origin?: ViewportEventOrigin; margin?: number } = {},
   ) => {
@@ -683,8 +709,8 @@ export class ViewportState extends EventSubscriber<ViewportEvents> {
 
     return this.fitOnScreen(
       {
-        x: panLimits.min.x,
-        y: panLimits.min.y,
+        x: panLimits.min.x - this.contentOffset.x,
+        y: panLimits.min.y - this.contentOffset.y,
         width: panLimits.max.x - panLimits.min.x,
         height: panLimits.max.y - panLimits.min.y,
       },
