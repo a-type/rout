@@ -1,4 +1,4 @@
-import { Chip, ChipProps, Icon } from '@a-type/ui';
+import { Chip, ChipProps, clsx, Icon } from '@a-type/ui';
 import { GameStatusValue } from '@long-game/common';
 
 export interface GameSessionStatusChipProps extends ChipProps {
@@ -7,7 +7,10 @@ export interface GameSessionStatusChipProps extends ChipProps {
 
 export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
   return (
-    <Chip color={status === 'complete' ? 'primary' : 'neutral'}>
+    <Chip
+      color={status === 'complete' ? 'primary' : 'neutral'}
+      className={clsx(status !== 'complete' && 'bg-white')}
+    >
       <Icon
         name={
           status === 'active'

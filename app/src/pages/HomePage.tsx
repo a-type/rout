@@ -25,7 +25,7 @@ export function HomePage({}: HomePageProps) {
   return (
     <PageRoot>
       <TopographyBackground />
-      <PageContent>
+      <PageContent scrollable={false}>
         <Box d="row" gap layout="center end" full="width">
           <Button size="small" color="ghost" asChild>
             <Link to="/settings">
@@ -59,12 +59,12 @@ export function HomePage({}: HomePageProps) {
             </Link>
           </Button>
         </Box>
-        <PageNowPlaying unstyled className="items-center justify-center">
-          <CreateGame />
-        </PageNowPlaying>
         <Suspense>
           <CompleteProfileDialog />
         </Suspense>
+        <PageNowPlaying unstyled className="items-center justify-center">
+          <CreateGame />
+        </PageNowPlaying>
       </PageContent>
       <PageNav>
         <MainNav />

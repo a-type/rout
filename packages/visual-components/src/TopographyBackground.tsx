@@ -13,5 +13,5 @@ function Topography(props: React.ComponentProps<typeof LazyTopography>) {
 
 export const TopographyBackground = withClassName(
   Topography,
-  'absolute inset-0 z-0',
+  'fixed inset-0 z-0',
 );
