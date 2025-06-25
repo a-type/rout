@@ -189,3 +189,11 @@ export function staminaToText(stamina: number): string {
   if (stamina < 0.8) return 'Good';
   return 'Fresh';
 }
+
+export function numberToWord(n: number): string {
+  const words = ['zero', 'one', 'two', 'three'];
+  if (n < 0 || n >= words.length) {
+    return n.toString(); // Fallback for numbers outside the range
+  }
+  return words[n];
+}

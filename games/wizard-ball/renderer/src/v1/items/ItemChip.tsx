@@ -48,5 +48,8 @@ export function ItemDefChip({ id }: { id: string }) {
 export function ItemChip({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
   const item = finalState.league.itemLookup[id];
+  if (!item) {
+    return <span className="text-red-500">Unknown Item</span>;
+  }
   return <ItemDefChip id={item.itemDef} />;
 }

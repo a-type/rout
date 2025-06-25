@@ -158,7 +158,7 @@ export function getModifiedAttributes(
   const clutchFactor = determineClutchFactor(gameState);
   const player = league.playerLookup[playerId];
   const stamina = Math.min(1, Math.max(0, player.stamina));
-  const staminaFactor = Math.max(0, (0.8 - stamina) * 2) + 1;
+  const staminaFactor = Math.max(0, ((0.8 - stamina) / 0.8) * 2) + 1;
   const reduction = 1.0 / staminaFactor;
   let baseStats = sumObjects(
     player.attributes,

@@ -272,7 +272,7 @@ export const perks: Record<string, Perk> = {
           return gameState;
         }
         player.statusIds.enraged =
-          (player.statusIds.enraged || 1) + random.int(1, 4);
+          (player.statusIds.enraged ?? 0) + random.int(2, 4);
         return gameState;
       },
     }),
@@ -290,8 +290,8 @@ export const perks: Record<string, Perk> = {
         if (event.kind !== 'strikeout' || event.isPitcher) {
           return gameState;
         }
-        player.statusIds.cursed =
-          (player.statusIds.cursed || 1) + random.int(1, 4);
+        player.statusIds.bless =
+          (player.statusIds.bless ?? 0) - random.int(2, 4);
         return gameState;
       },
     }),
@@ -309,8 +309,8 @@ export const perks: Record<string, Perk> = {
         if (event.kind !== 'defenderOut') {
           return gameState;
         }
-        player.statusIds.blessing =
-          (player.statusIds.blessing || 1) + random.int(1, 4);
+        player.statusIds.bless =
+          (player.statusIds.bless ?? 0) + random.int(2, 4);
         return gameState;
       },
     }),

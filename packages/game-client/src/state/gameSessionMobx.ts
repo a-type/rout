@@ -244,7 +244,7 @@ export class GameSessionSuite<
       if (!currentTurn) return viewingRound.initialPlayerState;
 
       return this.gameDefinition.getProspectivePlayerState({
-        playerState: toJS(viewingRound.initialPlayerState),
+        playerState: viewingRound.initialPlayerState,
         prospectiveTurn: {
           data: currentTurn,
           playerId: this.playerId,

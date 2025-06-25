@@ -29,4 +29,5 @@ export function checkTriggerEvent(
       });
     }
   });
+  return gameState;
 }

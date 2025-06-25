@@ -1,5 +1,6 @@
 import { LeagueGameState } from './gameTypes';
 import { PerkEffect } from './perkData';
+import { logger } from './sim/simGames';
 import { WeatherType } from './weatherData';
 
 export type Ballpark = {
@@ -206,18 +207,34 @@ export const ballparkData = {
   cursedGrounds: {
     name: 'Cursed Graveyard',
     description:
-      'A haunted field where the spirits of past players linger, cursing the away team when they get hits.',
+      'A haunted field where the spirits of past players linger, sometimes cursing the away team when they get hits.',
     icon: '👻',
     color: '#9C27B0',
     weather: {
       fog: 4,
+      blessedRain: 0,
+      bloodRain: 2,
     },
     effect: ({ isHome } = {}) => ({
-      trigger: ({ event, player, gameState }) => {
-        if (event.kind !== 'hit' || isHome) {
+      trigger: ({ event, player, gameState, random }) => {
+        if (event.kind !== 'hit' || isHome || event.isPitcher) {
           return gameState;
         }
-        player.statusIds.cursed = (player.statusIds.cursed || 1) + 1;
+        if (random.float(0, 1) > 0.2) {
+          return gameState;
+        }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player was cursed by the spirits.',
+            source: { kind: 'ballpark', id: 'cursedGrounds' },
+            important: true,
+          },
+          gameState,
+        );
+        player.statusIds.bless =
+          (player.statusIds.bless || 0) - random.int(2, 5);
         return gameState;
       },
     }),
@@ -234,6 +251,16 @@ export const ballparkData = {
         if (event.kind !== 'hit') {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their hit.',
+            source: { kind: 'ballpark', id: 'trainingGrounds' },
+            important: true,
+          },
+          gameState,
+        );
         player.xp += isHome ? 4 : 2;
         return gameState;
       },
@@ -247,6 +274,7 @@ export const ballparkData = {
     color: '#E0F7FA',
     weather: {
       clear: 2,
+      bloodRain: 0,
       blessedRain: 4,
     },
     effect: ({ isHome } = {}) => ({

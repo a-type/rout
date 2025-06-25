@@ -1,4 +1,5 @@
 import { Perk } from './perkData';
+import { logger } from './sim/simGames';
 import { isPitcher } from './utils';
 
 export type ItemInfo = Perk & {
@@ -312,6 +313,16 @@ export const itemData: Record<string, ItemInfo> = {
         if (event.kind !== 'steal' || !event.success) {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their item.',
+            source: { kind: 'item', id: 'stealLearner' },
+            important: false,
+          },
+          gameState,
+        );
         player.xp += 10;
         return gameState;
       },
@@ -329,6 +340,16 @@ export const itemData: Record<string, ItemInfo> = {
         if (event.kind !== 'defenderOut') {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their item.',
+            source: { kind: 'item', id: 'defensiveLearner' },
+            important: false,
+          },
+          gameState,
+        );
         player.xp += 10;
         return gameState;
       },
@@ -346,6 +367,16 @@ export const itemData: Record<string, ItemInfo> = {
         if (event.kind !== 'strikeout' || !event.isPitcher) {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their item.',
+            source: { kind: 'item', id: 'strikeoutLearner' },
+            important: false,
+          },
+          gameState,
+        );
         player.xp += 10;
         return gameState;
       },
@@ -363,6 +394,16 @@ export const itemData: Record<string, ItemInfo> = {
         if (event.kind !== 'hit') {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their item.',
+            source: { kind: 'item', id: 'homerunLearner' },
+            important: false,
+          },
+          gameState,
+        );
         player.xp += 2;
         return gameState;
       },
@@ -380,6 +421,16 @@ export const itemData: Record<string, ItemInfo> = {
         if (event.kind !== 'hit' || !event.isPitcher) {
           return gameState;
         }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player learned from their item.',
+            source: { kind: 'item', id: 'badPitcherLearner' },
+            important: false,
+          },
+          gameState,
+        );
         player.xp += 2;
         return gameState;
       },

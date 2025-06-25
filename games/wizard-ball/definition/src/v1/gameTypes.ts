@@ -221,6 +221,11 @@ export type LeagueGameState = {
   saveElligiblePitcherId: PlayerId | null;
 };
 
+export type TriggerSource = {
+  kind: 'ballpark' | 'perk' | 'weather' | 'item';
+  id: string;
+};
+
 export type LogsPitchData = Omit<ActualPitch, 'hitModifierTable'>;
 
 export type GameLogEvent =
@@ -273,12 +278,22 @@ export type GameLogEvent =
       pitcherId: PlayerId;
       swung: boolean;
       pitchData: LogsPitchData;
+      important: boolean;
     }
   | {
       kind: 'walk';
       batterId: PlayerId;
       pitcherId: PlayerId;
       pitchData: LogsPitchData;
+      runsScored: number;
+      important: boolean;
+    }
+  | {
+      kind: 'trigger';
+      playerId: PlayerId;
+      description: string;
+      source: TriggerSource;
+      important: boolean;
     };
 
 export type HitGameLogEvent = {
@@ -293,6 +308,8 @@ export type HitGameLogEvent = {
   pitchData: LogsPitchData;
   hitTable: HitTable;
   defenderRating: number;
+  runsScored: number;
+  important: boolean;
 };
 
 export type GameLog = Array<GameLogEvent>;

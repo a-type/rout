@@ -97,42 +97,28 @@ export const statusData = {
       },
     }),
   },
-  cursed: {
-    kind: 'debuff',
-    name: 'Cursed',
-    description: 'Player is cursed and plays worse.',
-    icon: '😈',
-    round: (stacks) => Math.max(0, stacks - 1),
-    condition: ({ isMe = false }) => isMe,
-    effect: ({ stacks = 1 }) => ({
-      attributeBonus: {
-        strength: -2,
-        agility: -2,
-        intelligence: -2,
-        charisma: -2,
-        constitution: -2,
-        wisdom: -2,
-      },
-    }),
-  },
-  blessing: {
+  bless: {
     kind: 'buff',
-    name: 'Blessed',
-    description: 'Player is blessed and plays better.',
-    icon: '😇',
-    round: (stacks) =>
-      Math.max(0, Math.min(stacks - 1, Math.floor(stacks / 2))),
+    name: (stacks) => (stacks > 0 ? 'Blessed' : 'Cursed'),
+    description: (stacks) =>
+      stacks > 0
+        ? 'Player is blessed and plays better.'
+        : 'Player is cursed and plays worse.',
+    icon: (stacks) => (stacks > 0 ? '✨' : '😈'),
     condition: ({ isMe = false }) => isMe,
+    round: (stacks) =>
+      stacks > 0 ? Math.max(0, stacks - 1) : Math.min(0, stacks + 1),
     effect: ({ stacks = 1 }) => {
-      const factor = Math.min(stacks, 5);
+      const sign = Math.sign(stacks);
+      const factor = sign * 2;
       return {
         attributeBonus: {
-          strength: 1 * factor,
-          agility: 1 * factor,
-          intelligence: 1 * factor,
-          charisma: 1 * factor,
-          constitution: 1 * factor,
-          wisdom: 1 * factor,
+          strength: factor,
+          agility: factor,
+          intelligence: factor,
+          charisma: factor,
+          constitution: factor,
+          wisdom: factor,
         },
       };
     },

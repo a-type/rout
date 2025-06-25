@@ -1,5 +1,6 @@
 import { LeagueGameState } from './gameTypes';
 import { PerkEffect } from './perkData';
+import { logger } from './sim/simGames';
 
 export type Weather = {
   name: string;
@@ -140,7 +141,17 @@ export const weather = {
         if (event.kind !== 'defenderOut') {
           return gameState;
         }
-        player.statusIds.blessing = (player.statusIds.blessing ?? 0) + 1;
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player was blessed by the rain!',
+            source: { kind: 'weather', id: 'blessedRain' },
+            important: true,
+          },
+          gameState,
+        );
+        player.statusIds.bless = (player.statusIds.bless ?? 0) + 1;
         return gameState;
       },
     }),
@@ -150,13 +161,27 @@ export const weather = {
     icon: '🩸',
     color: '#f44336',
     description:
-      'A sinister rain that causes players to become injured when they get hits.',
+      'A sinister rain that sometimes causes players to become injured when they get hits.',
     effect: () => ({
-      trigger: ({ event, player, gameState }) => {
-        if (event.kind !== 'hit') {
+      trigger: ({ event, player, gameState, random }) => {
+        if (event.kind !== 'hit' || event.isPitcher) {
           return gameState;
         }
-        player.statusIds.injured = (player.statusIds.injured ?? 0) + 1;
+        if (random.float(0, 1) > 0.1) {
+          return gameState;
+        }
+        gameState = logger.addToGameLog(
+          {
+            kind: 'trigger',
+            playerId: player.id,
+            description: 'Player was injured by blood rain.',
+            source: { kind: 'weather', id: 'bloodRain' },
+            important: true,
+          },
+          gameState,
+        );
+        player.statusIds.injured =
+          (player.statusIds.injured ?? 1) + random.int(2, 10);
         return gameState;
       },
     }),

@@ -67,7 +67,7 @@ function generateChoice(
     case 'buff':
       return {
         kind: 'buff',
-        statusId: random.item(['blessing', 'enraged']),
+        statusId: random.item(['bless', 'enraged']),
         id: random.id(),
         stacks: random.int(1, 4),
       };
