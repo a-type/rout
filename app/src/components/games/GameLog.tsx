@@ -3,6 +3,7 @@ import {
   Button,
   clsx,
   Dialog,
+  Icon,
   RelativeTime,
   ScrollArea,
   withClassName,
@@ -213,6 +214,16 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
           >
             <GameLogFull />
           </Box>
+          <Dialog.Close asChild>
+            <Button
+              size="icon-small"
+              color="ghost"
+              className="m-auto absolute top-md right-md"
+              aria-label="Close Game Log"
+            >
+              <Icon name="x" />
+            </Button>
+          </Dialog.Close>
         </Dialog.Content>
       </Dialog>
     </Box>
