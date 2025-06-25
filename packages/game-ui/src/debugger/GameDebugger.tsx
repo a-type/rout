@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   ButtonProps,
+  ErrorBoundary,
   H1,
   H2,
   Icon,
@@ -96,11 +97,37 @@ export function GameDebugger({ ...props }: GameDebuggerProps) {
 
 type DebugData = Awaited<ReturnType<GameSessionSuite<any>['debug']>>;
 const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
+  return (
+    <Box d="col" p gap>
+      <IconSpritesheet />
+      <H1>Game Debugger</H1>
+      <ActionBar>
+        <ActionButton onClick={() => gameSuite.resetGame()}>
+          <Icon name="warning" />
+          Reset Game
+        </ActionButton>
+      </ActionBar>
+
+      <ErrorBoundary fallback={({ error }) => <div>{error?.message}</div>}>
+        <DebuggerContent />
+      </ErrorBoundary>
+    </Box>
+  );
+});
+
+const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
   const [debug, setDebug] = useState<DebugData | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   useEffect(() => {
     function refresh() {
       console.log('refreshing debug data');
-      gameSuite.debug().then(setDebug);
+      gameSuite
+        .debug()
+        .then(setDebug)
+        .catch((err) => {
+          console.error('Error fetching debug data:', err);
+          setError(err);
+        });
     }
     refresh();
     const unsubs = [
@@ -114,19 +141,15 @@ const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
   }, [gameSuite]);
   const [roundIndex, setRoundIndex] = useState(gameSuite.latestRoundIndex);
 
-  if (!debug) return <Spinner />;
+  if (!debug) {
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    }
+    return <Spinner />;
+  }
 
   return (
-    <Box d="col" p gap>
-      <IconSpritesheet />
-      <H1>Game Debugger</H1>
-      <ActionBar>
-        <ActionButton onClick={() => debug.resetGame()}>
-          <Icon name="warning" />
-          Reset Game
-        </ActionButton>
-      </ActionBar>
-
+    <>
       <Box gap wrap items="center">
         {gameSuite.members.map((member) => (
           <Box key={member.id} d="col" items="center">
@@ -205,7 +228,7 @@ const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
           </Box>
         </Tabs.Content>
       </Tabs>
-    </Box>
+    </>
   );
 });
 

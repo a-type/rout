@@ -1018,4 +1018,13 @@ export class GameSessionSuite<
 
     return debugValue;
   };
+
+  /**
+   * Only works in dev mode
+   */
+  resetGame = () => {
+    this.ctx.socket.send({
+      type: 'resetGame',
+    });
+  };
 }
