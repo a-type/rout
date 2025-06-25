@@ -24,7 +24,7 @@ export function HomePage({}: HomePageProps) {
   useThemedTitleBar();
   return (
     <PageRoot>
-      <TopographyBackground />
+      <TopographyBackground className="fixed" />
       <PageContent>
         <Box d="row" gap layout="center end" full="width">
           <Button size="small" color="ghost" asChild>
