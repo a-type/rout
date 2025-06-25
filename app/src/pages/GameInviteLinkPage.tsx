@@ -31,7 +31,7 @@ const GameInviteLinkPage = () => {
     // to new user flow, then return here.
     return (
       <PageRoot>
-        <TopographyBackground />
+        <TopographyBackground className="fixed" />
         <PageContent>
           <Box d="col" gap layout="center center" full>
             <Wordmark />

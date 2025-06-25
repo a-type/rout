@@ -28,7 +28,7 @@ const App = () => {
           </Button>
         </Box>
       </Box>
-      <TopographyBackground colorMode="dark" />
+      <TopographyBackground colorMode="dark" className="fixed" />
       <GameIcons />
       <Container items="center" className="text-center py-xl">
         <H2 className="text-6xl font-medium font-heading">

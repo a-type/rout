@@ -19,7 +19,7 @@ export function LoginPage({}: LoginPageProps) {
 
   return (
     <Box className="w-full h-full" layout="center center">
-      <TopographyBackground />
+      <TopographyBackground className="fixed" />
       <Box p className="flex-col lg:flex-row m-auto relative z-1" gap>
         <Box
           d={{
