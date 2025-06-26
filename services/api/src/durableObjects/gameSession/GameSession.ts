@@ -1184,11 +1184,20 @@ export class GameSession extends DurableObject<ApiBindings> {
     );
     const sessionData = await this.#getSessionData();
     const roundState = await this.#getRoundState();
+    let globalState: {} = {};
+    try {
+      globalState = await this.#getGlobalStateUnchecked();
+    } catch (err) {
+      globalState = {
+        error: `Failed to get global state: ${(err as Error).message}`,
+      };
+    }
     return {
       turns,
       chatMessages,
       sessionData,
       roundState,
+      globalState,
     };
   }
 }
