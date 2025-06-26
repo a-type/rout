@@ -11,6 +11,20 @@ import {
   getActivePlayerPerks,
 } from './ratings';
 
+const RANDOM_FACTOR = 5;
+const DUELING_FACTOR = 0.2;
+const STRIKEOUT_FACTOR = 0.2;
+const COMPOSURE_FACTOR = 0.2;
+const PITCH_FACTOR = 0.4;
+const STRIKE_DESIRE = 0.66;
+const STRIKE_BEHIND = 5;
+const STRIKE_NEUTRAL = 1;
+const STRIKE_AHEAD = -4;
+const STRIKE_DESIRE_BATTER_OVERALL_FACTOR = 0.2;
+const BASE_STRIKE_FACTOR = 0.55;
+const ACCURACY_STRIKE_FACTOR = 0.4;
+const RANDOM_PITCH_STRIKE_CHANCE = 0.3;
+
 export function determinePitchType(
   random: GameRandom,
   batter: Player,
@@ -34,40 +48,41 @@ export function determinePitchType(
     activePerks,
   );
 
-  const randomMod = 5 * random.float(-1, 1);
+  const randomMod = RANDOM_FACTOR * random.float(-1, 1);
   let attributeTotal = 10 + randomMod;
-  const duelingFactor =
+  const duelingDifference =
     0.5 * (pitcherComposite.dueling - batterComposite.dueling);
   const duelingAmount =
-    0.2 * Math.pow(Math.abs(duelingFactor), 2) * Math.sign(duelingFactor);
+    DUELING_FACTOR *
+    Math.pow(Math.abs(duelingDifference), 2) *
+    Math.sign(duelingDifference);
   const strikeoutAmount =
-    0.2 * (pitcherComposite.strikeout - 10) * game.strikes;
+    STRIKEOUT_FACTOR * (pitcherComposite.strikeout - 10) * game.strikes;
   const composureAmount =
-    (0.2 * (pitcherComposite.composure - 10) * game.balls * 2) / 3;
+    (COMPOSURE_FACTOR * (pitcherComposite.composure - 10) * game.balls * 2) / 3;
 
-  const pitchFactor = 0.4;
   let pitchAmount = 0;
 
   switch (pitchKind) {
     case 'fastball':
-      pitchAmount = pitchFactor * (pitcherComposite.velocity - 10);
+      pitchAmount = PITCH_FACTOR * (pitcherComposite.velocity - 10);
     case 'curveball':
-      pitchAmount = pitchFactor * (pitcherComposite.movement - 10);
+      pitchAmount = PITCH_FACTOR * (pitcherComposite.movement - 10);
       break;
     case 'changeup':
       pitchAmount =
-        pitchFactor * 0.7 * (pitcherComposite.velocity - 10) +
-        pitchFactor * 0.3 * (pitcherComposite.accuracy - 10);
+        PITCH_FACTOR * 0.7 * (pitcherComposite.velocity - 10) +
+        PITCH_FACTOR * 0.3 * (pitcherComposite.accuracy - 10);
       break;
     case 'slider':
       pitchAmount =
-        pitchFactor * 0.5 * (pitcherComposite.velocity - 10) +
-        pitchFactor * 0.5 * (pitcherComposite.movement - 10);
+        PITCH_FACTOR * 0.5 * (pitcherComposite.velocity - 10) +
+        PITCH_FACTOR * 0.5 * (pitcherComposite.movement - 10);
       break;
     case 'sinker':
       pitchAmount =
-        pitchFactor * 0.7 * (pitcherComposite.movement - 10) +
-        pitchFactor * 0.3 * (pitcherComposite.accuracy - 10);
+        PITCH_FACTOR * 0.7 * (pitcherComposite.movement - 10) +
+        PITCH_FACTOR * 0.3 * (pitcherComposite.accuracy - 10);
       break;
     default:
       throw new Error(`Unknown pitch kind: ${pitchKind}`);
@@ -90,16 +105,17 @@ export function determinePitchType(
 
   const countAdvantage = getCountAdvantage(game.balls, game.strikes);
   const countFactor =
-    {
-      behind: 5,
-      neutral: 1,
-      ahead: -4,
-    }[countAdvantage] ?? 0;
+    countAdvantage === 'ahead'
+      ? STRIKE_AHEAD
+      : countAdvantage === 'neutral'
+        ? STRIKE_NEUTRAL
+        : STRIKE_BEHIND;
   const strikeDesireChance =
-    0.66 *
+    STRIKE_DESIRE *
     scaleAttributePercent(
       10 +
-        0.2 * (10 - getPlayerOverall(batter) / 6) +
+        STRIKE_DESIRE_BATTER_OVERALL_FACTOR *
+          (10 - getPlayerOverall(batter) / 6) +
         countFactor +
         runnersOnBases(game) * 2,
       1.5,
@@ -109,15 +125,17 @@ export function determinePitchType(
   const modifiedAccuracy = pitcherComposite.accuracy + qualityModifier;
 
   const strikeFactor =
-    0.55 +
+    BASE_STRIKE_FACTOR +
     scaleAttribute(
       modifiedAccuracy + pitchTypes[pitchKind]().accuracyBonus,
-      0.4,
+      ACCURACY_STRIKE_FACTOR,
     );
 
   const isAccurate = random.float(0, 1) < strikeFactor;
 
-  const isStrike = isAccurate ? strikeDesire : random.float(0, 1) < 0.3;
+  const isStrike = isAccurate
+    ? strikeDesire
+    : random.float(0, 1) < RANDOM_PITCH_STRIKE_CHANCE;
 
   const modifiedMovement = clamp(
     pitcherComposite.movement + qualityModifier,
@@ -142,7 +160,8 @@ export function determinePitchType(
       `Pitch quality can't be zero or negative ${JSON.stringify({
         pitcher,
         strikeDesire,
-        duelingFactor,
+        duelingDifference,
+        duelingAmount,
         qualityModifier,
         attributeTotal,
         basePitchData,

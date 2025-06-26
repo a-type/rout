@@ -1,21 +1,9 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import {
-  Choice,
-  League,
-  PlayerId,
-  Position,
-  PositionChart,
-  Team,
-} from './gameTypes';
+import { Choice, League, PlayerId, PositionChart, Team } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './sim/simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
-import {
-  getTeamBench,
-  hasPitcherPosition,
-  playerStatsToHotCold,
-  sum,
-} from './utils';
+import { getTeamBench, hasPitcherPosition, sum } from './utils';
 import { statusData, StatusType } from './data/statusData';
 import { itemData } from './data/itemData';
 import { recoverStaminaBetweenGames } from './sim/stamina';

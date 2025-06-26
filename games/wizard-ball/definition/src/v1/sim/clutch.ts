@@ -2,7 +2,6 @@ import type { LeagueGameState } from '../gameTypes';
 import { getInningInfo } from '../utils';
 
 /** Return a number between 0 and 1 based on situation (increases for fuller counts, more runners in scoring position, late in the game, close score) */
-
 export function determineClutchFactor(gameState: LeagueGameState): number {
   const {
     pitchingTeam,

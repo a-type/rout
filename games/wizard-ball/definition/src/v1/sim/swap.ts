@@ -2,7 +2,7 @@ import type { LeagueGameState, League, PlayerId } from '../gameTypes';
 import { isPitcher, sum, getInningInfo } from '../utils';
 import { getModifiedAttributes } from './ratings';
 import { runnersOnBases } from './runners';
-import { logger } from './simGames';
+import { logger } from '../logger';
 import { getCurrentPitcher } from './utils';
 
 export function considerSwapPitcher(

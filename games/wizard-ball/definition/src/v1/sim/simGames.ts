@@ -16,14 +16,9 @@ import {
   last,
   scaleAttributePercent,
 } from '../utils';
-import Logger from '../logger';
+import Logger, { logger } from '../logger';
 import { determinePitchType } from './pitchType';
 import { type HitResult, determineHitResult } from './hitResult';
-import {
-  getModifiedCompositeBattingRatings,
-  getModifiedCompositePitchingRatings,
-  getActivePlayerPerks,
-} from './ratings';
 import { determineSteal } from './steal';
 import { considerSwapPitcher, swapPitcher } from './swap';
 import { updatePlayerHeat } from './streak';
@@ -42,9 +37,6 @@ import { checkTriggerEvent } from './trigger';
 import { determineClutchFactor } from './clutch';
 import { updateStaminaAfterPitch } from './stamina';
 import { updateInjuryAfterPitch } from './injury';
-
-export const logger = new Logger('state');
-// const logger = new Logger('console');
 
 export function simulateRound(
   random: GameRandom,

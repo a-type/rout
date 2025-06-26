@@ -1,6 +1,6 @@
 import { GameRandom } from '@long-game/game-definition';
 import { League, LeagueGameState } from '../gameTypes';
-import { logger } from './simGames';
+import { logger } from '../logger';
 import { scaleAttributePercent } from '../utils';
 import { considerSwapPitcher, swapPitcher } from './swap';
 import { getCurrentBatter, getCurrentPitcher } from './utils';

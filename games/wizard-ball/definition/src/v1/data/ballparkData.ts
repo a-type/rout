@@ -1,6 +1,6 @@
 import { LeagueGameState } from '../gameTypes';
 import { PerkEffect } from './perkData';
-import { logger } from '../sim/simGames';
+import { logger } from '../logger';
 import { WeatherType } from './weatherData';
 
 export type Ballpark = {

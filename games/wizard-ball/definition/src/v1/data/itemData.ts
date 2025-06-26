@@ -1,5 +1,5 @@
 import { Perk } from './perkData';
-import { logger } from '../sim/simGames';
+import { logger } from '../logger';
 import { isPitcher } from '../utils';
 
 export type ItemInfo = Perk & {
