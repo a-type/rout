@@ -2,13 +2,13 @@ import type { GameModule } from '@long-game/game-definition';
 import { gameDefinition as v1 } from './v1/gameDefinition';
 
 export * from './v1/attributes';
-export { ballparkData, type BallparkType } from './v1/ballparkData';
-export { classData, classIcons } from './v1/classData';
-export { itemData } from './v1/itemData';
-export { perks, type PerkEffect } from './v1/perkData';
-export type { ActualPitch, PitchData } from './v1/pitchData';
-export { speciesData, speciesIcons } from './v1/speciesData';
-export { statusData, type StatusType } from './v1/statusData';
+export { ballparkData, type BallparkType } from './v1/data/ballparkData';
+export { classData, classIcons } from './v1/data/classData';
+export { itemData } from './v1/data/itemData';
+export { perks, type PerkEffect } from './v1/data/perkData';
+export type { ActualPitch, PitchData } from './v1/data/pitchData';
+export { speciesData, speciesIcons } from './v1/data/speciesData';
+export { statusData, type StatusType } from './v1/data/statusData';
 export {
   canAssignToPosition,
   getInningInfo,
@@ -17,7 +17,7 @@ export {
   sum,
   sumObjects,
 } from './v1/utils';
-export { weather, type WeatherType } from './v1/weatherData';
+export { weather, type WeatherType } from './v1/data/weatherData';
 
 export default {
   id: 'wizard-ball',

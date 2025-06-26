@@ -2,7 +2,7 @@ import {
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
 } from '../attributes';
-import { Ballpark, ballparkData } from '../ballparkData';
+import { Ballpark, ballparkData } from '../data/ballparkData';
 import type {
   League,
   LeagueGameState,
@@ -10,12 +10,12 @@ import type {
   BattingCompositeRatings,
   PitchingCompositeRatings,
 } from '../gameTypes';
-import { itemData, ItemInfo } from '../itemData';
-import { Perk, PerkEffect, perks } from '../perkData';
-import { PitchKind } from '../pitchData';
-import { Status, statusData, StatusType } from '../statusData';
+import { itemData, ItemInfo } from '../data/itemData';
+import { Perk, PerkEffect, perks } from '../data/perkData';
+import { PitchKind } from '../data/pitchData';
+import { Status, statusData, StatusType } from '../data/statusData';
 import { sumObjects, scaleAttribute, multiplyObjects } from '../utils';
-import { Weather, weather as weatherData } from '../weatherData';
+import { Weather, weather as weatherData } from '../data/weatherData';
 import { determineClutchFactor } from './clutch';
 import {
   getCurrentBatter,

@@ -1,12 +1,17 @@
 import { GameRandom } from '@long-game/game-definition';
 import type { Player, League, LeagueGameState } from '../gameTypes';
-import { ActualPitch } from '../pitchData';
+import { ActualPitch } from '../data/pitchData';
 import { scaleAttributePercent } from '../utils';
 import {
   getActivePlayerPerks,
   getModifiedCompositeBattingRatings,
 } from './ratings';
 import { randomByWeight } from './utils';
+
+const BASE_STRIKE_SWING_CHANCE = 0.68;
+const BASE_BALL_SWING_CHANCE = 0.25;
+const BASE_STRIKE_CONTACT_CHANCE = 0.8;
+const BASE_BALL_CONTACT_CHANCE = 0.6;
 
 export function determineSwing(
   random: GameRandom,
@@ -16,7 +21,9 @@ export function determineSwing(
   game: LeagueGameState,
   pitchData: ActualPitch,
 ): boolean {
-  const baseSwingChance = isStrike ? 0.68 : 0.25;
+  const baseSwingChance = isStrike
+    ? BASE_STRIKE_SWING_CHANCE
+    : BASE_BALL_SWING_CHANCE;
   const activePerks = getActivePlayerPerks(
     batter.id,
     league,
@@ -29,25 +36,6 @@ export function determineSwing(
     game,
     activePerks,
   );
-  const count = 2 * game.strikes - game.balls;
-  // const countWeight = 2 ** (batterComposite.plateDiscipline / 5) - 1;
-  // const swingModifier = scaleAttributePercent(
-  //   valueByWeights([
-  //     { value: count, weight: countWeight },
-  //     // TODO: Decide how to handle this (used to be agility)
-  //     // Maybe simplify a bit?
-  //     {
-  //       value: isStrike
-  //         ? batterComposite.plateDiscipline
-  //         : 20 - batterComposite.plateDiscipline,
-  //       weight: 3,
-  //     },
-  //   ]),
-  //   2,
-  // );
-  // let swingChance = isStrike
-  //   ? 0.68 ** (1 / swingModifier)
-  //   : 0.25 ** (1 / swingModifier);
   const pitchSwingFactor = pitchData.swingFactor;
   const plateDisciplineFactor =
     scaleAttributePercent(batterComposite.plateDiscipline, 3) **
@@ -81,7 +69,9 @@ export function determineContact(
     gameState,
     activePerks,
   );
-  let baseContactChance = isStrike ? 0.8 : 0.6;
+  let baseContactChance = isStrike
+    ? BASE_STRIKE_CONTACT_CHANCE
+    : BASE_BALL_CONTACT_CHANCE;
 
   const batterContactFactor = scaleAttributePercent(batterComposite.contact, 4);
   const pitchContactFactor = pitchData.contactFactor;

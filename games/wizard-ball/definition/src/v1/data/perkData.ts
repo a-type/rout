@@ -10,11 +10,11 @@ import {
   Player,
   HitTable,
   League,
-} from './gameTypes';
+} from '../gameTypes';
 import type { PitchKind } from './pitchData';
 import type { SpeciesType } from './speciesData';
 import type { WeatherType } from './weatherData';
-import { capitalize } from './utils';
+import { capitalize } from '../utils';
 import { GameRandom } from '@long-game/game-definition';
 
 export type TriggerEvent =

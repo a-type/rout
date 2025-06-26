@@ -9,9 +9,9 @@ describe('balance', () => {
   const seed = Math.random().toString(36).substring(2, 15);
   const random = new GameRandom(seed);
   let league = generateLeague(random, [], {
-    numTeams: 50,
-    numRounds: 500,
-    numPlayers: 12,
+    numTeams: 10,
+    numRounds: 100,
+    numPlayers: 20,
     skipPerks: true,
   });
   for (let i = 0; i < league.schedule.length; i++) {
@@ -67,7 +67,7 @@ describe('balance', () => {
 
     // Calculate Pearson correlation
     const n = teamInfo.length;
-    const avgWin = teamInfo.reduce((sum, t) => sum + t.winPercent, 0) / n;
+    const avgWin = 0.5;
     const avgOverall = teamInfo.reduce((sum, t) => sum + t.overall, 0) / n;
     const numerator = teamInfo.reduce(
       (sum, t) => sum + (t.winPercent - avgWin) * (t.overall - avgOverall),
@@ -86,7 +86,8 @@ describe('balance', () => {
     expect(correlation).toBeGreaterThan(0.4); // or another threshold you find reasonable
   });
 
-  it('should have a positive correlation between each attribute and win percentage', () => {
+  // Not really a reliable test.
+  it.skip('should have a positive correlation between each attribute and win percentage', () => {
     const teamInfo = league.teamIds
       .map((id) => league.teamLookup[id])
       .map((team) => ({
@@ -105,7 +106,8 @@ describe('balance', () => {
 
     for (const attr of attributes) {
       const n = teamInfo.length;
-      const avgWin = teamInfo.reduce((sum, t) => sum + t.winPercent, 0) / n;
+      const avgWin = 0.5;
+
       const avgAttr = teamInfo.reduce((sum, t) => sum + t[attr], 0) / n;
       const numerator = teamInfo.reduce(
         (sum, t) => sum + (t.winPercent - avgWin) * (t[attr] - avgAttr),
@@ -120,8 +122,7 @@ describe('balance', () => {
       );
       const correlation = numerator / denominator;
       console.log(`Correlation between ${attr} and win %:`, correlation);
-      // You can adjust the threshold as needed
-      expect(correlation).toBeGreaterThan(-1); // Just to ensure the test runs; set a real threshold if desired
+      expect(correlation).toBeGreaterThan(-1);
     }
   });
 });

@@ -8,7 +8,7 @@ import type {
   PositionChart,
 } from '../gameTypes';
 import { last } from '../utils';
-import { ActualPitch } from '../pitchData';
+import { ActualPitch } from '../data/pitchData';
 
 export function randomByWeight<T>(
   random: GameRandom,

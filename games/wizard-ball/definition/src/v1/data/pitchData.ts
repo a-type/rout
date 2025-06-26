@@ -1,5 +1,5 @@
-import { HitPower, HitType } from './gameTypes';
-import { scaleAttributePercent } from './utils';
+import { HitPower, HitType } from '../gameTypes';
+import { scaleAttributePercent } from '../utils';
 
 export type PitchData = {
   accuracyBonus: number;

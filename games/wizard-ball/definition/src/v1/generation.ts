@@ -14,19 +14,19 @@ import {
 import { names } from './names';
 import { teamAdjectives, teamNouns } from './teamNames';
 import { PrefixedId } from '@long-game/common';
-import { speciesData, SpeciesType } from './speciesData';
-import { classData, ClassType } from './classData';
-import { perks } from './perkData';
+import { speciesData, SpeciesType } from './data/speciesData';
+import { classData, ClassType } from './data/classData';
+import { perks } from './data/perkData';
 import { getLevelFromXp, getPlayerOverall } from './attributes';
-import { itemData } from './itemData';
+import { itemData } from './data/itemData';
 import {
   addPositionToPlayer,
   canAssignToPosition,
   hasPitcherPosition,
   isPitcher,
 } from './utils';
-import { weather as weatherData, WeatherType } from './weatherData';
-import { ballparkData, BallparkType } from './ballparkData';
+import { weather as weatherData, WeatherType } from './data/weatherData';
+import { ballparkData, BallparkType } from './data/ballparkData';
 import { applyXpAuto } from './boosts';
 
 const battingCompositeTypes = [
