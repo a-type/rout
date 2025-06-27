@@ -1,6 +1,7 @@
 import { CreateGame } from '@/components/games/CreateGame.jsx';
 import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
 import { MainNav } from '@/components/nav/MainNav';
+import { AppInstallBanner } from '@/components/settings/AppInstallBanner';
 import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
 import { MyAvatar } from '@/components/users/UserAvatar';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
@@ -34,6 +35,7 @@ export function HomePage({}: HomePageProps) {
             </Link>
           </Button>
         </Box>
+        <AppInstallBanner />
         <Box d="col" gap>
           <H2 className="font-300 text-md uppercase my-0 mx-4">Live Games</H2>
           <MembershipsList

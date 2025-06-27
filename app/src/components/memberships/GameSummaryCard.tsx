@@ -49,7 +49,6 @@ export const GameSummaryCard = withSuspense(
       <Card
         className={clsx(
           isMyTurn ? 'border-accent-dark' : 'border-gray-dark',
-          'aspect-1',
           className,
         )}
         {...rest}

@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
+import { Box, Button, Card } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
 import { CreateGame } from '../games/CreateGame';
 import { GameSummaryCard } from './GameSummaryCard';
@@ -32,7 +32,7 @@ export const MembershipsList = withSuspense(function MembershipsList({
           </Box>
         </Box>
       )}
-      <Card.Grid columns={cardGridColumns.small}>
+      <Card.Grid>
         {sessions?.map((session) => (
           <GameSummaryCard key={session.id} session={session} />
         ))}
