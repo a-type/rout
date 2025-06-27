@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react-swc';
 import UnoCSS from 'unocss/vite';
 import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
+import { IconResource, VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -74,7 +74,67 @@ export default defineConfig(({ mode }) => ({
   },
 }));
 
-const icons = [
+const icons: IconResource[] = [
+  {
+    src: 'icons/maskable/512.png',
+    sizes: '512x512',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/maskable/192.png',
+    sizes: '192x192',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/maskable/144.png',
+    sizes: '144x144',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/maskable/96.png',
+    sizes: '96x96',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/maskable/72.png',
+    sizes: '72x72',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/maskable/48.png',
+    sizes: '48x48',
+    purpose: 'maskable',
+  },
+  {
+    src: 'icons/monochrome/512.png',
+    sizes: '512x512',
+    purpose: 'monochrome',
+  },
+  {
+    src: 'icons/monochrome/192.png',
+    sizes: '192x192',
+    purpose: 'monochrome',
+  },
+  {
+    src: 'icons/monochrome/144.png',
+    sizes: '144x144',
+    purpose: 'monochrome',
+  },
+  {
+    src: 'icons/monochrome/96.png',
+    sizes: '96x96',
+    purpose: 'monochrome',
+  },
+  {
+    src: 'icons/monochrome/72.png',
+    sizes: '72x72',
+    purpose: 'monochrome',
+  },
+  {
+    src: 'icons/monochrome/48.png',
+    sizes: '48x48',
+    purpose: 'monochrome',
+  },
   {
     src: 'icons/windows11/SmallTile.scale-100.png',
     sizes: '71x71',
