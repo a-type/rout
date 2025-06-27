@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   clsx,
+  Dialog,
   Divider,
   H1,
   H2,
@@ -15,9 +16,10 @@ import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/game-ui';
 import games from '@long-game/games';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { PublicInviteLink } from '../memberships/PublicInviteLink.js';
 import { UserAvatar } from '../users/UserAvatar.js';
+import { GameIcon } from './GameIcon.js';
 import { GamePicker } from './GamePicker.jsx';
 
 export interface GameSetupProps {
@@ -34,24 +36,67 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
   const insufficientPlayers =
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
+  const hasPickedGame = !!pregame.session.gameId;
 
   return (
     <Box p d="col" gap className="m-auto max-w-800px">
       <Box d="col" gap>
         <H1>Game Setup</H1>
-        <P>Pick a game to play:</P>
-        <GamePicker
-          id="game-picker"
-          value={pregame.session.gameId}
-          onChange={async (gameId) => {
-            await updateGameMutation.mutateAsync({
-              id: gameSessionId,
-              gameId,
-            });
-          }}
-          loading={updateGameMutation.isPending}
-          gameSessionId={gameSessionId}
-        />
+        <Dialog defaultOpen={!hasPickedGame}>
+          <Dialog.Trigger asChild>
+            <Button
+              color="ghost"
+              className="relative w-full justify-between flex-wrap overflow-hidden"
+            >
+              {hasPickedGame && (
+                <GameIcon
+                  gameId={pregame.session.gameId}
+                  className="absolute inset-0 w-full h-full opacity-50"
+                />
+              )}
+              {hasPickedGame ? (
+                <Box d="row" items="center" gap surface p="sm">
+                  <span className="text-md">{game.title}</span>
+                </Box>
+              ) : (
+                <Box d="row" items="center" gap>
+                  <Icon name="gamePiece" />
+                  <span className="text-md">No game selected</span>
+                </Box>
+              )}
+              <Box
+                gap
+                surface
+                p="sm"
+                layout="center center"
+                className="text-sm"
+              >
+                Change
+                <Icon name="pencil" />
+              </Box>
+            </Button>
+          </Dialog.Trigger>
+          <Dialog.Content>
+            <Suspense>
+              <Dialog.Title>Pick a game to play:</Dialog.Title>
+              <GamePicker
+                id="game-picker"
+                value={pregame.session.gameId}
+                onChange={async (gameId) => {
+                  await updateGameMutation.mutateAsync({
+                    id: gameSessionId,
+                    gameId,
+                  });
+                }}
+                loading={updateGameMutation.isPending}
+                gameSessionId={gameSessionId}
+              />
+            </Suspense>
+            <Dialog.Actions className="z-100000">
+              <Dialog.Close />
+            </Dialog.Actions>
+          </Dialog.Content>
+        </Dialog>
       </Box>
       <Divider />
       <Box d="col">

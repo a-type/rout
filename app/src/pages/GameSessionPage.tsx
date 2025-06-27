@@ -69,8 +69,8 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const titleColor = !palette
     ? backupColor
     : getResolvedColorMode() === 'dark'
-      ? palette.range[10]
-      : palette.range[1];
+      ? palette.range[12]
+      : palette.range[0];
   useTitleBarColor(titleColor);
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
