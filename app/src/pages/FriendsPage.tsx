@@ -11,11 +11,7 @@ export function FriendsPage({}: FriendsPageProps) {
   useThemedTitleBar();
   return (
     <PageRoot>
-      <PageContent
-        innerProps={{
-          className: 'gap-lg',
-        }}
-      >
+      <PageContent gap="lg">
         <FriendInvites />
         <SendInvite />
         <FriendsList />

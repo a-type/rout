@@ -11,7 +11,7 @@ export function MainNav({}: MainNavProps) {
   const isFriends = routes.some((route) => route.path === '/friends');
   const isLibrary = routes.some((route) => route.path === '/library');
   return (
-    <NavBar className="bg-overlay md:(mt-8 rounded-md)">
+    <NavBar className="bg-overlay md:(rounded-md)">
       <Wordmark className="hidden md:block font-[Knewave] text-center w-full p-2 text-xl" />
       <NavBar.Item asChild active={isHome}>
         <Link to="/">
