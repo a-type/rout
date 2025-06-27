@@ -10,7 +10,7 @@ packages:
   - 'jobs/*'
 
 catalog:
-  '@a-type/ui': 2.1.21
+  '@a-type/ui': 2.2.0
   'react': 19.1.0
   'react-dom': 19.1.0
   '@types/react': ^19.1.8
