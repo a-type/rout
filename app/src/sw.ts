@@ -103,7 +103,7 @@ self.addEventListener('push', (event) => {
           data: pushData,
           tag: `turn-${pushData.gameSessionId}`,
           icon: '/icons/android/android-launchericon-192-192.png',
-          // TODO: monochrome badge
+          badge: '/icons/monochrome/192.png',
         });
       })(),
     );
