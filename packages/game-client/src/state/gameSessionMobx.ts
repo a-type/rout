@@ -547,6 +547,11 @@ export class GameSessionSuite<
     } else {
       this.localTurnData = turn;
     }
+    // if a turn submit was delayed, cancel it
+    if (this.turnSubmitTimeout) {
+      clearTimeout(this.turnSubmitTimeout);
+      this.turnSubmitTimeout = null;
+    }
     this.#events.emit('turnPrepared');
   };
 
