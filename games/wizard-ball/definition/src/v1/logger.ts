@@ -41,4 +41,6 @@ class Logger {
   }
 }
 
+export const logger = new Logger('state');
+
 export default Logger;

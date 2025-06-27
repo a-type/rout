@@ -1,23 +1,12 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import {
-  Choice,
-  League,
-  PlayerId,
-  Position,
-  PositionChart,
-  Team,
-} from './gameTypes';
+import { Choice, League, PlayerId, PositionChart, Team } from './gameTypes';
 import { generateLeague } from './generation';
 import { simulateRound } from './sim/simGames';
 import { applyChoice, applyXp, generateChoices } from './boosts';
-import {
-  getTeamBench,
-  hasPitcherPosition,
-  playerStatsToHotCold,
-  sum,
-} from './utils';
-import { statusData, StatusType } from './statusData';
-import { itemData } from './itemData';
+import { getTeamBench, hasPitcherPosition, sum } from './utils';
+import { statusData, StatusType } from './data/statusData';
+import { itemData } from './data/itemData';
+import { recoverStaminaBetweenGames } from './sim/stamina';
 
 export type GlobalState = {
   league: League;
@@ -265,14 +254,9 @@ export const gameDefinition: GameDefinition<
     });
 
     const results = simulateRound(random, globalState.league, currentRound);
-    Object.values(globalState.league.playerLookup).forEach((player) => {
-      const recovery = player.positions.some((p) => p === 'sp')
-        ? 0.25
-        : player.positions.some((p) => p === 'rp')
-          ? 0.25
-          : 0.4;
-      player.stamina = Math.min(1, player.stamina + recovery);
-    });
+    globalState.league = recoverStaminaBetweenGames(globalState.league);
+
+    // update player stats and team standings
     const pitcherList: string[] = [];
     for (const result of results) {
       const winner = globalState.league.teamLookup[result.winner];
@@ -290,6 +274,7 @@ export const gameDefinition: GameDefinition<
         }
       });
 
+      // update player xp
       [winner, loser].forEach((team) => {
         const teamBench = getTeamBench(globalState.league, team.id);
         team.playerIds.forEach((playerId) => {

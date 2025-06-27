@@ -9,8 +9,74 @@ import { getCurrentPitcher } from './utils';
 import { addToPlayerStats } from './stats';
 import { updatePlayerHeat } from './streak';
 import { checkTriggerEvent } from './trigger';
-import { ActualPitch } from '../pitchData';
+import { ActualPitch } from '../data/pitchData';
 
+const STEAL_SECOND_ATTEMPT_CHANCE = 0.04;
+const STEAL_THIRD_ATTEMPT_CHANCE = 0.01;
+const STEAL_AGILITY_FACTOR = 20;
+const STEAL_SECOND_SUCCESS_CHANCE = 0.8;
+const STEAL_THIRD_SUCCESS_CHANCE = 0.7;
+const STEAL_DEFENDER_FACTOR = 0.2;
+
+/** Determine if any runners are going to steal, then attempt the steals */
+export function determineSteal(
+  random: GameRandom,
+  gameState: LeagueGameState,
+  league: League,
+  pitchData: ActualPitch,
+): LeagueGameState {
+  const catcherId = league.teamLookup[gameState.pitchingTeam].positionChart.c;
+  if (!catcherId) {
+    throw new Error('No catcher found for steal attempt');
+  }
+  const catcherComposite = getModifiedCompositeBattingRatings(
+    catcherId,
+    league,
+    gameState,
+    getActivePlayerPerks(catcherId, league, gameState),
+  );
+  const playerOnFirst = gameState.bases[1];
+  const playerOnSecond = gameState.bases[2];
+  const playerOnThird = gameState.bases[3];
+  if (playerOnFirst !== null && playerOnSecond === null) {
+    const runnerComposite = getModifiedCompositeBattingRatings(
+      playerOnFirst,
+      league,
+      gameState,
+      getActivePlayerPerks(playerOnFirst, league, gameState),
+    );
+    const agilityFactor = scaleAttributePercent(
+      runnerComposite.stealing +
+        (10 - catcherComposite.fielding) * STEAL_DEFENDER_FACTOR,
+      STEAL_AGILITY_FACTOR,
+    );
+    const stealAttemptChance = STEAL_SECOND_ATTEMPT_CHANCE * agilityFactor;
+    if (random.float(0, 1) < stealAttemptChance) {
+      gameState = attemptSteal(random, gameState, 1, league, pitchData);
+    }
+  }
+  if (playerOnSecond !== null && playerOnThird === null) {
+    const runnerComposite = getModifiedCompositeBattingRatings(
+      playerOnSecond,
+      league,
+      gameState,
+      getActivePlayerPerks(playerOnSecond, league, gameState),
+    );
+    const agilityFactor = scaleAttributePercent(
+      runnerComposite.stealing +
+        (10 - catcherComposite.fielding) * STEAL_DEFENDER_FACTOR,
+      STEAL_AGILITY_FACTOR,
+    );
+    const stealAttemptChance = STEAL_THIRD_ATTEMPT_CHANCE * agilityFactor;
+    if (random.float(0, 1) < stealAttemptChance) {
+      gameState = attemptSteal(random, gameState, 2, league, pitchData);
+    }
+  }
+  // TODO: Implement stealing home
+  return gameState;
+}
+
+/** Applys results of a steal attempt (either successfully taking a base or getting thrown out) */
 function attemptSteal(
   random: GameRandom,
   gameState: LeagueGameState,
@@ -40,10 +106,12 @@ function attemptSteal(
     getActivePlayerPerks(playerId, league, gameState),
   );
   const agilityFactor = scaleAttributePercent(
-    batterComposite.stealing + (10 - defenderComposite.fielding) / 5,
+    batterComposite.stealing +
+      (10 - defenderComposite.fielding) * STEAL_DEFENDER_FACTOR,
     1 / 0.8,
   );
-  const baseFactor = fromBase === 2 ? 0.8 : 0.7;
+  const baseFactor =
+    fromBase === 2 ? STEAL_SECOND_SUCCESS_CHANCE : STEAL_THIRD_SUCCESS_CHANCE;
   const stealSuccessChance = baseFactor * agilityFactor;
   const isSuccessful = random.float(0, 1) < stealSuccessChance;
   if (isSuccessful) {
@@ -89,59 +157,5 @@ function attemptSteal(
     pitchData,
   );
 
-  return gameState;
-}
-export function determineSteal(
-  random: GameRandom,
-  gameState: LeagueGameState,
-  league: League,
-  pitchData: ActualPitch,
-): LeagueGameState {
-  const catcherId = league.teamLookup[gameState.pitchingTeam].positionChart.c;
-  if (!catcherId) {
-    throw new Error('No catcher found for steal attempt');
-  }
-  const catcherComposite = getModifiedCompositeBattingRatings(
-    catcherId,
-    league,
-    gameState,
-    getActivePlayerPerks(catcherId, league, gameState),
-  );
-  const playerOnFirst = gameState.bases[1];
-  const playerOnSecond = gameState.bases[2];
-  const playerOnThird = gameState.bases[3];
-  if (playerOnFirst !== null && playerOnSecond === null) {
-    const runnerComposite = getModifiedCompositeBattingRatings(
-      playerOnFirst,
-      league,
-      gameState,
-      getActivePlayerPerks(playerOnFirst, league, gameState),
-    );
-    const agilityFactor = scaleAttributePercent(
-      runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
-      20,
-    );
-    const stealAttemptChance = 0.04 * agilityFactor;
-    if (random.float(0, 1) < stealAttemptChance) {
-      gameState = attemptSteal(random, gameState, 1, league, pitchData);
-    }
-  }
-  if (playerOnSecond !== null && playerOnThird === null) {
-    const runnerComposite = getModifiedCompositeBattingRatings(
-      playerOnSecond,
-      league,
-      gameState,
-      getActivePlayerPerks(playerOnSecond, league, gameState),
-    );
-    const agilityFactor = scaleAttributePercent(
-      runnerComposite.stealing + (10 - catcherComposite.fielding) / 5,
-      20,
-    );
-    const stealAttemptChance = 0.01 * agilityFactor;
-    if (random.float(0, 1) < stealAttemptChance) {
-      gameState = attemptSteal(random, gameState, 2, league, pitchData);
-    }
-  }
-  // TODO: Implement stealing home
   return gameState;
 }

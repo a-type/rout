@@ -10,7 +10,7 @@ import type {
   LeagueGameState,
   League,
 } from '../gameTypes';
-import { ActualPitch } from '../pitchData';
+import { ActualPitch } from '../data/pitchData';
 import { multiplyObjects, scaleAttributePercent } from '../utils';
 import { determineDefender, multiplyHitTables } from './utils';
 import { getCurrentBatter } from './utils';
@@ -29,6 +29,17 @@ export type HitResult = {
   hitTable: HitTable;
   defenderRating: number;
 };
+
+const FOUL_CHANCE = 0.5;
+
+const HIT_AREA_TABLE: Record<HitArea, number> = {
+  farLeft: 1,
+  left: 3,
+  center: 4,
+  right: 2,
+  farRight: 1,
+};
+
 export function determineHitResult(
   random: GameRandom,
   pitchData: ActualPitch,
@@ -65,14 +76,8 @@ export function determineHitResult(
     gameState,
     activePerks,
   );
-  const hitAreaTable: Record<HitArea, number> = {
-    farLeft: 1,
-    left: 3,
-    center: 4,
-    right: 2,
-    farRight: 1,
-  };
-  const hitArea = random.table(hitAreaTable);
+
+  const hitArea = random.table(HIT_AREA_TABLE);
   const hitPowerTable: Record<HitPower, number> = multiplyObjects(
     isStrike
       ? {
@@ -218,7 +223,7 @@ export function determineHitResult(
     }
   }
   // TODO: more specific calculation for foul balls
-  const isFoul = random.float(0, 1) < 0.5;
+  const isFoul = random.float(0, 1) < FOUL_CHANCE;
 
   const result = isFoul ? (random.table(hitTable) as PitchOutcome) : 'foul';
   return {

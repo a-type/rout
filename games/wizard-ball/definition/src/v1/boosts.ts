@@ -9,7 +9,7 @@ import {
   PositionChartKey,
 } from './gameTypes';
 import { generateItem, pickRandomItemDef } from './generation';
-import { perks } from './perkData';
+import { perks } from './data/perkData';
 import { applyLevelup, getLevelFromXp } from './attributes';
 import { GlobalState } from './gameDefinition';
 import {

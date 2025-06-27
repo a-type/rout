@@ -1,6 +1,6 @@
 import { Perk } from './perkData';
-import { logger } from './sim/simGames';
-import { isPitcher } from './utils';
+import { logger } from '../logger';
+import { isPitcher } from '../utils';
 
 export type ItemInfo = Perk & {
   icon: string;

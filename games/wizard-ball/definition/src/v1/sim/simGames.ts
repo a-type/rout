@@ -16,18 +16,13 @@ import {
   last,
   scaleAttributePercent,
 } from '../utils';
-import Logger from '../logger';
+import Logger, { logger } from '../logger';
 import { determinePitchType } from './pitchType';
 import { type HitResult, determineHitResult } from './hitResult';
-import {
-  getModifiedCompositeBattingRatings,
-  getModifiedCompositePitchingRatings,
-  getActivePlayerPerks,
-} from './ratings';
 import { determineSteal } from './steal';
 import { considerSwapPitcher, swapPitcher } from './swap';
 import { updatePlayerHeat } from './streak';
-import { addToPlayerStats } from './stats';
+import { addToPlayerStats, checkSaveWinLossEligility } from './stats';
 import {
   endOfInning,
   getCurrentBatter,
@@ -40,9 +35,8 @@ import { advanceRunnerForced, advanceAllRunners } from './runners';
 import { determineSwing, determineContact } from './swing';
 import { checkTriggerEvent } from './trigger';
 import { determineClutchFactor } from './clutch';
-
-export const logger = new Logger('state');
-// const logger = new Logger('console');
+import { updateStaminaAfterPitch } from './stamina';
+import { updateInjuryAfterPitch } from './injury';
 
 export function simulateRound(
   random: GameRandom,
@@ -72,6 +66,7 @@ function checkGameOver(
   const pitchingScore =
     gameState.battingTeam === leagueGame.homeTeamId ? awayScore : homeScore;
 
+  // force game to end in case of a bug
   if (gameState.currentInning > 50) {
     return true;
   }
@@ -709,103 +704,16 @@ export function simulatePitch(
   }
 
   // Adjust pitching stamina
-  const pitcherComposite = getModifiedCompositePitchingRatings(
-    pitcherId,
-    league,
-    gameState,
-    getActivePlayerPerks(pitcherId, league, gameState, pitchData.kind),
-  );
-  const batterComposite = getModifiedCompositeBattingRatings(
-    batter.id,
-    league,
-    gameState,
-    getActivePlayerPerks(batter.id, league, gameState, pitchData.kind),
-  );
-  const isReliever = pitcher.positions.some((pos) => pos === 'rp');
-  let pitcherStaminaChange =
-    scaleAttributePercent(
-      pitcherComposite.durability,
-      isReliever ? 1.004 : 1.0015,
-    ) - (isReliever ? 1.016 : 1.006);
-  pitcherStaminaChange *=
-    {
-      strike: 1,
-      ball: 1,
-      foul: 1,
-      out: 1,
-      hit: 1.5,
-      double: 2,
-      triple: 3,
-      homeRun: 5,
-    }[outcome] ?? 1;
-  pitcher.stamina = Math.max(-0.25, pitcher.stamina + pitcherStaminaChange);
-  batter.stamina = Math.max(
-    -0.25,
-    batter.stamina +
-      scaleAttributePercent(batterComposite.durability, 1.005) -
-      1.02,
-  );
-  if (
-    random.float(0, 1) <
-    (isReliever ? 0.0005 : 0.00025) /
-      scaleAttributePercent(pitcherComposite.durability, 4)
-  ) {
-    league.playerLookup[pitcherId].statusIds.injured =
-      (league.playerLookup[pitcherId].statusIds.injured ?? 0) +
-      Math.floor(random.float(2, 10));
-    gameState = logger.addToGameLog(
-      {
-        kind: 'injury',
-        playerId: pitcherId,
-      },
-      gameState,
-    );
-    const pid = considerSwapPitcher(gameState, league);
-    if (pid) {
-      gameState = swapPitcher(gameState, pid);
-    }
-  }
-  if (
-    random.float(0, 1) <
-    0.001 / scaleAttributePercent(batterComposite.durability, 4)
-  ) {
-    league.playerLookup[batterId].statusIds.injured =
-      (league.playerLookup[batterId].statusIds.injured ?? 0) +
-      Math.floor(random.float(2, 10));
-    gameState = logger.addToGameLog(
-      {
-        kind: 'injury',
-        playerId: batterId,
-      },
-      gameState,
-    );
-    // TODO: Swap batter if injured
-  }
+  gameState = updateStaminaAfterPitch(gameState, league, pitchData, outcome);
+  gameState = updateInjuryAfterPitch(random, gameState, league, pitchData);
 
   if (nextBatter) {
     gameState = incrementBatterIndex(gameState, gameState.battingTeam);
     gameState = resetCount(gameState);
   }
 
-  const battingTeamScore = gameState.teamData[gameState.battingTeam].score;
-  const pitchingTeamScore = gameState.teamData[gameState.pitchingTeam].score;
-  if (battingTeamScore >= pitchingTeamScore) {
-    gameState.saveElligiblePitcherId = null;
-    if (
-      !gameState.winningPitcherId ||
-      league.teamLookup[gameState.pitchingTeam].playerIds.includes(
-        gameState.winningPitcherId,
-      )
-    ) {
-      const tied = battingTeamScore === pitchingTeamScore;
-      gameState.winningPitcherId = tied
-        ? null
-        : last(gameState.teamData[gameState.battingTeam].pitchers)!;
-      gameState.losingPitcherId = tied
-        ? null
-        : last(gameState.teamData[gameState.pitchingTeam].pitchers)!;
-    }
-  }
+  // Manage save eligibility
+  gameState = checkSaveWinLossEligility(gameState, league);
 
   return gameState;
 }

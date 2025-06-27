@@ -1,7 +1,8 @@
 import type { LeagueGameState, League, PlayerId } from '../gameTypes';
 import { isPitcher, sum, getInningInfo } from '../utils';
 import { getModifiedAttributes } from './ratings';
-import { logger } from './simGames';
+import { runnersOnBases } from './runners';
+import { logger } from '../logger';
 import { getCurrentPitcher } from './utils';
 
 export function considerSwapPitcher(
@@ -74,8 +75,7 @@ export function swapPitcher(
   const rd =
     gameState.teamData[gameState.pitchingTeam].score -
     gameState.teamData[gameState.battingTeam].score;
-  const potentialRuns =
-    2 + Object.values(gameState.bases).filter((b) => b !== null).length;
+  const potentialRuns = 2 + runnersOnBases(gameState);
   const inningInfo = getInningInfo(gameState.currentInning);
   const potentiallyLastInning =
     inningInfo.inning >= 9 ||
