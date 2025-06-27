@@ -53,9 +53,9 @@ export function Attributes({
             <span className="col-span-1 text-right">
               {roundFloat(stamina * 100, 0)}%
             </span>
-            <div className="col-span-3 w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+            <div className="col-span-3 w-full h-3 bg-gray-light rounded-sm overflow-hidden">
               <div
-                className="h-full bg-lime-500"
+                className="h-full bg-accent"
                 style={{
                   width: `${stamina * 100}%`,
                   transition: 'width 0.3s',

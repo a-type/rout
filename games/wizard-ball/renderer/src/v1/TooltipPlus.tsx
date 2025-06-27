@@ -1,5 +1,5 @@
 import { Popover, clsx } from '@a-type/ui';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function TooltipPlus({
   className,
@@ -37,7 +37,7 @@ export function TooltipPlus({
       <Popover.Content
         className={clsx(
           className,
-          'bg-gray-700 text-gray-100 max-w-[400px] p-2 rounded border-gray-600 z-9999',
+          'bg-gray-wash color-gray-ink max-w-[400px] p-2 rounded border-gray-dark z-9999',
         )}
       >
         {content}

@@ -1,22 +1,21 @@
+import { clsx } from '@a-type/ui';
 import {
-  getPlayerOverall,
   getTeamAvgAttributes,
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
-import { AttributeSummary } from '../ratings/AttributeSummary';
+import { Link } from 'react-router';
 import { hooks } from '../gameClient';
+import { PlayerClass } from '../players/PlayerClass';
+import { PlayerLevel } from '../players/PlayerLevel';
+import { PlayerSpecies } from '../players/PlayerSpecies';
+import { PlayerStatus } from '../players/PlayerStatus';
+import { AttributeSummary } from '../ratings/AttributeSummary';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 import {
   getPlayerAttributes,
   getPlayerComposite,
 } from '../ratings/useAttributes';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerClass } from '../players/PlayerClass';
-import { Link } from 'react-router';
-import { PlayerLevel } from '../players/PlayerLevel';
 import { capitalize } from '../utils';
-import { PlayerStatus } from '../players/PlayerStatus';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
-import { clsx } from '@a-type/ui';
 
 export function TeamSummary({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -53,15 +52,15 @@ export function TeamSummary({ id }: { id: string }) {
               key={player.id}
               className={clsx(
                 'flex-col',
-                'hover:bg-gray-700 transition-colors hover:outline outline-2 outline-gray-400',
-                'flex gap-2 items-center justify-between bg-gray-800 px-2 py-4 rounded',
+                'hover:bg-darken-1 transition-colors hover:outline outline-2 outline-gray',
+                'flex gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded',
               )}
             >
               <span className="font-bold text-lg flex flex-row items-center gap-2">
                 <PlayerStatus id={player.id} />
                 {player.positions.join('/').toUpperCase()} {player.name}{' '}
               </span>
-              <span className="text-sm text-gray-400 mb-2">
+              <span className="text-sm color-gray-dark mb-2">
                 <PlayerLevel id={player.id} /> <PlayerSpecies id={player.id} />{' '}
                 <PlayerClass id={player.id} /> {capitalize(player.species)}{' '}
                 {capitalize(player.class)}

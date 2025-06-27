@@ -19,7 +19,7 @@ export function StatusChip({
 }) {
   const status = statusData[id];
   if (!status) {
-    return <div className="p-2 text-red-500">Status not found</div>;
+    return <div className="p-2 color-attention-dark">Status not found</div>;
   }
   const { name, description, kind, icon, effect } = status;
   return (
@@ -32,13 +32,13 @@ export function StatusChip({
           </span>
         </div>
       }
-      className="bg-gray-700 text-gray-100"
+      className="bg-gray-wash color-gray-ink"
     >
       <span
         className={clsx(
-          'flex flex-row items-center bg-gray-800 border-solid border-1',
-          'p-1 rounded cursor-pointer hover:bg-gray-700',
-          (kind === 'buff') === stacks > 0 ? 'text-green-400' : 'text-red-400',
+          'flex flex-row items-center bg-white border-solid border-1',
+          'p-1 rounded cursor-pointer hover:bg-gray-wash',
+          (kind === 'buff') === stacks > 0 ? 'text-accent' : 'text-attention',
         )}
       >
         {strOrFn(icon, stacks)} {strOrFn(name, stacks)}{' '}

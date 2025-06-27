@@ -1,3 +1,4 @@
+import { clsx } from '@a-type/ui';
 import {
   DndContext,
   DragEndEvent,
@@ -7,17 +8,16 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { useEffect, useState } from 'react';
 import { hooks } from '../gameClient';
 import { ItemChip } from '../items/ItemChip';
-import { Draggable } from './Draggable';
-import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { useLineup } from './useLineup';
 import { PlayerChip } from '../players/PlayerChip';
-import { useEffect, useState } from 'react';
-import { clsx } from '@a-type/ui';
+import { Draggable } from './Draggable';
 import { useBench } from './useBench';
-import { usePitchingRotation } from './usePitchingRotation';
+import { useLineup } from './useLineup';
 import { usePitchingRelievers } from './usePitchingRelievers';
+import { usePitchingRotation } from './usePitchingRotation';
 
 function DroppablePlayerArea({
   id,
@@ -36,8 +36,8 @@ function DroppablePlayerArea({
       id={id}
       className={clsx(
         className,
-        isOver && 'border-dashed border-gray-200 border-1',
-        'flex flex-row gap-2 bg-gray-900 p-2 rounded-lg items-center',
+        isOver && 'border-dashed border-gray-ink border-1',
+        'flex flex-row gap-2 bg-gray-wash p-2 rounded-lg items-center',
       )}
     >
       {children}
@@ -149,7 +149,7 @@ export function TeamItems({ id }: { id: string }) {
               </Draggable>
             ))
           ) : (
-            <span className="text-gray-400 m-auto">No unassigned items</span>
+            <span className="color-gray-dark m-auto">No unassigned items</span>
           )}
         </DroppablePlayerArea>
       </div>
@@ -185,7 +185,7 @@ export function TeamItems({ id }: { id: string }) {
             </DroppablePlayerArea>
           );
         })}
-        <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+        <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
         <h2 className="mt-0 mb-2">Bench Players</h2>
         {teamBench
           .map((p) => p.id)
@@ -209,7 +209,7 @@ export function TeamItems({ id }: { id: string }) {
               </DroppablePlayerArea>
             );
           })}
-        <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+        <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
         <h2 className="mt-0 mb-2">Pitching Rotation</h2>
         {teamRotation.map(({ player: { id: playerId } }) => {
           return (

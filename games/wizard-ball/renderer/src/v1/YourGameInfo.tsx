@@ -1,8 +1,8 @@
 import { Link } from 'react-router';
+import { BallparkChip } from './BallparkChip';
 import { hooks } from './gameClient';
 import { TeamIcon } from './teams/TeamIcon';
 import { TeamName } from './teams/TeamName';
-import { BallparkChip } from './BallparkChip';
 import { WeatherChip } from './WeatherChip';
 
 export function YourGameInfo() {
@@ -14,7 +14,7 @@ export function YourGameInfo() {
     return (
       <div className="mb-4">
         <h2 className="text-lg font-bold mb-2">Game Info</h2>
-        <div className="flex items-center justify-center bg-gray-800 border-solid border-gray-300 px-2 py-4 rounded">
+        <div className="flex items-center justify-center bg-white border-solid border-gray-light px-2 py-4 rounded">
           You are not currently managing a team.
         </div>
       </div>
@@ -30,7 +30,7 @@ export function YourGameInfo() {
         <h2 className="text-lg font-bold mb-2">Game Result</h2>
         <div className="flex flex-row gap-2 flex-wrap">
           {gameResults.length === 0 ? (
-            <div className="flex items-center justify-center bg-gray-800 border-solid border-gray-300 px-2 py-4 rounded">
+            <div className="flex items-center justify-center bg-white border-solid border-gray-light px-2 py-4 rounded">
               No games played yet this week.
             </div>
           ) : (
@@ -39,7 +39,7 @@ export function YourGameInfo() {
               .map((game) => {
                 return (
                   <Link key={game.id} to={{ search: `?gameId=${game.id}` }}>
-                    <div className="flex flex-col gap-2 items-center justify-between bg-gray-800 border-solid border-gray-300 px-2 py-4 rounded">
+                    <div className="flex flex-col gap-2 items-center justify-between bg-white border-solid border-gray-light px-2 py-4 rounded">
                       <span className="flex flex-row gap-1 items-center">
                         <span className="font-bold">
                           {game.score[game.winner]}
@@ -71,14 +71,14 @@ export function YourGameInfo() {
             return (
               <div
                 key={game.id}
-                className="flex flex-col gap-2 items-center justify-between bg-gray-800 border-solid border-gray-300 px-2 py-4 rounded"
+                className="flex flex-col gap-2 items-center justify-between bg-white border-solid border-gray-light px-2 py-4 rounded"
               >
                 <div className="flex flex-row items-center gap-2">
                   <span className="flex flex-row gap-1 items-center">
                     <TeamIcon id={game.awayTeamId} size={12} />
                     <TeamName bold id={game.awayTeamId} />
                   </span>
-                  <span className="text-gray-500 font-bold">@</span>
+                  <span className="color-gray-dark font-bold">@</span>
                   <span className="flex flex-row gap-1 items-center">
                     <TeamIcon id={game.homeTeamId} size={12} />
                     <TeamName bold id={game.homeTeamId} />

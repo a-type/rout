@@ -1,14 +1,14 @@
-import { hooks } from '../gameClient';
 import { Tabs, TabsContent } from '@a-type/ui';
 import { useTransition } from 'react';
-import { GameLog } from './GameLog';
-import { GameBoxScore } from './GameBoxScore';
+import { useSearchParams } from 'react-router';
+import { BallparkChip } from '../BallparkChip';
+import { hooks } from '../gameClient';
 import { useGameResults } from '../useGameResults';
 import { WeatherChip } from '../WeatherChip';
-import { BallparkChip } from '../BallparkChip';
-import { ScheduledGamePage } from './ScheduledGamePage';
-import { useSearchParams } from 'react-router';
+import { GameBoxScore } from './GameBoxScore';
+import { GameLog } from './GameLog';
 import { GameSummary } from './GameSummary';
+import { ScheduledGamePage } from './ScheduledGamePage';
 
 export function GamePage({ id }: { id: string }) {
   const [params, setParams] = useSearchParams();
@@ -71,7 +71,7 @@ export function GamePage({ id }: { id: string }) {
           </div>
         </div>
         {isPending ? (
-          <div className="text-gray-500">Loading...</div>
+          <div className="color-gray-dark">Loading...</div>
         ) : (
           <>
             <TabsContent value="summary">

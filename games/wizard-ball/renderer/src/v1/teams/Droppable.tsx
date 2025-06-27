@@ -14,7 +14,7 @@ export function Droppable({
 
   return (
     <div
-      className={clsx(className, isOver ? 'bg-gray-800 rounded' : '')}
+      className={clsx(className, isOver ? 'bg-white rounded' : '')}
       ref={setNodeRef}
     >
       {children}

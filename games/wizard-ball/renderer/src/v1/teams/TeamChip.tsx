@@ -9,7 +9,7 @@ export function TeamChip({ id, noRecord }: { id: string; noRecord?: boolean }) {
       to={{
         search: `?teamId=${team.id}`,
       }}
-      className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray-500/50 rounded"
+      className="p1 inline-flex items-center gap-2 cursor-pointer hover:bg-gray/50 rounded"
     >
       {team.icon} {team.name} {!noRecord && `(${team.wins} - ${team.losses})`}
     </Link>

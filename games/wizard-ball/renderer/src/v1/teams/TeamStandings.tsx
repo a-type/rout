@@ -1,6 +1,6 @@
 import { clsx } from '@a-type/ui';
-import { hooks } from '../gameClient';
 import { Link } from 'react-router';
+import { hooks } from '../gameClient';
 
 export function TeamStandings() {
   const { finalState, players } = hooks.useGameSuite();
@@ -10,8 +10,8 @@ export function TeamStandings() {
   return (
     <div className="flex flex-col">
       <h2>Standings</h2>
-      <table className="table-auto min-w-full border border-gray-300 rounded-lg shadow-sm">
-        <thead className="bg-gray-800 text-light">
+      <table className="table-auto min-w-full border border-gray rounded-lg shadow-sm overflow-hidden">
+        <thead className="bg-white color-gray-dark">
           <tr>
             <th className="p-1">Team</th>
             <th className="p-1">Wins</th>
@@ -24,8 +24,8 @@ export function TeamStandings() {
             <tr
               key={team.id}
               className={clsx(
-                'cursor-pointer hover:bg-gray-700 p-1',
-                idx % 2 === 0 && 'bg-gray-500/30',
+                'cursor-pointer hover:bg-gray-light p-1',
+                idx % 2 === 0 && 'bg-gray-wash',
               )}
             >
               <td

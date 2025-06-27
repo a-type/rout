@@ -1,6 +1,6 @@
 import { LeagueGameState } from '../gameTypes';
-import { PerkEffect } from './perkData';
 import { logger } from '../logger';
+import { PerkEffect } from './perkData';
 
 export type Weather = {
   name: string;
@@ -16,7 +16,7 @@ export const weather = {
   clear: {
     name: 'Clear',
     icon: '☀️',
-    color: '#fff',
+    color: 'var(--color-black)',
     description: 'A pleasant day with no weather effects.',
     effect: () => ({}),
   },

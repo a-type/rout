@@ -9,7 +9,7 @@ export function WeatherChip({ id }: { id: WeatherType }) {
   const weather = weatherData[id];
 
   if (!weather) {
-    return <span className="text-red-500">Unknown Weather</span>;
+    return <span className="color-attention-dark">Unknown Weather</span>;
   }
   const { color, icon, name } = weather;
   return (
@@ -20,10 +20,10 @@ export function WeatherChip({ id }: { id: WeatherType }) {
           <PerkEffect effect={weather.effect()} />
         </div>
       }
-      className="bg-gray-700 text-gray-100 max-w-[400px]"
+      className="bg-gray-wash color-gray-ink max-w-[400px]"
     >
       <span
-        className="flex flex-row items-center bg-gray-700 border-solid border-1 p-1 rounded cursor-pointer hover:bg-gray-700"
+        className="flex flex-row items-center bg-gray-wash border-solid border-1 p-1 rounded cursor-pointer hover:bg-gray-wash"
         style={{
           borderColor: color,
           color: color,

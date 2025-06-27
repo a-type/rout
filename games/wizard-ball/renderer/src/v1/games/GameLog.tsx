@@ -5,8 +5,14 @@ import type {
   LogsPitchData,
   TriggerSource,
 } from '@long-game/game-wizard-ball-definition';
-import { TeamName } from '../teams/TeamName';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
+import { BallparkChip } from '../BallparkChip';
+import { ItemDefChip } from '../items/ItemChip';
+import { PerkChip } from '../perks/PerkChip';
+import { PlayerChip } from '../players/PlayerChip';
+import { TeamName } from '../teams/TeamName';
+import { TooltipPlus } from '../TooltipPlus';
+import { useGameResults } from '../useGameResults';
 import {
   capitalize,
   hitDirectionToString,
@@ -17,13 +23,7 @@ import {
   roundFloat,
   toPercentage,
 } from '../utils';
-import { useGameResults } from '../useGameResults';
-import { PlayerChip } from '../players/PlayerChip';
-import { TooltipPlus } from '../TooltipPlus';
 import { WeatherChip } from '../WeatherChip';
-import { BallparkChip } from '../BallparkChip';
-import { PerkChip } from '../perks/PerkChip';
-import { ItemChip, ItemDefChip } from '../items/ItemChip';
 
 export function ContactInfoTooltip({
   contactChance,
@@ -35,7 +35,7 @@ export function ContactInfoTooltip({
   }
   return (
     <TooltipPlus
-      className="bg-gray-700 text-gray-100 max-w-[400px]"
+      className="bg-gray-wash color-gray-ink max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
           <span>Raw={toPercentage(contactChance.raw)}</span>
@@ -57,7 +57,7 @@ export function ContactInfoTooltip({
         </div>
       }
     >
-      <span className="bg-gray-700 text-gray-100 p-1 rounded cursor-pointer hover:bg-gray-600 hover:text-gray-200 ml-1 text-xs font-mono">
+      <span className="bg-gray-wash color-gray-ink p-1 rounded cursor-pointer hover:bg-darken-1 hover:color-gray ml-1 text-xs font-mono">
         INFO
       </span>
     </TooltipPlus>
@@ -73,7 +73,7 @@ export function runsScoredToString(runs: number) {
 export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
   return (
     <TooltipPlus
-      className="bg-gray-700 text-gray-100 max-w-[400px]"
+      className="bg-gray-wash color-gray-ink max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
           <span>Defender rating={roundFloat(event.defenderRating)}</span>
@@ -87,7 +87,7 @@ export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
         </div>
       }
     >
-      <span className="bg-gray-700 text-gray-100 p-1 rounded cursor-pointer hover:bg-gray-600 hover:text-gray-200 ml-1 text-xs font-mono">
+      <span className="bg-gray-wash color-gray-ink p-1 rounded cursor-pointer hover:bg-darken-1 hover:color-gray ml-1 text-xs font-mono">
         HIT INFO
       </span>
     </TooltipPlus>
@@ -97,7 +97,7 @@ export function HitTableInfo({ event }: { event: HitGameLogEvent }) {
 export function PitchChip({ pitchData }: { pitchData: LogsPitchData }) {
   return (
     <TooltipPlus
-      className="bg-gray-700 text-gray-100 max-w-[400px]"
+      className="bg-gray-wash color-gray-ink max-w-[400px]"
       content={
         <div className="flex flex-col gap-1">
           <span>{capitalize(pitchData.kind)}</span>
@@ -110,7 +110,7 @@ export function PitchChip({ pitchData }: { pitchData: LogsPitchData }) {
         </div>
       }
     >
-      <span className="bg-gray-800 text-gray-100 p-1 rounded cursor-pointer hover:bg-gray-700 hover:text-gray-200">
+      <span className="bg-white color-gray-ink p-1 rounded cursor-pointer hover:bg-gray-wash hover:color-gray">
         {pitchQualityToString(pitchData.quality)}{' '}
         {pitchData.isStrike ? 'strike' : 'ball'}
       </span>
@@ -133,7 +133,7 @@ export function SourceChip({ source }: { source: TriggerSource }) {
   if (source.kind === 'item') {
     return <ItemDefChip id={source.id} />;
   }
-  return <span className="text-gray-300">{source.id}</span>;
+  return <span className="text-gray-dark">{source.id}</span>;
 }
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {
@@ -144,7 +144,7 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
       const battingScore = event.score[event.battingTeam];
       return (
         <div className="flex flex-col items-start">
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
           <div className="flex flex-col items-start gap-1">
             <div className="whitespace-nowrap">
               {capitalize(half)} of the {nthToString(inning)}, the{' '}
@@ -166,14 +166,14 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
               )}
             </div>
           </div>
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
         </div>
       );
 
     case 'pitcherChange':
       return (
         <div className="flex flex-col items-start">
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
           <div className="flex flex-col items-start gap-1">
             <div>
               <PlayerChip noPositions id={event.newPitcherId} /> is now pitching
@@ -181,20 +181,20 @@ export function GameLogEvent({ event }: { event: GameLogEvent }) {
               <PlayerChip noPositions id={event.oldPitcherId} />.
             </div>
           </div>
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
         </div>
       );
 
     case 'injury':
       return (
         <div className="flex flex-col items-start">
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
           <div className="flex flex-col items-start gap-1">
             <div>
               <PlayerChip noPositions id={event.playerId} /> has been injured!
             </div>
           </div>
-          <hr className="w-full h-1 border-none bg-gray-500" />
+          <hr className="w-full h-1 border-none bg-gray" />
         </div>
       );
 

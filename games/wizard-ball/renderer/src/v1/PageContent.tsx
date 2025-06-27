@@ -1,15 +1,14 @@
-import { TeamPage } from './teams/TeamPage';
-import { TeamStandings } from './teams/TeamStandings';
-import { PlayerPage } from './players/PlayerPage';
+import { useSearchParams } from 'react-router';
+import { Choices } from './Choices';
+import { hooks } from './gameClient';
 import { GamePage } from './games/GamePage';
 import { LeagueLeaders } from './LeagueLeaders';
-import { UpcomingGames } from './UpcomingGames';
-import { Choices } from './Choices';
-import { useSearchParams } from 'react-router';
-import { RecentResults } from './RecentResults';
-import { hooks } from './gameClient';
 import { Levelups } from './Levelups';
-import { YourGameInfo } from './YourGameInfo';
+import { PlayerPage } from './players/PlayerPage';
+import { RecentResults } from './RecentResults';
+import { TeamPage } from './teams/TeamPage';
+import { TeamStandings } from './teams/TeamStandings';
+import { UpcomingGames } from './UpcomingGames';
 
 export function PageContent() {
   const { gameStatus, turnWasSubmitted, currentTurn, turnError } =
@@ -35,7 +34,7 @@ export function PageContent() {
     return (
       <div>
         <h2 className="text-lg font-bold mb-2">Debug Information</h2>
-        <pre className="bg-gray-800 p-4 rounded">
+        <pre className="bg-white p-4 rounded">
           {turnWasSubmitted ? 'sent turn' : 'no turn sent'}
           <br />
           Error: {JSON.stringify(turnError)}

@@ -10,7 +10,7 @@ export function PlayerOverall({ id }: { id: string }) {
 
   return (
     <div
-      className="flex flex-row gap-2 items-center bg-gray-800 p-1 rounded"
+      className="flex flex-row gap-2 items-center bg-white p-1 rounded"
       style={{ color: attributeToColor(overall, 120).text }}
     >
       <span className="font-bold">OVR:</span>

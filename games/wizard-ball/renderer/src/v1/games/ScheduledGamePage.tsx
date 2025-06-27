@@ -1,10 +1,8 @@
 import { clsx } from '@a-type/ui';
-import { hooks } from '../gameClient';
-import { TeamName } from '../teams/TeamName';
-import { PlayerChip } from '../players/PlayerChip';
-import { TeamIcon } from '../teams/TeamIcon';
-import { TeamChip } from '../teams/TeamChip';
 import { BallparkChip } from '../BallparkChip';
+import { hooks } from '../gameClient';
+import { PlayerChip } from '../players/PlayerChip';
+import { TeamChip } from '../teams/TeamChip';
 import { WeatherChip } from '../WeatherChip';
 
 function CompactTeamLineup({ teamId }: { teamId: string }) {
@@ -24,13 +22,13 @@ function CompactTeamLineup({ teamId }: { teamId: string }) {
             team.positionChart[pos as keyof typeof team.positionChart];
           if (!playerId) {
             return (
-              <span key={pos} className="px-2 py-1 bg-gray-200 rounded">
+              <span key={pos} className="px-2 py-1 bg-wash rounded">
                 {pos}
               </span>
             );
           }
           return (
-            <div className="flex items-center gap-2 px-2 py-1 bg-gray-800 rounded">
+            <div className="flex items-center gap-2 px-2 py-1 bg-wash rounded">
               <span>{idx + 1}</span>
               <span>{pos.toUpperCase()}</span>
               <PlayerChip id={playerId} key={playerId} noPositions />

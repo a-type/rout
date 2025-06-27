@@ -1,11 +1,4 @@
 import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { hooks } from '../gameClient';
-import {
   closestCenter,
   DndContext,
   DragEndEvent,
@@ -17,23 +10,30 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import {
   restrictToVerticalAxis,
   restrictToWindowEdges,
 } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { forwardRef, useEffect, useState } from 'react';
+import { hooks } from '../gameClient';
 
-import { PropsWithChildren, HTMLAttributes } from 'react';
-import { Team, isPitcher } from '@long-game/game-wizard-ball-definition';
-import { PlayerOverall } from '../ratings/PlayerOverall';
 import { Tooltip } from '@a-type/ui';
-import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
-import { useSendTurn } from '../utils';
-import { PlayerSpecies } from '../players/PlayerSpecies';
+import { isPitcher, Team } from '@long-game/game-wizard-ball-definition';
+import { HTMLAttributes, PropsWithChildren } from 'react';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerStatus } from '../players/PlayerStatus';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
+import { PlayerOverall } from '../ratings/PlayerOverall';
 import { PlayerStamina } from '../ratings/PlayerStamina';
+import { useSendTurn } from '../utils';
 
 const Item = forwardRef<
   HTMLDivElement,
@@ -138,10 +138,10 @@ export function TeamLineup({ id }: { id: string }) {
                 <SortableItem
                   disabled={currentUserId !== team.ownerId}
                   id={position}
-                  className="bg-gray-700 border p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                  className="bg-gray-wash border-light p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray"
                 >
                   <Tooltip
-                    className="bg-gray-700 text-gray-100"
+                    className="bg-gray-wash color-gray-ink"
                     content={<PlayerTooltipContent id={player.id} />}
                   >
                     <div className="flex items-center gap-1">

@@ -1,4 +1,3 @@
-import { Tooltip } from '@a-type/ui';
 import {
   ballparkData,
   type BallparkType,
@@ -10,7 +9,7 @@ export function BallparkChip({ id }: { id: BallparkType }) {
   const ballpark = ballparkData[id];
 
   if (!ballpark) {
-    return <span className="text-red-500">Unknown ballpark</span>;
+    return <span className="color-attention-dark">Unknown ballpark</span>;
   }
   const { color, icon, name } = ballpark;
   return (
@@ -21,10 +20,10 @@ export function BallparkChip({ id }: { id: BallparkType }) {
           <PerkEffect effect={ballpark.effect({ isHome: true })} />
         </div>
       }
-      className="bg-gray-700 text-gray-100 max-w-[400px]"
+      className="bg-gray-wash color-gray-ink max-w-[400px]"
     >
       <span
-        className="flex flex-row items-center bg-gray-700 border-solid border-1 p-1 rounded cursor-pointer hover:bg-gray-700"
+        className="flex flex-row items-center bg-gray-wash border-solid border-1 p-1 rounded cursor-pointer hover:bg-gray-wash"
         style={{
           borderColor: color,
           color: color,

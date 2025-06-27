@@ -25,11 +25,12 @@ export function PageNav() {
           ? 'debug'
           : 'home';
 
-  const activeClass = 'font-bold text-gray-100 transition-colors';
-  const inActiveClass = 'text-gray-400 hover:text-gray-200 transition-colors';
+  const activeClass = 'font-bold color-gray-ink transition-colors';
+  const inActiveClass =
+    'color-gray-dark hover:color-gray-ink transition-colors';
 
   return (
-    <div className="fixed flex gap-4 bg-gray-800 p-4 w-full z-10 items-center max-h-[4rem]">
+    <div className="fixed flex gap-4 bg-wash p-4 w-full z-10 items-center max-h-[4rem]">
       {!nextRoundCheckAt && (
         <Button
           onClick={() => {

@@ -1,14 +1,13 @@
+import { clsx, Tooltip } from '@a-type/ui';
 import {
   BattingCompositeRatings,
   BattingCompositeType,
-  getPitchingCompositeRatings,
   PitchingCompositeRatings,
   PitchingCompositeType,
 } from '@long-game/game-wizard-ball-definition';
-import { roundFloat } from '../utils';
-import { clsx, Tooltip } from '@a-type/ui';
-import { Bar } from './Bar';
 import { hooks } from '../gameClient';
+import { roundFloat } from '../utils';
+import { Bar } from './Bar';
 
 export const battingRatingList: Array<{
   value: BattingCompositeType;
@@ -189,10 +188,10 @@ export function CompositeRatings({
                     className={clsx(
                       'font-semibold col-span-3',
                       advantageTypes.includes(value)
-                        ? 'text-green-500'
+                        ? 'color-accent-dark'
                         : disadvantageTypes.includes(value)
-                        ? 'text-red-500'
-                        : '',
+                          ? 'color-attention-dark'
+                          : '',
                     )}
                   >
                     {label}:
@@ -201,7 +200,7 @@ export function CompositeRatings({
                     {roundFloat(modValue, 1)}
                   </span>
                   <div className="col-span-8 flex items-center ml-4">
-                    <div className="w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+                    <div className="w-full h-3 bg-gray-light rounded-sm overflow-hidden">
                       <Bar
                         minValue={minValue}
                         maxValue={maxValue}

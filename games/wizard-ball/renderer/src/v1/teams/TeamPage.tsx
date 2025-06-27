@@ -1,20 +1,15 @@
 import { clsx, Tabs } from '@a-type/ui';
-import {
-  getTeamAvgAttributes,
-  type Team,
-  type TeamId,
-} from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
-import { useState } from 'react';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
-import { TeamLineup } from './TeamLineup';
+import { type TeamId } from '@long-game/game-wizard-ball-definition';
+import { useSearchParams } from 'react-router';
+import { BallparkChip } from '../BallparkChip';
+import { hooks } from '../gameClient';
 import { TeamChart } from './TeamChart';
 import { TeamItems } from './TeamItems';
-import { BallparkChip } from '../BallparkChip';
-import { Link, useSearchParams } from 'react-router';
+import { TeamLineup } from './TeamLineup';
 import { TeamPlayers } from './TeamPlayers';
-import { TeamSummary } from './TeamSummary';
 import { TeamSchedule } from './TeamSchedule';
+import { TeamSummary } from './TeamSummary';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },
@@ -76,7 +71,7 @@ export function TeamPage({ id }: { id: TeamId }) {
               className={clsx(
                 idx == 0 && 'rounded-l-lg',
                 idx == arr.length - 1 && 'rounded-r-lg',
-                'text-xs border-none rounded-none min-w-[1rem] bg-gray-700 hover:bg-gray-500 ring-0',
+                'text-xs border-none rounded-none min-w-[1rem] bg-gray-wash hover:bg-gray ring-0',
               )}
             >
               {option.label}

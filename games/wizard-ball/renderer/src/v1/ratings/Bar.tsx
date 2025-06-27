@@ -12,7 +12,7 @@ export function Bar({
   increase?: boolean;
 }) {
   return (
-    <div className="flex flex-row w-full h-3 bg-gray-300 rounded-sm overflow-hidden">
+    <div className="flex flex-row w-full h-3 bg-gray-light rounded-sm overflow-hidden">
       <div
         className="h-full"
         style={{

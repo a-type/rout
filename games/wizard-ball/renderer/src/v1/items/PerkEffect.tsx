@@ -3,7 +3,7 @@ import type {
   AttributeType,
   PerkEffect as PerkEffectType,
 } from '@long-game/game-wizard-ball-definition';
-import { shortAttribute, compositeToString } from '../utils';
+import { compositeToString, shortAttribute } from '../utils';
 
 export function PerkEffect({ effect }: { effect: PerkEffectType }) {
   return (
@@ -14,7 +14,7 @@ export function PerkEffect({ effect }: { effect: PerkEffectType }) {
             key={key}
             className={clsx(
               'text-sm uppercase',
-              value > 0 ? 'text-green-500' : 'text-red-500',
+              value > 0 ? 'color-accent-dark' : 'color-attention-dark',
             )}
           >
             {value > 0 ? '+' : ''}
@@ -31,7 +31,7 @@ export function PerkEffect({ effect }: { effect: PerkEffectType }) {
             key={key}
             className={clsx(
               'text-sm capitalize',
-              value > 0 ? 'text-green-500' : 'text-red-500',
+              value > 0 ? 'color-accent-dark' : 'color-attention-dark',
             )}
           >
             {value > 0 ? '+' : ''}

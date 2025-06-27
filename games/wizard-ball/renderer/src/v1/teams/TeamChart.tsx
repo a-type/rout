@@ -1,33 +1,31 @@
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { hooks } from '../gameClient';
 import {
   DndContext,
   DragEndEvent,
-  KeyboardSensor,
   MouseSensor,
-  PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { arrayMove } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
+import { hooks } from '../gameClient';
 
+import { clsx, Tooltip } from '@a-type/ui';
 import {
-  Position,
-  PositionChart,
   canAssignToPosition,
   isPitcher,
+  Position,
+  PositionChart,
 } from '@long-game/game-wizard-ball-definition';
-import { clsx, Tooltip } from '@a-type/ui';
-import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
-import { Draggable } from './Draggable';
-import { Droppable } from './Droppable';
-import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerStatus } from '../players/PlayerStatus';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
 import { PlayerOverall } from '../ratings/PlayerOverall';
 import { PlayerStamina } from '../ratings/PlayerStamina';
+import { Draggable } from './Draggable';
+import { Droppable } from './Droppable';
 
 const positions = [
   'c',
@@ -169,13 +167,13 @@ export function TeamChart({ id }: { id: string }) {
                       id={player.id}
                       className={clsx(
                         canAssignToPosition(player.positions, position)
-                          ? 'bg-gray-700'
-                          : 'bg-red-500',
-                        'p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray-500',
+                          ? 'bg-gray-wash'
+                          : 'bg-attention-dark',
+                        'border-light p-1 rounded flex items-center gap-2 cursor-pointer hover:bg-gray',
                       )}
                     >
                       <Tooltip
-                        className="bg-gray-700 text-gray-100"
+                        className="bg-gray-wash color-gray-ink"
                         content={<PlayerTooltipContent id={player.id} />}
                       >
                         <span className="flex items-center gap-1">
@@ -193,13 +191,13 @@ export function TeamChart({ id }: { id: string }) {
                     <PlayerStamina id={player.id} />
                   </>
                 ) : (
-                  <span className="text-gray-500 p-1">Empty</span>
+                  <span className="color-gray-dark p-1">Empty</span>
                 )}
               </Droppable>
             );
           })}
         </div>
-        <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+        <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
         <h4 className="mt-0 mb-2">Bench</h4>
         <Droppable id="bench" className="flex flex-col gap-1">
           {team.playerIds
@@ -216,13 +214,13 @@ export function TeamChart({ id }: { id: string }) {
                   <Draggable
                     disabled={currentUserId !== team.ownerId}
                     id={playerId}
-                    className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                    className="bg-gray-wash border-light p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray"
                   >
                     <span className="uppercase">
                       {player.positions.join('/')}
                     </span>
                     <Tooltip
-                      className="bg-gray-700 text-gray-100"
+                      className="bg-gray-wash color-gray-ink"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
                       <span className="flex items-center gap-1">
@@ -238,7 +236,7 @@ export function TeamChart({ id }: { id: string }) {
             })}
         </Droppable>
       </DndContext>
-      <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+      <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
       <h4 className="mt-0 mb-2">Pitching rotation</h4>
       <DndContext
         onDragEnd={handlePitchingOrderDragEnd}
@@ -260,13 +258,13 @@ export function TeamChart({ id }: { id: string }) {
                   <Draggable
                     disabled={currentUserId !== team.ownerId}
                     id={playerId}
-                    className="bg-gray-700 border p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                    className="bg-gray-wash border-light p-1 rounded shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray"
                   >
                     <span className="uppercase">
                       {player.positions.join('/')}
                     </span>
                     <Tooltip
-                      className="bg-gray-700 text-gray-100"
+                      className="bg-gray-wash color-gray-ink"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
                       <span className="flex items-center gap-1">
@@ -282,7 +280,7 @@ export function TeamChart({ id }: { id: string }) {
             );
           })}
         </div>
-        <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+        <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
         <h4 className="mt-0 mb-2">Relievers</h4>
         <Droppable id="relievers" className="flex flex-col gap-1">
           {team.playerIds
@@ -299,13 +297,13 @@ export function TeamChart({ id }: { id: string }) {
                   <Draggable
                     disabled={currentUserId !== team.ownerId}
                     id={playerId}
-                    className="bg-gray-700 border p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray-500"
+                    className="bg-gray-wash border-light p-1 rounded shadow-sm mb-1 flex items-center gap-2 cursor-pointer hover:bg-gray"
                   >
                     <span className="uppercase">
                       {player.positions.join('/')}
                     </span>
                     <Tooltip
-                      className="bg-gray-700 text-gray-100"
+                      className="bg-gray-wash color-gray-ink"
                       content={<PlayerTooltipContent id={player.id} />}
                     >
                       <span className="flex items-center gap-1">

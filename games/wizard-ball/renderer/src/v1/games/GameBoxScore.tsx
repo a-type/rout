@@ -1,12 +1,11 @@
-import { useSearchParams } from '@verdant-web/react-router';
-import { hooks } from '../gameClient';
-import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
-import { useGameResults } from '../useGameResults';
 import { Link } from 'react-router';
+import { hooks } from '../gameClient';
+import { PlayerClass } from '../players/PlayerClass';
 import { PlayerName } from '../players/PlayerName';
 import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerClass } from '../players/PlayerClass';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { TeamIcon } from '../teams/TeamIcon';
+import { useGameResults } from '../useGameResults';
 import { GameScoreboard } from './GameScoreboard';
 
 type StatValue =
@@ -39,7 +38,7 @@ export function GameBoxScore({ id }: { id: string }) {
 
       <div>
         <h3 className="mb-1">Batting Stats</h3>
-        <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
+        <table className="min-w-full border border-gray-light rounded-lg shadow-sm text-center">
           <thead>
             <tr>
               <th>Player</th>
@@ -51,7 +50,7 @@ export function GameBoxScore({ id }: { id: string }) {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-gray-500/50">
+            <tr className="bg-gray/50">
               <td
                 colSpan={boxScoreBattingStats.length + 1}
                 className="text-center"
@@ -62,10 +61,7 @@ export function GameBoxScore({ id }: { id: string }) {
               </td>
             </tr>
             {awayTeamPlayers.map((playerId) => (
-              <tr
-                key={playerId}
-                className="cursor-pointer hover:bg-gray-500/50"
-              >
+              <tr key={playerId} className="cursor-pointer hover:bg-gray/50">
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + playerId }}>
                     <PlayerSpecies id={playerId} />
@@ -80,7 +76,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 ))}
               </tr>
             ))}
-            <tr className="bg-gray-500/50">
+            <tr className="bg-gray/50">
               <td
                 colSpan={boxScoreBattingStats.length + 1}
                 className="text-center"
@@ -91,10 +87,7 @@ export function GameBoxScore({ id }: { id: string }) {
               </td>
             </tr>
             {homeTeamPlayers.map((playerId) => (
-              <tr
-                key={playerId}
-                className="cursor-pointer hover:bg-gray-500/50"
-              >
+              <tr key={playerId} className="cursor-pointer hover:bg-gray/50">
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + playerId }}>
                     <PlayerSpecies id={playerId} />
@@ -112,10 +105,10 @@ export function GameBoxScore({ id }: { id: string }) {
           </tbody>
         </table>
       </div>
-      <hr className="w-full h-1 bg-gray-700 my-4 border-none" />
+      <hr className="w-full h-1 bg-gray-wash my-4 border-none" />
       <div>
         <h3 className="mb-1">Pitching Stats</h3>
-        <table className="min-w-full border border-gray-300 rounded-lg shadow-sm text-center">
+        <table className="min-w-full border border-gray-light rounded-lg shadow-sm text-center">
           <thead>
             <tr>
               <th>Player</th>
@@ -127,7 +120,7 @@ export function GameBoxScore({ id }: { id: string }) {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-gray-500/50">
+            <tr className="bg-gray/50">
               <td
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
@@ -138,10 +131,7 @@ export function GameBoxScore({ id }: { id: string }) {
               </td>
             </tr>
             {game.teamData[homeTeam.id].pitchers.map((pitcherId) => (
-              <tr
-                key={pitcherId}
-                className="cursor-pointer hover:bg-gray-500/50"
-              >
+              <tr key={pitcherId} className="cursor-pointer hover:bg-gray/50">
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + pitcherId }}>
                     <PlayerSpecies id={pitcherId} />
@@ -156,7 +146,7 @@ export function GameBoxScore({ id }: { id: string }) {
                 ))}
               </tr>
             ))}
-            <tr className="bg-gray-500/50">
+            <tr className="bg-gray/50">
               <td
                 colSpan={boxScorePitchingStats.length + 1}
                 className="text-center"
@@ -167,10 +157,7 @@ export function GameBoxScore({ id }: { id: string }) {
               </td>
             </tr>
             {game.teamData[awayTeam.id].pitchers.map((pitcherId) => (
-              <tr
-                key={pitcherId}
-                className="cursor-pointer hover:bg-gray-500/50"
-              >
+              <tr key={pitcherId} className="cursor-pointer hover:bg-gray/50">
                 <td className="text-left">
                   <Link to={{ search: '?playerId=' + pitcherId }}>
                     <PlayerSpecies id={pitcherId} />

@@ -1,13 +1,13 @@
+import { clsx } from '@a-type/ui';
 import { itemData } from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { clsx } from '@a-type/ui';
-import { PerkEffect } from './PerkEffect';
 import { TooltipPlus } from '../TooltipPlus';
+import { PerkEffect } from './PerkEffect';
 
 export function ItemDefChip({ id }: { id: string }) {
   const itemDef = itemData[id];
   if (!itemDef) {
-    return <span className="text-red-500">Unknown Item</span>;
+    return <span className="color-attention-dark">Unknown Item</span>;
   }
   const itemName = itemDef.name;
   const itemRarity = itemDef.rarity;
@@ -21,7 +21,7 @@ export function ItemDefChip({ id }: { id: string }) {
   }[itemRarity];
   return (
     <TooltipPlus
-      className="bg-gray-700 text-gray-100"
+      className="bg-gray-wash color-gray-ink"
       content={
         <div className="flex flex-col gap-1">
           <span>{itemDef.description}</span>
@@ -31,8 +31,8 @@ export function ItemDefChip({ id }: { id: string }) {
     >
       <span
         className={clsx(
-          'flex flex-row items-center bg-gray-800 border-solid border-1',
-          'p-1 rounded cursor-pointer hover:bg-gray-700',
+          'flex flex-row items-center bg-white border-solid border-1',
+          'p-1 rounded cursor-pointer hover:bg-gray-wash',
         )}
         style={{
           borderColor: rarityColor,
@@ -49,7 +49,7 @@ export function ItemChip({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
   const item = finalState.league.itemLookup[id];
   if (!item) {
-    return <span className="text-red-500">Unknown Item</span>;
+    return <span className="color-attention-dark">Unknown Item</span>;
   }
   return <ItemDefChip id={item.itemDef} />;
 }

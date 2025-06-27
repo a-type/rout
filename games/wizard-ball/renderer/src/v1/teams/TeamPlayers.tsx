@@ -1,8 +1,4 @@
-import { Link } from 'react-router';
-import { attributeToColor, numberToLetter } from '../utils';
-import { hooks } from '../gameClient';
 import { clsx, Tabs } from '@a-type/ui';
-import { useState } from 'react';
 import {
   getBattingCompositeRatings,
   getLevelFromXp,
@@ -12,9 +8,13 @@ import {
   isPitcher,
   PITCHER_BATTING_PENALTY,
 } from '@long-game/game-wizard-ball-definition';
-import { PlayerSpecies } from '../players/PlayerSpecies';
+import { useState } from 'react';
+import { Link } from 'react-router';
+import { hooks } from '../gameClient';
 import { PlayerClass } from '../players/PlayerClass';
+import { PlayerSpecies } from '../players/PlayerSpecies';
 import { PlayerStatus } from '../players/PlayerStatus';
+import { attributeToColor, numberToLetter } from '../utils';
 
 const columns = {
   attributes: [
@@ -105,7 +105,7 @@ export function TeamPlayers({ id }: { id: string }) {
                 className={clsx(
                   idx == 0 && 'rounded-l-lg',
                   idx == arr.length - 1 && 'rounded-r-lg',
-                  'text-xs border-none rounded-none min-w-[1rem] bg-gray-700 hover:bg-gray-500 ring-0',
+                  'text-xs border-none rounded-none min-w-[1rem] bg-gray-wash hover:bg-gray ring-0',
                 )}
               >
                 {option.label}
@@ -182,7 +182,7 @@ export function TeamPlayers({ id }: { id: string }) {
                 return (
                   <tr
                     key={player.id}
-                    className="cursor-pointer hover:bg-gray-700"
+                    className="cursor-pointer hover:bg-gray-wash"
                   >
                     {columns[tab].map((col) => {
                       const value = (data as any)[col.key];

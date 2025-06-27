@@ -10,7 +10,7 @@ export function RecentResults() {
       <h2 className="text-lg font-bold mb-2">Recent Results</h2>
       <div className="flex flex-row gap-2 flex-wrap">
         {gameResults.length === 0 ? (
-          <div className="flex items-center justify-center bg-gray-800 border-solid border-gray-300 px-2 py-4 rounded">
+          <div className="flex items-center justify-center bg-white border-solid border-gray px-2 py-4 rounded">
             No games played yet this week.
           </div>
         ) : (

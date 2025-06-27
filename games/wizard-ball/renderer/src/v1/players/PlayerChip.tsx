@@ -1,11 +1,11 @@
-import { hooks } from '../gameClient';
 import { clsx, Tooltip } from '@a-type/ui';
-import { TeamIcon } from '../teams/TeamIcon';
-import { PlayerTooltipContent } from './PlayerTooltipContent';
 import { Link } from 'react-router';
-import { PlayerSpecies } from './PlayerSpecies';
+import { hooks } from '../gameClient';
+import { TeamIcon } from '../teams/TeamIcon';
 import { PlayerClass } from './PlayerClass';
+import { PlayerSpecies } from './PlayerSpecies';
 import { PlayerStatus } from './PlayerStatus';
+import { PlayerTooltipContent } from './PlayerTooltipContent';
 
 export function PlayerChip({
   id,
@@ -25,17 +25,17 @@ export function PlayerChip({
   const { finalState } = hooks.useGameSuite();
   const player = finalState.league.playerLookup[id];
   if (!player) {
-    return <span className="text-red-500">Unknown Player</span>;
+    return <span className="color-attention-dark">Unknown Player</span>;
   }
   return (
     <Tooltip
-      className="bg-gray-700 text-gray-100"
+      className="bg-gray-wash color-gray-ink"
       content={<PlayerTooltipContent id={id} />}
     >
       <Link to={{ search: '?playerId=' + id }}>
         <span
           className={clsx(
-            noBackground ? '' : 'p-1 bg-gray-800 hover:bg-gray-700',
+            noBackground ? '' : 'p-1 bg-white hover:bg-gray-wash',
             'inline-flex flex-row items-center gap-0 rounded cursor-pointer ',
           )}
         >
@@ -43,7 +43,7 @@ export function PlayerChip({
             (player.teamId ? (
               <TeamIcon id={player.teamId} size={16} />
             ) : (
-              <span className="text-gray-500">FA</span>
+              <span className="color-gray-dark">FA</span>
             ))}{' '}
           {includeSpecies && <PlayerSpecies id={player.id} />}
           {includeClass && <PlayerClass id={player.id} />}

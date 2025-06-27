@@ -1,32 +1,28 @@
-import {
-  speciesIcons,
-  perks,
-  isPitcher,
-  statusData,
-  StatusType,
-  hasPitcherPosition,
-} from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
 import { clsx } from '@a-type/ui';
-import { Attributes } from '../ratings/Attributes';
-import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
-import { CompositeRatings } from '../ratings/CompositeRatings';
+import {
+  hasPitcherPosition,
+  isPitcher,
+  perks,
+  StatusType,
+} from '@long-game/game-wizard-ball-definition';
+import { Link } from 'react-router';
+import { LevelupChoices } from '../Choices';
+import { hooks } from '../gameClient';
 import { ItemChip } from '../items/ItemChip';
 import { PerkChip } from '../perks/PerkChip';
+import { StatusChip } from '../perks/StatusChip';
+import { AttributeSummary } from '../ratings/AttributeSummary';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 import {
   usePlayerAttributes,
   usePlayerComposite,
 } from '../ratings/useAttributes';
-import { Link } from 'react-router';
 import { XpBar } from '../ratings/XpBar';
-import { LevelupChoices } from '../Choices';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
-import { AttributeSummary } from '../ratings/AttributeSummary';
-import { PlayerSpecies } from './PlayerSpecies';
-import { PlayerClass } from './PlayerClass';
-import { StatusChip } from '../perks/StatusChip';
-import { PlayerStatus } from './PlayerStatus';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
 import { TeamChip } from '../teams/TeamChip';
+import { PlayerClass } from './PlayerClass';
+import { PlayerSpecies } from './PlayerSpecies';
+import { PlayerStatus } from './PlayerStatus';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -102,7 +98,7 @@ export function PlayerPage({ id }: { id: string }) {
         </div>
         <XpBar xp={player.xp} />
         {finalState.levelups[id] && (
-          <div className="text-sm text-green-500 mb-2">
+          <div className="text-sm color-accent-dark mb-2">
             <span className="font-semibold">Level Up! Choose a boon:</span>{' '}
             <LevelupChoices id={id} />
           </div>
@@ -122,7 +118,7 @@ export function PlayerPage({ id }: { id: string }) {
                   return <PerkChip key={perkId} id={perkId} />;
                 })
               ) : (
-                <span className="text-gray-400">No perks</span>
+                <span className="color-gray-dark">No perks</span>
               )}
             </div>
           </div>
@@ -140,7 +136,7 @@ export function PlayerPage({ id }: { id: string }) {
                   );
                 })
               ) : (
-                <span className="text-gray-400">No statuses</span>
+                <span className="color-gray-dark">No statuses</span>
               )}
             </div>
           </div>
@@ -152,7 +148,7 @@ export function PlayerPage({ id }: { id: string }) {
                   <ItemChip key={itemId} id={itemId} />
                 ))
               ) : (
-                <span className="text-gray-400">No items equipped</span>
+                <span className="color-gray-dark">No items equipped</span>
               )}
             </div>
           </div>
@@ -176,7 +172,7 @@ export function PlayerPage({ id }: { id: string }) {
           <>
             <h2 className="text-xl font-semibold mb-2">Batting Stats</h2>
             <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
+              <table className="min-w-full border border-gray rounded-lg shadow-sm">
                 <thead>
                   <tr className="font-medium">
                     <th className="px-3 py-2 border-b">Game</th>
@@ -203,8 +199,8 @@ export function PlayerPage({ id }: { id: string }) {
                       <tr
                         key={index}
                         className={clsx(
-                          index % 2 === 0 && 'bg-gray-500/30',
-                          'cursor-pointer hover:bg-gray-500/50',
+                          index % 2 === 0 && 'bg-gray/30',
+                          'cursor-pointer hover:bg-gray/50',
                         )}
                       >
                         <td className="px-3 py-2 border-b whitespace-nowrap">
@@ -246,7 +242,7 @@ export function PlayerPage({ id }: { id: string }) {
             <div className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold mb-2">Pitching Stats</h2>
               <div className="overflow-x-auto">
-                <table className="min-w-full border border-gray-300 rounded-lg shadow-sm">
+                <table className="min-w-full border border-gray rounded-lg shadow-sm">
                   <thead>
                     <tr className="font-medium">
                       <th className="px-3 py-2 border-b">Game</th>
@@ -273,8 +269,8 @@ export function PlayerPage({ id }: { id: string }) {
                         <tr
                           key={index}
                           className={clsx(
-                            index % 2 === 0 && 'bg-gray-500/30',
-                            'cursor-pointer hover:bg-gray-500/50',
+                            index % 2 === 0 && 'bg-gray/30',
+                            'cursor-pointer hover:bg-gray/50',
                           )}
                         >
                           <td className="px-3 py-2 border-b whitespace-nowrap">

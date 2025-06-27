@@ -1,23 +1,22 @@
+import {
+  hasPitcherPosition,
+  isPitcher,
+} from '@long-game/game-wizard-ball-definition';
 import { hooks } from '../gameClient';
-import { TeamName } from '../teams/TeamName';
-import { TeamIcon } from '../teams/TeamIcon';
-import { Attributes } from '../ratings/Attributes';
 import { ItemChip } from '../items/ItemChip';
 import { PerkChip } from '../perks/PerkChip';
+import { AttributeSummary } from '../ratings/AttributeSummary';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 import {
   usePlayerAttributes,
   usePlayerComposite,
 } from '../ratings/useAttributes';
+import { TeamIcon } from '../teams/TeamIcon';
+import { TeamName } from '../teams/TeamName';
+import { PlayerClass } from './PlayerClass';
 import { PlayerLevel } from './PlayerLevel';
 import { PlayerSpecies } from './PlayerSpecies';
-import { PlayerClass } from './PlayerClass';
-import { AttributeSummary } from '../ratings/AttributeSummary';
 import { PlayerStatus } from './PlayerStatus';
-import {
-  isPitcher,
-  hasPitcherPosition,
-} from '@long-game/game-wizard-ball-definition';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();
@@ -37,7 +36,7 @@ export function PlayerTooltipContent({ id }: { id: string }) {
         <PlayerStatus id={player.id} />
         {player.name} ({player.positions.join('/').toUpperCase()})
       </h3>
-      <span className="text-sm text-gray-400 capitalize mb-2 flex flex-row items-center gap-2">
+      <span className="text-sm color-gray capitalize mb-2 flex flex-row items-center gap-2">
         <PlayerLevel id={id} /> <PlayerSpecies id={id} />{' '}
         <PlayerClass id={id} /> {player.species} {player.class}
         {team && (

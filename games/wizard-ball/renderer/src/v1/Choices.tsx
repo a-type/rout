@@ -1,12 +1,12 @@
+import { Button, clsx, Dialog } from '@a-type/ui';
+import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { useEffect, useState } from 'react';
 import { hooks } from './gameClient';
 import { ItemDefChip } from './items/ItemChip';
-import { clsx, Button, Dialog } from '@a-type/ui';
-import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
-import { PlayerChip } from './players/PlayerChip';
-import { useSendTurn, shortAttribute } from './utils';
 import { PerkChip } from './perks/PerkChip';
 import { StatusChip } from './perks/StatusChip';
+import { PlayerChip } from './players/PlayerChip';
+import { shortAttribute, useSendTurn } from './utils';
 
 export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
   if (choice.kind === 'item') {
@@ -106,7 +106,7 @@ export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
           <span
             className={clsx(
               'text-sm uppercase',
-              amount > 0 ? 'text-green-500' : 'text-red-500',
+              amount > 0 ? 'color-accent-dark' : 'color-attention-dark',
             )}
           >
             {amount > 0 ? '+' : ''}
@@ -124,7 +124,7 @@ export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
         <span
           className={clsx(
             'text-sm uppercase',
-            amount > 0 ? 'text-green-500' : 'text-red-500',
+            amount > 0 ? 'color-accent-dark' : 'color-attention-dark',
           )}
         >
           {amount > 0 ? '+' : ''}
@@ -142,7 +142,7 @@ export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
         <span
           className={clsx(
             'text-sm uppercase',
-            amount > 0 ? 'text-green-500' : 'text-red-500',
+            amount > 0 ? 'color-accent-dark' : 'color-attention-dark',
           )}
         >
           {amount > 0 ? '+' : ''}
@@ -167,7 +167,7 @@ export function Choices() {
   }, [selection]);
   const options = finalState.choices;
   if (!options || options.length === 0) {
-    return <div className="text-gray-500">No choices available.</div>;
+    return <div className="color-gray-dark">No choices available.</div>;
   }
   const selectedOption = options.find((choice) => choice.id === selection);
 
@@ -175,7 +175,7 @@ export function Choices() {
     <div className="mb-4">
       <Dialog>
         <Dialog.Trigger asChild>
-          <Button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded">
+          <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded">
             {selectedOption ? (
               <Choice choice={selectedOption} />
             ) : (
@@ -183,10 +183,10 @@ export function Choices() {
             )}
           </Button>
         </Dialog.Trigger>
-        <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
+        <Dialog.Content className="bg-white p-4 rounded shadow-lg max-w-xl">
           <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
           <Dialog.Description className="mt-0">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm color-gray-dark">
               Select one of the following options to improve your team.
             </span>
             <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
@@ -198,9 +198,9 @@ export function Choices() {
                         setSelection(choice.id);
                       }}
                       className={clsx(
-                        'flex flex-row gap-2 items-center justify-between bg-gray-700 px-2 py-4 rounded border-none',
+                        'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
                         selection === choice.id
-                          ? 'outline outline-4 outline-blue-500'
+                          ? 'outline outline-4 outline-primary'
                           : '',
                       )}
                     >
@@ -233,14 +233,14 @@ export function LevelupChoices({ id }: { id: string }) {
   }, [selection]);
   const optionsGroups = finalState.levelups[id];
   if (!optionsGroups || optionsGroups.length === 0) {
-    return <div className="text-gray-500">No choices available.</div>;
+    return <div className="color-gray-dark">No choices available.</div>;
   }
   return (
     <div className="my-4 flex flex-col gap-4 items-start">
       {optionsGroups.map((options, idx) => (
         <Dialog key={idx}>
           <Dialog.Trigger asChild>
-            <Button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded">
+            <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded">
               {selection[idx] ? (
                 <Choice
                   choice={options.find((c) => c.id === selection[idx])!}
@@ -251,10 +251,10 @@ export function LevelupChoices({ id }: { id: string }) {
               )}
             </Button>
           </Dialog.Trigger>
-          <Dialog.Content className="bg-gray-800 p-4 rounded shadow-lg max-w-xl">
+          <Dialog.Content className="bg-white p-4 rounded shadow-lg max-w-xl">
             <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
             <Dialog.Description className="mt-0">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm color-gray-dark">
                 Select one of the following options to improve your player.
               </span>
               <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
@@ -275,9 +275,9 @@ export function LevelupChoices({ id }: { id: string }) {
                           );
                         }}
                         className={clsx(
-                          'flex flex-row gap-2 items-center justify-between bg-gray-700 px-2 py-4 rounded border-none',
+                          'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
                           selection[idx] === choice.id
-                            ? 'outline outline-4 outline-blue-500'
+                            ? 'outline outline-4 outline-primary'
                             : '',
                         )}
                       >

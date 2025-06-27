@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 import { hooks } from './gameClient';
 import { PlayerChip } from './players/PlayerChip';
 import { PlayerLevel } from './players/PlayerLevel';
-import { PlayerName } from './players/PlayerName';
 
 export function Levelups() {
   const { finalState, currentTurn } = hooks.useGameSuite();
@@ -22,10 +21,10 @@ export function Levelups() {
             search: `?playerId=${pid}`,
           }}
         >
-          <div className="inline-flex flex-col md:flex-row items-center gap-2 bg-gray-500/30 p-2 rounded">
+          <div className="inline-flex flex-col md:flex-row items-center gap-2 bg-gray/30 p-2 rounded">
             {currentTurn?.levelupChoices?.[pid]?.length ===
               levelups[pid].length && (
-              <span className="text-sm text-green-500">Chosen ✓</span>
+              <span className="text-sm color-accent-dark">Chosen ✓</span>
             )}
             <PlayerChip includeClass includeSpecies noTeamIcon id={pid} />
             reached <PlayerLevel id={pid} /> and has a boon pick available!

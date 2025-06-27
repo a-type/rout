@@ -6,7 +6,7 @@ import { TooltipPlus } from '../TooltipPlus';
 export function PerkChip({ id }: { id: string }) {
   const perk = perks[id];
   if (!perk) {
-    return <div className="p-2 text-red-500">Perk not found</div>;
+    return <div className="p-2 color-attention-dark">Perk not found</div>;
   }
   const { name, description, rarity } = perk;
   const rarityColor = {
@@ -24,12 +24,12 @@ export function PerkChip({ id }: { id: string }) {
           <PerkEffect effect={perk.effect()} />
         </div>
       }
-      className="bg-gray-700 text-gray-100"
+      className="bg-gray-wash color-gray-ink"
     >
       <span
         className={clsx(
-          'flex flex-row items-center bg-gray-800 border-solid border-1',
-          'p-1 rounded cursor-pointer hover:bg-gray-700',
+          'flex flex-row items-center bg-white border-solid border-1',
+          'p-1 rounded cursor-pointer hover:bg-gray-wash',
         )}
         style={{
           borderColor: rarityColor,
