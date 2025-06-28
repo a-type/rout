@@ -69,7 +69,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   const titleColor = !palette
     ? backupColor
     : getResolvedColorMode() === 'dark'
-      ? palette.range[12]
+      ? palette.range[11]
       : palette.range[0];
   useTitleBarColor(titleColor);
   return (
