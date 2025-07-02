@@ -10,8 +10,8 @@ import {
   Draggable,
   DraggableProps,
   DraggedContainerComponent,
-} from './dnd/Draggable';
-import { DragGestureActivationConstraint } from './dnd/useDragGesture';
+} from '../dnd/Draggable';
+import { DragGestureActivationConstraint } from '../dnd/useDragGesture';
 import { useIsTokenInHand } from './TokenHand';
 import { useTokenData } from './types';
 

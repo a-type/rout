@@ -1,8 +1,8 @@
 import { Box, clsx } from '@a-type/ui';
 import { createContext, useContext, useState } from 'react';
-import { DraggableData } from './dnd/dndStore';
-import { Droppable, DroppableProps } from './dnd/Droppable';
-import { DragGestureContext } from './dnd/gestureStore';
+import { DraggableData } from '../dnd/dndStore';
+import { Droppable, DroppableProps } from '../dnd/Droppable';
+import { DragGestureContext } from '../dnd/gestureStore';
 import { isToken, TokenDragData } from './types';
 
 export interface TokenSpaceProps<T = any>
