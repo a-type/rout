@@ -329,6 +329,64 @@ importers:
         specifier: 'catalog:'
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
 
+  games/exquisite-fridge: {}
+
+  games/exquisite-fridge/definition:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
+  games/exquisite-fridge/renderer:
+    dependencies:
+      '@long-game/common':
+        specifier: workspace:*
+        version: link:../../../packages/common
+      '@long-game/game-client':
+        specifier: workspace:*
+        version: link:../../../packages/game-client
+      '@long-game/game-definition':
+        specifier: workspace:*
+        version: link:../../../packages/game-definition
+      '@long-game/game-exquisite-fridge-definition':
+        specifier: workspace:*
+        version: link:../definition
+      '@long-game/game-ui':
+        specifier: workspace:*
+        version: link:../../../packages/game-ui
+      react:
+        specifier: 'catalog:'
+        version: 19.1.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@long-game/scripts':
+        specifier: workspace:*
+        version: link:../../../packages/scripts
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.1.8
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.1.6(@types/react@19.1.8)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.3(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2)
+
   games/gudnak: {}
 
   games/gudnak/definition:
@@ -936,6 +994,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-exquisite-fridge-renderer':
+        specifier: workspace:*
+        version: link:../../games/exquisite-fridge/renderer
       '@long-game/game-gudnak-renderer':
         specifier: workspace:*
         version: link:../../games/gudnak/renderer
@@ -1046,6 +1107,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-exquisite-fridge-definition':
+        specifier: workspace:*
+        version: link:../../games/exquisite-fridge/definition
       '@long-game/game-gudnak-definition':
         specifier: workspace:*
         version: link:../../games/gudnak/definition

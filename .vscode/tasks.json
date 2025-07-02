@@ -12,7 +12,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/chess-arena",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "♟️ Chess Arena Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -20,7 +22,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/gudnak",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "🃏 Gudnak Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -28,7 +32,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/number-guess",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "🔢 Number Guess Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -36,7 +42,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/hearts",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "♥️ Hearts Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -44,7 +52,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/scribble",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "✏️ Scribble Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -52,7 +62,9 @@
       "type": "npm",
       "script": "dev",
       "path": "games/wizard-ball",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "⚾ Wizard Ball Dev",
       "detail": "pnpm --filter \"./*\" dev"
     },
@@ -60,8 +72,20 @@
       "type": "npm",
       "script": "dev",
       "path": "games/gunboats",
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "label": "🚢 Gunboats Dev",
+      "detail": "pnpm --filter \"./*\" dev"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "path": "games/exquisite-fridge",
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "label": "🕹️ Exquisite Fridge Dev",
       "detail": "pnpm --filter \"./*\" dev"
     }
   ]

@@ -110,6 +110,13 @@ await new Promise((resolve) => {
 
 installSpinner.stop('Dependencies installed');
 
+if (template === 'games') {
+  console.log('Opening game renderer mapping; you have to do this yourself.');
+  exec(`code src/mapping.tsx`, {
+    cwd: path.resolve(__dirname, '../../packages/game-renderer'),
+  });
+}
+
 outro('Done!');
 
 // helpers

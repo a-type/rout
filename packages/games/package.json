@@ -23,7 +23,8 @@
     "@long-game/game-hearts-definition": "workspace:*",
     "@long-game/game-wizard-ball-definition": "workspace:*",
     "@long-game/game-chess-arena-definition": "workspace:*",
-    "@long-game/game-gunboats-definition": "workspace:*"
+    "@long-game/game-gunboats-definition": "workspace:*",
+    "@long-game/game-exquisite-fridge-definition": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

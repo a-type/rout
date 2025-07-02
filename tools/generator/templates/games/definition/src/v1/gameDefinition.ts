@@ -46,7 +46,7 @@ export const gameDefinition: GameDefinition<
 
   // run on server
 
-  getInitialGlobalState: ({ members }) => {
+  getInitialGlobalState: ({ members, random }) => {
     // TODO: return the initial global state. possibly randomizing initial conditions.
     return {};
   },
@@ -58,6 +58,8 @@ export const gameDefinition: GameDefinition<
 
   applyRoundToGlobalState: ({ globalState, round, random, members }) => {
     // TODO: how does the round affect the global state?
+    // Note: you are free to mutate globalState, it's a structured clone
+    // and will not affect the original object.
     return globalState;
   },
 

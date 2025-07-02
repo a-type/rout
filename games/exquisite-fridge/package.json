@@ -1,0 +1,6 @@
+{
+  "name": "@long-game/game-exquisite-fridge",
+  "scripts": {
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
+  }
+}

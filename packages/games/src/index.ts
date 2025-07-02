@@ -1,3 +1,4 @@
+import exquisiteFridge from '@long-game/game-exquisite-fridge-definition';
 import gunboats from '@long-game/game-gunboats-definition';
 import chessArena from '@long-game/game-chess-arena-definition';
 import { GameModule } from '@long-game/game-definition';
@@ -15,6 +16,7 @@ const games: Record<string, GameModule> = {
   [wizardBall.id]: wizardBall,
   [chessArena.id]: chessArena,
   [gunboats.id]: gunboats,
+  [exquisiteFridge.id]: exquisiteFridge,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 
