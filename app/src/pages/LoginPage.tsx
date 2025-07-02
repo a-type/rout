@@ -77,6 +77,7 @@ export function LoginPage({}: LoginPageProps) {
                   <EmailSignupForm
                     endpoint={`${API_ORIGIN}/auth/begin-email-signup`}
                     returnTo={returnTo}
+                    disableName
                   />
                 </Box>
               </Box>
