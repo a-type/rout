@@ -211,6 +211,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           data-draggable={id}
           ref={dragDisabled ? undefined : box.bind}
           className={className}
+          animate={{ width: isPortaling ? 0 : 'auto' }}
           {...rest}
         >
           {children}

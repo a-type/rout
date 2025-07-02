@@ -5,6 +5,7 @@ export {
   type DraggableProps,
 } from '../dnd/Draggable';
 export { useGesture } from '../dnd/gestureStore';
+export * from './SortableTokenList';
 export * from './Token';
 export * from './TokenHand';
 export * from './TokenPresence';

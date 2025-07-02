@@ -19,6 +19,10 @@ export interface TokenSpaceProps<T = any>
   onReject?: (data: TokenDragData<T>) => void;
   onNonTokenReject?: (data: DraggableData) => void;
   onOver?: (data: TokenDragData<T> | null) => void;
+  /**
+   * Like onOver, but only for accepted tokens.
+   */
+  onOverAccepted?: (data: TokenDragData<T> | null) => void;
 }
 
 export function TokenSpace<T = any>({
@@ -31,6 +35,7 @@ export function TokenSpace<T = any>({
   onReject,
   onNonTokenReject,
   onOver,
+  onOverAccepted,
   ...rest
 }: TokenSpaceProps<T>) {
   const [overError, setOverError] = useState<string | null>(null);
@@ -62,11 +67,22 @@ export function TokenSpace<T = any>({
   };
 
   const handleOver = (data: DraggableData | null) => {
+    if (!data) {
+      onOver?.(null);
+      onOverAccepted?.(null);
+      setOverError(null);
+      return;
+    }
     if (data && isToken(data.data)) {
       onOver?.(data.data as TokenDragData<T>);
     }
 
-    if (!accept || !data || !isToken(data.data)) {
+    if (!isToken(data.data)) {
+      setOverError(null);
+      return;
+    }
+    if (!accept) {
+      onOverAccepted?.(data.data as TokenDragData<T>);
       setOverError(null);
       return;
     }
@@ -75,6 +91,7 @@ export function TokenSpace<T = any>({
       setOverError(result);
     } else {
       setOverError(null);
+      onOverAccepted?.(data.data as TokenDragData<T>);
     }
   };
 
