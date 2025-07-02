@@ -1,6 +1,6 @@
 import { useStableCallback } from '@a-type/ui';
 import { HTMLProps, useEffect, useRef } from 'react';
-import { useMergedRef } from '../../hooks/useMergedRef';
+import { useMergedRef } from '../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
 import { DraggableData, useDndStore, useDraggedData } from './dndStore';
 import { dropRegions, REGION_ID_ATTR } from './DropRegions';

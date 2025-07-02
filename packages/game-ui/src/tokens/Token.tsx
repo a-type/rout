@@ -65,17 +65,19 @@ const TokenInHandContainer: DraggedContainerComponent = ({
   draggable,
   gesture,
   ref,
+  status,
   ...rest
 }) => {
+  // freezes the X value until the gesture is activated
   const dampenedX = useTransform(() => {
-    if (!draggable.isCandidate) {
-      return gesture.current.x.get();
+    if (status === 'candidate') {
+      return gesture.initialBounds.x + gesture.initialBounds.width / 2;
     }
-    return gesture.initialBounds.x + gesture.initialBounds.width / 2;
+    return gesture.current.x.get();
   });
   const distanceScale = useSpring(
     useTransform(() => {
-      if (!draggable.isCandidate) {
+      if (status === 'active') {
         if (gesture.type === 'keyboard') {
           // when dragging with the keyboard, we want to scale up a bit
           // to indicate drag

@@ -1,4 +1,4 @@
-import { gestureEvents } from './gestureStore';
+import { gestureEvents } from './gestureEvents';
 
 export const REGION_ID_ATTR = 'data-droppable-id';
 

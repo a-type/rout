@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { useElementEvent } from '../../hooks/useWindowEvent';
+import { useElementEvent } from '../hooks/useWindowEvent';
 import { otherDragBoxRefs } from './DebugView';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';

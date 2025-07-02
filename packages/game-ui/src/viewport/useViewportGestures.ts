@@ -6,7 +6,7 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { gesture } from '../tokens/dnd/gestureStore';
+import { gesture } from '../dnd/gestureStore';
 import { Vector2 } from './types';
 import { ViewportState } from './ViewportState';
 

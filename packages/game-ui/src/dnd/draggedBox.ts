@@ -1,5 +1,5 @@
 import { throttle } from '@a-type/utils';
-import { gestureEvents } from './gestureStore';
+import { gestureEvents } from './gestureEvents';
 
 export class DraggedBox {
   current: DOMRect | null = null;
