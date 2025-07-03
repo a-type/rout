@@ -6,6 +6,7 @@ export {
 } from '../dnd/Draggable';
 export { useGesture } from '../dnd/gestureStore';
 export * from './SortableTokenList';
+export * from './sortHelpers';
 export * from './Token';
 export * from './TokenHand';
 export * from './TokenPresence';

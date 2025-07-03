@@ -43,6 +43,7 @@ export function Token({ children, data, className, ...rest }: TokenProps) {
       <Draggable.Handle
         activationConstraint={activationConstraint}
         allowStartFromDragIn={isInHand}
+        className="w-full h-full"
       >
         {children}
       </Draggable.Handle>

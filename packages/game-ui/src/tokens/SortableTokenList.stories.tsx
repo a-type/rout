@@ -35,7 +35,7 @@ export const Default: Story = {
       'J',
     ]);
     function moveToken(token: TokenDragData<string>, index: number) {
-      setTokens((old) => moveItem(old, old.indexOf(token.id), index)); // Update the state with the new order
+      setTokens((old) => moveItem(old, token.id, index)); // Update the state with the new order
     }
     return (
       <SortableTokenList {...args} onMove={moveToken}>

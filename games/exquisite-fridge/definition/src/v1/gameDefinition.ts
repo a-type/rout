@@ -35,7 +35,8 @@ export const gameDefinition: GameDefinition<
   PlayerState,
   TurnData,
   {},
-  TurnError
+  TurnError,
+  TurnData
 > = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -84,6 +85,9 @@ export const gameDefinition: GameDefinition<
         };
       }
     }
+  },
+  getInitialTurn() {
+    return { words: [] };
   },
 
   // run on client
