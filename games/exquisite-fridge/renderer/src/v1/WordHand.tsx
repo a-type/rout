@@ -26,7 +26,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         disabled={gameSuite.turnWasSubmitted}
       >
         <ScrollArea className="px-[10vw] w-full h-full">
-          <Box gap wrap p full="width" layout="center between">
+          <Box gap wrap p full="width" layout="center start">
             {hand
               .filter((handWord) => !usedIds.has(handWord.id))
               .sort((a, b) => a.text.localeCompare(b.text))

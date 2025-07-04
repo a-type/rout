@@ -205,21 +205,21 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      <AnimatePresence>
-        <motion.div
-          layoutId={id}
-          transition={flipTransition}
-          data-disabled={dragDisabled}
-          data-draggable={id}
-          data-is-moved={isPortaling}
-          ref={dragDisabled ? undefined : box.bind}
-          className={className}
-          animate={{ width: isPortaling ? 0 : 'auto' }}
-          {...rest}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        layoutId={isPortaling ? undefined : id}
+        key={`${id}-${isPortaling}`}
+        transition={flipTransition}
+        data-disabled={dragDisabled}
+        data-draggable={id}
+        data-is-moved={isPortaling}
+        ref={dragDisabled ? undefined : box.bind}
+        className={className}
+        animate={{ width: isPortaling ? 0 : 'auto' }}
+        style={{ opacity: isPortaling ? 0 : 1 }}
+        {...rest}
+      >
+        {children}
+      </motion.div>
     </>
   );
 });
