@@ -70,7 +70,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
               size={4}
             />
           </Box>
-          <Box gap wrap full="width" layout="center start">
+          <Box gap wrap full="width" layout="center start" className="pb-md">
             {hand
               .filter((handWord) => !usedIds.has(handWord.id))
               .filter(

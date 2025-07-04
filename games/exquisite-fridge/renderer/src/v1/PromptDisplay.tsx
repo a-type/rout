@@ -28,7 +28,7 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
     return (
       <Box
         col
-        gap="lg"
+        gap
         surface="primary"
         p
         style={theme.style}
@@ -38,7 +38,7 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
           <span className="leading-loose">
             The latest part of the story, written by
           </span>
-          <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full relative top-sm mx-sm">
+          <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full relative top-xs mx-sm">
             <PlayerAvatar playerId={prompt.playerId} />
             <PlayerName playerId={prompt.playerId} />
           </div>
