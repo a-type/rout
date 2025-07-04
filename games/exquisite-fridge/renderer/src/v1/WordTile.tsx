@@ -16,7 +16,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
   disabled,
 }) {
   const isBlank = value.text === '';
-  const isHandwritten = !!value.authorId;
+  const isHandwritten = !!value.isWriteIn;
 
   return (
     <Token
@@ -32,7 +32,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       <Box
         className={clsx(
           'px-lg py-xs h-full',
-          isHandwritten && 'font-[cursive]',
+          isHandwritten && 'font-[cursive] text-sm',
         )}
       >
         {isBlank ? (
@@ -41,7 +41,9 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
             ...
           </span>
         ) : (
-          value.text
+          <span className={clsx(isHandwritten && 'rotate--2')}>
+            {value.text}
+          </span>
         )}
       </Box>
       {value.isNew && (

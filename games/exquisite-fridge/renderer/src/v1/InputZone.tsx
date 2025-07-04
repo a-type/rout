@@ -8,6 +8,7 @@ import {
 } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { WordTile } from './WordTile';
+import { collectInput } from './WriteInDialog';
 
 export interface InputZoneProps {
   className?: string;
@@ -28,9 +29,18 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
         border
       >
         <SortableTokenList<WordItem>
-          onMove={(token, index) => {
+          onMove={async (token, index) => {
+            let wordData = token.data;
+            if (!token.data.text) {
+              // If the token is a blank tile, prompt for input
+              const word = await collectInput();
+              if (!word) {
+                return;
+              }
+              wordData = { ...token.data, text: word };
+            }
             gameSuite.prepareTurn((cur) => ({
-              words: moveItem(cur.words, token.data, index),
+              words: moveItem(cur.words, wordData, index),
             }));
           }}
           full="width"
@@ -44,10 +54,23 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
         </SortableTokenList>
         <TokenSpace<WordItem>
           id="append-area"
-          onDrop={(token) => {
+          onDrop={async (token) => {
+            let wordData = token.data;
+            if (!token.data.text) {
+              // If the token is a blank tile, prompt for input
+              const word = await collectInput();
+              if (word) {
+                wordData = { ...token.data, text: word };
+              } else {
+                return; // User cancelled input
+              }
+            }
             gameSuite.prepareTurn((cur) => ({
               ...cur,
-              words: [...cur.words, token.data],
+              words: [
+                ...cur.words.filter((w) => w.id !== token.data.id),
+                wordData,
+              ],
             }));
           }}
           className="flex-1 min-h-48px"

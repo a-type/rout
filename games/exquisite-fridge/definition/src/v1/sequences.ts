@@ -10,6 +10,7 @@ export type WordItem = {
   // if text is empty, this is a blank word that
   // the player is allowed to write in.
   text: string;
+  isWriteIn?: boolean; // if true, this word is a write-in word
   // if not present, this was game-generated
   // if present, this player wrote this word in.
   authorId?: string;
@@ -25,5 +26,5 @@ export function getPlayerSequenceIndex({
   roundIndex: number;
   playerIndex: number;
 }): number {
-  return (playerIndex * 2 + roundIndex * 2) % sequenceCount;
+  return (playerIndex + roundIndex) % sequenceCount;
 }

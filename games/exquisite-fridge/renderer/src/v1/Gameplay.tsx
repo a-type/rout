@@ -4,6 +4,7 @@ import { hooks } from './gameClient';
 import { InputZone } from './InputZone';
 import { PromptDisplay } from './PromptDisplay';
 import { WordHand } from './WordHand';
+import { WriteInDialog } from './WriteInDialog';
 
 export interface GameplayProps {}
 
@@ -29,6 +30,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
           className="sticky bottom-lg left-1/2 center-x"
           delay={5000}
         />
+        <WriteInDialog />
       </TokenRoot>
     </Box>
   );

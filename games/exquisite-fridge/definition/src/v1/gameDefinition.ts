@@ -11,6 +11,7 @@ import {
   WordItem,
 } from './sequences';
 import { wordBank } from './wordBank';
+import { isValidWriteIn } from './words';
 
 export type GlobalState = {
   sequences: StorySequence[];
@@ -84,6 +85,15 @@ export const gameDefinition: GameDefinition<
           data: { wordId: word.id },
         };
       }
+      if (handWords[word.id].isWriteIn) {
+        if (!isValidWriteIn(word.text)) {
+          return {
+            code: 'invalid-write-in',
+            message: `Your write-in word "${word.text}" is not a single word.`,
+            data: { wordId: word.id },
+          };
+        }
+      }
     }
   },
   getInitialTurn() {
@@ -111,7 +121,7 @@ export const gameDefinition: GameDefinition<
             .map((word) => ({
               id: random.id(),
               text: word,
-              isNew: true,
+              isWriteIn: !word, // if the word is empty, it's a write-in tile
             })),
         ]),
       ),
@@ -170,17 +180,19 @@ export const gameDefinition: GameDefinition<
     }
 
     // add new words to each player's hand
-    for (const member of members) {
-      const hand = globalState.hands[member.id] || [];
+    for (const turn of round.turns) {
+      const hand = globalState.hands[turn.playerId] || [];
+      const replaceCount = Math.max(5, turn.data.words.length);
       const newWords = random
         .shuffle(wordBank)
-        .slice(0, 5)
+        .slice(0, replaceCount)
         .map((word) => ({
           id: random.id(),
           text: word,
           isNew: true,
+          isWriteIn: !word,
         }));
-      globalState.hands[member.id] = [...hand, ...newWords];
+      globalState.hands[turn.playerId] = [...hand, ...newWords];
     }
 
     return globalState;

@@ -1,6 +1,6 @@
-import { Box } from '@a-type/ui';
+import { Box, clsx } from '@a-type/ui';
 import { WordItem } from '@long-game/game-exquisite-fridge-definition/v1';
-import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
+import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { WordTile } from './WordTile';
 
@@ -14,6 +14,8 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
       finalState: { prompt },
     } = gameSuite;
 
+    const theme = usePlayerThemed(prompt.playerId);
+
     if (prompt.words.length === 0) {
       // first round, no prompt yet
       return (
@@ -24,7 +26,14 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
     }
 
     return (
-      <Box col gap="lg" surface="primary" p className={className}>
+      <Box
+        col
+        gap="lg"
+        surface="primary"
+        p
+        style={theme.style}
+        className={clsx(theme.className, className)}
+      >
         <div>
           <span className="leading-loose">
             The latest part of the story, written by

@@ -1,5 +1,5 @@
 import { Box } from '@a-type/ui';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Token } from './Token.js';
 import { TokenHand } from './TokenHand.js';
@@ -20,7 +20,7 @@ const meta = {
   parameters: {
     controls: { expanded: true },
   },
-} satisfies Meta<typeof TokenHand>;
+} satisfies Meta;
 
 export default meta;
 
