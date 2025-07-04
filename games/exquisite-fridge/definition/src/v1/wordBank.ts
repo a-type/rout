@@ -216,12 +216,16 @@ export const wordBank: string[] = [
   repeat('serious', 2),
   repeat('smart', 2),
   repeat('dumb', 2),
+  repeat('stupid', 2),
+  repeat('lazy', 2),
+  repeat('hard', 2),
+  repeat('easy', 2),
   repeat('strong', 2),
   repeat('weak', 2),
   repeat('rich', 2),
   repeat('poor', 2),
-  repeat('good', 2),
-  repeat('bad', 2),
+  repeat('good', 4),
+  repeat('bad', 4),
   repeat('beautiful', 2),
   repeat('ugly', 2),
   repeat('old', 2),
@@ -279,8 +283,9 @@ export const wordBank: string[] = [
   repeat('ridiculously', 2),
 
   // some punctuation, sparingly
-  repeat('!', 5),
-  repeat('?', 5),
+  repeat('!', 10),
+  repeat('.', 10),
+  repeat('?', 10),
   repeat('...', 5),
 
   // for fun
