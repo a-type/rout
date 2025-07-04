@@ -68,7 +68,7 @@ export function HomePage({}: HomePageProps) {
           <CreateGame />
         </PageNowPlaying>
       </PageContent>
-      <PageNav>
+      <PageNav className="bg-transparent">
         <MainNav />
       </PageNav>
     </PageRoot>
