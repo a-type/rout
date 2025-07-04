@@ -1,4 +1,4 @@
-import { Box } from '@a-type/ui';
+import { Box, Button, Icon, Popover } from '@a-type/ui';
 import {
   GameDebugger,
   PlayerStatuses,
@@ -31,7 +31,19 @@ export function GameControls({ pregame }: GameControlsProps) {
           </Suspense>
           <PlayerStatuses className="flex-shrink-1" />
         </Box>
-        {!pregame && <RoundHistoryControl />}
+        {!pregame && (
+          <Popover>
+            <Popover.Trigger asChild>
+              <Button size="icon-small" color="ghost">
+                <Icon name="dots"></Icon>
+              </Button>
+            </Popover.Trigger>
+            <Popover.Content>
+              <Popover.Arrow />
+              <RoundHistoryControl />
+            </Popover.Content>
+          </Popover>
+        )}
       </GameLayout.SecondaryControls>
     </>
   );
