@@ -41,9 +41,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
             ...
           </span>
         ) : (
-          <span className={clsx(isHandwritten && 'rotate--2')}>
-            {value.text}
-          </span>
+          <span>{value.text}</span>
         )}
       </Box>
       {value.isNew && (

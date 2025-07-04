@@ -48,7 +48,7 @@ export const sessions = new SessionManager<Context>({
       mode: 'production',
       refreshPath,
       refreshTokenCookieName: 'lg-refresh',
-      refreshTokenDurationMinutes: 60 * 24 * 30, // 30 days
+      refreshTokenDurationMinutes: 60 * 24 * 90, // 90 days
     };
   },
   shortNames: {
