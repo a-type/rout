@@ -44,7 +44,7 @@ export const SubmitTurn = withSuspense(
       >
         <Box className={className}>
           <TopographyButton
-            className="items-center justify-center w-full h-full"
+            className="items-center justify-center w-full h-full disabled:opacity-100"
             color={turnError ? 'destructive' : 'primary'}
             disabled={isDisabled}
             onClick={() =>

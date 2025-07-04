@@ -4,6 +4,7 @@ import {
   roundFormat,
   type BaseTurnError,
 } from '@long-game/game-definition';
+import { ROUND_COUNT } from './constants';
 import {
   getPlayerSequenceIndex,
   StorySequence,
@@ -11,7 +12,7 @@ import {
   WordItem,
 } from './sequences';
 import { wordBank } from './wordBank';
-import { isValidWriteIn, takeWords } from './words';
+import { isValidFreebie, isValidWriteIn, takeWords } from './words';
 
 export type GlobalState = {
   wordBank: string[];
@@ -49,13 +50,16 @@ export const gameDefinition: GameDefinition<
 
   validateTurn: ({ playerState, turn }) => {
     // min/max words
-    if (turn.data.words.length < 5) {
+    const wordsUsed = turn.data.words.filter(
+      (word) => !isValidFreebie(word.text),
+    );
+    if (wordsUsed.length < 5) {
       return {
         code: 'too-few-words',
         message: 'You must use at least 5 words from your pile.',
       };
     }
-    if (turn.data.words.length > 20) {
+    if (wordsUsed.length > 20) {
       return {
         code: 'too-many-words',
         message: 'You can only use up to 20 words from your pile.',
@@ -68,6 +72,10 @@ export const gameDefinition: GameDefinition<
       playerState.hand.map((word) => [word.id, word]),
     );
     for (const word of turn.data.words) {
+      if (isValidFreebie(word.text)) {
+        continue;
+      }
+
       if (!handWords[word.id]) {
         return {
           code: 'invalid-word',
@@ -105,7 +113,14 @@ export const gameDefinition: GameDefinition<
   // run on client
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
-    return playerState;
+    // remove used words from the player's hand
+    const newHand = playerState.hand.filter(
+      (word) => !prospectiveTurn.data.words.some((w) => w.id === word.id),
+    );
+    return {
+      ...playerState,
+      hand: newHand,
+    };
   },
 
   // run on server
@@ -121,7 +136,7 @@ export const gameDefinition: GameDefinition<
         currentIndex: index,
         count: 75, // each player gets 75 words
         random,
-        areNew: true, // all words are new at the start
+        areNew: false,
       });
       gameWordBank = wordBank; // update the game word bank
       index = currentIndex; // update the index for the next player
@@ -191,7 +206,11 @@ export const gameDefinition: GameDefinition<
     // add new words to each player's hand
     for (const turn of round.turns) {
       const hand = globalState.hands[turn.playerId] || [];
-      const replaceCount = Math.max(5, turn.data.words.length);
+      // only replace non-freebie used words
+      const replaceCount = Math.max(
+        5,
+        turn.data.words.filter((w) => !isValidFreebie(w.text)).length,
+      );
       const {
         wordBank,
         words: newWords,
@@ -217,7 +236,7 @@ export const gameDefinition: GameDefinition<
   },
 
   getStatus: ({ globalState, rounds }) => {
-    if (rounds.length === 14) {
+    if (rounds.length >= ROUND_COUNT) {
       return {
         status: 'complete',
         winnerIds: [],

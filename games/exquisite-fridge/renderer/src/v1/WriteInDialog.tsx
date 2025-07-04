@@ -1,4 +1,5 @@
 import { Dialog, FormikForm, SubmitButton } from '@a-type/ui';
+import { isValidWriteIn } from '@long-game/game-exquisite-fridge-definition/v1';
 import { useEffect, useState } from 'react';
 
 export interface WriteInDialogProps {}
@@ -40,9 +41,16 @@ export function WriteInDialog({}: WriteInDialogProps) {
           key={requestId}
           initialValues={{ text: '' }}
           enableReinitialize
+          validate={(values) => {
+            if (!isValidWriteIn(values.text)) {
+              return { text: 'Please enter a single word.' };
+            }
+          }}
           onSubmit={({ text }) => {
             writeInEvents.dispatchEvent(
-              new CustomEvent('complete', { detail: { text } }),
+              new CustomEvent('complete', {
+                detail: { text: text.trim() },
+              }),
             );
             setRequestId(null);
           }}

@@ -1,4 +1,5 @@
-import { Box } from '@a-type/ui';
+import { Box, P } from '@a-type/ui';
+import { ROUND_COUNT } from '@long-game/game-exquisite-fridge-definition/v1';
 import { SubmitTurn, TokenRoot } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { InputZone } from './InputZone';
@@ -14,7 +15,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   return (
     <Box
       col
-      p="sm"
+      p="md"
       gap
       full="width"
       layout="center start"
@@ -23,13 +24,17 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       asChild
     >
       <TokenRoot>
-        <PromptDisplay className="w-full max-w-800px" />
-        <InputZone className="sticky top-0 z-1 max-w-800px" />
-        <WordHand />
-        <SubmitTurn
-          className="sticky bottom-lg left-1/2 center-x"
-          delay={5000}
-        />
+        <Box container="reset" gap col className="max-w-700px w-full my-auto">
+          <PromptDisplay className="w-full" />
+          {gameSuite.latestRoundIndex === ROUND_COUNT - 1 && (
+            <Box surface="accent" p layout="center center">
+              <P>Last round. Wrap up the story!</P>
+            </Box>
+          )}
+          <InputZone className="sticky w-full top-0 z-1" />
+          <WordHand className="w-full" />
+          <SubmitTurn className="sticky bottom-lg mx-auto" delay={5000} />
+        </Box>
         <WriteInDialog />
       </TokenRoot>
     </Box>

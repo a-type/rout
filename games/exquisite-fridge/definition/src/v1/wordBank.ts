@@ -3,9 +3,6 @@ export const wordBank: string[] = [
   repeat('', 15),
 
   // common words
-  repeat('a', 10),
-  repeat('the', 10),
-  repeat('and', 10),
   repeat('to', 10),
   repeat('of', 5),
   repeat('in', 5),
@@ -282,15 +279,20 @@ export const wordBank: string[] = [
   repeat('absurdly', 2),
   repeat('ridiculously', 2),
 
-  // some punctuation, sparingly
-  repeat('!', 10),
-  repeat('.', 10),
-  repeat('?', 10),
-  repeat('...', 5),
-
   // for fun
   repeat('$%@#', 3),
 ].flat();
+
+export const freebieWords: string[] = [
+  '.',
+  '!',
+  '?',
+  '"',
+  'a',
+  'an',
+  'the',
+  'and',
+];
 
 function repeat(word: string, count: number): string[] {
   return Array.from({ length: count }, () => word);

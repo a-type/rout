@@ -1,9 +1,14 @@
 import { GameRandom } from '@long-game/game-definition';
 import { WordItem } from './sequences';
+import { freebieWords } from './wordBank';
 
 export function isValidWriteIn(word: string): boolean {
   // Check if the word is a single word without spaces
   return /^\w+$/.test(word);
+}
+
+export function isValidFreebie(word: string): boolean {
+  return freebieWords.includes(word);
 }
 
 export function takeWords({

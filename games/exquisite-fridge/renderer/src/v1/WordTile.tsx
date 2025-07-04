@@ -24,7 +24,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       data={value}
       disabled={disabled || gameSuite.turnWasSubmitted}
       className={clsx(
-        'relative color-black border border-black shadow-[1px_1px_0_1px_var(--color-black)]',
+        'relative rounded-xs color-black border border-gray-dark shadow-[1px_1px_0_1px_var(--color-gray-dark)]',
         value.isNew ? 'bg-primary-wash' : 'bg-white',
         className,
       )}
