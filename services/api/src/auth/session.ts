@@ -16,13 +16,14 @@ export const sessions = new SessionManager<Context>({
     const ctx = baseCtx as Context<Env>;
     const apiUrl = new URL(ctx.env.API_ORIGIN);
     const refreshPath = apiUrl.pathname.replace(/\/$/, '') + '/auth/refresh';
+    const expiration = ctx.env.NODE_ENV === 'production' ? '1d' : '1m';
     return {
       cookieName: 'lg-session',
       cookieOptions: {
         sameSite: 'lax',
         domain: getRootDomain(ctx.env.API_ORIGIN),
       },
-      expiration: ctx.env.NODE_ENV === 'production' ? '1d' : '1m',
+      expiration,
       async createSession(userId) {
         assertPrefixedId(userId, 'u');
         const user = await (
