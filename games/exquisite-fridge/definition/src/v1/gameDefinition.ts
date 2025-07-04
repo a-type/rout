@@ -11,9 +11,11 @@ import {
   WordItem,
 } from './sequences';
 import { wordBank } from './wordBank';
-import { isValidWriteIn } from './words';
+import { isValidWriteIn, takeWords } from './words';
 
 export type GlobalState = {
+  wordBank: string[];
+  wordBankIndex: number;
   sequences: StorySequence[];
   playerOrder: PrefixedId<'u'>[];
   hands: Record<PrefixedId<'u'>, WordItem[]>;
@@ -109,22 +111,29 @@ export const gameDefinition: GameDefinition<
   // run on server
 
   getInitialGlobalState: ({ members, random }) => {
+    let gameWordBank = random.shuffle(wordBank);
+    let index = 0;
+    // ensure each player has a unique set of words
+    const hands = {} as Record<PrefixedId<'u'>, WordItem[]>;
+    for (const member of members) {
+      const { wordBank, words, currentIndex } = takeWords({
+        wordBank: gameWordBank,
+        currentIndex: index,
+        count: 75, // each player gets 75 words
+        random,
+        areNew: true, // all words are new at the start
+      });
+      gameWordBank = wordBank; // update the game word bank
+      index = currentIndex; // update the index for the next player
+      hands[member.id] = words; // assign the words to the player's hand
+    }
+
     return {
       sequences: members.map(() => []),
       playerOrder: random.shuffle(members.map((m) => m.id)),
-      hands: Object.fromEntries(
-        members.map((member) => [
-          member.id,
-          random
-            .shuffle(wordBank)
-            .slice(0, 75)
-            .map((word) => ({
-              id: random.id(),
-              text: word,
-              isWriteIn: !word, // if the word is empty, it's a write-in tile
-            })),
-        ]),
-      ),
+      hands,
+      wordBank: gameWordBank,
+      wordBankIndex: index, // track the current index in the word bank
     };
   },
 
@@ -183,15 +192,20 @@ export const gameDefinition: GameDefinition<
     for (const turn of round.turns) {
       const hand = globalState.hands[turn.playerId] || [];
       const replaceCount = Math.max(5, turn.data.words.length);
-      const newWords = random
-        .shuffle(wordBank)
-        .slice(0, replaceCount)
-        .map((word) => ({
-          id: random.id(),
-          text: word,
-          isNew: true,
-          isWriteIn: !word,
-        }));
+      const {
+        wordBank,
+        words: newWords,
+        currentIndex,
+      } = takeWords({
+        wordBank: globalState.wordBank,
+        currentIndex: globalState.wordBankIndex,
+        count: replaceCount,
+        random,
+        areNew: true, // all new words are new
+      });
+      globalState.wordBank = wordBank; // update the global word bank
+      globalState.wordBankIndex = currentIndex; // update the index for the next player
+      // add new words to the player's hand
       globalState.hands[turn.playerId] = [...hand, ...newWords];
     }
 
@@ -203,7 +217,13 @@ export const gameDefinition: GameDefinition<
   },
 
   getStatus: ({ globalState, rounds }) => {
-    // TODO: when is the game over? who won?
+    if (rounds.length === 14) {
+      return {
+        status: 'complete',
+        winnerIds: [],
+      };
+    }
+
     return {
       status: 'active',
     };
