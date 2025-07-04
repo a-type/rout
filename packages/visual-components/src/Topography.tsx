@@ -156,7 +156,7 @@ function paletteColors(palette: PlayerColorPalette, mode: 'light' | 'dark') {
     background: mode === 'light' ? colors[0] : colors[11],
     gradient: [
       colors[Math.floor(colors.length * 0.1)],
-      colors[Math.floor(colors.length * 0.4)],
+      colors[Math.floor(colors.length * 0.6)],
     ],
   };
 }

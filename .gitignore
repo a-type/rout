@@ -13,3 +13,6 @@ dist/
 tsconfig.tsbuildinfo
 vapidKeys.txt
 *:Zone.Identifier
+
+*storybook.log
+storybook-static

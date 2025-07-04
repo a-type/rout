@@ -1,18 +1,10 @@
 import { useAnimationFrame, useStableCallback } from '@a-type/ui';
-import { EventSubscriber } from '@a-type/utils';
 import { MotionValue, motionValue } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { useWindowEvent } from '../../hooks/useWindowEvent';
+import { useWindowEvent } from '../hooks/useWindowEvent';
 import { useDndStore } from './dndStore';
 import { dropRegions } from './DropRegions';
-
-export const gestureEvents = new EventSubscriber<{
-  start: () => void;
-  move: () => void;
-  end: () => void;
-  cancel: () => void;
-  claim: (id: string) => void;
-}>();
+import { gestureEvents } from './gestureEvents';
 
 export const gesture = {
   active: false,

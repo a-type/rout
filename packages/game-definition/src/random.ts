@@ -1,6 +1,8 @@
 import seedrandom, { State } from 'seedrandom';
 
-export type GameRandomState = State.Arc4;
+export type GameRandomState = State.Arc4 & {
+  idCounter: number;
+};
 
 export class GameRandom {
   private seed: string;
@@ -12,6 +14,7 @@ export class GameRandom {
     this.random = seedrandom(seed, {
       state: restoreState || true,
     });
+    this.idCounter = restoreState?.idCounter || 0;
   }
 
   float(min = 0, max = 1) {
@@ -65,6 +68,10 @@ export class GameRandom {
   }
 
   getState() {
-    return this.random.state();
+    const seedState = this.random.state();
+    return {
+      ...seedState,
+      idCounter: this.idCounter,
+    } as GameRandomState;
   }
 }

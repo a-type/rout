@@ -10,6 +10,14 @@ export type DraggableData<T = any> = {
   data: T;
 };
 
+export const draggableDataRegistry = new Map<string, any>();
+export function registerDraggableData(id: string, value: any) {
+  draggableDataRegistry.set(id, value);
+  return () => {
+    draggableDataRegistry.delete(id);
+  };
+}
+
 export type DndStoreValue = {
   overlayElement: HTMLElement | null;
   overlayRef: (element: HTMLElement | null) => void;
@@ -19,9 +27,6 @@ export type DndStoreValue = {
   startDrag: (id: string | null) => void;
   endDrag: (gesture: DragGestureContext) => void;
   cancelDrag: () => void;
-
-  data: Record<string, any>;
-  bindData: (id: string, data: any) => () => void;
 
   overRegion: string | null;
   setOverRegion: (regionId: string | null) => void;
@@ -35,7 +40,6 @@ export const useDndStore = create<DndStoreValue>()(
       dragging: null,
       dragGesture: { x: 0, y: 0, xOffset: 0, yOffset: 0 },
       overRegion: null,
-      data: {},
 
       overlayRef: (element: HTMLElement | null) => {
         set({ overlayElement: element });
@@ -98,17 +102,6 @@ export const useDndStore = create<DndStoreValue>()(
           state.overRegion = regionId;
         });
       },
-
-      bindData: (id: string, data: any) => {
-        set((state) => {
-          state.data[id] = data;
-        });
-        return () => {
-          set((state) => {
-            delete state.data[id];
-          });
-        };
-      },
     })),
   ),
 );
@@ -122,7 +115,7 @@ export function useDraggedData() {
       if (!dragging) return null;
       return {
         id: dragging,
-        data: state.data[dragging],
+        data: draggableDataRegistry.get(dragging),
       };
     }),
   );

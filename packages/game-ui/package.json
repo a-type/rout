@@ -24,7 +24,9 @@
     "build:uno": "scripts uno ./dist",
     "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
     "dev:ts": "tsc -w --preserveWatchOutput",
-    "dev:uno": "scripts uno ./dist -w"
+    "dev:uno": "scripts uno ./dist -w",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "peerDependencies": {
     "@a-type/ui": "catalog:",
@@ -40,19 +42,23 @@
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "@types/three": "catalog:",
+    "@use-gesture/react": "catalog:",
     "@verdant-web/react-router": "catalog:",
+    "immer": "catalog:",
+    "motion": "catalog:",
+    "react-flip-toolkit": "catalog:",
     "three": "catalog:",
     "valtio": "catalog:",
-    "react-flip-toolkit": "catalog:",
-    "motion": "catalog:",
-    "@use-gesture/react": "catalog:",
-    "zustand": "catalog:",
-    "immer": "catalog:"
+    "zustand": "catalog:"
   },
   "devDependencies": {
+    "@long-game/scripts": "workspace:*",
+    "@storybook/react-vite": "^9.0.15",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "storybook": "^9.0.15",
     "typescript": "catalog:",
-    "@long-game/scripts": "workspace:*"
+    "unocss": "catalog:",
+    "@unocss/transformer-variant-group": "catalog:"
   }
 }

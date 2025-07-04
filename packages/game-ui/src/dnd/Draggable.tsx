@@ -3,7 +3,6 @@ import {
   AnimatePresence,
   HTMLMotionProps,
   motion,
-  Transition,
   useMotionTemplate,
   useTransform,
 } from 'motion/react';
@@ -20,9 +19,10 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { activeDragRef } from './DebugView';
-import { useDndStore } from './dndStore';
+import { registerDraggableData, useDndStore } from './dndStore';
 import { DraggedBox } from './draggedBox';
 import { DragGestureContext, gesture } from './gestureStore';
+import { flipTransition } from './transitions';
 import {
   DragGestureActivationConstraint,
   useDragGesture,
@@ -47,25 +47,27 @@ function DraggableRoot({
   const isDragged = useDndStore((state) => state.dragging === id);
   const isCandidate = useDndStore((state) => state.candidate === id);
 
-  const bindData = useDndStore((state) => state.bindData);
-  // necessary for multiple concurrent draggables not to clobber...
-  // TODO: simplify...
-  const hasBoundData = useDndStore((state) => !!state.data[id]);
-  const needsRebind = !!data && !hasBoundData;
-  useEffect(() => bindData(id, data), [id, data, bindData, needsRebind]);
+  useEffect(() => registerDraggableData(id, data), [id, data]);
 
   const box = useState(() => new DraggedBox())[0];
+
+  const isMoving = isDragged || isCandidate;
+  useEffect(() => {
+    activeDragRef.current = {
+      id,
+      disabled,
+      box,
+    };
+  }, [isMoving, box, id, disabled]);
 
   const ctxValue = useMemo(
     () => ({
       id,
       data,
-      isDragged,
-      isCandidate,
       disabled,
       box,
     }),
-    [id, isDragged, isCandidate, disabled, box],
+    [id, disabled, box],
   );
 
   return (
@@ -85,8 +87,6 @@ function DraggableRoot({
 
 export interface DraggableContextValue {
   id: string;
-  isDragged: boolean;
-  isCandidate: boolean;
   disabled: boolean;
   box: DraggedBox;
 }
@@ -138,6 +138,7 @@ function DraggableHandle({
       data-candidate={isCandidate}
       data-dragging={isDragging}
       className={clsx(
+        'select-none',
         !disabled && 'cursor-grab',
         !disabled && '[body.cursor-grabbing_&]:cursor-grabbing',
         className,
@@ -172,8 +173,6 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   box: DraggedBox;
 }
 
-const flipTransition: Transition = { duration: 0.1, ease: 'easeInOut' };
-
 /**
  * Selectively portals the dragged element to the overlay layer if it is being dragged.
  * Applies local (relative) movement to non-portaled content if any.
@@ -206,19 +205,21 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      <AnimatePresence>
-        <motion.div
-          layoutId={id}
-          transition={flipTransition}
-          data-disabled={dragDisabled}
-          data-draggable={id}
-          ref={dragDisabled ? undefined : box.bind}
-          className={className}
-          {...rest}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        layoutId={isPortaling ? undefined : id}
+        key={`${id}-${isPortaling}`}
+        transition={flipTransition}
+        data-disabled={dragDisabled}
+        data-draggable={id}
+        data-is-moved={isPortaling}
+        ref={dragDisabled ? undefined : box.bind}
+        className={className}
+        animate={{ width: isPortaling ? 0 : 'auto' }}
+        style={{ opacity: isPortaling ? 0 : 1 }}
+        {...rest}
+      >
+        {children}
+      </motion.div>
     </>
   );
 });
@@ -244,29 +245,30 @@ const DraggedRoot = memo(function DraggedRoot({
   children: ReactNode;
 }) {
   const dragged = useDraggableContext();
-
-  useEffect(() => {
-    // this is really just for debugging.
-    if (dragged.isDragged) {
-      activeDragRef.current = dragged;
-      return () => {
-        activeDragRef.current = null;
-      };
-    }
-  }, [dragged.isDragged, dragged]);
+  const status = useDndStore((state) =>
+    state.dragging === dragged.id
+      ? 'active'
+      : state.candidate === dragged.id
+        ? 'candidate'
+        : 'inactive',
+  );
 
   const ContainerImpl = UserContainer || DefaultDraggedContainer;
 
   return (
     <DraggedRootContext.Provider value={true}>
-      <ContainerImpl ref={ref} draggable={dragged} gesture={gesture} {...rest}>
+      <ContainerImpl
+        ref={ref}
+        draggable={dragged}
+        status={status}
+        gesture={gesture}
+        {...rest}
+      >
         <AnimatePresence>
           <motion.div
             layoutId={dragged.id}
             transition={flipTransition}
             data-draggable-preview={dragged.id}
-            data-dragging={dragged.isDragged}
-            data-candidate={dragged.isCandidate}
             data-disabled={dragged.disabled}
           >
             {children}
@@ -281,6 +283,13 @@ export type DraggedContainerComponent = ComponentType<{
   children?: ReactNode;
   draggable: DraggableContextValue;
   gesture: DragGestureContext;
+  /**
+   * The status of the drag operation on this element, if any.
+   * Candidate means the object is being evaluated to decide if it qualifies to be dragged.
+   * Active means the object is currently being dragged.
+   * Inactive means the object is not being dragged.
+   */
+  status: 'active' | 'candidate' | 'inactive';
   ref: Ref<HTMLDivElement> | undefined;
   className?: string;
 }>;

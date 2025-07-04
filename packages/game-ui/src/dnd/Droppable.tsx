@@ -1,8 +1,13 @@
 import { useStableCallback } from '@a-type/ui';
 import { HTMLProps, useEffect, useRef } from 'react';
-import { useMergedRef } from '../../hooks/useMergedRef';
+import { useMergedRef } from '../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
-import { DraggableData, useDndStore, useDraggedData } from './dndStore';
+import {
+  DraggableData,
+  draggableDataRegistry,
+  useDndStore,
+  useDraggedData,
+} from './dndStore';
 import { dropRegions, REGION_ID_ATTR } from './DropRegions';
 import { DragGestureContext } from './gestureStore';
 
@@ -35,7 +40,7 @@ export function Droppable<T = any>({
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
-        const data = useDndStore.getState().data[dragged];
+        const data = draggableDataRegistry.get(dragged);
         if (!stableAccept || stableAccept({ id: dragged, data })) {
           dropCb({ id: dragged, data }, gesture);
         } else if (stableOnReject) {

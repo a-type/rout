@@ -61,6 +61,14 @@ const moduleMap = {
         return { default: () => null };
       }),
   },
+  ['exquisite-fridge']: {
+    main: () => import('@long-game/game-exquisite-fridge-renderer'),
+    css: () =>
+      import('@long-game/game-exquisite-fridge-renderer/css.css').catch(() => {
+        console.warn('Failed to load css for exquisite-fridge');
+        return { default: () => null };
+      }),
+  },
 };
 
 const packageCache: Record<string, Promise<GameRendererModule>> = {};

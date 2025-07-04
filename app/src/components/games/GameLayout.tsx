@@ -10,7 +10,7 @@ export const GameLayoutRoot = withClassName(
 export const GameLayoutMain = withClassName(
   'div',
   '[grid-area:main]',
-  'overflow-auto max-h-full [container:game/inline-size]',
+  'overflow-auto max-h-full [container:game/inline-size] flex flex-col',
   'lg:border-l lg:border-l-black lg:border-l-solid lg:py-0',
 );
 

@@ -14,8 +14,8 @@ import {
   useContext,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { draggableDataRegistry, useDndStore } from '../dnd/dndStore';
 import { useWindowEvent } from '../hooks/useWindowEvent';
-import { useDndStore } from './dnd/dndStore';
 import { TokenSpace } from './TokenSpace';
 import { isToken, TokenDragData } from './types';
 
@@ -99,8 +99,8 @@ const TokenHandPreview = memo(function TokenHandPreview({
     state.dragging
       ? null
       : state.candidate
-      ? state.data[state.candidate]
-      : null,
+        ? draggableDataRegistry.get(state.candidate)
+        : null,
   );
   const previewPosition = useFollowPointer({ x: 0, y: -80 });
   const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;

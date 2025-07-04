@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGesture } from '../tokens/dnd/gestureStore';
+import { useGesture } from '../dnd/gestureStore';
 import { AutoPan } from './AutoPan';
 import { ViewportState } from './ViewportState';
 

@@ -1,4 +1,4 @@
-import { gestureEvents } from './gestureStore';
+import { gestureEvents } from './gestureEvents';
 
 export const REGION_ID_ATTR = 'data-droppable-id';
 
@@ -87,15 +87,47 @@ export class DropRegions {
     );
   };
 
-  #onGestureChange = () => {
+  #updateAll = () => {
     requestAnimationFrame(() => {
       for (const [id, element] of this.elements) {
         this.regions.set(id, element.getBoundingClientRect());
       }
     });
   };
+  #throttledUpdateAll = throttle(this.#updateAll, 100);
+
+  #onGestureChange = () => {
+    this.#throttledUpdateAll();
+  };
 }
 
 export const dropRegions = new DropRegions();
 
 (window as any).dropRegions = dropRegions; // For debugging purposes
+
+function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  limit: number,
+): (...args: Parameters<T>) => void {
+  let lastFunc: ReturnType<typeof setTimeout>;
+  let lastRan = 0;
+
+  return function (...args: Parameters<T>) {
+    if (Date.now() - lastRan >= limit) {
+      if (lastFunc) {
+        clearTimeout(lastFunc);
+      }
+      func(...args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(lastFunc);
+      lastFunc = setTimeout(
+        () => {
+          func(...args);
+          lastRan = Date.now();
+        },
+        limit - (Date.now() - lastRan),
+      );
+    }
+  };
+}
