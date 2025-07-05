@@ -8,7 +8,8 @@ export const fetch = createFetch({
   isSessionExpired(response) {
     return (
       LongGameError.fromResponse(response)?.code ===
-      LongGameError.Code.SessionExpired
+        LongGameError.Code.SessionExpired ||
+      response.headers.get('x-auth-error') === 'session-expired'
     );
   },
 });
