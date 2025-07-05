@@ -3,6 +3,7 @@ export * from './chat/DefaultChatMessage';
 export * from './chat/SpatialChat';
 export * from './debugger/GameDebugger';
 export * from './decoration/GameIllustration1';
+export * from './dnd/index';
 export * from './history/RoundHistoryControl';
 export * from './hooks/useMediaQuery';
 export * from './players/PlayerAvatar';

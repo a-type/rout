@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Token } from './Token.js';
 import { TokenHand } from './TokenHand.js';
-import { TokenRoot } from './TokenRoot.js';
 import { TokenSpace } from './TokenSpace.js';
 
 const meta = {
@@ -54,13 +53,6 @@ export const Default: Story = {
       </Box>
     );
   },
-  decorators: [
-    (Story) => (
-      <TokenRoot>
-        <Story />
-      </TokenRoot>
-    ),
-  ],
 };
 
 const TokenCard = ({ id }: { id: string }) => (

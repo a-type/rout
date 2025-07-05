@@ -6,9 +6,7 @@ export class DropRegions {
   elements: Map<string, HTMLElement> = new Map();
   regions: Map<string, DOMRect> = new Map();
 
-  constructor() {
-    this.#bind();
-  }
+  constructor() {}
 
   register = (element: HTMLElement | null) => {
     if (!element) {
@@ -61,9 +59,17 @@ export class DropRegions {
     return containing;
   };
 
-  #bind = () => {
-    gestureEvents.subscribe('start', this.#onGestureChange);
-    gestureEvents.subscribe('move', this.#onGestureChange);
+  bind = () => {
+    const unsubs = [
+      gestureEvents.subscribe('start', this.#onGestureChange),
+      gestureEvents.subscribe('move', this.#onGestureChange),
+    ];
+    return () => {
+      for (const unsub of unsubs) {
+        unsub();
+      }
+      this.#throttledUpdateAll.cancel();
+    };
   };
 
   #calculateOverlappedArea = (rect1: DOMRect, rect2: DOMRect) => {
@@ -108,11 +114,11 @@ export const dropRegions = new DropRegions();
 function throttle<T extends (...args: any[]) => void>(
   func: T,
   limit: number,
-): (...args: Parameters<T>) => void {
-  let lastFunc: ReturnType<typeof setTimeout>;
+): { (...args: Parameters<T>): void; cancel: () => void } {
+  let lastFunc: ReturnType<typeof setTimeout> | undefined = undefined;
   let lastRan = 0;
 
-  return function (...args: Parameters<T>) {
+  function throttled(...args: Parameters<T>) {
     if (Date.now() - lastRan >= limit) {
       if (lastFunc) {
         clearTimeout(lastFunc);
@@ -129,5 +135,12 @@ function throttle<T extends (...args: any[]) => void>(
         limit - (Date.now() - lastRan),
       );
     }
+  }
+  throttled.cancel = () => {
+    if (lastFunc) {
+      clearTimeout(lastFunc);
+      lastFunc = undefined;
+    }
   };
+  return throttled;
 }

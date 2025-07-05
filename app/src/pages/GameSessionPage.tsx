@@ -20,6 +20,7 @@ import { GameSessionProvider, withGame } from '@long-game/game-client';
 import { GameRenderer } from '@long-game/game-renderer';
 import {
   DelayedSubmitUndo,
+  DndRoot,
   TopographyProvider,
   usePlayerThemed,
 } from '@long-game/game-ui';
@@ -89,26 +90,30 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
           </ScrollTicker>
         </Box>
       )}
-      <GameLayout className={className} style={style}>
-        <GameLayout.Main>
-          <Suspense
-            fallback={
-              <Box full layout="center center">
-                <Spinner />
-              </Box>
-            }
-          >
-            {gameSuite.gameStatus.status === 'pending' ? (
-              <GameSetup gameSessionId={sessionId} />
-            ) : (
-              <GameRenderer />
-            )}
-          </Suspense>
-        </GameLayout.Main>
-        <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
-        <DelayedSubmitUndo />
-        {gameSuite.gameStatus.status === 'abandoned' && <GameAbandonedNotice />}
-      </GameLayout>
+      <DndRoot className="w-full h-full flex flex-col">
+        <GameLayout className={className} style={style}>
+          <GameLayout.Main>
+            <Suspense
+              fallback={
+                <Box full layout="center center">
+                  <Spinner />
+                </Box>
+              }
+            >
+              {gameSuite.gameStatus.status === 'pending' ? (
+                <GameSetup gameSessionId={sessionId} />
+              ) : (
+                <GameRenderer />
+              )}
+            </Suspense>
+          </GameLayout.Main>
+          <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
+          <DelayedSubmitUndo />
+          {gameSuite.gameStatus.status === 'abandoned' && (
+            <GameAbandonedNotice />
+          )}
+        </GameLayout>
+      </DndRoot>
     </TopographyProvider>
   );
 });

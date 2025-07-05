@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { SortableTokenList } from './SortableTokenList.js';
 import { moveItem } from './sortHelpers.js';
 import { Token } from './Token.js';
-import { TokenRoot } from './TokenRoot.js';
 import { TokenDragData } from './types.js';
 
 const meta = {
@@ -45,13 +44,6 @@ export const Default: Story = {
       </SortableTokenList>
     );
   },
-  decorators: [
-    (Story) => (
-      <TokenRoot>
-        <Story />
-      </TokenRoot>
-    ),
-  ],
 };
 
 const TokenCard = ({ id }: { id: string }) => (

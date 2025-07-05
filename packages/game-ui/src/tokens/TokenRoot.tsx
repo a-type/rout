@@ -1,10 +1,6 @@
-import { HTMLProps, ReactNode } from 'react';
-import { DndRoot } from '../dnd/DndRoot';
+import { ReactNode } from 'react';
 
-export interface TokenRootProps extends HTMLProps<HTMLDivElement> {
-  children?: ReactNode;
-}
-
-export function TokenRoot({ children, ...rest }: TokenRootProps) {
-  return <DndRoot {...rest}>{children}</DndRoot>;
-}
+/** @deprecated - DndRoot is included in root App structure, you don't need to render it yourself. */
+export const TokenRoot = ({ children }: { children: ReactNode }) => (
+  <>{children}</>
+);
