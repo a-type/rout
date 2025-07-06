@@ -110,7 +110,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
             {gameSuite.gameStatus.status !== 'pending' && (
               <ErrorBoundary>
                 <Suspense>
-                  <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] md:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                  <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
                 </Suspense>
               </ErrorBoundary>
             )}
