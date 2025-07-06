@@ -1,4 +1,5 @@
 import { Box, Button, Icon, Popover } from '@a-type/ui';
+import { withGame } from '@long-game/game-client';
 import {
   GameDebugger,
   PlayerStatuses,
@@ -15,7 +16,10 @@ export interface GameControlsProps {
   pregame?: boolean;
 }
 
-export function GameControls({ pregame }: GameControlsProps) {
+export const GameControls = withGame<GameControlsProps>(function GameControls({
+  pregame,
+  gameSuite,
+}) {
   return (
     <>
       <GameLayout.Controls>
@@ -35,7 +39,9 @@ export function GameControls({ pregame }: GameControlsProps) {
           <Popover>
             <Popover.Trigger asChild>
               <Button size="icon-small" color="ghost">
-                <Icon name="dots"></Icon>
+                <Icon name="next" />
+                {gameSuite.viewingRoundIndex + 1}
+                <Icon name="chevron" />
               </Button>
             </Popover.Trigger>
             <Popover.Content>
@@ -47,4 +53,4 @@ export function GameControls({ pregame }: GameControlsProps) {
       </GameLayout.SecondaryControls>
     </>
   );
-}
+});

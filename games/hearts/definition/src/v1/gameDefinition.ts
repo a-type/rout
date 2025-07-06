@@ -138,6 +138,13 @@ export const gameDefinition: GameDefinition<
   minimumPlayers: 3,
   maximumPlayers: 5,
   getRoundIndex,
+  getRoundLabel: ({ roundIndex, members }) => {
+    const draftingRound = getDraftingRound(members.length, roundIndex);
+    if (draftingRound.passOffset) {
+      return `Round ${roundIndex + 1} (Drafting)`;
+    }
+    return `Round ${roundIndex + 1}`;
+  },
   // run on both client and server
 
   validateTurn: ({ playerState, turn, roundIndex, members }) => {

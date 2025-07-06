@@ -8,7 +8,7 @@ import {
   ScrollArea,
   withClassName,
 } from '@a-type/ui';
-import { withGame } from '@long-game/game-client';
+import { useGameSuite, withGame } from '@long-game/game-client';
 import { ChatRenderer } from '@long-game/game-renderer';
 import {
   ChatForm,
@@ -103,12 +103,21 @@ function RoundBoundary({
   startIndex: number;
   endIndex: number;
 }) {
+  const gameSuite = useGameSuite();
+  const roundLabelStart = gameSuite.gameDefinition.getRoundLabel?.({
+    roundIndex: startIndex,
+    members: gameSuite.members,
+  });
+  const roundLabelEnd = gameSuite.gameDefinition.getRoundLabel?.({
+    roundIndex: endIndex,
+    members: gameSuite.members,
+  });
   return (
     <div className="w-full items-center flex flex-row text-xxs color-gray-dark">
       <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
       <div className="px-md py-xs">
-        Round{startIndex !== endIndex ? 's' : ''} {startIndex + 1}
-        {endIndex !== startIndex ? ` - ${endIndex + 1}` : ''}
+        {roundLabelStart ?? `Round ${startIndex + 1}`}
+        {roundLabelEnd && <> - {roundLabelEnd ?? `Round ${endIndex + 1}`}</>}
       </div>
       <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
     </div>

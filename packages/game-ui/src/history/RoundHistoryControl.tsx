@@ -56,7 +56,10 @@ export const RoundHistoryControl = withGame(
             {/* Note: specifically skipping latest index, which === current */}
             {Array.from({ length: latestRoundIndex + 1 }).map((_, i) => (
               <Select.Item key={i} value={i.toString()}>
-                Round {i + 1}
+                {suite.gameDefinition.getRoundLabel?.({
+                  roundIndex: i,
+                  members: suite.members,
+                }) ?? `Round ${i + 1}`}
               </Select.Item>
             ))}
           </Select.Content>

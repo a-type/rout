@@ -43,9 +43,15 @@ export type GameDefinition<
   TurnError extends BaseTurnError = BaseTurnError,
   InitialTurnData extends BaseTurnData | null = null,
 > = {
+  // Metadata
   version: `v${number}.${number}`;
   minimumPlayers: number;
   maximumPlayers: number;
+  getRoundLabel?: (data: {
+    roundIndex: number;
+    members: GameMember[];
+  }) => string;
+
   // SHARED
 
   /**
