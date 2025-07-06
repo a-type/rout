@@ -23,9 +23,10 @@ export const SubmitTurn = withSuspense(
       submitTurn,
       turnWasSubmitted,
       nextRoundCheckAt,
+      canSubmitTurn,
     } = useGameSuite();
 
-    const isDisabled = !!turnError || !hasLocalTurn;
+    const isDisabled = !!turnError || !hasLocalTurn || !canSubmitTurn;
     const icon = turnError
       ? 'warning'
       : nextRoundCheckAt
@@ -33,6 +34,7 @@ export const SubmitTurn = withSuspense(
         : !hasLocalTurn && turnWasSubmitted
           ? 'check'
           : 'arrowRight';
+    const hideIcon = !hasLocalTurn && !turnWasSubmitted && !nextRoundCheckAt;
 
     return (
       <Tooltip
@@ -46,7 +48,7 @@ export const SubmitTurn = withSuspense(
       >
         <Box className={clsx('rounded-lg', className)}>
           <TopographyButton
-            className="items-center justify-center w-full h-full disabled:(opacity-100 bg-white)"
+            className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray)"
             color={turnError ? 'destructive' : 'primary'}
             disabled={isDisabled}
             onClick={() =>
@@ -76,7 +78,7 @@ export const SubmitTurn = withSuspense(
               ) : (
                 `Submit turn`
               ))}
-            {!children && <Icon name={icon} />}
+            {!children && !hideIcon && <Icon name={icon} />}
           </TopographyButton>
           <PlayerStatuses className="absolute z-100 pointer-events-none bottom-0 left-50% -translate-x-1/2 translate-y-2/3" />
         </Box>
