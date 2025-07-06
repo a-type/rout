@@ -1,6 +1,7 @@
 export * from './chat/ChatForm';
 export * from './chat/DefaultChatMessage';
 export * from './chat/SpatialChat';
+export * from './chat/SpatialChatDraggable';
 export * from './debugger/GameDebugger';
 export * from './decoration/GameIllustration1';
 export * from './dnd/index';

@@ -2,6 +2,7 @@ import { PrefixedId } from '@long-game/common';
 
 export type StorySequence = StoryStep[];
 export type StoryStep = {
+  id: string;
   words: WordItem[];
   playerId: PrefixedId<'u'>;
 };

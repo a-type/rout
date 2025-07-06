@@ -464,7 +464,7 @@ export const freebieWords: string[] = [
   '.',
   '!',
   '?',
-  "'",
+  '"',
   'a',
   'an',
   'the',

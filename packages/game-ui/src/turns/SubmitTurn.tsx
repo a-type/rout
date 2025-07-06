@@ -1,4 +1,4 @@
-import { Box, Button, Icon, RelativeTime, Tooltip } from '@a-type/ui';
+import { Box, Button, clsx, Icon, RelativeTime, Tooltip } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/visual-components';
 import { ReactNode } from 'react';
@@ -30,7 +30,9 @@ export const SubmitTurn = withSuspense(
       ? 'warning'
       : nextRoundCheckAt
         ? 'clock'
-        : 'arrowRight';
+        : !hasLocalTurn && turnWasSubmitted
+          ? 'check'
+          : 'arrowRight';
 
     return (
       <Tooltip
@@ -42,9 +44,9 @@ export const SubmitTurn = withSuspense(
             : turnError?.message
         }
       >
-        <Box className={className}>
+        <Box className={clsx('rounded-lg', className)}>
           <TopographyButton
-            className="items-center justify-center w-full h-full disabled:opacity-100"
+            className="items-center justify-center w-full h-full disabled:(opacity-100 bg-white)"
             color={turnError ? 'destructive' : 'primary'}
             disabled={isDisabled}
             onClick={() =>

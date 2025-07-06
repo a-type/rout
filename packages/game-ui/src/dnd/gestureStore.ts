@@ -27,6 +27,12 @@ export const gesture = {
    * when dragging.
    */
   activationPosition: { x: 0, y: 0 },
+  /**
+   * Cumulative movement since the gesture started. For example if
+   * you dragged 6px to left and 6px to right, this will be x=12,
+   * but delta will be x=0.
+   */
+  totalMovement: { x: 0, y: 0 },
 };
 
 (window as any).gesture = gesture; // for debugging
@@ -41,6 +47,7 @@ export function resetGesture() {
   setVector(gesture.velocity, 0, 0);
   setVector(gesture.offset, 0, 0);
   setVector(gesture.activationPosition, 0, 0);
+  setVector(gesture.totalMovement, 0, 0);
   gesture.initialBounds.x = 0;
   gesture.initialBounds.y = 0;
   gesture.initialBounds.width = 0;
@@ -65,6 +72,7 @@ export function useMonitorGlobalGesture() {
     setVector(gesture.delta, 0, 0);
     setVector(gesture.velocity, 0, 0);
     setVector(gesture.activationPosition, 0, 0);
+    setVector(gesture.totalMovement, 0, 0);
     gesture.initialBounds.x = 0;
     gesture.initialBounds.y = 0;
     gesture.initialBounds.width = 0;
@@ -82,6 +90,7 @@ export function useMonitorGlobalGesture() {
     }
   };
 
+  let tmpVector = { x: 0, y: 0 };
   function moveGesture(event: GestureEvent) {
     const coords = getEventCoordinates(event);
     applySubtraction(gesture.initial, coords, gesture.delta);
@@ -90,6 +99,9 @@ export function useMonitorGlobalGesture() {
     applySubtraction(gesture.current, coords, gesture.velocity);
     setVector(gesture.current, coords.x, coords.y);
     setVector(gesture.currentRaw, coords.x, coords.y);
+    tmpVector.x = Math.abs(gesture.velocity.x.get());
+    tmpVector.y = Math.abs(gesture.velocity.y.get());
+    applyAddition(gesture.totalMovement, tmpVector, gesture.totalMovement);
 
     updateOver();
 
@@ -320,11 +332,11 @@ function getEventCoordinates(ev: GestureEvent): { x: number; y: number } {
   return { x: 0, y: 0 };
 }
 
-type VectorLike =
+export type VectorLike =
   | { x: number; y: number }
   | { x: MotionValue<number>; y: MotionValue<number> };
 
-function getCurrentVector(v: VectorLike): { x: number; y: number } {
+export function getCurrentVector(v: VectorLike): { x: number; y: number } {
   if (v.x instanceof MotionValue && v.y instanceof MotionValue) {
     return { x: v.x.get(), y: v.y.get() };
   } else {
@@ -332,7 +344,7 @@ function getCurrentVector(v: VectorLike): { x: number; y: number } {
   }
 }
 
-function setVector(v: VectorLike, x: number, y: number) {
+export function setVector(v: VectorLike, x: number, y: number) {
   if (v.x instanceof MotionValue && v.y instanceof MotionValue) {
     v.x.set(x);
     v.y.set(y);
@@ -342,12 +354,31 @@ function setVector(v: VectorLike, x: number, y: number) {
   }
 }
 
+function getNumberOrMotionValue(v: number | MotionValue<number>): number {
+  return v instanceof MotionValue ? v.get() : v;
+}
+
 function applySubtraction(a: VectorLike, b: VectorLike, target: VectorLike) {
-  const aCurrent = getCurrentVector(a);
-  const bCurrent = getCurrentVector(b);
-  const x = bCurrent.x - aCurrent.x;
-  const y = bCurrent.y - aCurrent.y;
-  setVector(target, x, y);
+  const dx = getNumberOrMotionValue(a.x) - getNumberOrMotionValue(b.x);
+  const dy = getNumberOrMotionValue(a.y) - getNumberOrMotionValue(b.y);
+  if (target.x instanceof MotionValue) {
+    (target.x as MotionValue).set(dx);
+  } else {
+    target.x = dx;
+  }
+  if (target.y instanceof MotionValue) {
+    (target.y as MotionValue).set(dy);
+  } else {
+    target.y = dy;
+  }
+}
+const invertTmpVector = { x: 0, y: 0 };
+function applyAddition(a: VectorLike, b: VectorLike, target: VectorLike) {
+  invertTmpVector.x = getNumberOrMotionValue(b.x);
+  invertTmpVector.y = getNumberOrMotionValue(b.y);
+  invertTmpVector.x = -invertTmpVector.x;
+  invertTmpVector.y = -invertTmpVector.y;
+  applySubtraction(a, invertTmpVector, target);
 }
 
 function isTouchEvent(event: GestureEvent): event is TouchEvent {

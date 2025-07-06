@@ -61,7 +61,7 @@ export function GameLogChatInput() {
     [],
   );
 
-  return <ChatForm toolsRef={toolsRef} />;
+  return <ChatForm toolsRef={toolsRef} className="px-sm" />;
 }
 
 const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
@@ -80,7 +80,7 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
 
   if (latestMessage.type === 'chat') {
     return (
-      <div className="absolute top-full left-sm right-sm">
+      <div className="absolute top-full left-0 right-xs">
         <div className="relative -top-32px w-full">
           <ChatRenderer
             message={latestMessage.chatMessage}
@@ -186,7 +186,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
   }
 
   return (
-    <Box direction="col" gap="none" p="none" items="stretch" {...props}>
+    <Box gap="xs" p="xs" items="center" {...props}>
       <Dialog open={open} onOpenChange={(o) => (localState.open = o)}>
         <Dialog.Trigger asChild>
           <Button
@@ -200,7 +200,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
                 }, 50);
               }
             }}
-            className="w-full font-normal h-32px rounded-xs"
+            className="w-full font-normal h-32px rounded-xs p-0"
           >
             <GameLogCollapsedTriggerContent />
           </Button>

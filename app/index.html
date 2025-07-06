@@ -36,6 +36,13 @@
     <meta name="mobile-web-app-capable" content="yes" />
 
     <link rel="canonical" href="https://rout.games/" />
+
+    <!-- TODO: remove when anchor positioning is widely available -->
+    <script type="module">
+      if (!('anchorName' in document.documentElement.style)) {
+        import('https://unpkg.com/@oddbird/css-anchor-positioning');
+      }
+    </script>
   </head>
 
   <body>

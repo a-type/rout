@@ -31,7 +31,10 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
         )}
         <InputZone className="sticky w-full top-0 z-1" />
         <WordHand className="w-full" />
-        <SubmitTurn className="sticky bottom-lg mx-auto" delay={5000} />
+        <SubmitTurn
+          className="sticky bottom-lg mx-auto shadow-lg"
+          delay={5000}
+        />
       </Box>
       <WriteInDialog />
     </Box>

@@ -49,7 +49,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
           disabled={turnWasSubmitted}
         >
           {currentTurn.words.map((word) => (
-            <WordTile value={word} key={word.id} />
+            <WordTile value={word} key={word.id} movedBehavior="fade" />
           ))}
         </SortableTokenList>
         <TokenSpace<WordItem>

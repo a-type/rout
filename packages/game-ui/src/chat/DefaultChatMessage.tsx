@@ -87,7 +87,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           >
             <PlayerAvatar
               playerId={message.authorId}
-              className="flex-shrink-0 w-16px h-16px"
+              className="flex-shrink-0 w-16px h-auto"
             />
             <span className="font-bold block pr-md py-xs text-nowrap overflow-hidden">
               <PlayerName playerId={message.authorId} />

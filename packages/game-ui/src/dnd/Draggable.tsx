@@ -18,6 +18,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useMergedRef } from '../hooks/useMergedRef';
 import { activeDragRef } from './DebugView';
 import { registerDraggableData, useDndStore } from './dndStore';
 import { DraggedBox } from './draggedBox';
@@ -35,13 +36,18 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   children?: ReactNode;
   DraggedContainer?: DraggedContainerComponent;
   draggedClassName?: string;
+  noHandle?: boolean;
+  handleProps?: DraggableHandleProps;
+  movedBehavior?: 'remove' | 'fade';
 }
 
 function DraggableRoot({
   id,
   data,
   disabled = false,
+  noHandle = false,
   children,
+  handleProps,
   ...rest
 }: DraggableProps) {
   const isDragged = useDndStore((state) => state.dragging === id);
@@ -79,7 +85,9 @@ function DraggableRoot({
         id={id}
         {...rest}
       >
-        {children}
+        <ConditionalHandle disabled={noHandle} {...handleProps}>
+          {children}
+        </ConditionalHandle>
       </DndOverlayPortal>
     </DraggableContext.Provider>
   );
@@ -102,21 +110,31 @@ export function useDraggableContext() {
   return context;
 }
 
-export interface DraggableHandleProps extends HTMLMotionProps<'div'> {
+export interface DraggableHandleProps
+  extends Omit<HTMLMotionProps<'div'>, 'onTap'> {
   activationConstraint?: DragGestureActivationConstraint;
   allowStartFromDragIn?: boolean;
+  touchOffset?: number; // Y offset for touch gestures, default is -40px
+  onTap?: () => void;
 }
 function DraggableHandle({
   children,
   activationConstraint,
   allowStartFromDragIn = false,
   className,
+  touchOffset,
+  ref: userRef,
+  onTap,
   ...rest
 }: DraggableHandleProps) {
   const { ref, isCandidate, isDragging, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
+    touchOffset,
+    onTap,
   });
+
+  const finalRef = useMergedRef<HTMLDivElement>(ref, userRef);
 
   return (
     <motion.div
@@ -124,11 +142,16 @@ function DraggableHandle({
         touchAction: disabled ? 'initial' : 'none',
         pointerEvents: isCandidate ? 'none' : 'auto',
       }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      ref={ref}
+      onContextMenuCapture={
+        disabled
+          ? undefined
+          : (e) => {
+              console.log('prevent menu');
+              e.preventDefault();
+              e.stopPropagation();
+            }
+      }
+      ref={finalRef}
       role="button"
       aria-roledescription="draggable"
       aria-describedby="dnd-instructions"
@@ -149,6 +172,21 @@ function DraggableHandle({
     </motion.div>
   );
 }
+
+const ConditionalHandle = ({
+  disabled,
+  children,
+  ...rest
+}: { disabled?: boolean } & DraggableHandleProps) => {
+  if (disabled) {
+    return <>{children}</>;
+  }
+  return (
+    <DraggableHandle className="w-full h-full" {...rest}>
+      {children}
+    </DraggableHandle>
+  );
+};
 
 export const Draggable = Object.assign(DraggableRoot, {
   Handle: DraggableHandle,
@@ -171,6 +209,7 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   id: string;
   dragDisabled: boolean;
   box: DraggedBox;
+  movedBehavior?: DraggableProps['movedBehavior'];
 }
 
 /**
@@ -186,11 +225,18 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   id,
   dragDisabled,
   box,
+  movedBehavior = 'remove',
+  ref,
   ...rest
 }: DndOverlayPortalProps) {
   const overlayEl = useDndStore((state) => state.overlayElement);
 
   const isPortaling = enabled && !!overlayEl;
+
+  const mainRef = useMergedRef<HTMLDivElement>(
+    ref,
+    dragDisabled ? undefined : box.bind,
+  );
 
   return (
     <>
@@ -212,10 +258,16 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
         data-disabled={dragDisabled}
         data-draggable={id}
         data-is-moved={isPortaling}
-        ref={dragDisabled ? undefined : box.bind}
+        ref={mainRef}
         className={className}
-        animate={{ width: isPortaling ? 0 : 'auto' }}
-        style={{ opacity: isPortaling ? 0 : 1 }}
+        animate={{
+          width: isPortaling && movedBehavior === 'remove' ? 0 : 'auto',
+        }}
+        style={{
+          opacity: isPortaling ? (movedBehavior === 'remove' ? 0 : 0.5) : 1,
+          position:
+            isPortaling && movedBehavior === 'remove' ? 'absolute' : undefined,
+        }}
         {...rest}
       >
         {children}
@@ -268,7 +320,8 @@ const DraggedRoot = memo(function DraggedRoot({
           <motion.div
             layoutId={dragged.id}
             transition={flipTransition}
-            data-draggable-preview={dragged.id}
+            data-draggable-preview
+            data-draggable-preview-id={dragged.id}
             data-disabled={dragged.disabled}
           >
             {children}

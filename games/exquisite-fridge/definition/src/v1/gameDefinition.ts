@@ -181,6 +181,7 @@ export const gameDefinition: GameDefinition<
         hand.map((word) => [word.id, word]),
       );
       const newStep: StoryStep = {
+        id: random.id(),
         playerId: turn.playerId,
         words: [],
       };

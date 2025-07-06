@@ -7,6 +7,7 @@ export interface WordTileProps {
   value: WordItem;
   className?: string;
   disabled?: boolean;
+  movedBehavior?: 'fade' | 'remove';
 }
 
 export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
@@ -14,6 +15,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
   value,
   className,
   disabled,
+  movedBehavior = 'fade',
 }) {
   const isBlank = value.text === '';
   const isHandwritten = !!value.isWriteIn;
@@ -28,6 +30,11 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
         value.isNew ? 'bg-primary-wash' : 'bg-white',
         className,
       )}
+      handleProps={{
+        // words are smaller; move the upward a bit
+        touchOffset: -60,
+      }}
+      movedBehavior={movedBehavior}
     >
       <Box
         className={clsx(

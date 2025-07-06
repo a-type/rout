@@ -4,11 +4,18 @@ import { useElementEvent } from '../hooks/useWindowEvent';
 import { otherDragBoxRefs } from './DebugView';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';
-import { DragGestureContext, useGesture } from './gestureStore';
+import {
+  DragGestureContext,
+  gesture,
+  setVector,
+  useGesture,
+} from './gestureStore';
 
 export interface DragGestureOptions {
   allowStartFromDragIn?: boolean;
   activationConstraint?: (ctx: DragGestureContext) => boolean;
+  touchOffset?: number;
+  onTap?: () => void;
 }
 
 export type DragGestureActivationConstraint =
@@ -126,7 +133,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         draggable.box.update();
       },
       onEnd: (gesture) => {
-        if (gesture.type === 'keyboard') {
+        if (gesture.type === 'keyboard' && isDragging) {
           // when we end a drag with the keyboard,
           // return focus to the element once it's back in place.
           setTimeout(() => {
@@ -139,6 +146,19 @@ export function useDragGesture(options?: DragGestureOptions) {
         document.body.classList.remove('cursor-grabbing');
         cancelDrag();
         draggable.box.update();
+
+        if (isDragging || isCandidate) {
+          console.log('drag end', gesture);
+          if (
+            Math.sqrt(
+              gesture.totalMovement.x ** 2 + gesture.totalMovement.y ** 2,
+            ) < 10
+          ) {
+            console.log('tap');
+            // if the drag was very small, we consider it a tap.
+            options?.onTap?.();
+          }
+        }
       },
     },
     {
@@ -151,6 +171,9 @@ export function useDragGesture(options?: DragGestureOptions) {
     if (!el) return;
     claim(draggable.id, el);
     document.body.classList.add('cursor-grabbing');
+    if (gesture.type === 'touch' && options?.touchOffset) {
+      setVector(gesture.offset, 0, options.touchOffset);
+    }
 
     if (!options?.activationConstraint) {
       return activateDrag();

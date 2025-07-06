@@ -11,17 +11,28 @@ import {
 import { dropRegions, REGION_ID_ATTR } from './DropRegions';
 import { DragGestureContext } from './gestureStore';
 
+export interface DropInfo {
+  relativePosition: { x: number; y: number };
+  droppableRect: { x: number; y: number; width: number; height: number };
+}
+
 export type DroppableProps<T = any> = Omit<
   HTMLProps<HTMLDivElement>,
   'onDrop' | 'accept'
 > & {
   id: string;
-  onDrop?: (draggable: DraggableData<T>, gesture: DragGestureContext) => void;
+  onDrop?: (
+    draggable: DraggableData<T>,
+    gesture: DragGestureContext,
+    dropInfo: DropInfo,
+  ) => void;
   onOver?: (draggable: DraggableData<T> | null) => void;
   onReject?: (draggable: DraggableData<T>) => void;
   disabled?: boolean;
   accept?: (draggable: DraggableData<T>) => boolean;
 };
+
+const defaultAccept = () => true;
 
 export function Droppable<T = any>({
   id,
@@ -35,14 +46,24 @@ export function Droppable<T = any>({
   ...rest
 }: DroppableProps<T>) {
   const dropCb = useStableCallback(onDrop);
-  const stableAccept = useStableCallback(accept);
+  const stableAccept = useStableCallback(accept || defaultAccept);
   const stableOnReject = useStableCallback(onReject);
+
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
         const data = draggableDataRegistry.get(dragged);
-        if (!stableAccept || stableAccept({ id: dragged, data })) {
-          dropCb({ id: dragged, data }, gesture);
+        if (stableAccept({ id: dragged, data })) {
+          const region = dropRegions.regions.get(id)!;
+          const dropInfo: DropInfo = {
+            relativePosition: {
+              x: gesture.currentRaw.x - region.x,
+              y: gesture.currentRaw.y - region.y,
+            },
+            droppableRect: region,
+          };
+          console.log('here');
+          dropCb({ id: dragged, data }, gesture, dropInfo);
         } else if (stableOnReject) {
           stableOnReject({ id: dragged, data });
         }

@@ -26,7 +26,7 @@ export default defineConfig({
   content: {
     pipeline: {
       include: [
-        /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
+        /\.(tsx?|mdx?|astro|html)($|\?)/,
         // include .js files from workspace packages
         /packages\/(game-ui|visual-components)\/dist\/.*\.js($|\?)/,
         /games\/[^/]+\/renderer\/dist\/.*\.js($|\?)/,
@@ -38,7 +38,7 @@ export default defineConfig({
     extract(ctx) {
       // uncomment to log which files are being processed
       // if (ctx.id && !ctx.id.includes('@a-type')) {
-      //   console.log(ctx.id);
+      // console.log(ctx.id);
       // }
       return extractorDefault.extract!(ctx);
     },

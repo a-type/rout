@@ -19,7 +19,13 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
 }
 
-export function Token({ children, data, className, ...rest }: TokenProps) {
+export function Token({
+  children,
+  data,
+  className,
+  handleProps,
+  ...rest
+}: TokenProps) {
   const tokenData = useTokenData(rest.id, data);
   const isInHand = tokenData.internal.space?.type === 'hand';
 
@@ -39,11 +45,13 @@ export function Token({ children, data, className, ...rest }: TokenProps) {
       className={className}
       DraggedContainer={TokenContainer}
       data={tokenData}
+      noHandle
     >
       <Draggable.Handle
         activationConstraint={activationConstraint}
         allowStartFromDragIn={isInHand}
         className="w-full h-full"
+        {...handleProps}
       >
         {children}
       </Draggable.Handle>

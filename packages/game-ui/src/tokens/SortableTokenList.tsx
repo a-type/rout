@@ -1,7 +1,7 @@
 import { Box, BoxProps, clsx } from '@a-type/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { Children, useId, useState } from 'react';
-import { flipTransition } from '../dnd/transitions';
+import { gesture } from '../dnd';
 import { TokenSpace, TokenSpaceProps } from './TokenSpace';
 import { TokenDragData } from './types';
 
@@ -9,6 +9,17 @@ export interface SortableTokenListProps<T> extends BoxProps {
   onMove: (token: TokenDragData<T>, index: number) => void;
 }
 
+/**
+ * Renders a list of Tokens which can be reordered by dragging.
+ * It automatically inserts gaps between tokens to allow for dropping between
+ * items. If your list doesn't take up the entire vertical space, consider
+ * adding another TokenSpace below it to append new items.
+ *
+ * For Tokens rendered in SortableTokenList, the `movedBehavior` prop
+ * should be set to 'fade' which produces the most stable animations on
+ * drop. This gives the user context on where they are reordering the
+ * item from, as well.
+ */
 export function SortableTokenList<T = any>({
   children: rawChildren,
   onMove,
@@ -53,7 +64,7 @@ function SortableTokenListGap({
   listId: string;
   last?: boolean;
 } & Omit<TokenSpaceProps, 'id'>) {
-  const [width, setWidth] = useState(32);
+  const [width, setWidth] = useState(0);
   return (
     <motion.div
       className={clsx(
@@ -61,12 +72,14 @@ function SortableTokenListGap({
         last && 'flex-1',
       )}
       animate={last ? undefined : { width }}
-      transition={flipTransition}
+      transition={
+        width === 0 ? { duration: 0 } : { duration: 0.08, ease: 'easeInOut' }
+      }
     >
       <TokenSpace
         id={`${listId}-gap-[${index}]`}
         onOverAccepted={(token) => {
-          if (token) setWidth(gapSize);
+          if (token) setWidth(gesture.initialBounds.width || gapSize);
           else setWidth(0);
         }}
         className={clsx(

@@ -43,7 +43,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         }}
         disabled={gameSuite.turnWasSubmitted}
       >
-        <ScrollArea className="px-[40px] md:px-0 w-full h-full">
+        <ScrollArea className="px-[50px] md:px-0 w-full h-full">
           <H4 className="text-center mb-xs">Free tiles</H4>
           <FreebieWords className="mb-md" />
           <H4 className="text-center mb-xs">Your pile</H4>

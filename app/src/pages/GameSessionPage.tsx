@@ -21,6 +21,7 @@ import { GameRenderer } from '@long-game/game-renderer';
 import {
   DelayedSubmitUndo,
   DndRoot,
+  SpatialChatDraggable,
   TopographyProvider,
   usePlayerThemed,
 } from '@long-game/game-ui';
@@ -106,6 +107,11 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
                 <GameRenderer />
               )}
             </Suspense>
+            <ErrorBoundary>
+              <Suspense>
+                <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] md:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+              </Suspense>
+            </ErrorBoundary>
           </GameLayout.Main>
           <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
           <DelayedSubmitUndo />

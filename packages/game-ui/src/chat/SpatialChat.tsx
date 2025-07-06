@@ -1,6 +1,7 @@
-import { Box, BoxProps, clsx, Dialog, Popover } from '@a-type/ui';
+import { Box, BoxProps, clsx, Dialog, Icon, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { TopographyBackground } from '@long-game/visual-components';
 import {
   MouseEvent as ReactMouseEvent,
   useEffect,
@@ -8,7 +9,11 @@ import {
   useState,
 } from 'react';
 import { subscribe } from 'valtio';
+import { DropInfo, Droppable } from '../dnd';
+import { DraggableData, useDndStore } from '../dnd/dndStore';
+import { DragGestureContext } from '../dnd/gestureStore';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useMergedRef } from '../hooks/useMergedRef';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 import { PlayerName } from '../players/PlayerName';
 import { ChatForm } from './ChatForm';
@@ -28,6 +33,7 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
   sceneId,
   timing,
   visualize,
+  ref,
   ...props
 }) {
   const [position, setPosition] = useState<{ x: number; y: number } | null>(
@@ -58,30 +64,60 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
     (message) => message.sceneId === sceneId,
   );
 
+  const innerRef = useRef<HTMLDivElement>(null);
+  const handleDrop = (
+    draggable: DraggableData,
+    _: DragGestureContext,
+    { relativePosition, droppableRect }: DropInfo,
+  ) => {
+    if (draggable.id !== 'spatial-chat') return;
+    setPosition({
+      x: relativePosition.x / droppableRect.width,
+      y: relativePosition.y / droppableRect.height,
+    });
+  };
+
+  const finalRef = useMergedRef(ref, innerRef);
+  const isSpatialChatDragging = useDndStore(
+    (state) => state.dragging === 'spatial-chat',
+  );
+
   return (
     <Box
       className={clsx(
         'chat-root',
-        'relative',
+        'relative transition-all',
         !!visualize && 'hover:(ring-2 ring-accent)',
+        isSpatialChatDragging &&
+          'ring-2 ring-accent shadow-[0_0_48px_12px_var(--color-accent-light)]',
         className,
       )}
       onContextMenu={handleLongPress}
       data-scene-id={sceneId}
+      ref={finalRef}
       {...props}
     >
-      {children}
-      {position !== null && (
-        <Chatbox
-          position={position}
-          sceneId={sceneId}
-          timing={timing}
-          onClose={() => setPosition(null)}
-        />
-      )}
+      <Droppable
+        id={`spatial-chat-${sceneId}`}
+        onDrop={handleDrop}
+        className="w-full h-full"
+      >
+        {children}
+        {position !== null && (
+          <Chatbox
+            position={position}
+            sceneId={sceneId}
+            timing={timing}
+            onClose={() => setPosition(null)}
+          />
+        )}
+      </Droppable>
       {shownChats.map((message) => (
         <SpatialChatBubble message={message} key={message.id} />
       ))}
+      {isSpatialChatDragging && (
+        <TopographyBackground className="absolute inset-0 z-1 pointer-events-none opacity-20 transition-opacity" />
+      )}
     </Box>
   );
 });
@@ -133,14 +169,29 @@ const Chatbox = withGame<{
       )}
 
       {isMobile && (
-        <Dialog
-          open
-          onOpenChange={(open) => {
-            if (!open) onClose();
-          }}
-        >
-          <Dialog.Content>{content}</Dialog.Content>
-        </Dialog>
+        <>
+          <Box
+            style={{
+              left: position.x * 100 + '%',
+              top: position.y * 100 + '%',
+            }}
+            surface
+            p="sm"
+            border
+            className="absolute -translate-50% z-10000"
+          >
+            <Icon name="chat" />
+            ...
+          </Box>
+          <Dialog
+            open
+            onOpenChange={(open) => {
+              if (!open) onClose();
+            }}
+          >
+            <Dialog.Content>{content}</Dialog.Content>
+          </Dialog>
+        </>
       )}
     </>
   );
