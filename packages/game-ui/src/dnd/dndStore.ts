@@ -10,12 +10,33 @@ export type DraggableData<T = any> = {
   data: T;
 };
 
-export const draggableDataRegistry = new Map<string, any>();
+const draggableDataRegistry = new Map<
+  string,
+  { data: any; refCount: number }
+>();
 export function registerDraggableData(id: string, value: any) {
-  draggableDataRegistry.set(id, value);
+  const existing = draggableDataRegistry.get(id);
+  if (existing) {
+    existing.refCount++;
+  } else {
+    draggableDataRegistry.set(id, { data: value, refCount: 1 });
+  }
   return () => {
-    draggableDataRegistry.delete(id);
+    const entry = draggableDataRegistry.get(id);
+    if (entry) {
+      entry.refCount--;
+      if (entry.refCount === 0) {
+        draggableDataRegistry.delete(id);
+      }
+    }
   };
+}
+export function getDraggableData(id: string) {
+  const entry = draggableDataRegistry.get(id);
+  if (entry) {
+    return entry.data;
+  }
+  return null;
 }
 
 export type DndStoreValue = {
@@ -115,7 +136,7 @@ export function useDraggedData() {
       if (!dragging) return null;
       return {
         id: dragging,
-        data: draggableDataRegistry.get(dragging),
+        data: getDraggableData(dragging),
       };
     }),
   );

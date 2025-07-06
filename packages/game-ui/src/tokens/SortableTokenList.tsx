@@ -7,6 +7,7 @@ import { TokenDragData } from './types';
 
 export interface SortableTokenListProps<T> extends BoxProps {
   onMove: (token: TokenDragData<T>, index: number) => void;
+  debug?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ export interface SortableTokenListProps<T> extends BoxProps {
 export function SortableTokenList<T = any>({
   children: rawChildren,
   onMove,
+  debug,
   ...rest
 }: SortableTokenListProps<T>) {
   const listId = useId();
@@ -33,6 +35,7 @@ export function SortableTokenList<T = any>({
       index={index}
       listId={listId}
       onDrop={(data) => onMove(data, Math.max(0, index))}
+      debug={debug}
     />,
     child,
   ]);
@@ -43,6 +46,7 @@ export function SortableTokenList<T = any>({
       listId={listId}
       onDrop={(data) => onMove(data, children.length)}
       last
+      debug={debug}
     />,
   );
 
@@ -58,11 +62,13 @@ function SortableTokenListGap({
   index,
   listId,
   last,
+  debug,
   ...rest
 }: {
   index: number;
   listId: string;
   last?: boolean;
+  debug?: boolean;
 } & Omit<TokenSpaceProps, 'id'>) {
   const [width, setWidth] = useState(0);
   return (
@@ -83,8 +89,9 @@ function SortableTokenListGap({
           else setWidth(0);
         }}
         className={clsx(
-          'absolute left-1/2 center-x h-full',
+          'absolute left-1/2 top-1/2 center h-120%',
           last ? 'w-full' : 'w-200%',
+          debug && 'outline outline-attention',
         )}
         style={{ minWidth: last ? 40 : gapSize }}
         {...rest}

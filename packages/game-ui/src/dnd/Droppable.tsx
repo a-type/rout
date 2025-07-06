@@ -4,7 +4,7 @@ import { useMergedRef } from '../hooks/useMergedRef';
 import { dndEvents } from './dndEvents';
 import {
   DraggableData,
-  draggableDataRegistry,
+  getDraggableData,
   useDndStore,
   useDraggedData,
 } from './dndStore';
@@ -52,7 +52,7 @@ export function Droppable<T = any>({
   useEffect(() => {
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
-        const data = draggableDataRegistry.get(dragged);
+        const data = getDraggableData(dragged);
         if (stableAccept({ id: dragged, data })) {
           const region = dropRegions.regions.get(id)!;
           const dropInfo: DropInfo = {
