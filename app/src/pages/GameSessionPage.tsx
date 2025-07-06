@@ -26,7 +26,7 @@ import {
   usePlayerThemed,
 } from '@long-game/game-ui';
 import { useParams } from '@verdant-web/react-router';
-import { Suspense } from 'react';
+import { Suspense, useLayoutEffect } from 'react';
 
 export function GameSessionPage() {
   const { sessionId } = useParams<{
@@ -65,15 +65,8 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
   gameSuite,
 }) {
   const sessionId = gameSuite.gameSessionId;
-  const { className, style, palette } = usePlayerThemed(gameSuite.playerId);
-  const backupColor = useDefaultBgColor();
-  useColorMode();
-  const titleColor = !palette
-    ? backupColor
-    : getResolvedColorMode() === 'dark'
-      ? palette.range[11]
-      : palette.range[0];
-  useTitleBarColor(titleColor);
+  const { palette } = usePlayerThemedPage(gameSuite.playerId);
+
   return (
     <TopographyProvider value={{ palette: palette ?? null }}>
       {gameSuite.gameStatus.status === 'complete' && (
@@ -92,7 +85,7 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
         </Box>
       )}
       <DndRoot className="w-full h-full flex flex-col">
-        <GameLayout className={className} style={style}>
+        <GameLayout>
           <GameLayout.Main>
             <Suspense
               fallback={
@@ -127,3 +120,32 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
 });
 
 export default GameSessionPage;
+
+function usePlayerThemedPage(playerId: PrefixedId<'u'>) {
+  const { className, style, palette } = usePlayerThemed(playerId);
+  const backupColor = useDefaultBgColor();
+  useColorMode();
+
+  const titleColor = !palette
+    ? backupColor
+    : getResolvedColorMode() === 'dark'
+      ? palette.range[11]
+      : palette.range[0];
+  useTitleBarColor(titleColor);
+
+  useLayoutEffect(() => {
+    document.body.classList.add(className);
+    for (const [key, value] of Object.entries(style)) {
+      document.body.style.setProperty(key, value as string);
+    }
+
+    return () => {
+      document.body.classList.remove(className);
+      for (const key of Object.keys(style)) {
+        document.body.style.removeProperty(key);
+      }
+    };
+  }, [className, style]);
+
+  return { className, style, palette };
+}

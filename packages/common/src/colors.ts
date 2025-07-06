@@ -18,8 +18,17 @@ import {
 // to abstract these would probably produce
 // a bad experience
 
+export type PlayerColorPalette = {
+  range: string[];
+  default: string;
+  defaultText: string;
+  okHue: number;
+  okRotate: number;
+  okSaturation: number;
+};
+
 /** supported player color palettes */
-export const colors = {
+export const colors: Record<string, PlayerColorPalette> = {
   red: {
     range: [
       red.red1,
@@ -275,7 +284,6 @@ export const colors = {
 };
 
 export type PlayerColorName = keyof typeof colors;
-export type PlayerColorPalette = (typeof colors)[PlayerColorName];
 export const colorNames = Object.keys(colors) as [
   PlayerColorName,
   ...PlayerColorName[],
