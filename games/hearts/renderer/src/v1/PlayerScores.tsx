@@ -1,4 +1,4 @@
-import { Box, clsx, HorizontalList, ScrollArea } from '@a-type/ui';
+import { Box, clsx, HorizontalList } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { getScore } from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
@@ -12,14 +12,14 @@ export interface PlayerScoresProps {
 export const PlayerScores = hooks.withGame<PlayerScoresProps>(
   function PlayerScores({ gameSuite, className }) {
     return (
-      <ScrollArea className={clsx('select-none', className)}>
+      <Box col className={clsx('select-none overflow-y-auto', className)}>
         <div className="text-xs text-bold color-gray-dark mb-sm">Scores</div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-sm items-start">
           {gameSuite.finalState.playerOrder.map((playerId) => (
             <PlayerScore playerId={playerId} key={playerId} />
           ))}
         </div>
-      </ScrollArea>
+      </Box>
     );
   },
 );
