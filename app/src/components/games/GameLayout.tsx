@@ -24,10 +24,9 @@ export const GameLayoutControls = withClassName(
 
 export const GameLayoutSecondaryControls = withClassName(
   'div',
-  '[grid-area:top] w-full h-auto p-2 flex flex-row flex-wrap gap-2 items-center layer-responsive:bg-white',
+  '[grid-area:top] w-full h-auto p-2 flex flex-col gap-sm items-stretch layer-responsive:bg-white',
   'anchor-gameSecondaryControls',
-  'lg:([grid-area:sidebarsecondary] z-0 relative p-md bg-wash w-full flex-nowrap)',
-  'xl:flex-row',
+  'lg:([grid-area:sidebarsecondary] z-0 relative p-md bg-wash w-full)',
 );
 
 export const GameLayout = Object.assign(GameLayoutRoot, {
