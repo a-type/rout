@@ -100,7 +100,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           items="start"
           gap="sm"
           className={clsx(
-            'bg-primary-wash bg-lighten-3 color-black',
+            'bg-primary-wash bg-lighten-2 color-black',
             'shadow-sm',
             'transition-opacity',
             'px-md py-sm',

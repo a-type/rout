@@ -284,7 +284,7 @@ const CardRoot = withClassName(
   withProps(Box, { container: 'reset' }),
   'aspect-[3/4] flex-1 h-auto min-w-24px min-h-32px max-h-50vh select-none @container',
   '[&[data-suit=s]]:(color-black)',
-  '[&[data-suit=c]]:(color-gray-dark color-darken-4)',
+  '[&[data-suit=c]]:(color-gray-ink)',
   '[&[data-suit=h]]:(color-attention-ink)',
   '[&[data-suit=d]]:(color-attention-dark color-lighten-1)',
 );
