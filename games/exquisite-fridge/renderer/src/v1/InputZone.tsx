@@ -29,6 +29,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
         border
       >
         <SortableTokenList<WordItem>
+          //debug
           onMove={async (token, index) => {
             let wordData = token.data;
             if (!token.data.text) {

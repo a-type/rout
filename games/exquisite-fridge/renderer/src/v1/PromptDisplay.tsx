@@ -41,13 +41,15 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
         asChild
       >
         <SpatialChat sceneId={`exquisite-fridge-${prompt.id}`}>
-          <Box gap items="center">
-            <span>The latest part of the story, written by</span>
+          <div className="text-xs">
+            <span className="[line-height:32px] [vertical-align:top]">
+              The latest part of the story, written by
+            </span>
             <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full">
               <PlayerAvatar playerId={prompt.playerId} />
               <PlayerName playerId={prompt.playerId} />
             </div>
-          </Box>
+          </div>
           <Box gap wrap>
             {prompt.words.map((word: WordItem) => (
               <WordTile key={word.id} value={word} disabled />

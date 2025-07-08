@@ -95,6 +95,7 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
       onContextMenu={handleLongPress}
       data-scene-id={sceneId}
       ref={finalRef}
+      asChild
       {...props}
     >
       <Droppable
@@ -111,13 +112,13 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
             onClose={() => setPosition(null)}
           />
         )}
+        {shownChats.map((message) => (
+          <SpatialChatBubble message={message} key={message.id} />
+        ))}
+        {isSpatialChatDragging && (
+          <TopographyBackground className="absolute inset-0 z-1 pointer-events-none opacity-20 transition-opacity" />
+        )}
       </Droppable>
-      {shownChats.map((message) => (
-        <SpatialChatBubble message={message} key={message.id} />
-      ))}
-      {isSpatialChatDragging && (
-        <TopographyBackground className="absolute inset-0 z-1 pointer-events-none opacity-20 transition-opacity" />
-      )}
     </Box>
   );
 });
