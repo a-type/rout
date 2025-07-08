@@ -102,6 +102,8 @@ export class GameSessionSuite<
   // non-reactive
   #chatNextToken: string | null = null;
 
+  #disposes: (() => void)[] = [];
+
   constructor(
     init: {
       currentRoundIndex: number;
@@ -125,6 +127,7 @@ export class GameSessionSuite<
     this.applyGameData(init);
 
     this.subscribeSocket();
+    this.#subscribeWindowEvents();
     this.setupLocalTurnStorage();
 
     if (init.status.status === 'complete') {
@@ -149,6 +152,10 @@ export class GameSessionSuite<
       this.ctx.socket.id,
     );
     this.ctx.socket.disconnect();
+  };
+
+  dispose = () => {
+    this.#disposes.forEach((dispose) => dispose());
   };
 
   /**
@@ -1030,6 +1037,18 @@ export class GameSessionSuite<
   resetGame = () => {
     this.ctx.socket.send({
       type: 'resetGame',
+    });
+  };
+
+  #subscribeWindowEvents = () => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        this.onGameChange();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    this.#disposes.push(() => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     });
   };
 }

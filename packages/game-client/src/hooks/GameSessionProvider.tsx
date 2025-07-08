@@ -49,6 +49,7 @@ export function GameSessionProvider({
       new GameSessionSuite(details, { socket: connectToSocket(details.id) }),
   );
   if (gameSuite.gameSessionId !== gameSessionId) {
+    gameSuite.dispose();
     setGameSuite(
       new GameSessionSuite(details, {
         socket: connectToSocket(details.id),
