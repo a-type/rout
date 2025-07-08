@@ -59,7 +59,7 @@ export function WriteInDialog({}: WriteInDialogProps) {
           <Dialog.Description>
             Enter a single word to write into your blank tile.
           </Dialog.Description>
-          <FormikForm.TextField name="text" required />
+          <FormikForm.TextField name="text" required autoCapitalize="none" />
           <Dialog.Actions>
             <Dialog.Close>Nevermind</Dialog.Close>
             <SubmitButton>Write it!</SubmitButton>
