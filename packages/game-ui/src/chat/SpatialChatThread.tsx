@@ -9,21 +9,35 @@ export interface SpatialChatThreadProps {
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  sceneId: string;
+  position?: { x: number; y: number };
 }
 
 export const SpatialChatThread = withGame<SpatialChatThreadProps>(
-  function ChatThread({ className, chats, open, onOpenChange }) {
+  function ChatThread({
+    className,
+    chats,
+    open,
+    onOpenChange,
+    sceneId,
+    position,
+  }) {
     const latestMessage = chats[chats.length - 1];
 
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <Popover.Trigger asChild>
-          <Box surface border className={clsx('', className)}>
-            {latestMessage.content.slice(0, 50)}
-            {latestMessage.content.length > 50 && '...'}
-          </Box>
+          <Box
+            surface="accent"
+            border
+            className={clsx(
+              'w-8px h-8px',
+              !latestMessage && 'invisible',
+              className,
+            )}
+          />
         </Popover.Trigger>
-        <Popover.Content>
+        <Popover.Content side="bottom" className="p-xs">
           <Popover.Arrow />
           <ChatLog
             log={chats.map((chat) => ({
@@ -33,7 +47,7 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
             }))}
             className="w-300px max-h-400px"
           />
-          <ChatForm className="w-full" />
+          <ChatForm className="w-full" sceneId={sceneId} position={position} />
         </Popover.Content>
       </Popover>
     );

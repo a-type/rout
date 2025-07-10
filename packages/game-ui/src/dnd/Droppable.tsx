@@ -1,3 +1,4 @@
+import { SlotDiv } from '@a-type/ui';
 import { HTMLProps } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { useBindBounds } from './bounds';
@@ -19,6 +20,8 @@ export type DroppableProps<T = any> = Omit<
   onReject?: OnRejectCb<T>;
   disabled?: boolean;
   accept?: Accept<T>;
+  asChild?: boolean;
+  tags?: string[];
 };
 
 export function Droppable<T = any>({
@@ -30,6 +33,8 @@ export function Droppable<T = any>({
   ref: userRef,
   accept,
   onReject,
+  asChild,
+  tags,
   ...rest
 }: DroppableProps<T>) {
   const {
@@ -37,34 +42,36 @@ export function Droppable<T = any>({
     rejected,
     isAnyOver: isDraggedOverThisRegion,
     draggedData,
-  } = useDroppable({ onDrop, onOver, accept, onReject, id, disabled });
+  } = useDroppable({ onDrop, onOver, accept, onReject, id, disabled, tags });
   const bindBounds = useBindBounds(id);
   const finalRef = useMergedRef<HTMLDivElement>(bindBounds, userRef);
 
   if (disabled) {
     return (
-      <div
+      <SlotDiv
         data-role="droppable"
         data-droppable-disabled
         ref={userRef}
+        asChild={asChild}
         {...rest}
       >
         {children}
-      </div>
+      </SlotDiv>
     );
   }
 
   return (
-    <div
+    <SlotDiv
       data-role="droppable"
       ref={finalRef}
       data-over={isOver}
       data-over-rejected={rejected && isDraggedOverThisRegion}
       data-dragged-rejected={rejected}
       data-dragged-accepted={!!draggedData && !rejected}
+      asChild={asChild}
       {...rest}
     >
       {children}
-    </div>
+    </SlotDiv>
   );
 }

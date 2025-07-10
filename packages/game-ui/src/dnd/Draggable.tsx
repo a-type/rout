@@ -38,6 +38,8 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   noHandle?: boolean;
   handleProps?: DraggableHandleProps;
   movedBehavior?: 'remove' | 'fade';
+  tags?: string[];
+  dropOnTag?: string;
 }
 
 function DraggableRoot({
@@ -47,6 +49,8 @@ function DraggableRoot({
   noHandle = false,
   children,
   handleProps,
+  tags,
+  dropOnTag = TAGS.DROPPABLE,
   ...rest
 }: DraggableProps) {
   const isDragged = useDndStore((state) => state.dragging === id);
@@ -59,8 +63,9 @@ function DraggableRoot({
       id,
       data,
       disabled,
+      dropOnTag,
     }),
-    [id, disabled],
+    [id, disabled, dropOnTag],
   );
 
   return (
@@ -69,6 +74,7 @@ function DraggableRoot({
         enabled={isDragged || isCandidate}
         dragDisabled={disabled}
         id={id}
+        tags={tags}
         {...rest}
       >
         <ConditionalHandle disabled={noHandle} {...handleProps}>
@@ -82,6 +88,7 @@ function DraggableRoot({
 export interface DraggableContextValue {
   id: string;
   disabled: boolean;
+  dropOnTag: string;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -102,6 +109,8 @@ export interface DraggableHandleProps
   touchOffset?: number; // Y offset for touch gestures, default is -40px
   onTap?: () => void;
 }
+
+const allowDragInTags = [TAGS.DRAG_INTERACTIVE];
 function DraggableHandle({
   children,
   activationConstraint,
@@ -112,17 +121,18 @@ function DraggableHandle({
   onTap,
   ...rest
 }: DraggableHandleProps) {
+  const { id, dropOnTag } = useDraggableContext();
   const { ref, isCandidate, isDragging, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
     touchOffset,
     onTap,
+    dropOnTag,
   });
 
   const finalRef = useMergedRef<HTMLDivElement>(ref, userRef);
 
-  const { id } = useDraggableContext();
-  useTagBounds(id, TAGS.DRAG_INTERACTIVE, !allowStartFromDragIn);
+  useTagBounds(id, allowDragInTags, !allowStartFromDragIn);
 
   return (
     <motion.div
@@ -134,7 +144,6 @@ function DraggableHandle({
         disabled
           ? undefined
           : (e) => {
-              console.log('prevent menu');
               e.preventDefault();
               e.stopPropagation();
             }
@@ -197,8 +206,10 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   id: string;
   dragDisabled: boolean;
   movedBehavior?: DraggableProps['movedBehavior'];
+  tags?: string[];
 }
 
+const defaultTags = [TAGS.DRAGGABLE];
 /**
  * Selectively portals the dragged element to the overlay layer if it is being dragged.
  * Applies local (relative) movement to non-portaled content if any.
@@ -213,6 +224,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   dragDisabled,
   movedBehavior = 'remove',
   ref,
+  tags = defaultTags,
   ...rest
 }: DndOverlayPortalProps) {
   const overlayEl = useDndStore((state) => state.overlayElement);
@@ -220,7 +232,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   const isPortaling = enabled && !!overlayEl;
 
   const bindBounds = useBindBounds(id);
-  useTagBounds(id, TAGS.DRAGGABLE);
+  useTagBounds(id, tags);
   const mainRef = useMergedRef<HTMLDivElement>(
     ref,
     dragDisabled ? undefined : bindBounds,

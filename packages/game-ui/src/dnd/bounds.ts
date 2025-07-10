@@ -1,7 +1,6 @@
-import { useCallback, useEffect } from 'react';
-import { subscribeToWindow } from '../utils';
+import { useCallback, useEffect, useRef } from 'react';
 import { gestureEvents } from './gestureEvents';
-import { TAGS } from './tags';
+import { DragGestureContext } from './gestureStore';
 
 export interface BoundsRegistryEntry {
   element: HTMLElement;
@@ -9,6 +8,7 @@ export interface BoundsRegistryEntry {
   visible: boolean;
   tags: Set<string>;
   id: string;
+  measuredAt: number;
 }
 
 class BoundsRegistry {
@@ -35,10 +35,8 @@ class BoundsRegistry {
     this.#unsubs = [
       gestureEvents.subscribe('move', this.#onGestureChange),
       gestureEvents.subscribe('start', this.#onGestureChange),
-      subscribeToWindow('resize', this.#onGestureChange),
-      subscribeToWindow('orientationchange', this.#onGestureChange),
     ];
-    return this.destroy();
+    return this.destroy;
   };
   destroy = () => {
     this.#unsubs.forEach((unsub) => unsub());
@@ -82,25 +80,36 @@ class BoundsRegistry {
         visible: true,
         tags: new Set(),
         id,
+        measuredAt: Date.now(),
       });
       this.#intersectionObserver.observe(element);
     }
   };
-  bindTag = (id: string, tag: string) => {
+  bindTags = (id: string, tags: string[]) => {
     const entry = this.#entries.get(id);
     if (entry) {
-      entry.tags.add(tag);
+      tags.forEach((tag) => entry.tags.add(tag));
     }
     return () => {
       const entry = this.#entries.get(id);
       if (entry) {
-        entry.tags.delete(tag);
+        tags.forEach((tag) => entry.tags.delete(tag));
       }
     };
   };
 
   getEntry = (id: string) => {
     return this.#entries.get(id);
+  };
+
+  getByTag = (tag: string) => {
+    const entries: BoundsRegistryEntry[] = [];
+    this.#entries.forEach((entry) => {
+      if (entry.tags.has(tag)) {
+        entries.push(entry);
+      }
+    });
+    return entries;
   };
 
   measure = (id: string) => {
@@ -127,6 +136,7 @@ class BoundsRegistry {
     if (!invoker) {
       invoker = throttled(() => {
         entry.bounds = entry.element.getBoundingClientRect();
+        entry.measuredAt = Date.now();
       }, 200);
       this.#remeasureThrottles.set(entry, invoker);
     }
@@ -134,8 +144,10 @@ class BoundsRegistry {
   };
 
   // automatically update drag-interactive bounds when gesture is active
-  #onGestureChange = () => {
-    this.measureAll(TAGS.DRAG_INTERACTIVE);
+  #onGestureChange = (gesture: DragGestureContext) => {
+    if (gesture.claimId) {
+      this.measureAll(gesture.targetTag);
+    }
   };
 
   #updateElementVisibility = (entry: IntersectionObserverEntry) => {
@@ -237,12 +249,15 @@ export function useBindBounds(id: string) {
     [id],
   );
 }
-export function useTagBounds(id: string, tag: string, skip?: boolean) {
+export function useTagBounds(id: string, tags: string[], skip?: boolean) {
+  const tagsRef = useRef(tags);
+  tagsRef.current = tags;
+  const updateKey = tags.sort().join('|');
   return useEffect(() => {
     if (!skip) {
-      return boundsRegistry.bindTag(id, tag);
+      return boundsRegistry.bindTags(id, tagsRef.current);
     }
-  }, [id, tag, skip]);
+  }, [id, updateKey, skip]);
 }
 
 function throttled<T extends (...args: any[]) => void>(

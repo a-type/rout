@@ -21,11 +21,16 @@ export function DebugView({}: DebugViewProps) {
     ctx.lineWidth = 1;
     for (const [id, entry] of boundsRegistry.__entries) {
       const { bounds: region, tags } = entry;
-      const color = tags.has(TAGS.DROPPABLE)
-        ? 'red'
+      let color = tags.has(TAGS.DROPPABLE)
+        ? '#ff0000'
         : id === useDndStore.getState().dragging
-          ? 'yellow'
-          : 'blue';
+          ? '#ffff00'
+          : '#0000ff';
+      if (entry.measuredAt < Date.now() - 1000) {
+        color += '20'; // faded color for stale entries
+      } else {
+        color += 'ff'; // full opacity for recent entries
+      }
       ctx.strokeStyle = color;
       ctx.strokeRect(region.x, region.y, region.width, region.height);
       ctx.fillStyle = color;

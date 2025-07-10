@@ -16,6 +16,7 @@ export interface DragGestureOptions {
   activationConstraint?: (ctx: DragGestureContext) => boolean;
   touchOffset?: number;
   onTap?: () => void;
+  dropOnTag?: string;
 }
 
 export type DragGestureActivationConstraint =
@@ -138,13 +139,11 @@ export function useDragGesture(options?: DragGestureOptions) {
         cancelDrag();
 
         if (isDragging || isCandidate) {
-          console.log('drag end', gesture);
           if (
             Math.sqrt(
               gesture.totalMovement.x ** 2 + gesture.totalMovement.y ** 2,
             ) < 10
           ) {
-            console.log('tap');
             // if the drag was very small, we consider it a tap.
             options?.onTap?.();
           }
@@ -159,7 +158,9 @@ export function useDragGesture(options?: DragGestureOptions) {
   function beginDrag() {
     const el = ref.current;
     if (!el) return;
-    claim(draggable.id, el);
+    claim(draggable.id, el, {
+      targetTag: options?.dropOnTag,
+    });
     document.body.classList.add('cursor-grabbing');
     if (gesture.type === 'touch' && options?.touchOffset) {
       setVector(gesture.offset, 0, options.touchOffset);

@@ -1,44 +1,61 @@
 import { withGame } from '@long-game/game-client';
-import { ReactNode } from 'react';
+import { HTMLAttributes, ReactNode, useState } from 'react';
 import { Droppable } from '../dnd';
 import { DraggableData } from '../dnd/dndStore';
 import { SpatialChatShimmer } from './SpatialChatShimmer';
 import { SpatialChatThread } from './SpatialChatThread';
 
-export interface ChatSurfaceProps {
+export interface ChatSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   sceneId: string;
   children?: ReactNode;
   className?: string;
+  asChild?: boolean;
+  disabled?: boolean;
 }
+
+const droppableTags = ['spatial-chat-surface'];
 
 export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
   sceneId,
   children,
   className,
   gameSuite,
+  asChild,
+  disabled,
+  ...rest
 }) {
   const chats = gameSuite.chat.filter((message) => message.sceneId === sceneId);
+  const [open, setOpen] = useState(false);
 
   const handleDrop = (draggable: DraggableData) => {
     if (draggable.id !== 'spatial-chat') return;
-    gameSuite.sendChat({
-      sceneId,
-      content: draggable.data.content,
-      position: { x: 0, y: 0 },
-    });
+    setOpen(true);
   };
 
+  if (disabled) {
+    return (
+      <div className={className} {...rest}>
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <SpatialChatShimmer asChild className={className}>
+    <SpatialChatShimmer className={className}>
       <Droppable
-        id={`chat-surface-${sceneId}`}
+        id={sceneId}
         onDrop={handleDrop}
         className="w-full h-full"
+        asChild={asChild}
+        tags={droppableTags}
       >
         {children}
         <SpatialChatThread
           chats={chats}
           className="absolute top-full left-1/2 center"
+          open={open}
+          onOpenChange={setOpen}
+          sceneId={sceneId}
         />
       </Droppable>
     </SpatialChatShimmer>

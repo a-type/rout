@@ -5,6 +5,7 @@ import {
   useTransform,
 } from 'motion/react';
 import { useMemo } from 'react';
+import { ChatSurface } from '../chat/ChatSurface';
 import {
   DefaultDraggedContainer,
   Draggable,
@@ -20,15 +21,17 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   disableChat?: boolean;
 }
 
+const tokenTags = ['token'];
 export function Token({
   children,
   data,
   className,
   handleProps,
   disableChat,
+  id,
   ...rest
 }: TokenProps) {
-  const tokenData = useTokenData(rest.id, data);
+  const tokenData = useTokenData(id, data);
   const isInHand = tokenData.internal.space?.type === 'hand';
 
   const activationConstraint = useMemo<DragGestureActivationConstraint>(
@@ -42,22 +45,27 @@ export function Token({
   );
 
   return (
-    <Draggable
-      {...rest}
-      className={className}
-      DraggedContainer={TokenContainer}
-      data={tokenData}
-      noHandle
-    >
-      <Draggable.Handle
-        activationConstraint={activationConstraint}
-        allowStartFromDragIn={isInHand}
-        className="w-full h-full"
-        {...handleProps}
+    <ChatSurface disabled={disableChat} sceneId={id}>
+      <Draggable
+        {...rest}
+        id={id}
+        className={className}
+        DraggedContainer={TokenContainer}
+        data={tokenData}
+        noHandle
+        tags={tokenTags}
+        dropOnTag="token-space"
       >
-        {children}
-      </Draggable.Handle>
-    </Draggable>
+        <Draggable.Handle
+          activationConstraint={activationConstraint}
+          allowStartFromDragIn={isInHand}
+          className="w-full h-full"
+          {...handleProps}
+        >
+          {children}
+        </Draggable.Handle>
+      </Draggable>
+    </ChatSurface>
   );
 }
 

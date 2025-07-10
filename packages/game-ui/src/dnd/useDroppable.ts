@@ -29,6 +29,8 @@ export type Accept<T> = (draggable: DraggableData<T>) => boolean;
 
 const defaultAccept: Accept<any> = () => true;
 
+const defaultTags = [TAGS.DROPPABLE, TAGS.DRAG_INTERACTIVE];
+
 export function useDroppable<T>({
   onDrop,
   accept,
@@ -36,6 +38,7 @@ export function useDroppable<T>({
   id,
   onOver,
   disabled,
+  tags = defaultTags,
 }: {
   onDrop?: OnDropCb<T>;
   accept?: Accept<T>;
@@ -43,6 +46,7 @@ export function useDroppable<T>({
   id: string;
   onOver?: OnOverCb<T>;
   disabled?: boolean;
+  tags?: string[];
 }) {
   const dropCb = useStableCallback(onDrop);
   const stableAccept = useStableCallback(accept || defaultAccept);
@@ -95,8 +99,7 @@ export function useDroppable<T>({
     stableOnOver?.(unvalidatedOver);
   }, [stableOnOver, unvalidatedOver]);
 
-  useTagBounds(id, TAGS.DROPPABLE);
-  useTagBounds(id, TAGS.DRAG_INTERACTIVE);
+  useTagBounds(id, tags);
 
   return {
     isAcceptedOver,
