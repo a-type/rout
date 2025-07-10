@@ -15,14 +15,13 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../hooks/useMergedRef';
-import { activeDragRef } from './DebugView';
+import { useBindBounds, useTagBounds } from './bounds';
 import { registerDraggableData, useDndStore } from './dndStore';
-import { DraggedBox } from './draggedBox';
 import { DragGestureContext, gesture } from './gestureStore';
+import { TAGS } from './tags';
 import { flipTransition } from './transitions';
 import {
   DragGestureActivationConstraint,
@@ -55,25 +54,13 @@ function DraggableRoot({
 
   useEffect(() => registerDraggableData(id, data), [id, data]);
 
-  const box = useState(() => new DraggedBox())[0];
-
-  const isMoving = isDragged || isCandidate;
-  useEffect(() => {
-    activeDragRef.current = {
-      id,
-      disabled,
-      box,
-    };
-  }, [isMoving, box, id, disabled]);
-
   const ctxValue = useMemo(
     () => ({
       id,
       data,
       disabled,
-      box,
     }),
-    [id, disabled, box],
+    [id, disabled],
   );
 
   return (
@@ -81,7 +68,6 @@ function DraggableRoot({
       <DndOverlayPortal
         enabled={isDragged || isCandidate}
         dragDisabled={disabled}
-        box={box}
         id={id}
         {...rest}
       >
@@ -96,7 +82,6 @@ function DraggableRoot({
 export interface DraggableContextValue {
   id: string;
   disabled: boolean;
-  box: DraggedBox;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -135,6 +120,9 @@ function DraggableHandle({
   });
 
   const finalRef = useMergedRef<HTMLDivElement>(ref, userRef);
+
+  const { id } = useDraggableContext();
+  useTagBounds(id, TAGS.DRAG_INTERACTIVE, !allowStartFromDragIn);
 
   return (
     <motion.div
@@ -208,7 +196,6 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   draggedClassName?: string;
   id: string;
   dragDisabled: boolean;
-  box: DraggedBox;
   movedBehavior?: DraggableProps['movedBehavior'];
 }
 
@@ -224,7 +211,6 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   className,
   id,
   dragDisabled,
-  box,
   movedBehavior = 'remove',
   ref,
   ...rest
@@ -233,9 +219,11 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
 
   const isPortaling = enabled && !!overlayEl;
 
+  const bindBounds = useBindBounds(id);
+  useTagBounds(id, TAGS.DRAGGABLE);
   const mainRef = useMergedRef<HTMLDivElement>(
     ref,
-    dragDisabled ? undefined : box.bind,
+    dragDisabled ? undefined : bindBounds,
   );
 
   return (

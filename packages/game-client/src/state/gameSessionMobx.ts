@@ -1041,14 +1041,15 @@ export class GameSessionSuite<
   };
 
   #subscribeWindowEvents = () => {
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        this.onGameChange();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    this.#disposes.push(() => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    });
+    // FIXME: causing infinite suspense???
+    // const onVisibilityChange = () => {
+    //   if (document.visibilityState === 'visible') {
+    //     this.onGameChange();
+    //   }
+    // };
+    // document.addEventListener('visibilitychange', onVisibilityChange);
+    // this.#disposes.push(() => {
+    //   document.removeEventListener('visibilitychange', onVisibilityChange);
+    // });
   };
 }

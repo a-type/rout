@@ -200,6 +200,10 @@ export const gameDefinition: GameDefinition<
         if (wordIndex !== -1) {
           hand.splice(wordIndex, 1);
         }
+        // rewrite freebie ids as they are defined by the client arbitrarily
+        if (isValidFreebie(word.text)) {
+          word.id = random.id();
+        }
         // reset new
         word.isNew = false;
         // add word to step

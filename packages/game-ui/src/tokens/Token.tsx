@@ -17,6 +17,7 @@ import { useTokenData } from './types';
 
 export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
+  disableChat?: boolean;
 }
 
 export function Token({
@@ -24,6 +25,7 @@ export function Token({
   data,
   className,
   handleProps,
+  disableChat,
   ...rest
 }: TokenProps) {
   const tokenData = useTokenData(rest.id, data);

@@ -1,22 +1,23 @@
 import { Box, BoxProps, clsx, Dialog, Icon, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { TopographyBackground } from '@long-game/visual-components';
 import {
   MouseEvent as ReactMouseEvent,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { subscribe } from 'valtio';
 import { DropInfo, Droppable } from '../dnd';
-import { DraggableData, useDndStore } from '../dnd/dndStore';
+import { DraggableData } from '../dnd/dndStore';
 import { DragGestureContext } from '../dnd/gestureStore';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { PlayerAvatar } from '../players/PlayerAvatar';
 import { PlayerName } from '../players/PlayerName';
 import { ChatForm } from './ChatForm';
+import { SpatialChatShimmer } from './SpatialChatShimmer';
 import { spatialChatState } from './spatialChatState';
 
 export interface SpatialChatProps extends BoxProps {
@@ -63,6 +64,23 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
   const shownChats = gameSuite.chat.filter(
     (message) => message.sceneId === sceneId,
   );
+  const groupedByPosition = useMemo(
+    () =>
+      gameSuite.chat
+        .filter((message) => message.sceneId === sceneId)
+        .reduce(
+          (acc, message) => {
+            const key = `${message.position?.x ?? 0}-${message.position?.y ?? 0}`;
+            if (!acc[key]) {
+              acc[key] = [];
+            }
+            acc[key].push(message);
+            return acc;
+          },
+          {} as Record<string, GameSessionChatMessage[]>,
+        ),
+    [gameSuite.chat, sceneId],
+  );
 
   const innerRef = useRef<HTMLDivElement>(null);
   const handleDrop = (
@@ -78,24 +96,18 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
   };
 
   const finalRef = useMergedRef(ref, innerRef);
-  const isSpatialChatDragging = useDndStore(
-    (state) => state.dragging === 'spatial-chat',
-  );
 
   return (
-    <Box
+    <SpatialChatShimmer
       className={clsx(
         'chat-root',
         'relative transition-all',
         !!visualize && 'hover:(ring-2 ring-accent)',
-        isSpatialChatDragging &&
-          'ring-2 ring-accent shadow-[0_0_48px_12px_var(--color-accent-light)]',
         className,
       )}
       onContextMenu={handleLongPress}
       data-scene-id={sceneId}
       ref={finalRef}
-      asChild
       {...props}
     >
       <Droppable
@@ -115,11 +127,8 @@ export const SpatialChat = withGame<SpatialChatProps>(function SpatialChat({
         {shownChats.map((message) => (
           <SpatialChatBubble message={message} key={message.id} />
         ))}
-        {isSpatialChatDragging && (
-          <TopographyBackground className="absolute inset-0 z-1 pointer-events-none opacity-20 transition-opacity" />
-        )}
       </Droppable>
-    </Box>
+    </SpatialChatShimmer>
   );
 });
 

@@ -100,7 +100,7 @@ function FreebieWords({ className }: { className?: string }) {
         <WordTile
           key={word}
           value={{
-            id: `freebie-${Math.random().toString(36).substring(2, 15)}`,
+            id: `freebie-${word}`,
             text: word,
             isWriteIn: false,
             isNew: false,

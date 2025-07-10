@@ -1043,6 +1043,9 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-renderer':
+        specifier: workspace:*
+        version: link:../game-renderer
       '@long-game/visual-components':
         specifier: workspace:*
         version: link:../visual-components

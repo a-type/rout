@@ -2,9 +2,10 @@ import { useAnimationFrame, useStableCallback } from '@a-type/ui';
 import { MotionValue, motionValue } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useWindowEvent } from '../hooks/useWindowEvent';
+import { boundsRegistry } from './bounds';
 import { useDndStore } from './dndStore';
-import { dropRegions } from './DropRegions';
 import { gestureEvents } from './gestureEvents';
+import { TAGS } from './tags';
 
 export const gesture = {
   active: false,
@@ -82,7 +83,9 @@ export function useMonitorGlobalGesture() {
   }
 
   const updateOver = () => {
-    const overlapped = dropRegions.getContainingRegions(gesture.currentRaw);
+    const overlapped = boundsRegistry.getContainingRegions(gesture.currentRaw, {
+      tag: TAGS.DROPPABLE,
+    });
     if (overlapped.length > 0) {
       useDndStore.getState().setOverRegion(overlapped[0].id);
     } else {
@@ -192,7 +195,9 @@ export function useMonitorGlobalGesture() {
           setVector(gesture.currentRaw, coord.x, coord.y);
 
           // track overlapping regions
-          const overlapped = dropRegions.getContainingRegions(coord);
+          const overlapped = boundsRegistry.getContainingRegions(coord, {
+            tag: TAGS.DROPPABLE,
+          });
           if (overlapped.length > 0) {
             useDndStore.getState().setOverRegion(overlapped[0].id);
           } else {
