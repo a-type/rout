@@ -106,6 +106,7 @@ function FreebieWords({ className }: { className?: string }) {
             isNew: false,
           }}
           className="bg-yellow-200"
+          disableChat
         />
       ))}
     </Box>

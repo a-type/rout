@@ -27,15 +27,26 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <Popover.Trigger asChild>
-          <Box
-            surface="accent"
-            border
-            className={clsx(
-              'w-8px h-8px',
-              !latestMessage && 'invisible',
-              className,
-            )}
-          />
+          {latestMessage ? (
+            <Box
+              layout="center center"
+              className={clsx(
+                'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
+                className,
+              )}
+            >
+              <Box
+                surface="accent"
+                border
+                className={clsx(
+                  /* Invisible outer area to increase touch target size */
+                  'w-8px h-8px',
+                )}
+              />
+            </Box>
+          ) : (
+            <div className={className} />
+          )}
         </Popover.Trigger>
         <Popover.Content side="bottom" className="p-xs">
           <Popover.Arrow />

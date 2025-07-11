@@ -668,6 +668,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       {
         type: 'chat',
         messages: [message],
+        sceneId: message.sceneId ?? null,
       },
       {
         to: message.recipientIds,
@@ -709,12 +710,20 @@ export class GameSession extends DurableObject<ApiBindings> {
   };
   async getChatForPlayer(
     playerId: PrefixedId<'u'>,
-    pagination: {
-      limit: number;
-      nextToken?: string | null;
-    } = { limit: 100 },
+    {
+      pagination,
+      filter,
+    }: {
+      pagination?: {
+        limit: number;
+        nextToken?: string | null;
+      };
+      filter?: {
+        sceneId?: string | null;
+      };
+    },
   ) {
-    const { limit, nextToken } = pagination;
+    const { limit = 100, nextToken } = pagination ?? {};
     if (limit > 100) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -738,6 +747,11 @@ export class GameSession extends DurableObject<ApiBindings> {
 
     if (before) {
       sql = sql.where('ChatMessage.createdAt', '<', before);
+    }
+    if (filter?.sceneId) {
+      sql = sql.where('ChatMessage.sceneId', '=', filter.sceneId);
+    } else {
+      sql = sql.where('ChatMessage.sceneId', 'is', null);
     }
     if (!gameIsOver) {
       sql = sql
@@ -824,6 +838,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     await this.#socketHandler.send({
       type: 'chat',
       messages: updated.map(this.#hydrateChatMessage),
+      sceneId: updated[0].sceneId ?? null,
     });
   }
 

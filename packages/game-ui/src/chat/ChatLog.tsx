@@ -1,4 +1,10 @@
-import { RelativeTime, ScrollArea, withClassName } from '@a-type/ui';
+import {
+  Box,
+  clsx,
+  RelativeTime,
+  useStayScrolledToBottom,
+  withClassName,
+} from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
 import { ChatRenderer } from '@long-game/game-renderer';
 import { ReactNode } from 'react';
@@ -11,6 +17,7 @@ export interface ChatLogProps {
 export const ChatLog = withGame<ChatLogProps>(function ChatLog({
   gameSuite,
   log,
+  className,
   ...props
 }) {
   const items: ReactNode[] = [];
@@ -50,15 +57,24 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
     }
   }
 
+  const scrollProps = useStayScrolledToBottom();
+
   return (
-    <ChatLogRoot {...props}>
-      <ScrollArea
-        className="flex flex-col min-h-0 overflow-y-auto flex-1 px-sm"
-        stickToBottom
-      >
-        <ChatLogListRoot>{items}</ChatLogListRoot>
-      </ScrollArea>
-    </ChatLogRoot>
+    <Box
+      grow
+      container="reset"
+      overflow="auto-y"
+      full
+      gap="xs"
+      p
+      col
+      items="stretch"
+      className={clsx('pt-xl', className)}
+      {...props}
+      {...scrollProps}
+    >
+      {items}
+    </Box>
   );
 });
 

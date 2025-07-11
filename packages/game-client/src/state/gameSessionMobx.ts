@@ -41,6 +41,8 @@ import {
 } from './api.js';
 import { GameSocket } from './socket.js';
 
+const ROOT_CHAT_SCENE_ID = 'null' as const;
+
 export type PlayerInfo = {
   id: PrefixedId<'u'>;
   displayName: string;
@@ -68,7 +70,16 @@ export class GameSessionSuite<
     GameSessionPlayerStatus
   >;
   @observable accessor players!: Record<PrefixedId<'u'>, PlayerInfo>;
-  @observable accessor chat: GameSessionChatMessage[] = [];
+  @observable private accessor sceneChats: Record<
+    string,
+    {
+      nextToken: string | null;
+      messages: GameSessionChatMessage[];
+      empty: boolean;
+    }
+  > = {
+    [ROOT_CHAT_SCENE_ID]: { messages: [], nextToken: null, empty: false },
+  };
   @observable accessor gameStatus!: GameStatus;
   /**
    * Accessing rounds directly is not advisable, as they
@@ -417,6 +428,18 @@ export class GameSessionSuite<
     return null;
   };
 
+  @computed get chat() {
+    return this.sceneChats.null.messages;
+  }
+
+  getSceneChat(sceneId: string) {
+    return (
+      this.sceneChats[sceneId] ?? {
+        messages: [],
+      }
+    ).messages;
+  }
+
   @computed get combinedLog() {
     const chat = this.chat;
 
@@ -699,11 +722,13 @@ export class GameSessionSuite<
     this.removeChat(tempId);
   };
 
-  @action loadMoreChat = async () => {
-    if (this.#chatNextToken) {
+  @action loadMoreChat = async (sceneId: string | null = null) => {
+    const sceneChat = this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID];
+    if (!sceneChat?.empty) {
       this.ctx.socket.send({
         type: 'requestChat',
-        nextToken: this.#chatNextToken,
+        nextToken: sceneChat?.nextToken ?? null,
+        sceneId,
       });
     }
   };
@@ -801,23 +826,31 @@ export class GameSessionSuite<
     this.ctx.socket.subscribe('nextRoundScheduled', this.onNextRoundScheduled);
   };
 
-  private onChat = (msg: ServerChatMessage) => {
-    msg.messages.forEach(this.addChat);
+  @action private onChat = (msg: ServerChatMessage) => {
+    let sceneChat = this.sceneChats[msg.sceneId ?? ROOT_CHAT_SCENE_ID];
+    if (!sceneChat) {
+      sceneChat = this.sceneChats[msg.sceneId ?? ROOT_CHAT_SCENE_ID] = {
+        messages: [],
+        nextToken: null,
+        empty: false,
+      };
+    }
+
+    msg.messages.forEach((msg) => {
+      sceneChat.messages = sceneChat.messages.filter((c) => c.id !== msg.id);
+      sceneChat.messages.push(msg);
+      sceneChat.messages.sort((a, b) =>
+        new Date(a.createdAt) > new Date(b.createdAt) ? 1 : -1,
+      );
+    });
     if (msg.nextToken !== undefined) {
-      this.#chatNextToken = msg.nextToken;
+      sceneChat.nextToken = msg.nextToken;
     }
   };
 
-  @action private addChat = (msg: GameSessionChatMessage) => {
-    this.chat = this.chat.filter((c) => c.id !== msg.id);
-    this.chat.push(msg);
-    this.chat.sort((a, b) =>
-      new Date(a.createdAt) > new Date(b.createdAt) ? 1 : -1,
-    );
-  };
-
-  @action private removeChat = (id: string) => {
-    this.chat = this.chat.filter((msg) => msg.id !== id);
+  @action private removeChat = (id: string, sceneId: string | null = null) => {
+    this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID].messages =
+      this.sceneChats.null.messages.filter((msg) => msg.id !== id);
   };
 
   @action private onPlayerStatusChange = (

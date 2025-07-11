@@ -27,6 +27,7 @@ export type ServerPlayerStatusChangeMessage = z.infer<
 export const serverChatMessageShape = baseServerMessageShape.extend({
   type: z.literal('chat'),
   messages: gameSessionChatMessageShape.array(),
+  sceneId: z.string().nullable(),
   nextToken: z.string().nullable().optional(),
 });
 export type ServerChatMessage = z.infer<typeof serverChatMessageShape>;
@@ -167,6 +168,7 @@ export type ClientSubmitTurnMessage = z.infer<
 export const clientRequestChatMessageShape = baseClientMessageShape.extend({
   type: z.literal('requestChat'),
   nextToken: z.string().nullable(),
+  sceneId: z.string().nullable(),
 });
 export type ClientRequestChatMessage = z.infer<
   typeof clientRequestChatMessageShape

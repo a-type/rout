@@ -2,19 +2,14 @@ import { env, runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 
 declare module 'cloudflare:test' {
-  interface ProvidedEnv {
-    NAMESPACE: KVNamespace;
-  }
-
-  // ...or if you have an existing `Env` type...
   interface ProvidedEnv extends ApiBindings {}
 }
 
 describe('GameSessionState', () => {
   describe('Playing number guess', () => {
     it('returns correct historical player states', async () => {
-      const id = env.GAME_SESSION_STATE.idFromName('game-session-1');
-      const stub = env.GAME_SESSION_STATE.get(id);
+      const id = env.GAME_SESSION.idFromName('game-session-1');
+      const stub = env.GAME_SESSION.get(id);
       const response = await runInDurableObject(stub, async (instance) => {
         await instance.initialize({
           id: 'gs-1',
@@ -23,6 +18,8 @@ describe('GameSessionState', () => {
           members: [
             {
               id: 'u-player',
+              color: 'gray',
+              displayName: 'User Player',
             },
           ],
           randomSeed: 'seed',

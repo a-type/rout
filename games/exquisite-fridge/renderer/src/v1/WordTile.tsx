@@ -8,6 +8,7 @@ export interface WordTileProps {
   className?: string;
   disabled?: boolean;
   movedBehavior?: 'fade' | 'remove';
+  disableChat?: boolean;
 }
 
 export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
@@ -16,6 +17,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
   className,
   disabled,
   movedBehavior = 'fade',
+  disableChat,
 }) {
   const isBlank = value.text === '';
   const isHandwritten = !!value.isWriteIn;
@@ -35,6 +37,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
         touchOffset: -60,
       }}
       movedBehavior={movedBehavior}
+      disableChat={disableChat}
     >
       <Box
         className={clsx(

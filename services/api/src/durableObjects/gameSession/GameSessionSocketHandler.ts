@@ -111,13 +111,14 @@ export class GameSessionSocketHandler {
           // send start of chat backlog to the new player (this will enqueue for delivery later)
           const { messages, nextToken } =
             await this.gameSession.getChatForPlayer(userId, {
-              limit: 100,
+              pagination: { limit: 100 },
             });
           if (messages.length) {
             this.send({
               type: 'chat',
               messages: messages,
               nextToken,
+              sceneId: null,
             });
           }
         })();
@@ -335,8 +336,13 @@ export class GameSessionSocketHandler {
     const { messages, nextToken } = await this.gameSession.getChatForPlayer(
       info.userId,
       {
-        limit: 25,
-        nextToken: msg.nextToken,
+        pagination: {
+          limit: 25,
+          nextToken: msg.nextToken,
+        },
+        filter: {
+          sceneId: msg.sceneId,
+        },
       },
     );
     // only reply to this socket
@@ -345,6 +351,7 @@ export class GameSessionSocketHandler {
       messages: messages,
       nextToken,
       responseTo: msg.messageId,
+      sceneId: msg.sceneId ?? null,
     };
     ws.send(JSON.stringify(reply));
   };

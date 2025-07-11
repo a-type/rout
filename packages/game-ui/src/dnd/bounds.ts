@@ -137,7 +137,7 @@ class BoundsRegistry {
       invoker = throttled(() => {
         entry.bounds = entry.element.getBoundingClientRect();
         entry.measuredAt = Date.now();
-      }, 200);
+      }, 500);
       this.#remeasureThrottles.set(entry, invoker);
     }
     invoker();

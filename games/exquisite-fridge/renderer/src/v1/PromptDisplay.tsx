@@ -43,7 +43,7 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
             <PlayerName playerId={prompt.playerId} />
           </div>
         </div>
-        <Box gap wrap>
+        <Box gap wrap items="center">
           {prompt.words.map((word: WordItem) => (
             <WordTile key={word.id} value={word} disabled />
           ))}

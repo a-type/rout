@@ -158,16 +158,6 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
                   />
                 </span>
               )}
-              {message.sceneId && (
-                <Button
-                  size="icon-small"
-                  color="ghost"
-                  className="p-0 ml-auto"
-                  onClick={revealSpatialChat}
-                >
-                  <Icon name="location" />
-                </Button>
-              )}
             </Box>
             {!compact && (
               <ChatReactions
