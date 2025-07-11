@@ -377,6 +377,9 @@ export class GameSessionSuite<
       typeof turnData === 'function'
         ? (turnData as any)(this.getPreviousTurnForUpdater())
         : turnData;
+    if (!dataToValidate) {
+      return null;
+    }
     const err = this.gameDefinition.validatePartialTurn({
       members: this.members,
       playerState: baseState,
@@ -406,6 +409,9 @@ export class GameSessionSuite<
       typeof turnData === 'function'
         ? (turnData as any)(this.getPreviousTurnForUpdater())
         : turnData;
+    if (!dataToValidate) {
+      return null; // no turn data to validate
+    }
     const params = {
       members: this.members,
       playerState: baseState,

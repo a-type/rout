@@ -21,7 +21,7 @@ export function DebugView({}: DebugViewProps) {
     ctx.lineWidth = 1;
     for (const [id, entry] of boundsRegistry.__entries) {
       const { bounds: region, tags } = entry;
-      let color = tags.has(TAGS.DROPPABLE)
+      let color = tags[TAGS.DROPPABLE]
         ? '#ff0000'
         : id === useDndStore.getState().dragging
           ? '#ffff00'

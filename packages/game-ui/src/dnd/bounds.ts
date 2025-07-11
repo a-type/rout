@@ -6,7 +6,9 @@ export interface BoundsRegistryEntry {
   element: HTMLElement;
   bounds: DOMRect;
   visible: boolean;
-  tags: Set<string>;
+  // this actually uses ref counting so multiple components can declaratively add tags
+  // and we only remove them when the last one is unbound
+  tags: Record<string, number>;
   id: string;
   measuredAt: number;
 }
@@ -78,24 +80,31 @@ class BoundsRegistry {
         element,
         bounds,
         visible: true,
-        tags: new Set(),
+        tags: {},
         id,
         measuredAt: Date.now(),
       });
       this.#intersectionObserver.observe(element);
     }
   };
-  bindTags = (id: string, tags: string[]) => {
+  addTags = (id: string, tags: string[]) => {
     const entry = this.#entries.get(id);
     if (entry) {
-      tags.forEach((tag) => entry.tags.add(tag));
+      tags.forEach((tag) => (entry.tags[tag] = (entry.tags[tag] || 0) + 1));
     }
-    return () => {
-      const entry = this.#entries.get(id);
-      if (entry) {
-        tags.forEach((tag) => entry.tags.delete(tag));
-      }
-    };
+  };
+  removeTags = (id: string, tags: string[]) => {
+    const entry = this.#entries.get(id);
+    if (entry) {
+      tags.forEach((tag) => {
+        if (entry.tags[tag]) {
+          entry.tags[tag]--;
+          if (entry.tags[tag] === 0) {
+            delete entry.tags[tag];
+          }
+        }
+      });
+    }
   };
 
   getEntry = (id: string) => {
@@ -105,7 +114,7 @@ class BoundsRegistry {
   getByTag = (tag: string) => {
     const entries: BoundsRegistryEntry[] = [];
     this.#entries.forEach((entry) => {
-      if (entry.tags.has(tag)) {
+      if (entry.tags[tag]) {
         entries.push(entry);
       }
     });
@@ -121,7 +130,7 @@ class BoundsRegistry {
 
   measureAll = (tag: string) => {
     this.#entries.forEach((entry) => {
-      if (entry.visible && entry.tags.has(tag)) {
+      if (entry.visible && entry.tags[tag]) {
         this.#measureElement(entry);
       }
     });
@@ -185,7 +194,7 @@ class BoundsRegistry {
       const overlappedArea = this.#calculateOverlappedArea(rect, region);
       if (overlappedArea > areaThreshold) {
         if (tag) {
-          if (entry.tags.has(tag)) {
+          if (entry.tags[tag]) {
             overlaps.push({ overlappedArea, ...entry });
           }
         } else {
@@ -210,7 +219,7 @@ class BoundsRegistry {
         point.y <= rect.bottom
       ) {
         if (tag) {
-          if (entry.tags.has(tag)) {
+          if (entry.tags[tag]) {
             containing.push(entry);
           }
         } else {
@@ -255,7 +264,11 @@ export function useTagBounds(id: string, tags: string[], skip?: boolean) {
   const updateKey = tags.sort().join('|');
   return useEffect(() => {
     if (!skip) {
-      return boundsRegistry.bindTags(id, tagsRef.current);
+      const tags = tagsRef.current;
+      boundsRegistry.addTags(id, tags);
+      return () => {
+        boundsRegistry.removeTags(id, tags);
+      };
     }
   }, [id, updateKey, skip]);
 }
