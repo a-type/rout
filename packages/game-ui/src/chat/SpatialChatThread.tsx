@@ -58,7 +58,11 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
             }))}
             className="w-300px max-h-400px"
           />
-          <ChatForm className="w-full" sceneId={sceneId} position={position} />
+          <ChatForm
+            className="w-full px-md"
+            sceneId={sceneId}
+            position={position}
+          />
         </Popover.Content>
       </Popover>
     );

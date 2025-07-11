@@ -29,7 +29,7 @@ export function GameLogChatInput() {
     [],
   );
 
-  return <ChatForm toolsRef={toolsRef} className="px-sm" />;
+  return <ChatForm toolsRef={toolsRef} className="px-md" />;
 }
 
 const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {

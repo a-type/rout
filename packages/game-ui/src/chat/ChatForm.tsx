@@ -53,8 +53,8 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
             timing === 'endgame'
               ? -1
               : timing === 'round'
-              ? latestRoundIndex
-              : undefined;
+                ? latestRoundIndex
+                : undefined;
           gameSuite.sendChat({
             content: values.text,
             position,
@@ -64,7 +64,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
           resetForm();
           onSent?.();
         }}
-        className="!gap-0 !p-0"
+        className="!gap-0"
       >
         {(form) => (
           <>

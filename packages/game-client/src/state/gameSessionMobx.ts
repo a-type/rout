@@ -587,7 +587,7 @@ export class GameSessionSuite<
 
   @action submitTurn = async ({
     data: override,
-    delay,
+    delay = 5000,
   }: {
     data?: GetTurnData<TGame> | null;
     delay?: number;
