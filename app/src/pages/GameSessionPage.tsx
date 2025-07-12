@@ -17,10 +17,11 @@ import {
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { GameSessionProvider, withGame } from '@long-game/game-client';
-import { GameRenderer } from '@long-game/game-renderer';
+import { ChatRenderer, GameRenderer } from '@long-game/game-renderer';
 import {
   DelayedSubmitUndo,
   DndRoot,
+  RendererProvider,
   SpatialChatDraggable,
   TopographyProvider,
   usePlayerThemed,
@@ -61,6 +62,9 @@ export function GameSessionPage() {
   );
 }
 
+const providerValue = {
+  ChatRendererComponent: ChatRenderer,
+};
 const GameSessionRenderer = withGame(function GameSessionRenderer({
   gameSuite,
 }) {
@@ -84,37 +88,39 @@ const GameSessionRenderer = withGame(function GameSessionRenderer({
           </ScrollTicker>
         </Box>
       )}
-      <DndRoot className="w-full h-full flex flex-col">
-        <GameLayout>
-          <GameLayout.Main>
-            <Suspense
-              fallback={
-                <Box full layout="center center">
-                  <Spinner />
-                </Box>
-              }
-            >
-              {gameSuite.gameStatus.status === 'pending' ? (
-                <GameSetup gameSessionId={sessionId} />
-              ) : (
-                <GameRenderer />
+      <RendererProvider value={providerValue}>
+        <DndRoot className="w-full h-full flex flex-col">
+          <GameLayout>
+            <GameLayout.Main>
+              <Suspense
+                fallback={
+                  <Box full layout="center center">
+                    <Spinner />
+                  </Box>
+                }
+              >
+                {gameSuite.gameStatus.status === 'pending' ? (
+                  <GameSetup gameSessionId={sessionId} />
+                ) : (
+                  <GameRenderer />
+                )}
+              </Suspense>
+              {gameSuite.gameStatus.status !== 'pending' && (
+                <ErrorBoundary>
+                  <Suspense>
+                    <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                  </Suspense>
+                </ErrorBoundary>
               )}
-            </Suspense>
-            {gameSuite.gameStatus.status !== 'pending' && (
-              <ErrorBoundary>
-                <Suspense>
-                  <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
-                </Suspense>
-              </ErrorBoundary>
+            </GameLayout.Main>
+            <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
+            <DelayedSubmitUndo />
+            {gameSuite.gameStatus.status === 'abandoned' && (
+              <GameAbandonedNotice />
             )}
-          </GameLayout.Main>
-          <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
-          <DelayedSubmitUndo />
-          {gameSuite.gameStatus.status === 'abandoned' && (
-            <GameAbandonedNotice />
-          )}
-        </GameLayout>
-      </DndRoot>
+          </GameLayout>
+        </DndRoot>
+      </RendererProvider>
     </TopographyProvider>
   );
 });

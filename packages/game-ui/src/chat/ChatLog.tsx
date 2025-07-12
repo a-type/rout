@@ -6,8 +6,8 @@ import {
   withClassName,
 } from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
-import { ChatRenderer } from '@long-game/game-renderer';
 import { ReactNode } from 'react';
+import { useRendererContext } from '../RendererProvider';
 
 export interface ChatLogProps {
   log: GameLogItem<any>[];
@@ -20,6 +20,8 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
   className,
   ...props
 }) {
+  const { ChatRendererComponent: ChatRenderer } = useRendererContext();
+
   const items: ReactNode[] = [];
   let startRoundIndex = -1;
   for (let i = 0; i < log.length; i++) {
