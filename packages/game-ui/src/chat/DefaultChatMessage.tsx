@@ -119,7 +119,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
         </Box>
         {!compact && (
           <Box
-            className="text-xs text-gray-dark px-sm"
+            className="text-xs color-gray-dark px-sm"
             full="width"
             gap
             justify="between"

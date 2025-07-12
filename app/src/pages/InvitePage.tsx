@@ -81,7 +81,7 @@ function LoggedOutInvite({
       <Button asChild>
         <Link to="/login?tab=signup">Sign Up</Link>
       </Button>
-      <Box className="text-gray-7">
+      <Box className="color-gray-dark">
         Have an account already?{' '}
         <Button asChild className="inline-flex" size="small" color="ghost">
           <Link to="/login">

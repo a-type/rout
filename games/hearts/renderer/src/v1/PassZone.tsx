@@ -89,7 +89,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
             }
           })}
         </CardGrid>
-        <Box className="text-gray-dark text-xs md:text-sm">
+        <Box className="color-gray-dark text-xs md:text-sm">
           Drag 3 cards here to pass to another player
         </Box>
       </TokenSpace>

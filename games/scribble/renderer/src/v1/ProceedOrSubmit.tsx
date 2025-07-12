@@ -33,7 +33,7 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
     return (
       <Box d="col" items="center" gap>
         {debouncedError && (
-          <Box p gap items="center" className="text-attention-ink">
+          <Box p gap items="center" className="color-attention-ink">
             <Icon name="lightbulb" />
             {debouncedError.message}
           </Box>

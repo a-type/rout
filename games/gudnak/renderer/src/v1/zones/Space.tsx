@@ -1,17 +1,17 @@
-import { Box, clsx } from '@a-type/ui';
-import {
-  type CardStack,
-  type Card as CardType,
-  Target,
-  Coordinate,
-  cardDefinitions,
-} from '@long-game/game-gudnak-definition/v1';
-import { Card } from '../card/Card';
-import { isCard, isCoordinate, Selection } from '../gameAction/useSelect';
-import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
-import { hooks } from '../gameClient';
+import { clsx } from '@a-type/ui';
 import { useDroppable } from '@dnd-kit/core';
 import { PrefixedId } from '@long-game/common';
+import {
+  cardDefinitions,
+  type CardStack,
+  type Card as CardType,
+  Coordinate,
+  Target,
+} from '@long-game/game-gudnak-definition/v1';
+import { useMediaQuery, usePlayerThemed } from '@long-game/game-ui';
+import { Card } from '../card/Card';
+import { isCard, isCoordinate, Selection } from '../gameAction/useSelect';
+import { hooks } from '../gameClient';
 import { useHighlightSpace } from '../useHighlightSpace';
 
 export function Space({
@@ -82,7 +82,7 @@ export function Space({
         className={clsx(
           'aspect-square border-4 rounded-2xl relative transition-colors',
           isLarge ? 'p-2' : 'p-1',
-          ownerId ? 'border-primary' : 'border-gray-400',
+          ownerId ? 'border-primary' : 'border-gray',
           draggedKind === 'fighter' && isOver && 'bg-red-500/50',
           selected && 'bg-primary-light',
           targeted && 'bg-purple-500/50',

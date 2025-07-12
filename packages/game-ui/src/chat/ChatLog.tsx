@@ -110,7 +110,7 @@ function RoundBoundary({
 
 export function ChatLogTimestamp({ value }: { value: Date | number }) {
   return (
-    <span className="text-xs text-gray-dark italic pl-sm">
+    <span className="text-xs color-gray-dark italic pl-sm">
       <RelativeTime value={new Date(value).getTime()} />
     </span>
   );

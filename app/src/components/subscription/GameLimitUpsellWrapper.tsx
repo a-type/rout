@@ -33,7 +33,7 @@ export function GameLimitUpsellWrapper({
           }{' '}
           simultaneous games.
         </Dialog.Description>
-        <P className="text-sm text-gray-dark">
+        <P className="text-sm color-gray-dark">
           Completed and abandoned games do not count towards your limit.
         </P>
         <Dialog.Actions>

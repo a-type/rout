@@ -62,7 +62,7 @@ export const ChatReactions = withGame<ChatReactionsProps>(
                   {emoji}
                 </span>{' '}
                 {users.length > 1 && (
-                  <span className="text-gray-dark font-bold text-xs">
+                  <span className="color-gray-dark font-bold text-xs">
                     {users.length}
                   </span>
                 )}

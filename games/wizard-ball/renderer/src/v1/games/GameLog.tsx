@@ -133,7 +133,7 @@ export function SourceChip({ source }: { source: TriggerSource }) {
   if (source.kind === 'item') {
     return <ItemDefChip id={source.id} />;
   }
-  return <span className="text-gray-dark">{source.id}</span>;
+  return <span className="color-gray-dark">{source.id}</span>;
 }
 
 export function GameLogEvent({ event }: { event: GameLogEvent }) {

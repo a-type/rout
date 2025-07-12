@@ -120,7 +120,7 @@ export const NotificationsButton = withSuspense(function NotificationsButton({
                 full
                 d="col"
                 layout="center center"
-                className="text-gray-dark flex-1"
+                className="color-gray-dark flex-1"
               >
                 <Icon name="bell" size={80} />
                 <span>Nothing to see here!</span>

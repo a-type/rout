@@ -38,7 +38,7 @@ export function StatusChip({
         className={clsx(
           'flex flex-row items-center bg-white border-solid border-1',
           'p-1 rounded cursor-pointer hover:bg-gray-wash',
-          (kind === 'buff') === stacks > 0 ? 'text-accent' : 'text-attention',
+          (kind === 'buff') === stacks > 0 ? 'color-accent' : 'color-attention',
         )}
       >
         {strOrFn(icon, stacks)} {strOrFn(name, stacks)}{' '}

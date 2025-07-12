@@ -22,7 +22,7 @@ export const MembershipsList = withSuspense(function MembershipsList({
     <Box d="col" gap full="width">
       {!sessions.length && (
         <Box full="width" layout="center center" p className="min-h-8">
-          <Box gap className="text-gray-dark" items="center">
+          <Box gap className="color-gray-dark" items="center">
             Nothing here.
             {(!statusFilter || statusFilter.includes('active')) && (
               <CreateGame color="unstyled" className="italic">

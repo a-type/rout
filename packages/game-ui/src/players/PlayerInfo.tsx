@@ -43,7 +43,7 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
             <span>Online</span>
           </Chip>
         ) : (
-          <Chip color="neutral" className="text-sm text-gray-dark">
+          <Chip color="neutral" className="text-sm color-gray-dark">
             <Icon name="x" size={16} />
             <span>Offline</span>
           </Chip>
@@ -61,7 +61,7 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
           </Chip>
         )}
         {!hasPlayed && !isPendingTurn && (
-          <Chip color="neutral" className="text-sm text-black">
+          <Chip color="neutral" className="text-sm color-black">
             <Icon name="x" size={16} />
             <span>Not playing this round</span>
           </Chip>

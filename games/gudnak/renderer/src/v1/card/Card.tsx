@@ -1,5 +1,6 @@
 import { Box, clsx, Popover } from '@a-type/ui';
 import { useDndContext } from '@dnd-kit/core';
+import { PrefixedId } from '@long-game/common';
 import {
   cardDefinitions,
   type FighterCard,
@@ -13,15 +14,14 @@ import {
 import { usePlayerThemed } from '@long-game/game-ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { Flipped } from 'react-flip-toolkit';
-import { cardImageLookup } from './cardImageLookup';
 import { Draggable } from '../Draggable';
 import { hooks } from '../gameClient';
 import cardBack from '../images/cardback.png';
 import { useDoubleClick } from '../utils/useDoubleClick';
 import { useViewState } from '../views/useViewState';
-import { isMobile } from 'react-device-detect';
-import { PrefixedId } from '@long-game/common';
+import { cardImageLookup } from './cardImageLookup';
 
 type BaseCardProps = {
   selected?: boolean;
@@ -189,7 +189,7 @@ export function RenderCard({
                     'w-full h-full outline outline-4 outline-primary rounded-lg bg-cover',
                     selected && 'bg-primary-light',
                     targeted && 'bg-primary-wash',
-                    fatigued && 'bg-gray-300',
+                    fatigued && 'bg-gray',
                   )}
                   // border={!noBorder}
                   onClick={(e) => {
