@@ -37,12 +37,13 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
   const hasPickedGame = !!pregame.session.gameId;
+  const [open, setOpen] = useState(!hasPickedGame);
 
   return (
     <Box p d="col" gap className="m-auto max-w-800px">
       <Box d="col" gap>
         <H1>Game Setup</H1>
-        <Dialog defaultOpen={!hasPickedGame}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <Dialog.Trigger asChild>
             <Button
               color="ghost"
@@ -76,7 +77,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
               </Box>
             </Button>
           </Dialog.Trigger>
-          <Dialog.Content>
+          <Dialog.Content width="lg">
             <Suspense>
               <Dialog.Title>Pick a game to play:</Dialog.Title>
               <GamePicker
@@ -87,6 +88,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
                     id: gameSessionId,
                     gameId,
                   });
+                  setOpen(false);
                 }}
                 loading={updateGameMutation.isPending}
                 gameSessionId={gameSessionId}
