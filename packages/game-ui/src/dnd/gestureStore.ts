@@ -2,9 +2,10 @@ import { useAnimationFrame, useStableCallback } from '@a-type/ui';
 import { MotionValue, motionValue } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useWindowEvent } from '../hooks/useWindowEvent';
+import { boundsRegistry } from './bounds';
 import { useDndStore } from './dndStore';
-import { dropRegions } from './DropRegions';
 import { gestureEvents } from './gestureEvents';
+import { TAGS } from './tags';
 
 export const gesture = {
   active: false,
@@ -33,6 +34,11 @@ export const gesture = {
    * but delta will be x=0.
    */
   totalMovement: { x: 0, y: 0 },
+  /**
+   * A filtering mechanism to avoid checking every monitored element.
+   * Set by the claiming dragged item.
+   */
+  targetTag: TAGS.DROPPABLE,
 };
 
 (window as any).gesture = gesture; // for debugging
@@ -52,6 +58,7 @@ export function resetGesture() {
   gesture.initialBounds.y = 0;
   gesture.initialBounds.width = 0;
   gesture.initialBounds.height = 0;
+  gesture.targetTag = TAGS.DROPPABLE;
 }
 
 export type DragGestureContext = typeof gesture;
@@ -78,11 +85,13 @@ export function useMonitorGlobalGesture() {
     gesture.initialBounds.width = 0;
     gesture.initialBounds.height = 0;
 
-    gestureEvents.emit('start');
+    gestureEvents.emit('start', gesture);
   }
 
   const updateOver = () => {
-    const overlapped = dropRegions.getContainingRegions(gesture.currentRaw);
+    const overlapped = boundsRegistry.getContainingRegions(gesture.currentRaw, {
+      tag: gesture.targetTag,
+    });
     if (overlapped.length > 0) {
       useDndStore.getState().setOverRegion(overlapped[0].id);
     } else {
@@ -105,7 +114,7 @@ export function useMonitorGlobalGesture() {
 
     updateOver();
 
-    gestureEvents.emit('move');
+    gestureEvents.emit('move', gesture);
   }
 
   function endGesture() {
@@ -113,7 +122,7 @@ export function useMonitorGlobalGesture() {
     useDndStore.getState().endDrag(gesture);
     document.body.style.userSelect = '';
 
-    gestureEvents.emit('end');
+    gestureEvents.emit('end', gesture);
     resetGesture();
   }
 
@@ -122,7 +131,7 @@ export function useMonitorGlobalGesture() {
     useDndStore.getState().cancelDrag();
     document.body.style.userSelect = '';
 
-    gestureEvents.emit('cancel');
+    gestureEvents.emit('cancel', gesture);
     resetGesture();
   }
 
@@ -192,14 +201,16 @@ export function useMonitorGlobalGesture() {
           setVector(gesture.currentRaw, coord.x, coord.y);
 
           // track overlapping regions
-          const overlapped = dropRegions.getContainingRegions(coord);
+          const overlapped = boundsRegistry.getContainingRegions(coord, {
+            tag: gesture.targetTag,
+          });
           if (overlapped.length > 0) {
             useDndStore.getState().setOverRegion(overlapped[0].id);
           } else {
             useDndStore.getState().setOverRegion(null);
           }
 
-          gestureEvents.emit('move');
+          gestureEvents.emit('move', gesture);
         }
       }
     }
@@ -254,28 +265,46 @@ export function useGesture(
     return gestureEvents.subscribe('claim', onClaim);
   }, [onClaim, options.disabled]);
 
-  const claim = useCallback((id: string, element: HTMLElement) => {
-    // cancel any existing text selection and prevent text selection globally
-    document.body.style.userSelect = 'none';
+  const claim = useCallback(
+    (
+      id: string,
+      element: HTMLElement,
+      {
+        targetTag = TAGS.DROPPABLE,
+      }: {
+        targetTag?: string;
+      } = {},
+    ) => {
+      // cancel any existing text selection and prevent text selection globally
+      document.body.style.userSelect = 'none';
 
-    gesture.claimId = id;
-    const elPosition = element?.getBoundingClientRect();
-    const { x, y } = getCurrentVector(gesture.current);
-    const xOffset = elPosition ? x - elPosition.left : 0;
-    const yOffset = elPosition ? y - elPosition.top : 0;
-    setVector(gesture.activationPosition, xOffset, yOffset);
-    if (elPosition) {
-      gesture.initialBounds.x = elPosition.left;
-      gesture.initialBounds.y = elPosition.top;
-      gesture.initialBounds.width = elPosition.width;
-      gesture.initialBounds.height = elPosition.height;
-    }
-    gestureEvents.emit('claim', id);
-  }, []);
+      gesture.claimId = id;
+      gesture.targetTag = targetTag;
+      const elPosition = element?.getBoundingClientRect();
+      const { x, y } = getCurrentVector(gesture.current);
+      const xOffset = elPosition ? x - elPosition.left : 0;
+      const yOffset = elPosition ? y - elPosition.top : 0;
+      setVector(gesture.activationPosition, xOffset, yOffset);
+      if (elPosition) {
+        gesture.initialBounds.x = elPosition.left;
+        gesture.initialBounds.y = elPosition.top;
+        gesture.initialBounds.width = elPosition.width;
+        gesture.initialBounds.height = elPosition.height;
+      }
+      gestureEvents.emit('claim', id, gesture);
+      console.debug(`Gesture claimed by ${id}, targetTag: ${targetTag}`);
+    },
+    [],
+  );
 
   const startKeyboardDrag = useCallback(
-    (id: string, element: HTMLElement) => {
+    (
+      id: string,
+      element: HTMLElement,
+      { targetTag = TAGS.DROPPABLE }: { targetTag?: string } = {},
+    ) => {
       gesture.claimId = id;
+      gesture.targetTag = targetTag;
       setVector(gesture.offset, 0, 0);
       const elPosition = element?.getBoundingClientRect();
       if (elPosition) {
@@ -297,14 +326,14 @@ export function useGesture(
       gesture.active = true;
       gesture.type = 'keyboard';
       document.body.style.userSelect = 'none';
-      gestureEvents.emit('start');
+      gestureEvents.emit('start', gesture);
     },
     [claim],
   );
 
   const cancelKeyboardDrag = useCallback(() => {
     document.body.style.userSelect = '';
-    gestureEvents.emit('cancel');
+    gestureEvents.emit('cancel', gesture);
     resetGesture();
   }, []);
 

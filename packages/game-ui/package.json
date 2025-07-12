@@ -39,6 +39,7 @@
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/visual-components": "workspace:*",
+    "@long-game/game-renderer": "workspace:*",
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "@types/three": "catalog:",

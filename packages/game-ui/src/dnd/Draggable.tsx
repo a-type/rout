@@ -15,14 +15,13 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../hooks/useMergedRef';
-import { activeDragRef } from './DebugView';
+import { useBindBounds, useTagBounds } from './bounds';
 import { registerDraggableData, useDndStore } from './dndStore';
-import { DraggedBox } from './draggedBox';
 import { DragGestureContext, gesture } from './gestureStore';
+import { TAGS } from './tags';
 import { flipTransition } from './transitions';
 import {
   DragGestureActivationConstraint,
@@ -39,6 +38,8 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   noHandle?: boolean;
   handleProps?: DraggableHandleProps;
   movedBehavior?: 'remove' | 'fade';
+  tags?: string[];
+  dropOnTag?: string;
 }
 
 function DraggableRoot({
@@ -48,6 +49,8 @@ function DraggableRoot({
   noHandle = false,
   children,
   handleProps,
+  tags,
+  dropOnTag = TAGS.DROPPABLE,
   ...rest
 }: DraggableProps) {
   const isDragged = useDndStore((state) => state.dragging === id);
@@ -55,25 +58,14 @@ function DraggableRoot({
 
   useEffect(() => registerDraggableData(id, data), [id, data]);
 
-  const box = useState(() => new DraggedBox())[0];
-
-  const isMoving = isDragged || isCandidate;
-  useEffect(() => {
-    activeDragRef.current = {
-      id,
-      disabled,
-      box,
-    };
-  }, [isMoving, box, id, disabled]);
-
   const ctxValue = useMemo(
     () => ({
       id,
       data,
       disabled,
-      box,
+      dropOnTag,
     }),
-    [id, disabled, box],
+    [id, disabled, dropOnTag],
   );
 
   return (
@@ -81,8 +73,8 @@ function DraggableRoot({
       <DndOverlayPortal
         enabled={isDragged || isCandidate}
         dragDisabled={disabled}
-        box={box}
         id={id}
+        tags={tags}
         {...rest}
       >
         <ConditionalHandle disabled={noHandle} {...handleProps}>
@@ -96,7 +88,7 @@ function DraggableRoot({
 export interface DraggableContextValue {
   id: string;
   disabled: boolean;
-  box: DraggedBox;
+  dropOnTag: string;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -117,6 +109,8 @@ export interface DraggableHandleProps
   touchOffset?: number; // Y offset for touch gestures, default is -40px
   onTap?: () => void;
 }
+
+const allowDragInTags = [TAGS.DRAG_INTERACTIVE];
 function DraggableHandle({
   children,
   activationConstraint,
@@ -127,14 +121,18 @@ function DraggableHandle({
   onTap,
   ...rest
 }: DraggableHandleProps) {
+  const { id, dropOnTag } = useDraggableContext();
   const { ref, isCandidate, isDragging, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
     touchOffset,
     onTap,
+    dropOnTag,
   });
 
   const finalRef = useMergedRef<HTMLDivElement>(ref, userRef);
+
+  useTagBounds(id, allowDragInTags, !allowStartFromDragIn);
 
   return (
     <motion.div
@@ -146,7 +144,6 @@ function DraggableHandle({
         disabled
           ? undefined
           : (e) => {
-              console.log('prevent menu');
               e.preventDefault();
               e.stopPropagation();
             }
@@ -208,10 +205,11 @@ interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
   draggedClassName?: string;
   id: string;
   dragDisabled: boolean;
-  box: DraggedBox;
   movedBehavior?: DraggableProps['movedBehavior'];
+  tags?: string[];
 }
 
+const defaultTags = [TAGS.DRAGGABLE];
 /**
  * Selectively portals the dragged element to the overlay layer if it is being dragged.
  * Applies local (relative) movement to non-portaled content if any.
@@ -224,18 +222,20 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   className,
   id,
   dragDisabled,
-  box,
   movedBehavior = 'remove',
   ref,
+  tags = defaultTags,
   ...rest
 }: DndOverlayPortalProps) {
   const overlayEl = useDndStore((state) => state.overlayElement);
 
   const isPortaling = enabled && !!overlayEl;
 
+  const bindBounds = useBindBounds(id);
+  useTagBounds(id, tags);
   const mainRef = useMergedRef<HTMLDivElement>(
     ref,
-    dragDisabled ? undefined : box.bind,
+    dragDisabled ? undefined : bindBounds,
   );
 
   return (

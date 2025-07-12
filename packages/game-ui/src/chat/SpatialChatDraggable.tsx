@@ -27,6 +27,8 @@ export function SpatialChatDraggable({ className }: SpatialChatDraggableProps) {
         data={{ type: 'spatial-chat' }}
         className={className}
         noHandle
+        tags={['spatial-chat']}
+        dropOnTag="spatial-chat-surface"
       >
         <Popover.Anchor asChild>
           <Draggable.Handle

@@ -5,7 +5,7 @@ import {
   ItemKey,
   SequenceItem,
 } from '@long-game/game-scribble-definition/v1';
-import { PlayerAvatar, SpatialChat } from '@long-game/game-ui';
+import { ChatSurface, PlayerAvatar } from '@long-game/game-ui';
 import { DescriptionText } from './DescriptionText';
 import { PlayerAttribution } from './PlayerAttribution';
 import { Canvas } from './drawing/Canvas';
@@ -78,7 +78,7 @@ const RecapItem = hooks.withGame<{
   if (item.kind === 'start') return null;
 
   return (
-    <SpatialChat sceneId={itemKey} visualize timing="endgame">
+    <ChatSurface sceneId={itemKey}>
       <Box surface d="col" gap items="center" className="relative">
         {item.kind === 'drawing' ? (
           <Box d="col" gap items="center">
@@ -100,7 +100,7 @@ const RecapItem = hooks.withGame<{
         )}
         <RecapRating item={item} />
       </Box>
-    </SpatialChat>
+    </ChatSurface>
   );
 });
 

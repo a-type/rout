@@ -1,11 +1,6 @@
 import { Box, clsx } from '@a-type/ui';
 import { WordItem } from '@long-game/game-exquisite-fridge-definition/v1';
-import {
-  PlayerAvatar,
-  PlayerName,
-  SpatialChat,
-  usePlayerThemed,
-} from '@long-game/game-ui';
+import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient';
 import { WordTile } from './WordTile';
 
@@ -38,24 +33,21 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
         p
         style={theme.style}
         className={clsx(theme.className, className)}
-        asChild
       >
-        <SpatialChat sceneId={`exquisite-fridge-${prompt.id}`}>
-          <div className="text-xs">
-            <span className="[line-height:32px] [vertical-align:top]">
-              The latest part of the story, written by
-            </span>
-            <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full">
-              <PlayerAvatar playerId={prompt.playerId} />
-              <PlayerName playerId={prompt.playerId} />
-            </div>
+        <div className="text-xs">
+          <span className="[line-height:32px] [vertical-align:top]">
+            The latest part of the story, written by
+          </span>
+          <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full">
+            <PlayerAvatar playerId={prompt.playerId} />
+            <PlayerName playerId={prompt.playerId} />
           </div>
-          <Box gap wrap>
-            {prompt.words.map((word: WordItem) => (
-              <WordTile key={word.id} value={word} disabled />
-            ))}
-          </Box>
-        </SpatialChat>
+        </div>
+        <Box gap wrap items="center">
+          {prompt.words.map((word: WordItem) => (
+            <WordTile key={word.id} value={word} disabled />
+          ))}
+        </Box>
       </Box>
     );
   },

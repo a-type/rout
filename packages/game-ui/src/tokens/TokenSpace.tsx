@@ -25,6 +25,7 @@ export interface TokenSpaceProps<T = any>
   onOverAccepted?: (data: TokenDragData<T> | null) => void;
 }
 
+const tokenSpaceTags = ['token-space'];
 export function TokenSpace<T = any>({
   id,
   children,
@@ -36,6 +37,7 @@ export function TokenSpace<T = any>({
   onNonTokenReject,
   onOver,
   onOverAccepted,
+  tags,
   ...rest
 }: TokenSpaceProps<T>) {
   const [overError, setOverError] = useState<string | null>(null);
@@ -111,6 +113,7 @@ export function TokenSpace<T = any>({
         accept={wrappedAccept}
         onReject={wrappedOnReject}
         onOver={handleOver}
+        tags={tokenSpaceTags}
         {...rest}
       >
         {children}

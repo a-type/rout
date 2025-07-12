@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useElementEvent } from '../hooks/useWindowEvent';
-import { otherDragBoxRefs } from './DebugView';
+import { boundsRegistry } from './bounds';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';
 import {
@@ -16,6 +16,7 @@ export interface DragGestureOptions {
   activationConstraint?: (ctx: DragGestureContext) => boolean;
   touchOffset?: number;
   onTap?: () => void;
+  dropOnTag?: string;
 }
 
 export type DragGestureActivationConstraint =
@@ -44,13 +45,6 @@ export function useDragGesture(options?: DragGestureOptions) {
     ]),
   );
 
-  useEffect(() => {
-    otherDragBoxRefs.add(draggable);
-    return () => {
-      otherDragBoxRefs.delete(draggable);
-    };
-  }, [draggable]);
-
   // when using touch, events are locked to the initial touched element,
   // so we can't detect a drag-in from another element by attaching to
   // the target element. we then have to manually hittest against this
@@ -65,14 +59,13 @@ export function useDragGesture(options?: DragGestureOptions) {
         }
       }
     } else if (startFromDragIn && !hasDragging) {
-      draggable.box.update();
       // else if this element is not related to the gesture,
       // let's see if we should claim it.
       // We use a heuristic to decide if a gesture which moves
       // over this element should start a drag.
-      const containsGesture = draggable.box.contains(
-        gesture.currentRaw.x,
-        gesture.currentRaw.y,
+      const containsGesture = boundsRegistry.entryContainsPoint(
+        draggable.id,
+        gesture.currentRaw,
       );
 
       if (!containsGesture) {
@@ -130,7 +123,6 @@ export function useDragGesture(options?: DragGestureOptions) {
           }, 100);
         }
         document.body.classList.remove('cursor-grabbing');
-        draggable.box.update();
       },
       onEnd: (gesture) => {
         if (gesture.type === 'keyboard' && isDragging) {
@@ -145,16 +137,13 @@ export function useDragGesture(options?: DragGestureOptions) {
         }
         document.body.classList.remove('cursor-grabbing');
         cancelDrag();
-        draggable.box.update();
 
         if (isDragging || isCandidate) {
-          console.log('drag end', gesture);
           if (
             Math.sqrt(
               gesture.totalMovement.x ** 2 + gesture.totalMovement.y ** 2,
             ) < 10
           ) {
-            console.log('tap');
             // if the drag was very small, we consider it a tap.
             options?.onTap?.();
           }
@@ -169,7 +158,9 @@ export function useDragGesture(options?: DragGestureOptions) {
   function beginDrag() {
     const el = ref.current;
     if (!el) return;
-    claim(draggable.id, el);
+    claim(draggable.id, el, {
+      targetTag: options?.dropOnTag,
+    });
     document.body.classList.add('cursor-grabbing');
     if (gesture.type === 'touch' && options?.touchOffset) {
       setVector(gesture.offset, 0, options.touchOffset);
