@@ -77,7 +77,10 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       const gameDefinition = getLatestVersion(game);
 
       const userStore = ctx.get('userStore');
-      const gameSession = await userStore.createGameSession();
+      const gameSession = await userStore.createGameSession(
+        gameId,
+        gameDefinition.version,
+      );
 
       const durableObjectId = ctx.env.GAME_SESSION.idFromName(gameSession.id);
       const sessionState = await ctx.env.GAME_SESSION.get(durableObjectId);

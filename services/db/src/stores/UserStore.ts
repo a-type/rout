@@ -454,7 +454,7 @@ export class UserStore extends RpcTarget {
 
   // game sessions and invites
 
-  async createGameSession() {
+  async createGameSession(gameId?: string, gameVersion?: string) {
     const canJoin = await this.canJoinGame();
     if (!canJoin) {
       throw new LongGameError(
@@ -469,6 +469,8 @@ export class UserStore extends RpcTarget {
       .values({
         id: gameSessionId,
         status: 'pending',
+        gameId,
+        gameVersion,
       })
       .executeTakeFirstOrThrow();
 
