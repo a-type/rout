@@ -1,24 +1,50 @@
 import { Box, useAnimationFrame } from '@a-type/ui';
+import gameMetadata from '@long-game/games';
 import { Children, useEffect, useRef } from 'react';
 
 export interface GameIconsProps {}
+
+const publicGames = Object.values(gameMetadata).filter(
+  (game) => !game.prerelease,
+);
 
 export function GameIcons({}: GameIconsProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const repeat = 3;
 
-  const children = new Array(6).fill(0).map((_, i) => (
-    <Box
-      surface="wash"
-      border
-      className="aspect-1 w-200px flex-shrink-0 color-gray-dark"
-      key={i}
-      layout="center center"
-    >
-      Game Coming Someday
-    </Box>
-  ));
+  const children = new Array(6).fill(0).map((_, i) => {
+    if (publicGames[i]) {
+      const game = publicGames[i];
+      return (
+        <Box
+          key={game.id}
+          surface="wash"
+          border
+          className="aspect-1 w-200px flex-shrink-0 color-gray-dark"
+          layout="center center"
+          href={`/games/${game.id}`}
+        >
+          <img
+            src={`https://play.rout.games/game-data/${game.id}/icon.png`}
+            alt={`${game.title} icon`}
+            className="w-full h-full object-cover"
+          />
+        </Box>
+      );
+    }
+    return (
+      <Box
+        surface="wash"
+        border
+        className="aspect-1 w-200px flex-shrink-0 color-primary-dark text-center"
+        key={i}
+        layout="center center"
+      >
+        More Games Coming Someday
+      </Box>
+    );
+  });
 
   const innerWidth = useRef(0);
   useEffect(() => {

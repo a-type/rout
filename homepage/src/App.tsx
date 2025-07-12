@@ -31,17 +31,17 @@ const App = () => {
       <TopographyBackground colorMode="dark" className="fixed" />
       <GameIcons />
       <Container items="center" className="text-center py-xl">
-        <H2 className="text-6xl font-medium font-heading">
+        <H2 className="text-6xl font-medium font-heading text-shadow text-shadow-lg text-shadow-color-primary">
           Play games
           <br />
           every day
           <br />
           with your friends
         </H2>
-        <P className="text-lg color-gray-dark">
+        <P className="text-lg color-gray-ink">
           No more scheduling. Every day is game night.
         </P>
-        <P className="text-lg color-gray-dark">
+        <P className="text-lg color-gray-ink">
           Rout games are social party games you play like a daily crossword.
         </P>
       </Container>

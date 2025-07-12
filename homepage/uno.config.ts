@@ -4,7 +4,7 @@ import variantGroup from '@unocss/transformer-variant-group';
 import { defineConfig } from 'unocss';
 
 export const presetOptions = {
-  borderScale: 2,
+  borderScale: 1,
   roundedness: 0.6,
   scale: 'lg',
   saturation: 100,
@@ -18,6 +18,7 @@ export const presetOptions = {
       hueRotate: 4,
     },
   },
+  hardShadows: true,
 } as Parameters<typeof preset>[0];
 
 export default defineConfig({

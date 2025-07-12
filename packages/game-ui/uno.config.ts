@@ -18,6 +18,7 @@ export const presetOptions = {
       hueRotate: 4,
     },
   },
+  hardShadows: true,
 } as Parameters<typeof preset>[0];
 
 export default defineConfig({
