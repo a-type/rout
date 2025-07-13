@@ -105,9 +105,9 @@ export function useMonitorGlobalGesture() {
   let tmpVector = { x: 0, y: 0 };
   function moveGesture(event: GestureEvent) {
     const coords = getEventCoordinates(event);
-    applySubtraction(gesture.initial, coords, gesture.delta);
     coords.x += gesture.offset.x;
     coords.y += gesture.offset.y;
+    applySubtraction(gesture.initial, coords, gesture.delta);
     applySubtraction(gesture.current, coords, gesture.velocity);
     setVector(gesture.current, coords.x, coords.y);
     setVector(gesture.currentRaw, coords.x, coords.y);

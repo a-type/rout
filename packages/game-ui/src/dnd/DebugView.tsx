@@ -27,7 +27,7 @@ export function DebugView({}: DebugViewProps) {
           ? '#ffff00'
           : '#0000ff';
       if (entry.measuredAt < Date.now() - 1000) {
-        color += '20'; // faded color for stale entries
+        color += '80'; // faded color for stale entries
       } else {
         color += 'ff'; // full opacity for recent entries
       }

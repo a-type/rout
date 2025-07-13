@@ -23,6 +23,8 @@ export interface DragGestureOptions {
 export type DragGestureActivationConstraint =
   DragGestureOptions['activationConstraint'];
 
+const tmpVec = { x: 0, y: 0 };
+
 export function useDragGesture(options?: DragGestureOptions) {
   const draggable = useDraggableContext();
   const ref = useRef<HTMLDivElement>(null);
@@ -64,9 +66,12 @@ export function useDragGesture(options?: DragGestureOptions) {
       // let's see if we should claim it.
       // We use a heuristic to decide if a gesture which moves
       // over this element should start a drag.
+      // FIXME: remove need to subtract offset here
+      tmpVec.x = gesture.currentRaw.x - gesture.offset.x;
+      tmpVec.y = gesture.currentRaw.y - gesture.offset.y;
       const containsGesture = boundsRegistry.entryContainsPoint(
         draggable.id,
-        gesture.currentRaw,
+        tmpVec,
       );
 
       if (!containsGesture) {
@@ -80,7 +85,6 @@ export function useDragGesture(options?: DragGestureOptions) {
         // with a standard pointer-down.
         return;
       } else {
-        console.debug(`${draggable.id} evaluating for drag-in`);
         // first, we only want to claim the drag if the gesture is mostly
         // horizontal.
         const deltaX = gesture.delta.x.get();
@@ -88,9 +92,6 @@ export function useDragGesture(options?: DragGestureOptions) {
         const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
-          console.debug(
-            `${draggable.id} not mostly horizontal, not claiming drag-in`,
-          );
           return;
         }
 
@@ -100,7 +101,6 @@ export function useDragGesture(options?: DragGestureOptions) {
         const velocityXSign = Math.sign(gesture.velocity.x.get());
         // for 0 velocity, don't claim.
         if (velocityXSign === 0) {
-          console.debug(`${draggable.id} velocity is 0, not claiming drag-in`);
           return;
         }
 
@@ -110,12 +110,8 @@ export function useDragGesture(options?: DragGestureOptions) {
           gesture.current.x.get() - xCenterOfPriorClaim,
         );
 
-        if (directionRelatedToPriorClaim === velocityXSign) {
+        if (directionRelatedToPriorClaim === -velocityXSign) {
           beginDrag();
-        } else {
-          console.debug(
-            `${draggable.id} direction does not match prior claim, not claiming drag-in`,
-          );
         }
       }
     }
