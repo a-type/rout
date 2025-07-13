@@ -178,6 +178,7 @@ export function useDragGesture(options?: DragGestureOptions) {
       return activateDrag();
     } else {
       setCandidate(draggable.id);
+      gesture.draggedFrom = parentId;
     }
   }
 

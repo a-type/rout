@@ -1,13 +1,9 @@
 import { useStableCallback } from '@a-type/ui';
 import { useEffect, useRef } from 'react';
 import { boundsRegistry, useTagBounds } from './bounds';
+import { draggableDataRegistry } from './dataRegistry';
 import { dndEvents } from './dndEvents';
-import {
-  DraggableData,
-  getDraggableData,
-  useDndStore,
-  useDraggedData,
-} from './dndStore';
+import { DraggableData, useDndStore, useDraggedData } from './dndStore';
 import { DragGestureContext, gesture } from './gestureStore';
 import { TAGS } from './tags';
 
@@ -66,7 +62,7 @@ export function useDroppable<T>({
 
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
-        const data = getDraggableData(dragged);
+        const data = draggableDataRegistry.get(dragged);
         if (stableAccept({ id: dragged, data }, gesture)) {
           const region = boundsRegistry.getEntry(id)!;
           const dropInfo: DropInfo = {

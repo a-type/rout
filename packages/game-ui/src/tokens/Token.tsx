@@ -47,17 +47,17 @@ export function Token({
   );
 
   return (
-    <ChatSurface disabled={disableChat} sceneId={id}>
-      <Draggable
-        {...rest}
-        id={id}
-        className={className}
-        DraggedContainer={TokenContainer}
-        data={tokenData}
-        noHandle
-        tags={tokenTags}
-        dropOnTag="token-space"
-      >
+    <Draggable
+      {...rest}
+      id={id}
+      className={className}
+      DraggedContainer={TokenContainer}
+      data={tokenData}
+      noHandle
+      tags={tokenTags}
+      dropOnTag="token-space"
+    >
+      <ChatSurface disabled={disableChat} sceneId={id}>
         <Draggable.Handle
           activationConstraint={activationConstraint}
           allowStartFromDragIn={isInHand}
@@ -66,8 +66,8 @@ export function Token({
         >
           {children}
         </Draggable.Handle>
-      </Draggable>
-    </ChatSurface>
+      </ChatSurface>
+    </Draggable>
   );
 }
 

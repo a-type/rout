@@ -50,6 +50,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
 
   return (
     <Droppable
+      noParenting
       id={sceneId}
       onDrop={handleDrop}
       className={clsx(

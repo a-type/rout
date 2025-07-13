@@ -19,7 +19,8 @@ import {
 import { createPortal } from 'react-dom';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { useBindBounds, useTagBounds } from './bounds';
-import { registerDraggableData, useDndStore } from './dndStore';
+import { draggableDataRegistry } from './dataRegistry';
+import { useDndStore } from './dndStore';
 import { DragGestureContext, gesture } from './gestureStore';
 import { TAGS } from './tags';
 import { flipTransition } from './transitions';
@@ -56,7 +57,7 @@ function DraggableRoot({
   const isDragged = useDndStore((state) => state.dragging === id);
   const isCandidate = useDndStore((state) => state.candidate === id);
 
-  useEffect(() => registerDraggableData(id, data), [id, data]);
+  useEffect(() => draggableDataRegistry.register(id, data), [id, data]);
 
   const ctxValue = useMemo(
     () => ({

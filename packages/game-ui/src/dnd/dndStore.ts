@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/shallow';
+import { draggableDataRegistry } from './dataRegistry';
 import { dndEvents } from './dndEvents';
 import { DragGestureContext } from './gestureStore';
 
@@ -9,35 +10,6 @@ export type DraggableData<T = any> = {
   id: string;
   data: T;
 };
-
-const draggableDataRegistry = new Map<
-  string,
-  { data: any; refCount: number }
->();
-export function registerDraggableData(id: string, value: any) {
-  const existing = draggableDataRegistry.get(id);
-  if (existing) {
-    existing.refCount++;
-  } else {
-    draggableDataRegistry.set(id, { data: value, refCount: 1 });
-  }
-  return () => {
-    const entry = draggableDataRegistry.get(id);
-    if (entry) {
-      entry.refCount--;
-      if (entry.refCount === 0) {
-        draggableDataRegistry.delete(id);
-      }
-    }
-  };
-}
-export function getDraggableData(id: string) {
-  const entry = draggableDataRegistry.get(id);
-  if (entry) {
-    return entry.data;
-  }
-  return null;
-}
 
 export type DndStoreValue = {
   overlayElement: HTMLElement | null;
@@ -136,7 +108,7 @@ export function useDraggedData() {
       if (!dragging) return null;
       return {
         id: dragging,
-        data: getDraggableData(dragging),
+        data: draggableDataRegistry.get(dragging),
       };
     }),
   );

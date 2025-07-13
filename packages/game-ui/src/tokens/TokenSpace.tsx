@@ -1,6 +1,7 @@
 import { Box, clsx } from '@a-type/ui';
 import { useMemo, useState } from 'react';
-import { DraggableData, getDraggableData } from '../dnd/dndStore';
+import { droppableDataRegistry } from '../dnd/dataRegistry';
+import { DraggableData } from '../dnd/dndStore';
 import {
   Droppable,
   DroppableProps,
@@ -161,7 +162,7 @@ function TokenSpaceValidationMessage({ message }: { message: string }) {
 export function useMaybeParentTokenSpace() {
   const parentId = useParentDroppable();
   if (!parentId) return null;
-  const data = getDraggableData(parentId);
+  const data = droppableDataRegistry.get(parentId);
   if (!data || data.tokenSpace) return null;
   return data as TokenSpaceData;
 }

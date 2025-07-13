@@ -70,6 +70,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
               data={card}
               disabled={cardDisabled}
               className="rounded-lg"
+              movedBehavior="fade"
             >
               <PlayingCard
                 cardSuit={getCardSuit(card)}
