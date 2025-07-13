@@ -14,6 +14,7 @@ import {
   useContext,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { gesture } from '../dnd';
 import { getDraggableData, useDndStore } from '../dnd/dndStore';
 import { useWindowEvent } from '../hooks/useWindowEvent';
 import { TokenSpace } from './TokenSpace';
@@ -110,10 +111,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
     return null;
   }
 
-  if (
-    candidate.internal.space?.type !== 'hand' ||
-    candidate.internal.space.id !== parentId
-  ) {
+  if (gesture.draggedFrom !== parentId) {
     // don't show previews for tokens not in this hand
     return null;
   }

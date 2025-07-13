@@ -4,6 +4,7 @@ import { useElementEvent } from '../hooks/useWindowEvent';
 import { boundsRegistry } from './bounds';
 import { useDndStore } from './dndStore';
 import { useDraggableContext } from './Draggable';
+import { useParentDroppable } from './Droppable';
 import {
   DragGestureContext,
   gesture,
@@ -79,6 +80,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         // with a standard pointer-down.
         return;
       } else {
+        console.debug(`${draggable.id} evaluating for drag-in`);
         // first, we only want to claim the drag if the gesture is mostly
         // horizontal.
         const deltaX = gesture.delta.x.get();
@@ -86,6 +88,9 @@ export function useDragGesture(options?: DragGestureOptions) {
         const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
+          console.debug(
+            `${draggable.id} not mostly horizontal, not claiming drag-in`,
+          );
           return;
         }
 
@@ -95,6 +100,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         const velocityXSign = Math.sign(gesture.velocity.x.get());
         // for 0 velocity, don't claim.
         if (velocityXSign === 0) {
+          console.debug(`${draggable.id} velocity is 0, not claiming drag-in`);
           return;
         }
 
@@ -106,11 +112,16 @@ export function useDragGesture(options?: DragGestureOptions) {
 
         if (directionRelatedToPriorClaim === velocityXSign) {
           beginDrag();
+        } else {
+          console.debug(
+            `${draggable.id} direction does not match prior claim, not claiming drag-in`,
+          );
         }
       }
     }
   }
 
+  const parentId = useParentDroppable();
   const { claim, startKeyboardDrag } = useGesture(
     {
       onMove: moveDrag,
@@ -160,6 +171,7 @@ export function useDragGesture(options?: DragGestureOptions) {
     if (!el) return;
     claim(draggable.id, el, {
       targetTag: options?.dropOnTag,
+      droppableParentId: parentId,
     });
     document.body.classList.add('cursor-grabbing');
     if (gesture.type === 'touch' && options?.touchOffset) {
@@ -192,7 +204,10 @@ export function useDragGesture(options?: DragGestureOptions) {
       if (ev.key === 'Enter' || ev.key === ' ') {
         ev.preventDefault();
         ev.stopPropagation();
-        startKeyboardDrag(draggable.id, ref.current);
+        startKeyboardDrag(draggable.id, ref.current, {
+          targetTag: options?.dropOnTag,
+          droppableParentId: parentId,
+        });
         activateDrag();
       }
     },

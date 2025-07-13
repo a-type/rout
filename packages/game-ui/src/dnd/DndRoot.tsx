@@ -9,7 +9,7 @@ export interface DndRootProps extends HTMLProps<HTMLDivElement> {
   debug?: boolean;
 }
 
-export function DndRoot({ children, debug, ...rest }: DndRootProps) {
+export function DndRoot({ children, debug = true, ...rest }: DndRootProps) {
   const overlayRef = useDndStore((state) => state.overlayRef);
   useMonitorGlobalGesture();
   useEffect(() => boundsRegistry.setup(), []);

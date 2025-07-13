@@ -39,6 +39,8 @@ export const gesture = {
    * Set by the claiming dragged item.
    */
   targetTag: TAGS.DROPPABLE,
+  /** The droppable ID which used to contain the currently dragged item */
+  draggedFrom: null as string | null,
 };
 
 (window as any).gesture = gesture; // for debugging
@@ -47,6 +49,7 @@ export function resetGesture() {
   gesture.active = false;
   gesture.type = 'none';
   gesture.claimId = null;
+  gesture.draggedFrom = null;
   setVector(gesture.current, 0, 0);
   setVector(gesture.currentRaw, 0, 0);
   setVector(gesture.delta, 0, 0);
@@ -271,8 +274,10 @@ export function useGesture(
       element: HTMLElement,
       {
         targetTag = TAGS.DROPPABLE,
+        droppableParentId = null,
       }: {
         targetTag?: string;
+        droppableParentId?: string | null;
       } = {},
     ) => {
       // cancel any existing text selection and prevent text selection globally
@@ -280,6 +285,7 @@ export function useGesture(
 
       gesture.claimId = id;
       gesture.targetTag = targetTag;
+      gesture.draggedFrom = droppableParentId;
       const elPosition = element?.getBoundingClientRect();
       const { x, y } = getCurrentVector(gesture.current);
       const xOffset = elPosition ? x - elPosition.left : 0;
@@ -301,31 +307,28 @@ export function useGesture(
     (
       id: string,
       element: HTMLElement,
-      { targetTag = TAGS.DROPPABLE }: { targetTag?: string } = {},
+      {
+        targetTag = TAGS.DROPPABLE,
+        droppableParentId = null,
+      }: { targetTag?: string; droppableParentId?: string | null } = {},
     ) => {
-      gesture.claimId = id;
-      gesture.targetTag = targetTag;
+      claim(id, element, { targetTag, droppableParentId });
       setVector(gesture.offset, 0, 0);
-      const elPosition = element?.getBoundingClientRect();
-      if (elPosition) {
-        gesture.initialBounds.x = elPosition.left;
-        gesture.initialBounds.y = elPosition.top;
-        gesture.initialBounds.width = elPosition.width;
-        gesture.initialBounds.height = elPosition.height;
-
-        setVector(
-          gesture.current,
-          elPosition.left + elPosition.width / 2,
-          elPosition.top + elPosition.height / 2,
-        );
-        setVector(gesture.delta, 0, 0);
-        setVector(gesture.velocity, 0, 0);
-        gesture.initial.x = elPosition.left;
-        gesture.initial.y = elPosition.top;
-      }
+      const currentX =
+        gesture.initialBounds.x + gesture.initialBounds.width / 2;
+      const currentY =
+        gesture.initialBounds.y + gesture.initialBounds.height / 2;
+      setVector(gesture.current, currentX, currentY);
+      setVector(gesture.currentRaw, currentX, currentY);
+      setVector(gesture.delta, 0, 0);
+      setVector(gesture.velocity, 0, 0);
+      setVector(
+        gesture.initial,
+        gesture.initialBounds.x,
+        gesture.initialBounds.y,
+      );
       gesture.active = true;
       gesture.type = 'keyboard';
-      document.body.style.userSelect = 'none';
       gestureEvents.emit('start', gesture);
     },
     [claim],

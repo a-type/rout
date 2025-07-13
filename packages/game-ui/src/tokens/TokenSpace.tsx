@@ -1,7 +1,11 @@
 import { Box, clsx } from '@a-type/ui';
-import { createContext, useContext, useState } from 'react';
-import { DraggableData } from '../dnd/dndStore';
-import { Droppable, DroppableProps } from '../dnd/Droppable';
+import { useMemo, useState } from 'react';
+import { DraggableData, getDraggableData } from '../dnd/dndStore';
+import {
+  Droppable,
+  DroppableProps,
+  useParentDroppable,
+} from '../dnd/Droppable';
 import { DragGestureContext } from '../dnd/gestureStore';
 import { isToken, TokenDragData } from './types';
 
@@ -42,14 +46,14 @@ export function TokenSpace<T = any>({
 }: TokenSpaceProps<T>) {
   const [overError, setOverError] = useState<string | null>(null);
 
-  const wrappedAccept = (data: DraggableData) => {
+  const wrappedAccept = (data: DraggableData, gesture: DragGestureContext) => {
     // only accept tokens
     if (!isToken(data.data)) {
       return false;
     }
 
     // do not accept tokens already in this space
-    if (data.data.internal.space?.id === id) {
+    if (gesture.draggedFrom === id) {
       return false;
     }
 
@@ -57,11 +61,18 @@ export function TokenSpace<T = any>({
     return accept(data.data as TokenDragData<T>) === true;
   };
 
-  const wrappedOnReject = (data: DraggableData) => {
+  const wrappedOnReject = (
+    data: DraggableData,
+    gesture: DragGestureContext,
+  ) => {
     if (!isToken(data.data)) {
+      console.debug(`TokenSpace: rejecting non-token data ${data.id}`);
       return onNonTokenReject?.(data);
     }
-    if (data.data.internal.space?.id === id) {
+    if (gesture.draggedFrom === id) {
+      console.debug(
+        `TokenSpace: rejecting token ${data.id} that is already in this space`,
+      );
       // do not notify user of tokens already in this space
       return;
     }
@@ -97,49 +108,39 @@ export function TokenSpace<T = any>({
     }
   };
 
+  const data = useMemo<TokenSpaceData>(
+    () => ({ isTokenSpace: true, type }),
+    [type],
+  );
+
   return (
-    <TokenSpaceContext.Provider value={{ id, type }}>
-      <Droppable<TokenDragData>
-        id={id}
-        className={clsx(
-          'relative',
-          '[&[data-over=true]]:(scale-102)',
-          'transition-transform',
-          className,
-        )}
-        onDrop={(droppable, gesture) =>
-          onDrop?.(droppable.data as TokenDragData<T>, gesture)
-        }
-        accept={wrappedAccept}
-        onReject={wrappedOnReject}
-        onOver={handleOver}
-        tags={tokenSpaceTags}
-        {...rest}
-      >
-        {children}
-        {overError && <TokenSpaceValidationMessage message={overError} />}
-      </Droppable>
-    </TokenSpaceContext.Provider>
+    <Droppable<TokenDragData>
+      id={id}
+      className={clsx(
+        'relative',
+        '[&[data-over=true]]:(scale-102)',
+        'transition-transform',
+        className,
+      )}
+      onDrop={(droppable, gesture) =>
+        onDrop?.(droppable.data as TokenDragData<T>, gesture)
+      }
+      accept={wrappedAccept}
+      onReject={wrappedOnReject}
+      onOver={handleOver}
+      tags={tokenSpaceTags}
+      data={data}
+      {...rest}
+    >
+      {children}
+      {overError && <TokenSpaceValidationMessage message={overError} />}
+    </Droppable>
   );
 }
 
 export interface TokenSpaceData {
-  id: string;
   type?: string;
-}
-
-export const TokenSpaceContext = createContext<TokenSpaceData | null>(null);
-export function useTokenSpaceContext() {
-  const context = useContext(TokenSpaceContext);
-  if (!context) {
-    throw new Error(
-      'useTokenSpaceContext must be used within a TokenSpace component',
-    );
-  }
-  return context;
-}
-export function useMaybeTokenSpaceContext() {
-  return useContext(TokenSpaceContext);
+  isTokenSpace: boolean;
 }
 
 function TokenSpaceValidationMessage({ message }: { message: string }) {
@@ -155,4 +156,12 @@ function TokenSpaceValidationMessage({ message }: { message: string }) {
       </Box>
     </div>
   );
+}
+
+export function useMaybeParentTokenSpace() {
+  const parentId = useParentDroppable();
+  if (!parentId) return null;
+  const data = getDraggableData(parentId);
+  if (!data || data.tokenSpace) return null;
+  return data as TokenSpaceData;
 }

@@ -1,7 +1,8 @@
 import { SlotDiv } from '@a-type/ui';
-import { HTMLProps } from 'react';
+import { createContext, HTMLProps, useContext, useEffect } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef';
 import { useBindBounds } from './bounds';
+import { registerDraggableData } from './dndStore';
 import {
   Accept,
   OnDropCb,
@@ -22,6 +23,7 @@ export type DroppableProps<T = any> = Omit<
   accept?: Accept<T>;
   asChild?: boolean;
   tags?: string[];
+  data?: any;
 };
 
 export function Droppable<T = any>({
@@ -35,6 +37,7 @@ export function Droppable<T = any>({
   onReject,
   asChild,
   tags,
+  data,
   ...rest
 }: DroppableProps<T>) {
   const {
@@ -45,33 +48,39 @@ export function Droppable<T = any>({
   } = useDroppable({ onDrop, onOver, accept, onReject, id, disabled, tags });
   const bindBounds = useBindBounds(id);
   const finalRef = useMergedRef<HTMLDivElement>(bindBounds, userRef);
-
-  if (disabled) {
-    return (
-      <SlotDiv
-        data-role="droppable"
-        data-droppable-disabled
-        ref={userRef}
-        asChild={asChild}
-        {...rest}
-      >
-        {children}
-      </SlotDiv>
-    );
-  }
+  useEffect(() => registerDraggableData(id, data), [id, data]);
 
   return (
-    <SlotDiv
-      data-role="droppable"
-      ref={finalRef}
-      data-over={isOver}
-      data-over-rejected={rejected && isDraggedOverThisRegion}
-      data-dragged-rejected={rejected}
-      data-dragged-accepted={!!draggedData && !rejected}
-      asChild={asChild}
-      {...rest}
-    >
-      {children}
-    </SlotDiv>
+    <DroppableContext.Provider value={id}>
+      {disabled ? (
+        <SlotDiv
+          data-role="droppable"
+          data-droppable-disabled
+          ref={userRef}
+          asChild={asChild}
+          {...rest}
+        >
+          {children}
+        </SlotDiv>
+      ) : (
+        <SlotDiv
+          data-role="droppable"
+          ref={finalRef}
+          data-over={isOver}
+          data-over-rejected={rejected && isDraggedOverThisRegion}
+          data-dragged-rejected={rejected}
+          data-dragged-accepted={!!draggedData && !rejected}
+          asChild={asChild}
+          {...rest}
+        >
+          {children}
+        </SlotDiv>
+      )}
+    </DroppableContext.Provider>
   );
+}
+
+const DroppableContext = createContext<string | null>(null);
+export function useParentDroppable() {
+  return useContext(DroppableContext);
 }

@@ -14,6 +14,7 @@ import {
 } from '../dnd/Draggable';
 import { DragGestureActivationConstraint } from '../dnd/useDragGesture';
 import { useIsTokenInHand } from './TokenHand';
+import { useMaybeParentTokenSpace } from './TokenSpace';
 import { useTokenData } from './types';
 
 export interface TokenProps<Data = unknown> extends DraggableProps {
@@ -32,7 +33,8 @@ export function Token({
   ...rest
 }: TokenProps) {
   const tokenData = useTokenData(id, data);
-  const isInHand = tokenData.internal.space?.type === 'hand';
+  const parent = useMaybeParentTokenSpace();
+  const isInHand = parent?.type === 'hand';
 
   const activationConstraint = useMemo<DragGestureActivationConstraint>(
     () =>

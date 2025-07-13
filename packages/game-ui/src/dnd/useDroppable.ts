@@ -8,7 +8,7 @@ import {
   useDndStore,
   useDraggedData,
 } from './dndStore';
-import { DragGestureContext } from './gestureStore';
+import { DragGestureContext, gesture } from './gestureStore';
 import { TAGS } from './tags';
 
 export interface DropInfo {
@@ -22,10 +22,19 @@ export type OnDropCb<T> = (
   dropInfo: DropInfo,
 ) => void;
 
-export type OnOverCb<T> = (draggable: DraggableData<T> | null) => void;
+export type OnOverCb<T> = (
+  draggable: DraggableData<T> | null,
+  gesture: DragGestureContext,
+) => void;
 
-export type OnRejectCb<T> = (draggable: DraggableData<T>) => void;
-export type Accept<T> = (draggable: DraggableData<T>) => boolean;
+export type OnRejectCb<T> = (
+  draggable: DraggableData<T>,
+  gesture: DragGestureContext,
+) => void;
+export type Accept<T> = (
+  draggable: DraggableData<T>,
+  gesture: DragGestureContext,
+) => boolean;
 
 const defaultAccept: Accept<any> = () => true;
 
@@ -58,7 +67,7 @@ export function useDroppable<T>({
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
         const data = getDraggableData(dragged);
-        if (stableAccept({ id: dragged, data })) {
+        if (stableAccept({ id: dragged, data }, gesture)) {
           const region = boundsRegistry.getEntry(id)!;
           const dropInfo: DropInfo = {
             relativePosition: {
@@ -69,7 +78,7 @@ export function useDroppable<T>({
           };
           dropCb({ id: dragged, data }, gesture, dropInfo);
         } else if (stableOnReject) {
-          stableOnReject({ id: dragged, data });
+          stableOnReject({ id: dragged, data }, gesture);
         }
       }
     });
@@ -78,7 +87,8 @@ export function useDroppable<T>({
   const isAnyOver =
     useDndStore((state) => state.overRegion === id) && !disabled;
   const draggedData = useDraggedData();
-  const rejected = !disabled && accept && draggedData && !accept(draggedData);
+  const rejected =
+    !disabled && accept && draggedData && !accept(draggedData, gesture);
   const isAcceptedOver = !disabled && isAnyOver && !rejected;
 
   const wasOverRef = useRef(false);
@@ -96,7 +106,7 @@ export function useDroppable<T>({
   const unvalidatedOver = isAnyOver ? draggedData : null;
   useEffect(() => {
     // Call the stable callback with
-    stableOnOver?.(unvalidatedOver);
+    stableOnOver?.(unvalidatedOver, gesture);
   }, [stableOnOver, unvalidatedOver]);
 
   useTagBounds(id, tags);
