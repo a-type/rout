@@ -68,10 +68,9 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
       overflow="auto-y"
       full
       gap="xs"
-      p
       col
       items="stretch"
-      className={clsx('pt-xl', className)}
+      className={clsx('pt-md', className)}
       {...props}
       {...scrollProps}
     >

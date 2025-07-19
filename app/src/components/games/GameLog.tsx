@@ -73,8 +73,8 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
 
   if (isLarge) {
     return (
-      <Box d="col" gap="none" p="xs" items="stretch" {...props}>
-        <ChatLog log={gameSuite.combinedLog} />
+      <Box d="col" gap="none" p="sm" items="stretch" {...props}>
+        <ChatLog log={gameSuite.combinedLog} className="px-xs" />
         <GameLogChatInput />
       </Box>
     );

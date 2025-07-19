@@ -48,7 +48,7 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
             <div className={className} />
           )}
         </Popover.Trigger>
-        <Popover.Content side="bottom" className="p-xs">
+        <Popover.Content side="bottom" className="p-xs w-300px">
           <Popover.Arrow />
           <ChatLog
             log={chats.map((chat) => ({
@@ -56,10 +56,10 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
               chatMessage: chat,
               timestamp: chat.createdAt,
             }))}
-            className="w-300px max-h-400px"
+            className="w-full max-h-400px"
           />
           <ChatForm
-            className="w-full px-md"
+            className="w-full px-xs"
             sceneId={sceneId}
             position={position}
           />
