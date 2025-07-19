@@ -1,6 +1,0 @@
-{
-  "name": "@long-game/game-chess-arena",
-  "scripts": {
-    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
-  }
-}

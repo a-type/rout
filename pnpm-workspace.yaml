@@ -21,9 +21,9 @@ catalog:
   '@types/react': ^19.1.8
   '@types/react-dom': ^19.1.6
   typescript: 5.8.3
-  unocss: ^66.3.2
-  '@unocss/cli': '^66.3.2'
-  '@unocss/transformer-variant-group': ^66.3.2
+  unocss: ^66.3.3
+  '@unocss/cli': '^66.3.3'
+  '@unocss/transformer-variant-group': ^66.3.3
   vitest: 3.2.4
   hono: 4.7.11
   zod: ^3.25.64
@@ -40,7 +40,7 @@ catalog:
   three: 0.175.0
   '@types/three': 0.175.0
   '@react-three/drei': 10.0.6
-  vite: 6.3.2
+  vite: 7.0.5
   '@vitejs/plugin-react-swc': 3.9.0
   kysely: 0.27.6
   '@a-type/kysely': 1.1.1
@@ -60,3 +60,4 @@ catalog:
   zustand: 5.0.6
   immer: 10.1.1
   env-cmd: 10.1.0
+  '@originjs/vite-plugin-federation': 1.4.1
