@@ -1,3 +1,0 @@
-# Gudnak
-
-Rules TODO

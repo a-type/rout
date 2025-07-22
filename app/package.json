@@ -5,7 +5,8 @@
     "dev": "rsbuild dev",
     "build": "pnpm build:app && pnpm build:copy-game-files",
     "build:app": "rsbuild build",
-    "build:copy-game-files": "node scripts/copyGameFiles.mjs"
+    "build:copy-game-files": "node scripts/copyGameFiles.mjs",
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "@a-type/auth-ui": "catalog:",

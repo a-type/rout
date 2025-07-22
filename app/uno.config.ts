@@ -38,7 +38,7 @@ export default defineConfig({
     extract(ctx) {
       // uncomment to log which files are being processed
       if (ctx.id && ctx.id.includes('game-ui')) {
-        console.log(ctx.id);
+        // console.log(ctx.id);
       }
       return extractorDefault.extract(ctx);
     },

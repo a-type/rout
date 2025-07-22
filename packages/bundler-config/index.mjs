@@ -44,7 +44,10 @@ export const gameRsbuildConfig = (game) => {
       name: idToFederationId(game.id),
       manifest: true,
       dts: false,
-      getPublicPath: `function() { return "http://localhost:${game.devPort}/"; }`,
+      getPublicPath:
+        command === 'build'
+          ? undefined // in prod, we serve federated modules from the same origin as the app
+          : `function() { return "http://localhost:${game.devPort}/"; }`,
       exposes: game.versions.reduce((map, { version }) => {
         const majorVersion = version.split('.')[0];
         map[`./${majorVersion}/renderer`] =
@@ -114,7 +117,7 @@ export const gameRsbuildConfig = (game) => {
         assetPrefix: `http://localhost:${game.devPort}/`,
       },
       output: {
-        assetPrefix: `https://play.rout.games/game-modules/${idToFederationId(game.id)}/`,
+        assetPrefix: `/game-modules/${idToFederationId(game.id)}/`,
       },
     };
   });
