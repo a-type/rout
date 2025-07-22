@@ -1,5 +1,5 @@
 import { isPitcher } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function usePitchingRelievers(teamId: string) {
   const { finalState } = hooks.useGameSuite();

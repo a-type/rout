@@ -1,5 +1,5 @@
 import { Box, BoxProps, Button, clsx, Icon } from '@a-type/ui';
-import { useViewport } from './ViewportContext';
+import { useViewport } from './ViewportContext.js';
 
 export function ViewportZoomControls({ className, ...props }: BoxProps) {
   const viewport = useViewport();

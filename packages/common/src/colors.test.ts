@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicatePlayerColors, PlayerColorName } from './colors';
+import { deduplicatePlayerColors, PlayerColorName } from './colors.js';
 
 describe('player colors', () => {
   it('deduplicates assigned colors', () => {

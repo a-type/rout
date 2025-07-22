@@ -1,7 +1,7 @@
 import { clsx } from '@a-type/ui';
 import { statusData, StatusType } from '@long-game/game-wizard-ball-definition';
-import { TooltipPlus } from '../TooltipPlus';
-import { PerkEffect } from '../items/PerkEffect';
+import { TooltipPlus } from '../TooltipPlus.js';
+import { PerkEffect } from '../items/PerkEffect.js';
 
 export function strOrFn(
   x: string | ((stacks: number) => string),

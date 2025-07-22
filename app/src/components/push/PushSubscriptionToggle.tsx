@@ -5,7 +5,7 @@ import {
   useIsSubscribedToPush,
   useSubscribeToPush,
   useUnsubscribeFromPush,
-} from './hooks';
+} from './hooks.js';
 
 export interface PushSubscriptionToggleProps extends ButtonProps {
   showWhenEnabled?: boolean;

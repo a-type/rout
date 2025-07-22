@@ -1,8 +1,8 @@
 import { Box, clsx } from '@a-type/ui';
 import { WordItem } from '@long-game/game-exquisite-fridge-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { WordTile } from './WordTile';
+import { hooks } from './gameClient.js';
+import { WordTile } from './WordTile.js';
 
 export interface PromptDisplayProps {
   className?: string;

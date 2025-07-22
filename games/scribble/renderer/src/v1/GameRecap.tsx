@@ -6,11 +6,11 @@ import {
   SequenceItem,
 } from '@long-game/game-scribble-definition/v1';
 import { ChatSurface, PlayerAvatar } from '@long-game/game-ui';
-import { DescriptionText } from './DescriptionText';
-import { PlayerAttribution } from './PlayerAttribution';
-import { Canvas } from './drawing/Canvas';
-import { hooks } from './gameClient';
-import { ratingEmoji } from './ratings';
+import { DescriptionText } from './DescriptionText.js';
+import { PlayerAttribution } from './PlayerAttribution.js';
+import { Canvas } from './drawing/Canvas.js';
+import { hooks } from './gameClient.js';
+import { ratingEmoji } from './ratings.js';
 
 export const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
   const { postgameGlobalState } = gameSuite;

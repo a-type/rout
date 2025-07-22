@@ -1,7 +1,8 @@
+import { skipWaiting, usePollForUpdates } from '@/swRegister.js';
 import { Box, Button, Icon } from '@a-type/ui';
 import { useState } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
-import { updateApp, useIsUpdateAvailable, usePollForUpdates } from './updateState.js';
+import { useIsUpdateAvailable } from './updateState.js';
 
 const TEST = false;
 
@@ -34,7 +35,7 @@ export function UpdateBanner({}) {
         onClick={async () => {
           try {
             setLoading(true);
-            await updateApp(true);
+            await skipWaiting();
           } finally {
             setLoading(false);
           }

@@ -12,12 +12,11 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { GameSession } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
-import games from '@long-game/games';
 import { Link } from '@verdant-web/react-router';
 import { Suspense } from 'react';
-import { GameIcon } from '../games/GameIcon';
-import { UserAvatar } from '../users/UserAvatar';
-import { GameSessionStatusChip } from './GameSessionStatusChip';
+import { GameIcon } from '../games/GameIcon.js';
+import { UserAvatar } from '../users/UserAvatar.js';
+import { GameSessionStatusChip } from './GameSessionStatusChip.js';
 
 export interface GameSummaryCardProps {
   session: GameSession;
@@ -30,6 +29,7 @@ export const GameSummaryCard = withSuspense(
     className,
     ...rest
   }: GameSummaryCardProps) {
+    const games = sdkHooks.useGetGames().data ?? {};
     const game = summary.gameId ? games[summary.gameId] : null;
     const deleteSession = sdkHooks.useDeleteGameSession();
     const abandonSession = sdkHooks.useAbandonGameSession();

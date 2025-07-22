@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Avatar, Box, Button, H2, toast } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
-import { UserAvatar } from '../users/UserAvatar';
+import { UserAvatar } from '../users/UserAvatar.js';
 
 export function FriendInvites() {
   return (

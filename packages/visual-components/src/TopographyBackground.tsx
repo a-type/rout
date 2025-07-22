@@ -1,7 +1,7 @@
 import { withClassName } from '@a-type/ui';
 import { lazy, Suspense } from 'react';
 
-const LazyTopography = lazy(() => import('./Topography'));
+const LazyTopography = lazy(() => import('./Topography.js'));
 
 function Topography(props: React.ComponentProps<typeof LazyTopography>) {
   return (

@@ -1,14 +1,14 @@
 import { GameRandom } from '@long-game/game-definition';
 import {
   BattingCompositeRatings,
-  PitchingCompositeRatings,
+  BattingCompositeType,
   League,
+  PitchingCompositeRatings,
+  PitchingCompositeType,
   Player,
   PlayerAttributes,
-  BattingCompositeType,
-  PitchingCompositeType,
-} from './gameTypes';
-import { avg, isPitcher, sum, sumObjects } from './utils';
+} from './gameTypes.js';
+import { avg, isPitcher, sum, sumObjects } from './utils.js';
 
 export const PITCHER_BATTING_PENALTY = 5;
 

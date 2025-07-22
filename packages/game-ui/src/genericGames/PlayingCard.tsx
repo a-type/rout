@@ -9,7 +9,7 @@ import {
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { CSSProperties, memo } from 'react';
-import { PlayerAvatar } from '../players/PlayerAvatar';
+import { PlayerAvatar } from '../players/PlayerAvatar.js';
 
 export type PlayingCardSuit = 'h' | 'd' | 'c' | 's';
 

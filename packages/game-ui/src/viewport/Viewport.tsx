@@ -7,15 +7,15 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useMergedRef } from '../hooks/useMergedRef';
-import { ViewportContent } from './ViewportContent';
-import { ViewportProvider } from './ViewportContext';
-import { PositionOrPercentage, ViewportState } from './ViewportState';
-import { useDndAutoPan } from './useDndAutoPan';
+import { useMergedRef } from '../hooks/useMergedRef.js';
+import { ViewportContent } from './ViewportContent.js';
+import { ViewportProvider } from './ViewportContext.js';
+import { PositionOrPercentage, ViewportState } from './ViewportState.js';
+import { useDndAutoPan } from './useDndAutoPan.js';
 import {
   useKeyboardControls,
   useViewportGestureControls,
-} from './useViewportGestures';
+} from './useViewportGestures.js';
 
 export interface ViewportProps {
   children?: ReactNode;

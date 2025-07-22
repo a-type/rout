@@ -1,4 +1,4 @@
-import { PlayerAttributes } from '../gameTypes';
+import { PlayerAttributes } from '../gameTypes.js';
 
 export const speciesData = {
   turtle: {

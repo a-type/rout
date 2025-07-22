@@ -1,6 +1,6 @@
 import { EventSubscriber, preventDefault } from '@a-type/utils';
-import { addVectors, clamp, clampVector, subtractVectors } from './math';
-import { Box, RectLimits, Size, Vector2 } from './types';
+import { addVectors, clamp, clampVector, subtractVectors } from './math.js';
+import { Box, RectLimits, Size, Vector2 } from './types.js';
 
 const MIN_POSSIBLE_ZOOM = 0.000001;
 

@@ -1,15 +1,15 @@
 import { GameRandom } from '@long-game/game-definition';
-import type { LeagueGameState, Base, League } from '../gameTypes';
-import { scaleAttributePercent } from '../utils';
+import { ActualPitch } from '../data/pitchData.js';
+import type { Base, League, LeagueGameState } from '../gameTypes.js';
+import { scaleAttributePercent } from '../utils.js';
 import {
-  getModifiedCompositeBattingRatings,
   getActivePlayerPerks,
-} from './ratings';
-import { getCurrentPitcher } from './utils';
-import { addToPlayerStats } from './stats';
-import { updatePlayerHeat } from './streak';
-import { checkTriggerEvent } from './trigger';
-import { ActualPitch } from '../data/pitchData';
+  getModifiedCompositeBattingRatings,
+} from './ratings.js';
+import { addToPlayerStats } from './stats.js';
+import { updatePlayerHeat } from './streak.js';
+import { checkTriggerEvent } from './trigger.js';
+import { getCurrentPitcher } from './utils.js';
 
 const STEAL_SECOND_ATTEMPT_CHANCE = 0.04;
 const STEAL_THIRD_ATTEMPT_CHANCE = 0.01;

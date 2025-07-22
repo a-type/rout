@@ -1,4 +1,4 @@
-import { SpeciesType } from './data/speciesData';
+import { SpeciesType } from './data/speciesData.js';
 
 export const names: Record<
   SpeciesType,

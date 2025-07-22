@@ -1,13 +1,16 @@
 import { z } from 'zod';
-import { gameSessionChatInitShape, gameSessionChatMessageShape } from './chat';
-import { colorNames } from './colors';
-import { idShapes, PrefixedId } from './ids';
-import { gameRoundSummaryShape } from './rounds';
+import {
+  gameSessionChatInitShape,
+  gameSessionChatMessageShape,
+} from './chat.js';
+import { colorNames } from './colors.js';
+import { idShapes, PrefixedId } from './ids.js';
+import { gameRoundSummaryShape } from './rounds.js';
 import {
   gameSessionPlayerStatusShape,
   gameSessionPlayerStatusUpdateShape,
   gameStatusShape,
-} from './status';
+} from './status.js';
 
 const baseServerMessageShape = z.object({
   responseTo: z.string().optional().nullable(),

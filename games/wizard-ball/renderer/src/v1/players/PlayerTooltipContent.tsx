@@ -2,21 +2,21 @@ import {
   hasPitcherPosition,
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
-import { ItemChip } from '../items/ItemChip';
-import { PerkChip } from '../perks/PerkChip';
-import { AttributeSummary } from '../ratings/AttributeSummary';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
+import { hooks } from '../gameClient.js';
+import { ItemChip } from '../items/ItemChip.js';
+import { PerkChip } from '../perks/PerkChip.js';
+import { AttributeSummary } from '../ratings/AttributeSummary.js';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary.js';
 import {
   usePlayerAttributes,
   usePlayerComposite,
-} from '../ratings/useAttributes';
-import { TeamIcon } from '../teams/TeamIcon';
-import { TeamName } from '../teams/TeamName';
-import { PlayerClass } from './PlayerClass';
-import { PlayerLevel } from './PlayerLevel';
-import { PlayerSpecies } from './PlayerSpecies';
-import { PlayerStatus } from './PlayerStatus';
+} from '../ratings/useAttributes.js';
+import { TeamIcon } from '../teams/TeamIcon.js';
+import { TeamName } from '../teams/TeamName.js';
+import { PlayerClass } from './PlayerClass.js';
+import { PlayerLevel } from './PlayerLevel.js';
+import { PlayerSpecies } from './PlayerSpecies.js';
+import { PlayerStatus } from './PlayerStatus.js';
 
 export function PlayerTooltipContent({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

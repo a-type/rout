@@ -10,7 +10,7 @@ import {
 } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { PlayerAvatar } from '../players/PlayerAvatar';
+import { PlayerAvatar } from '../players/PlayerAvatar.js';
 
 export interface ChatReactionsProps {
   message: GameSessionChatMessage;

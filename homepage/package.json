@@ -20,6 +20,7 @@
     "three-stdlib": "^2.35.15"
   },
   "devDependencies": {
+    "@long-game/uno-config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/three": "catalog:",

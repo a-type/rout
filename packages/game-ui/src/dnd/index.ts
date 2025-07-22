@@ -1,6 +1,6 @@
-export * from './dndEvents';
-export { DndRoot } from './DndRoot';
-export * from './Draggable';
-export * from './Droppable';
-export { gesture, useGesture } from './gestureStore';
-export { type DropInfo } from './useDroppable';
+export * from './dndEvents.js';
+export { DndRoot } from './DndRoot.js';
+export * from './Draggable.js';
+export * from './Droppable.js';
+export { gesture, useGesture } from './gestureStore.js';
+export { type DropInfo } from './useDroppable.js';

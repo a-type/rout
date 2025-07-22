@@ -1,0 +1,22 @@
+{
+  "name": "@long-game/bundler-config",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "types": "./index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "unocss": "catalog:",
+    "@unocss/webpack": "catalog:",
+    "@rsbuild/core": "catalog:",
+    "@rsbuild/plugin-react": "catalog:",
+    "@module-federation/rsbuild-plugin": "catalog:",
+    "@module-federation/enhanced": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/uno-config": "workspace:*"
+  }
+}

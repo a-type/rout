@@ -3,7 +3,7 @@
  */
 
 import { PrefixedId, withTimezone } from '@long-game/common';
-import add from 'date-fns/esm/add';
+import add from 'date-fns/esm/add/index.js';
 import { BaseTurnData, Turn } from './gameDefinition.js';
 
 export interface RoundIndexContext<

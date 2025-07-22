@@ -1,16 +1,16 @@
 import { useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { useElementEvent } from '../hooks/useWindowEvent';
-import { boundsRegistry } from './bounds';
-import { useDndStore } from './dndStore';
-import { useDraggableContext } from './Draggable';
-import { useParentDroppable } from './Droppable';
+import { useElementEvent } from '../hooks/useWindowEvent.js';
+import { boundsRegistry } from './bounds.js';
+import { useDndStore } from './dndStore.js';
+import { useDraggableContext } from './Draggable.js';
+import { useParentDroppable } from './Droppable.js';
 import {
   DragGestureContext,
   gesture,
   setVector,
   useGesture,
-} from './gestureStore';
+} from './gestureStore.js';
 
 export interface DragGestureOptions {
   allowStartFromDragIn?: boolean;

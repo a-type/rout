@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idShapes } from './ids';
+import { idShapes } from './ids.js';
 
 /**
  * Gets the start and end of the round for a given day.

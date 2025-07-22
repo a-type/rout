@@ -8,7 +8,7 @@ import {
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
-import { UploadAvatar } from './UploadAvatar';
+import { UploadAvatar } from './UploadAvatar.js';
 
 export interface EditProfileProps {
   onSave?: () => void;

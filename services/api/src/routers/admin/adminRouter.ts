@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { Env } from '../../config/ctx';
-import { loggedInMiddleware } from '../../middleware';
-import { adminMiddleware } from '../../middleware/admin';
-import { adminGameProductsRouter } from './adminGameProductsRouter';
-import { adminGameSessionsRouter } from './adminGameSessions';
-import { adminUsersRouter } from './adminUsers';
+import { Env } from '../../config/ctx.js';
+import { adminMiddleware } from '../../middleware/admin.js';
+import { loggedInMiddleware } from '../../middleware/index.js';
+import { adminGameProductsRouter } from './adminGameProductsRouter.js';
+import { adminGameSessionsRouter } from './adminGameSessions.js';
+import { adminUsersRouter } from './adminUsers.js';
 
 export const adminRouter = new Hono<Env>()
   .use(loggedInMiddleware, adminMiddleware)

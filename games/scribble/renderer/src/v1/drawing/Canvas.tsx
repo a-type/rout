@@ -3,8 +3,8 @@ import { colors, PrefixedId } from '@long-game/common';
 import { Drawing } from '@long-game/game-scribble-definition/v1';
 import { getStroke, StrokeOptions } from 'perfect-freehand';
 import { PointerEvent, useRef, useState } from 'react';
-import { hooks } from '../gameClient';
-import { PlayerAttribution } from '../PlayerAttribution';
+import { hooks } from '../gameClient.js';
+import { PlayerAttribution } from '../PlayerAttribution.js';
 
 export interface CanvasProps {
   readonly?: boolean;

@@ -1,12 +1,12 @@
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { Choice, League, PlayerId, PositionChart, Team } from './gameTypes';
-import { generateLeague } from './generation';
-import { simulateRound } from './sim/simGames';
-import { applyChoice, applyXp, generateChoices } from './boosts';
-import { getTeamBench, hasPitcherPosition, sum } from './utils';
-import { statusData, StatusType } from './data/statusData';
-import { itemData } from './data/itemData';
-import { recoverStaminaBetweenGames } from './sim/stamina';
+import { applyChoice, applyXp, generateChoices } from './boosts.js';
+import { itemData } from './data/itemData.js';
+import { statusData, StatusType } from './data/statusData.js';
+import { Choice, League, PlayerId, PositionChart, Team } from './gameTypes.js';
+import { generateLeague } from './generation.js';
+import { simulateRound } from './sim/simGames.js';
+import { recoverStaminaBetweenGames } from './sim/stamina.js';
+import { getTeamBench, hasPitcherPosition, sum } from './utils.js';
 
 export type GlobalState = {
   league: League;

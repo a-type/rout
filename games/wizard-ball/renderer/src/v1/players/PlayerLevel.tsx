@@ -1,5 +1,5 @@
 import { getLevelFromXp } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function PlayerLevel({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

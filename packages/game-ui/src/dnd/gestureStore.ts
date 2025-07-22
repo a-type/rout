@@ -1,11 +1,11 @@
 import { useAnimationFrame, useStableCallback } from '@a-type/ui';
 import { MotionValue, motionValue } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { useWindowEvent } from '../hooks/useWindowEvent';
-import { boundsRegistry } from './bounds';
-import { useDndStore } from './dndStore';
-import { gestureEvents } from './gestureEvents';
-import { TAGS } from './tags';
+import { useWindowEvent } from '../hooks/useWindowEvent.js';
+import { boundsRegistry } from './bounds.js';
+import { useDndStore } from './dndStore.js';
+import { gestureEvents } from './gestureEvents.js';
+import { TAGS } from './tags.js';
 
 export const gesture = {
   active: false,

@@ -5,8 +5,9 @@ import {
   UseSuspenseInfiniteQueryOptions,
   UseSuspenseQueryOptions,
 } from '@tanstack/react-query';
+import { API_ORIGIN } from '../config.js';
 import { fetch } from '../fetch.js';
-import { queryClient } from '../queryClient.jsx';
+import { queryClient } from '../queryClient.js';
 
 type TypedResponse<T> = Response & { json: () => Promise<T> };
 export type EraseEmptyArg<T> = T extends void
@@ -25,7 +26,9 @@ export type QueryFactory<Output, Input> = {
   __isQuery: true;
 };
 export type QueryFactoryInfinite<Output, Input> = {
-  (...args: EraseEmptyArg<Input>): UseSuspenseInfiniteQueryOptions<
+  (
+    ...args: EraseEmptyArg<Input>
+  ): UseSuspenseInfiniteQueryOptions<
     Output,
     Error,
     Output,
@@ -55,7 +58,7 @@ export class BaseSdk extends EventTarget {
 
   constructor() {
     super();
-    this.apiRpc = apiHc(import.meta.env.VITE_PUBLIC_API_ORIGIN, { fetch });
+    this.apiRpc = apiHc(API_ORIGIN, { fetch });
   }
 
   protected sdkQuery = <TReq, TRes, Output = TRes, Input = void>(
@@ -315,15 +318,15 @@ export type InferReturnData<T> = T extends (
 ) => UseSuspenseQueryOptions<infer U>
   ? U
   : T extends QueryFactoryInfinite<infer U, any>
-  ? U
-  : T extends () => UseMutationOptions<infer U>
-  ? U
-  : never;
+    ? U
+    : T extends () => UseMutationOptions<infer U>
+      ? U
+      : never;
 
 export type InferInput<T> = T extends (
   ...args: infer U
 ) => UseSuspenseQueryOptions<any>
   ? U
   : T extends () => UseMutationOptions<any, any, infer U>
-  ? U
-  : never;
+    ? U
+    : never;

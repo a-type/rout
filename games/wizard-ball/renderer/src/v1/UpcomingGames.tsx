@@ -1,6 +1,6 @@
-import { hooks } from './gameClient';
 import dayjs from 'dayjs';
-import { ScheduledGameCard } from './ScheduledGameCard';
+import { hooks } from './gameClient.js';
+import { ScheduledGameCard } from './ScheduledGameCard.js';
 
 export function UpcomingGames() {
   const { finalState, latestRoundIndex, nextRoundCheckAt } =

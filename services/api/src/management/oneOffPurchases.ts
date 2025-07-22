@@ -1,9 +1,9 @@
 import { isPrefixedId, LongGameError } from '@long-game/common';
 import { Context } from 'hono';
 import Stripe from 'stripe';
-import { CtxVars } from '../config/ctx';
-import { isStripeGameProductCheckoutMetadata } from './stripeMetadata';
-import { getUserWithFallbacks } from './users';
+import { CtxVars } from '../config/ctx.js';
+import { isStripeGameProductCheckoutMetadata } from './stripeMetadata.js';
+import { getUserWithFallbacks } from './users.js';
 
 type EnvWithStripe = {
   Variables: CtxVars & { stripe: Stripe };

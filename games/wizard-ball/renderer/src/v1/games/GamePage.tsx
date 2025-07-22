@@ -1,14 +1,14 @@
 import { Tabs, TabsContent } from '@a-type/ui';
 import { useTransition } from 'react';
 import { useSearchParams } from 'react-router';
-import { BallparkChip } from '../BallparkChip';
-import { hooks } from '../gameClient';
-import { useGameResults } from '../useGameResults';
-import { WeatherChip } from '../WeatherChip';
-import { GameBoxScore } from './GameBoxScore';
-import { GameLog } from './GameLog';
-import { GameSummary } from './GameSummary';
-import { ScheduledGamePage } from './ScheduledGamePage';
+import { BallparkChip } from '../BallparkChip.js';
+import { hooks } from '../gameClient.js';
+import { useGameResults } from '../useGameResults.js';
+import { WeatherChip } from '../WeatherChip.js';
+import { GameBoxScore } from './GameBoxScore.js';
+import { GameLog } from './GameLog.js';
+import { GameSummary } from './GameSummary.js';
+import { ScheduledGamePage } from './ScheduledGamePage.js';
 
 export function GamePage({ id }: { id: string }) {
   const [params, setParams] = useSearchParams();

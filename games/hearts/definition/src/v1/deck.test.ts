@@ -1,7 +1,7 @@
 import { GameRandom } from '@long-game/game-definition';
 import { describe, expect, it } from 'vitest';
-import { shuffleHands } from './deck';
-import { fivePlayerDeck, fullDeck, threePlayerDeck } from './gameDefinition';
+import { shuffleHands } from './deck.js';
+import { fivePlayerDeck, fullDeck, threePlayerDeck } from './gameDefinition.js';
 
 describe('shuffling the deck', () => {
   describe('3 player game', () => {

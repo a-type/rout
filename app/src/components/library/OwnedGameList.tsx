@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
 import { useNavigate } from '@verdant-web/react-router';
-import { GameCard } from './GameCard';
+import { GameCard } from './GameCard.js';
 
 export interface OwnedGameListProps {
   className?: string;

@@ -1,3 +1,4 @@
+import { useGame } from '@/hooks/useGame.js';
 import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Box,
@@ -15,12 +16,11 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/game-ui';
-import games from '@long-game/games';
 import { Suspense, useState } from 'react';
 import { PublicInviteLink } from '../memberships/PublicInviteLink.js';
 import { UserAvatar } from '../users/UserAvatar.js';
 import { GameIcon } from './GameIcon.js';
-import { GamePicker } from './GamePicker.jsx';
+import { GamePicker } from './GamePicker.js';
 
 export interface GameSetupProps {
   gameSessionId: PrefixedId<'gs'>;
@@ -32,7 +32,7 @@ export function GameSetup({ gameSessionId }: GameSetupProps) {
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: gameSessionId,
   });
-  const game = games[pregame.session.gameId];
+  const game = useGame(pregame.session.gameId);
   const insufficientPlayers =
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);

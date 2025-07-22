@@ -9,10 +9,10 @@ import {
 } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../config/ctx';
-import { userStoreMiddleware } from '../middleware';
-import { sendFriendshipInviteEmail } from '../services/email';
-import { notifyUser } from '../services/notification';
+import { Env } from '../config/ctx.js';
+import { userStoreMiddleware } from '../middleware/index.js';
+import { sendFriendshipInviteEmail } from '../services/email.js';
+import { notifyUser } from '../services/notification.js';
 
 export const friendshipsRouter = new Hono<Env>()
   .get(

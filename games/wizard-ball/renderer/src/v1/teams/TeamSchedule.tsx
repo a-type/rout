@@ -1,8 +1,6 @@
-import { clsx } from '@a-type/ui';
-import { Link } from 'react-router';
-import { hooks } from '../gameClient';
-import { ScheduledGameCard } from '../ScheduledGameCard';
-import { GameResultCard } from '../GameResultsCard';
+import { hooks } from '../gameClient.js';
+import { GameResultCard } from '../GameResultsCard.js';
+import { ScheduledGameCard } from '../ScheduledGameCard.js';
 
 export function TeamSchedule({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

@@ -3,8 +3,8 @@ import { idShapes, PrefixedId, wrapRpcData } from '@long-game/common';
 import { AnyNotification } from '@long-game/notifications';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../config/ctx';
-import { userStoreMiddleware } from '../middleware';
+import { Env } from '../config/ctx.js';
+import { userStoreMiddleware } from '../middleware/index.js';
 
 export const notificationsRouter = new Hono<Env>()
   .get(

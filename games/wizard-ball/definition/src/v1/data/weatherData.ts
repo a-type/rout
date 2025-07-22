@@ -1,6 +1,6 @@
-import { LeagueGameState } from '../gameTypes';
-import { logger } from '../logger';
-import { PerkEffect } from './perkData';
+import { LeagueGameState } from '../gameTypes.js';
+import { logger } from '../logger.js';
+import { PerkEffect } from './perkData.js';
 
 export type Weather = {
   name: string;

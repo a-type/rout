@@ -1,9 +1,9 @@
-import type { LeagueGameState, League, PlayerId } from '../gameTypes';
-import { isPitcher, sum, getInningInfo } from '../utils';
-import { getModifiedAttributes } from './ratings';
-import { runnersOnBases } from './runners';
-import { logger } from '../logger';
-import { getCurrentPitcher } from './utils';
+import type { League, LeagueGameState, PlayerId } from '../gameTypes.js';
+import { logger } from '../logger.js';
+import { getInningInfo, isPitcher, sum } from '../utils.js';
+import { getModifiedAttributes } from './ratings.js';
+import { runnersOnBases } from './runners.js';
+import { getCurrentPitcher } from './utils.js';
 
 export function considerSwapPitcher(
   gameState: LeagueGameState,

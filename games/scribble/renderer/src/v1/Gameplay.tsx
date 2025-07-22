@@ -96,12 +96,12 @@ function ItemTab({
       {item.kind === 'description'
         ? 'Draw'
         : item.kind === 'drawing'
-        ? 'Describe'
-        : item.kind === 'ratings'
-        ? 'Rate'
-        : item.type === 'drawing'
-        ? 'Draw'
-        : 'Write'}
+          ? 'Describe'
+          : item.kind === 'ratings'
+            ? 'Rate'
+            : item.type === 'drawing'
+              ? 'Draw'
+              : 'Write'}
     </Tabs.Trigger>
   );
 }

@@ -1,6 +1,6 @@
 import { createId } from '@paralleldrive/cuid2';
 import { z } from 'zod';
-import { LongGameError } from './error';
+import { LongGameError } from './error.js';
 
 export const resourceIdTypes = {
   u: 'User',
@@ -79,3 +79,7 @@ export const idShapes = Object.entries(resourceIdTypes).reduce(
     [K in ResourceIdPrefix as ResourceNameMap[K]]: z.ZodType<PrefixedId<K>>;
   },
 );
+
+export function idToFederationId(id: string): string {
+  return id.replace(/-/g, '_');
+}

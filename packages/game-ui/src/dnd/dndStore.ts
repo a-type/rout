@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/shallow';
-import { draggableDataRegistry } from './dataRegistry';
-import { dndEvents } from './dndEvents';
-import { DragGestureContext } from './gestureStore';
+import { draggableDataRegistry } from './dataRegistry.js';
+import { dndEvents } from './dndEvents.js';
+import { DragGestureContext } from './gestureStore.js';
 
 export type DraggableData<T = any> = {
   id: string;

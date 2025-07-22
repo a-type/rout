@@ -1,10 +1,10 @@
 import { PrefixedId } from '@long-game/common';
-import { SpeciesType } from './data/speciesData';
-import { ClassType } from './data/classData';
-import { WeatherType } from './data/weatherData';
-import { BallparkType } from './data/ballparkData';
-import { ActualPitch } from './data/pitchData';
-import { StatusType } from './data/statusData';
+import { BallparkType } from './data/ballparkData.js';
+import { ClassType } from './data/classData.js';
+import { ActualPitch } from './data/pitchData.js';
+import { SpeciesType } from './data/speciesData.js';
+import { StatusType } from './data/statusData.js';
+import { WeatherType } from './data/weatherData.js';
 
 export type TeamId = string;
 export type PlayerId = string;

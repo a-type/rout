@@ -1,6 +1,6 @@
-import { hooks } from '../gameClient';
-import { attributeToColor, numberToLetter } from '../utils';
-import { getPlayerAttributes } from './useAttributes';
+import { hooks } from '../gameClient.js';
+import { attributeToColor, numberToLetter } from '../utils.js';
+import { getPlayerAttributes } from './useAttributes.js';
 
 export function PlayerOverall({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

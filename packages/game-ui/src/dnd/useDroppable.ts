@@ -1,11 +1,11 @@
 import { useStableCallback } from '@a-type/ui';
 import { useEffect, useRef } from 'react';
-import { boundsRegistry, useTagBounds } from './bounds';
-import { draggableDataRegistry } from './dataRegistry';
-import { dndEvents } from './dndEvents';
-import { DraggableData, useDndStore, useDraggedData } from './dndStore';
-import { DragGestureContext, gesture } from './gestureStore';
-import { TAGS } from './tags';
+import { boundsRegistry, useTagBounds } from './bounds.js';
+import { draggableDataRegistry } from './dataRegistry.js';
+import { dndEvents } from './dndEvents.js';
+import { DraggableData, useDndStore, useDraggedData } from './dndStore.js';
+import { DragGestureContext, gesture } from './gestureStore.js';
+import { TAGS } from './tags.js';
 
 export interface DropInfo {
   relativePosition: { x: number; y: number };

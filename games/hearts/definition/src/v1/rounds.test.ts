@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getDraftingRound } from './rounds';
+import { getDraftingRound } from './rounds.js';
 
 describe('getDraftingRound', () => {
   it.each([

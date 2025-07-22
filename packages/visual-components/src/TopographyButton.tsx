@@ -1,5 +1,5 @@
 import { Button, ButtonProps, clsx } from '@a-type/ui';
-import { TopographyBackground } from './TopographyBackground';
+import { TopographyBackground } from './TopographyBackground.js';
 
 export const TopographyButton = ({
   children,

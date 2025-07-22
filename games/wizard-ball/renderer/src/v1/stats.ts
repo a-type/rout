@@ -1,10 +1,9 @@
 import {
   GameResult,
-  League,
   PlayerId,
   PlayerStats,
 } from '@long-game/game-wizard-ball-definition';
-import { roundFloat } from './utils';
+import { roundFloat } from './utils.js';
 
 export type CalculatedStats = {
   battingAverage: string;

@@ -1,9 +1,9 @@
 import { Box, BoxProps, clsx } from '@a-type/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { Children, useId, useState } from 'react';
-import { gesture } from '../dnd';
-import { TokenSpace, TokenSpaceProps } from './TokenSpace';
-import { TokenDragData } from './types';
+import { gesture } from '../dnd/gestureStore.js';
+import { TokenSpace, TokenSpaceProps } from './TokenSpace.js';
+import { TokenDragData } from './types.js';
 
 export interface SortableTokenListProps<T> extends BoxProps {
   onMove: (token: TokenDragData<T>, index: number) => void;

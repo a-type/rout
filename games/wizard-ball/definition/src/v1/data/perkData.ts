@@ -1,21 +1,21 @@
-import { ClassType } from './classData';
+import { GameRandom } from '@long-game/game-definition';
 import {
   AttributeType,
   BattingCompositeType,
   HitPower,
+  HitTable,
   HitType,
+  League,
   LeagueGameState,
   PitchingCompositeType,
-  Position,
   Player,
-  HitTable,
-  League,
-} from '../gameTypes';
-import type { PitchKind } from './pitchData';
-import type { SpeciesType } from './speciesData';
-import type { WeatherType } from './weatherData';
-import { capitalize } from '../utils';
-import { GameRandom } from '@long-game/game-definition';
+  Position,
+} from '../gameTypes.js';
+import { capitalize } from '../utils.js';
+import { ClassType } from './classData.js';
+import type { PitchKind } from './pitchData.js';
+import type { SpeciesType } from './speciesData.js';
+import type { WeatherType } from './weatherData.js';
 
 export type TriggerEvent =
   | {

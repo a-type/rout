@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { UserAvatar } from '../users/UserAvatar';
+import { UserAvatar } from '../users/UserAvatar.js';
 
 export function FriendsList() {
   const { data } = sdkHooks.useGetFriendships();

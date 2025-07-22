@@ -2,9 +2,9 @@ import {
   BattingCompositeRatings,
   PitchingCompositeRatings,
 } from '@long-game/game-wizard-ball-definition';
-import { battingRatingList, pitchingRatingList } from './CompositeRatings';
-import { numberToLetter } from '../utils';
-import { TooltipPlus } from '../TooltipPlus';
+import { TooltipPlus } from '../TooltipPlus.js';
+import { numberToLetter } from '../utils.js';
+import { battingRatingList, pitchingRatingList } from './CompositeRatings.js';
 
 export function CompositeRatingsSummary({
   compositeRatings,

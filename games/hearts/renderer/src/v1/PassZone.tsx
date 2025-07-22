@@ -5,10 +5,9 @@ import {
   isCard,
   isPassTurn,
 } from '@long-game/game-hearts-definition/v1';
-import { Token, TokenSpace } from '@long-game/game-ui';
-import { PlayingCard } from '@long-game/game-ui/genericGames';
-import { CardGrid } from './CardGrid';
-import { hooks } from './gameClient';
+import { PlayingCard, Token, TokenSpace } from '@long-game/game-ui';
+import { CardGrid } from './CardGrid.js';
+import { hooks } from './gameClient.js';
 
 export interface PassZoneProps {
   className?: string;
@@ -77,6 +76,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
                   id={passed[i]}
                   data={passed[i]}
                   className="rounded-lg"
+                  movedBehavior="fade"
                 >
                   <PlayingCard
                     cardSuit={getCardSuit(passed[i])}

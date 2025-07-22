@@ -1,8 +1,8 @@
 import { clsx } from '@a-type/ui';
 import { Link } from 'react-router';
-import { hooks } from './gameClient';
-import { TeamIcon } from './teams/TeamIcon';
-import { TeamName } from './teams/TeamName';
+import { hooks } from './gameClient.js';
+import { TeamIcon } from './teams/TeamIcon.js';
+import { TeamName } from './teams/TeamName.js';
 
 export function GameResultCard({
   id,

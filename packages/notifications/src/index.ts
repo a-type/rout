@@ -1,15 +1,18 @@
 import {
   friendInviteNotification,
   FriendInviteNotification,
-} from './friendInvite';
+} from './friendInvite.js';
 import {
   gameAbandonedNotification,
   GameAbandonedNotification,
-} from './gameAbandoned';
-import { gameInviteNotification, GameInviteNotification } from './gameInvite';
-import { newGameNotification, NewGameNotification } from './newGame';
-import { turnReadyNotification, TurnReadyNotification } from './turnReady';
-import { NotificationConfig } from './types';
+} from './gameAbandoned.js';
+import {
+  gameInviteNotification,
+  GameInviteNotification,
+} from './gameInvite.js';
+import { newGameNotification, NewGameNotification } from './newGame.js';
+import { turnReadyNotification, TurnReadyNotification } from './turnReady.js';
+import { NotificationConfig } from './types.js';
 
 export type AnyNotification =
   | TurnReadyNotification
@@ -47,5 +50,5 @@ export const notificationTypes = [
   'game-abandoned',
 ] as const;
 
-export * from './turnReady';
-export * from './types';
+export * from './turnReady.js';
+export * from './types.js';

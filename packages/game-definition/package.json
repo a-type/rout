@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch --preserveWatchOutput"
   },
   "dependencies": {
     "@long-game/common": "workspace:*",

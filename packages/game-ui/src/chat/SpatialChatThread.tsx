@@ -1,8 +1,8 @@
 import { Box, clsx, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { ChatForm } from './ChatForm';
-import { ChatLog } from './ChatLog';
+import { ChatForm } from './ChatForm.js';
+import { ChatLog } from './ChatLog.js';
 
 export interface SpatialChatThreadProps {
   chats: GameSessionChatMessage[];

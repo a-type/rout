@@ -6,8 +6,8 @@ import {
   TopographyBackground,
   usePlayerThemed,
 } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { WordTile } from './WordTile';
+import { hooks } from './gameClient.js';
+import { WordTile } from './WordTile.js';
 
 export interface GameRecapProps {}
 

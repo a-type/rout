@@ -1,4 +1,13 @@
+import { PrefixedId } from '@long-game/common';
 import { GameRandom } from '@long-game/game-definition';
+import { getLevelFromXp, getPlayerOverall } from './attributes.js';
+import { applyXpAuto } from './boosts.js';
+import { ballparkData, BallparkType } from './data/ballparkData.js';
+import { classData, ClassType } from './data/classData.js';
+import { itemData } from './data/itemData.js';
+import { perks } from './data/perkData.js';
+import { speciesData, SpeciesType } from './data/speciesData.js';
+import { weather as weatherData } from './data/weatherData.js';
 import {
   BattingCompositeType,
   League,
@@ -10,24 +19,15 @@ import {
   PositionChartKey,
   Team,
   TeamId,
-} from './gameTypes';
-import { names } from './names';
-import { teamAdjectives, teamNouns } from './teamNames';
-import { PrefixedId } from '@long-game/common';
-import { speciesData, SpeciesType } from './data/speciesData';
-import { classData, ClassType } from './data/classData';
-import { perks } from './data/perkData';
-import { getLevelFromXp, getPlayerOverall } from './attributes';
-import { itemData } from './data/itemData';
+} from './gameTypes.js';
+import { names } from './names.js';
+import { teamAdjectives, teamNouns } from './teamNames.js';
 import {
   addPositionToPlayer,
   canAssignToPosition,
   hasPitcherPosition,
   isPitcher,
-} from './utils';
-import { weather as weatherData, WeatherType } from './data/weatherData';
-import { ballparkData, BallparkType } from './data/ballparkData';
-import { applyXpAuto } from './boosts';
+} from './utils.js';
 
 const battingCompositeTypes = [
   'extraBases',

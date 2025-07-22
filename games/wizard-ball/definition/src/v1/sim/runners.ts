@@ -1,7 +1,7 @@
-import type { LeagueGameState, League, Base, PlayerId } from '../gameTypes';
-import { addToPlayerStats } from './stats';
-import { updatePlayerHeat } from './streak';
-import { getCurrentPitcher, getCurrentBatter } from './utils';
+import type { Base, League, LeagueGameState, PlayerId } from '../gameTypes.js';
+import { addToPlayerStats } from './stats.js';
+import { updatePlayerHeat } from './streak.js';
+import { getCurrentBatter, getCurrentPitcher } from './utils.js';
 
 export function runnersOnBases(gameState: LeagueGameState): number {
   return Object.values(gameState.bases).filter((playerId) => playerId !== null)

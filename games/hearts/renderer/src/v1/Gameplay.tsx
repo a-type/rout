@@ -1,12 +1,12 @@
 import { Box } from '@a-type/ui';
 import { TurnError } from '@long-game/game-ui';
 import { useEffect } from 'react';
-import { BackupSubmit } from './BackupSubmit';
-import { CurrentTrick } from './CurrentTrick';
-import { hooks } from './gameClient';
-import { Hand } from './Hand';
-import { PassZone } from './PassZone';
-import { PlayerScores } from './PlayerScores';
+import { BackupSubmit } from './BackupSubmit.js';
+import { CurrentTrick } from './CurrentTrick.js';
+import { hooks } from './gameClient.js';
+import { Hand } from './Hand.js';
+import { PassZone } from './PassZone.js';
+import { PlayerScores } from './PlayerScores.js';
 
 export interface GameplayProps {}
 

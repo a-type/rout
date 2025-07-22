@@ -1,8 +1,8 @@
 import { clsx } from '@a-type/ui';
 import { itemData } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
-import { TooltipPlus } from '../TooltipPlus';
-import { PerkEffect } from './PerkEffect';
+import { hooks } from '../gameClient.js';
+import { TooltipPlus } from '../TooltipPlus.js';
+import { PerkEffect } from './PerkEffect.js';
 
 export function ItemDefChip({ id }: { id: string }) {
   const itemDef = itemData[id];

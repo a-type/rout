@@ -1,12 +1,12 @@
 import { Button, clsx, Dialog } from '@a-type/ui';
 import { Choice as ChoiceType } from '@long-game/game-wizard-ball-definition';
 import { useEffect, useState } from 'react';
-import { hooks } from './gameClient';
-import { ItemDefChip } from './items/ItemChip';
-import { PerkChip } from './perks/PerkChip';
-import { StatusChip } from './perks/StatusChip';
-import { PlayerChip } from './players/PlayerChip';
-import { shortAttribute, useSendTurn } from './utils';
+import { hooks } from './gameClient.js';
+import { ItemDefChip } from './items/ItemChip.js';
+import { PerkChip } from './perks/PerkChip.js';
+import { StatusChip } from './perks/StatusChip.js';
+import { PlayerChip } from './players/PlayerChip.js';
+import { shortAttribute, useSendTurn } from './utils.js';
 
 export function Choice({ choice, id }: { choice: ChoiceType; id?: string }) {
   if (choice.kind === 'item') {

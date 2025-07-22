@@ -1,16 +1,14 @@
 import {
-  itemData,
-  perks,
-  sumObjects,
-  sum,
-  Player,
-  League,
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
-  statusData,
-  StatusType,
+  itemData,
+  League,
+  perks,
+  Player,
+  sum,
+  sumObjects,
 } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 function getActivePerks(player: Player, league: League) {
   // TODO: Better handle perks and statuses with conditions

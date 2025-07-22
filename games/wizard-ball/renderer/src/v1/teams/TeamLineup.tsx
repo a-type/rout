@@ -22,18 +22,18 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { forwardRef, useEffect, useState } from 'react';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 import { Tooltip } from '@a-type/ui';
 import { isPitcher, Team } from '@long-game/game-wizard-ball-definition';
 import { HTMLAttributes, PropsWithChildren } from 'react';
-import { PlayerClass } from '../players/PlayerClass';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerStatus } from '../players/PlayerStatus';
-import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
-import { PlayerOverall } from '../ratings/PlayerOverall';
-import { PlayerStamina } from '../ratings/PlayerStamina';
-import { useSendTurn } from '../utils';
+import { PlayerClass } from '../players/PlayerClass.js';
+import { PlayerSpecies } from '../players/PlayerSpecies.js';
+import { PlayerStatus } from '../players/PlayerStatus.js';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent.js';
+import { PlayerOverall } from '../ratings/PlayerOverall.js';
+import { PlayerStamina } from '../ratings/PlayerStamina.js';
+import { useSendTurn } from '../utils.js';
 
 const Item = forwardRef<
   HTMLDivElement,

@@ -1,6 +1,6 @@
-import { hooks } from '../gameClient';
-import { TeamIcon } from '../teams/TeamIcon';
-import { useGameResults } from '../useGameResults';
+import { hooks } from '../gameClient.js';
+import { TeamIcon } from '../teams/TeamIcon.js';
+import { useGameResults } from '../useGameResults.js';
 
 export function GameScoreboard({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

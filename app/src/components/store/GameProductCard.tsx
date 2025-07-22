@@ -1,8 +1,8 @@
 import { Button, Card, Dialog, Icon, Marquee, clsx } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
 import { useSearchParams } from '@verdant-web/react-router';
-import { GameIcon } from '../games/GameIcon';
-import { BuyGameProduct } from './BuyGameProduct';
+import { GameIcon } from '../games/GameIcon.js';
+import { BuyGameProduct } from './BuyGameProduct.js';
 
 export interface GameProductCardProps {
   returnToAfterPurchase?: string;
@@ -58,8 +58,8 @@ export function GameProductCard({
               {product.isOwned
                 ? 'Owned'
                 : product.priceCents === 0
-                ? 'Free'
-                : `$${product.priceCents / 100}`}
+                  ? 'Free'
+                  : `$${product.priceCents / 100}`}
             </Card.Content>
             <Card.Content>{product.gameProductItems.length} games</Card.Content>
             {!product.publishedAt && (
@@ -90,8 +90,8 @@ export function GameProductCard({
               {product.isOwned
                 ? 'Owned'
                 : product.priceCents === 0
-                ? 'Get'
-                : 'Buy'}
+                  ? 'Get'
+                  : 'Buy'}
             </BuyGameProduct>
           </Dialog.Actions>
         </Dialog.Content>

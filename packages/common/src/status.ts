@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idShapes } from './ids';
+import { idShapes } from './ids.js';
 
 export const gameSessionPlayerStatusShape = z.object({
   online: z.boolean(),

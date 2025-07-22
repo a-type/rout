@@ -2,26 +2,10 @@
   "name": "@long-game/game-exquisite-fridge-renderer",
   "version": "0.0.1",
   "private": true,
-  "exports": {
-    ".": {
-      "workerd": "./src/index.ts",
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./css.css": {
-      "import": "./dist/uno.css",
-      "types": "./dist/uno.css.d.ts"
-    }
-  },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts && pnpm build:css && pnpm build:uno",
-    "build:ts": "tsc",
-    "build:css": "scripts css ./dist",
-    "build:uno": "scripts uno ./dist",
-    "dev": "pnpm run --filter @long-game/game-exquisite-fridge-renderer --parallel \"/^dev:.*/\"",
-    "dev:ts": "tsc -w --preserveWatchOutput",
-    "dev:uno": "scripts uno ./dist -w",
+    "build": "rsbuild build",
+    "dev": "rsbuild dev",
     "test": "vitest"
   },
   "dependencies": {
@@ -38,6 +22,9 @@
     "vitest": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@long-game/scripts": "workspace:*"
+    "@long-game/scripts": "workspace:*",
+    "@long-game/bundler-config": "workspace:*",
+    "@long-game/uno-config": "workspace:*",
+    "@rsbuild/core": "catalog:"
   }
 }

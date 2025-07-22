@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Knewave';
-  src: url('/fonts/Knewave-Regular.ttf');
+  src: url('../public/fonts/Knewave-Regular.ttf');
 }
 
 #root {

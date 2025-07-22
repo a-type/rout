@@ -1,23 +1,22 @@
 import { GameRandom } from '@long-game/game-definition';
+import { applyLevelup, getLevelFromXp } from './attributes.js';
+import { perks } from './data/perkData.js';
+import { GlobalState } from './gameDefinition.js';
 import {
-  League,
   Choice,
   ChoiceKind,
-  Team,
+  League,
   Player,
-  Position,
   PositionChartKey,
-} from './gameTypes';
-import { generateItem, pickRandomItemDef } from './generation';
-import { perks } from './data/perkData';
-import { applyLevelup, getLevelFromXp } from './attributes';
-import { GlobalState } from './gameDefinition';
+  Team,
+} from './gameTypes.js';
+import { generateItem, pickRandomItemDef } from './generation.js';
 import {
   addPositionToPlayer,
   canAssignToPosition,
   hasPitcherPosition,
   isPitcher,
-} from './utils';
+} from './utils.js';
 
 export function generateChoices(
   random: GameRandom,

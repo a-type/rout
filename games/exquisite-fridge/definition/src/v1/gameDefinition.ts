@@ -4,15 +4,15 @@ import {
   roundFormat,
   type BaseTurnError,
 } from '@long-game/game-definition';
-import { ROUND_COUNT } from './constants';
+import { ROUND_COUNT } from './constants.js';
 import {
   getPlayerSequenceIndex,
   StorySequence,
   StoryStep,
   WordItem,
-} from './sequences';
-import { wordBank } from './wordBank';
-import { isValidFreebie, isValidWriteIn, takeWords } from './words';
+} from './sequences.js';
+import { wordBank } from './wordBank.js';
+import { isValidFreebie, isValidWriteIn, takeWords } from './words.js';
 
 export type GlobalState = {
   wordBank: string[];

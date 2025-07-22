@@ -1,9 +1,9 @@
 import { clsx } from '@a-type/ui';
-import { BallparkChip } from '../BallparkChip';
-import { hooks } from '../gameClient';
-import { PlayerChip } from '../players/PlayerChip';
-import { TeamChip } from '../teams/TeamChip';
-import { WeatherChip } from '../WeatherChip';
+import { BallparkChip } from '../BallparkChip.js';
+import { hooks } from '../gameClient.js';
+import { PlayerChip } from '../players/PlayerChip.js';
+import { TeamChip } from '../teams/TeamChip.js';
+import { WeatherChip } from '../WeatherChip.js';
 
 function CompactTeamLineup({ teamId }: { teamId: string }) {
   const { finalState } = hooks.useGameSuite();

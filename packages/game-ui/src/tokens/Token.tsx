@@ -5,17 +5,17 @@ import {
   useTransform,
 } from 'motion/react';
 import { useMemo } from 'react';
-import { ChatSurface } from '../chat/ChatSurface';
+import { ChatSurface } from '../chat/ChatSurface.js';
 import {
   DefaultDraggedContainer,
   Draggable,
   DraggableProps,
   DraggedContainerComponent,
-} from '../dnd/Draggable';
-import { DragGestureActivationConstraint } from '../dnd/useDragGesture';
-import { useIsTokenInHand } from './TokenHand';
-import { useMaybeParentTokenSpace } from './TokenSpace';
-import { useTokenData } from './types';
+} from '../dnd/Draggable.js';
+import { DragGestureActivationConstraint } from '../dnd/useDragGesture.js';
+import { useIsTokenInHand } from './TokenHand.js';
+import { useMaybeParentTokenSpace } from './TokenSpace.js';
+import { useTokenData } from './types.js';
 
 export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;

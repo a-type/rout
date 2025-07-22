@@ -16,8 +16,8 @@ import { useMediaQuery, withSuspense } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode, Suspense, useState } from 'react';
-import { NotificationSettings } from './NotificationSettings';
-import { useAutoReadNotifications } from './useAutoReadNotifications';
+import { NotificationSettings } from './NotificationSettings.js';
+import { useAutoReadNotifications } from './useAutoReadNotifications.js';
 
 export interface NotificationsButtonProps
   extends Omit<ButtonProps, 'children'> {

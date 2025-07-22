@@ -15,8 +15,8 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { RefObject, useImperativeHandle, useRef } from 'react';
-import { PlayerAvatar } from '../players/PlayerAvatar';
-import { PlayerName } from '../players/PlayerName';
+import { PlayerAvatar } from '../players/PlayerAvatar.js';
+import { PlayerName } from '../players/PlayerName.js';
 
 export interface ChatFormProps extends BoxProps {
   timing?: 'round' | 'endgame';

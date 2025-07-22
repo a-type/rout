@@ -7,9 +7,10 @@ import {
 } from '@long-game/game-definition';
 import { hcWithType as apiHc } from '@long-game/service-api';
 import type { InferResponseType } from 'hono/client';
-import { fetch } from '../fetch';
+import { API_ORIGIN } from '../config.js';
+import { fetch } from '../fetch.js';
 
-export const apiRpc = apiHc(import.meta.env.VITE_PUBLIC_API_ORIGIN, {
+export const apiRpc = apiHc(API_ORIGIN, {
   fetch,
 });
 

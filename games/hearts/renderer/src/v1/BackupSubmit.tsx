@@ -1,6 +1,6 @@
 import { SubmitTurn } from '@long-game/game-ui';
 import { useEffect, useState } from 'react';
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export interface BackupSubmitProps {}
 

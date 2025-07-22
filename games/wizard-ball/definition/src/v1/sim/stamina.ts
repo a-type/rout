@@ -1,12 +1,12 @@
-import { LeagueGameState, League, PitchOutcome } from '../gameTypes';
-import { ActualPitch } from '../data/pitchData';
-import { scaleAttributePercent } from '../utils';
+import { ActualPitch } from '../data/pitchData.js';
+import { League, LeagueGameState, PitchOutcome } from '../gameTypes.js';
+import { scaleAttributePercent } from '../utils.js';
 import {
-  getModifiedCompositePitchingRatings,
   getActivePlayerPerks,
   getModifiedCompositeBattingRatings,
-} from './ratings';
-import { getCurrentBatter, getCurrentPitcher } from './utils';
+  getModifiedCompositePitchingRatings,
+} from './ratings.js';
+import { getCurrentBatter, getCurrentPitcher } from './utils.js';
 
 const MIN_STAMINA = -0.25; // Minimum stamina value for players
 

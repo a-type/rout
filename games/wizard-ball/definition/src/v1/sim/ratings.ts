@@ -1,27 +1,27 @@
 import {
   getBattingCompositeRatings,
   getPitchingCompositeRatings,
-} from '../attributes';
-import { Ballpark, ballparkData } from '../data/ballparkData';
+} from '../attributes.js';
+import { Ballpark, ballparkData } from '../data/ballparkData.js';
+import { itemData, ItemInfo } from '../data/itemData.js';
+import { Perk, PerkEffect, perks } from '../data/perkData.js';
+import { PitchKind } from '../data/pitchData.js';
+import { Status, statusData, StatusType } from '../data/statusData.js';
+import { Weather, weather as weatherData } from '../data/weatherData.js';
 import type {
+  BattingCompositeRatings,
   League,
   LeagueGameState,
-  Player,
-  BattingCompositeRatings,
   PitchingCompositeRatings,
-} from '../gameTypes';
-import { itemData, ItemInfo } from '../data/itemData';
-import { Perk, PerkEffect, perks } from '../data/perkData';
-import { PitchKind } from '../data/pitchData';
-import { Status, statusData, StatusType } from '../data/statusData';
-import { sumObjects, scaleAttribute, multiplyObjects } from '../utils';
-import { Weather, weather as weatherData } from '../data/weatherData';
-import { determineClutchFactor } from './clutch';
+  Player,
+} from '../gameTypes.js';
+import { multiplyObjects, scaleAttribute, sumObjects } from '../utils.js';
+import { determineClutchFactor } from './clutch.js';
 import {
   getCurrentBatter,
   getCurrentPitcher,
   getPitcherForTeam,
-} from './utils';
+} from './utils.js';
 
 export type PerkInfo = {
   source: Weather | Ballpark | Perk | Status | ItemInfo;

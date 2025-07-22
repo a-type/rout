@@ -1,8 +1,8 @@
-import { LeagueGameState, Player } from '../gameTypes';
-import { PerkEffect } from './perkData';
-import { PitchKind } from './pitchData';
-import { clamp } from '../utils';
-import type { WeatherType } from './weatherData';
+import { LeagueGameState, Player } from '../gameTypes.js';
+import { clamp } from '../utils.js';
+import { PerkEffect } from './perkData.js';
+import { PitchKind } from './pitchData.js';
+import type { WeatherType } from './weatherData.js';
 
 export type StatusDuration = 'end-of-game';
 

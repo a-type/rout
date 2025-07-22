@@ -1,5 +1,5 @@
-import { hooks } from './gameClient';
-import { GameResultCard } from './GameResultsCard';
+import { hooks } from './gameClient.js';
+import { GameResultCard } from './GameResultsCard.js';
 
 export function RecentResults() {
   const { finalState } = hooks.useGameSuite();

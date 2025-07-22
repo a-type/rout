@@ -6,9 +6,9 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { gesture } from '../dnd/gestureStore';
-import { Vector2 } from './types';
-import { ViewportState } from './ViewportState';
+import { gesture } from '../dnd/gestureStore.js';
+import { Vector2 } from './types.js';
+import { ViewportState } from './ViewportState.js';
 
 const PINCH_GESTURE_DAMPING = 150;
 const WHEEL_GESTURE_DAMPING = 1000;

@@ -1,4 +1,5 @@
 import { GameRandom } from '@long-game/game-definition';
+import { ActualPitch } from '../data/pitchData.js';
 import type {
   HitArea,
   HitTable,
@@ -6,9 +7,8 @@ import type {
   LeagueGameState,
   LogsPitchData,
   PositionChart,
-} from '../gameTypes';
-import { last } from '../utils';
-import { ActualPitch } from '../data/pitchData';
+} from '../gameTypes.js';
+import { last } from '../utils.js';
 
 export function randomByWeight<T>(
   random: GameRandom,

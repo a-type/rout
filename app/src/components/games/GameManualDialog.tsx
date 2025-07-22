@@ -1,7 +1,7 @@
 import { Button, ButtonProps, Dialog, Icon, Spinner } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { Suspense } from 'react';
-import { GameManual } from './GameManual';
+import { GameManual } from './GameManual.js';
 
 export interface GameManualDialogProps extends ButtonProps {}
 

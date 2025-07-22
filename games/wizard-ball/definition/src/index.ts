@@ -1,14 +1,15 @@
 import type { GameModule } from '@long-game/game-definition';
-import { gameDefinition as v1 } from './v1/gameDefinition';
+import { gameDefinition as v1 } from './v1/gameDefinition.js';
 
-export * from './v1/attributes';
-export { ballparkData, type BallparkType } from './v1/data/ballparkData';
-export { classData, classIcons } from './v1/data/classData';
-export { itemData } from './v1/data/itemData';
-export { perks, type PerkEffect } from './v1/data/perkData';
-export type { ActualPitch, PitchData } from './v1/data/pitchData';
-export { speciesData, speciesIcons } from './v1/data/speciesData';
-export { statusData, type StatusType } from './v1/data/statusData';
+export * from './v1/attributes.js';
+export { ballparkData, type BallparkType } from './v1/data/ballparkData.js';
+export { classData, classIcons } from './v1/data/classData.js';
+export { itemData } from './v1/data/itemData.js';
+export { perks, type PerkEffect } from './v1/data/perkData.js';
+export type { ActualPitch, PitchData } from './v1/data/pitchData.js';
+export { speciesData, speciesIcons } from './v1/data/speciesData.js';
+export { statusData, type StatusType } from './v1/data/statusData.js';
+export { weather, type WeatherType } from './v1/data/weatherData.js';
 export {
   canAssignToPosition,
   getInningInfo,
@@ -16,8 +17,7 @@ export {
   isPitcher,
   sum,
   sumObjects,
-} from './v1/utils';
-export { weather, type WeatherType } from './v1/data/weatherData';
+} from './v1/utils.js';
 
 export default {
   id: 'wizard-ball',
@@ -32,8 +32,9 @@ export default {
     },
   ],
   prerelease: true,
+  devPort: 3303,
 } satisfies GameModule;
 
 export { v1 };
 
-export * from './v1/gameTypes';
+export * from './v1/gameTypes.js';

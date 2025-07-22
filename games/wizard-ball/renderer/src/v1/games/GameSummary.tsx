@@ -1,6 +1,6 @@
-import { useGameResults } from '../useGameResults';
-import { GameScoreboard } from './GameScoreboard';
-import { GameLogEvent } from './GameLog';
+import { useGameResults } from '../useGameResults.js';
+import { GameLogEvent } from './GameLog.js';
+import { GameScoreboard } from './GameScoreboard.js';
 
 export function GameSummary({ id }: { id: string }) {
   const game = useGameResults({ id });

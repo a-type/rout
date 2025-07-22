@@ -2,8 +2,8 @@ import {
   ballparkData,
   type BallparkType,
 } from '@long-game/game-wizard-ball-definition';
-import { PerkEffect } from './items/PerkEffect';
-import { TooltipPlus } from './TooltipPlus';
+import { PerkEffect } from './items/PerkEffect.js';
+import { TooltipPlus } from './TooltipPlus.js';
 
 export function BallparkChip({ id }: { id: BallparkType }) {
   const ballpark = ballparkData[id];

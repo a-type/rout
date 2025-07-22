@@ -2,8 +2,8 @@ import { Box, clsx, HorizontalList } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { getScore } from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { PlayerScoredCards } from './PlayerScoredCards';
+import { hooks } from './gameClient.js';
+import { PlayerScoredCards } from './PlayerScoredCards.js';
 
 export interface PlayerScoresProps {
   className?: string;

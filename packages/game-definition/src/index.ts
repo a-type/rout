@@ -16,8 +16,11 @@ export interface GameModule {
   tags: string[];
   creators: { name: string; role?: string; url?: string }[];
   prerelease?: boolean;
+  devPort: number;
 }
 
 export function getLatestVersion(game: GameModule): GameDefinition {
   return game.versions[game.versions.length - 1];
 }
+
+export { emptyGameDefinition } from './empty.js';

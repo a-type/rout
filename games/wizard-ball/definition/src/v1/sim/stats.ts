@@ -1,5 +1,5 @@
-import type { League, LeagueGameState, PlayerStats } from '../gameTypes';
-import { last } from '../utils';
+import type { League, LeagueGameState, PlayerStats } from '../gameTypes.js';
+import { last } from '../utils.js';
 
 export function addToPlayerStats(
   gameState: LeagueGameState,

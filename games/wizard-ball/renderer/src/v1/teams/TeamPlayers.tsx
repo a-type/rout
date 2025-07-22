@@ -10,11 +10,11 @@ import {
 } from '@long-game/game-wizard-ball-definition';
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
-import { PlayerClass } from '../players/PlayerClass';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerStatus } from '../players/PlayerStatus';
-import { attributeToColor, numberToLetter } from '../utils';
+import { hooks } from '../gameClient.js';
+import { PlayerClass } from '../players/PlayerClass.js';
+import { PlayerSpecies } from '../players/PlayerSpecies.js';
+import { PlayerStatus } from '../players/PlayerStatus.js';
+import { attributeToColor, numberToLetter } from '../utils.js';
 
 const columns = {
   attributes: [

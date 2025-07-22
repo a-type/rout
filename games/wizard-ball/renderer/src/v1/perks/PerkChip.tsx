@@ -1,7 +1,7 @@
 import { clsx } from '@a-type/ui';
 import { perks } from '@long-game/game-wizard-ball-definition';
-import { PerkEffect } from '../items/PerkEffect';
-import { TooltipPlus } from '../TooltipPlus';
+import { PerkEffect } from '../items/PerkEffect.js';
+import { TooltipPlus } from '../TooltipPlus.js';
 
 export function PerkChip({ id }: { id: string }) {
   const perk = perks[id];

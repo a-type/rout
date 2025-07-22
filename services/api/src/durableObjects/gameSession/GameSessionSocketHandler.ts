@@ -16,8 +16,8 @@ import {
 } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { verifySocketToken } from '../../auth/socketTokens';
-import { GameSession } from './GameSession';
+import { verifySocketToken } from '../../auth/socketTokens.js';
+import { GameSession } from './GameSession.js';
 
 export interface SocketSessionInfo {
   gameSessionId: string;

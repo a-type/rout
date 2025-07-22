@@ -1,8 +1,8 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../config/ctx';
-import { userStoreMiddleware } from '../middleware';
+import { Env } from '../config/ctx.js';
+import { userStoreMiddleware } from '../middleware/index.js';
 
 export const pushRouter = new Hono<Env>()
   .post(

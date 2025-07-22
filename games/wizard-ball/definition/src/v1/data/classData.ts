@@ -1,4 +1,4 @@
-import { AttributeType } from '../gameTypes';
+import { AttributeType } from '../gameTypes.js';
 
 export const classData = {
   wizard: 'intelligence',

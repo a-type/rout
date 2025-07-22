@@ -13,11 +13,11 @@ import {
   SYSTEM_CHAT_AUTHOR_ID,
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { PlayerAvatar } from '../players/PlayerAvatar';
-import { PlayerName } from '../players/PlayerName';
-import { usePlayerThemed } from '../players/usePlayerThemed';
-import { ChatReactions } from './ChatReactions';
-import { spatialChatState } from './spatialChatState';
+import { PlayerAvatar } from '../players/PlayerAvatar.js';
+import { PlayerName } from '../players/PlayerName.js';
+import { usePlayerThemed } from '../players/usePlayerThemed.js';
+import { ChatReactions } from './ChatReactions.js';
+import { spatialChatState } from './spatialChatState.js';
 
 export interface ChatMessageProps extends BoxProps {
   message: GameSessionChatMessage;

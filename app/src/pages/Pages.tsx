@@ -1,14 +1,11 @@
 import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
-import {
-  checkForUpdate,
-  updateApp,
-  updateState,
-} from '@/components/updates/updateState.js';
+import { updateState } from '@/components/updates/updateState.js';
+import { checkForUpdate, skipWaiting } from '@/swRegister.js';
 import { Box, ErrorBoundary } from '@a-type/ui';
 import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
 import { lazy, useCallback } from 'react';
-import GameSessionPage from './GameSessionPage.jsx';
-import HomePage from './HomePage.jsx';
+import GameSessionPage from './GameSessionPage.js';
+import HomePage from './HomePage.js';
 
 const routes = makeRoutes([
   {
@@ -109,7 +106,7 @@ export const Pages = () => {
         !ev.state?.noUpdate
       ) {
         console.info('Update ready to install, intercepting navigation...');
-        updateApp(ev?.state?.isSwipeNavigation);
+        skipWaiting();
         return false;
       }
       if (!prev) {

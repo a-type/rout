@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
-import { dndEvents } from './dndEvents';
-import { useDndStore } from './dndStore';
+import { dndEvents } from './dndEvents.js';
+import { useDndStore } from './dndStore.js';
 
 export interface DndAllyProps {}
 

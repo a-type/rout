@@ -7,24 +7,14 @@
       "production": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./genericGames": {
-      "production": "./dist/genericGames/index.js",
-      "import": "./dist/genericGames/index.js",
-      "types": "./dist/genericGames/index.d.ts"
-    },
-    "./css.css": {
-      "default": "./dist/uno.css"
     }
   },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts && pnpm build:uno",
+    "build": "pnpm build:ts",
     "build:ts": "tsc",
-    "build:uno": "scripts uno ./dist",
     "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
     "dev:ts": "tsc -w --preserveWatchOutput",
-    "dev:uno": "scripts uno ./dist -w",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -53,6 +43,7 @@
   },
   "devDependencies": {
     "@long-game/scripts": "workspace:*",
+    "@long-game/uno-config": "workspace:*",
     "@storybook/react-vite": "^9.0.15",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

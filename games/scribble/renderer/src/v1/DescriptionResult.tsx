@@ -3,9 +3,9 @@ import {
   DescriptionItem,
   DrawingItem,
 } from '@long-game/game-scribble-definition/v1';
-import { DescriptionText } from './DescriptionText';
-import { Canvas } from './drawing/Canvas';
-import { hooks } from './gameClient';
+import { DescriptionText } from './DescriptionText.js';
+import { Canvas } from './drawing/Canvas.js';
+import { hooks } from './gameClient.js';
 
 export interface DescriptionResultProps {
   drawing?: DrawingItem;

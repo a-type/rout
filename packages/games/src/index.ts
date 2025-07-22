@@ -1,8 +1,5 @@
-import exquisiteFridge from '@long-game/game-exquisite-fridge-definition';
-import gunboats from '@long-game/game-gunboats-definition';
-import chessArena from '@long-game/game-chess-arena-definition';
 import { GameModule } from '@long-game/game-definition';
-import gudnak from '@long-game/game-gudnak-definition';
+import exquisiteFridge from '@long-game/game-exquisite-fridge-definition';
 import hearts from '@long-game/game-hearts-definition';
 import numberGuess from '@long-game/game-number-guess-definition';
 import scribble from '@long-game/game-scribble-definition';
@@ -10,12 +7,9 @@ import wizardBall from '@long-game/game-wizard-ball-definition';
 
 const games: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
-  [gudnak.id]: gudnak,
   [scribble.id]: scribble,
   [hearts.id]: hearts,
   [wizardBall.id]: wizardBall,
-  [chessArena.id]: chessArena,
-  [gunboats.id]: gunboats,
   [exquisiteFridge.id]: exquisiteFridge,
   // GENERATED - DO NOT REMOVE THIS LINE
 };

@@ -6,8 +6,8 @@ import {
 } from '@long-game/game-exquisite-fridge-definition/v1';
 import { TokenSpace } from '@long-game/game-ui';
 import { useState } from 'react';
-import { hooks } from './gameClient';
-import { WordTile } from './WordTile';
+import { hooks } from './gameClient.js';
+import { WordTile } from './WordTile.js';
 
 export interface WordHandProps {
   className?: string;

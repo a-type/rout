@@ -11,10 +11,10 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useSdk } from '../hooks';
-import { PublicSdk } from '../sdk';
-import { GameSessionSuite } from '../state/gameSessionMobx';
-import { connectToSocket } from '../state/socket';
+import { useSdk } from '../hooks.jsx';
+import { PublicSdk } from '../sdk/PublicSdk.js';
+import { GameSessionSuite } from '../state/gameSessionMobx.js';
+import { connectToSocket } from '../state/socket.js';
 
 export const GameSessionContext = createContext<GameSessionSuite<any> | null>(
   null,
@@ -32,10 +32,12 @@ export function withGame<T = {}, G extends GameDefinition = GameDefinition>(
 
 export function GameSessionProvider({
   gameSessionId,
+  gameDefinition,
   children,
   fallback,
 }: {
   gameSessionId: PrefixedId<'gs'>;
+  gameDefinition: GameDefinition;
   children: ReactNode;
   fallback?: ReactNode;
 }) {
@@ -46,14 +48,20 @@ export function GameSessionProvider({
 
   const [gameSuite, setGameSuite] = useState(
     () =>
-      new GameSessionSuite(details, { socket: connectToSocket(details.id) }),
+      new GameSessionSuite(
+        { ...details, gameDefinition },
+        { socket: connectToSocket(details.id) },
+      ),
   );
   if (gameSuite.gameSessionId !== gameSessionId) {
     gameSuite.dispose();
     setGameSuite(
-      new GameSessionSuite(details, {
-        socket: connectToSocket(details.id),
-      }),
+      new GameSessionSuite(
+        { ...details, gameDefinition },
+        {
+          socket: connectToSocket(details.id),
+        },
+      ),
     );
   }
   useEffect(() => gameSuite.connect(), [gameSuite]);

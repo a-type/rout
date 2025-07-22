@@ -1,11 +1,11 @@
 import { Box, P } from '@a-type/ui';
 import { ROUND_COUNT } from '@long-game/game-exquisite-fridge-definition/v1';
 import { SubmitTurn } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { InputZone } from './InputZone';
-import { PromptDisplay } from './PromptDisplay';
-import { WordHand } from './WordHand';
-import { WriteInDialog } from './WriteInDialog';
+import { hooks } from './gameClient.js';
+import { InputZone } from './InputZone.js';
+import { PromptDisplay } from './PromptDisplay.js';
+import { WordHand } from './WordHand.js';
+import { WriteInDialog } from './WriteInDialog.js';
 
 export interface GameplayProps {}
 

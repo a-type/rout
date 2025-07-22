@@ -3,7 +3,7 @@ import type {
   AttributeType,
   PerkEffect as PerkEffectType,
 } from '@long-game/game-wizard-ball-definition';
-import { compositeToString, shortAttribute } from '../utils';
+import { compositeToString, shortAttribute } from '../utils.js';
 
 export function PerkEffect({ effect }: { effect: PerkEffectType }) {
   return (

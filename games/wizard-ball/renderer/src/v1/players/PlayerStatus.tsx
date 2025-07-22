@@ -1,6 +1,6 @@
 import { statusData } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
-import { strOrFn } from '../perks/StatusChip';
+import { hooks } from '../gameClient.js';
+import { strOrFn } from '../perks/StatusChip.js';
 
 export function PlayerStatus({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

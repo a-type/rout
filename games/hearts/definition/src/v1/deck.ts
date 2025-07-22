@@ -5,7 +5,7 @@ import {
   fivePlayerDeck,
   fullDeck,
   threePlayerDeck,
-} from './gameDefinition';
+} from './gameDefinition.js';
 
 export function shuffleHands({
   random,
@@ -18,8 +18,8 @@ export function shuffleHands({
     members.length === 4
       ? fullDeck
       : members.length === 5
-      ? fivePlayerDeck
-      : threePlayerDeck;
+        ? fivePlayerDeck
+        : threePlayerDeck;
   const shuffledDeck = random.shuffle(deck);
   const handSize = Math.floor(shuffledDeck.length / members.length);
   const hands = members.map((member, index) => ({

@@ -1,4 +1,4 @@
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export function useGameResults({ id }: { id: string }) {
   const { finalState, getRound, latestRoundIndex } = hooks.useGameSuite();

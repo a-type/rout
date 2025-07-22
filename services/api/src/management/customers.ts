@@ -1,7 +1,7 @@
 import { isPrefixedId } from '@long-game/common';
 import { Context } from 'hono';
 import Stripe from 'stripe';
-import { CtxVars } from '../config/ctx';
+import { CtxVars } from '../config/ctx.js';
 
 type EnvWithStripe = {
   Variables: CtxVars & { stripe: Stripe };

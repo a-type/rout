@@ -1,11 +1,11 @@
 import { clsx, Tooltip } from '@a-type/ui';
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
-import { TeamIcon } from '../teams/TeamIcon';
-import { PlayerClass } from './PlayerClass';
-import { PlayerSpecies } from './PlayerSpecies';
-import { PlayerStatus } from './PlayerStatus';
-import { PlayerTooltipContent } from './PlayerTooltipContent';
+import { hooks } from '../gameClient.js';
+import { TeamIcon } from '../teams/TeamIcon.js';
+import { PlayerClass } from './PlayerClass.js';
+import { PlayerSpecies } from './PlayerSpecies.js';
+import { PlayerStatus } from './PlayerStatus.js';
+import { PlayerTooltipContent } from './PlayerTooltipContent.js';
 
 export function PlayerChip({
   id,

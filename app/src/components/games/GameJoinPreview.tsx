@@ -1,3 +1,4 @@
+import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { AvatarList, Box, Button, H1, P, toast } from '@a-type/ui';
 import {
@@ -8,10 +9,9 @@ import {
   GameSessionInvitation,
   GameSessionPregame,
 } from '@long-game/game-client';
-import games from '@long-game/games';
 import { Link, useNavigate } from '@verdant-web/react-router';
-import { GoldUpgrade } from '../subscription/GoldUpgrade';
-import { UserAvatar } from '../users/UserAvatar';
+import { GoldUpgrade } from '../subscription/GoldUpgrade.js';
+import { UserAvatar } from '../users/UserAvatar.js';
 
 export interface GameJoinPreviewProps {
   myInvite: GameSessionInvitation;
@@ -24,7 +24,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
     data: { count: remainingGames },
   } = sdkHooks.useGetRemainingGameSessions();
 
-  const game = games[pregame.session.gameId];
+  const game = useGame(pregame.session.gameId);
 
   const whoInvited = pregame.members.find((m) => m.id === myInvite.inviterId);
 

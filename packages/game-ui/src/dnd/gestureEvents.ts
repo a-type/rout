@@ -1,5 +1,5 @@
 import { EventSubscriber } from '@a-type/utils';
-import { DragGestureContext } from './gestureStore';
+import { DragGestureContext } from './gestureStore.js';
 
 export const gestureEvents = new EventSubscriber<{
   start: (gesture: DragGestureContext) => void;

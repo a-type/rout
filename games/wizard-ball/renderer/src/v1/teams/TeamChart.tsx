@@ -9,7 +9,7 @@ import {
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 import { clsx, Tooltip } from '@a-type/ui';
 import {
@@ -18,14 +18,14 @@ import {
   Position,
   PositionChart,
 } from '@long-game/game-wizard-ball-definition';
-import { PlayerClass } from '../players/PlayerClass';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerStatus } from '../players/PlayerStatus';
-import { PlayerTooltipContent } from '../players/PlayerTooltipContent';
-import { PlayerOverall } from '../ratings/PlayerOverall';
-import { PlayerStamina } from '../ratings/PlayerStamina';
-import { Draggable } from './Draggable';
-import { Droppable } from './Droppable';
+import { PlayerClass } from '../players/PlayerClass.js';
+import { PlayerSpecies } from '../players/PlayerSpecies.js';
+import { PlayerStatus } from '../players/PlayerStatus.js';
+import { PlayerTooltipContent } from '../players/PlayerTooltipContent.js';
+import { PlayerOverall } from '../ratings/PlayerOverall.js';
+import { PlayerStamina } from '../ratings/PlayerStamina.js';
+import { Draggable } from './Draggable.js';
+import { Droppable } from './Droppable.js';
 
 const positions = [
   'c',

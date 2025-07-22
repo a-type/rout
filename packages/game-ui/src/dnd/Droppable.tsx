@@ -1,15 +1,15 @@
 import { SlotDiv } from '@a-type/ui';
 import { createContext, HTMLProps, useContext, useEffect } from 'react';
-import { useMergedRef } from '../hooks/useMergedRef';
-import { useBindBounds } from './bounds';
-import { droppableDataRegistry } from './dataRegistry';
+import { useMergedRef } from '../hooks/useMergedRef.js';
+import { useBindBounds } from './bounds.js';
+import { droppableDataRegistry } from './dataRegistry.js';
 import {
   Accept,
   OnDropCb,
   OnOverCb,
   OnRejectCb,
   useDroppable,
-} from './useDroppable';
+} from './useDroppable.js';
 
 export type DroppableProps<T = any> = Omit<
   HTMLProps<HTMLDivElement>,

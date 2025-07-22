@@ -6,11 +6,11 @@ import {
   RoundHistoryControl,
 } from '@long-game/game-ui';
 import { Suspense } from 'react';
-import { NotificationsButton } from '../notifications/NotificationsButton';
-import { GameLayout } from './GameLayout';
-import { GameLog } from './GameLog';
-import { GameManualDialog } from './GameManualDialog';
-import { NavigationControls } from './NavigationControls';
+import { NotificationsButton } from '../notifications/NotificationsButton.js';
+import { GameLayout } from './GameLayout.js';
+import { GameLog } from './GameLog.js';
+import { GameManualDialog } from './GameManualDialog.js';
+import { NavigationControls } from './NavigationControls.js';
 
 export interface GameControlsProps {
   pregame?: boolean;

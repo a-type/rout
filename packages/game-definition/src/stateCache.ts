@@ -11,8 +11,8 @@
  */
 
 import { GameRound, LongGameError } from '@long-game/common';
-import { GameDefinition, GameMember } from './gameDefinition';
-import { GameRandom, GameRandomState } from './random';
+import { GameDefinition, GameMember } from './gameDefinition.js';
+import { GameRandom, GameRandomState } from './random.js';
 
 type StateCheckpoint = {
   state: any;

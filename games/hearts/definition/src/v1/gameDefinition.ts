@@ -1,8 +1,12 @@
 import { isPrefixedId, PrefixedId } from '@long-game/common';
 import { GameDefinition, SystemChatMessage } from '@long-game/game-definition';
-import { shuffleHands } from './deck';
-import { getDraftingRound, getRoundIndex } from './rounds';
-import { getCurrentPlayer, getDealStartCard, getTrickLeader } from './tricks';
+import { shuffleHands } from './deck.js';
+import { getDraftingRound, getRoundIndex } from './rounds.js';
+import {
+  getCurrentPlayer,
+  getDealStartCard,
+  getTrickLeader,
+} from './tricks.js';
 
 export type Card = `${CardRank}${CardSuit}`;
 export const suits = ['h', 'd', 's', 'c'] as const;

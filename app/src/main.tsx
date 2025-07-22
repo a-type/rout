@@ -1,21 +1,5 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { App } from './App.js';
+import('./bootstrap.jsx');
 
-// import '@a-type/ui/main.css';
-import 'virtual:uno.css';
-import './main.css';
-import { attachToPwaEvents } from './pwaEvents.js';
-
-function main() {
-  const root = createRoot(document.getElementById('root')!);
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
-}
-
-main();
-
-attachToPwaEvents();
+// TODO: safer way to expose config to other packages
+import * as config from './config.js';
+(window as any).LONG_GAME_CONFIG = config;

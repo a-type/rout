@@ -10,14 +10,14 @@ import {
 } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useEffect, useState } from 'react';
-import { hooks } from '../gameClient';
-import { ItemChip } from '../items/ItemChip';
-import { PlayerChip } from '../players/PlayerChip';
-import { Draggable } from './Draggable';
-import { useBench } from './useBench';
-import { useLineup } from './useLineup';
-import { usePitchingRelievers } from './usePitchingRelievers';
-import { usePitchingRotation } from './usePitchingRotation';
+import { hooks } from '../gameClient.js';
+import { ItemChip } from '../items/ItemChip.js';
+import { PlayerChip } from '../players/PlayerChip.js';
+import { Draggable } from './Draggable.js';
+import { useBench } from './useBench.js';
+import { useLineup } from './useLineup.js';
+import { usePitchingRelievers } from './usePitchingRelievers.js';
+import { usePitchingRotation } from './usePitchingRotation.js';
 
 function DroppablePlayerArea({
   id,

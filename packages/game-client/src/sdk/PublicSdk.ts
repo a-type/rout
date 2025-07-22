@@ -1,5 +1,5 @@
 import { PrefixedId } from '@long-game/common';
-import { BaseSdk, InferReturnData } from './BaseSdk';
+import { BaseSdk, InferReturnData } from './BaseSdk.js';
 
 export class PublicSdk extends BaseSdk {
   getMe = this.sdkQuery('getMe', this.apiRpc.users.me.$get);
@@ -151,6 +151,7 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+  getGames = this.sdkQuery('getGames', this.apiRpc.games.$get);
 
   // yeah this is on the game session API, but it's
   // kind of more useful here.

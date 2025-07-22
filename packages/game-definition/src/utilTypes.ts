@@ -1,5 +1,5 @@
 import { GameRound } from '@long-game/common';
-import { GameDefinition, Turn } from './gameDefinition';
+import { GameDefinition, Turn } from './gameDefinition.js';
 
 export type GetPlayerState<G extends GameDefinition> =
   G extends GameDefinition<any, infer T, any, any, any, any> ? T : never;

@@ -1,9 +1,8 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, Chip, clsx, Icon, Select } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import games from '@long-game/games';
 import { useState } from 'react';
-import { GameCard } from '../library/GameCard';
+import { GameCard } from '../library/GameCard.js';
 
 export interface GamePickerProps {
   value: string;
@@ -14,13 +13,6 @@ export interface GamePickerProps {
   gameSessionId: PrefixedId<'gs'>;
 }
 
-const allTags = new Set<string>();
-for (const game of Object.values(games)) {
-  for (const tag of game.tags) {
-    allTags.add(tag);
-  }
-}
-
 export function GamePicker({
   value,
   onChange,
@@ -29,6 +21,14 @@ export function GamePicker({
   className,
   ...rest
 }: GamePickerProps) {
+  const { data: games } = sdkHooks.useGetGames();
+  const allTags = new Set<string>();
+  for (const game of Object.values(games)) {
+    for (const tag of game.tags) {
+      allTags.add(tag);
+    }
+  }
+
   const [filters, setFilters] = useState({
     tags: [] as string[],
     owned: true,

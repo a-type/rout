@@ -20,8 +20,8 @@ import {
 } from '@long-game/game-client';
 import { Suspense, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { PlayerAvatar } from '../players/PlayerAvatar';
-import { PlayerName } from '../players/PlayerName';
+import { PlayerAvatar } from '../players/PlayerAvatar.js';
+import { PlayerName } from '../players/PlayerName.js';
 
 export interface GameDebuggerProps extends ButtonProps {}
 

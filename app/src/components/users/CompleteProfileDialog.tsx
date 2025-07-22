@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk.js';
 import { Dialog, DialogContent, DialogTitle } from '@a-type/ui';
 import { PlayerColorName } from '@long-game/common';
-import { EditProfileForm } from './EditProfile.jsx';
+import { EditProfileForm } from './EditProfile.js';
 
 export function CompleteProfileDialog() {
   const { data: me } = sdkHooks.useGetMe();

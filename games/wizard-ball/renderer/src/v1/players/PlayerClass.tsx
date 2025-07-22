@@ -1,8 +1,5 @@
-import {
-  classIcons,
-  speciesIcons,
-} from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
+import { classIcons } from '@long-game/game-wizard-ball-definition';
+import { hooks } from '../gameClient.js';
 
 export function PlayerClass({ id }: { id: string; bold?: boolean }) {
   const { finalState } = hooks.useGameSuite();

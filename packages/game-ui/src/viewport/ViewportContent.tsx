@@ -8,8 +8,8 @@ import {
   useSpring,
 } from 'motion/react';
 import { useEffect, useRef } from 'react';
-import { useMergedRef } from '../hooks/useMergedRef';
-import { ViewportState } from './ViewportState';
+import { useMergedRef } from '../hooks/useMergedRef.js';
+import { ViewportState } from './ViewportState.js';
 
 export interface ViewportContentProps
   extends Omit<HTMLMotionProps<'div'>, 'viewport'> {

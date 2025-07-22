@@ -1,6 +1,6 @@
 import { PrefixedId } from '@long-game/common';
 import { GameDefinition, roundFormat } from '@long-game/game-definition';
-import { getPlayerSequenceIndexes } from './ordering';
+import { getPlayerSequenceIndexes } from './ordering.js';
 
 const PROMPT_ROUNDS = 8;
 const RATING_ROUND = PROMPT_ROUNDS + 1;

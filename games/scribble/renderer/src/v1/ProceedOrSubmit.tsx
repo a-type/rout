@@ -1,8 +1,8 @@
 import { Box, Button, Icon } from '@a-type/ui';
 import { useDebounced } from '@long-game/game-client';
 import { SubmitTurn } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { gameplayState } from './gameplayState';
+import { hooks } from './gameClient.js';
+import { gameplayState } from './gameplayState.js';
 
 export interface ProceedOrSubmitProps {
   taskIndex: number;

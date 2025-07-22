@@ -4,8 +4,8 @@ import {
   DrawingItem,
 } from '@long-game/game-scribble-definition/v1';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
-import { Canvas } from './drawing/Canvas';
-import { hooks } from './gameClient';
+import { Canvas } from './drawing/Canvas.js';
+import { hooks } from './gameClient.js';
 
 export interface DrawingResultProps {
   prompt?: DescriptionItem;

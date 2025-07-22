@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useViewport } from './ViewportContext';
+import { useViewport } from './ViewportContext.js';
 
 export function useZoom(config: { instant?: boolean } = {}) {
   const viewport = useViewport();

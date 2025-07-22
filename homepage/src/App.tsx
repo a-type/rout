@@ -4,8 +4,8 @@ import {
   TopographyBackground,
   Wordmark,
 } from '@long-game/visual-components';
-import { Footer } from './Footer';
-import { GameIcons } from './GameIcons';
+import { Footer } from './Footer.js';
+import { GameIcons } from './GameIcons.js';
 
 const App = () => {
   return (

@@ -1,15 +1,15 @@
 import { GameRandom } from '@long-game/game-definition';
-import { League, LeagueGameState } from '../gameTypes';
-import { logger } from '../logger';
-import { scaleAttributePercent } from '../utils';
-import { considerSwapPitcher, swapPitcher } from './swap';
-import { getCurrentBatter, getCurrentPitcher } from './utils';
+import { ActualPitch } from '../data/pitchData.js';
+import { League, LeagueGameState } from '../gameTypes.js';
+import { logger } from '../logger.js';
+import { scaleAttributePercent } from '../utils.js';
 import {
-  getModifiedCompositePitchingRatings,
   getActivePlayerPerks,
   getModifiedCompositeBattingRatings,
-} from './ratings';
-import { ActualPitch } from '../data/pitchData';
+  getModifiedCompositePitchingRatings,
+} from './ratings.js';
+import { considerSwapPitcher, swapPitcher } from './swap.js';
+import { getCurrentBatter, getCurrentPitcher } from './utils.js';
 
 const BASE_RELIEVER_INJURY_CHANCE = 0.0005;
 const BASE_STARTER_INJURY_CHANCE = 0.00025;

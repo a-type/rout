@@ -1,8 +1,8 @@
 import { GameRandom } from '@long-game/game-definition';
-import { League, LeagueGameState } from '../gameTypes';
-import { TriggerEvent } from '../data/perkData';
-import { ActualPitch } from '../data/pitchData';
-import { getActivePlayerPerks } from './ratings';
+import { TriggerEvent } from '../data/perkData.js';
+import { ActualPitch } from '../data/pitchData.js';
+import { League, LeagueGameState } from '../gameTypes.js';
+import { getActivePlayerPerks } from './ratings.js';
 
 export function checkTriggerEvent(
   event: TriggerEvent,

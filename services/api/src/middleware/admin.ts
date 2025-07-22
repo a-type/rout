@@ -1,6 +1,6 @@
 import { LongGameError } from '@long-game/common';
 import { createMiddleware } from 'hono/factory';
-import { Env } from '../config/ctx';
+import { Env } from '../config/ctx.js';
 
 export const adminMiddleware = createMiddleware<Env>(async (ctx, next) => {
   const session = ctx.get('session');

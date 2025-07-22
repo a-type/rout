@@ -7,7 +7,7 @@ import {
 } from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
 import { ReactNode } from 'react';
-import { useRendererContext } from '../RendererProvider';
+import { useRendererContext } from '../RendererProvider.js';
 
 export interface ChatLogProps {
   log: GameLogItem<any>[];

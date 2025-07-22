@@ -1,5 +1,5 @@
 import { PrefixedId } from '@long-game/common';
-import { Card, GlobalState } from './gameDefinition';
+import { Card, GlobalState } from './gameDefinition.js';
 
 export function getDealStartCard(playerCount: number): Card {
   if (playerCount === 5) {

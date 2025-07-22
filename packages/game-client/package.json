@@ -30,7 +30,6 @@
     "@a-type/auth-fetch": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/games": "workspace:*",
     "@paralleldrive/cuid2": "2.2.2",
     "@tanstack/react-query": "5.53.1",
     "react": "catalog:"

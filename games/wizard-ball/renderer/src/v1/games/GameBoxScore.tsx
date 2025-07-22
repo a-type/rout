@@ -1,12 +1,12 @@
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
-import { PlayerClass } from '../players/PlayerClass';
-import { PlayerName } from '../players/PlayerName';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
-import { TeamIcon } from '../teams/TeamIcon';
-import { useGameResults } from '../useGameResults';
-import { GameScoreboard } from './GameScoreboard';
+import { hooks } from '../gameClient.js';
+import { PlayerClass } from '../players/PlayerClass.js';
+import { PlayerName } from '../players/PlayerName.js';
+import { PlayerSpecies } from '../players/PlayerSpecies.js';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats.js';
+import { TeamIcon } from '../teams/TeamIcon.js';
+import { useGameResults } from '../useGameResults.js';
+import { GameScoreboard } from './GameScoreboard.js';
 
 type StatValue =
   | (typeof battingStats)[number]['value']

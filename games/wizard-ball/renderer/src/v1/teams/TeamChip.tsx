@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function TeamChip({ id, noRecord }: { id: string; noRecord?: boolean }) {
   const { finalState } = hooks.useGameSuite();

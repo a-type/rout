@@ -1,5 +1,5 @@
-import type { LeagueGameState } from '../gameTypes';
-import { getInningInfo } from '../utils';
+import type { LeagueGameState } from '../gameTypes.js';
+import { getInningInfo } from '../utils.js';
 
 /** Return a number between 0 and 1 based on situation (increases for fuller counts, more runners in scoring position, late in the game, close score) */
 export function determineClutchFactor(gameState: LeagueGameState): number {

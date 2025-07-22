@@ -1,5 +1,5 @@
 import type { GameModule } from '@long-game/game-definition';
-import { gameDefinition as v1 } from './v1/gameDefinition';
+import { gameDefinition as v1 } from './v1/gameDefinition.js';
 
 export default {
   id: 'hearts',
@@ -15,6 +15,7 @@ export default {
       url: 'https://rout.games',
     },
   ],
+  devPort: 3302,
 } satisfies GameModule;
 
 export { v1 };

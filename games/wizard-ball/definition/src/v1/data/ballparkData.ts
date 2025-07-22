@@ -1,7 +1,7 @@
-import { LeagueGameState } from '../gameTypes';
-import { PerkEffect } from './perkData';
-import { logger } from '../logger';
-import { WeatherType } from './weatherData';
+import { LeagueGameState } from '../gameTypes.js';
+import { logger } from '../logger.js';
+import { PerkEffect } from './perkData.js';
+import { WeatherType } from './weatherData.js';
 
 export type Ballpark = {
   name: string;

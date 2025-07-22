@@ -1,0 +1,103 @@
+import { InjectManifest } from '@birchill/inject-manifest-plugin';
+import {
+  ModuleFederationPlugin,
+  createModuleFederationConfig,
+} from '@module-federation/enhanced/rspack';
+import { defineConfig, loadEnv } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { UnoCSSRspackPlugin } from '@unocss/webpack/rspack';
+
+const { publicVars } = loadEnv({ prefixes: ['VITE_', 'PUBLIC_'] });
+
+const federationConfig = createModuleFederationConfig({
+  name: 'long-game',
+  manifest: true,
+  dts: false,
+  shared: {
+    react: { singleton: true, requiredVersion: '>19.0.0', eager: true },
+    'react/': {},
+    'react-dom': {
+      singleton: true,
+      requiredVersion: '>19.0.0',
+      eager: true,
+    },
+    'react-dom/': {},
+    '@a-type/ui': {
+      singleton: true,
+      requiredVersion: '>2.0.0',
+      eager: true,
+    },
+    '@long-game/game-client': {
+      singleton: true,
+      requiredVersion: '>0.0.0',
+    },
+    '@long-game/game-ui': { singleton: true, requiredVersion: '>0.0.0' },
+  },
+  experiments: {
+    // asyncStartup: true,
+    // optimization: {
+    //   target: 'web',
+    // },
+  },
+});
+
+// https://vitejs.dev/config/
+export default defineConfig(({ command }) => ({
+  plugins: [pluginReact()],
+  resolve: {
+    alias: {
+      '@': './src',
+    },
+  },
+  tools: {
+    rspack: {
+      plugins: [
+        UnoCSSRspackPlugin(),
+        new InjectManifest({
+          swDest: 'serviceworker.js',
+        }),
+        new ModuleFederationPlugin(federationConfig),
+      ],
+      resolve: {
+        conditionNames:
+          command === 'build'
+            ? ['production', 'import', 'module', 'browser', 'default']
+            : ['development', 'import', 'module', 'browser', 'default'],
+      },
+      output: {
+        chunkFilename: (assetInfo) => {
+          // The service worker entrypoint needs to be fixed (i.e. not have a hash
+          // appended).
+          if (assetInfo.chunk?.name === 'serviceworker') {
+            return '[name].js';
+          }
+          return '[name].[contenthash].js';
+        },
+      },
+      optimization: {
+        realContentHash: true,
+      },
+    },
+  },
+  server: {
+    port: 3100,
+  },
+  html: {
+    template: './index.html',
+  },
+  source: {
+    entry: {
+      index: './src/main.tsx',
+    },
+    define: {
+      VITE_VAPID_PUBLIC_KEY: '""',
+      ...publicVars,
+    },
+  },
+  dev: {
+    hmr: false,
+    client: {
+      host: 'localhost',
+    },
+  },
+}));

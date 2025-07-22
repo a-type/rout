@@ -1,4 +1,4 @@
-import { type BaseTurnError } from './gameDefinition';
+import { type BaseTurnError } from './gameDefinition.js';
 
 export function simpleError(message: string): BaseTurnError {
   return {

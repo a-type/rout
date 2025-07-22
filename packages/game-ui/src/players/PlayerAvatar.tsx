@@ -6,8 +6,8 @@ import {
   SystemChatAuthorId,
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { PlayerInfo } from './PlayerInfo';
-import { usePlayerThemed } from './usePlayerThemed';
+import { PlayerInfo } from './PlayerInfo.js';
+import { usePlayerThemed } from './usePlayerThemed.js';
 
 export interface PlayerAvatarProps {
   playerId?: PrefixedId<'u'> | SystemChatAuthorId;
@@ -33,7 +33,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
   if (playerId === SYSTEM_CHAT_AUTHOR_ID) {
     imageUrl = '/icon.png';
   } else {
-    const urlRaw = new URL((import.meta as any).env.VITE_PUBLIC_API_ORIGIN);
+    const urlRaw = new URL((window as any).LONG_GAME_CONFIG.API_ORIGIN);
     urlRaw.pathname = `/users/${playerId}/avatar`;
     imageUrl = urlRaw.toString();
   }

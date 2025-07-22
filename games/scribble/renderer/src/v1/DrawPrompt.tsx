@@ -1,9 +1,9 @@
 import { Box, H2 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
-import { Canvas } from './drawing/Canvas';
-import { hooks } from './gameClient';
-import { ProceedOrSubmit } from './ProceedOrSubmit';
+import { Canvas } from './drawing/Canvas.js';
+import { hooks } from './gameClient.js';
+import { ProceedOrSubmit } from './ProceedOrSubmit.js';
 
 export interface DrawPromptProps {
   prompt: string;

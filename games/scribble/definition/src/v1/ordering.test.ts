@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPlayerSequenceIndexes } from './ordering';
+import { getPlayerSequenceIndexes } from './ordering.js';
 
 describe('player sequence ordering', () => {
   it.each([

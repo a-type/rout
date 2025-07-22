@@ -1,12 +1,12 @@
 import { GameRandom } from '@long-game/game-definition';
-import type { Player, League, LeagueGameState } from '../gameTypes';
-import { ActualPitch } from '../data/pitchData';
-import { scaleAttributePercent } from '../utils';
+import { ActualPitch } from '../data/pitchData.js';
+import type { League, LeagueGameState, Player } from '../gameTypes.js';
+import { scaleAttributePercent } from '../utils.js';
 import {
   getActivePlayerPerks,
   getModifiedCompositeBattingRatings,
-} from './ratings';
-import { randomByWeight } from './utils';
+} from './ratings.js';
+import { randomByWeight } from './utils.js';
 
 const BASE_STRIKE_SWING_CHANCE = 0.68;
 const BASE_BALL_SWING_CHANCE = 0.25;

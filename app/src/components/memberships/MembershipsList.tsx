@@ -1,8 +1,8 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, Card } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
-import { CreateGame } from '../games/CreateGame';
-import { GameSummaryCard } from './GameSummaryCard';
+import { CreateGame } from '../games/CreateGame.js';
+import { GameSummaryCard } from './GameSummaryCard.js';
 
 export const MembershipsList = withSuspense(function MembershipsList({
   statusFilter,

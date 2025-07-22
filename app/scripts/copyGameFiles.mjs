@@ -4,6 +4,7 @@ import * as path from 'path';
 // for each directory in ../../games, copy the icon.png file to ../public/game-icons/<dirname>.png
 const gamesDir = path.join(import.meta.dirname, '../../games');
 const publicDir = path.join(import.meta.dirname, '../public/game-data');
+const federatedDir = path.join(import.meta.dirname, '../public/game-modules');
 
 const gameDirs = fs.readdirSync(gamesDir).filter((file) => {
   const filePath = path.join(gamesDir, file);
@@ -20,9 +21,13 @@ gameDirs.forEach((gameDir) => {
   if (!fs.existsSync(path.join(publicDir, gameDir))) {
     fs.mkdirSync(path.join(publicDir, gameDir), { recursive: true });
   }
+  if (!fs.existsSync(path.join(federatedDir, gameDir))) {
+    fs.mkdirSync(path.join(federatedDir, gameDir), { recursive: true });
+  }
   copyFile(gameDir, 'icon.png');
   copyFile(gameDir, 'rules.md');
   copyDir(gameDir, 'assets');
+  copyDir(gameDir, 'dist', path.join(federatedDir, gameDir));
 });
 
 function copyFile(gameDir, fileName) {
@@ -35,7 +40,11 @@ function copyFile(gameDir, fileName) {
   }
 }
 
-function copyDir(gameDir, dirName) {
+function copyDir(
+  gameDir,
+  dirName,
+  dest = path.join(publicDir, gameDir, dirName),
+) {
   const src = path.join(gamesDir, gameDir, dirName);
 
   if (!fs.existsSync(src)) {
@@ -43,7 +52,6 @@ function copyDir(gameDir, dirName) {
     return;
   }
 
-  const dest = path.join(publicDir, gameDir, dirName);
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });
   }

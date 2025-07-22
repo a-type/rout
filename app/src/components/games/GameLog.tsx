@@ -1,9 +1,10 @@
+import { getFederatedGameComponent } from '@/services/games';
 import { Box, Button, clsx, Dialog, Icon } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
-import { ChatRenderer } from '@long-game/game-renderer';
 import {
   ChatForm,
   ChatLog,
+  DefaultChatMessage,
   PlayerAvatar,
   useMediaQuery,
 } from '@long-game/game-ui';
@@ -47,10 +48,16 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   }
 
   if (latestMessage.type === 'chat') {
+    const ChatMessage =
+      getFederatedGameComponent(
+        gameSuite.gameId,
+        gameSuite.gameDefinition.version,
+        'chat',
+      ) || DefaultChatMessage;
     return (
       <div className="absolute top-full left-0 right-xs">
         <div className="relative -top-32px w-full">
-          <ChatRenderer
+          <ChatMessage
             message={latestMessage.chatMessage}
             previousMessage={null}
             nextMessage={null}

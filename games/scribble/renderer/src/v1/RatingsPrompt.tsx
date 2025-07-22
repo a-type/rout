@@ -9,9 +9,9 @@ import {
 } from '@long-game/game-scribble-definition/v1';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { useState } from 'react';
-import { Canvas } from './drawing/Canvas';
-import { hooks } from './gameClient';
-import { ratingEmoji } from './ratings';
+import { Canvas } from './drawing/Canvas.js';
+import { hooks } from './gameClient.js';
+import { ratingEmoji } from './ratings.js';
 import './RatingsPrompt.css';
 
 export interface RatingsPromptProps {

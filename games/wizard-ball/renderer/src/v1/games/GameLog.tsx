@@ -6,13 +6,13 @@ import type {
   TriggerSource,
 } from '@long-game/game-wizard-ball-definition';
 import { getInningInfo } from '@long-game/game-wizard-ball-definition';
-import { BallparkChip } from '../BallparkChip';
-import { ItemDefChip } from '../items/ItemChip';
-import { PerkChip } from '../perks/PerkChip';
-import { PlayerChip } from '../players/PlayerChip';
-import { TeamName } from '../teams/TeamName';
-import { TooltipPlus } from '../TooltipPlus';
-import { useGameResults } from '../useGameResults';
+import { BallparkChip } from '../BallparkChip.js';
+import { ItemDefChip } from '../items/ItemChip.js';
+import { PerkChip } from '../perks/PerkChip.js';
+import { PlayerChip } from '../players/PlayerChip.js';
+import { TeamName } from '../teams/TeamName.js';
+import { TooltipPlus } from '../TooltipPlus.js';
+import { useGameResults } from '../useGameResults.js';
 import {
   capitalize,
   hitDirectionToString,
@@ -22,8 +22,8 @@ import {
   pitchQualityToString,
   roundFloat,
   toPercentage,
-} from '../utils';
-import { WeatherChip } from '../WeatherChip';
+} from '../utils.js';
+import { WeatherChip } from '../WeatherChip.js';
 
 export function ContactInfoTooltip({
   contactChance,

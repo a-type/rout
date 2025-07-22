@@ -1,4 +1,4 @@
-import { GameLogEvent, LeagueGameState } from './gameTypes';
+import { GameLogEvent, LeagueGameState } from './gameTypes.js';
 
 type LoggerMode = 'state' | 'console' | 'none';
 type LogLevel = 'info' | 'debug';

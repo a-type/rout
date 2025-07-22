@@ -2,8 +2,8 @@ import { zValidator } from '@hono/zod-validator';
 import { assertPrefixedId } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { verifySocketToken } from '../auth/socketTokens';
-import { Env } from '../config/ctx';
+import { verifySocketToken } from '../auth/socketTokens.js';
+import { Env } from '../config/ctx.js';
 
 export const socketRouter = new Hono<Env>().all(
   '/',

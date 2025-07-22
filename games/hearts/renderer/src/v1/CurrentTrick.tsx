@@ -9,12 +9,12 @@ import {
 import {
   PlayerAvatar,
   PlayerName,
+  PlayingCard,
   Token,
   TokenSpace,
 } from '@long-game/game-ui';
-import { PlayingCard } from '@long-game/game-ui/genericGames';
-import { CardGrid } from './CardGrid';
-import { hooks } from './gameClient';
+import { CardGrid } from './CardGrid.js';
+import { hooks } from './gameClient.js';
 
 export interface CurrentTrickProps {
   className?: string;

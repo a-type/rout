@@ -4,7 +4,7 @@ import {
   MAX_ACTIVE_GAMES_BY_ENTITLEMENT,
 } from '@long-game/common';
 import { ReactNode } from 'react';
-import { GoldUpgrade } from './GoldUpgrade';
+import { GoldUpgrade } from './GoldUpgrade.js';
 
 export interface GameLimitUpsellWrapperProps {
   children: ReactNode;

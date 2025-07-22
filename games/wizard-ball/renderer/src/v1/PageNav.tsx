@@ -1,6 +1,6 @@
 import { Button, clsx } from '@a-type/ui';
 import { NavLink, useSearchParams } from 'react-router';
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export function PageNav() {
   const {

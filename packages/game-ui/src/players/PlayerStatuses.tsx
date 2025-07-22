@@ -1,7 +1,7 @@
 import { AvatarList, AvatarListItemRoot, clsx, Icon } from '@a-type/ui';
 import { GameSessionPlayerStatus } from '@long-game/common';
 import { PlayerInfo, withGame } from '@long-game/game-client';
-import { PlayerAvatar } from './PlayerAvatar';
+import { PlayerAvatar } from './PlayerAvatar.js';
 
 export interface PlayerStatusesProps {
   className?: string;
@@ -35,8 +35,8 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
             a.status.pendingTurn && !b.status.pendingTurn
               ? 1
               : b.status.pendingTurn && !a.status.pendingTurn
-              ? -1
-              : 0,
+                ? -1
+                : 0,
           )
           .map(({ status, player, hasPlayed }, index) => (
             <AvatarListItemRoot

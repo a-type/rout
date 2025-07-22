@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { idShapes, wrapRpcData } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../../config/ctx';
+import { Env } from '../../config/ctx.js';
 
 export const adminUsersRouter = new Hono<Env>()
   .get(

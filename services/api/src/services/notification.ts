@@ -3,8 +3,8 @@ import {
   AnyNotification,
   getNotificationConfig,
 } from '@long-game/notifications';
-import { email } from './email';
-import { sendPushToAllUserDevices } from './push';
+import { email } from './email.js';
+import { sendPushToAllUserDevices } from './push.js';
 
 export async function notifyUser(
   userId: PrefixedId<'u'>,

@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { generateLeague } from './generation';
-import { simulateRound } from './sim/simGames';
 import { GameRandom } from '@long-game/game-definition';
-import { getTeamAvgAttributes } from './attributes';
+import { describe, expect, it } from 'vitest';
+import { getTeamAvgAttributes } from './attributes.js';
+import { generateLeague } from './generation.js';
+import { simulateRound } from './sim/simGames.js';
 
 describe('balance', () => {
   // random seed string

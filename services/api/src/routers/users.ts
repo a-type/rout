@@ -9,9 +9,9 @@ import {
 import { Hono } from 'hono';
 import { proxy } from 'hono/proxy';
 import { z } from 'zod';
-import { sessions } from '../auth/session';
-import { Env } from '../config/ctx';
-import { sessionMiddleware, userStoreMiddleware } from '../middleware';
+import { sessions } from '../auth/session.js';
+import { Env } from '../config/ctx.js';
+import { sessionMiddleware, userStoreMiddleware } from '../middleware/index.js';
 
 export const usersRouter = new Hono<Env>()
   .get('/me', sessionMiddleware, async (ctx) => {

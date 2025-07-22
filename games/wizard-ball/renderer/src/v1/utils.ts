@@ -6,7 +6,7 @@ import {
   PitchingCompositeType,
 } from '@long-game/game-wizard-ball-definition';
 import { TurnData } from '@long-game/game-wizard-ball-definition/v1';
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export function roundFloat(value: number, decimalPlaces: number = 2): number {
   const factor = Math.pow(10, decimalPlaces);

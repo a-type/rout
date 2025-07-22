@@ -2,8 +2,8 @@ import { Box, Button, clsx, Icon, RelativeTime, Tooltip } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/visual-components';
 import { ReactNode } from 'react';
-import { PlayerStatuses } from '../players/PlayerStatuses';
-import { withSuspense } from '../withSuspense';
+import { PlayerStatuses } from '../players/PlayerStatuses.js';
+import { withSuspense } from '../withSuspense.js';
 
 export interface SubmitTurnProps {
   className?: string;

@@ -1,2 +1,2 @@
-export * from './PlayingCard';
-export * from './Sprite';
+export * from './PlayingCard.js';
+export * from './Sprite.js';

@@ -1,6 +1,6 @@
+import { useGame } from '@/hooks/useGame';
 import { Card, Chip, clsx } from '@a-type/ui';
-import games from '@long-game/games';
-import { OpenQuickBuyButton } from '../store/QuickBuyPopup';
+import { OpenQuickBuyButton } from '../store/QuickBuyPopup.js';
 
 export interface GameCardProps {
   onClick?: (gameId: string) => void;
@@ -17,7 +17,7 @@ export function GameCard({
   owned,
   selected,
 }: GameCardProps) {
-  const game = games[gameId];
+  const game = useGame(gameId);
   return (
     <Card
       key={gameId}

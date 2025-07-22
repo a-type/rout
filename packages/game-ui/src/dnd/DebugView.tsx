@@ -1,9 +1,9 @@
 import { useAnimationFrame } from '@a-type/ui';
 import { useRef } from 'react';
-import { boundsRegistry } from './bounds';
-import { useDndStore } from './dndStore';
-import { gesture } from './gestureStore';
-import { TAGS } from './tags';
+import { boundsRegistry } from './bounds.js';
+import { useDndStore } from './dndStore.js';
+import { gesture } from './gestureStore.js';
+import { TAGS } from './tags.js';
 
 export interface DebugViewProps {}
 

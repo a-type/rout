@@ -1,5 +1,5 @@
 import { createContext, use } from 'react';
-import { ViewportState } from './ViewportState';
+import { ViewportState } from './ViewportState.js';
 
 const ViewportContext = createContext<ViewportState | null>(null);
 

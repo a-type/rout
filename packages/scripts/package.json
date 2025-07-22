@@ -11,6 +11,7 @@
     "@types/node": "22.14.0",
     "minimist": "1.2.8",
     "unocss": "catalog:",
-    "@unocss/cli": "catalog:"
+    "@unocss/cli": "catalog:",
+    "@long-game/uno-config": "workspace:*"
   }
 }

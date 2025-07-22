@@ -4,10 +4,10 @@ import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { EnvWith } from '../config/ctx';
-import { userStoreMiddleware } from '../middleware';
+import { EnvWith } from '../config/ctx.js';
+import { userStoreMiddleware } from '../middleware/index.js';
 
-import { gameSessionRouter } from './gameSession';
+import { gameSessionRouter } from './gameSession.js';
 
 export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
   .use(userStoreMiddleware)

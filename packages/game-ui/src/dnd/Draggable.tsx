@@ -17,17 +17,17 @@ import {
   useMemo,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useMergedRef } from '../hooks/useMergedRef';
-import { useBindBounds, useTagBounds } from './bounds';
-import { draggableDataRegistry } from './dataRegistry';
-import { useDndStore } from './dndStore';
-import { DragGestureContext, gesture } from './gestureStore';
-import { TAGS } from './tags';
-import { flipTransition } from './transitions';
+import { useMergedRef } from '../hooks/useMergedRef.js';
+import { useBindBounds, useTagBounds } from './bounds.js';
+import { draggableDataRegistry } from './dataRegistry.js';
+import { useDndStore } from './dndStore.js';
+import { DragGestureContext, gesture } from './gestureStore.js';
+import { TAGS } from './tags.js';
+import { flipTransition } from './transitions.js';
 import {
   DragGestureActivationConstraint,
   useDragGesture,
-} from './useDragGesture';
+} from './useDragGesture.js';
 
 export interface DraggableProps extends HTMLMotionProps<'div'> {
   id: string;

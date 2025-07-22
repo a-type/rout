@@ -4,7 +4,7 @@ import { LongGameError } from '@long-game/common';
 import { withSuspense } from '@long-game/game-ui';
 import { useNavigate } from '@verdant-web/react-router';
 import { MouseEvent } from 'react';
-import { GameLimitUpsellWrapper } from '../subscription/GameLimitUpsellWrapper';
+import { GameLimitUpsellWrapper } from '../subscription/GameLimitUpsellWrapper.js';
 
 export const CreateGame = withSuspense(
   function CreateGame({ children, onClick, ...rest }: ButtonProps) {
@@ -37,7 +37,8 @@ export const CreateGame = withSuspense(
         >
           {children ?? (
             <>
-              <Icon name="plus" /> New Game
+              <Icon name="plus" />
+              <span>New Game</span>
             </>
           )}
         </Button>

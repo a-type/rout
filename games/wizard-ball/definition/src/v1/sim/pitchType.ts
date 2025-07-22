@@ -1,15 +1,15 @@
 import { GameRandom } from '@long-game/game-definition';
-import { getPlayerOverall } from '../attributes';
-import type { Player, LeagueGameState, League } from '../gameTypes';
-import { ActualPitch, pitchTypes, PitchKind } from '../data/pitchData';
-import { scaleAttributePercent, scaleAttribute, clamp } from '../utils';
-import { runnersOnBases } from './runners';
-import { getCountAdvantage } from './utils';
+import { getPlayerOverall } from '../attributes.js';
+import { ActualPitch, PitchKind, pitchTypes } from '../data/pitchData.js';
+import type { League, LeagueGameState, Player } from '../gameTypes.js';
+import { clamp, scaleAttribute, scaleAttributePercent } from '../utils.js';
 import {
+  getActivePlayerPerks,
   getModifiedCompositeBattingRatings,
   getModifiedCompositePitchingRatings,
-  getActivePlayerPerks,
-} from './ratings';
+} from './ratings.js';
+import { runnersOnBases } from './runners.js';
+import { getCountAdvantage } from './utils.js';
 
 const RANDOM_FACTOR = 5;
 const DUELING_FACTOR = 0.2;

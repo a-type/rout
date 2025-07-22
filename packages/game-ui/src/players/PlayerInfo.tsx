@@ -1,8 +1,8 @@
 import { Box, Chip, clsx, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { PlayerAvatar } from './PlayerAvatar';
-import { usePlayerThemed } from './usePlayerThemed';
+import { PlayerAvatar } from './PlayerAvatar.js';
+import { usePlayerThemed } from './usePlayerThemed.js';
 
 export interface PlayerInfoProps {
   playerId: PrefixedId<'u'>;

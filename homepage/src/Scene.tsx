@@ -12,9 +12,9 @@ import {
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { Group } from 'three';
-import { Coin } from './models/Coin';
-import { Flag } from './models/Flag';
-import { Sword } from './models/Sword';
+import { Coin } from './models/Coin.js';
+import { Flag } from './models/Flag.js';
+import { Sword } from './models/Sword.js';
 
 export interface SceneProps {
   className?: string;

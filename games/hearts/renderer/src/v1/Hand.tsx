@@ -4,9 +4,8 @@ import {
   getCardSuit,
   isPassTurn,
 } from '@long-game/game-hearts-definition/v1';
-import { Token, TokenHand } from '@long-game/game-ui';
-import { PlayingCard } from '@long-game/game-ui/genericGames';
-import { hooks } from './gameClient';
+import { PlayingCard, Token, TokenHand } from '@long-game/game-ui';
+import { hooks } from './gameClient.js';
 
 export interface HandProps {
   className?: string;

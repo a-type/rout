@@ -1,5 +1,5 @@
-import { hooks } from '../gameClient';
-import { attributeToColor, staminaToText } from '../utils';
+import { hooks } from '../gameClient.js';
+import { attributeToColor, staminaToText } from '../utils.js';
 
 export function PlayerStamina({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

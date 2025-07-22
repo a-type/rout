@@ -15,7 +15,6 @@ import {
   useValues,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import games from '@long-game/games';
 import { useSearchParams } from '@verdant-web/react-router';
 
 export interface AdminEditProductProps {}
@@ -156,6 +155,8 @@ function AdminEditProductContent({
 
 function ProductItemField() {
   const values = (useValues() as any)['items'] as string[];
+  const games = sdkHooks.useGetGames().data || {};
+
   return (
     <FieldArray name="items">
       {(arrayHelpers) => (

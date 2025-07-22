@@ -1,5 +1,5 @@
 import { Player } from '@long-game/game-wizard-ball-definition';
-import { numberToLetter, shortAttribute } from '../utils';
+import { numberToLetter, shortAttribute } from '../utils.js';
 
 const attributeList: Array<{
   value: keyof Player['attributes'];

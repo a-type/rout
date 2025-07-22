@@ -1,5 +1,5 @@
 import { clsx } from '@a-type/ui';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function TeamName({ id, bold }: { id: string; bold?: boolean }) {
   const { finalState, players } = hooks.useGameSuite();

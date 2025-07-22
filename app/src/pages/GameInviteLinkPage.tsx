@@ -1,10 +1,10 @@
 import { Wordmark } from '@/components/brand/Wordmark';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { UserAvatar } from '@/components/users/UserAvatar';
+import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, P, PageContent, PageRoot, toast } from '@a-type/ui';
 import { TopographyBackground } from '@long-game/game-ui';
-import games from '@long-game/games';
 import { Link, useNavigate, useParams } from '@verdant-web/react-router';
 
 const GameInviteLinkPage = () => {
@@ -17,7 +17,7 @@ const GameInviteLinkPage = () => {
   const { data: publicInviteData } =
     sdkHooks.useGetPublicGameSessionFromInviteCode(code);
 
-  const game = games[publicInviteData.gameId];
+  const game = useGame(publicInviteData.gameId);
 
   const navigate = useNavigate();
   const claimMutation = sdkHooks.useClaimPublicGameSessionLink();

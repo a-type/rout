@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { gestureEvents } from './gestureEvents';
-import { DragGestureContext } from './gestureStore';
+import { gestureEvents } from './gestureEvents.js';
+import { DragGestureContext } from './gestureStore.js';
 
 export interface BoundsRegistryEntry {
   element: HTMLElement;

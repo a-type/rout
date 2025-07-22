@@ -1,6 +1,6 @@
 import { PrefixedId } from '@long-game/common';
 import { Context } from 'hono';
-import { Env } from '../config/ctx';
+import { Env } from '../config/ctx.js';
 
 export async function getGameSessionState(
   id: PrefixedId<'gs'>,

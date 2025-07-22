@@ -1,14 +1,14 @@
 import { Box, clsx } from '@a-type/ui';
 import { useMemo, useState } from 'react';
-import { droppableDataRegistry } from '../dnd/dataRegistry';
-import { DraggableData } from '../dnd/dndStore';
+import { droppableDataRegistry } from '../dnd/dataRegistry.js';
+import { DraggableData } from '../dnd/dndStore.js';
 import {
   Droppable,
   DroppableProps,
   useParentDroppable,
-} from '../dnd/Droppable';
-import { DragGestureContext } from '../dnd/gestureStore';
-import { isToken, TokenDragData } from './types';
+} from '../dnd/Droppable.js';
+import { DragGestureContext } from '../dnd/gestureStore.js';
+import { isToken, TokenDragData } from './types.js';
 
 export interface TokenSpaceProps<T = any>
   extends Omit<DroppableProps, 'onDrop' | 'onReject' | 'onOver' | 'accept'> {

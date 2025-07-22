@@ -1,15 +1,16 @@
+import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, ButtonProps, Card, clsx, Dialog, Icon } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
-import games from '@long-game/games';
 import { Link, useSearchParams } from '@verdant-web/react-router';
-import { BuyGameProduct } from './BuyGameProduct';
+import { BuyGameProduct } from './BuyGameProduct.js';
 
 export interface QuickBuyPopupProps {}
 
 export function QuickBuyPopup({}: QuickBuyPopupProps) {
   const [search, setSearch] = useSearchParams();
   const gameId = search.get('quickBuy');
+  const game = useGame(gameId || '');
 
   const close = () => {
     setSearch((v) => {
@@ -30,7 +31,7 @@ export function QuickBuyPopup({}: QuickBuyPopupProps) {
           <Dialog.Title>Buy game</Dialog.Title>
           {/* TODO: game info */}
           <Dialog.Description>
-            {games[gameId]?.title} is available in these bundles:
+            {game?.title} is available in these bundles:
           </Dialog.Description>
           <QuickBuyProductList gameId={gameId} />
           <Dialog.Actions>

@@ -1,7 +1,7 @@
 import { Box } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export interface PlayerAttributionProps {
   playerId: PrefixedId<'u'>;

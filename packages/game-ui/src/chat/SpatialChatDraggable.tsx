@@ -1,9 +1,9 @@
 import { Button, clsx, H2, Icon, P, Popover } from '@a-type/ui';
 import { useGameSuite } from '@long-game/game-client';
 import { useState } from 'react';
-import { Draggable } from '../dnd';
-import { DragGestureContext } from '../dnd/gestureStore';
-import { usePlayerThemed } from '../players/usePlayerThemed';
+import { Draggable } from '../dnd/Draggable.js';
+import { DragGestureContext } from '../dnd/gestureStore.js';
+import { usePlayerThemed } from '../players/usePlayerThemed.js';
 
 export interface SpatialChatDraggableProps {
   className?: string;

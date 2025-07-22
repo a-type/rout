@@ -4,7 +4,7 @@ import {
   roundFormat,
   RoundIndexDecider,
 } from '@long-game/game-definition';
-import { getCurrentPlayer } from './tricks';
+import { getCurrentPlayer } from './tricks.js';
 
 /**
  * Round format changes between "deals" as there's a small drafting phase

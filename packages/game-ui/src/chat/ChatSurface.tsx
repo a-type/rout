@@ -1,9 +1,9 @@
 import { clsx } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { HTMLAttributes, ReactNode, useEffect, useState } from 'react';
-import { Droppable } from '../dnd';
-import { DraggableData, useDndStore } from '../dnd/dndStore';
-import { SpatialChatThread } from './SpatialChatThread';
+import { Droppable } from '../dnd/Droppable.js';
+import { DraggableData, useDndStore } from '../dnd/dndStore.js';
+import { SpatialChatThread } from './SpatialChatThread.js';
 
 export interface ChatSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   sceneId: string;
@@ -65,7 +65,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       {children}
       <SpatialChatThread
         chats={chats}
-        className="absolute top-full left-1/2 center"
+        className="absolute top-full left-1/2 -translate-1/2"
         open={open}
         onOpenChange={setOpen}
         sceneId={sceneId}

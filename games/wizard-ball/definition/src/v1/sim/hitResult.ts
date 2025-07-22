@@ -1,23 +1,26 @@
 import { GameRandom } from '@long-game/game-definition';
+import { ActualPitch } from '../data/pitchData.js';
 import type {
   HitArea,
   HitPower,
-  HitType,
-  Position,
-  PlayerId,
-  PitchOutcome,
   HitTable,
-  LeagueGameState,
+  HitType,
   League,
-} from '../gameTypes';
-import { ActualPitch } from '../data/pitchData';
-import { multiplyObjects, scaleAttributePercent } from '../utils';
-import { determineDefender, multiplyHitTables } from './utils';
-import { getCurrentBatter } from './utils';
+  LeagueGameState,
+  PitchOutcome,
+  PlayerId,
+  Position,
+} from '../gameTypes.js';
+import { multiplyObjects, scaleAttributePercent } from '../utils.js';
 import {
-  getModifiedCompositeBattingRatings,
   getActivePlayerPerks,
-} from './ratings';
+  getModifiedCompositeBattingRatings,
+} from './ratings.js';
+import {
+  determineDefender,
+  getCurrentBatter,
+  multiplyHitTables,
+} from './utils.js';
 
 export type HitResult = {
   hitArea: HitArea;

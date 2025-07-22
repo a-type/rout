@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useGesture } from '../dnd/gestureStore';
-import { AutoPan } from './AutoPan';
-import { ViewportState } from './ViewportState';
+import { useGesture } from '../dnd/gestureStore.js';
+import { AutoPan } from './AutoPan.js';
+import { ViewportState } from './ViewportState.js';
 
 export function useDndAutoPan(viewport: ViewportState) {
   const autoPan = useState(() => new AutoPan(viewport))[0];

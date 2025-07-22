@@ -6,23 +6,23 @@ import {
   StatusType,
 } from '@long-game/game-wizard-ball-definition';
 import { Link } from 'react-router';
-import { LevelupChoices } from '../Choices';
-import { hooks } from '../gameClient';
-import { ItemChip } from '../items/ItemChip';
-import { PerkChip } from '../perks/PerkChip';
-import { StatusChip } from '../perks/StatusChip';
-import { AttributeSummary } from '../ratings/AttributeSummary';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
+import { LevelupChoices } from '../Choices.js';
+import { hooks } from '../gameClient.js';
+import { ItemChip } from '../items/ItemChip.js';
+import { PerkChip } from '../perks/PerkChip.js';
+import { StatusChip } from '../perks/StatusChip.js';
+import { AttributeSummary } from '../ratings/AttributeSummary.js';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary.js';
 import {
   usePlayerAttributes,
   usePlayerComposite,
-} from '../ratings/useAttributes';
-import { XpBar } from '../ratings/XpBar';
-import { battingStats, calculatePlayerStats, pitchingStats } from '../stats';
-import { TeamChip } from '../teams/TeamChip';
-import { PlayerClass } from './PlayerClass';
-import { PlayerSpecies } from './PlayerSpecies';
-import { PlayerStatus } from './PlayerStatus';
+} from '../ratings/useAttributes.js';
+import { XpBar } from '../ratings/XpBar.js';
+import { battingStats, calculatePlayerStats, pitchingStats } from '../stats.js';
+import { TeamChip } from '../teams/TeamChip.js';
+import { PlayerClass } from './PlayerClass.js';
+import { PlayerSpecies } from './PlayerSpecies.js';
+import { PlayerStatus } from './PlayerStatus.js';
 
 export function PlayerPage({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

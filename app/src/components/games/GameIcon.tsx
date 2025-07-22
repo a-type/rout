@@ -1,5 +1,5 @@
+import { useGame } from '@/hooks/useGame';
 import { clsx } from '@a-type/ui';
-import games from '@long-game/games';
 
 export interface GameIconProps {
   gameId: string;
@@ -7,7 +7,7 @@ export interface GameIconProps {
 }
 
 export function GameIcon({ gameId, className }: GameIconProps) {
-  const game = games[gameId];
+  const game = useGame(gameId);
 
   return (
     <img

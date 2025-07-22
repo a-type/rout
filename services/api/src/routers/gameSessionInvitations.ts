@@ -4,8 +4,8 @@ import { UserStore } from '@long-game/service-db';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { userStoreMiddleware } from '../middleware';
-import { notifyUser } from '../services/notification';
+import { userStoreMiddleware } from '../middleware/index.js';
+import { notifyUser } from '../services/notification.js';
 
 export const gameSessionInvitationsRouter = new Hono()
   .use(userStoreMiddleware)

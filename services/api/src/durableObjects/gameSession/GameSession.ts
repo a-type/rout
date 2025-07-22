@@ -24,9 +24,9 @@ import {
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
 import { z } from 'zod';
-import { notifyUser } from '../../services/notification';
-import { GameSessionSocketHandler } from './GameSessionSocketHandler';
-import { ChatMessage, db, SqlWrapper } from './sql';
+import { notifyUser } from '../../services/notification.js';
+import { GameSessionSocketHandler } from './GameSessionSocketHandler.js';
+import { ChatMessage, db, SqlWrapper } from './sql.js';
 
 export interface GameSessionBaseData {
   id: PrefixedId<'gs'>;

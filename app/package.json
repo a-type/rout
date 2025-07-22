@@ -2,9 +2,9 @@
   "name": "@long-game/app",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "rsbuild dev",
     "build": "pnpm build:app && pnpm build:copy-game-files",
-    "build:app": "vite build",
+    "build:app": "rsbuild build",
     "build:copy-game-files": "node scripts/copyGameFiles.mjs"
   },
   "dependencies": {
@@ -13,9 +13,7 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/game-renderer": "workspace:*",
     "@long-game/game-ui": "workspace:*",
-    "@long-game/games": "workspace:*",
     "@long-game/notifications": "workspace:*",
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
@@ -26,13 +24,17 @@
     "valtio": "catalog:"
   },
   "devDependencies": {
+    "@birchill/inject-manifest-plugin": "^1.0.1",
+    "@long-game/uno-config": "workspace:*",
+    "@module-federation/enhanced": "catalog:",
+    "@module-federation/rsbuild-plugin": "catalog:",
+    "@rsbuild/core": "catalog:",
+    "@rsbuild/plugin-react": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@unocss/transformer-variant-group": "catalog:",
-    "@vitejs/plugin-react-swc": "catalog:",
+    "@unocss/webpack": "catalog:",
+    "inject-manifest-plugin": "0.6.5",
     "unocss": "catalog:",
-    "vite": "catalog:",
-    "vite-plugin-pwa": "^0.21.1",
     "workbox-core": "^7.3.0",
     "workbox-expiration": "^7.3.0",
     "workbox-precaching": "^7.3.0",

@@ -2,14 +2,14 @@ import { clsx, Tabs } from '@a-type/ui';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { type TeamId } from '@long-game/game-wizard-ball-definition';
 import { useSearchParams } from 'react-router';
-import { BallparkChip } from '../BallparkChip';
-import { hooks } from '../gameClient';
-import { TeamChart } from './TeamChart';
-import { TeamItems } from './TeamItems';
-import { TeamLineup } from './TeamLineup';
-import { TeamPlayers } from './TeamPlayers';
-import { TeamSchedule } from './TeamSchedule';
-import { TeamSummary } from './TeamSummary';
+import { BallparkChip } from '../BallparkChip.js';
+import { hooks } from '../gameClient.js';
+import { TeamChart } from './TeamChart.js';
+import { TeamItems } from './TeamItems.js';
+import { TeamLineup } from './TeamLineup.js';
+import { TeamPlayers } from './TeamPlayers.js';
+import { TeamSchedule } from './TeamSchedule.js';
+import { TeamSummary } from './TeamSummary.js';
 
 const tabOptions = [
   { value: 'summary', label: 'Summary' },

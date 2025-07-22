@@ -1,14 +1,14 @@
 import { useSearchParams } from 'react-router';
-import { Choices } from './Choices';
-import { hooks } from './gameClient';
-import { GamePage } from './games/GamePage';
-import { LeagueLeaders } from './LeagueLeaders';
-import { Levelups } from './Levelups';
-import { PlayerPage } from './players/PlayerPage';
-import { RecentResults } from './RecentResults';
-import { TeamPage } from './teams/TeamPage';
-import { TeamStandings } from './teams/TeamStandings';
-import { UpcomingGames } from './UpcomingGames';
+import { Choices } from './Choices.js';
+import { hooks } from './gameClient.js';
+import { GamePage } from './games/GamePage.js';
+import { LeagueLeaders } from './LeagueLeaders.js';
+import { Levelups } from './Levelups.js';
+import { PlayerPage } from './players/PlayerPage.js';
+import { RecentResults } from './RecentResults.js';
+import { TeamPage } from './teams/TeamPage.js';
+import { TeamStandings } from './teams/TeamStandings.js';
+import { UpcomingGames } from './UpcomingGames.js';
 
 export function PageContent() {
   const { gameStatus, turnWasSubmitted, currentTurn, turnError } =

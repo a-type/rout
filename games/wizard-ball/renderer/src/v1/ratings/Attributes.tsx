@@ -1,7 +1,7 @@
 import { Player } from '@long-game/game-wizard-ball-definition';
 import { Fragment } from 'react/jsx-runtime';
-import { roundFloat } from '../utils';
-import { Bar } from './Bar';
+import { roundFloat } from '../utils.js';
+import { Bar } from './Bar.js';
 
 const attributeList: Array<{
   value: keyof Player['attributes'];

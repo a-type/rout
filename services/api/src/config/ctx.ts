@@ -1,4 +1,4 @@
-import { SessionWithPrefixedIds } from '../middleware';
+import { SessionWithPrefixedIds } from '../middleware/index.js';
 
 export interface CtxVars {
   requestId: string;

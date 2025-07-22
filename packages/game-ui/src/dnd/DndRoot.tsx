@@ -1,9 +1,9 @@
 import { HTMLProps, useEffect } from 'react';
-import { boundsRegistry } from './bounds';
-import { DebugView } from './DebugView';
-import { DndAlly } from './DndAlly';
-import { useDndStore } from './dndStore';
-import { useMonitorGlobalGesture } from './gestureStore';
+import { boundsRegistry } from './bounds.js';
+import { DebugView } from './DebugView.js';
+import { DndAlly } from './DndAlly.js';
+import { useDndStore } from './dndStore.js';
+import { useMonitorGlobalGesture } from './gestureStore.js';
 
 export interface DndRootProps extends HTMLProps<HTMLDivElement> {
   debug?: boolean;

@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { idShapes, wrapRpcData } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../../config/ctx';
+import { Env } from '../../config/ctx.js';
 
 export const adminGameProductsRouter = new Hono<Env>()
   .post('/', async (ctx) => {
@@ -69,9 +69,8 @@ export const adminGameProductsRouter = new Hono<Env>()
     async (ctx) => {
       // we cannot delete products owned by users, so we unpublish them.
       const { productId } = ctx.req.valid('param');
-      const isOwned = await ctx.env.ADMIN_STORE.isGameProductOwnedByUsers(
-        productId,
-      );
+      const isOwned =
+        await ctx.env.ADMIN_STORE.isGameProductOwnedByUsers(productId);
       if (isOwned) {
         await ctx.env.ADMIN_STORE.unpublishGameProduct(productId);
       } else {

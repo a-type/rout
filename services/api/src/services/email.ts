@@ -118,8 +118,8 @@ export function sendFreeTrialEndingEmail(
         <h1>Your free trial is ending soon!</h1>
         <p>Hi ${data.userName},</p>
         <p>Your free trial of ${APP_NAME} is ending on ${data.trialEndDate.toDateString()}. You can manage your subscription at <a href="${
-        ctx.env.UI_ORIGIN
-      }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
+          ctx.env.UI_ORIGIN
+        }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
         <p>Thanks,</p>
         <p>The ${APP_NAME} Team</p>
       </div>`,
@@ -149,8 +149,8 @@ export function sendSubscriptionCanceledEmail(
         <h1>Your subscription has been canceled</h1>
         <p>Hi ${data.userName},</p>
         <p>Your subscription has been canceled. It will remain active until ${data.endsAt.toDateString()}. You can manage your subscription at <a href="${
-        ctx.env.UI_ORIGIN
-      }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
+          ctx.env.UI_ORIGIN
+        }/settings">${ctx.env.UI_ORIGIN}/settings</a>.</p>
         <p>Thanks,</p>
         <p>The ${APP_NAME} Team</p>
       </div>`,

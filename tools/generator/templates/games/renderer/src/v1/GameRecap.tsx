@@ -1,4 +1,4 @@
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export interface GameRecapProps {}
 

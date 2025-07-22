@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Button, Card, ConfirmedButton } from '@a-type/ui';
 import { AdminGameSessionSummary } from '@long-game/game-client';
-import { GameSessionStatusChip } from '../memberships/GameSessionStatusChip';
+import { GameSessionStatusChip } from '../memberships/GameSessionStatusChip.js';
 
 export interface AdminListGameSessionsProps {}
 

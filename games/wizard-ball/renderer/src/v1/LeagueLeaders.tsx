@@ -1,13 +1,13 @@
 import { clsx, Tabs } from '@a-type/ui';
 import { useState } from 'react';
-import { hooks } from './gameClient';
-import { PlayerChip } from './players/PlayerChip';
+import { hooks } from './gameClient.js';
+import { PlayerChip } from './players/PlayerChip.js';
 import {
   AllStats,
   battingStats,
   calculatePlayerStats,
   pitchingStats,
-} from './stats';
+} from './stats.js';
 
 const invertList: Array<keyof AllStats> = [
   'era',

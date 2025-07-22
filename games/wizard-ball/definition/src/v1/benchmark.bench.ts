@@ -1,13 +1,13 @@
-import { describe, bench } from 'vitest';
-import { generateLeague } from './generation';
 import { GameRandom } from '@long-game/game-definition';
+import { bench, describe } from 'vitest';
+import { generateLeague } from './generation.js';
 import {
   initialGameState,
   setupGame,
   simulateGame,
   simulatePitch,
   simulateRound,
-} from './sim/simGames';
+} from './sim/simGames.js';
 
 describe('benchmark', () => {
   const random = new GameRandom('test');

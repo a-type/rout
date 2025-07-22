@@ -2,10 +2,10 @@ import { zValidator } from '@hono/zod-validator';
 import { assertPrefixedId, LongGameError } from '@long-game/common';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { sessions } from '../auth/session';
-import { Env } from '../config/ctx';
-import { userStoreMiddleware } from '../middleware';
-import { getStripe } from '../services/stripe';
+import { sessions } from '../auth/session.js';
+import { Env } from '../config/ctx.js';
+import { userStoreMiddleware } from '../middleware/index.js';
+import { getStripe } from '../services/stripe.js';
 
 export const subscriptionRouter = new Hono<Env>()
   .post(

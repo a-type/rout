@@ -1,9 +1,9 @@
 import { Link } from 'react-router';
-import { BallparkChip } from './BallparkChip';
-import { hooks } from './gameClient';
-import { TeamIcon } from './teams/TeamIcon';
-import { TeamName } from './teams/TeamName';
-import { WeatherChip } from './WeatherChip';
+import { BallparkChip } from './BallparkChip.js';
+import { hooks } from './gameClient.js';
+import { TeamIcon } from './teams/TeamIcon.js';
+import { TeamName } from './teams/TeamName.js';
+import { WeatherChip } from './WeatherChip.js';
 
 export function YourGameInfo() {
   const { finalState, playerId } = hooks.useGameSuite();

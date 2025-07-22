@@ -1,6 +1,6 @@
 import { PrefixedId } from '@long-game/common';
 import games from '@long-game/games';
-import { NotificationConfig } from './types';
+import { NotificationConfig } from './types.js';
 
 export interface NewGameNotification {
   type: 'new-game';

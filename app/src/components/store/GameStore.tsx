@@ -1,6 +1,6 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Card, cardGridColumns } from '@a-type/ui';
-import { GameProductCard } from './GameProductCard';
+import { GameProductCard } from './GameProductCard.js';
 
 export interface GameStoreProps {
   className?: string;

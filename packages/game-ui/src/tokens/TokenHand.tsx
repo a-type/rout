@@ -14,12 +14,12 @@ import {
   useContext,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { gesture } from '../dnd';
-import { draggableDataRegistry } from '../dnd/dataRegistry';
-import { useDndStore } from '../dnd/dndStore';
-import { useWindowEvent } from '../hooks/useWindowEvent';
-import { TokenSpace } from './TokenSpace';
-import { isToken, TokenDragData } from './types';
+import { draggableDataRegistry } from '../dnd/dataRegistry.js';
+import { useDndStore } from '../dnd/dndStore.js';
+import { gesture } from '../dnd/index.js';
+import { useWindowEvent } from '../hooks/useWindowEvent.js';
+import { TokenSpace } from './TokenSpace.js';
+import { isToken, TokenDragData } from './types.js';
 
 /**
  * A generic 'hand' of Token representations which the user can drag tokens

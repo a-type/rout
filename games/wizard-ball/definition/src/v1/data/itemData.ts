@@ -1,6 +1,6 @@
-import { Perk } from './perkData';
-import { logger } from '../logger';
-import { isPitcher } from '../utils';
+import { logger } from '../logger.js';
+import { isPitcher } from '../utils.js';
+import { Perk } from './perkData.js';
 
 export type ItemInfo = Perk & {
   icon: string;

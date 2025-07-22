@@ -1,5 +1,5 @@
 import { PrefixedId } from '@long-game/common';
-import { NotificationConfig } from './types';
+import { NotificationConfig } from './types.js';
 
 export interface GameAbandonedNotification {
   type: 'game-abandoned';

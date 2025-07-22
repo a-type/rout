@@ -1,10 +1,10 @@
 import { GameRound } from '@long-game/common';
 import { describe, expect, it, Mock, vi } from 'vitest';
-import { GameDefinition, Turn } from './gameDefinition';
-import { GameRandom } from './random';
-import { roundFormat } from './rounds';
-import { GameStateCache } from './stateCache';
-import { testPlayer } from './test';
+import { GameDefinition, Turn } from './gameDefinition.js';
+import { GameRandom } from './random.js';
+import { roundFormat } from './rounds.js';
+import { GameStateCache } from './stateCache.js';
+import { testPlayer } from './test.js';
 
 const randomSeed = '1234567890abcdef';
 

@@ -29,7 +29,6 @@ import {
   simpleError,
   TurnUpdater,
 } from '@long-game/game-definition';
-import games from '@long-game/games';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
 import { GameLogItem } from '../types.js';
 import {
@@ -104,6 +103,7 @@ export class GameSessionSuite<
 
   // static
   gameSessionId: PrefixedId<'gs'>;
+  gameDefinition!: TGame;
   members!: GameMember[];
   playerId: PrefixedId<'u'>;
   startedAt: Date | null = null;
@@ -117,6 +117,7 @@ export class GameSessionSuite<
 
   constructor(
     init: {
+      gameDefinition: TGame;
       currentRoundIndex: number;
       playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
       gameId: string;
@@ -134,6 +135,7 @@ export class GameSessionSuite<
   ) {
     this.playerId = init.playerId;
     this.gameSessionId = init.id;
+    this.gameDefinition = init.gameDefinition;
 
     this.applyGameData(init);
 
@@ -177,27 +179,6 @@ export class GameSessionSuite<
    */
   get subscribe() {
     return this.#events.subscribe;
-  }
-
-  @computed get gameDefinition() {
-    const { gameId, gameVersion } = this;
-    const def = games[gameId].versions.find(
-      (v) => v.version === gameVersion,
-    ) as TGame;
-    if (!def) {
-      this.#events.emit(
-        'error',
-        new LongGameError(
-          LongGameError.Code.Unknown,
-          'Game definition not found',
-        ),
-      );
-      throw new LongGameError(
-        LongGameError.Code.Unknown,
-        'Game definition not found',
-      );
-    }
-    return def;
   }
 
   /**

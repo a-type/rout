@@ -4,18 +4,18 @@ import {
   isPitcher,
 } from '@long-game/game-wizard-ball-definition';
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
-import { PlayerClass } from '../players/PlayerClass';
-import { PlayerLevel } from '../players/PlayerLevel';
-import { PlayerSpecies } from '../players/PlayerSpecies';
-import { PlayerStatus } from '../players/PlayerStatus';
-import { AttributeSummary } from '../ratings/AttributeSummary';
-import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary';
+import { hooks } from '../gameClient.js';
+import { PlayerClass } from '../players/PlayerClass.js';
+import { PlayerLevel } from '../players/PlayerLevel.js';
+import { PlayerSpecies } from '../players/PlayerSpecies.js';
+import { PlayerStatus } from '../players/PlayerStatus.js';
+import { AttributeSummary } from '../ratings/AttributeSummary.js';
+import { CompositeRatingsSummary } from '../ratings/CompositeRatingsSummary.js';
 import {
   getPlayerAttributes,
   getPlayerComposite,
-} from '../ratings/useAttributes';
-import { capitalize } from '../utils';
+} from '../ratings/useAttributes.js';
+import { capitalize } from '../utils.js';
 
 export function TeamSummary({ id }: { id: string }) {
   const { finalState } = hooks.useGameSuite();

@@ -1,6 +1,6 @@
 import { clsx } from '@a-type/ui';
 import { Link } from 'react-router';
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function TeamStandings() {
   const { finalState, players } = hooks.useGameSuite();

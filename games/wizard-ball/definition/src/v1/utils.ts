@@ -4,7 +4,7 @@ import type {
   PlayerStats,
   Position,
   PositionChartKey,
-} from './gameTypes';
+} from './gameTypes.js';
 
 export function scaleAttribute(
   attribute: number,

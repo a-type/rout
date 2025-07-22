@@ -5,14 +5,44 @@ import {
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
+import games from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { Env } from '../config/ctx';
-import { createStripeGameProductCheckoutMetadata } from '../management/stripeMetadata';
-import { sessionMiddleware, userStoreMiddleware } from '../middleware';
-import { getStripe } from '../services/stripe';
+import { Env } from '../config/ctx.js';
+import { getGameUrl } from '../config/gameFederation.js';
+import { createStripeGameProductCheckoutMetadata } from '../management/stripeMetadata.js';
+import { sessionMiddleware, userStoreMiddleware } from '../middleware/index.js';
+import { getStripe } from '../services/stripe.js';
 
 export const gamesRouter = new Hono<Env>()
+  .get('/', async (ctx) => {
+    const metadata = Object.entries(games)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([id, game]) => ({
+        id,
+        versions: game.versions.map((def) => ({
+          version: def.version,
+          minimumPlayers: def.minimumPlayers,
+          maximumPlayers: def.maximumPlayers,
+        })),
+        title: game.title,
+        description: game.description,
+        tags: game.tags,
+        creators: game.creators,
+        prerelease: game.prerelease,
+        url: getGameUrl(game, ctx.env),
+      }));
+    // returns a list of all games and some metadata
+    return ctx.json(
+      metadata.reduce(
+        (acc, game) => {
+          acc[game.id] = game;
+          return acc;
+        },
+        {} as Record<string, (typeof metadata)[number]>,
+      ),
+    );
+  })
   // basically useful for correcting a lack of free games which should be
   // provided on signup
   .post('/applyFree', userStoreMiddleware, async (ctx) => {

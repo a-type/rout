@@ -1,7 +1,7 @@
 import { Box, clsx, Icon } from '@a-type/ui';
 import { WordItem } from '@long-game/game-exquisite-fridge-definition/v1';
 import { Token } from '@long-game/game-ui';
-import { hooks } from './gameClient';
+import { hooks } from './gameClient.js';
 
 export interface WordTileProps {
   value: WordItem;

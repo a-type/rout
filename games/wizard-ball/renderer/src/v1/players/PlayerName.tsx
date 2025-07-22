@@ -1,4 +1,4 @@
-import { hooks } from '../gameClient';
+import { hooks } from '../gameClient.js';
 
 export function PlayerName({ id, bold }: { id: string; bold?: boolean }) {
   const { finalState } = hooks.useGameSuite();

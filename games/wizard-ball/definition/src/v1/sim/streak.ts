@@ -1,4 +1,4 @@
-import type { AtBatOutcome, PlayerId, League } from '../gameTypes';
+import type { AtBatOutcome, League, PlayerId } from '../gameTypes.js';
 
 type HeatOutcome =
   | AtBatOutcome

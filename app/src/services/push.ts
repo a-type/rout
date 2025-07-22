@@ -1,8 +1,7 @@
+import { VAPID_PUBLIC_KEY } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
 import { useCallback, useEffect, useState } from 'react';
 import { proxy, useSnapshot } from 'valtio';
-
-const VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 const subscribedState = proxy({
   subscribed: false,
@@ -41,7 +40,7 @@ async function subscribeToPush() {
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   });
 
   const parsedSubscription = JSON.parse(JSON.stringify(subscription)) as {
@@ -73,7 +72,7 @@ export function useSubscribeToPush() {
   const createPush = sdkHooks.useCreatePushSubscription();
   return [
     useCallback(async () => {
-      if (!VAPID_KEY) {
+      if (!VAPID_PUBLIC_KEY) {
         throw new Error('VAPID key is not set');
       }
 

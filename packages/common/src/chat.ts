@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idShapes } from './ids';
+import { idShapes } from './ids.js';
 
 export const SYSTEM_CHAT_AUTHOR_ID = 'system' as const;
 

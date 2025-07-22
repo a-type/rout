@@ -12,10 +12,10 @@ import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
-import { getSocketToken } from '../auth/socketTokens';
-import { Env } from '../config/ctx';
-import { GameSession } from '../durableObjects/gameSession/GameSession';
-import { SessionWithPrefixedIds } from '../middleware';
+import { getSocketToken } from '../auth/socketTokens.js';
+import { Env } from '../config/ctx.js';
+import { GameSession } from '../durableObjects/gameSession/GameSession.js';
+import { SessionWithPrefixedIds } from '../middleware/index.js';
 
 const openGameSessionMiddleware = createMiddleware<{
   Variables: {

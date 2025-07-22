@@ -5,9 +5,9 @@ import {
   PitchingCompositeRatings,
   PitchingCompositeType,
 } from '@long-game/game-wizard-ball-definition';
-import { hooks } from '../gameClient';
-import { roundFloat } from '../utils';
-import { Bar } from './Bar';
+import { hooks } from '../gameClient.js';
+import { roundFloat } from '../utils.js';
+import { Bar } from './Bar.js';
 
 export const battingRatingList: Array<{
   value: BattingCompositeType;

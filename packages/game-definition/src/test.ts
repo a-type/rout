@@ -3,7 +3,7 @@
  */
 
 import { colors, PlayerColorName } from '@long-game/common';
-import { GameMember } from './gameDefinition';
+import { GameMember } from './gameDefinition.js';
 
 export function testPlayer(index: number): GameMember {
   return {

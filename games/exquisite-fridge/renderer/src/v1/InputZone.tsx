@@ -1,14 +1,18 @@
 import { Box, Button, clsx, Icon } from '@a-type/ui';
-import { WordItem } from '@long-game/game-exquisite-fridge-definition/v1';
+import { genericId } from '@long-game/common';
+import {
+  isValidFreebie,
+  WordItem,
+} from '@long-game/game-exquisite-fridge-definition/v1';
 import {
   moveItem,
   SortableTokenList,
   TokenSpace,
   TurnError,
 } from '@long-game/game-ui';
-import { hooks } from './gameClient';
-import { WordTile } from './WordTile';
-import { collectInput } from './WriteInDialog';
+import { hooks } from './gameClient.js';
+import { WordTile } from './WordTile.js';
+import { collectInput } from './WriteInDialog.js';
 
 export interface InputZoneProps {
   className?: string;
@@ -40,6 +44,16 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
               }
               wordData = { ...token.data, text: word };
             }
+            if (
+              isValidFreebie(wordData.text) &&
+              wordData.id.startsWith('freebie-')
+            ) {
+              // rewrite ids of freebies before placing
+              wordData = {
+                ...wordData,
+                id: genericId(),
+              };
+            }
             gameSuite.prepareTurn((cur) => ({
               words: moveItem(cur.words, wordData, index),
             }));
@@ -65,6 +79,13 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
               } else {
                 return; // User cancelled input
               }
+            }
+            if (isValidFreebie(wordData.text)) {
+              // rewrite ids of freebies before placing
+              wordData = {
+                ...wordData,
+                id: genericId(),
+              };
             }
             gameSuite.prepareTurn((cur) => ({
               ...cur,

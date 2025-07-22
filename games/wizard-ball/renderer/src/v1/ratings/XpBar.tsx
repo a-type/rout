@@ -2,7 +2,7 @@ import {
   getLevelFromXp,
   getXpForLevel,
 } from '@long-game/game-wizard-ball-definition';
-import { Bar } from './Bar';
+import { Bar } from './Bar.js';
 
 export function XpBar({ xp }: { xp: number }) {
   const { level, xp: remainingXp } = getLevelFromXp(xp);

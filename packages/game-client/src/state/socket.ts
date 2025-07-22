@@ -9,15 +9,13 @@ import {
   serverMessageShape,
   ServerMessageType,
 } from '@long-game/common';
-import { apiRpc } from './api';
+import { API_ORIGIN } from '../config.js';
+import { apiRpc } from './api.js';
 
 export type GameSocket = Awaited<ReturnType<typeof connectToSocket>>;
 
 export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
-  const socketOrigin = import.meta.env.VITE_PUBLIC_API_ORIGIN.replace(
-    /^http/,
-    'ws',
-  );
+  const socketOrigin = API_ORIGIN.replace(/^http/, 'ws');
   const websocket = new ReconnectingWebsocket(
     `${socketOrigin}/socket`,
     gameSessionId,

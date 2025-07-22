@@ -1,4 +1,4 @@
-import { DrawingItem, TaskCompletion } from './gameDefinition';
+import { DrawingItem, TaskCompletion } from './gameDefinition.js';
 
 export function isDrawingCompletion(
   completion: TaskCompletion,

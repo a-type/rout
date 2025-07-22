@@ -2,8 +2,8 @@ import {
   weather as weatherData,
   type WeatherType,
 } from '@long-game/game-wizard-ball-definition';
-import { PerkEffect } from './items/PerkEffect';
-import { TooltipPlus } from './TooltipPlus';
+import { PerkEffect } from './items/PerkEffect.js';
+import { TooltipPlus } from './TooltipPlus.js';
 
 export function WeatherChip({ id }: { id: WeatherType }) {
   const weather = weatherData[id];

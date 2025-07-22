@@ -1,8 +1,7 @@
 import { PrefixedId } from '@long-game/common';
 import { getCardRank, getCardSuit } from '@long-game/game-hearts-definition/v1';
-import { Token } from '@long-game/game-ui';
-import { PlayingCard } from '@long-game/game-ui/genericGames';
-import { hooks } from './gameClient';
+import { PlayingCard, Token } from '@long-game/game-ui';
+import { hooks } from './gameClient.js';
 
 export interface PlayerScoredCardsProps {
   playerId: PrefixedId<'u'>;

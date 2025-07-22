@@ -1,6 +1,7 @@
 import { toast } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { hookifySdk, PublicSdk } from '@long-game/game-client';
+export type { BaseSdk, PublicSdk } from '@long-game/game-client';
 
 export const publicSdk = new PublicSdk();
 

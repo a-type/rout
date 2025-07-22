@@ -9,20 +9,26 @@ import type {
   PitchOutcome,
   PositionChartKey,
   RoundResult,
-} from '../gameTypes';
+} from '../gameTypes.js';
+import { logger } from '../logger.js';
 import {
   getInningInfo,
   isPitcher,
   last,
   scaleAttributePercent,
-} from '../utils';
-import Logger, { logger } from '../logger';
-import { determinePitchType } from './pitchType';
-import { type HitResult, determineHitResult } from './hitResult';
-import { determineSteal } from './steal';
-import { considerSwapPitcher, swapPitcher } from './swap';
-import { updatePlayerHeat } from './streak';
-import { addToPlayerStats, checkSaveWinLossEligility } from './stats';
+} from '../utils.js';
+import { determineClutchFactor } from './clutch.js';
+import { type HitResult, determineHitResult } from './hitResult.js';
+import { updateInjuryAfterPitch } from './injury.js';
+import { determinePitchType } from './pitchType.js';
+import { advanceAllRunners, advanceRunnerForced } from './runners.js';
+import { updateStaminaAfterPitch } from './stamina.js';
+import { addToPlayerStats, checkSaveWinLossEligility } from './stats.js';
+import { determineSteal } from './steal.js';
+import { updatePlayerHeat } from './streak.js';
+import { considerSwapPitcher, swapPitcher } from './swap.js';
+import { determineContact, determineSwing } from './swing.js';
+import { checkTriggerEvent } from './trigger.js';
 import {
   endOfInning,
   getCurrentBatter,
@@ -30,13 +36,7 @@ import {
   incrementBatterIndex,
   logsPitchData,
   resetCount,
-} from './utils';
-import { advanceRunnerForced, advanceAllRunners } from './runners';
-import { determineSwing, determineContact } from './swing';
-import { checkTriggerEvent } from './trigger';
-import { determineClutchFactor } from './clutch';
-import { updateStaminaAfterPitch } from './stamina';
-import { updateInjuryAfterPitch } from './injury';
+} from './utils.js';
 
 export function simulateRound(
   random: GameRandom,

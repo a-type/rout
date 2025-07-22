@@ -1,4 +1,4 @@
-import { LongGameError } from './error';
+import { LongGameError } from './error.js';
 
 export function assert(
   condition: boolean,

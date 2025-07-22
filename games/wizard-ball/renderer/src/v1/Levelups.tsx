@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
-import { hooks } from './gameClient';
-import { PlayerChip } from './players/PlayerChip';
-import { PlayerLevel } from './players/PlayerLevel';
+import { hooks } from './gameClient.js';
+import { PlayerChip } from './players/PlayerChip.js';
+import { PlayerLevel } from './players/PlayerLevel.js';
 
 export function Levelups() {
   const { finalState, currentTurn } = hooks.useGameSuite();
