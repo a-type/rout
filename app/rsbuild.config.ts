@@ -3,11 +3,9 @@ import {
   ModuleFederationPlugin,
   createModuleFederationConfig,
 } from '@module-federation/enhanced/rspack';
-import { defineConfig, loadEnv } from '@rsbuild/core';
+import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { UnoCSSRspackPlugin } from '@unocss/webpack/rspack';
-
-const { publicVars } = loadEnv({ prefixes: ['VITE_', 'PUBLIC_'] });
 
 const federationConfig = createModuleFederationConfig({
   name: 'long-game',
@@ -88,10 +86,6 @@ export default defineConfig(({ command }) => ({
   source: {
     entry: {
       index: './src/main.tsx',
-    },
-    define: {
-      VITE_VAPID_PUBLIC_KEY: '""',
-      ...publicVars,
     },
   },
   dev: {
