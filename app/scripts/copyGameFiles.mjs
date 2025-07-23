@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const gamesDir = path.join(import.meta.dirname, '../../games');
-const gamesMetaOutput = path.join(import.meta.dirname, '../dist/game-data');
+const gamesMetaOutput = path.join(import.meta.dirname, '../public/game-data');
 const federatedOutput = path.join(import.meta.dirname, '../dist/game-modules');
 
 const gameDirs = fs.readdirSync(gamesDir).filter((file) => {
