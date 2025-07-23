@@ -17,13 +17,15 @@ jobs:
           cache: 'pnpm'
       - name: Install deps
         run: pnpm install
+      - name: Write .env to app dir
+        run: |
+          echo "PUBLIC_API_ORIGIN=${{ vars.PUBLIC_API_ORIGIN }}" >> ./app/.env
+          echo "PUBLIC_APP_ORIGIN=${{ vars.APP_ORIGIN }}" >> ./app/.env
+          echo "PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> ./app/.env
       - name: Build everything
         run: pnpm run build
         env:
-          PUBLIC_API_ORIGIN: ${{ vars.PUBLIC_API_ORIGIN }}
-          PUBLIC_APP_ORIGIN: ${{ vars.APP_ORIGIN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
 
       - name: Verify cloudflare token
         run: |
