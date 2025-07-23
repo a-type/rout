@@ -6,7 +6,11 @@ import { useEffect } from 'react';
 
 const hooks = typedHooks<typeof gameDefinition>();
 
-export default hooks.withGame(function Client({ gameSuite }) {
+// Debugging HMR stuff.
+const title = 'Guess!';
+console.log('Renderer loaded', gameDefinition, title);
+
+export const Renderer = hooks.withGame(function Client({ gameSuite }) {
   useEffect(
     () => gameSuite.subscribe('turnValidationFailed', toast.error),
     [gameSuite],
@@ -27,6 +31,7 @@ export default hooks.withGame(function Client({ gameSuite }) {
     </>
   );
 });
+export default Renderer;
 
 const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   const { prepareTurn, isViewingCurrentRound, viewingTurn } = gameSuite;
@@ -34,7 +39,7 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
 
   return (
     <Box direction="col" p="lg" gap>
-      <h1>Guess</h1>
+      <h1>{title}</h1>
       <Input
         type="number"
         disabled={!isViewingCurrentRound}

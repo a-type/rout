@@ -9,13 +9,14 @@ import { PageNav } from './PageNav.js';
 // a fully reactive SDK which lets you read game state, members, chat,
 // etc, prepare and submit turns, as well as view historical states
 
-export default hooks.withGame(function Client({ gameSuite }) {
+export const Renderer = hooks.withGame(function Client({ gameSuite }) {
   return (
     <BrowserRouter>
       <Gameplay />
     </BrowserRouter>
   );
 });
+export default Renderer;
 
 // perhaps you'll want to move these to other modules.
 

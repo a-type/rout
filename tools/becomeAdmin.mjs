@@ -23,19 +23,21 @@ const sql = `update User set isProductAdmin = true where email = '${email}';`;
 console.log('Running', sql);
 
 spawnSync(
-  'pnpx',
+  'pnpm',
   [
     'wrangler',
     'd1',
     'execute',
     'prod-long-game-core',
+    '-c',
+    './db/wrangler.toml',
     remote ? '--remote' : '--local',
     '--command',
     sql,
   ],
   {
     stdio: 'inherit',
-    cwd: join(process.cwd(), 'services/db'),
+    cwd: join(process.cwd(), 'services'),
   },
 );
 

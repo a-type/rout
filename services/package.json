@@ -4,13 +4,20 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "db:reset": "rimraf db/.wrangler && rimraf api/.wrangler && cd ./db && pnpm migrations:apply:local"
+    "db:reset": "rimraf db/.wrangler && rimraf api/.wrangler && cd ./db && pnpm migrations:apply:local",
+    "dev": "wrangler dev -c ./api/wrangler.toml --port 3101 --inspector-port 9229 --ip 127.0.0.1 -c ./db/wrangler.toml --persist-to ./.wrangler",
+    "migrations:create": "wrangler d1 migrations create prod-long-game-core -c ./db/wrangler.toml --persist-to ./.wrangler",
+    "migrations:apply:local": "cross-env CI=true wrangler d1 migrations apply prod-long-game-core --local -c ./db/wrangler.toml --persist-to ./.wrangler",
+    "migrations:apply:remote": "cross-env CI=true env-cmd wrangler d1 migrations apply prod-long-game-core --remote -c ./db/wrangler.toml --persist-to ./.wrangler",
+    "db:run:local": "wrangler d1 execute prod-long-game-core -c ./db/wrangler.toml --local --persist-to ./.wrangler --command",
+    "wrangler": "wrangler --persist-to ./.wrangler"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "vitest": "catalog:",
     "@cloudflare/vitest-pool-workers": "0.8.15",
-    "rimraf": "6.0.1"
+    "@types/node": "^22.14.0",
+    "cross-env": "^7.0.3",
+    "rimraf": "6.0.1",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
   }
 }

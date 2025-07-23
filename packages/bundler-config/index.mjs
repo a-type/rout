@@ -114,6 +114,11 @@ export const gameRsbuildConfig = (game) => {
       },
       dev: {
         assetPrefix: `http://localhost:${game.devPort}/`,
+        // hmr: true,
+        liveReload: true,
+        client: {
+          port: game.devPort,
+        },
       },
       output: {
         assetPrefix: `/game-modules/${idToFederationId(game.id)}/`,

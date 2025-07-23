@@ -1,3 +1,4 @@
 import { DefaultChatMessage } from '@long-game/game-ui';
 
-export default DefaultChatMessage;
+export const ChatMessage = DefaultChatMessage;
+export default ChatMessage;

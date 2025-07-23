@@ -12,7 +12,7 @@ export function CompleteProfileDialog() {
     <Dialog open={open}>
       <DialogContent>
         <DialogTitle>Complete your profile</DialogTitle>
-        <div>Just a few things to start playing</div>
+        <div className="mb-lg">Just a few things to start playing</div>
 
         <EditProfileForm />
       </DialogContent>

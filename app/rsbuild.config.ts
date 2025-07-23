@@ -12,18 +12,16 @@ const federationConfig = createModuleFederationConfig({
   manifest: true,
   dts: false,
   shared: {
-    react: { singleton: true, requiredVersion: '>19.0.0', eager: true },
+    react: { singleton: true, requiredVersion: '>19.0.0' },
     'react/': {},
     'react-dom': {
       singleton: true,
       requiredVersion: '>19.0.0',
-      eager: true,
     },
     'react-dom/': {},
     '@a-type/ui': {
       singleton: true,
       requiredVersion: '>2.0.0',
-      eager: true,
     },
     '@long-game/game-client': {
       singleton: true,
@@ -71,6 +69,7 @@ export default defineConfig(({ command }) => ({
           }
           return '[name].[contenthash].js';
         },
+        uniqueName: 'long-game',
       },
       optimization: {
         realContentHash: true,
@@ -89,7 +88,6 @@ export default defineConfig(({ command }) => ({
     },
   },
   dev: {
-    hmr: false,
     client: {
       host: 'localhost',
     },

@@ -41,11 +41,21 @@ export function getFederatedGameComponent(
     cache.set(federatedPath, promise);
     return promise;
   }
-  const promise = lazy(() =>
-    loadRemote<{ default: ComponentType<any> }>(federatedPath).then((m) => m!),
-  );
-  cache.set(federatedPath, promise);
-  return promise;
+  if (componentName === 'renderer') {
+    const promise = lazy(() =>
+      loadRemote(federatedPath).then((m: any) => ({ default: m.Renderer })),
+    );
+    cache.set(federatedPath, promise);
+    return promise;
+  }
+  if (componentName === 'chat') {
+    const promise = lazy(() =>
+      loadRemote(federatedPath).then((m: any) => ({ default: m.ChatMessage })),
+    );
+    cache.set(federatedPath, promise);
+    return promise;
+  }
+  throw new Error(`Unknown component name: ${componentName}`);
 }
 
 async function registerFederatedGames() {
@@ -54,7 +64,6 @@ async function registerFederatedGames() {
     Object.entries(games).map(([id, meta]) => ({
       name: idToFederationId(id),
       entry: `${meta.url}/mf-manifest.json`,
-      type: 'module',
     })),
   );
 }
