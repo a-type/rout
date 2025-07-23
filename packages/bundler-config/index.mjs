@@ -4,7 +4,7 @@ import {
   createModuleFederationConfig,
   ModuleFederationPlugin,
 } from '@module-federation/enhanced/rspack';
-import { defineConfig, loadEnv } from '@rsbuild/core';
+import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { UnoCSSRspackPlugin } from '@unocss/webpack/rspack';
 import * as fs from 'fs';
@@ -111,7 +111,6 @@ export const gameRsbuildConfig = (game) => {
           // arbitrary
           index: './src/v1/Renderer.tsx',
         },
-        define: loadEnv({ prefixes: ['VITE_', 'PUBLIC_'] }).publicVars,
       },
       dev: {
         assetPrefix: `http://localhost:${game.devPort}/`,

@@ -1,3 +1,4 @@
+import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
 import { Avatar, AvatarProps, clsx } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
@@ -18,7 +19,7 @@ export const UserAvatar = withSuspense(
     return (
       <Avatar
         {...rest}
-        imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
+        imageSrc={`${API_ORIGIN}/users/${user.id}/avatar`}
         name={user.displayName}
         crossOrigin="use-credentials"
         className={clsx('aspect-1 overflow-hidden', rest.className)}
@@ -39,7 +40,7 @@ export const MyAvatar = withSuspense(
     return (
       <Avatar
         {...props}
-        imageSrc={`${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${user.id}/avatar`}
+        imageSrc={`${API_ORIGIN}/users/${user.id}/avatar`}
         name={user?.displayName}
         crossOrigin="use-credentials"
         className={clsx('aspect-1 overflow-hidden', props.className)}

@@ -1,3 +1,4 @@
+import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
 import { clsx, Icon, ImageUploader, ImageUploaderRoot } from '@a-type/ui';
 
@@ -10,11 +11,7 @@ export function UploadAvatar({ className }: UploadAvatarProps) {
   const { data: me } = sdkHooks.useGetMe();
   return (
     <ImageUploaderRoot
-      value={
-        me?.hasAvatar
-          ? `${import.meta.env.VITE_PUBLIC_API_ORIGIN}/users/${me.id}/avatar`
-          : null
-      }
+      value={me?.hasAvatar ? `${API_ORIGIN}/users/${me.id}/avatar` : null}
       className={clsx('w-32 aspect-1 overflow-hidden', className)}
       onChange={async (image) => {
         if (image) {

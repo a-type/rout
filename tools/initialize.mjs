@@ -63,7 +63,7 @@ VAPID_PRIVATE_KEY=${vapidKeys.privateKey}
     Object.entries(secrets)
       .map(([k, v]) => `${k}=${v}`)
       .join('\n') || '';
-const appEnv = `VITE_PUBLIC_API_ORIGIN=http://localhost:3101
+const appEnv = `PUBLIC_API_ORIGIN=http://localhost:3101
 `;
 await tasks([
   {
