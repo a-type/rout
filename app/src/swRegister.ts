@@ -14,7 +14,7 @@ export async function registerServiceWorker() {
   try {
     const registration = await navigator.serviceWorker.register(
       new URL(
-        /* webpackChunkName: "serviceworker" */
+        /* webpackChunkName: "sw" */
         './sw.ts',
         import.meta.url,
       ),

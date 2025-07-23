@@ -54,7 +54,7 @@ export default defineConfig(({ command }) => ({
       plugins: [
         UnoCSSRspackPlugin(),
         new InjectManifest({
-          swDest: 'serviceworker.js',
+          swDest: 'sw.js',
         }),
         new ModuleFederationPlugin(federationConfig),
       ],
@@ -68,7 +68,7 @@ export default defineConfig(({ command }) => ({
         chunkFilename: (assetInfo) => {
           // The service worker entrypoint needs to be fixed (i.e. not have a hash
           // appended).
-          if (assetInfo.chunk?.name === 'serviceworker') {
+          if (assetInfo.chunk?.name === 'sw') {
             return '[name].js';
           }
           return '[name].[contenthash].js';
