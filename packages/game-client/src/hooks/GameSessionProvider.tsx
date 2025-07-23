@@ -11,7 +11,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useSdk } from '../hooks.jsx';
+import { useSdk } from '../hooks.js';
 import { PublicSdk } from '../sdk/PublicSdk.js';
 import { GameSessionSuite } from '../state/gameSessionMobx.js';
 import { connectToSocket } from '../state/socket.js';

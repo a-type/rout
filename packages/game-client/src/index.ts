@@ -1,9 +1,9 @@
 export { toJS } from 'mobx';
 export * from './fetch.js';
-export * from './hooks.jsx';
-export * from './hooks/GameSessionProvider.jsx';
+export * from './hooks.js';
+export * from './hooks/GameSessionProvider.js';
 export * from './hooks/useDebounce.js';
-export * from './queryClient.jsx';
+export * from './queryClient.js';
 export * from './sdk/index.js';
 export type { GameSessionSuite, PlayerInfo } from './state/gameSessionMobx.js';
 export * from './types.js';

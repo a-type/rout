@@ -1,8 +1,8 @@
-import { CreateGame } from '@/components/games/CreateGame.jsx';
-import { MembershipsList } from '@/components/memberships/MembershipsList.jsx';
+import { CreateGame } from '@/components/games/CreateGame.js';
+import { MembershipsList } from '@/components/memberships/MembershipsList.js';
 import { MainNav } from '@/components/nav/MainNav';
 import { AppInstallBanner } from '@/components/settings/AppInstallBanner';
-import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.jsx';
+import { CompleteProfileDialog } from '@/components/users/CompleteProfileDialog.js';
 import { MyAvatar } from '@/components/users/UserAvatar';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import {
