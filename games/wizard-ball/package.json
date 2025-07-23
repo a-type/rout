@@ -1,3 +1,6 @@
 {
-  "name": "@long-game/game-wizard-ball"
+  "name": "@long-game/game-wizard-ball",
+  "scripts": {
+    "dev-all": "pnpm --filter \"./*\" --parallel --stream dev"
+  }
 }

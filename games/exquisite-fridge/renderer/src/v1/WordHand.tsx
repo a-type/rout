@@ -42,6 +42,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
           }));
         }}
         disabled={gameSuite.turnWasSubmitted}
+        priority={-1}
       >
         <ScrollArea className="px-[50px] md:px-0 w-full h-full">
           <H4 className="text-center mb-xs">Free tiles</H4>

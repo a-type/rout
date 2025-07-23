@@ -1,6 +1,6 @@
 {
   "name": "@long-game/game-{{name}}",
   "scripts": {
-    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
+    "dev-all": "pnpm --filter \"./*\" --parallel --stream dev"
   }
 }

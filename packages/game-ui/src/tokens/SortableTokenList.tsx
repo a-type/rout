@@ -8,6 +8,7 @@ import { TokenDragData } from './types.js';
 export interface SortableTokenListProps<T> extends BoxProps {
   onMove: (token: TokenDragData<T>, index: number) => void;
   debug?: boolean;
+  priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
 }
 
 /**
@@ -25,6 +26,7 @@ export function SortableTokenList<T = any>({
   children: rawChildren,
   onMove,
   debug,
+  priority: droppablePriority,
   ...rest
 }: SortableTokenListProps<T>) {
   const listId = useId();
@@ -36,6 +38,7 @@ export function SortableTokenList<T = any>({
       listId={listId}
       onDrop={(data) => onMove(data, Math.max(0, index))}
       debug={debug}
+      priority={droppablePriority}
     />,
     child,
   ]);
@@ -47,6 +50,7 @@ export function SortableTokenList<T = any>({
       onDrop={(data) => onMove(data, children.length)}
       last
       debug={debug}
+      priority={droppablePriority}
     />,
   );
 

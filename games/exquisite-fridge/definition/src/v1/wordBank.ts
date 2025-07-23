@@ -17,7 +17,6 @@ const groupedWordBank: (string[] | string)[] = [
   repeat('as', 5),
   repeat('by', 5),
   repeat('at', 5),
-  repeat('an', 5),
   repeat('be', 5),
   repeat('are', 5),
   repeat('from', 5),

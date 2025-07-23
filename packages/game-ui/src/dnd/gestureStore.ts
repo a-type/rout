@@ -96,6 +96,15 @@ export function useMonitorGlobalGesture() {
       tag: gesture.targetTag,
     });
     if (overlapped.length > 0) {
+      if (overlapped.length > 1) {
+        console.debug(
+          `Multiple overlapping regions found, sorting by priority: ${overlapped.map((o) => o.id).join(', ')}`,
+        );
+        overlapped.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+        console.debug(`Selected region: ${overlapped[0].id}`);
+      }
+      // find highest priority
+      // set the first one as the over region
       useDndStore.getState().setOverRegion(overlapped[0].id);
     } else {
       useDndStore.getState().setOverRegion(null);

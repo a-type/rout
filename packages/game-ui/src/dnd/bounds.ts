@@ -2,16 +2,33 @@ import { useCallback, useEffect, useRef } from 'react';
 import { gestureEvents } from './gestureEvents.js';
 import { DragGestureContext } from './gestureStore.js';
 
+type BoundsRect = Pick<
+  DOMRect,
+  'x' | 'y' | 'width' | 'height' | 'top' | 'right' | 'bottom' | 'left'
+>;
+
 export interface BoundsRegistryEntry {
   element: HTMLElement;
-  bounds: DOMRect;
+  bounds: BoundsRect;
   visible: boolean;
   // this actually uses ref counting so multiple components can declaratively add tags
   // and we only remove them when the last one is unbound
   tags: Record<string, number>;
   id: string;
   measuredAt: number;
+  priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
 }
+
+const emptyBounds: BoundsRect = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+};
 
 class BoundsRegistry {
   #entries: Map<string, BoundsRegistryEntry> = new Map();
@@ -44,7 +61,7 @@ class BoundsRegistry {
     this.#unsubs.forEach((unsub) => unsub());
   };
 
-  bind = (id: string, element: HTMLElement | null) => {
+  bind = (id: string, element: HTMLElement | null, priority = 0) => {
     if (!element) {
       const entry = this.#entries.get(id);
       if (entry?.element === element) {
@@ -70,20 +87,23 @@ class BoundsRegistry {
         this.#intersectionObserver.unobserve(entry.element);
         this.#intersectionObserver.observe(element);
         entry.element = element;
-        entry.bounds = element.getBoundingClientRect();
+        entry.priority = priority;
+        this.#applyBounds(entry);
       }
     }
     // otherwise create a new entry
     else {
-      const bounds = element.getBoundingClientRect();
-      this.#entries.set(id, {
+      const entry = {
         element,
-        bounds,
+        bounds: emptyBounds,
         visible: true,
         tags: {},
         id,
+        priority,
         measuredAt: Date.now(),
-      });
+      } as BoundsRegistryEntry;
+      this.#applyBounds(entry);
+      this.#entries.set(id, entry);
       this.#intersectionObserver.observe(element);
     }
   };
@@ -152,6 +172,11 @@ class BoundsRegistry {
     invoker();
   };
 
+  #applyBounds = (entry: BoundsRegistryEntry) => {
+    entry.bounds = entry.element.getBoundingClientRect();
+    entry.measuredAt = Date.now();
+  };
+
   // automatically update drag-interactive bounds when gesture is active
   #onGestureChange = (gesture: DragGestureContext) => {
     if (gesture.claimId) {
@@ -172,7 +197,7 @@ class BoundsRegistry {
     }
   };
 
-  #calculateOverlappedArea = (rect1: DOMRect, rect2: DOMRect) => {
+  #calculateOverlappedArea = (rect1: BoundsRect, rect2: BoundsRect) => {
     const xOverlap = Math.max(
       0,
       Math.min(rect1.right, rect2.right) - Math.max(rect1.left, rect2.left),
@@ -185,7 +210,7 @@ class BoundsRegistry {
   };
 
   getOverlappingRegions = (
-    rect: DOMRect,
+    rect: BoundsRect,
     { tag, areaThreshold = 0 }: { tag?: string; areaThreshold?: number } = {},
   ) => {
     const overlaps: (BoundsRegistryEntry & { overlappedArea: number })[] = [];
@@ -250,10 +275,10 @@ class BoundsRegistry {
 
 export const boundsRegistry = new BoundsRegistry();
 
-export function useBindBounds(id: string) {
+export function useBindBounds(id: string, priority = 0) {
   return useCallback(
     (element: HTMLElement | null) => {
-      boundsRegistry.bind(id, element);
+      boundsRegistry.bind(id, element, priority);
     },
     [id],
   );

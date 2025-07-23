@@ -43,6 +43,7 @@ export interface TokenHandProps<T> {
   onDrop?: (value: TokenDragData<T>) => void;
   /** Defaults to 'hand', use if you have multiple hands */
   id?: string;
+  priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
 }
 
 export function TokenHand<T = unknown>({
@@ -52,6 +53,7 @@ export function TokenHand<T = unknown>({
   onDrop,
   id,
   children,
+  priority,
   ...rest
 }: TokenHandProps<T>) {
   return (
@@ -69,6 +71,7 @@ export function TokenHand<T = unknown>({
           type="hand"
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
           className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
+          priority={priority}
         >
           <AnimatePresence>
             {Children.map(children, (child) => (

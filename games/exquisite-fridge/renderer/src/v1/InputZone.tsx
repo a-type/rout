@@ -62,6 +62,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
           gap="sm"
           p="md"
           disabled={turnWasSubmitted}
+          priority={1}
         >
           {currentTurn.words.map((word) => (
             <WordTile value={word} key={word.id} movedBehavior="remove" />

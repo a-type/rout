@@ -10,23 +10,7 @@
     },
     {
       "type": "npm",
-      "script": "dev",
-      "path": "games/chess-arena",
-      "problemMatcher": ["$tsc-watch"],
-      "label": "♟️ Chess Arena Dev",
-      "detail": "pnpm --filter \"./*\" dev"
-    },
-    {
-      "type": "npm",
-      "script": "dev",
-      "path": "games/gudnak",
-      "problemMatcher": ["$tsc-watch"],
-      "label": "🃏 Gudnak Dev",
-      "detail": "pnpm --filter \"./*\" dev"
-    },
-    {
-      "type": "npm",
-      "script": "dev",
+      "script": "dev-all",
       "path": "games/number-guess",
       "problemMatcher": ["$tsc-watch"],
       "label": "🔢 Number Guess Dev",
@@ -34,7 +18,7 @@
     },
     {
       "type": "npm",
-      "script": "dev",
+      "script": "dev-all",
       "path": "games/hearts",
       "problemMatcher": ["$tsc-watch"],
       "label": "♥️ Hearts Dev",
@@ -42,7 +26,7 @@
     },
     {
       "type": "npm",
-      "script": "dev",
+      "script": "dev-all",
       "path": "games/scribble",
       "problemMatcher": ["$tsc-watch"],
       "label": "✏️ Scribble Dev",
@@ -50,7 +34,7 @@
     },
     {
       "type": "npm",
-      "script": "dev",
+      "script": "dev-all",
       "path": "games/wizard-ball",
       "problemMatcher": ["$tsc-watch"],
       "label": "⚾ Wizard Ball Dev",
@@ -58,15 +42,7 @@
     },
     {
       "type": "npm",
-      "script": "dev",
-      "path": "games/gunboats",
-      "problemMatcher": ["$tsc-watch"],
-      "label": "🚢 Gunboats Dev",
-      "detail": "pnpm --filter \"./*\" dev"
-    },
-    {
-      "type": "npm",
-      "script": "dev",
+      "script": "dev-all",
       "path": "games/exquisite-fridge",
       "problemMatcher": ["$tsc-watch"],
       "label": "❄️ Exquisite Fridge Dev",

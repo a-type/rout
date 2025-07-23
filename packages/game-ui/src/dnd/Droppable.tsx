@@ -26,6 +26,7 @@ export type DroppableProps<T = any> = Omit<
   data?: any;
   /** Hides this droppable from any nested draggables */
   noParenting?: boolean;
+  priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
 };
 
 export function Droppable<T = any>({
@@ -41,6 +42,7 @@ export function Droppable<T = any>({
   tags,
   data,
   noParenting,
+  priority,
   ...rest
 }: DroppableProps<T>) {
   const {
