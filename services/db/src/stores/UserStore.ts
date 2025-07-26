@@ -262,6 +262,14 @@ export class UserStore extends RpcTarget {
     if (direction === 'outgoing') {
       return builder
         .where('FriendshipInvitation.inviterId', '=', this.#userId)
+        .select((eb) =>
+          jsonObjectFrom(
+            eb
+              .selectFrom('User')
+              .select(['User.id', 'User.color'])
+              .whereRef('User.email', '=', 'FriendshipInvitation.email'),
+          ).as('otherUser'),
+        )
         .execute();
     } else {
       const { email } = await this.#db

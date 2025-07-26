@@ -21,7 +21,7 @@ import {
 
 export { useMutation, useSuspenseQuery };
 
-type SdkHooks<Sdk extends BaseSdk> = {
+export type SdkHooks<Sdk extends BaseSdk> = {
   [K in keyof Sdk as `use${Capitalize<
     string & K
   >}`]: Sdk[K] extends QueryFactory<infer O, infer I>

@@ -1,6 +1,7 @@
-import { Box, Chip, clsx, Icon } from '@a-type/ui';
+import { Box, Button, Chip, clsx, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { sdkHooks } from '../sdkHooks.js';
 import { PlayerAvatar } from './PlayerAvatar.js';
 import { usePlayerThemed } from './usePlayerThemed.js';
 
@@ -21,6 +22,13 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
   const isPendingTurn = status?.pendingTurn;
   const player = gameSuite.getPlayer(playerId);
   const { className: themeClass, style } = usePlayerThemed(playerId);
+
+  const inviteMutation = sdkHooks.useSendFriendshipInvite();
+  const { data } = sdkHooks.useGetFriendshipInvites({ direction: 'outgoing' });
+  const { data: playerInfo } = sdkHooks.useGetUserLazy({ id: playerId });
+  const isMe = playerId === gameSuite.playerId;
+  const isFriend = playerInfo?.isFriend;
+  const inviteSent = data?.some((invite) => invite.otherUser?.id === playerId);
 
   return (
     <Box d="col" gap className={clsx(themeClass, className)} style={style}>
@@ -66,6 +74,25 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
             <span>Not playing this round</span>
           </Chip>
         )}
+        {!!playerInfo &&
+          !isMe &&
+          (isFriend ? (
+            <Chip color="neutral" className="text-sm">
+              <Icon name="smile" size={16} />
+              <span>Friend</span>
+            </Chip>
+          ) : (
+            <Button
+              size="small"
+              color="primary"
+              className="text-sm"
+              onClick={() => inviteMutation.mutateAsync({ userId: playerId })}
+              disabled={inviteSent}
+            >
+              <Icon name="add_person" size={16} />
+              <span>{inviteSent ? 'Sent' : 'Add friend'}</span>
+            </Button>
+          ))}
       </Box>
     </Box>
   );

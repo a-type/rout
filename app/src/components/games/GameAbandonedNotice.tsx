@@ -11,6 +11,7 @@ export function GameAbandonedNotice({}: GameAbandonedNoticeProps) {
       gap
       className="fixed bottom-sm right-sm shadow-lg"
       border
+      p
     >
       <H2>Game Abandoned</H2>
       <P>One or more players left mid-game. Sorry, we can't keep playing.</P>

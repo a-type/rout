@@ -1,11 +1,11 @@
 import { toast } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { hookifySdk, PublicSdk } from '@long-game/game-client';
+import { hookifySdk, PublicSdk, SdkHooks } from '@long-game/game-client';
 export type { BaseSdk, PublicSdk } from '@long-game/game-client';
 
 export const publicSdk = new PublicSdk();
 
-export const sdkHooks = hookifySdk<PublicSdk>();
+export const sdkHooks: SdkHooks<PublicSdk> = hookifySdk<PublicSdk>();
 
 publicSdk.addEventListener('error', (ev) => {
   if (ev instanceof ErrorEvent) {
