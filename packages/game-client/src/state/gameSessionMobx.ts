@@ -10,8 +10,12 @@ import {
   PrefixedId,
   ServerChatMessage,
   ServerGameMembersChangeMessage,
+  ServerGameStartingMessage,
   ServerNextRoundScheduledMessage,
+  ServerPlayerReadyMessage,
   ServerPlayerStatusChangeMessage,
+  ServerPlayerUnreadyMessage,
+  ServerPlayerVoteForGameMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
   ServerTurnPlayedMessage,
@@ -57,6 +61,8 @@ type GameSessionSuiteEvents = {
   error: (error: LongGameError) => void;
   roundChanged: () => void;
   membersChanged: () => void;
+  gameStarting: (startsAt: string) => void;
+  gameStartingCancelled: () => void;
 };
 
 export class GameSessionSuite<
@@ -101,6 +107,10 @@ export class GameSessionSuite<
   @observable accessor turnSubmitTimeout: ReturnType<typeof setTimeout> | null =
     null;
 
+  // pregame stuff
+  @observable accessor gameVotes: Record<string, PrefixedId<'u'>[]> = {};
+  @observable accessor readyPlayers: PrefixedId<'u'>[] = [];
+
   // static
   gameSessionId: PrefixedId<'gs'>;
   gameDefinition!: TGame;
@@ -128,6 +138,8 @@ export class GameSessionSuite<
       playerId: PrefixedId<'u'>;
       startedAt: string | null;
       timezone: string;
+      gameVotes?: Record<string, PrefixedId<'u'>[]>;
+      readyPlayers?: PrefixedId<'u'>[];
     },
     private ctx: {
       socket: GameSocket;
@@ -802,6 +814,41 @@ export class GameSessionSuite<
     this.viewingRoundIndex = roundIndex;
   };
 
+  readyUp = () => {
+    this.ctx.socket.send({
+      type: 'readyUp',
+      unready: false,
+    });
+  };
+  unreadyUp = () => {
+    this.ctx.socket.send({
+      type: 'readyUp',
+      unready: true,
+    });
+  };
+  toggleReady = () => {
+    if (this.readyPlayers.includes(this.playerId)) {
+      this.unreadyUp();
+    } else {
+      this.readyUp();
+    }
+  };
+
+  voteForGame = (gameId: string) => {
+    this.ctx.socket.send({
+      type: 'voteForGame',
+      gameId,
+      remove: false,
+    });
+  };
+  removeVoteForGame = (gameId: string) => {
+    this.ctx.socket.send({
+      type: 'voteForGame',
+      gameId,
+      remove: true,
+    });
+  };
+
   private subscribeSocket = () => {
     this.ctx.socket.subscribe('chat', this.onChat);
     this.ctx.socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
@@ -811,6 +858,10 @@ export class GameSessionSuite<
     this.ctx.socket.subscribe('membersChange', this.onMembersChange);
     this.ctx.socket.subscribe('turnPlayed', this.onTurnPlayed);
     this.ctx.socket.subscribe('nextRoundScheduled', this.onNextRoundScheduled);
+    this.ctx.socket.subscribe('playerReady', this.onPlayerReady);
+    this.ctx.socket.subscribe('playerUnready', this.onPlayerUnready);
+    this.ctx.socket.subscribe('playerVoteForGame', this.onPlayerVoteForGame);
+    this.ctx.socket.subscribe('gameStarting', this.onGameStarting);
   };
 
   @action private onChat = (msg: ServerChatMessage) => {
@@ -952,6 +1003,8 @@ export class GameSessionSuite<
     timezone: string;
     nextRoundCheckAt?: string | null;
     currentRoundIndex: number;
+    gameVotes?: Record<string, PrefixedId<'u'>[]>;
+    readyPlayers?: PrefixedId<'u'>[];
   }) => {
     this.viewingRoundIndex = init.currentRoundIndex;
     this.localTurnData = undefined;
@@ -977,6 +1030,12 @@ export class GameSessionSuite<
     this.nextRoundCheckAt = init.nextRoundCheckAt
       ? new Date(init.nextRoundCheckAt)
       : null;
+    if (init.gameVotes) {
+      this.gameVotes = init.gameVotes;
+    }
+    if (init.readyPlayers) {
+      this.readyPlayers = init.readyPlayers;
+    }
     this.fetchMembers();
   };
 
@@ -997,6 +1056,23 @@ export class GameSessionSuite<
     this.fetchMembers().then(() => {
       this.#events.emit('membersChanged');
     });
+  };
+
+  @action private onPlayerReady = (msg: ServerPlayerReadyMessage) => {
+    this.readyPlayers.push(msg.playerId);
+  };
+  @action private onPlayerUnready = (msg: ServerPlayerUnreadyMessage) => {
+    this.readyPlayers = this.readyPlayers.filter((id) => id !== msg.playerId);
+    this.#events.emit('gameStartingCancelled');
+  };
+  @action private onPlayerVoteForGame = (
+    msg: ServerPlayerVoteForGameMessage,
+  ) => {
+    this.gameVotes = msg.votes;
+  };
+
+  private onGameStarting = (msg: ServerGameStartingMessage) => {
+    this.#events.emit('gameStarting', msg.startsAt);
   };
 
   debug = async () => {

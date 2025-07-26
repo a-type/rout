@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@a-type/auth':
-      specifier: 1.3.13
-      version: 1.3.13
+      specifier: 1.3.16
+      version: 1.3.16
     '@a-type/auth-fetch':
       specifier: 2.1.2
       version: 2.1.2
@@ -84,6 +84,9 @@ catalogs:
     cross-env:
       specifier: 7.0.3
       version: 7.0.3
+    date-fns:
+      specifier: ^4.1.0
+      version: 4.1.0
     delay-cli:
       specifier: 2.0.0
       version: 2.0.0
@@ -1118,10 +1121,10 @@ importers:
     dependencies:
       '@a-type/auth':
         specifier: 'catalog:'
-        version: 1.3.13(encoding@0.1.13)
+        version: 1.3.16(encoding@0.1.13)
       '@a-type/auth-email-ses':
         specifier: ^2.1.8
-        version: 2.1.8(@a-type/auth@1.3.13(encoding@0.1.13))
+        version: 2.1.8(@a-type/auth@1.3.16(encoding@0.1.13))
       '@a-type/utils':
         specifier: 'catalog:'
         version: 1.1.5
@@ -1146,6 +1149,9 @@ importers:
       '@long-game/service-db':
         specifier: workspace:*
         version: link:../db
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
       durable-utils:
         specifier: ^0.3.4
         version: 0.3.4
@@ -1182,7 +1188,7 @@ importers:
     dependencies:
       '@a-type/auth':
         specifier: 'catalog:'
-        version: 1.3.13(encoding@0.1.13)
+        version: 1.3.16(encoding@0.1.13)
       '@a-type/utils':
         specifier: 'catalog:'
         version: 1.1.5
@@ -1240,8 +1246,8 @@ packages:
       '@a-type/ui': '>=1.0.0 <3.0.0'
       react: ^19
 
-  '@a-type/auth@1.3.13':
-    resolution: {integrity: sha512-YXAi/VGrMxcMr3pE+a/mueEieHZr24g4QxoLWICmoWp5SymwZ5Lmp6VIXYDYnu04Kb0sBnvxPcMOHdKZjmNFvQ==}
+  '@a-type/auth@1.3.16':
+    resolution: {integrity: sha512-1FPvmHcCQsW0M0wAP9XCHIADdDxYsYUl31vIZGHrnZB+3YJHaqHMyLz/R3jDIx7RAIojalzEPRY/ANR4rI1uHQ==}
 
   '@a-type/kysely@1.1.1':
     resolution: {integrity: sha512-JOCyXi09IEmhscHAoU/lLy7/prkPRtFLgTrWs5uK7q0nLL2zN6soFwtafOWsRh3iJsM/km47aXohyGx5mHRmnQ==}
@@ -7469,9 +7475,9 @@ packages:
 
 snapshots:
 
-  '@a-type/auth-email-ses@2.1.8(@a-type/auth@1.3.13(encoding@0.1.13))':
+  '@a-type/auth-email-ses@2.1.8(@a-type/auth@1.3.16(encoding@0.1.13))':
     dependencies:
-      '@a-type/auth': 1.3.13(encoding@0.1.13)
+      '@a-type/auth': 1.3.16(encoding@0.1.13)
       '@aws-sdk/client-sesv2': 3.726.1
     transitivePeerDependencies:
       - aws-crt
@@ -7483,7 +7489,7 @@ snapshots:
       '@a-type/ui': 2.7.3(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(unocss@66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))
       react: 19.1.0
 
-  '@a-type/auth@1.3.13(encoding@0.1.13)':
+  '@a-type/auth@1.3.16(encoding@0.1.13)':
     dependencies:
       cookie: 0.6.0
       discord-oauth2: 2.12.1

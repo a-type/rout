@@ -51,7 +51,7 @@ export function Droppable<T = any>({
     isAnyOver: isDraggedOverThisRegion,
     draggedData,
   } = useDroppable({ onDrop, onOver, accept, onReject, id, disabled, tags });
-  const bindBounds = useBindBounds(id);
+  const bindBounds = useBindBounds(id, priority);
   const finalRef = useMergedRef<HTMLDivElement>(bindBounds, userRef);
   useEffect(() => droppableDataRegistry.register(id, data), [id, data]);
 

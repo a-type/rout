@@ -100,6 +100,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
         ],
         // TODO: configurable / automatic detection
         timezone: 'America/New_York',
+        createdBy: me.id,
       });
 
       return ctx.json({ sessionId: gameSession.id });

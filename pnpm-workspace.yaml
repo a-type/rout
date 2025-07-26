@@ -14,7 +14,7 @@ catalog:
   '@a-type/react-space': 0.2.17
   '@a-type/auth-fetch': 2.1.2
   '@a-type/auth-ui': 1.0.18
-  '@a-type/auth': 1.3.13
+  '@a-type/auth': 1.3.16
   '@a-type/utils': 1.1.5
   'react': 19.1.0
   'react-dom': 19.1.0
@@ -65,3 +65,4 @@ catalog:
   '@module-federation/enhanced': 0.17.0
   '@rsbuild/core': 1.4.8
   '@rsbuild/plugin-react': 1.3.4
+  date-fns: ^4.1.0

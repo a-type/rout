@@ -1,4 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
+import { clsx } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { CopyTextbox } from '../general/CopyTextbox.js';
 
@@ -15,5 +16,11 @@ export function PublicInviteLink({
     id: gameSessionId,
   });
 
-  return <CopyTextbox value={data.link} className={className} hideVisit />;
+  return (
+    <CopyTextbox
+      value={data.link}
+      className={clsx('text-xs', className)}
+      hideVisit
+    />
+  );
 }

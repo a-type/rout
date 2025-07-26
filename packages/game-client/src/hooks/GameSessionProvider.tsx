@@ -35,11 +35,15 @@ export function GameSessionProvider({
   gameDefinition,
   children,
   fallback,
+  gameVotes,
+  readyPlayers,
 }: {
   gameSessionId: PrefixedId<'gs'>;
   gameDefinition: GameDefinition;
   children: ReactNode;
   fallback?: ReactNode;
+  gameVotes?: Record<string, PrefixedId<'u'>[]>;
+  readyPlayers?: PrefixedId<'u'>[];
 }) {
   const sdk = useSdk() as PublicSdk;
   const { data: details } = useSuspenseQuery(
@@ -49,7 +53,7 @@ export function GameSessionProvider({
   const [gameSuite, setGameSuite] = useState(
     () =>
       new GameSessionSuite(
-        { ...details, gameDefinition },
+        { ...details, gameDefinition, gameVotes, readyPlayers },
         { socket: connectToSocket(details.id) },
       ),
   );
@@ -57,7 +61,7 @@ export function GameSessionProvider({
     gameSuite.dispose();
     setGameSuite(
       new GameSessionSuite(
-        { ...details, gameDefinition },
+        { ...details, gameDefinition, gameVotes, readyPlayers },
         {
           socket: connectToSocket(details.id),
         },

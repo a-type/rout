@@ -117,6 +117,8 @@ export const gameSessionRouter = new Hono<Env>()
     using members = await userStore.getGameSessionMembers(sessionId);
     using invitations = await userStore.getInvitationsToGameSession(sessionId);
     using summary = await state.getDetails();
+    using votes = await state.getGameVotes();
+    using readyPlayers = await state.getReadyPlayers();
 
     // while in pregame, double check that vital data is
     // synced to the DO...
@@ -127,6 +129,8 @@ export const gameSessionRouter = new Hono<Env>()
       invitations: wrapRpcData(invitations),
       myInvitation,
       session: wrapRpcData(summary),
+      votes: wrapRpcData(votes),
+      readyPlayers: wrapRpcData(readyPlayers),
     });
   })
   .get('/postgame', async (ctx) => {
@@ -183,7 +187,11 @@ export const gameSessionRouter = new Hono<Env>()
     async (ctx) => {
       const { gameId } = ctx.req.valid('json');
       const state = ctx.get('gameSessionState');
-      await state.updateGame(gameId, getLatestVersion(games[gameId]).version);
+      await state.updateGame(
+        gameId,
+        getLatestVersion(games[gameId]).version,
+        ctx.get('session').userId,
+      );
       const summary = await state.getDetails();
       return ctx.json({ session: summary });
     },

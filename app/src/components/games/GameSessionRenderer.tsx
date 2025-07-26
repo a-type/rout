@@ -12,7 +12,11 @@ import {
   useTitleBarColor,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { GameSessionProvider, withGame } from '@long-game/game-client';
+import {
+  GameSessionPregame,
+  GameSessionProvider,
+  withGame,
+} from '@long-game/game-client';
 import {
   DelayedSubmitUndo,
   DndRoot,
@@ -30,15 +34,15 @@ import { GameSetup } from './GameSetup.js';
 
 export interface GameSessionRendererProps {
   gameSessionId: PrefixedId<'gs'>;
-  gameId: string;
-  gameVersion: string;
+  pregame: GameSessionPregame;
 }
 
 export function GameSessionRenderer({
   gameSessionId,
-  gameId,
-  gameVersion,
+  pregame,
 }: GameSessionRendererProps) {
+  const gameId = pregame.session.gameId;
+  const gameVersion = pregame.session.gameVersion;
   const gameDefinition = use(
     getFederatedGameComponent(gameId, gameVersion, 'definition'),
   );
@@ -47,6 +51,8 @@ export function GameSessionRenderer({
     <GameSessionProvider
       gameSessionId={gameSessionId}
       gameDefinition={gameDefinition}
+      gameVotes={pregame.votes}
+      readyPlayers={pregame.readyPlayers}
       fallback={
         <Box full layout="center center">
           <Spinner />
@@ -120,7 +126,7 @@ const GameSessionRendererInner = withGame(function GameSessionRendererInner({
                 }
               >
                 {gameSuite.gameStatus.status === 'pending' ? (
-                  <GameSetup gameSessionId={sessionId} />
+                  <GameSetup gameSessionId={sessionId} className="w-full" />
                 ) : (
                   <Renderer />
                 )}

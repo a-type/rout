@@ -70,10 +70,13 @@ export default defineConfig(({ command }) => ({
           return '[name].[contenthash].js';
         },
         uniqueName: 'long-game',
+        cssChunkFilename: '[name].[contenthash].css',
+        cssFilename: '[name].[contenthash].css',
       },
       optimization: {
         realContentHash: true,
       },
+      cache: false,
     },
   },
   server: {

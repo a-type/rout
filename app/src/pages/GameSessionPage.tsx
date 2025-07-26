@@ -24,11 +24,7 @@ export function GameSessionPage() {
 
   return (
     <ErrorBoundary fallback={<div>Ooops, something went wrong 😥.</div>}>
-      <GameSessionRenderer
-        gameSessionId={sessionId}
-        gameId={pregame.session.gameId}
-        gameVersion={pregame.session.gameVersion}
-      />
+      <GameSessionRenderer gameSessionId={sessionId} pregame={pregame} />
     </ErrorBoundary>
   );
 }

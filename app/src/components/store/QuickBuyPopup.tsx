@@ -43,20 +43,28 @@ export function QuickBuyPopup({}: QuickBuyPopupProps) {
   );
 }
 
-export function OpenQuickBuyButton({
-  gameId,
-  ...rest
-}: { gameId: string } & ButtonProps) {
-  const [_, setSearch] = useSearchParams();
-  const open = () => {
+export function useOpenQuickBuy() {
+  const [search, setSearch] = useSearchParams();
+  const open = (gameId: string) => {
     setSearch((v) => {
       v.set('quickBuy', gameId);
       return v;
     });
   };
+  return open;
+}
+
+export function OpenQuickBuyButton({
+  gameId,
+  ...rest
+}: { gameId: string } & ButtonProps) {
+  const open = useOpenQuickBuy();
+  const onClick = () => {
+    open(gameId);
+  };
 
   return (
-    <Button {...rest} onClick={open}>
+    <Button {...rest} onClick={onClick}>
       <Icon name="cart" />
       Buy
     </Button>

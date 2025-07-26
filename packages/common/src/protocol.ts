@@ -102,6 +102,39 @@ export type ServerGameMembersChangeMessage = z.infer<
   typeof serverGameMembersChangeMessageShape
 >;
 
+export const serverPlayerReadyMessageShape = baseServerMessageShape.extend({
+  type: z.literal('playerReady'),
+  playerId: idShapes.User,
+});
+export type ServerPlayerReadyMessage = z.infer<
+  typeof serverPlayerReadyMessageShape
+>;
+export const serverPlayerUnreadyMessageShape = baseServerMessageShape.extend({
+  type: z.literal('playerUnready'),
+  playerId: idShapes.User,
+});
+export type ServerPlayerUnreadyMessage = z.infer<
+  typeof serverPlayerUnreadyMessageShape
+>;
+
+export const serverGameStartingMessageShape = baseServerMessageShape.extend({
+  type: z.literal('gameStarting'),
+  startsAt: z.string().describe('ISO date string when the game starts'),
+});
+export type ServerGameStartingMessage = z.infer<
+  typeof serverGameStartingMessageShape
+>;
+
+export const serverPlayerVoteForGameMessageShape =
+  baseServerMessageShape.extend({
+    type: z.literal('playerVoteForGame'),
+    playerId: idShapes.User,
+    votes: z.record(z.array(idShapes.User)).describe('Votes keyed by game ID'),
+  });
+export type ServerPlayerVoteForGameMessage = z.infer<
+  typeof serverPlayerVoteForGameMessageShape
+>;
+
 // general-purpose ack for client messages
 export const serverAckMessageShape = baseServerMessageShape.extend({
   type: z.literal('ack'),
@@ -135,6 +168,10 @@ export const serverMessageShape = z.discriminatedUnion('type', [
   serverGameChangeMessageShape,
   serverGameMembersChangeMessageShape,
   serverNextRoundScheduledMessageShape,
+  serverPlayerReadyMessageShape,
+  serverPlayerUnreadyMessageShape,
+  serverPlayerVoteForGameMessageShape,
+  serverGameStartingMessageShape,
 ]);
 export type ServerMessage = z.infer<typeof serverMessageShape>;
 
@@ -196,6 +233,31 @@ export type ClientToggleChatReactionMessage = z.infer<
   typeof clientToggleChatReactionMessageShape
 >;
 
+export const clientReadyUpMessageShape = baseClientMessageShape.extend({
+  type: z.literal('readyUp'),
+  unready: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe('If true, the player will unready instead of readying up.'),
+});
+export type ClientReadyUpMessage = z.infer<typeof clientReadyUpMessageShape>;
+
+export const clientVoteForGameMessageShape = baseClientMessageShape.extend({
+  type: z.literal('voteForGame'),
+  gameId: z.string(),
+  remove: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      'If true, this will remove the vote for the game instead of adding it.',
+    ),
+});
+export type ClientVoteForGameMessage = z.infer<
+  typeof clientVoteForGameMessageShape
+>;
+
 export const clientMessageShape = z.discriminatedUnion('type', [
   clientPingMessageShape,
   clientSendChatMessageShape,
@@ -203,6 +265,8 @@ export const clientMessageShape = z.discriminatedUnion('type', [
   clientRequestChatMessageShape,
   clientResetGameMessageShape,
   clientToggleChatReactionMessageShape,
+  clientReadyUpMessageShape,
+  clientVoteForGameMessageShape,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageShape>;

@@ -1,26 +1,46 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Chip, clsx, Icon, Select } from '@a-type/ui';
+import {
+  AvatarList,
+  Box,
+  Button,
+  Card,
+  Chip,
+  clsx,
+  Icon,
+  Select,
+} from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
+import { withGame } from '@long-game/game-client';
+import { PlayerAvatar } from '@long-game/game-ui';
 import { useState } from 'react';
-import { GameCard } from '../library/GameCard.js';
+import { GameDetailsDialog } from '../library/GameDetailsDialog.js';
+import { useOpenQuickBuy } from '../store/QuickBuyPopup.js';
+import { GameIcon } from './GameIcon.js';
+import { GameTitle } from './GameTitle.js';
 
 export interface GamePickerProps {
   value: string;
-  onChange: (value: string) => void;
   id?: string;
   className?: string;
   loading?: boolean;
   gameSessionId: PrefixedId<'gs'>;
 }
 
-export function GamePicker({
+export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   value,
-  onChange,
   loading,
   gameSessionId,
   className,
+  gameSuite,
   ...rest
-}: GamePickerProps) {
+}) {
+  const { data: pregame } = sdkHooks.useGetGameSessionPregame({
+    id: gameSessionId,
+  });
+  const canSelectGame =
+    !pregame.session.createdBy ||
+    pregame.session.createdBy === gameSuite.playerId;
+
   const { data: games } = sdkHooks.useGetGames();
   const allTags = new Set<string>();
   for (const game of Object.values(games)) {
@@ -76,24 +96,30 @@ export function GamePicker({
   });
 
   return (
-    <Box d="col" gap items="stretch" className={clsx(className)} {...rest}>
+    <Box
+      d="col"
+      gap
+      items="stretch"
+      full="width"
+      className={clsx(className)}
+      {...rest}
+    >
       <Box items="center" gap className="flex-wrap" surface="wash" p>
         <Icon name="filter" />
         Filter
-        <Chip asChild color={filters.owned ? 'primary' : 'neutral'}>
-          <Button
-            size="small"
-            color="unstyled"
-            toggled={filters.owned}
-            onClick={toggleOwnedFilter}
-          >
-            Owned
-          </Button>
-        </Chip>
+        <Button
+          size="small"
+          color="accent"
+          toggled={filters.owned}
+          onClick={toggleOwnedFilter}
+        >
+          Owned
+        </Button>
         {filters.tags.map((tag) => (
-          <Chip
+          <Button
             key={tag}
-            color="primary"
+            size="small"
+            color="accent"
             className="cursor-pointer"
             onClick={() => {
               removeTagFilter(tag);
@@ -101,7 +127,7 @@ export function GamePicker({
           >
             {tag}
             <Icon name="x" />
-          </Chip>
+          </Button>
         ))}
         <Select value="" onValueChange={addTagFilter}>
           <Select.Trigger size="small" asChild>
@@ -123,16 +149,12 @@ export function GamePicker({
       </Box>
       <Box className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md p-md">
         {filteredGames.map(([gameId]) => (
-          <GameCard
+          <GamePickerItem
             gameId={gameId}
-            onClick={
-              availableGames.includes(gameId)
-                ? () => onChange(gameId)
-                : undefined
-            }
             owned={availableGames.includes(gameId)}
+            isGameLeader={canSelectGame}
             key={gameId}
-            selected={gameId === value}
+            selected={value === gameId}
           />
         ))}
       </Box>
@@ -157,4 +179,99 @@ export function GamePicker({
       )}
     </Box>
   );
-}
+});
+
+const GamePickerItem = withGame<{
+  gameId: string;
+  owned: boolean;
+  isGameLeader: boolean;
+  selected: boolean;
+}>(function GamePickerItem({
+  gameId,
+  owned,
+  gameSuite,
+  isGameLeader,
+  selected,
+}) {
+  const openQuickBuy = useOpenQuickBuy();
+  const updateGameMutation = sdkHooks.useUpdateGameSession();
+  const voters = gameSuite.gameVotes[gameId];
+  const votedForThisGame = voters?.includes(gameSuite.playerId);
+
+  return (
+    <Card
+      className={clsx(
+        'aspect-1 min-w-80px',
+        selected && 'ring ring-inset ring-accent ring-6',
+      )}
+    >
+      <Card.Image asChild>
+        <GameIcon gameId={gameId} />
+      </Card.Image>
+      <GameDetailsDialog gameId={gameId}>
+        <Card.Main nonInteractive={false}>
+          <Card.Title className="text-sm md:text-md">
+            <GameTitle gameId={gameId} />
+          </Card.Title>
+          {voters?.length > 0 && (
+            <Card.Content unstyled>
+              <AvatarList count={voters.length}>
+                {voters.map((voter, i) => (
+                  <AvatarList.ItemRoot index={i} key={voter}>
+                    <PlayerAvatar playerId={voter} />
+                  </AvatarList.ItemRoot>
+                ))}
+              </AvatarList>
+            </Card.Content>
+          )}
+        </Card.Main>
+      </GameDetailsDialog>
+      <Card.Footer>
+        <Card.Actions>
+          {!owned && (
+            <Button
+              size="small"
+              color="accent"
+              onClick={() => openQuickBuy(gameId)}
+            >
+              <Icon name="cart" />
+              Buy
+            </Button>
+          )}
+          {owned && isGameLeader && (
+            <Button
+              size="small"
+              color="primary"
+              onClick={() =>
+                updateGameMutation.mutateAsync({
+                  id: gameSuite.gameSessionId,
+                  gameId,
+                })
+              }
+              disabled={selected}
+            >
+              <Icon name="check" />
+              {selected ? 'Selected!' : 'Select'}
+            </Button>
+          )}
+          {owned && !isGameLeader && (
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => {
+                if (votedForThisGame) {
+                  gameSuite.removeVoteForGame(gameId);
+                } else {
+                  gameSuite.voteForGame(gameId);
+                }
+              }}
+            >
+              <Icon name={votedForThisGame ? 'x' : 'plus'} />
+              {votedForThisGame ? 'Voted!' : 'Vote'}
+            </Button>
+          )}
+        </Card.Actions>
+      </Card.Footer>
+    </Card>
+  );
+});

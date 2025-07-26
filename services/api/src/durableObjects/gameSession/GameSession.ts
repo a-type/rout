@@ -23,8 +23,10 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
+import { addSeconds } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
+import { Scheduler } from '../Scheduler.js';
 import { GameSessionSocketHandler } from './GameSessionSocketHandler.js';
 import { ChatMessage, db, SqlWrapper } from './sql.js';
 
@@ -39,6 +41,7 @@ export interface GameSessionBaseData {
   gameVersion: string;
   timezone: string;
   members: GameSessionMember[];
+  createdBy?: PrefixedId<'u'>;
 }
 
 export type GameSessionTurn = Turn<{}>;
@@ -64,15 +67,30 @@ interface GameSessionRoundState {
   roundIndex: number;
 }
 
+type ScheduledTasks =
+  | {
+      type: 'checkRound';
+    }
+  | {
+      type: 'startGame';
+    };
+const startGameTaskId = '@@startGame';
+
 export class GameSession extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #socketHandler: GameSessionSocketHandler;
   #stateCache: GameStateCache | undefined;
+  #scheduler: Scheduler<ScheduledTasks>;
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
     this.#sql = new SqlWrapper(ctx.storage);
     this.#socketHandler = new GameSessionSocketHandler(this, ctx, env);
+    this.#scheduler = new Scheduler(
+      this.#sql,
+      ctx.storage,
+      this.handleScheduledTask,
+    );
   }
 
   // socket delegation
@@ -213,6 +231,131 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
   }
 
+  async getIsReady(playerId: PrefixedId<'u'>): Promise<boolean> {
+    const existingReadyUp = await this.#sql.run(
+      db
+        .selectFrom('ReadyUp')
+        .select('createdAt')
+        .where('userId', '=', playerId),
+    );
+    return !!existingReadyUp.length;
+  }
+
+  async getReadyPlayers(): Promise<PrefixedId<'u'>[]> {
+    const result = await this.#sql.run(
+      db.selectFrom('ReadyUp').select('userId'),
+    );
+    return result.map((row) => row.userId);
+  }
+  async getAllPlayersReady() {
+    const members = await this.getMembers();
+    const readyPlayers = await this.getReadyPlayers();
+    return members.length > 0 && members.length === readyPlayers.length;
+  }
+
+  async readyUp(playerId: PrefixedId<'u'>) {
+    if (await this.getIsReady(playerId)) {
+      // since this method sends a notification, check before continuing
+      // to avoid duplicate notifications.
+      return;
+    }
+    await this.#sql.run(
+      db
+        .insertInto('ReadyUp')
+        .values({ userId: playerId, createdAt: new Date().toISOString() })
+        // ... but still have redundancy
+        .onConflict((oc) => oc.column('userId').doNothing()),
+    );
+    this.#socketHandler.send({
+      type: 'playerReady',
+      playerId,
+    });
+
+    // if all players are ready, set a timer to start the game in 5 seconds
+    const readyPlayers = await this.getReadyPlayers();
+    const members = await this.getMembers();
+    if (readyPlayers.length === members.length) {
+      const startsAt = addSeconds(new Date(), 5);
+      this.#scheduler.scheduleTask(
+        startsAt,
+        {
+          type: 'startGame',
+        },
+        startGameTaskId,
+      );
+      console.log('All players ready. Starting game in 5 seconds');
+      this.#socketHandler.send({
+        type: 'gameStarting',
+        startsAt: startsAt.toISOString(),
+      });
+    }
+  }
+  async unreadyUp(playerId: PrefixedId<'u'>) {
+    await this.#sql.run(
+      db.deleteFrom('ReadyUp').where('userId', '=', playerId),
+    );
+    this.#socketHandler.send({
+      type: 'playerUnready',
+      playerId,
+    });
+    this.#scheduler.cancelTask(startGameTaskId);
+  }
+
+  async getGameVotes(): Promise<Record<string, PrefixedId<'u'>[]>> {
+    const result = await this.#sql.run(
+      db
+        .selectFrom('GameVote')
+        .select(['gameId', 'userId'])
+        .orderBy('createdAt', 'asc'),
+    );
+    const votes: Record<string, PrefixedId<'u'>[]> = {};
+    for (const row of result) {
+      if (!votes[row.gameId]) {
+        votes[row.gameId] = [];
+      }
+      votes[row.gameId].push(row.userId);
+    }
+    return votes;
+  }
+
+  async voteForGame(playerId: PrefixedId<'u'>, gameId: string) {
+    await this.#sql.run(
+      db
+        .insertInto('GameVote')
+        .values({
+          userId: playerId,
+          gameId,
+          createdAt: new Date().toISOString(),
+        })
+        .onConflict((oc) =>
+          oc.columns(['userId', 'gameId']).doUpdateSet({
+            gameId,
+            createdAt: new Date().toISOString(),
+          }),
+        ),
+    );
+    // send an update
+    this.#socketHandler.send({
+      type: 'playerVoteForGame',
+      playerId,
+      votes: await this.getGameVotes(),
+    });
+  }
+  async removeVoteForGame(playerId: PrefixedId<'u'>, gameId: string) {
+    await this.#sql.run(
+      db
+        .deleteFrom('GameVote')
+        .where('userId', '=', playerId)
+        .where('gameId', '=', gameId),
+    );
+    // send an update
+    this.#socketHandler.send({
+      type: 'playerVoteForGame',
+      playerId,
+      votes: await this.getGameVotes(),
+    });
+  }
+
   async #getStateCache(): Promise<GameStateCache> {
     if (this.#stateCache) return this.#stateCache;
     const sessionData = await this.#getSessionData();
@@ -252,7 +395,13 @@ export class GameSession extends DurableObject<ApiBindings> {
   async initialize(
     data: Pick<
       GameSessionBaseData,
-      'id' | 'randomSeed' | 'gameId' | 'gameVersion' | 'timezone' | 'members'
+      | 'id'
+      | 'randomSeed'
+      | 'gameId'
+      | 'gameVersion'
+      | 'timezone'
+      | 'members'
+      | 'createdBy'
     >,
   ): Promise<GameSessionBaseData> {
     if (await this.#hasSessionData()) {
@@ -306,12 +455,22 @@ export class GameSession extends DurableObject<ApiBindings> {
       members: await this.getMembers(),
     });
   }
-  async updateGame(gameId: string, gameVersion: string): Promise<void> {
+  async updateGame(
+    gameId: string,
+    gameVersion: string,
+    userId?: PrefixedId<'u'>,
+  ): Promise<void> {
     const sessionData = await this.#getSessionData();
     if (sessionData.startedAt) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
         'Cannot update game after game has started',
+      );
+    }
+    if (sessionData.createdBy && userId && sessionData.createdBy !== userId) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only the creator of the game session can change the game',
       );
     }
     await this.#updateSessionData({ gameId, gameVersion });
@@ -619,6 +778,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       nextRoundCheckAt: roundData.checkAgainAt?.toISOString() ?? null,
       currentRoundIndex: roundData.roundIndex,
       playerStatuses,
+      createdBy: sessionData.createdBy ?? null,
     };
   }
   async resetGame() {
@@ -1143,7 +1303,9 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     if (roundState.checkAgainAt) {
       console.log(`Scheduling check again at ${roundState.checkAgainAt}`);
-      this.ctx.storage.setAlarm(roundState.checkAgainAt);
+      this.#scheduler.scheduleTask(roundState.checkAgainAt, {
+        type: 'checkRound',
+      });
       this.#socketHandler.send({
         type: 'nextRoundScheduled',
         nextRoundCheckAt: roundState.checkAgainAt.toISOString(),
@@ -1185,11 +1347,18 @@ export class GameSession extends DurableObject<ApiBindings> {
   };
 
   async alarm() {
-    if (!(await this.#hasSessionData())) {
-      return;
-    }
-    this.#checkForRoundChange();
+    this.#scheduler.handleAlarm();
   }
+  private handleScheduledTask = async (task: ScheduledTasks) => {
+    switch (task.type) {
+      case 'checkRound':
+        return this.#checkForRoundChange();
+      case 'startGame':
+        if (await this.getAllPlayersReady()) {
+          return this.startGame();
+        }
+    }
+  };
 
   // debug / admin
   async dumpDb() {

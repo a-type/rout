@@ -98,7 +98,7 @@ export function useMonitorGlobalGesture() {
     if (overlapped.length > 0) {
       if (overlapped.length > 1) {
         console.debug(
-          `Multiple overlapping regions found, sorting by priority: ${overlapped.map((o) => o.id).join(', ')}`,
+          `Multiple overlapping regions found, sorting by priority: ${overlapped.map((o) => `${o.id}: ${o.priority}`).join(', ')}`,
         );
         overlapped.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
         console.debug(`Selected region: ${overlapped[0].id}`);

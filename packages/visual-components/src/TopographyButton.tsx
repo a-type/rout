@@ -4,18 +4,28 @@ import { TopographyBackground } from './TopographyBackground.js';
 export const TopographyButton = ({
   children,
   className,
+  disableTopography,
+  wrapperClassName,
   ...props
-}: ButtonProps) => {
+}: ButtonProps & {
+  disableTopography?: boolean;
+  wrapperClassName?: string;
+}) => {
   return (
     <Button
       {...props}
       color="primary"
       className={clsx('relative z-10 overflow-hidden', className)}
     >
-      {!props.disabled && (
+      {!props.disabled && !disableTopography && (
         <TopographyBackground className="absolute opacity-50 [:hover>&]:[filter:brightness(1.25)]" />
       )}
-      <div className="relative z-1 flex flex-row gap-2 items-center">
+      <div
+        className={clsx(
+          'relative z-1 flex flex-row gap-2 items-center',
+          wrapperClassName,
+        )}
+      >
         {children}
       </div>
     </Button>

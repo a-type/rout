@@ -143,8 +143,8 @@ export const gameDefinition: GameDefinition<
       hands[member.id] = words; // assign the words to the player's hand
       // add 2 blanks for each player
       hands[member.id].push(
-        { id: random.id(), text: '', isNew: true, isWriteIn: false },
-        { id: random.id(), text: '', isNew: true, isWriteIn: false },
+        { id: random.id(), text: '', isNew: false, isWriteIn: false },
+        { id: random.id(), text: '', isNew: false, isWriteIn: false },
       );
     }
 

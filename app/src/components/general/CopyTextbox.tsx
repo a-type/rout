@@ -30,7 +30,11 @@ export function CopyTextbox({
       className={clsx('w-full', className)}
       {...rest}
     >
-      <Input disabled value={value} className="flex-[1_1_0]" />
+      <Input
+        disabled
+        value={value}
+        className="flex-[1_1_0] [font-size:inherit] px-md"
+      />
       <Box d="row" gap="sm">
         <Button size="icon" onClick={copy}>
           <Icon name="copy" />

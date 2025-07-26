@@ -50,7 +50,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
           'The Rout app'
         )
       }
-      disabled={!playerId}
+      disabled={!playerId || gameSuite.gameStatus.status === 'pending'}
     >
       <Avatar
         name={

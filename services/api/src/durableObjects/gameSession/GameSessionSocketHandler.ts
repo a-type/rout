@@ -263,6 +263,20 @@ export class GameSessionSocketHandler {
         case 'toggleChatReaction':
           await this.#onClientToggleChatReaction(msg, ws, info);
           break;
+        case 'voteForGame':
+          if (msg.remove) {
+            await this.gameSession.removeVoteForGame(info.userId, msg.gameId);
+          } else {
+            await this.gameSession.voteForGame(info.userId, msg.gameId);
+          }
+          break;
+        case 'readyUp':
+          if (msg.unready) {
+            await this.gameSession.unreadyUp(info.userId);
+          } else {
+            await this.gameSession.readyUp(info.userId);
+          }
+          break;
       }
       // ack the message for the client
       ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
