@@ -11,9 +11,9 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { PublicSdk } from '../api/PublicSdk.js';
 import { useSdk } from '../hooks.js';
-import { PublicSdk } from '../sdk/PublicSdk.js';
-import { GameSessionSuite } from '../state/gameSessionMobx.js';
+import { GameSessionSuite } from '../state/gameSuite.js';
 import { connectToSocket } from '../state/socket.js';
 
 export const GameSessionContext = createContext<GameSessionSuite<any> | null>(

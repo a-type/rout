@@ -17,7 +17,7 @@ import {
   isQueryFactory,
   QueryFactory,
   QueryFactoryInfinite,
-} from './sdk/BaseSdk.js';
+} from './api/BaseSdk.js';
 
 export { useMutation, useSuspenseQuery };
 
