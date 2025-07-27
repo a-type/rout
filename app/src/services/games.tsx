@@ -2,9 +2,15 @@
  * On startup, register all federated game modules
  */
 
+import { checkForUpdate, skipWaiting } from '@/swRegister.js';
+import { Box, Button, H2, Icon, P } from '@a-type/ui';
 import { idToFederationId } from '@long-game/common';
 import { queryClient } from '@long-game/game-client';
-import { GameDefinition } from '@long-game/game-definition';
+import {
+  emptyGameDefinition,
+  GameDefinition,
+} from '@long-game/game-definition';
+import { DefaultChatMessage } from '@long-game/game-ui';
 import {
   loadRemote,
   registerRemotes,
@@ -35,22 +41,39 @@ export function getFederatedGameComponent(
     return cache.get(federatedPath)!;
   }
   if (componentName === 'definition') {
-    const promise = loadRemote<{ default: GameDefinition }>(federatedPath).then(
-      (mod) => mod?.default,
-    ) as Promise<GameDefinition>;
+    const promise = loadRemote<{ default: GameDefinition }>(federatedPath)
+      .then((mod) => mod?.default)
+      .catch((err) => {
+        console.error(err);
+        return emptyGameDefinition;
+      }) as Promise<GameDefinition>;
     cache.set(federatedPath, promise);
     return promise;
   }
   if (componentName === 'renderer') {
     const promise = lazy(() =>
-      loadRemote(federatedPath).then((m: any) => ({ default: m.Renderer })),
+      loadRemote(federatedPath)
+        .then((m: any) => ({ default: m.Renderer }))
+        .catch((err) => {
+          console.error(err);
+          return {
+            default: MissingRenderer,
+          };
+        }),
     );
     cache.set(federatedPath, promise);
     return promise;
   }
   if (componentName === 'chat') {
     const promise = lazy(() =>
-      loadRemote(federatedPath).then((m: any) => ({ default: m.ChatMessage })),
+      loadRemote(federatedPath)
+        .then((m: any) => ({ default: m.ChatMessage }))
+        .catch((err) => {
+          console.error(err);
+          return {
+            default: DefaultChatMessage,
+          };
+        }),
     );
     cache.set(federatedPath, promise);
     return promise;
@@ -69,3 +92,29 @@ async function registerFederatedGames() {
 }
 
 registerFederatedGames();
+
+function MissingRenderer() {
+  return (
+    <Box gap col layout="center center" full>
+      <Icon name="warning" size={64} />
+      <H2>Game Not Found</H2>
+      <P>We're having trouble loading this game.</P>
+      {import.meta.env.DEV ? (
+        <P>Make sure you're running the dev task for it.</P>
+      ) : (
+        <>
+          <P>You could try reloading the app.</P>
+          <Button
+            onClick={async () => {
+              await checkForUpdate();
+              skipWaiting();
+              window.location.reload();
+            }}
+          >
+            Reload
+          </Button>
+        </>
+      )}
+    </Box>
+  );
+}

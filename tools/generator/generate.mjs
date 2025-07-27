@@ -199,7 +199,7 @@ async function addGameDevTask() {
   const tasksFileJson = JSON.parse(tasksFileContent);
   const newTask = {
     type: 'npm',
-    script: 'dev-all',
+    script: 'dev-game',
     path: `games/${name}`,
     problemMatcher: ['$tsc-watch'],
     label: `🕹️ ${titleName} Dev`,

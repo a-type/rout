@@ -1,6 +1,6 @@
 {
   "name": "@long-game/game-scribble",
   "scripts": {
-    "dev-all": "pnpm --filter \"./*\" --parallel --stream dev"
+    "dev-game": "pnpm --filter \"./*\" --parallel --stream dev"
   }
 }
