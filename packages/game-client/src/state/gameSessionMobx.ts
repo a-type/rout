@@ -733,20 +733,13 @@ export class GameSessionSuite<
   };
 
   @action toggleChatReaction = async (
-    messageId: PrefixedId<'cm'>,
+    chatMessage: GameSessionChatMessage,
     reaction: string,
   ) => {
-    const chatMessage = this.chat.find((msg) => msg.id === messageId);
-    if (!chatMessage) {
-      throw new LongGameError(
-        LongGameError.Code.Unknown,
-        `Chat message ${messageId} not found`,
-      );
-    }
     const isOn = chatMessage.reactions[reaction]?.includes(this.playerId);
     await this.ctx.socket.request({
       type: 'toggleChatReaction',
-      chatMessageId: messageId,
+      chatMessageId: chatMessage.id,
       isOn: !isOn,
       reaction,
     });

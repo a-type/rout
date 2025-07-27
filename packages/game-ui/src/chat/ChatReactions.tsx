@@ -30,7 +30,7 @@ export const ChatReactions = withGame<ChatReactionsProps>(
           <Popover.Content className="p-xs">
             <Popover.Arrow />
             <EmojiPicker
-              onValueChange={(v) => gameSuite.toggleChatReaction(message.id, v)}
+              onValueChange={(v) => gameSuite.toggleChatReaction(message, v)}
             />
           </Popover.Content>
         </Popover>
@@ -56,7 +56,7 @@ export const ChatReactions = withGame<ChatReactionsProps>(
                   users.includes(gameSuite.playerId) ? 'accent' : 'default'
                 }
                 className="cursor-pointer text-sm rounded-full py-xs px-sm"
-                onClick={() => gameSuite.toggleChatReaction(message.id, emoji)}
+                onClick={() => gameSuite.toggleChatReaction(message, emoji)}
               >
                 <span className="hover:scale-150% transition-transform">
                   {emoji}

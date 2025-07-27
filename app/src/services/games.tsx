@@ -53,7 +53,10 @@ export function getFederatedGameComponent(
   if (componentName === 'renderer') {
     const promise = lazy(() =>
       loadRemote(federatedPath)
-        .then((m: any) => ({ default: m.Renderer }))
+        .then((m: any) => {
+          console.debug('Loaded remote renderer for', gameId, version);
+          return { default: m.Renderer };
+        })
         .catch((err) => {
           console.error(err);
           return {

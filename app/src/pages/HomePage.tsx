@@ -1,3 +1,4 @@
+import { IncomingInvites } from '@/components/friendships/FriendInvites';
 import { CreateGame } from '@/components/games/CreateGame.js';
 import { MembershipsList } from '@/components/memberships/MembershipsList.js';
 import { MainNav } from '@/components/nav/MainNav';
@@ -36,6 +37,7 @@ export function HomePage({}: HomePageProps) {
           </Button>
         </Box>
         <AppInstallBanner />
+        <IncomingInvites surface p />
         <Box d="col" gap>
           <H2 className="font-300 text-md uppercase my-0 mx-4">Live Games</H2>
           <MembershipsList

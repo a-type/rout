@@ -1,6 +1,7 @@
 import { Box, clsx, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { Suspense } from 'react';
 import { ChatForm } from './ChatForm.js';
 import { ChatLog } from './ChatLog.js';
 
@@ -48,22 +49,24 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
             <div className={className} />
           )}
         </Popover.Trigger>
-        <Popover.Content side="bottom" className="p-xs w-300px">
-          <Popover.Arrow />
-          <ChatLog
-            log={chats.map((chat) => ({
-              type: 'chat',
-              chatMessage: chat,
-              timestamp: chat.createdAt,
-            }))}
-            className="w-full max-h-400px"
-          />
-          <ChatForm
-            className="w-full px-xs"
-            sceneId={sceneId}
-            position={position}
-          />
-        </Popover.Content>
+        <Suspense>
+          <Popover.Content side="bottom" className="p-xs w-300px">
+            <Popover.Arrow />
+            <ChatLog
+              log={chats.map((chat) => ({
+                type: 'chat',
+                chatMessage: chat,
+                timestamp: chat.createdAt,
+              }))}
+              className="w-full max-h-400px"
+            />
+            <ChatForm
+              className="w-full px-xs"
+              sceneId={sceneId}
+              position={position}
+            />
+          </Popover.Content>
+        </Suspense>
       </Popover>
     );
   },

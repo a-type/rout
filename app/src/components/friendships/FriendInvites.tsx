@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, Box, Button, H2, toast } from '@a-type/ui';
+import { Avatar, Box, BoxProps, Button, H2, toast } from '@a-type/ui';
 import { FriendshipInvitation } from '@long-game/game-client';
 import { UserAvatar } from '../users/UserAvatar.js';
 
@@ -12,7 +12,7 @@ export function FriendInvites() {
   );
 }
 
-function IncomingInvites() {
+export function IncomingInvites(props: BoxProps) {
   const { data: invites } = sdkHooks.useGetFriendshipInvites({
     direction: 'incoming',
   });
@@ -22,14 +22,14 @@ function IncomingInvites() {
   }
 
   return (
-    <>
+    <Box col gap {...props}>
       <H2>Incoming Invites</H2>
       <Box d="col" surface p gap>
         {invites.map((invite) => (
           <IncomingInvite key={invite.id} invite={invite} />
         ))}
       </Box>
-    </>
+    </Box>
   );
 }
 
@@ -82,7 +82,7 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   );
 }
 
-function OutgoingInvites() {
+export function OutgoingInvites(props: BoxProps) {
   const { data: invites } = sdkHooks.useGetFriendshipInvites({
     direction: 'outgoing',
   });
@@ -92,14 +92,14 @@ function OutgoingInvites() {
   }
 
   return (
-    <>
+    <Box col gap {...props}>
       <H2>Sent Invites</H2>
-      <Box d="col" surface p gap>
+      <Box col surface p gap>
         {invites.map((invite) => (
           <OutgoingInvite key={invite.id} invite={invite} />
         ))}
       </Box>
-    </>
+    </Box>
   );
 }
 
