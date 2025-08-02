@@ -1,6 +1,7 @@
 import { LongGameError } from '@long-game/common';
 import { hcWithType as apiHc } from '@long-game/service-api';
 import {
+  InfiniteData,
   UseMutationOptions,
   UseSuspenseInfiniteQueryOptions,
   UseSuspenseQueryOptions,
@@ -10,9 +11,9 @@ import { fetch } from '../fetch.js';
 import { queryClient } from '../queryClient.js';
 
 type TypedResponse<T> = Response & { json: () => Promise<T> };
-export type EraseEmptyArg<T> = T extends void
-  ? [QueryOptions] | []
-  : [T, QueryOptions] | [T];
+export type EraseEmptyArg<T, TEnd = never> = T extends void
+  ? [TEnd] | []
+  : [T, TEnd] | [T];
 export type QueryOptions = Pick<
   UseSuspenseQueryOptions,
   | 'refetchInterval'
@@ -24,6 +25,7 @@ export type QueryOptions = Pick<
 export type QueryFactory<Output, Input> = {
   (...args: EraseEmptyArg<Input>): UseSuspenseQueryOptions<Output>;
   __isQuery: true;
+  run: (input: Input) => Promise<Output>;
 };
 export type QueryFactoryInfinite<Output, Input> = {
   (
@@ -37,6 +39,7 @@ export type QueryFactoryInfinite<Output, Input> = {
     string | undefined
   >;
   __isInfiniteQuery: true;
+  run: (input: Input) => Promise<InfiniteData<Output>>;
 };
 
 export const isQueryFactory = (
@@ -114,6 +117,12 @@ export class BaseSdk extends EventTarget {
       } as UseSuspenseQueryOptions<Output>;
     };
     factory.__isQuery = true as const;
+    factory.run = async (input: Input) => {
+      const result = await this.queryClient.fetchQuery(
+        factory(...([input] as EraseEmptyArg<Input>)),
+      );
+      return result;
+    };
     return factory;
   };
   protected manualQuery = <Output, Input = void>(
@@ -128,6 +137,12 @@ export class BaseSdk extends EventTarget {
       };
     };
     factory.__isQuery = true as const;
+    factory.run = async (input: Input) => {
+      const result = await this.queryClient.fetchQuery(
+        factory(...([input] as EraseEmptyArg<Input>)),
+      );
+      return result;
+    };
     return factory;
   };
   protected sdkInfiniteQuery = <
@@ -156,7 +171,7 @@ export class BaseSdk extends EventTarget {
   ): QueryFactoryInfinite<Output, Input> => {
     const factory = (...args: EraseEmptyArg<Input>) => {
       const input = args[0] as Input;
-      const options = args[1] as QueryOptions;
+      const options = args[1] as unknown as QueryOptions;
       const queryFn = async ({
         pageParam,
       }: {
@@ -209,6 +224,12 @@ export class BaseSdk extends EventTarget {
       >;
     };
     factory.__isInfiniteQuery = true as const;
+    factory.run = async (input: Input) => {
+      const result = await this.queryClient.fetchInfiniteQuery(
+        factory(...([input] as EraseEmptyArg<Input>)),
+      );
+      return result;
+    };
     return factory;
   };
 

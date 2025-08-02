@@ -42,6 +42,10 @@ const routes = makeRoutes([
     component: GameSessionPage,
   },
   {
+    path: '/hotseat/:sessionId',
+    component: lazy(() => import('./HotseatSessionPage.jsx')),
+  },
+  {
     path: '/gameInvite/:code',
     component: lazy(() => import('./GameInviteLinkPage.jsx')),
   },

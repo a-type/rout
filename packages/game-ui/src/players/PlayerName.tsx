@@ -7,11 +7,13 @@ import { withGame } from '@long-game/game-client';
 
 export interface PlayerNameProps {
   playerId: PrefixedId<'u'> | SystemChatAuthorId;
+  disableYou?: boolean;
 }
 
 export const PlayerName = withGame<PlayerNameProps>(function PlayerName({
   gameSuite,
   playerId,
+  disableYou = false,
 }) {
   const player =
     playerId && playerId !== SYSTEM_CHAT_AUTHOR_ID
@@ -19,7 +21,7 @@ export const PlayerName = withGame<PlayerNameProps>(function PlayerName({
       : null;
   const isMe = playerId === gameSuite.playerId;
 
-  if (isMe) {
+  if (isMe && !disableYou) {
     return <>You</>;
   }
 

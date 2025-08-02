@@ -94,5 +94,6 @@ export default defineConfig(({ command }) => ({
     client: {
       host: 'localhost',
     },
+    progressBar: true,
   },
 }));

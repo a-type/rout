@@ -1,5 +1,6 @@
 import { IncomingInvites } from '@/components/friendships/FriendInvites';
 import { CreateGame } from '@/components/games/CreateGame.js';
+import { CreateHotseat } from '@/components/games/CreateHotseat';
 import { MembershipsList } from '@/components/memberships/MembershipsList.js';
 import { MainNav } from '@/components/nav/MainNav';
 import { AppInstallBanner } from '@/components/settings/AppInstallBanner';
@@ -68,6 +69,7 @@ export function HomePage({}: HomePageProps) {
         </Suspense>
         <PageNowPlaying unstyled className="items-center justify-center">
           <CreateGame />
+          <CreateHotseat />
         </PageNowPlaying>
       </PageContent>
       <PageNav className="bg-transparent">

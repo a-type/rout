@@ -18,6 +18,7 @@
   "dependencies": {
     "@a-type/utils": "1.1.5",
     "@long-game/service-api": "workspace:*",
+    "idb": "^8.0.3",
     "mobx": "^6.13.5",
     "mobx-react-lite": "^4.1.0",
     "optics-ts": "^2.4.1",

@@ -1,3 +1,9 @@
+/**
+ * The foundational game suite class with common behaviors and the full API interface.
+ * This is implemented by the backend-backed GameSuite class, and the local-backed
+ * HotseatGameSuite class.
+ */
+
 import { EventSubscriber } from '@a-type/utils';
 import {
   GameRoundSummary,
@@ -6,7 +12,6 @@ import {
   GameStatus,
   isPrefixedId,
   LongGameError,
-  PlayerColorName,
   PrefixedId,
   ServerChatMessage,
   ServerGameMembersChangeMessage,
@@ -22,6 +27,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnError,
+  emptyGameDefinition,
   GameDefinition,
   GameMember,
   GetGlobalState,
@@ -34,25 +40,14 @@ import {
   TurnUpdater,
 } from '@long-game/game-definition';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
+import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { GameLogItem } from '../types.js';
-import {
-  getDevModeTurns,
-  getPlayers,
-  getPostgame,
-  getPublicRound,
-  getSummary,
-} from './api.js';
-import { GameSocket } from './socket.js';
+import { getDevModeTurns } from './api.js';
+import { PlayerInfo } from './GameSessionSuite.js';
 
 const ROOT_CHAT_SCENE_ID = 'null' as const;
 
-export type PlayerInfo = {
-  id: PrefixedId<'u'>;
-  displayName: string;
-  color: PlayerColorName;
-};
-
-type GameSessionSuiteEvents = {
+export type GameSuiteEvents = {
   turnPlayed: () => void;
   turnPrepared: () => void;
   turnValidationFailed: (error: BaseTurnError) => void;
@@ -63,19 +58,38 @@ type GameSessionSuiteEvents = {
   membersChanged: () => void;
   gameStarting: (startsAt: string) => void;
   gameStartingCancelled: () => void;
+  // only hotseat
+  playerChanged: (playerId: PrefixedId<'u'>) => void;
 };
 
-export class GameSessionSuite<
+export interface GameSuiteBaseInit {
+  currentRoundIndex: number;
+  playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
+  gameId: string;
+  gameVersion: string;
+  id: PrefixedId<'gs'>;
+  playerId: PrefixedId<'u'>;
+  members: GameMember[];
+  status: GameStatus;
+  startedAt: string | null;
+  timezone: string;
+  gameVotes: Record<string, PrefixedId<'u'>[]>;
+  readyPlayers: PrefixedId<'u'>[];
+  nextRoundCheckAt?: Date | string | number | null;
+}
+
+export abstract class AbstractGameSuite<
   TGame extends GameDefinition<any, any, any, any, any, any>,
 > {
-  #instanceId = Math.random().toString(36).slice(2);
+  protected instanceId = Math.random().toString(36).slice(2);
+
   @observable accessor localTurnData!: GetTurnData<TGame> | null | undefined;
   @observable accessor playerStatuses!: Record<
     PrefixedId<'u'>,
     GameSessionPlayerStatus
   >;
-  @observable accessor players!: Record<PrefixedId<'u'>, PlayerInfo>;
-  @observable private accessor sceneChats: Record<
+  @observable accessor players: Record<PrefixedId<'u'>, PlayerInfo> = {};
+  @observable protected accessor sceneChats: Record<
     string,
     {
       nextToken: string | null;
@@ -86,112 +100,204 @@ export class GameSessionSuite<
     [ROOT_CHAT_SCENE_ID]: { messages: [], nextToken: null, empty: false },
   };
   @observable accessor gameStatus!: GameStatus;
-  /**
-   * Accessing rounds directly is not advisable, as they
-   * may be undefined if not loaded from the server, and this
-   * will not load them for you. Use getRound instead.
-   * @see getRound
-   * @see viewingRound
-   * @see latestRound
-   */
-  @observable accessor rounds: GameRoundSummary<
-    GetTurnData<TGame>,
-    GetPublicTurnData<TGame>,
-    GetPlayerState<TGame>
-  >[] = [];
+  // rounds are keyed by player ID -- this is strange if you're thinking
+  // about remote games, but it's important for hotseat where all players
+  // are on the same device.
+  @observable protected accessor rounds: Record<
+    PrefixedId<'u'>,
+    GameRoundSummary<
+      GetTurnData<TGame>,
+      GetPublicTurnData<TGame>,
+      GetPlayerState<TGame>
+    >[]
+  > = {};
   @observable accessor viewingRoundIndex = 0;
+  @observable accessor latestRoundIndex = 0;
   @observable accessor postgameGlobalState: GetGlobalState<TGame> | null = null;
   @observable accessor gameId!: string;
   @observable accessor gameVersion!: string;
   @observable accessor nextRoundCheckAt: Date | null = null;
   @observable accessor turnSubmitTimeout: ReturnType<typeof setTimeout> | null =
     null;
+  @observable accessor playerId!: PrefixedId<'u'>;
+  @observable accessor members: GameMember[] = [];
 
   // pregame stuff
   @observable accessor gameVotes: Record<string, PrefixedId<'u'>[]> = {};
   @observable accessor readyPlayers: PrefixedId<'u'>[] = [];
 
   // static
-  gameSessionId: PrefixedId<'gs'>;
-  gameDefinition!: TGame;
-  members!: GameMember[];
-  playerId: PrefixedId<'u'>;
+  gameModules: GameModuleContext;
+  gameSessionId!: PrefixedId<'gs'>;
+  gameDefinition: TGame = emptyGameDefinition as any;
   startedAt: Date | null = null;
   timezone!: string;
-  #events = new EventSubscriber<GameSessionSuiteEvents>();
+  protected events = new EventSubscriber<GameSuiteEvents>();
 
   // non-reactive
-  #chatNextToken: string | null = null;
-
-  #disposes: (() => void)[] = [];
+  protected disposes: (() => void)[] = [];
 
   constructor(
-    init: {
-      gameDefinition: TGame;
-      currentRoundIndex: number;
-      playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
-      gameId: string;
-      gameVersion: string;
-      id: PrefixedId<'gs'>;
-      members: GameMember[];
-      status: GameStatus;
-      playerId: PrefixedId<'u'>;
-      startedAt: string | null;
-      timezone: string;
-      gameVotes?: Record<string, PrefixedId<'u'>[]>;
-      readyPlayers?: PrefixedId<'u'>[];
-    },
-    private ctx: {
-      socket: GameSocket;
-    },
+    init: GameSuiteBaseInit,
+    { gameModules }: { gameModules: GameModuleContext },
   ) {
-    this.playerId = init.playerId;
+    // NOTE: how current player ID is assigned is up to the subclass
     this.gameSessionId = init.id;
-    this.gameDefinition = init.gameDefinition;
+    this.gameModules = gameModules;
 
-    this.applyGameData(init);
-
-    this.subscribeSocket();
-    this.#subscribeWindowEvents();
     this.setupLocalTurnStorage();
+    this.applyGameData(init);
 
     if (init.status.status === 'complete') {
       this.loadPostgame();
     }
   }
 
-  connect = () => {
-    console.log(
-      'connecting...',
-      this.#instanceId,
-      'socket',
-      this.ctx.socket.id,
-    );
-    return this.ctx.socket.reconnect();
+  abstract connect(): () => void;
+  abstract disconnect(): void;
+
+  dispose = () => this.disposes.forEach((dispose) => dispose());
+  get subscribe() {
+    return this.events.subscribe.bind(this.events);
+  }
+
+  // implement this method to actually load round data from your data source
+  protected abstract loadRound(
+    roundIndex: number,
+  ): Promise<
+    GameRoundSummary<
+      GetTurnData<TGame>,
+      GetPublicTurnData<TGame>,
+      GetPlayerState<TGame>
+    >
+  >;
+
+  /**
+   * Internal usage. If the round summary for the current playerId
+   * is available, returns it. Does not load it otherwise.
+   */
+  protected maybeGetRound = (roundIndex: number) => {
+    console.log('maybeGetRound', roundIndex, this.rounds);
+    return this.rounds[this.playerId]?.[roundIndex];
   };
-  disconnect = () => {
-    console.log(
-      'disconnecting...',
-      this.#instanceId,
-      'socket',
-      this.ctx.socket.id,
-    );
-    this.ctx.socket.disconnect();
+  /**
+   * Assigns the given round summary to the current playerId.
+   */
+  protected setRound = (
+    round: GameRoundSummary<
+      GetTurnData<TGame>,
+      GetPublicTurnData<TGame>,
+      GetPlayerState<TGame>
+    >,
+    playerId = this.playerId,
+  ) => {
+    if (!this.rounds[playerId]) {
+      this.rounds[playerId] = [];
+    }
+    this.rounds[playerId][round.roundIndex] = round;
   };
 
-  dispose = () => {
-    this.#disposes.forEach((dispose) => dispose());
+  // caching and suspense mechanisms which wrap loadRound
+  private cachedLoadRoundPromises: Record<
+    `${PrefixedId<'u'>}-${number}`,
+    Promise<void>
+  > = {};
+  loadRoundSuspended = (roundIndex: number) => {
+    throw this.loadRoundUnsuspended(roundIndex);
+  };
+  loadRoundUnsuspended = (roundIndex: number) => {
+    if (this.gameStatus.status === 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Cannot load rounds while the game is pending. Wait for the game to start.',
+      );
+    }
+
+    if (this.maybeGetRound(roundIndex)) {
+      console.debug(
+        `Round ${roundIndex} already loaded, returning cached data.`,
+      );
+      return;
+    }
+    return this.#getOrCreateRoundLoadingPromise(roundIndex);
+  };
+  #getOrCreateRoundLoadingPromise = (roundIndex: number) => {
+    const cacheKey: `${PrefixedId<'u'>}-${number}` = `${this.playerId}-${roundIndex}`;
+    if (!!this.cachedLoadRoundPromises[cacheKey]) {
+      console.debug(`Using cached loading promise for ${cacheKey}`);
+      return this.cachedLoadRoundPromises[cacheKey];
+    }
+    console.log(`Loading round ${roundIndex}...`);
+    const promise = this.loadRound(roundIndex)
+      .then(action(this.setRound))
+      .catch((err) => {
+        console.error('Error loading round', roundIndex, err);
+        this.events.emit(
+          'error',
+          new LongGameError(LongGameError.Code.Unknown, err.message),
+        );
+        throw new LongGameError(LongGameError.Code.Unknown, err.message);
+      })
+      .finally(() => {
+        console.log('loaded round', roundIndex);
+      });
+    this.cachedLoadRoundPromises[cacheKey] = promise;
+    return promise;
   };
 
   /**
-   * Subscribe to events from the game session. Normally
-   * you can use withGame and reference properties directly,
-   * which will automatically re-render your component. But
-   * you can use this as needed too.
+   * Get a summary of a specific round. If the round has not
+   * been loaded from the server, this will suspend your
+   * component.
    */
-  get subscribe() {
-    return this.#events.subscribe;
-  }
+  getRound = (roundIndex: number) => {
+    if (!this.maybeGetRound(roundIndex)) {
+      console.log(`Suspending to load round ${roundIndex}`);
+      // this will throw a promise if the round is not loaded
+      this.loadRoundSuspended(roundIndex);
+    }
+    return this.maybeGetRound(roundIndex);
+  };
+  /**
+   * Loads specific rounds by indexes and returns them.
+   */
+  getRounds = (indexes: number[]) => {
+    const missingRounds = indexes.filter((i) => !this.maybeGetRound(i));
+    if (missingRounds.length > 0) {
+      // throw a meta-promise to load all rounds
+      throw Promise.allSettled(
+        missingRounds.map(this.#getOrCreateRoundLoadingPromise),
+      );
+    }
+    return indexes.map((i) => this.maybeGetRound(i)!);
+  };
+  /**
+   * Loads a range of rounds from game history and returns them.
+   */
+  getRoundRange = (from: number, to: number) => {
+    if (from < 0 || to < 0 || from > to) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Invalid round range: ${from} to ${to}`,
+      );
+    }
+    const rounds = this.getRounds(
+      Array.from({ length: to - from + 1 }, (_, i) => i + from),
+    );
+    return rounds;
+  };
+
+  /**
+   * Loads and returns the full game history. WARNING! This can be a
+   * lot of data and network requests! Please don't use it?
+   */
+  getAllRounds = () => {
+    return this.getRoundRange(0, this.latestRoundIndex);
+  };
+
+  @action showRound = (roundIndex: number) => {
+    this.viewingRoundIndex = roundIndex;
+  };
 
   /**
    * Which round is currently being viewed, according
@@ -202,19 +308,7 @@ export class GameSessionSuite<
    * @see latestRound
    */
   @computed get viewingRound() {
-    if (!this.rounds[this.viewingRoundIndex]) {
-      this.loadRound(this.viewingRoundIndex);
-    }
-    return this.rounds[this.viewingRoundIndex];
-  }
-
-  /**
-   * The most recent round index of the game (i.e. the one
-   * being played, if the game is active). Remember
-   * round indexes are 0-based.
-   */
-  @computed get latestRoundIndex() {
-    return this.rounds.length - 1;
+    return this.getRound(this.viewingRoundIndex);
   }
 
   /**
@@ -225,10 +319,7 @@ export class GameSessionSuite<
    * accessible (null) since the round is in progress.
    */
   @computed get latestRound() {
-    if (!this.rounds[this.latestRoundIndex]) {
-      this.loadRound(this.latestRoundIndex);
-    }
-    return this.rounds[this.latestRoundIndex];
+    return this.getRound(this.latestRoundIndex);
   }
 
   /**
@@ -519,57 +610,6 @@ export class GameSessionSuite<
     );
   };
 
-  /**
-   * Get a summary of a specific round. If the round has not
-   * been loaded from the server, this will suspend your
-   * component.
-   */
-  getRound = (roundIndex: number) => {
-    if (!this.rounds[roundIndex]) {
-      // this will throw a promise if the round is not loaded
-      this.loadRound(roundIndex);
-    }
-    return this.rounds[roundIndex];
-  };
-
-  /**
-   * Loads specific rounds by indexes and returns them.
-   */
-  getRounds = (indexes: number[]) => {
-    const missingRounds = indexes.filter((i) => !this.rounds[i]);
-    if (missingRounds.length > 0) {
-      // throw a meta-promise to load all rounds
-      throw Promise.allSettled(
-        missingRounds.map(this.#getOrCreateRoundLoadingPromise),
-      );
-    }
-    return indexes.map((i) => this.rounds[i]!);
-  };
-
-  /**
-   * Loads a range of rounds from game history and returns them.
-   */
-  getRoundRange = (from: number, to: number) => {
-    if (from < 0 || to < 0 || from > to) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        `Invalid round range: ${from} to ${to}`,
-      );
-    }
-    const rounds = this.getRounds(
-      Array.from({ length: to - from + 1 }, (_, i) => i + from),
-    );
-    return rounds;
-  };
-
-  /**
-   * Loads and returns the full game history. WARNING! This can be a
-   * lot of data and network requests! Please don't use it?
-   */
-  getAllRounds = () => {
-    return this.getRoundRange(0, this.latestRoundIndex);
-  };
-
   @action prepareTurn = (turn: TurnUpdater<TGame> | null) => {
     if (typeof turn === 'function') {
       this.localTurnData = (turn as any)(this.getPreviousTurnForUpdater());
@@ -581,7 +621,7 @@ export class GameSessionSuite<
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
     }
-    this.#events.emit('turnPrepared');
+    this.events.emit('turnPrepared');
   };
 
   @action submitTurn = async ({
@@ -600,21 +640,22 @@ export class GameSessionSuite<
     }
     const error = this.turnError;
     if (error) {
-      this.#events.emit('turnValidationFailed', error);
+      this.events.emit('turnValidationFailed', error);
       return error;
     }
     if (this.turnSubmitTimeout) {
       clearTimeout(this.turnSubmitTimeout);
+      this.turnSubmitTimeout = null;
     }
     if (delay) {
-      this.#events.emit('turnSubmitDelayed', delay);
+      this.events.emit('turnSubmitDelayed', delay);
       return new Promise<BaseTurnError | void>((resolve) => {
         // if the user closes the window before the timeout, force the submit.
         const beforeUnload = async () => {
           if (this.turnSubmitTimeout) {
             clearTimeout(this.turnSubmitTimeout);
             this.turnSubmitTimeout = null;
-            await this.#actuallySubmitTurn(localTurnData);
+            await this.wrappedSubmitTurn(localTurnData);
             resolve();
           }
         };
@@ -634,48 +675,42 @@ export class GameSessionSuite<
           this.turnSubmitTimeout = setTimeout(async () => {
             window.removeEventListener('beforeunload', beforeUnload);
             document.removeEventListener('visibilitychange', visibilityChange);
-            await this.#actuallySubmitTurn(localTurnData);
+            await this.wrappedSubmitTurn(localTurnData);
             resolve();
           }, delay);
         });
       });
     } else {
-      return this.#actuallySubmitTurn(localTurnData);
+      return this.wrappedSubmitTurn(localTurnData);
     }
   };
 
-  @action #actuallySubmitTurn = async (
+  // implement this in subclasses to actually submit the turn
+  protected abstract actuallySubmitTurn(
     data: GetTurnData<TGame>,
-  ): Promise<BaseTurnError | void> => {
+  ): Promise<BaseTurnError | void>;
+  @action private wrappedSubmitTurn = async (data: GetTurnData<TGame>) => {
     if (this.turnSubmitTimeout) {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
     }
-
     const submittingToRound = this.latestRoundIndex;
     try {
-      const response = await this.ctx.socket.request({
-        type: 'submitTurn',
-        turnData: data,
-      });
-      if (response.type === 'error') {
-        this.#events.emit(
-          'error',
-          new LongGameError(LongGameError.Code.Unknown, response.message),
-        );
-        return simpleError(response.message);
-      } else {
-        // locally update the submitted round with our turn and
-        // reset local turn data
-        runInAction(() => {
-          this.rounds[submittingToRound].yourTurnData = data;
-          this.localTurnData = undefined;
-        });
-        this.#events.emit('turnPlayed');
+      const remoteError = await this.actuallySubmitTurn(toJS(data));
+      if (remoteError) {
+        console.info(`Turn submission invalid: ${remoteError.message}`);
+        return remoteError;
       }
+      runInAction(() => {
+        if (this.maybeGetRound(submittingToRound)) {
+          this.rounds[this.playerId][submittingToRound].yourTurnData = data;
+        }
+        this.localTurnData = undefined;
+      });
+      this.events.emit('turnPlayed');
     } catch (e) {
       const msg = LongGameError.wrap(e as any).message;
-      this.#events.emit(
+      this.events.emit(
         'error',
         new LongGameError(LongGameError.Code.Unknown, msg),
       );
@@ -683,11 +718,11 @@ export class GameSessionSuite<
     }
   };
 
-  @action cancelSubmit = () => {
+  @action cancelSubmitTurn = () => {
     if (this.turnSubmitTimeout) {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
-      this.#events.emit('turnSubmitCancelled');
+      this.events.emit('turnSubmitCancelled');
     }
   };
 
@@ -698,166 +733,47 @@ export class GameSessionSuite<
     sceneId?: string;
     roundIndex?: number;
   }) => {
-    const tempId = `cm-pending-${Math.random().toString().slice(2)}` as const;
-
-    const messageWithRound = {
+    const messageWithRound: Omit<
+      GameSessionChatMessage,
+      'id' | 'createdAt' | 'reactions'
+    > = {
       ...message,
       roundIndex:
         message.roundIndex === undefined
           ? this.latestRoundIndex
           : message.roundIndex,
+      authorId: this.playerId,
     };
 
-    // this.addChat({
-    //   id: tempId,
-    //   createdAt: new Date().toISOString(),
-    //   authorId: this.playerId,
-    //   ...messageWithRound,
-    // });
-    await this.ctx.socket.request({
-      type: 'sendChat',
-      message: messageWithRound,
-    });
-    this.removeChat(tempId);
+    await this.actuallySendChat(messageWithRound);
   };
-
-  @action loadMoreChat = async (sceneId: string | null = null) => {
+  protected abstract actuallySendChat(
+    message: Omit<GameSessionChatMessage, 'id' | 'createdAt' | 'reactions'>,
+  ): Promise<void>;
+  loadMoreChat = async (sceneId?: string | null): Promise<void> => {
     const sceneChat = this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID];
-    if (!sceneChat?.empty) {
-      this.ctx.socket.send({
-        type: 'requestChat',
-        nextToken: sceneChat?.nextToken ?? null,
-        sceneId,
-      });
-    }
-  };
-
-  @action toggleChatReaction = async (
-    chatMessage: GameSessionChatMessage,
-    reaction: string,
-  ) => {
-    const isOn = chatMessage.reactions[reaction]?.includes(this.playerId);
-    await this.ctx.socket.request({
-      type: 'toggleChatReaction',
-      chatMessageId: chatMessage.id,
-      isOn: !isOn,
-      reaction,
-    });
-  };
-
-  private cachedLoadRoundPromises: Record<number, Promise<void>> = {};
-
-  /**
-   * Suspends the caller component until round is loaded
-   */
-  @action loadRound = (roundIndex: number) => {
-    throw this.preloadRound(roundIndex);
-  };
-
-  /**
-   * Loads a round, but does not suspend the caller component.
-   */
-  preloadRound = (roundIndex: number) => {
-    if (this.gameStatus.status === 'pending') {
-      throw new LongGameError(
-        LongGameError.Code.Unknown,
-        'Cannot load rounds while the game is pending. Wait for the game to start.',
-      );
-    }
-
-    if (roundIndex < 0 || roundIndex > this.latestRoundIndex) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        `Cannot get data for round ${roundIndex}. Current round is ${this.latestRoundIndex}`,
-      );
-    }
-
-    if (this.rounds[roundIndex]) {
+    if (sceneChat?.empty) {
       return;
     }
-    return this.#getOrCreateRoundLoadingPromise(roundIndex);
+    this.actuallyLoadMoreChat(sceneChat?.nextToken, sceneId);
   };
+  abstract actuallyLoadMoreChat(
+    nextToken: string | null,
+    sceneId?: string | null,
+  ): Promise<void>;
+  abstract toggleChatReaction(
+    chatMessage: GameSessionChatMessage,
+    reaction: string,
+  ): Promise<void>;
 
-  #getOrCreateRoundLoadingPromise = (roundIndex: number) => {
-    if (!!this.cachedLoadRoundPromises[roundIndex]) {
-      return this.cachedLoadRoundPromises[roundIndex];
-    }
-    const promise = getPublicRound<TGame>(this.gameSessionId, roundIndex)
-      .then(
-        action((res) => {
-          this.rounds[roundIndex] = res;
-        }),
-      )
-      .catch((err) => {
-        console.error('Error loading round', roundIndex, err);
-        this.#events.emit(
-          'error',
-          new LongGameError(LongGameError.Code.Unknown, err.message),
-        );
-        throw new LongGameError(LongGameError.Code.Unknown, err.message);
-      })
-      .finally(() => {
-        console.log('loaded round', roundIndex);
-      });
-    this.cachedLoadRoundPromises[roundIndex] = promise;
-    return promise;
-  };
+  abstract readyUp(): void;
+  abstract unreadyUp(): void;
+  abstract toggleReady(): void;
 
-  @action showRound = (roundIndex: number) => {
-    this.viewingRoundIndex = roundIndex;
-  };
+  abstract voteForGame(gameId: string): void;
+  abstract removeVoteForGame(gameId: string): void;
 
-  readyUp = () => {
-    this.ctx.socket.send({
-      type: 'readyUp',
-      unready: false,
-    });
-  };
-  unreadyUp = () => {
-    this.ctx.socket.send({
-      type: 'readyUp',
-      unready: true,
-    });
-  };
-  toggleReady = () => {
-    if (this.readyPlayers.includes(this.playerId)) {
-      this.unreadyUp();
-    } else {
-      this.readyUp();
-    }
-  };
-
-  voteForGame = (gameId: string) => {
-    this.ctx.socket.send({
-      type: 'voteForGame',
-      gameId,
-      remove: false,
-    });
-  };
-  removeVoteForGame = (gameId: string) => {
-    this.ctx.socket.send({
-      type: 'voteForGame',
-      gameId,
-      remove: true,
-    });
-  };
-
-  private subscribeSocket = () => {
-    this.ctx.socket.subscribe('chat', this.onChat);
-    this.ctx.socket.subscribe('playerStatusChange', this.onPlayerStatusChange);
-    this.ctx.socket.subscribe('roundChange', this.onRoundChange);
-    this.ctx.socket.subscribe('statusChange', this.onStatusChange);
-    this.ctx.socket.subscribe('gameChange', this.onGameChange);
-    this.ctx.socket.subscribe('membersChange', this.onMembersChange);
-    this.ctx.socket.subscribe('turnPlayed', this.onTurnPlayed);
-    this.ctx.socket.subscribe('nextRoundScheduled', this.onNextRoundScheduled);
-    this.ctx.socket.subscribe('playerReady', this.onPlayerReady);
-    this.ctx.socket.subscribe('playerUnready', this.onPlayerUnready);
-    this.ctx.socket.subscribe('playerVoteForGame', this.onPlayerVoteForGame);
-    this.ctx.socket.subscribe('gameStarting', this.onGameStarting);
-  };
-
-  @action private onChat = (msg: ServerChatMessage) => {
+  @action protected onChat = (msg: ServerChatMessage) => {
     let sceneChat = this.sceneChats[msg.sceneId ?? ROOT_CHAT_SCENE_ID];
     if (!sceneChat) {
       sceneChat = this.sceneChats[msg.sceneId ?? ROOT_CHAT_SCENE_ID] = {
@@ -879,12 +795,7 @@ export class GameSessionSuite<
     }
   };
 
-  @action private removeChat = (id: string, sceneId: string | null = null) => {
-    this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID].messages =
-      this.sceneChats.null.messages.filter((msg) => msg.id !== id);
-  };
-
-  @action private onPlayerStatusChange = (
+  @action protected onPlayerStatusChange = (
     msg: ServerPlayerStatusChangeMessage,
   ) => {
     this.playerStatuses[msg.playerId] = {
@@ -893,30 +804,32 @@ export class GameSessionSuite<
     };
   };
 
-  @action private onRoundChange = (msg: ServerRoundChangeMessage) => {
-    // always best to update our data regardless; server knows best.
-    this.rounds[msg.completedRound.roundIndex] = msg.completedRound;
-    this.rounds[msg.newRound.roundIndex] = msg.newRound;
-    // reset turn data for new round
-    this.localTurnData = null;
+  @action protected onRoundChange = async (msg: ServerRoundChangeMessage) => {
+    await this.loadRoundUnsuspended(msg.newRoundIndex);
+    this.latestRoundIndex = msg.newRoundIndex;
+    console.log('here');
+    runInAction(() => {
+      // reset turn data for new round
+      this.localTurnData = null;
 
-    // update current state if the round has advanced and we were viewing
-    // the current round
-    if (this.viewingRoundIndex === msg.completedRound.roundIndex) {
-      this.viewingRoundIndex = msg.newRound.roundIndex;
-    }
-
-    // update player statuses
-    for (const [id, status] of Object.entries(msg.playerStatuses)) {
-      if (status && isPrefixedId(id, 'u')) {
-        this.playerStatuses[id] = status;
+      // update current state if the round has advanced and we were viewing
+      // the current round
+      if (this.viewingRoundIndex === msg.newRoundIndex - 1) {
+        this.viewingRoundIndex = msg.newRoundIndex;
       }
-    }
 
-    this.#events.emit('roundChanged');
+      // update player statuses
+      for (const [id, status] of Object.entries(msg.playerStatuses)) {
+        if (status && isPrefixedId(id, 'u')) {
+          this.playerStatuses[id] = status;
+        }
+      }
+    });
+
+    this.events.emit('roundChanged');
   };
 
-  @action private onStatusChange = (msg: ServerStatusChangeMessage) => {
+  @action protected onStatusChange = (msg: ServerStatusChangeMessage) => {
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
     if (msg.status.status === 'complete') {
@@ -924,9 +837,9 @@ export class GameSessionSuite<
     }
   };
 
-  @action private onTurnPlayed = (msg: ServerTurnPlayedMessage) => {
+  @action protected onTurnPlayed = (msg: ServerTurnPlayedMessage) => {
     // update the round with the new turn data
-    const round = this.rounds[msg.roundIndex];
+    const round = this.maybeGetRound(msg.roundIndex);
     if (round) {
       // replace the turn data for the player
       const playerId = msg.turn.playerId;
@@ -940,68 +853,102 @@ export class GameSessionSuite<
     }
   };
 
-  @action private onNextRoundScheduled = (
+  @action protected onNextRoundScheduled = (
     msg: ServerNextRoundScheduledMessage,
   ) => {
     this.nextRoundCheckAt = new Date(msg.nextRoundCheckAt);
   };
 
-  @action loadPostgame = async () => {
-    const postgame = await getPostgame(this.gameSessionId);
-    this.postgameGlobalState = postgame.globalState;
+  @action protected onGameChange = async () => {
+    const newData = await this.getGameData();
+    this.applyGameData(newData);
   };
 
-  private fetchMembers = async () => {
-    const members = await getPlayers(this.gameSessionId);
-    members.forEach(
-      action((member: any) => {
-        if (!this.players[member.id]) {
-          this.players[member.id] = member;
-        } else {
-          // selectively override from API - we want to keep player colors intact,
-          // particularly. but we can show the latest display name.
-          this.players[member.id].displayName ||= member.displayName;
-        }
-      }),
+  @action protected onMembersChange = async (
+    msg: ServerGameMembersChangeMessage,
+  ) => {
+    console.log('Members changed', msg);
+    this.members = msg.members;
+    this.players = msg.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
+      (acc, member) => {
+        acc[member.id] = this.players[member.id] ?? {
+          id: member.id,
+          displayName: member.displayName,
+          imageUrl: null,
+          color: member.color,
+        };
+        return acc;
+      },
+      {},
     );
+    await this.loadMembers();
   };
 
-  @action private setupLocalTurnStorage = () => {
-    const key = `game-session-${this.gameSessionId}-local-turn-${this.playerId}`;
-    const localTurn = localStorage.getItem(key);
-    if (localTurn && localTurn !== 'undefined') {
-      this.localTurnData = JSON.parse(localTurn);
+  @action protected onPlayerReady = (msg: ServerPlayerReadyMessage) => {
+    this.readyPlayers.push(msg.playerId);
+  };
+  @action protected onPlayerUnready = (msg: ServerPlayerUnreadyMessage) => {
+    this.readyPlayers = this.readyPlayers.filter((id) => id !== msg.playerId);
+    this.events.emit('gameStartingCancelled');
+  };
+
+  @action protected onPlayerVoteForGame = (
+    msg: ServerPlayerVoteForGameMessage,
+  ) => {
+    this.gameVotes = msg.votes;
+  };
+
+  protected onGameStarting = (msg: ServerGameStartingMessage) => {
+    this.events.emit('gameStarting', msg.startsAt);
+  };
+
+  protected abstract getPostgame(): Promise<GetGlobalState<TGame> | null>;
+  @action protected loadPostgame = async () => {
+    const postgame = await this.getPostgame();
+    if (postgame) {
+      this.postgameGlobalState = postgame;
     }
+  };
+
+  @computed get localTurnStorageKey() {
+    return `game-session-${this.gameSessionId}-local-turn-${this.playerId}`;
+  }
+  @action private setupLocalTurnStorage = () => {
+    // when the key changes, load new localTurnData
+    autorun(() => {
+      const localTurn = localStorage.getItem(this.localTurnStorageKey);
+      runInAction(() => {
+        if (localTurn && localTurn !== 'undefined') {
+          this.localTurnData = JSON.parse(localTurn);
+        } else {
+          this.localTurnData = undefined;
+        }
+      });
+    });
+    // when localTurnData changes, save it to localStorage
     autorun(() => {
       if (this.localTurnData === undefined) {
-        localStorage.removeItem(key);
+        localStorage.removeItem(this.localTurnStorageKey);
       } else {
-        localStorage.setItem(key, JSON.stringify(this.localTurnData));
+        localStorage.setItem(
+          this.localTurnStorageKey,
+          JSON.stringify(this.localTurnData),
+        );
       }
     });
   };
 
-  @action private onGameChange = async () => {
-    const newData = await getSummary(this.gameSessionId);
-    this.applyGameData(newData);
-  };
+  protected abstract getGameData(): Promise<GameSuiteBaseInit>;
 
-  @action private applyGameData = (init: {
-    playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
-    gameId: string;
-    gameVersion: string;
-    status: GameStatus;
-    members: GameMember[];
-    startedAt: string | null;
-    timezone: string;
-    nextRoundCheckAt?: string | null;
-    currentRoundIndex: number;
-    gameVotes?: Record<string, PrefixedId<'u'>[]>;
-    readyPlayers?: PrefixedId<'u'>[];
-  }) => {
+  @action private applyGameData = async (init: GameSuiteBaseInit) => {
+    this.gameModules.getGameDefinition(init.gameId, init.gameVersion).then(
+      action((gameDefinition) => {
+        this.gameDefinition = gameDefinition as TGame;
+      }),
+    );
     this.viewingRoundIndex = init.currentRoundIndex;
+    this.latestRoundIndex = init.currentRoundIndex;
     this.localTurnData = undefined;
-    this.rounds = new Array(init.currentRoundIndex + 1).fill(null);
     this.playerStatuses = init.playerStatuses;
     this.gameId = init.gameId;
     this.gameVersion = init.gameVersion;
@@ -1029,44 +976,44 @@ export class GameSessionSuite<
     if (init.readyPlayers) {
       this.readyPlayers = init.readyPlayers;
     }
-    this.fetchMembers();
+    // wait a tick... since this gets called from the constructor...
+    // subclasses haven't defined methods yet :S
+    setTimeout(this.loadMembers);
   };
 
-  @action private onMembersChange = (msg: ServerGameMembersChangeMessage) => {
-    this.members = msg.members;
-    this.players = msg.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
-      (acc, member) => {
-        acc[member.id] = this.players[member.id] ?? {
-          id: member.id,
-          displayName: member.displayName,
-          imageUrl: null,
-          color: member.color,
-        };
-        return acc;
-      },
-      {},
+  @action changeGame = async (gameId: string, version: string) => {
+    if (this.gameStatus.status !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot change game when the game is already started.',
+      );
+    }
+    this.gameDefinition = (await this.gameModules.getGameDefinition(
+      gameId,
+      version,
+    )) as TGame;
+    this.gameId = gameId;
+    this.gameVersion = version;
+  };
+
+  protected abstract getMembers(): Promise<GameMember[]>;
+  @action protected loadMembers = async () => {
+    const members = await this.getMembers();
+    members.forEach(
+      action((member: any) => {
+        if (!this.players[member.id]) {
+          this.players[member.id] = member;
+        } else {
+          // selectively override from API - we want to keep player colors intact,
+          // particularly. but we can show the latest display name.
+          this.players[member.id].displayName ||= member.displayName;
+        }
+      }),
     );
-    this.fetchMembers().then(() => {
-      this.#events.emit('membersChanged');
-    });
+    this.events.emit('membersChanged');
   };
 
-  @action private onPlayerReady = (msg: ServerPlayerReadyMessage) => {
-    this.readyPlayers.push(msg.playerId);
-  };
-  @action private onPlayerUnready = (msg: ServerPlayerUnreadyMessage) => {
-    this.readyPlayers = this.readyPlayers.filter((id) => id !== msg.playerId);
-    this.#events.emit('gameStartingCancelled');
-  };
-  @action private onPlayerVoteForGame = (
-    msg: ServerPlayerVoteForGameMessage,
-  ) => {
-    this.gameVotes = msg.votes;
-  };
-
-  private onGameStarting = (msg: ServerGameStartingMessage) => {
-    this.#events.emit('gameStarting', msg.startsAt);
-  };
+  abstract switchPlayer(playerId: PrefixedId<'u'>): void;
 
   debug = async () => {
     // try loading global state (works in dev mode)
@@ -1110,9 +1057,7 @@ export class GameSessionSuite<
         environment: 'development',
       });
     debugValue.resetGame = () => {
-      this.ctx.socket.send({
-        type: 'resetGame',
-      });
+      this.resetGame();
     };
 
     (window as any).gameSuiteRaw = debugValue;
@@ -1123,22 +1068,5 @@ export class GameSessionSuite<
   /**
    * Only works in dev mode
    */
-  resetGame = () => {
-    this.ctx.socket.send({
-      type: 'resetGame',
-    });
-  };
-
-  #subscribeWindowEvents = () => {
-    // FIXME: causing infinite suspense???
-    // const onVisibilityChange = () => {
-    //   if (document.visibilityState === 'visible') {
-    //     this.onGameChange();
-    //   }
-    // };
-    // document.addEventListener('visibilitychange', onVisibilityChange);
-    // this.#disposes.push(() => {
-    //   document.removeEventListener('visibilitychange', onVisibilityChange);
-    // });
-  };
+  abstract resetGame(): Promise<void>;
 }

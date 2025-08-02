@@ -164,6 +164,7 @@ export const gameDefinition: GameDefinition<
       playerIndex: globalState.playerOrder.indexOf(playerId),
     });
     const seq = globalState.sequences[index];
+    console.log('Player state for', playerId, 'at round', roundIndex, seq);
     return {
       prompt: seq[seq.length - 1] || { words: [] },
       hand: globalState.hands[playerId] || [],

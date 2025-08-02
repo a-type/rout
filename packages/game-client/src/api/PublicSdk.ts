@@ -152,6 +152,9 @@ export class PublicSdk extends BaseSdk {
     },
   );
   getGames = this.sdkQuery('getGames', this.apiRpc.games.$get);
+  getGame = this.sdkQuery('getGame', this.apiRpc.games[':id'].$get, {
+    transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+  });
 
   // yeah this is on the game session API, but it's
   // kind of more useful here.

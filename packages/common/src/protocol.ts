@@ -5,7 +5,6 @@ import {
 } from './chat.js';
 import { colorNames } from './colors.js';
 import { idShapes, PrefixedId } from './ids.js';
-import { gameRoundSummaryShape } from './rounds.js';
 import {
   gameSessionPlayerStatusShape,
   gameSessionPlayerStatusUpdateShape,
@@ -37,9 +36,8 @@ export type ServerChatMessage = z.infer<typeof serverChatMessageShape>;
 
 export const serverRoundChangeMessageShape = baseServerMessageShape.extend({
   type: z.literal('roundChange'),
-  newRound: gameRoundSummaryShape,
-  completedRound: gameRoundSummaryShape,
   playerStatuses: z.record(idShapes.User, gameSessionPlayerStatusShape),
+  newRoundIndex: z.number(),
 });
 export type ServerRoundChangeMessage = z.infer<
   typeof serverRoundChangeMessageShape

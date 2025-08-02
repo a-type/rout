@@ -5,7 +5,7 @@
 import { checkForUpdate, skipWaiting } from '@/swRegister.js';
 import { Box, Button, H2, Icon, P } from '@a-type/ui';
 import { idToFederationId } from '@long-game/common';
-import { queryClient } from '@long-game/game-client';
+import { GameModuleContext, queryClient } from '@long-game/game-client';
 import {
   emptyGameDefinition,
   GameDefinition,
@@ -121,3 +121,15 @@ function MissingRenderer() {
     </Box>
   );
 }
+
+export const gameModules: GameModuleContext = {
+  getGameDefinition: (gameId, version) =>
+    getFederatedGameComponent(gameId, version, 'definition'),
+  getGameLatestVersion: async (gameId) => {
+    const data = await publicSdk.getGame.run({ id: gameId });
+    if (!data) {
+      throw new Error(`Game not found: ${gameId}`);
+    }
+    return data.latestVersion;
+  },
+};

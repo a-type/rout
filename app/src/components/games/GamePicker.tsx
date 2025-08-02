@@ -24,6 +24,8 @@ export interface GamePickerProps {
   className?: string;
   loading?: boolean;
   gameSessionId: PrefixedId<'gs'>;
+  sessionCreator: PrefixedId<'u'> | null;
+  hotseat?: boolean;
 }
 
 export const GamePicker = withGame<GamePickerProps>(function GamePicker({
@@ -32,14 +34,12 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   gameSessionId,
   className,
   gameSuite,
+  sessionCreator,
+  hotseat,
   ...rest
 }) {
-  const { data: pregame } = sdkHooks.useGetGameSessionPregame({
-    id: gameSessionId,
-  });
   const canSelectGame =
-    !pregame.session.createdBy ||
-    pregame.session.createdBy === gameSuite.playerId;
+    !sessionCreator || sessionCreator === gameSuite.playerId;
 
   const { data: games } = sdkHooks.useGetGames();
   const allTags = new Set<string>();
@@ -76,9 +76,16 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   const { data: me } = sdkHooks.useGetMe();
   const isAdmin = me?.isProductAdmin;
 
-  const { data: availableGames } = sdkHooks.useGetAvailableGames({
-    id: gameSessionId,
-  });
+  const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGamesLazy(
+    {
+      id: gameSessionId,
+    },
+    {
+      enabled: !hotseat,
+    },
+  );
+  const { data: ownedGames } = sdkHooks.useGetOwnedGames();
+  const availableGames = sessionAvailableGames || ownedGames;
 
   const filteredGamesIncludingUnowned = Object.entries(games)
     .filter(([_, game]) => isAdmin || !game.prerelease)
@@ -194,7 +201,6 @@ const GamePickerItem = withGame<{
   selected,
 }) {
   const openQuickBuy = useOpenQuickBuy();
-  const updateGameMutation = sdkHooks.useUpdateGameSession();
   const voters = gameSuite.gameVotes[gameId];
   const votedForThisGame = voters?.includes(gameSuite.playerId);
 
@@ -242,12 +248,7 @@ const GamePickerItem = withGame<{
             <Button
               size="small"
               color="primary"
-              onClick={() =>
-                updateGameMutation.mutateAsync({
-                  id: gameSuite.gameSessionId,
-                  gameId,
-                })
-              }
+              onClick={() => gameSuite.voteForGame(gameId)}
               disabled={selected}
             >
               <Icon name="check" />

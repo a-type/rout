@@ -5,6 +5,7 @@ export * from './chat.js';
 export * from './colors.js';
 export * from './entitlements.js';
 export * from './error.js';
+export * from './hotseat.js';
 export * from './ids.js';
 export * from './objects.js';
 export * from './protocol.js';
