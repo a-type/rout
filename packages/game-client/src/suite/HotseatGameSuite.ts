@@ -43,7 +43,10 @@ export class HotseatGameSuite<
     },
   ) {
     super(init, { gameModules: ctx.gameModules });
-    this.playerId = init.playerId;
+    this.playerId =
+      (localStorage.getItem(`hotseat-last-player:${init.id}`) as
+        | PrefixedId<'u'>
+        | undefined) || init.playerId;
     this.ctx.backend.subscribe('chat', this.onChat);
     this.ctx.backend.subscribe('gameChange', this.onGameChange);
     this.ctx.backend.subscribe('roundChange', this.onRoundChange);
@@ -153,6 +156,7 @@ export class HotseatGameSuite<
   };
   @action switchPlayer = (playerId: PrefixedId<'u'>) => {
     this.playerId = playerId;
+    localStorage.setItem(`hotseat-last-player:${this.gameSessionId}`, playerId);
     this.events.emit('playerChanged', playerId);
   };
 }

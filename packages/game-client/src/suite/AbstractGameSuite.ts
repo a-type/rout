@@ -522,12 +522,19 @@ export abstract class AbstractGameSuite<
     return this.sceneChats.null.messages;
   }
 
+  // this may seem superfluous but in hotseat mode
+  // we want to hide dms that aren't yours and there's
+  // not any point in doing something more elaborate!
+  private filterChats = (msg: GameSessionChatMessage) => {
+    return !msg.recipientIds || msg.recipientIds.includes(this.playerId);
+  };
+
   getSceneChat(sceneId: string) {
     return (
       this.sceneChats[sceneId] ?? {
         messages: [],
       }
-    ).messages;
+    ).messages.filter(this.filterChats);
   }
 
   @computed get combinedLog() {
@@ -563,6 +570,7 @@ export abstract class AbstractGameSuite<
       if (chatForRound) {
         log.push(
           ...chatForRound
+            .filter(this.filterChats)
             .map((msg) => ({
               type: 'chat' as const,
               chatMessage: msg,
@@ -585,11 +593,14 @@ export abstract class AbstractGameSuite<
     if (this.gameStatus.status === 'complete') {
       log.push(
         ...(
-          chatsGroupedByRound.get(-1)?.map((msg) => ({
-            type: 'chat' as const,
-            chatMessage: msg,
-            timestamp: msg.createdAt,
-          })) ?? []
+          chatsGroupedByRound
+            .get(-1)
+            ?.filter(this.filterChats)
+            ?.map((msg) => ({
+              type: 'chat' as const,
+              chatMessage: msg,
+              timestamp: msg.createdAt,
+            })) ?? []
         ).sort((a, b) =>
           new Date(a.timestamp) > new Date(b.timestamp) ? 1 : -1,
         ),
@@ -810,7 +821,7 @@ export abstract class AbstractGameSuite<
     console.log('here');
     runInAction(() => {
       // reset turn data for new round
-      this.localTurnData = null;
+      this.localTurnData = undefined;
 
       // update current state if the round has advanced and we were viewing
       // the current round

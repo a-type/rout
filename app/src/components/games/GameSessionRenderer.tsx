@@ -235,8 +235,11 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
   const members = gameSuite.members;
 
   return (
-    <Box full col layout="center center">
-      <H1>Select Player</H1>
+    <Box full col gap layout="center center">
+      <Box col gap="xs">
+        <div className="text-xs uppercase color-gray">Hotseat</div>
+        <H1>Select Player</H1>
+      </Box>
       <Box className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
         {members.map((member) => (
           <Button
@@ -246,12 +249,12 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
           >
             <PlayerAvatar
               playerId={member.id}
-              size={80}
+              size={40}
               className="rounded-full"
             />
-            <Box gap="sm">
+            <Box gap="sm" col items="start">
               <PlayerName playerId={member.id} />
-              <div>
+              <div className="text-xs color-gray-dark">
                 {gameSuite.playerStatuses[member.id]?.pendingTurn
                   ? 'Yet to play'
                   : 'Played'}
@@ -282,7 +285,7 @@ const HotseatBanner = withGame<{ className?: string }>(function HotseatBanner({
         value={gameSuite.playerId}
         onValueChange={(value) => gameSuite.switchPlayer(value)}
       >
-        <Select.Trigger />
+        <Select.Trigger size="small" />
         <Select.Content>
           {gameSuite.members.map((member) => (
             <Select.Item key={member.id} value={member.id}>

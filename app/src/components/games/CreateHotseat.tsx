@@ -1,5 +1,5 @@
 import { Button, ButtonProps, Icon } from '@a-type/ui';
-import { id } from '@long-game/common';
+import { genericId } from '@long-game/common';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode } from 'react';
 
@@ -13,7 +13,7 @@ export function CreateHotseat({ children, ...rest }: CreateHotseatProps) {
     <Button
       color="primary"
       onClick={async () => {
-        const gameId = id('gs');
+        const gameId = `gs-hotseat-${genericId()}`;
         navigate(`/hotseat/${gameId}`);
       }}
       {...rest}
