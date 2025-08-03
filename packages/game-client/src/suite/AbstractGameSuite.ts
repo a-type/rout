@@ -833,6 +833,7 @@ export abstract class AbstractGameSuite<
   };
 
   @action protected onStatusChange = (msg: ServerStatusChangeMessage) => {
+    console.log('incoming status', msg.status);
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
     if (msg.status.status === 'complete') {
