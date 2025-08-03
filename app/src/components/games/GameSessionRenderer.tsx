@@ -237,31 +237,32 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
   return (
     <Box full col gap layout="center center">
       <Box col gap="xs">
-        <div className="text-xs uppercase color-gray">Hotseat</div>
+        <div className="text-xs uppercase color-gray-dark">Hotseat</div>
+        <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>
         <H1>Select Player</H1>
-      </Box>
-      <Box className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
-        {members.map((member) => (
-          <Button
-            key={member.id}
-            onClick={() => gameSuite.switchPlayer(member.id)}
-            className="p-0 rounded-full"
-          >
-            <PlayerAvatar
-              playerId={member.id}
-              size={40}
-              className="rounded-full"
-            />
-            <Box gap="sm" col items="start">
-              <PlayerName playerId={member.id} />
-              <div className="text-xs color-gray-dark">
-                {gameSuite.playerStatuses[member.id]?.pendingTurn
-                  ? 'Yet to play'
-                  : 'Played'}
-              </div>
-            </Box>
-          </Button>
-        ))}
+        <Box className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
+          {members.map((member) => (
+            <Button
+              key={member.id}
+              onClick={() => gameSuite.switchPlayer(member.id)}
+              className="p-0 rounded-full"
+            >
+              <PlayerAvatar
+                playerId={member.id}
+                size={40}
+                className="rounded-full"
+              />
+              <Box gap="sm" col items="start">
+                <PlayerName playerId={member.id} disableYou />
+                <div className="text-xs color-gray-dark">
+                  {gameSuite.playerStatuses[member.id]?.pendingTurn
+                    ? 'Yet to play'
+                    : 'Played'}
+                </div>
+              </Box>
+            </Button>
+          ))}
+        </Box>
       </Box>
     </Box>
   );

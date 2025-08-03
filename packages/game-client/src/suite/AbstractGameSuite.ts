@@ -177,7 +177,6 @@ export abstract class AbstractGameSuite<
    * is available, returns it. Does not load it otherwise.
    */
   protected maybeGetRound = (roundIndex: number) => {
-    console.log('maybeGetRound', roundIndex, this.rounds);
     return this.rounds[this.playerId]?.[roundIndex];
   };
   /**
@@ -214,9 +213,6 @@ export abstract class AbstractGameSuite<
     }
 
     if (this.maybeGetRound(roundIndex)) {
-      console.debug(
-        `Round ${roundIndex} already loaded, returning cached data.`,
-      );
       return;
     }
     return this.#getOrCreateRoundLoadingPromise(roundIndex);
@@ -224,10 +220,8 @@ export abstract class AbstractGameSuite<
   #getOrCreateRoundLoadingPromise = (roundIndex: number) => {
     const cacheKey: `${PrefixedId<'u'>}-${number}` = `${this.playerId}-${roundIndex}`;
     if (!!this.cachedLoadRoundPromises[cacheKey]) {
-      console.debug(`Using cached loading promise for ${cacheKey}`);
       return this.cachedLoadRoundPromises[cacheKey];
     }
-    console.log(`Loading round ${roundIndex}...`);
     const promise = this.loadRound(roundIndex)
       .then(action(this.setRound))
       .catch((err) => {
@@ -252,7 +246,6 @@ export abstract class AbstractGameSuite<
    */
   getRound = (roundIndex: number) => {
     if (!this.maybeGetRound(roundIndex)) {
-      console.log(`Suspending to load round ${roundIndex}`);
       // this will throw a promise if the round is not loaded
       this.loadRoundSuspended(roundIndex);
     }
@@ -818,7 +811,6 @@ export abstract class AbstractGameSuite<
   @action protected onRoundChange = async (msg: ServerRoundChangeMessage) => {
     await this.loadRoundUnsuspended(msg.newRoundIndex);
     this.latestRoundIndex = msg.newRoundIndex;
-    console.log('here');
     runInAction(() => {
       // reset turn data for new round
       this.localTurnData = undefined;
@@ -878,7 +870,6 @@ export abstract class AbstractGameSuite<
   @action protected onMembersChange = async (
     msg: ServerGameMembersChangeMessage,
   ) => {
-    console.log('Members changed', msg);
     this.members = msg.members;
     this.players = msg.members.reduce<Record<PrefixedId<'u'>, PlayerInfo>>(
       (acc, member) => {
