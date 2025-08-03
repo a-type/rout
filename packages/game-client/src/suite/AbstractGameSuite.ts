@@ -126,6 +126,9 @@ export abstract class AbstractGameSuite<
   @observable accessor gameVotes: Record<string, PrefixedId<'u'>[]> = {};
   @observable accessor readyPlayers: PrefixedId<'u'>[] = [];
 
+  // hotseat only
+  @observable accessor pickingPlayer = true;
+
   // static
   gameModules: GameModuleContext;
   gameSessionId!: PrefixedId<'gs'>;

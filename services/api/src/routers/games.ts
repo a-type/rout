@@ -32,6 +32,7 @@ function gameSummary(game: GameModule, env: ApiBindings) {
       minimumPlayers: def.minimumPlayers,
       maximumPlayers: def.maximumPlayers,
     })),
+    screenshots: game.screenshots ?? [],
   };
 }
 
@@ -60,8 +61,14 @@ export const gamesRouter = new Hono<Env>()
     await ctx.env.ADMIN_STORE.applyFreeGames(userId);
     return ctx.json({ success: true });
   })
-  .get('/owned', userStoreMiddleware, async (ctx) => {
-    const gameIds = await ctx.get('userStore').getOwnedGames();
+  .get('/owned', sessionMiddleware, async (ctx) => {
+    const session = ctx.get('session');
+    if (!session) {
+      return ctx.json([]);
+    }
+    const gameIds = await ctx.env.PUBLIC_STORE.getStoreForUser(
+      session.userId,
+    ).getOwnedGames();
     return ctx.json(wrapRpcData(gameIds));
   })
   .get(

@@ -38,7 +38,10 @@ export type SdkHooks<Sdk extends BaseSdk> = {
       ? (
           ...args: EraseEmptyArg<
             I,
-            Omit<UseSuspenseInfiniteQueryOptions, 'queryKey' | 'queryFn'>
+            Omit<
+              UseSuspenseInfiniteQueryOptions,
+              'queryKey' | 'queryFn' | 'getNextPageParam' | 'initialPageParam'
+            >
           >
         ) => UseSuspenseInfiniteQueryResult<O>
       : Sdk[K] extends UseMutationOptions<infer O, infer E, infer V>

@@ -2,7 +2,13 @@ import { PrefixedId } from '@long-game/common';
 import { BaseSdk, InferReturnData } from './BaseSdk.js';
 
 export class PublicSdk extends BaseSdk {
-  getMe = this.sdkQuery('getMe', this.apiRpc.users.me.$get);
+  getMe = this.sdkQuery('getMe', this.apiRpc.users.me.$get, {
+    defaults: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  });
   updateMe = this.sdkMutation(this.apiRpc.users.me.$put, {
     transformInput: (input: {
       displayName?: string;
@@ -20,10 +26,22 @@ export class PublicSdk extends BaseSdk {
   });
   getUser = this.sdkQuery('getUser', this.apiRpc.users[':id'].$get, {
     transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+    defaults: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
   });
   getFriendships = this.sdkQuery(
     'getFriendships',
     this.apiRpc.friendships.$get,
+    {
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
+    },
   );
   getFriendshipInvites = this.sdkQuery(
     'getFriendshipInvites',
@@ -151,9 +169,20 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
-  getGames = this.sdkQuery('getGames', this.apiRpc.games.$get);
+  getGames = this.sdkQuery('getGames', this.apiRpc.games.$get, {
+    defaults: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  });
   getGame = this.sdkQuery('getGame', this.apiRpc.games[':id'].$get, {
     transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
+    defaults: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
   });
 
   // yeah this is on the game session API, but it's
@@ -267,6 +296,11 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { id: string }) => ({
         param: { id: input.id },
       }),
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
     },
   );
 
@@ -308,6 +342,9 @@ export class PublicSdk extends BaseSdk {
         }
         return key;
       },
+      defaults: {
+        refetchInterval: 1000 * 60 * 15,
+      },
     },
   );
   markNotificationAsRead = this.sdkMutation(
@@ -332,6 +369,13 @@ export class PublicSdk extends BaseSdk {
   getNotificationSettings = this.sdkQuery(
     'getNotificationSettings',
     this.apiRpc.users.me.notificationSettings.$get,
+    {
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
+    },
   );
   updateNotificationSettings = this.sdkMutation(
     this.apiRpc.users.me.notificationSettings.$put,
@@ -363,6 +407,11 @@ export class PublicSdk extends BaseSdk {
       transformInput: (input: { tags?: string[]; includingGame?: string }) => ({
         query: input,
       }),
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
     },
   );
   getGameProduct = this.sdkQuery(
@@ -373,6 +422,11 @@ export class PublicSdk extends BaseSdk {
         param: { productId: input.id },
       }),
       enabled: (input) => !!input.id,
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
     },
   );
 

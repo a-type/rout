@@ -35,6 +35,25 @@ export function getFederatedGameComponent(
   version: string,
   componentName: 'renderer' | 'chat' | 'definition',
 ): Promise<GameDefinition> | ComponentType<any> {
+  if (gameId === 'empty') {
+    if (componentName === 'definition') {
+      return Promise.resolve(emptyGameDefinition);
+    }
+    if (componentName === 'renderer') {
+      return lazy(() =>
+        Promise.resolve({
+          default: MissingRenderer,
+        }),
+      );
+    }
+    if (componentName === 'chat') {
+      return lazy(() =>
+        Promise.resolve({
+          default: DefaultChatMessage,
+        }),
+      );
+    }
+  }
   const majorVersion = version.split('.')[0];
   const federatedPath = `${idToFederationId(gameId)}/${majorVersion}/${componentName}`;
   if (cache.has(federatedPath)) {

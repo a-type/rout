@@ -30,6 +30,7 @@ gameDirs.forEach((gameDir) => {
   copyGameFile(gameDir, 'icon.png');
   copyGameFile(gameDir, 'rules.md');
   copyGameDir(gameDir, 'assets');
+  copyGameDir(gameDir, 'screenshots');
   copyGameDir(
     gameDir,
     'renderer/dist',

@@ -26,6 +26,7 @@ export interface GamePickerProps {
   gameSessionId: PrefixedId<'gs'>;
   sessionCreator: PrefixedId<'u'> | null;
   hotseat?: boolean;
+  availableGames?: string[];
 }
 
 export const GamePicker = withGame<GamePickerProps>(function GamePicker({
@@ -36,6 +37,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   gameSuite,
   sessionCreator,
   hotseat,
+  availableGames,
   ...rest
 }) {
   const canSelectGame =
@@ -51,7 +53,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
 
   const [filters, setFilters] = useState({
     tags: [] as string[],
-    owned: true,
+    owned: hotseat ? false : true,
   });
 
   const removeTagFilter = (tag: string) => {
@@ -76,17 +78,6 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   const { data: me } = sdkHooks.useGetMe();
   const isAdmin = me?.isProductAdmin;
 
-  const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGamesLazy(
-    {
-      id: gameSessionId,
-    },
-    {
-      enabled: !hotseat,
-    },
-  );
-  const { data: ownedGames } = sdkHooks.useGetOwnedGames();
-  const availableGames = sessionAvailableGames || ownedGames;
-
   const filteredGamesIncludingUnowned = Object.entries(games)
     .filter(([_, game]) => isAdmin || !game.prerelease)
     .filter(([_, game]) => {
@@ -96,7 +87,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       return true;
     });
   const filteredGames = filteredGamesIncludingUnowned.filter(([gameId]) => {
-    if (filters.owned && !availableGames.includes(gameId)) {
+    if (filters.owned && !availableGames?.includes(gameId)) {
       return false;
     }
     return true;
@@ -158,7 +149,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
         {filteredGames.map(([gameId]) => (
           <GamePickerItem
             gameId={gameId}
-            owned={availableGames.includes(gameId)}
+            owned={!!availableGames?.includes(gameId)}
             isGameLeader={canSelectGame}
             key={gameId}
             selected={value === gameId}

@@ -3,6 +3,7 @@ import { Box, Button, Card, Chip, DropdownMenu, H2, Icon } from '@a-type/ui';
 import {
   HotseatBackend,
   HotseatGameDetails,
+  queryClient,
   useSuspenseQuery,
 } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
@@ -71,7 +72,12 @@ const HotseatSummaryCard = withSuspense(function HotseatSummaryCard({
             <DropdownMenu.Content>
               <DropdownMenu.Item
                 color="destructive"
-                onClick={() => HotseatBackend.delete(session.gameSessionId)}
+                onClick={async () => {
+                  await HotseatBackend.delete(session.gameSessionId);
+                  queryClient.invalidateQueries({
+                    queryKey: ['hotseatGames'],
+                  });
+                }}
               >
                 Delete
                 <DropdownMenu.ItemRightSlot>

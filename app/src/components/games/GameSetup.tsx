@@ -28,6 +28,10 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
 
+  const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGames({
+    id: gameSessionId,
+  });
+
   return (
     <Box p d="col" gap grow className={clsx('m-auto max-w-800px', className)}>
       <Box d="col" gap grow>
@@ -38,6 +42,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
           loading={updateGameMutation.isPending}
           gameSessionId={gameSessionId}
           sessionCreator={pregame.session.createdBy}
+          availableGames={sessionAvailableGames}
         />
       </Box>
       <GameSetupInviteFriends />

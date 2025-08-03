@@ -98,6 +98,28 @@ function playerId(index: number): PrefixedId<'u'> {
   return `u-hotseat-${index}` as PrefixedId<'u'>;
 }
 
+const defaultGameDetails = (
+  sessionId: PrefixedId<'gs'>,
+): HotseatGameDetails => ({
+  gameId: 'empty',
+  gameVersion: '0.0.1',
+  randomSeed: Math.random().toString(36).substring(2, 15),
+  members: [
+    {
+      id: playerId(0),
+      displayName: 'Player 1',
+      index: 0,
+      color: randomItem(colorNames),
+    },
+  ],
+  createdAt: new Date().toISOString(),
+  startedAt: null,
+  status: 'pending',
+  winnerIds: null,
+  gameSessionId: sessionId,
+  roundIndex: 0,
+});
+
 export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
   readonly sessionId: PrefixedId<'gs'>;
   private db: IDBPDatabase<GameSessionSchema>;
@@ -124,25 +146,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     const managementDb = await getManagementDb();
     let gameDetails = await managementDb.get('sessions', sessionId);
     if (!gameDetails) {
-      gameDetails = {
-        gameId: 'empty',
-        gameVersion: '0.0.1',
-        randomSeed: Math.random().toString(36).substring(2, 15),
-        members: [
-          {
-            id: playerId(0),
-            displayName: 'Player 1',
-            index: 0,
-            color: randomItem(colorNames),
-          },
-        ],
-        createdAt: new Date().toISOString(),
-        startedAt: null,
-        status: 'pending',
-        winnerIds: null,
-        gameSessionId: sessionId,
-        roundIndex: 0,
-      };
+      gameDetails = defaultGameDetails(sessionId);
       await managementDb.put('sessions', gameDetails);
       return new HotseatBackend({
         sessionId,
@@ -165,6 +169,31 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       gameDetails,
       managementDb,
     });
+  };
+
+  static preSetGame = async (
+    sessionId: PrefixedId<'gs'>,
+    gameId: string,
+    gameDefinition: GameDefinition,
+  ) => {
+    const managementDb = await getManagementDb();
+    let gameDetails = await managementDb.get('sessions', sessionId);
+    if (!gameDetails) {
+      gameDetails = defaultGameDetails(sessionId);
+    }
+    gameDetails.gameId = gameId;
+    gameDetails.gameVersion = gameDefinition.version;
+    gameDetails.randomSeed = Math.random().toString(36).substring(2, 15);
+    gameDetails.members = Array.from(
+      { length: gameDefinition.minimumPlayers || 1 },
+      (_, i) => ({
+        id: playerId(i),
+        displayName: `Player ${i + 1}`,
+        index: i,
+        color: randomItem(colorNames),
+      }),
+    );
+    await managementDb.put('sessions', gameDetails);
   };
 
   static list = async (

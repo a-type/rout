@@ -68,6 +68,10 @@ const routes = makeRoutes([
     component: lazy(() => import('./SettingsPage.jsx')),
   },
   {
+    path: '/games/:gameId',
+    component: lazy(() => import('./PublicGamePage.jsx')),
+  },
+  {
     path: '/admin',
     component: lazy(() => import('./admin/AdminPage.jsx')),
     children: [
@@ -129,7 +133,7 @@ export const Pages = () => {
       }
     >
       <Router routes={routes} onNavigate={handleNavigate}>
-        <Box full className="flex-1" col>
+        <Box full="width" className="flex-1" col>
           <Outlet />
         </Box>
         <QuickBuyPopup />

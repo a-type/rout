@@ -11,6 +11,7 @@ const federationConfig = createModuleFederationConfig({
   name: 'long-game',
   manifest: true,
   dts: false,
+  shareStrategy: 'loaded-first',
   shared: {
     react: { singleton: true, requiredVersion: '>19.0.0' },
     'react/': {},
@@ -19,6 +20,7 @@ const federationConfig = createModuleFederationConfig({
       requiredVersion: '>19.0.0',
     },
     'react-dom/': {},
+    'react-markdown': {},
     '@a-type/ui': {
       singleton: true,
       requiredVersion: '>2.0.0',

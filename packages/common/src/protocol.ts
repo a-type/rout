@@ -205,7 +205,7 @@ export type ClientSubmitTurnMessage = z.infer<
 
 export const clientRequestChatMessageShape = baseClientMessageShape.extend({
   type: z.literal('requestChat'),
-  nextToken: z.string().nullable(),
+  nextToken: z.string().nullable().optional(),
   sceneId: z.string().nullable(),
 });
 export type ClientRequestChatMessage = z.infer<

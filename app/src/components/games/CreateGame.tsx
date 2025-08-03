@@ -7,7 +7,12 @@ import { MouseEvent } from 'react';
 import { GameLimitUpsellWrapper } from '../subscription/GameLimitUpsellWrapper.js';
 
 export const CreateGame = withSuspense(
-  function CreateGame({ children, onClick, ...rest }: ButtonProps) {
+  function CreateGame({
+    children,
+    onClick,
+    gameId,
+    ...rest
+  }: ButtonProps & { gameId?: string }) {
     const mutation = sdkHooks.usePrepareGameSession();
     const {
       data: { count: remaining },
@@ -16,7 +21,7 @@ export const CreateGame = withSuspense(
     const navigate = useNavigate();
 
     const create = async (ev: MouseEvent<HTMLButtonElement>) => {
-      const result = await mutation.mutateAsync({ gameId: 'number-guess' });
+      const result = await mutation.mutateAsync({ gameId: gameId || 'empty' });
       const gameSessionId = result?.sessionId;
       if (!gameSessionId) {
         throw new LongGameError(

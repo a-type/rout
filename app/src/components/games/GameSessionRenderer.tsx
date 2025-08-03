@@ -1,21 +1,16 @@
-import { useDefaultBgColor } from '@/hooks/useThemedTitleBar';
 import { gameModules, getFederatedGameComponent } from '@/services/games';
 import {
   Box,
   Button,
   clsx,
   ErrorBoundary,
-  getResolvedColorMode,
   H1,
   Icon,
   Select,
   Spinner,
-  useColorMode,
-  useTitleBarColor,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import {
-  AbstractGameSuite,
   GameSuiteProvider,
   useCreateGameSuite,
   withGame,
@@ -27,18 +22,10 @@ import {
   PlayerName,
   RendererProvider,
   SpatialChatDraggable,
-  TopographyProvider,
-  usePlayerThemed,
 } from '@long-game/game-ui';
-import {
-  ReactNode,
-  Suspense,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { Suspense, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
+import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameAbandonedNotice } from './GameAbandonedNotice.js';
 import { GameControls } from './GameControls.js';
 import { GameLayout } from './GameLayout.js';
@@ -73,71 +60,8 @@ export function GameSessionRenderer({
   );
 }
 
-function usePlayerThemedPage(playerId: PrefixedId<'u'>) {
-  const { className, style, palette } = usePlayerThemed(playerId);
-  const backupColor = useDefaultBgColor();
-  useColorMode();
-
-  const titleColor = !palette
-    ? backupColor
-    : getResolvedColorMode() === 'dark'
-      ? palette.range[11]
-      : palette.range[0];
-  useTitleBarColor(titleColor);
-
-  useLayoutEffect(() => {
-    document.body.classList.add(className);
-    for (const [key, value] of Object.entries(style)) {
-      document.body.style.setProperty(key, value as string);
-    }
-
-    return () => {
-      document.body.classList.remove(className);
-      for (const key of Object.keys(style)) {
-        document.body.style.removeProperty(key);
-      }
-    };
-  }, [className, style]);
-
-  return { className, style, palette };
-}
-
-const PlayerThemeWrapper = withGame<{ children: ReactNode }>(
-  function PlayerThemeWrapper({ gameSuite, children }) {
-    const { palette } = usePlayerThemedPage(gameSuite.playerId);
-
-    return (
-      <TopographyProvider value={{ palette: palette ?? null }}>
-        {children}
-      </TopographyProvider>
-    );
-  },
-);
-
-function useHotseatState(gameSuite: AbstractGameSuite<any>, hotseat: boolean) {
-  const [showPlayerSelector, setShowPlayerSelector] = useState(false);
-
-  useEffect(() => {
-    if (!hotseat) return;
-
-    return gameSuite.subscribe('turnPlayed', () => {
-      setShowPlayerSelector(true);
-    });
-  }, [gameSuite, hotseat]);
-  useEffect(
-    () =>
-      gameSuite.subscribe('playerChanged', () => {
-        setShowPlayerSelector(false);
-      }),
-    [gameSuite],
-  );
-
-  return { showPlayerSelector };
-}
-
 const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
   function GameSessionRendererInner({ gameSuite, hotseat }) {
-    const { showPlayerSelector } = useHotseatState(gameSuite, hotseat);
     return (
       <>
         {gameSuite.gameStatus.status === 'complete' && (
@@ -155,7 +79,7 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
             </ScrollTicker>
           </Box>
         )}
-        {showPlayerSelector ? (
+        {gameSuite.pickingPlayer ? (
           <HotseatPlayerSelector />
         ) : (
           <GameplayRenderer hotseat={hotseat} />

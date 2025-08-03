@@ -81,15 +81,22 @@ export class HotseatGameSuite<
   > => {
     return this.ctx.backend.getRound(this.playerId, roundIndex);
   };
-  protected actuallySubmitTurn = (
+  protected actuallySubmitTurn = async (
     data: GetTurnData<TGame>,
   ): Promise<BaseTurnError | void> => {
     console.log(`Submitting turn for round ${this.latestRoundIndex}`, data);
-    return this.ctx.backend.submitTurn({
+    const error = await this.ctx.backend.submitTurn({
       data,
       playerId: this.playerId,
       roundIndex: this.latestRoundIndex,
       createdAt: new Date().toISOString(),
+    });
+    if (error) {
+      return error;
+    }
+    // turn was submitted, back to picking player.
+    runInAction(() => {
+      this.pickingPlayer = true;
     });
   };
   protected actuallySendChat = async (
@@ -158,6 +165,7 @@ export class HotseatGameSuite<
   };
   @action switchPlayer = (playerId: PrefixedId<'u'>) => {
     this.playerId = playerId;
+    this.pickingPlayer = false;
     localStorage.setItem(`hotseat-last-player:${this.gameSessionId}`, playerId);
     this.events.emit('playerChanged', playerId);
   };
