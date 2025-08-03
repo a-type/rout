@@ -1,3 +1,4 @@
+import { Wordmark } from '@/components/brand/Wordmark';
 import { CreateHotseat } from '@/components/games/CreateHotseat';
 import { GameIcon } from '@/components/games/GameIcon';
 import { GameManual } from '@/components/games/GameManual';
@@ -15,7 +16,7 @@ import {
   PageNowPlaying,
   PageRoot,
 } from '@a-type/ui';
-import { TopographyBackground } from '@long-game/game-ui';
+import { ScrollTicker, TopographyBackground } from '@long-game/game-ui';
 import { Link, useParams } from '@verdant-web/react-router';
 
 const PublicGamePage = () => {
@@ -25,11 +26,16 @@ const PublicGamePage = () => {
   return (
     <PageRoot className="h-auto">
       <TopographyBackground className="fixed" />
-      <PageContent className="pb-25vh">
+      <PageContent>
+        <Box gap p>
+          <Link to="https://rout.games">
+            <Wordmark className="text-lg" />
+          </Link>
+        </Box>
         {!!game.screenshots?.length && (
           <GameScreenshotGallery
             gameId={gameId}
-            className="w-full max-h-60vh"
+            className="w-full max-h-60vh mb-xl"
           />
         )}
         <Box gap>
@@ -47,6 +53,17 @@ const PublicGamePage = () => {
           <GameManual gameId={gameId} />
         </ErrorBoundary>
 
+        <Box justify="between" full="width" className="text-xs mt-25vh">
+          <Box col gap>
+            <div className="font-fancy text-bold">Rout!</div>
+            <div>© 2025 Grant Forrest</div>
+          </Box>
+          <Box col gap>
+            <a href="https://rout.games/privacy">Privacy Policy</a>
+            <a href="https://rout.games/tos">Terms of Service</a>
+          </Box>
+        </Box>
+
         <PageNowPlaying
           unstyled
           className="flex flex-row items-center justify-center"
@@ -62,6 +79,9 @@ const PublicGamePage = () => {
           </Button>
         </PageNowPlaying>
       </PageContent>
+      <ScrollTicker className="bg-accent color-accent-ink w-full relative z-1 p-sm font-bold uppercase">
+        Never lose touch
+      </ScrollTicker>
     </PageRoot>
   );
 };

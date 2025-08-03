@@ -7,16 +7,6 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [UnoCSS(), react()],
-  optimizeDeps: {
-    exclude: ['@a-type/ui'],
-    include: [
-      'react/jsx-runtime',
-      'react',
-      'react-dom',
-      'react-dom/client',
-      '@a-type/ui > formik',
-    ],
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
