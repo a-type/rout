@@ -33,7 +33,7 @@ import { GameModuleContext } from '../federation/gameModuleContext.js';
 
 // combines the data from the GameSession table and the
 // basic data in GameSession DO from the backend.
-type HotseatGameDetails = {
+export type HotseatGameDetails = {
   gameSessionId: PrefixedId<'gs'>;
   gameId: string;
   gameVersion: string;
@@ -69,12 +69,18 @@ interface GameManagerSchema extends DBSchema {
   sessions: {
     key: PrefixedId<'gs'>;
     value: HotseatGameDetails;
+    indexes: { status: 'pending' | 'active' | 'complete' | 'abandoned' };
   };
 }
 const getManagementDb = () =>
   openDB<GameManagerSchema>('hotseat-list', 1, {
     upgrade(db) {
-      db.createObjectStore('sessions', { keyPath: 'gameSessionId' });
+      const sessions = db.createObjectStore('sessions', {
+        keyPath: 'gameSessionId',
+      });
+      sessions.createIndex('status', 'status', {
+        unique: false,
+      });
     },
   });
 
@@ -161,9 +167,18 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     });
   };
 
-  static list = async () => {
+  static list = async (
+    status?: 'pending' | 'active' | 'complete' | 'abandoned',
+  ) => {
     const db = await getManagementDb();
-    return await db.getAll('sessions');
+    let sessions;
+    if (status) {
+      sessions = await db.getAllFromIndex('sessions', 'status', status);
+    }
+    sessions = await db.getAll('sessions');
+    return sessions.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   };
 
   static delete = async (sessionId: PrefixedId<'gs'>) => {
@@ -305,15 +320,18 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     );
     const turns = await this.db.getAll('turns');
     const globalState = this.cache.getState(groupTurnsToRounds(turns));
-    const { roundIndex, pendingTurns } = gameDefinition.getRoundIndex({
-      currentTime: new Date(),
-      environment: 'production',
-      gameTimeZone: 'UTC',
-      globalState,
-      members: details.members,
-      startedAt: new Date(details.startedAt || details.createdAt),
-      turns,
-    });
+    const { roundIndex, pendingTurns } =
+      details.status === 'pending'
+        ? { roundIndex: -1, pendingTurns: [] }
+        : gameDefinition.getRoundIndex({
+            currentTime: new Date(),
+            environment: 'production',
+            gameTimeZone: 'UTC',
+            globalState,
+            members: details.members,
+            startedAt: new Date(details.startedAt || details.createdAt),
+            turns,
+          });
     const playerStatuses = Object.fromEntries(
       details.members.map((member) => [
         member.id,
@@ -410,9 +428,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
   getGlobalState = async (roundIndex: number) => {
     const turns = await this.#getTurnsUpToRound(roundIndex);
     const rounds = groupTurnsToRounds(turns);
-    console.log('Rounds for round index', roundIndex, rounds);
     const globalState = this.cache.getState(rounds);
-    console.log('Global state for round', roundIndex, globalState);
     return { rounds, globalState };
   };
   getPlayerState = async (playerId: PrefixedId<'u'>, roundIndex: number) => {
@@ -444,7 +460,6 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       playerId,
       roundIndex - 1,
     );
-    console.log('playerstate', initialPlayerState);
     return {
       roundIndex,
       turns: turns.map((turn) => {
@@ -552,7 +567,6 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       members: details.members,
     });
     if (status !== details.status) {
-      console.log('Status change:', status);
       this.emit('statusChange', {
         type: 'statusChange',
         status,

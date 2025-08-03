@@ -12,7 +12,7 @@ import {
   GetPublicTurnData,
   GetTurnData,
 } from '@long-game/game-definition';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { HotseatBackend } from '../hotseat/HotseatBackend.js';
 import { AbstractGameSuite, GameSuiteBaseInit } from './AbstractGameSuite.js';
@@ -43,10 +43,12 @@ export class HotseatGameSuite<
     },
   ) {
     super(init, { gameModules: ctx.gameModules });
-    this.playerId =
-      (localStorage.getItem(`hotseat-last-player:${init.id}`) as
-        | PrefixedId<'u'>
-        | undefined) || init.playerId;
+    runInAction(() => {
+      this.playerId =
+        (localStorage.getItem(`hotseat-last-player:${init.id}`) as
+          | PrefixedId<'u'>
+          | undefined) || init.playerId;
+    });
     this.ctx.backend.subscribe('chat', this.onChat);
     this.ctx.backend.subscribe('gameChange', this.onGameChange);
     this.ctx.backend.subscribe('roundChange', this.onRoundChange);

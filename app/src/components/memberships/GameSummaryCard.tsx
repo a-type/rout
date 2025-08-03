@@ -19,7 +19,7 @@ import { UserAvatar } from '../users/UserAvatar.js';
 import { GameSessionStatusChip } from './GameSessionStatusChip.js';
 
 export interface GameSummaryCardProps {
-  session: GameSession;
+  session: Pick<GameSession, 'id' | 'gameId' | 'status' | 'canDelete'>;
   className?: string;
 }
 

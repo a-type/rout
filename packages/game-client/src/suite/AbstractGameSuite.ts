@@ -149,7 +149,7 @@ export abstract class AbstractGameSuite<
     this.applyGameData(init);
 
     if (init.status.status === 'complete') {
-      this.loadPostgame();
+      setTimeout(() => this.loadPostgame(), 0);
     }
   }
 

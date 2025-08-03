@@ -3,6 +3,7 @@ import { gameModules, getFederatedGameComponent } from '@/services/games';
 import {
   Box,
   Button,
+  clsx,
   ErrorBoundary,
   getResolvedColorMode,
   H1,
@@ -183,7 +184,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
 
     return (
       <RendererProvider value={renderProviderValue}>
-        <DndRoot className="w-full h-full flex flex-col">
+        <DndRoot className="w-full flex-1-0-0 min-h-0 flex flex-col">
           <GameLayout>
             <GameLayout.Main>
               <Suspense
@@ -245,7 +246,12 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
             <Button
               key={member.id}
               onClick={() => gameSuite.switchPlayer(member.id)}
-              className="p-0 rounded-full"
+              className={clsx('p-0 rounded-full')}
+              color={
+                gameSuite.playerStatuses[member.id]?.pendingTurn
+                  ? 'default'
+                  : 'ghost'
+              }
             >
               <PlayerAvatar
                 playerId={member.id}
@@ -255,9 +261,14 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
               <Box gap="sm" col items="start">
                 <PlayerName playerId={member.id} disableYou />
                 <div className="text-xs color-gray-dark">
+                  {/* FIXME: clean up */}
                   {gameSuite.playerStatuses[member.id]?.pendingTurn
-                    ? 'Yet to play'
-                    : 'Played'}
+                    ? 'Your turn!'
+                    : gameSuite.latestRound.turns.find(
+                          (t) => t.playerId === member.id,
+                        )
+                      ? 'Played'
+                      : 'Not playing'}
                 </div>
               </Box>
             </Button>

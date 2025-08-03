@@ -5,6 +5,10 @@ export * from './api/index.js';
 export { type GameModuleContext } from './federation/gameModuleContext.js';
 export * from './fetch.js';
 export * from './hooks/useDebounce.js';
+export {
+  HotseatBackend,
+  type HotseatGameDetails,
+} from './hotseat/HotseatBackend.js';
 export * from './queryClient.js';
 export { type AbstractGameSuite } from './suite/AbstractGameSuite.js';
 export type { GameSessionSuite, PlayerInfo } from './suite/GameSessionSuite.js';

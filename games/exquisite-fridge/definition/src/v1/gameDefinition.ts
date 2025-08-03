@@ -246,12 +246,15 @@ export const gameDefinition: GameDefinition<
     return { ...turn, data: {} };
   },
 
-  getStatus: ({ globalState, rounds }) => {
+  getStatus: ({ globalState, rounds, members }) => {
     if (rounds.length >= ROUND_COUNT) {
-      return {
-        status: 'complete',
-        winnerIds: [],
-      };
+      const thisRound = rounds[rounds.length - 1];
+      if (thisRound.turns.length >= members.length) {
+        return {
+          status: 'complete',
+          winnerIds: [],
+        };
+      }
     }
 
     return {
