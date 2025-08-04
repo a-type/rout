@@ -132,12 +132,12 @@ export function isPassTurn(data: TurnData): data is PassTurnData {
   return (data as PassTurnData).pass !== undefined;
 }
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  TurnData,
-  TurnData
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: TurnData;
+  PublicTurnData: TurnData;
+}> = {
   version: 'v1.0',
   minimumPlayers: 3,
   maximumPlayers: 5,

@@ -79,12 +79,12 @@ export type TurnData = {
   taskCompletions: TaskCompletion[];
 };
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  TurnData,
-  {}
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: TurnData;
+  PublicTurnData: {};
+}> = {
   version: 'v1.0',
   minimumPlayers: 2,
   maximumPlayers: 10,

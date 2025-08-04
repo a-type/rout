@@ -29,12 +29,12 @@ export type TurnData = {
   nextItemAssignments?: Record<PlayerId, string[]>;
 };
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  TurnData,
-  TurnData
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: TurnData;
+  PublicTurnData: TurnData;
+}> = {
   version: 'v1.0',
   minimumPlayers: 1,
   maximumPlayers: 10,

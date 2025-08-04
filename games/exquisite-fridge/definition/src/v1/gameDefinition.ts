@@ -34,14 +34,14 @@ export type TurnData = {
 // optional: extend the validation error type with your own metadata
 export type TurnError = BaseTurnError;
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  TurnData,
-  {},
-  TurnError,
-  TurnData
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: TurnData;
+  PublicTurnData: {};
+  TurnError: TurnError;
+  InitialTurnData: TurnData;
+}> = {
   version: 'v1.0',
   minimumPlayers: 2,
   maximumPlayers: 10,

@@ -9,7 +9,7 @@ export * from './stateCache.js';
 export type * from './utilTypes.js';
 
 export interface GameModule {
-  versions: GameDefinition<any, any, any, any, any, any>[];
+  versions: GameDefinition<any>[];
   id: string;
   title: string;
   description?: string;

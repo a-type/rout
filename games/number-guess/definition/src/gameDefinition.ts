@@ -21,12 +21,12 @@ export type PublicMoveData = {
   result?: 'tooLow' | 'tooHigh' | 'correct';
 };
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  MoveData,
-  PublicMoveData
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: MoveData;
+  PublicTurnData: PublicMoveData;
+}> = {
   version: 'v1.0',
   minimumPlayers: 1,
   maximumPlayers: 100,
@@ -62,8 +62,8 @@ export const gameDefinition: GameDefinition<
           lastGuess.data.guess === globalState.secretNumber
             ? 'correct'
             : lastGuess.data.guess < globalState.secretNumber
-            ? 'tooLow'
-            : 'tooHigh',
+              ? 'tooLow'
+              : 'tooHigh',
       };
     }
   },
@@ -85,8 +85,8 @@ export const gameDefinition: GameDefinition<
           turn.data.guess === globalState.secretNumber
             ? 'correct'
             : turn.data.guess < globalState.secretNumber
-            ? 'tooLow'
-            : 'tooHigh',
+              ? 'tooLow'
+              : 'tooHigh',
       },
     };
   },
@@ -137,8 +137,8 @@ export const gameDefinition: GameDefinition<
             memberTurn?.data.guess === data.globalState.secretNumber
               ? 'correct'
               : memberTurn?.data.guess < data.globalState.secretNumber
-              ? 'too low'
-              : 'too high'
+                ? 'too low'
+                : 'too high'
           }`,
         });
       });

@@ -10,6 +10,15 @@ import {
 } from '@long-game/common';
 import { GameRandom, GameRandomState } from './random.js';
 import { RoundIndexDecider } from './rounds.js';
+import {
+  ConfigGlobalState,
+  ConfigInitialTurnData,
+  ConfigPlayerState,
+  ConfigPublicTurnData,
+  ConfigTurnData,
+  ConfigTurnError,
+  GameDefinitionConfig,
+} from './utilTypes.js';
 
 // back compat
 export type { BaseTurnData, LocalTurn, Turn };
@@ -29,12 +38,7 @@ export type BaseTurnError = {
 };
 
 export type GameDefinition<
-  GlobalState = any,
-  PlayerState = any,
-  TurnData extends BaseTurnData = any,
-  PublicTurnData extends BaseTurnData = TurnData,
-  TurnError extends BaseTurnError = BaseTurnError,
-  InitialTurnData extends BaseTurnData | null = null,
+  Config extends GameDefinitionConfig = GameDefinitionConfig,
 > = {
   // Metadata
   version: `v${number}.${number}`;
@@ -52,11 +56,11 @@ export type GameDefinition<
    * Returns an error message if the moves are invalid.
    */
   validateTurn: (data: {
-    playerState: PlayerState;
-    turn: LocalTurn<TurnData>;
+    playerState: ConfigPlayerState<Config>;
+    turn: LocalTurn<ConfigTurnData<Config>>;
     roundIndex: number;
     members: GameMember[];
-  }) => TurnError | string | void;
+  }) => ConfigTurnError<Config> | string | void;
   /**
    * Like `validateTurn`, but for incomplete turns. If a player's
    * turn includes multiple steps or moves, this can be used to
@@ -74,11 +78,11 @@ export type GameDefinition<
    * they exist in `validateTurn`. Or storing multiple moves in an array.
    */
   validatePartialTurn?: (data: {
-    playerState: PlayerState;
-    turn: LocalTurn<TurnData>;
+    playerState: ConfigPlayerState<Config>;
+    turn: LocalTurn<ConfigTurnData<Config>>;
     roundIndex: number;
     members: GameMember[];
-  }) => TurnError | string | void;
+  }) => ConfigTurnError<Config> | string | void;
 
   /**
    * Provide an empty/default turn object that conforms to your
@@ -86,7 +90,7 @@ export type GameDefinition<
    * providing the convenience of not always having to check if the
    * turn data is empty and initializing it yourself.
    */
-  getInitialTurn?: () => InitialTurnData;
+  getInitialTurn?: () => ConfigInitialTurnData<Config>;
 
   /**
    * Returns the player state as it would be if the player made the move.
@@ -97,9 +101,9 @@ export type GameDefinition<
    */
   getProspectivePlayerState: (data: {
     playerId: PrefixedId<'u'>;
-    playerState: PlayerState;
-    prospectiveTurn: LocalTurn<TurnData>;
-  }) => PlayerState;
+    playerState: ConfigPlayerState<Config>;
+    prospectiveTurn: LocalTurn<ConfigTurnData<Config>>;
+  }) => ConfigPlayerState<Config>;
 
   // SERVER ONLY
 
@@ -115,13 +119,13 @@ export type GameDefinition<
   getInitialGlobalState: (data: {
     random: GameRandom;
     members: GameMember[];
-  }) => GlobalState;
+  }) => ConfigGlobalState<Config>;
   /**
    * This is the player's view of the game state. It should be deterministically
    * computed from global state.
    */
   getPlayerState: (data: {
-    globalState: GlobalState;
+    globalState: ConfigGlobalState<Config>;
     playerId: PrefixedId<'u'>;
     members: GameMember[];
     /**
@@ -132,19 +136,19 @@ export type GameDefinition<
      * information about other players' moves. If you really need this
      * maybe we can include it as a separate parameter just to be safe?
      */
-    rounds: GameRound<Turn<TurnData>>[];
-    playerTurn: Turn<TurnData> | null;
+    rounds: GameRound<Turn<ConfigTurnData<Config>>>[];
+    playerTurn: Turn<ConfigTurnData<Config>> | null;
     /** easier than counting rounds */
     roundIndex: number;
-  }) => PlayerState;
+  }) => ConfigPlayerState<Config>;
 
   applyRoundToGlobalState: (data: {
-    globalState: GlobalState;
-    round: GameRound<Turn<TurnData>>;
+    globalState: ConfigGlobalState<Config>;
+    round: GameRound<Turn<ConfigTurnData<Config>>>;
     random: GameRandom;
     members: GameMember[];
     roundIndex: number;
-  }) => GlobalState;
+  }) => ConfigGlobalState<Config>;
 
   /**
    * This is the public view of a turn, visible to all players
@@ -153,18 +157,18 @@ export type GameDefinition<
    * a player their own move in a different way from others'.
    */
   getPublicTurn: (data: {
-    turn: Turn<TurnData>;
-    globalState: GlobalState;
+    turn: Turn<ConfigTurnData<Config>>;
+    globalState: ConfigGlobalState<Config>;
     viewerId: PrefixedId<'u'>;
-  }) => Turn<PublicTurnData>;
+  }) => Turn<ConfigPublicTurnData<Config>>;
   /**
    * globalState is the computed current state. moves are provided
    * for reference only, you do not need to recompute the current
    * state.
    */
   getStatus: (data: {
-    globalState: GlobalState;
-    rounds: GameRound<Turn<TurnData>>[];
+    globalState: ConfigGlobalState<Config>;
+    rounds: GameRound<Turn<ConfigTurnData<Config>>>[];
     members: GameMember[];
   }) => GameStatus;
   /**
@@ -172,7 +176,10 @@ export type GameDefinition<
    * - Periodic rounds based on some set time interval
    * - Rounds advance when all players submit turns
    */
-  getRoundIndex: RoundIndexDecider<GlobalState, TurnData>;
+  getRoundIndex: RoundIndexDecider<
+    ConfigGlobalState<Config>,
+    ConfigTurnData<Config>
+  >;
 
   /**
    * Optionally customize the message sent to players when the round changes.
@@ -181,14 +188,16 @@ export type GameDefinition<
    * part of your game UI.
    */
   getRoundChangeMessages?: (data: {
-    globalState: GlobalState;
-    rounds: GameRound<Turn<TurnData>>[];
+    globalState: ConfigGlobalState<Config>;
+    rounds: GameRound<Turn<ConfigTurnData<Config>>>[];
     members: GameMember[];
     roundIndex: number;
-    newRound: GameRound<Turn<TurnData>>;
-    completedRound: GameRound<Turn<TurnData>> | null;
+    newRound: GameRound<Turn<ConfigTurnData<Config>>>;
+    completedRound: GameRound<Turn<ConfigTurnData<Config>>> | null;
   }) => SystemChatMessage[];
 };
+
+export type AnyGameDefinition = GameDefinition<GameDefinitionConfig>;
 
 export function validateGameDefinition(game: GameDefinition) {
   // no-op, for now

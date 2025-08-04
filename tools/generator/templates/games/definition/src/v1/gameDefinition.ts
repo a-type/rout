@@ -19,13 +19,19 @@ export type TurnData = {
 // optional: extend the validation error type with your own metadata
 export type TurnError = BaseTurnError;
 
-export const gameDefinition: GameDefinition<
-  GlobalState,
-  PlayerState,
-  TurnData,
-  TurnData,
-  TurnError
-> = {
+export const gameDefinition: GameDefinition<{
+  GlobalState: GlobalState;
+  PlayerState: PlayerState;
+  TurnData: TurnData;
+  PublicTurnData: TurnData;
+  TurnError: TurnError;
+  // optional: define an initial turn data type and getInitialTurnData
+  // this is nice if you don't want to always have _some_ data in the turn
+  // at all times, rather than checking if turn data is null / the user hasn't played yet.
+  // mostly useful for the "update" version of prepare/submit turn, which takes the previous
+  // value -- specifying the initial turn means that value will always be defined.
+  // InitialTurnData: TurnData;
+}> = {
   version: 'v1.0',
   minimumPlayers: 2,
   maximumPlayers: 10,

@@ -26,9 +26,9 @@ import {
   ServerTurnPlayedMessage,
 } from '@long-game/common';
 import {
+  AnyGameDefinition,
   BaseTurnError,
   emptyGameDefinition,
-  GameDefinition,
   GameMember,
   GetGlobalState,
   GetPlayerState,
@@ -78,9 +78,7 @@ export interface GameSuiteBaseInit {
   nextRoundCheckAt?: Date | string | number | null;
 }
 
-export abstract class AbstractGameSuite<
-  TGame extends GameDefinition<any, any, any, any, any, any>,
-> {
+export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   protected instanceId = Math.random().toString(36).slice(2);
 
   @observable accessor localTurnData!: GetTurnData<TGame> | null | undefined;
@@ -426,7 +424,12 @@ export abstract class AbstractGameSuite<
       }
       // otherwise we should validate the reset turn.
       const toValidate = this.gameDefinition.getInitialTurn?.() ?? null;
-      const err = this.validateTurn(toValidate);
+      if (!toValidate) {
+        return simpleError(
+          'You submitted an empty turn',
+        ) as GetTurnError<TGame>;
+      }
+      const err = this.validateTurn(toValidate as any);
       if (typeof err === 'string') {
         return simpleError(err) as GetTurnError<TGame>;
       }

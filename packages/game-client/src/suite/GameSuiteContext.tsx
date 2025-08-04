@@ -26,9 +26,7 @@ export function useGameSuite<TGame extends GameDefinition>() {
   return suite as AbstractGameSuite<TGame>;
 }
 
-export function typedHooks<
-  TGame extends GameDefinition<any, any, any, any, any, any>,
->() {
+export function typedHooks<TGame extends GameDefinition<any>>() {
   function useGameSuiteTyped() {
     return useGameSuite<TGame>();
   }

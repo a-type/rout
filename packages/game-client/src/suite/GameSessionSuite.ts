@@ -5,8 +5,8 @@ import {
   PrefixedId,
 } from '@long-game/common';
 import {
+  AnyGameDefinition,
   BaseTurnError,
-  GameDefinition,
   GetTurnData,
 } from '@long-game/game-definition';
 import { runInAction } from 'mobx';
@@ -28,7 +28,7 @@ export type PlayerInfo = {
  * Implements AbstractGameSuite against a backend game session.
  */
 export class GameSessionSuite<
-  TGame extends GameDefinition<any, any, any, any, any, any>,
+  TGame extends AnyGameDefinition,
 > extends AbstractGameSuite<TGame> {
   static load = async (
     gameSessionId: PrefixedId<'gs'>,

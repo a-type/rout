@@ -4,8 +4,8 @@ import {
   PrefixedId,
 } from '@long-game/common';
 import {
+  AnyGameDefinition,
   BaseTurnError,
-  GameDefinition,
   GameMember,
   GetGlobalState,
   GetPlayerState,
@@ -18,7 +18,7 @@ import { HotseatBackend } from '../hotseat/HotseatBackend.js';
 import { AbstractGameSuite, GameSuiteBaseInit } from './AbstractGameSuite.js';
 
 export class HotseatGameSuite<
-  TGame extends GameDefinition<any, any, any, any, any, any>,
+  TGame extends AnyGameDefinition,
 > extends AbstractGameSuite<TGame> {
   static load = async (
     gameSessionId: PrefixedId<'gs'>,

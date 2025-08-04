@@ -19,7 +19,11 @@ type TurnData = { value: string };
 function createCache() {
   // this test game is designed to expose the determinism aspects of computation
   // for assertions.
-  const game: GameDefinition<GlobalState, any, TurnData> = {
+  const game: GameDefinition<{
+    GlobalState: GlobalState;
+    PlayerState: any;
+    TurnData: TurnData;
+  }> = {
     version: 'v1.0',
     minimumPlayers: 0,
     maximumPlayers: 100,
