@@ -805,7 +805,6 @@ export abstract class AbstractGameSuite<
   @action protected onPlayerStatusChange = (
     msg: ServerPlayerStatusChangeMessage,
   ) => {
-    console.log('incoming player status change', msg);
     this.playerStatuses[msg.playerId] = {
       ...this.playerStatuses[msg.playerId],
       ...msg.playerStatus,
@@ -828,7 +827,6 @@ export abstract class AbstractGameSuite<
       // update player statuses
       for (const [id, status] of Object.entries(msg.playerStatuses)) {
         if (status && isPrefixedId(id, 'u')) {
-          console.log('updating player status', id, status);
           this.playerStatuses[id] = status;
         }
       }
@@ -838,7 +836,6 @@ export abstract class AbstractGameSuite<
   };
 
   @action protected onStatusChange = (msg: ServerStatusChangeMessage) => {
-    console.log('incoming status', msg.status);
     this.gameStatus = msg.status;
     // prefetch postgame when status is completed
     if (msg.status.status === 'complete') {
@@ -957,7 +954,6 @@ export abstract class AbstractGameSuite<
     this.viewingRoundIndex = init.currentRoundIndex;
     this.latestRoundIndex = init.currentRoundIndex;
     this.localTurnData = undefined;
-    console.log('playerStatues', init.playerStatuses);
     this.playerStatuses = init.playerStatuses;
     this.gameId = init.gameId;
     this.gameVersion = init.gameVersion;
