@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+const API_ORIGIN = process.env.API_ORIGIN || 'http://localhost:3101';
+
 const numberGuessGameData = {
   url: 'http://localhost:3333/game-modules/number_guess',
   id: 'number-guess',
@@ -25,22 +27,19 @@ test.beforeEach(async ({ page }) => {
     }
   });
   // mock games API
-  await page.route(`http://localhost:3101/games`, async (route) => {
+  await page.route(`${API_ORIGIN}/games`, async (route) => {
     await route.fulfill({
       json: {
         'number-guess': numberGuessGameData,
       },
     });
   });
-  await page.route(
-    `http://localhost:3101/games/number-guess`,
-    async (route) => {
-      await route.fulfill({
-        json: numberGuessGameData,
-      });
-    },
-  );
-  await page.route(`http://localhost:3101/users/me`, async (route) => {
+  await page.route(`${API_ORIGIN}/games/number-guess`, async (route) => {
+    await route.fulfill({
+      json: numberGuessGameData,
+    });
+  });
+  await page.route(`${API_ORIGIN}/users/me`, async (route) => {
     await route.fulfill({
       json: null, // no user logged in
     });

@@ -29,6 +29,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Run Playwright tests
         run: pnpm exec playwright test
+        env:
+          API_ORIGIN: https://api.rout.games
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
