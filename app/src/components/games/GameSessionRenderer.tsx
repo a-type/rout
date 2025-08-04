@@ -23,7 +23,7 @@ import {
   RendererProvider,
   SpatialChatDraggable,
 } from '@long-game/game-ui';
-import { Suspense, useMemo } from 'react';
+import { startTransition, Suspense, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameAbandonedNotice } from './GameAbandonedNotice.js';
@@ -169,7 +169,11 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
           {members.map((member) => (
             <Button
               key={member.id}
-              onClick={() => gameSuite.switchPlayer(member.id)}
+              onClick={() => {
+                startTransition(() => {
+                  gameSuite.switchPlayer(member.id);
+                });
+              }}
               className={clsx('p-0 rounded-full')}
               color={
                 gameSuite.playerStatuses[member.id]?.pendingTurn

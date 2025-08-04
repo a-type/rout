@@ -40,7 +40,13 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
 
   if (!latestMessage) {
     return (
-      <Box direction="row" gap="sm" p="none" items="center">
+      <Box
+        direction="row"
+        gap="sm"
+        p="none"
+        items="center"
+        data-testid="game-log-collapsed-trigger"
+      >
         <PlayerAvatar playerId={selfId} />
         <span>Start chatting...</span>
       </Box>
@@ -55,7 +61,10 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
         'chat',
       ) || DefaultChatMessage;
     return (
-      <div className="absolute top-full left-0 right-xs">
+      <div
+        className="absolute top-full left-0 right-xs"
+        data-testid="game-log-collapsed-trigger"
+      >
         <div className="relative -top-32px w-full">
           <ChatMessage
             message={latestMessage.chatMessage}
@@ -103,6 +112,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
               }
             }}
             className="w-full font-normal h-32px rounded-xs p-0"
+            aria-label="Open Game Log"
           >
             <GameLogCollapsedTriggerContent />
           </Button>

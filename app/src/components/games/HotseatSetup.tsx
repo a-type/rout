@@ -1,4 +1,11 @@
-import { Box, clsx, H1, LiveUpdateTextField, NumberStepper } from '@a-type/ui';
+import {
+  Box,
+  clsx,
+  H1,
+  H2,
+  LiveUpdateTextField,
+  NumberStepper,
+} from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { HotseatGameSuite, withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
@@ -41,6 +48,7 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
 const HotseatPlayerSetup = withGame(function HotseatPlayerSetup({ gameSuite }) {
   return (
     <Box d="col" gap>
+      <H2>Players</H2>
       <NumberStepper
         value={gameSuite.members.length}
         min={gameSuite.gameDefinition.minimumPlayers}
@@ -48,6 +56,7 @@ const HotseatPlayerSetup = withGame(function HotseatPlayerSetup({ gameSuite }) {
         onChange={(val) => {
           (gameSuite as HotseatGameSuite<any>).backend.setMemberCount(val);
         }}
+        data-testid="hotseat-player-count"
       />
       {gameSuite.members.map((player) => (
         <HotseatPlayerEntry key={player.id} playerId={player.id} />

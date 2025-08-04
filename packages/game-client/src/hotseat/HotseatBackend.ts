@@ -414,6 +414,34 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       type: 'gameChange',
     });
   };
+  setSeed = async (seed: string) => {
+    const details = await this.getDetails();
+    if (details.status.status !== 'pending') {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot change seed after game has started',
+      );
+    }
+    if (!seed) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Seed cannot be empty',
+      );
+    }
+    if (seed === details.randomSeed) {
+      return; // no change
+    }
+    await this.updateDetails({
+      randomSeed: seed,
+    });
+    this.cache = new GameStateCache(this.gameDefinition, {
+      randomSeed: seed,
+      members: details.members,
+    });
+    this.emit('gameChange', {
+      type: 'gameChange',
+    });
+  };
   startGame = async () => {
     const details = await this.getDetails();
     if (details.status.status !== 'pending') {

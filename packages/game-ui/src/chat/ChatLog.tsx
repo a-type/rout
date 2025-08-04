@@ -71,6 +71,7 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
       col
       items="stretch"
       className={clsx('pt-md', className)}
+      data-testid="game-log"
       {...props}
       {...scrollProps}
     >
