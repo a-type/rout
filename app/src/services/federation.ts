@@ -2,6 +2,7 @@ import {
   registerPlugins,
   type ModuleFederationRuntimePlugin,
 } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const runtimePlugin: () => ModuleFederationRuntimePlugin = function () {
   return {
@@ -36,4 +37,16 @@ const runtimePlugin: () => ModuleFederationRuntimePlugin = function () {
   };
 };
 
-registerPlugins([runtimePlugin()]);
+registerPlugins([
+  // runtimePlugin(),
+  RetryPlugin({
+    fetch: {
+      retryTimes: 3,
+      retryDelay: 300,
+    },
+    script: {
+      retryTimes: 3,
+      retryDelay: 800,
+    },
+  }),
+]);

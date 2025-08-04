@@ -117,7 +117,7 @@ const defaultGameDetails = (
   status: 'pending',
   winnerIds: null,
   gameSessionId: sessionId,
-  roundIndex: 0,
+  roundIndex: -1,
 });
 
 export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
@@ -437,6 +437,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
           status: 'active',
         },
       });
+      this.checkRoundChange();
     }, 1000);
   };
 

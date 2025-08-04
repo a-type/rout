@@ -157,7 +157,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.7.3(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(unocss@66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2))(postcss@8.5.6)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))
+        version: 2.7.3(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react@19.1.0)(unocss@66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2))(postcss@8.5.6)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))
       '@clack/prompts':
         specifier: 0.9.0
         version: 0.9.0
@@ -221,6 +221,9 @@ importers:
       '@long-game/notifications':
         specifier: workspace:*
         version: link:../packages/notifications
+      '@module-federation/retry-plugin':
+        specifier: ^0.17.1
+        version: 0.17.1
       '@verdant-web/react-router':
         specifier: 'catalog:'
         version: 0.8.0(react@19.1.0)
@@ -2659,6 +2662,9 @@ packages:
       react-dom:
         optional: true
 
+  '@module-federation/retry-plugin@0.17.1':
+    resolution: {integrity: sha512-lI/y0C5PbABiD31I0LYHTN3CkHDXj9uba/wgZ2IiiKi6wY0VWLpZ/A+xn79hGS0ac8ANp2MHofpgIWSRxBl/XA==}
+
   '@module-federation/rsbuild-plugin@0.17.0':
     resolution: {integrity: sha512-4sj9f+9Jo2Am+tBZGxUiDOXok48cjx/cGg+n+QHuvBuoQYqovrC8hSiSn2FOKpaqCP4Vh3Q1Xwi8n/hhk5FSUg==}
     engines: {node: '>=16.0.0'}
@@ -2703,6 +2709,9 @@ packages:
 
   '@module-federation/sdk@0.17.0':
     resolution: {integrity: sha512-tjrNaYdDocHZsWu5iXlm83lwEK8A64r4PQB3/kY1cW1iOvggR2RESLAWPxRJXC2cLF8fg8LDKOBdgERZW1HPFA==}
+
+  '@module-federation/sdk@0.17.1':
+    resolution: {integrity: sha512-nlUcN6UTEi+3HWF+k8wPy7gH0yUOmCT+xNatihkIVR9REAnr7BUvHFGlPJmx7WEbLPL46+zJUbtQHvLzXwFhng==}
 
   '@module-federation/third-party-dts-extractor@0.17.0':
     resolution: {integrity: sha512-1OkHLDgRZBGNH3h2aQ8f2V8g8p3x8DvLD6qzRb1s7P27/oOrKZW8OGxUSOwQ8M2+/R5cwUgRM0+KYeKUD1xa4g==}
@@ -7712,7 +7721,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@a-type/ui@2.7.3(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(unocss@66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2))(postcss@8.5.6)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))':
+  '@a-type/ui@2.7.3(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react@19.1.0)(unocss@66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2))(postcss@8.5.6)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@radix-ui/react-accordion': 1.2.2(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -7751,6 +7760,7 @@ snapshots:
       frimousse: 0.2.0(react@19.1.0)
       motion: 12.23.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       pluralize: 8.0.0
+      react: 19.1.0
       react-hot-toast: 2.4.1(csstype@3.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-is: 19.1.0
       unocss: 66.3.3(@unocss/webpack@66.3.3(webpack@5.100.2))(postcss@8.5.6)(vite@6.3.2(@types/node@22.14.0)(jiti@2.4.2)(terser@5.33.0)(tsx@4.19.2))(vue@3.5.13(typescript@5.8.3))
@@ -9229,6 +9239,10 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
+  '@module-federation/retry-plugin@0.17.1':
+    dependencies:
+      '@module-federation/sdk': 0.17.1
+
   '@module-federation/rsbuild-plugin@0.17.0(@rsbuild/core@1.4.8)(@rspack/core@1.4.8(@swc/helpers@0.5.17))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(webpack@5.100.2(esbuild@0.17.19))':
     dependencies:
       '@module-federation/enhanced': 0.17.0(@rspack/core@1.4.8(@swc/helpers@0.5.17))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(webpack@5.100.2(esbuild@0.17.19))
@@ -9325,6 +9339,8 @@ snapshots:
   '@module-federation/sdk@0.16.0': {}
 
   '@module-federation/sdk@0.17.0': {}
+
+  '@module-federation/sdk@0.17.1': {}
 
   '@module-federation/third-party-dts-extractor@0.17.0':
     dependencies:

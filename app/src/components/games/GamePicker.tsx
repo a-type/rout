@@ -87,6 +87,9 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       return true;
     });
   const filteredGames = filteredGamesIncludingUnowned.filter(([gameId]) => {
+    if (!availableGames) {
+      return true;
+    }
     if (filters.owned && !availableGames?.includes(gameId)) {
       return false;
     }
@@ -149,7 +152,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
         {filteredGames.map(([gameId]) => (
           <GamePickerItem
             gameId={gameId}
-            owned={!!availableGames?.includes(gameId)}
+            owned={!availableGames || !!availableGames?.includes(gameId)}
             isGameLeader={canSelectGame}
             key={gameId}
             selected={value === gameId}

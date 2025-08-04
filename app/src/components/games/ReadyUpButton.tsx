@@ -22,7 +22,7 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
     return (
       <div className={`relative ${className}`}>
         <TopographyButton
-          disabled={insufficientPlayers}
+          disabled={insufficientPlayers || gameSuite.gameId === 'empty'}
           onClick={() => gameSuite.toggleReady()}
           disableTopography={amIReady}
           className="w-full"

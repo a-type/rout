@@ -79,7 +79,7 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
             </ScrollTicker>
           </Box>
         )}
-        {gameSuite.pickingPlayer ? (
+        {gameSuite.gameStatus.status === 'active' && gameSuite.pickingPlayer ? (
           <HotseatPlayerSelector />
         ) : (
           <GameplayRenderer hotseat={hotseat} />

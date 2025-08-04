@@ -49,7 +49,7 @@ export function DelayedSubmitUndo({ className }: DelayedSubmitUndoProps) {
           )}
         >
           <div className="font-bold color-accent-ink">Submitting turn...</div>
-          <Button color="accent" onClick={gameSuite.cancelSubmit}>
+          <Button color="accent" onClick={gameSuite.cancelSubmitTurn}>
             Cancel
           </Button>
           <div className="absolute bottom-0 left-0 right-0 h-3px">
