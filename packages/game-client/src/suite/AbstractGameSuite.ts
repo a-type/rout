@@ -127,7 +127,7 @@ export abstract class AbstractGameSuite<
   @observable accessor readyPlayers: PrefixedId<'u'>[] = [];
 
   // hotseat only
-  @observable accessor pickingPlayer = true;
+  @observable accessor pickingPlayer = false;
 
   // static
   gameModules: GameModuleContext;

@@ -48,6 +48,7 @@ export class HotseatGameSuite<
         (localStorage.getItem(`hotseat-last-player:${init.id}`) as
           | PrefixedId<'u'>
           | undefined) || init.playerId;
+      this.pickingPlayer = true; // show player picker on launch
     });
     this.ctx.backend.subscribe('chat', this.onChat);
     this.ctx.backend.subscribe('gameChange', this.onGameChange);
