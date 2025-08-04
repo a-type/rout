@@ -12,7 +12,10 @@
     "bench": "turbo run bench",
     "gen": "node ./tools/generator/generate.mjs",
     "wrangler": "wrangler",
-    "become-admin": "node ./tools/becomeAdmin.mjs"
+    "become-admin": "node ./tools/becomeAdmin.mjs",
+    "browser-test:server": "pnpm run --filter @long-game/app preview --port 3333",
+    "browser-test:run": "playwright test --config=playwright.config.ts",
+    "browser-test:ui": "pnpm browser-test:run --ui"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +34,8 @@
     "vitest": "catalog:",
     "prettier": "3.5.3",
     "change-case": "5.4.4",
-    "@long-game/uno-config": "workspace:*"
+    "@long-game/uno-config": "workspace:*",
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^24.1.0"
   }
 }

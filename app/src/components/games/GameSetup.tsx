@@ -1,6 +1,6 @@
 import { useGame } from '@/hooks/useGame.js';
 import { sdkHooks } from '@/services/publicSdk.js';
-import { Box, Button, clsx, H1, P, withClassName, withProps } from '@a-type/ui';
+import { Box, Button, clsx, H1, P } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
@@ -14,15 +14,23 @@ export interface GameSetupProps {
   className?: string;
 }
 
-export function GameSetup({ gameSessionId, className }: GameSetupProps) {
+export const GameSetup = withGame<GameSetupProps>(function GameSetup({
+  gameSessionId,
+  className,
+  gameSuite,
+}) {
   const updateGameMutation = sdkHooks.useUpdateGameSession();
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: gameSessionId,
   });
-  const game = useGame(pregame.session.gameId);
+  const game = useGame(gameSuite.gameId);
   const insufficientPlayers =
     pregame.members.length <
     (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
+
+  const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGames({
+    id: gameSessionId,
+  });
 
   return (
     <Box p d="col" gap grow className={clsx('m-auto max-w-800px', className)}>
@@ -30,9 +38,11 @@ export function GameSetup({ gameSessionId, className }: GameSetupProps) {
         <H1>Game Setup</H1>
         <GamePicker
           id="game-picker"
-          value={pregame.session.gameId}
+          value={gameSuite.gameId}
           loading={updateGameMutation.isPending}
           gameSessionId={gameSessionId}
+          sessionCreator={pregame.session.createdBy}
+          availableGames={sessionAvailableGames}
         />
       </Box>
       <GameSetupInviteFriends />
@@ -44,7 +54,7 @@ export function GameSetup({ gameSessionId, className }: GameSetupProps) {
       <GameStartingNotice />
     </Box>
   );
-}
+});
 
 type GameSetupInviteEntryData = {
   id: string;
@@ -140,23 +150,3 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
     </Box>
   );
 });
-
-const PeopleGrid = withClassName(
-  withProps(Box, {
-    gap: true,
-    p: true,
-  }),
-  'flex-wrap',
-);
-
-const PeopleGridItem = withClassName(
-  withProps(Box, {
-    d: 'col',
-    surface: true,
-    p: true,
-    gap: true,
-    items: 'center',
-    border: true,
-  }),
-  'w-20vmin max-w-120px relative rounded-2xl',
-);

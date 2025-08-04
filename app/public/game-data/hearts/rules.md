@@ -1,5 +1,3 @@
-# Hearts
-
 Hearts is a classic competitive trick-taking card game. Players try to avoid winning tricks containing _scored cards_: any card with a heart suit, and the Queen of Spades.
 
 ## Objective

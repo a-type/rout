@@ -17,3 +17,9 @@ vapidKeys.txt
 *storybook.log
 storybook-static
 .__mf__temp
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

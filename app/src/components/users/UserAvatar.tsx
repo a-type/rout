@@ -10,7 +10,14 @@ export interface UserAvatarProps extends AvatarProps {
 
 export const UserAvatar = withSuspense(
   function UserAvatar({ userId, ...rest }: UserAvatarProps) {
-    const { data: user } = sdkHooks.useGetUser({ id: userId });
+    const { data: user } = sdkHooks.useGetUser(
+      { id: userId },
+      {
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 60 * 6,
+      },
+    );
 
     if (!user) {
       return <Avatar {...rest} name="Anonymous" />;

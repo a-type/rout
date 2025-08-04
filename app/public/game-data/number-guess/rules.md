@@ -1,5 +1,3 @@
-# Number Guess
-
 Guess a number from 1 to 100. Sounds easy? Yeah, it is.
 
 This is a test game for Rout mechanics and platform features. If you're playing it, you're either a developer or very mischievous.

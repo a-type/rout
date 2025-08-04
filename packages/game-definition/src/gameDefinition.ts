@@ -1,25 +1,18 @@
 import {
+  BaseTurnData,
   GameRound,
   GameSessionChatInit,
   GameStatus,
+  LocalTurn,
   PlayerColorName,
   PrefixedId,
+  Turn,
 } from '@long-game/common';
 import { GameRandom, GameRandomState } from './random.js';
 import { RoundIndexDecider } from './rounds.js';
 
-export type BaseTurnData = Record<string, unknown>;
-
-export interface LocalTurn<TurnData extends BaseTurnData> {
-  playerId: PrefixedId<'u'>;
-  data: TurnData;
-}
-
-export interface Turn<TurnData extends BaseTurnData>
-  extends LocalTurn<TurnData> {
-  createdAt: string;
-  roundIndex: number;
-}
+// back compat
+export type { BaseTurnData, LocalTurn, Turn };
 
 export type SystemChatMessage = Omit<GameSessionChatInit, 'roundIndex'>;
 

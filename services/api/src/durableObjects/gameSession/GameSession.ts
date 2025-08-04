@@ -6,6 +6,7 @@ import {
   GameSessionChatMessage,
   GameSessionPlayerStatus,
   GameStatus,
+  groupTurnsToRounds,
   id,
   LongGameError,
   PrefixedId,
@@ -319,6 +320,14 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   async voteForGame(playerId: PrefixedId<'u'>, gameId: string) {
+    // if this is the game leader, or if the game has no leader,
+    // we select the game immediately
+    const sessionData = await this.#getSessionData();
+    if (!sessionData.createdBy || sessionData.createdBy === playerId) {
+      await this.updateGame(gameId, getLatestVersion(games[gameId]).version);
+      return;
+    }
+
     await this.#sql.run(
       db
         .insertInto('GameVote')
@@ -766,6 +775,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const status = await this.getStatus();
     const members = await this.getMembers();
     const playerStatuses = await this.getPlayerStatuses();
+    const gameVotes = await this.getGameVotes();
+    const readyPlayers = await this.getReadyPlayers();
     return {
       id: sessionData.id,
       status,
@@ -779,6 +790,8 @@ export class GameSession extends DurableObject<ApiBindings> {
       currentRoundIndex: roundData.roundIndex,
       playerStatuses,
       createdBy: sessionData.createdBy ?? null,
+      gameVotes,
+      readyPlayers,
     };
   }
   async resetGame() {
@@ -1056,16 +1069,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     upToAndIncluding: number;
   }): Promise<GameRound<GameSessionTurn>[]> {
     const turns = await this.#listTurns({ roundLte: upToAndIncluding });
-    return turns.reduce<GameRound<GameSessionTurn>[]>((acc, turn) => {
-      const round = acc[turn.roundIndex] ?? {
-        roundIndex: turn.roundIndex,
-        turns: [],
-      };
-      round.roundIndex = turn.roundIndex;
-      round.turns.push(turn);
-      acc[turn.roundIndex] = round;
-      return acc;
-    }, []);
+    return groupTurnsToRounds(turns);
   }
   async #getGlobalStateUnchecked(
     upToAndIncludingRoundIndex?: number,
@@ -1262,26 +1266,11 @@ export class GameSession extends DurableObject<ApiBindings> {
         this.#sendGameRoundChangeMessages(roundState.roundIndex);
       } else {
         // notify players of round change
-        const members = await this.getMembers();
-        for (const member of members) {
-          this.#socketHandler.send(
-            {
-              type: 'roundChange',
-              completedRound: await this.getPublicRound(
-                member.id,
-                roundState.roundIndex - 1,
-              ),
-              newRound: await this.getPublicRound(
-                member.id,
-                roundState.roundIndex,
-              ),
-              playerStatuses: await this.getPlayerStatuses(),
-            },
-            {
-              to: [member.id],
-            },
-          );
-        }
+        this.#socketHandler.send({
+          type: 'roundChange',
+          newRoundIndex: roundState.roundIndex,
+          playerStatuses: await this.getPlayerStatuses(),
+        });
         this.#sendGameRoundChangeMessages(roundState.roundIndex);
       }
     }

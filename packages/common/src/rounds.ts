@@ -1,5 +1,18 @@
 import { z } from 'zod';
-import { idShapes } from './ids.js';
+import { idShapes, PrefixedId } from './ids.js';
+
+export type BaseTurnData = Record<string, unknown>;
+
+export interface LocalTurn<TurnData extends BaseTurnData> {
+  playerId: PrefixedId<'u'>;
+  data: TurnData;
+}
+
+export interface Turn<TurnData extends BaseTurnData>
+  extends LocalTurn<TurnData> {
+  createdAt: string;
+  roundIndex: number;
+}
 
 /**
  * Gets the start and end of the round for a given day.
@@ -88,3 +101,18 @@ export const gameRoundSummaryShape = z.custom<GameRoundSummary<any, any, any>>(
       })
       .parse(v),
 );
+
+export function groupTurnsToRounds<Data extends BaseTurnData = any>(
+  turns: Turn<Data>[],
+) {
+  return turns.reduce<GameRound<Turn<Data>>[]>((acc, turn) => {
+    const round = acc[turn.roundIndex] ?? {
+      roundIndex: turn.roundIndex,
+      turns: [],
+    };
+    round.roundIndex = turn.roundIndex;
+    round.turns.push(turn);
+    acc[turn.roundIndex] = round;
+    return acc;
+  }, []);
+}

@@ -84,6 +84,11 @@ export const getRoundIndex: RoundIndexDecider<any, any> =
       members: ctx.members,
     });
     if (draftInfo.passOffset && pendingTurns.length > 0) {
+      console.log(
+        `Drafting round ${currentRoundIndex}, pending turns: ${pendingTurns.join(
+          ', ',
+        )}, pass offset: ${draftInfo.passOffset}, turns: ${ctx.turns.map((t) => t.playerId).join(', ')}`,
+      );
       return {
         roundIndex: currentRoundIndex,
         pendingTurns: pendingTurns,

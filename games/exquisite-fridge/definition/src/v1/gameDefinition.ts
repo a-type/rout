@@ -164,6 +164,7 @@ export const gameDefinition: GameDefinition<
       playerIndex: globalState.playerOrder.indexOf(playerId),
     });
     const seq = globalState.sequences[index];
+    console.log('Player state for', playerId, 'at round', roundIndex, seq);
     return {
       prompt: seq[seq.length - 1] || { words: [] },
       hand: globalState.hands[playerId] || [],
@@ -245,12 +246,15 @@ export const gameDefinition: GameDefinition<
     return { ...turn, data: {} };
   },
 
-  getStatus: ({ globalState, rounds }) => {
+  getStatus: ({ globalState, rounds, members }) => {
     if (rounds.length >= ROUND_COUNT) {
-      return {
-        status: 'complete',
-        winnerIds: [],
-      };
+      const thisRound = rounds[rounds.length - 1];
+      if (thisRound.turns.length >= members.length) {
+        return {
+          status: 'complete',
+          winnerIds: [],
+        };
+      }
     }
 
     return {

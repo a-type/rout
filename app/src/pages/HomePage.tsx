@@ -1,5 +1,7 @@
 import { IncomingInvites } from '@/components/friendships/FriendInvites';
 import { CreateGame } from '@/components/games/CreateGame.js';
+import { CreateHotseat } from '@/components/games/CreateHotseat';
+import { HotseatGamesList } from '@/components/memberships/HotseatGamesList';
 import { MembershipsList } from '@/components/memberships/MembershipsList.js';
 import { MainNav } from '@/components/nav/MainNav';
 import { AppInstallBanner } from '@/components/settings/AppInstallBanner';
@@ -27,7 +29,7 @@ export function HomePage({}: HomePageProps) {
   return (
     <PageRoot>
       <TopographyBackground className="fixed" />
-      <PageContent>
+      <PageContent className="pb-25vh">
         <Box d="row" gap layout="center end" full="width">
           <Button size="small" color="ghost" asChild>
             <Link to="/settings">
@@ -44,6 +46,7 @@ export function HomePage({}: HomePageProps) {
             invitationStatus="accepted"
             statusFilter={['active']}
           />
+          <HotseatGamesList status="active" />
           <H2 className="font-300 text-md uppercase my-0 mx-4">
             Upcoming Games
           </H2>
@@ -66,7 +69,11 @@ export function HomePage({}: HomePageProps) {
         <Suspense>
           <CompleteProfileDialog />
         </Suspense>
-        <PageNowPlaying unstyled className="items-center justify-center">
+        <PageNowPlaying
+          unstyled
+          className="flex-row gap-sm items-center justify-center"
+        >
+          <CreateHotseat color="default" />
           <CreateGame />
         </PageNowPlaying>
       </PageContent>

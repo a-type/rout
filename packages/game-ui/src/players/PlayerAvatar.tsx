@@ -1,5 +1,6 @@
 import { Avatar, clsx, Tooltip } from '@a-type/ui';
 import {
+  isHotseatPlayerId,
   isPrefixedId,
   PrefixedId,
   SYSTEM_CHAT_AUTHOR_ID,
@@ -29,10 +30,12 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
     ? (gameSuite.playerStatuses[onlyPlayerId] ?? null)
     : null;
 
-  let imageUrl: string;
+  let imageUrl: string | null = null;
   if (playerId === SYSTEM_CHAT_AUTHOR_ID) {
     imageUrl = '/icon.png';
-  } else {
+  } else if (playerId && isHotseatPlayerId(playerId)) {
+    imageUrl = null;
+  } else if (playerId) {
     const urlRaw = new URL((window as any).LONG_GAME_CONFIG.API_ORIGIN);
     urlRaw.pathname = `/users/${playerId}/avatar`;
     imageUrl = urlRaw.toString();

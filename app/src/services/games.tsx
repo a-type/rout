@@ -5,7 +5,7 @@
 import { checkForUpdate, skipWaiting } from '@/swRegister.js';
 import { Box, Button, H2, Icon, P } from '@a-type/ui';
 import { idToFederationId } from '@long-game/common';
-import { queryClient } from '@long-game/game-client';
+import { GameModuleContext, queryClient } from '@long-game/game-client';
 import {
   emptyGameDefinition,
   GameDefinition,
@@ -35,6 +35,25 @@ export function getFederatedGameComponent(
   version: string,
   componentName: 'renderer' | 'chat' | 'definition',
 ): Promise<GameDefinition> | ComponentType<any> {
+  if (gameId === 'empty') {
+    if (componentName === 'definition') {
+      return Promise.resolve(emptyGameDefinition);
+    }
+    if (componentName === 'renderer') {
+      return lazy(() =>
+        Promise.resolve({
+          default: MissingRenderer,
+        }),
+      );
+    }
+    if (componentName === 'chat') {
+      return lazy(() =>
+        Promise.resolve({
+          default: DefaultChatMessage,
+        }),
+      );
+    }
+  }
   const majorVersion = version.split('.')[0];
   const federatedPath = `${idToFederationId(gameId)}/${majorVersion}/${componentName}`;
   if (cache.has(federatedPath)) {
@@ -121,3 +140,15 @@ function MissingRenderer() {
     </Box>
   );
 }
+
+export const gameModules: GameModuleContext = {
+  getGameDefinition: (gameId, version) =>
+    getFederatedGameComponent(gameId, version, 'definition'),
+  getGameLatestVersion: async (gameId) => {
+    const data = await publicSdk.getGame.run({ id: gameId });
+    if (!data) {
+      throw new Error(`Game not found: ${gameId}`);
+    }
+    return data.latestVersion;
+  },
+};

@@ -16,6 +16,8 @@ export interface GameModule {
   tags: string[];
   creators: { name: string; role?: string; url?: string }[];
   prerelease?: boolean;
+  /** Names of image files in the /games/<gameId>/screenshots folder */
+  screenshots?: { file: string; alt: string }[];
   devPort: number;
 }
 

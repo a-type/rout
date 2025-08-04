@@ -22,39 +22,39 @@ export interface GameManualProps {
   gameId: string;
 }
 
-export const GameManual = withSuspense(function GameManual({
-  gameId,
-}: GameManualProps) {
-  const { data: markdown } = useSuspenseQuery(
-    {
-      queryKey: ['gameManual', gameId],
-      queryFn: async () => {
-        const result = await fetch(`/game-data/${gameId}/rules.md`);
-        if (!result.ok) {
-          throw LongGameError.fromResponse(result);
-        }
-        return result.text();
+export const GameManual = withSuspense(
+  function GameManual({ gameId }: GameManualProps) {
+    const { data: markdown } = useSuspenseQuery(
+      {
+        queryKey: ['gameManual', gameId],
+        queryFn: async () => {
+          const result = await fetch(`/game-data/${gameId}/rules.md`);
+          if (!result.ok) {
+            throw LongGameError.fromResponse(result);
+          }
+          return result.text();
+        },
       },
-    },
-    queryClient,
-  );
+      queryClient,
+    );
 
-  return (
-    <Box d="col" gap="lg">
-      <LazyMarkdown
-        urlTransform={(url) => {
-          const asUrl = new URL(url, window.location.href);
-          asUrl.pathname = `/game-data/${gameId}${asUrl.pathname}`;
-          return asUrl.toString();
-        }}
-        components={markdownComponents}
-      >
-        {markdown}
-      </LazyMarkdown>
-    </Box>
-  );
-},
-<Spinner />);
+    return (
+      <Box d="col" gap="lg">
+        <LazyMarkdown
+          urlTransform={(url) => {
+            const asUrl = new URL(url, window.location.href);
+            asUrl.pathname = `/game-data/${gameId}${asUrl.pathname}`;
+            return asUrl.toString();
+          }}
+          components={markdownComponents}
+        >
+          {markdown}
+        </LazyMarkdown>
+      </Box>
+    );
+  },
+  <Spinner />,
+);
 
 const markdownComponents: Components = {
   a: ({ node, ...props }) => {

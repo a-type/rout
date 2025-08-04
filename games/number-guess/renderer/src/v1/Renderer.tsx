@@ -40,6 +40,7 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   return (
     <Box direction="col" p="lg" gap>
       <h1>{title}</h1>
+      <label htmlFor="guess">Enter your guess:</label>
       <Input
         type="number"
         disabled={!isViewingCurrentRound}
@@ -50,6 +51,7 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
           prepareTurn({ guess: num });
         }}
         autoFocus
+        id="guess"
       />
       <SubmitTurn />
     </Box>

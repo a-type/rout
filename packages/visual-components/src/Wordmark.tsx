@@ -11,7 +11,7 @@ export function Wordmark({ asChild, className }: WordmarkProps) {
   return (
     <Comp
       className={clsx(
-        'layer-components:(font-fancy [font-size:12vmin] text-center relative z-1 text-shadow-[0_0_20px_var(--color-white)])',
+        'font-fancy layer-components:([font-size:12vmin] text-center relative z-1 text-shadow-[0_0_20px_var(--color-white)])',
         className,
       )}
     >

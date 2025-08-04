@@ -4,9 +4,12 @@ import {
   UseMutationOptions,
   UseMutationResult,
   useQuery,
+  UseQueryOptions,
   UseQueryResult,
+  UseSuspenseInfiniteQueryOptions,
   UseSuspenseInfiniteQueryResult,
   useSuspenseQuery,
+  UseSuspenseQueryOptions,
   UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 import { createContext, ReactNode, useContext } from 'react';
@@ -17,7 +20,7 @@ import {
   isQueryFactory,
   QueryFactory,
   QueryFactoryInfinite,
-} from './sdk/BaseSdk.js';
+} from './BaseSdk.js';
 
 export { useMutation, useSuspenseQuery };
 
@@ -25,9 +28,22 @@ export type SdkHooks<Sdk extends BaseSdk> = {
   [K in keyof Sdk as `use${Capitalize<
     string & K
   >}`]: Sdk[K] extends QueryFactory<infer O, infer I>
-    ? (...args: EraseEmptyArg<I>) => UseSuspenseQueryResult<O>
+    ? (
+        ...args: EraseEmptyArg<
+          I,
+          Omit<UseSuspenseQueryOptions, 'queryKey' | 'queryFn'>
+        >
+      ) => UseSuspenseQueryResult<O>
     : Sdk[K] extends QueryFactoryInfinite<infer O, infer I>
-      ? (...args: EraseEmptyArg<I>) => UseSuspenseInfiniteQueryResult<O>
+      ? (
+          ...args: EraseEmptyArg<
+            I,
+            Omit<
+              UseSuspenseInfiniteQueryOptions,
+              'queryKey' | 'queryFn' | 'getNextPageParam' | 'initialPageParam'
+            >
+          >
+        ) => UseSuspenseInfiniteQueryResult<O>
       : Sdk[K] extends UseMutationOptions<infer O, infer E, infer V>
         ? () => UseMutationResult<O, E, V>
         : never;
@@ -37,7 +53,9 @@ export type SdkHooks<Sdk extends BaseSdk> = {
     infer O,
     infer I
   >
-    ? (...args: EraseEmptyArg<I>) => UseQueryResult<O>
+    ? (
+        ...args: EraseEmptyArg<I, Omit<UseQueryOptions, 'queryKey' | 'queryFn'>>
+      ) => UseQueryResult<O>
     : never;
 };
 
@@ -61,18 +79,16 @@ function makeHookProxy<Sdk extends BaseSdk>(): any {
           correctedMethodName.startsWith('get') ||
           correctedMethodName.startsWith('adminGet')
         ) {
-          return (args: any) => {
+          return (...args: any[]) => {
             const sdk = useSdk() as Sdk;
-            const method = sdk[correctedMethodName as keyof Sdk] as
-              | QueryFactory<any, any>
-              | QueryFactoryInfinite<any, any>;
+            const method = sdk[correctedMethodName as keyof Sdk] as any;
             if (isQueryFactory(method)) {
               if (isLazy) {
-                return useQuery(method(args));
+                return useQuery(method(...(args as any)));
               }
-              return useSuspenseQuery(method(args));
+              return useSuspenseQuery(method(...(args as any)));
             } else if (isInfiniteQueryFactory(method)) {
-              return useSuspenseQuery(method(args));
+              return useSuspenseQuery(method(...(args as any)));
             }
             throw new Error(
               `Method ${correctedMethodName} starts with 'get' but is not a query or infinite query`,

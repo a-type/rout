@@ -2,20 +2,27 @@ import { AvatarList, Box, clsx, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar, TopographyButton } from '@long-game/game-ui';
+import { ReactNode } from 'react';
 
 export interface ReadyUpButtonProps {
   className?: string;
   insufficientPlayers?: boolean;
+  children?: ReactNode;
 }
 
 export const ReadyUpButton = withGame<ReadyUpButtonProps>(
-  function ReadyUpButton({ gameSuite, className, insufficientPlayers }) {
+  function ReadyUpButton({
+    gameSuite,
+    className,
+    insufficientPlayers,
+    children,
+  }) {
     const amIReady = gameSuite.readyPlayers.includes(gameSuite.playerId);
 
     return (
       <div className={`relative ${className}`}>
         <TopographyButton
-          disabled={insufficientPlayers}
+          disabled={insufficientPlayers || gameSuite.gameId === 'empty'}
           onClick={() => gameSuite.toggleReady()}
           disableTopography={amIReady}
           className="w-full"
@@ -23,11 +30,12 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
         >
           <Box gap>
             <Icon name={insufficientPlayers || amIReady ? 'x' : 'check'} />
-            {insufficientPlayers
-              ? 'Need more players'
-              : amIReady
-                ? 'Ready!'
-                : 'Ready Up!'}
+            {children ||
+              (insufficientPlayers
+                ? 'Need more players'
+                : amIReady
+                  ? 'Ready!'
+                  : 'Ready Up!')}
           </Box>
           <AvatarList count={gameSuite.members.length}>
             {gameSuite.members.map((member, i) => (

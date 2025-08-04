@@ -19,6 +19,10 @@ export async function registerServiceWorker() {
         import.meta.url,
       ),
     );
+    if (!registration) {
+      console.error(`Service worker registration failed`);
+      return;
+    }
 
     console.info('Service worker registered', registration);
 

@@ -1,5 +1,3 @@
-# Scribble
-
 Scribble is _Rout_'s take on the classic party game, Telephone Pictionary. Players take turns drawing their take on a prompt, or describing what they see in someone's drawing. As the game goes on, you 'pass around' these descriptions and drawings to each player in a circle. Illustration gaffes and bizarre misinterpretations abound. It's a good time.
 
 ## Rounds

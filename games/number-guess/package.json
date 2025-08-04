@@ -1,6 +1,6 @@
 {
   "name": "@long-game/game-number-guess",
   "scripts": {
-    "dev-game": "pnpm --filter \"./*\" --parallel --stream dev"
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev-game"
   }
 }

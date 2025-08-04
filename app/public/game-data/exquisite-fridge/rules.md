@@ -1,5 +1,3 @@
-# Exquisite Fridge
-
 A classic creative writing game with a twist. Collaborate with friends to write stories, but you can only see the latest paragraph... and you can only use the words we give you.
 
 ## The first round

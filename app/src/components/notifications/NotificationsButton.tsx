@@ -1,3 +1,4 @@
+import { withOnlyLoggedIn } from '@/hocs/withOnlyLoggedIn.js';
 import { sdkHooks } from '@/services/publicSdk';
 import {
   Box,
@@ -24,126 +25,134 @@ export interface NotificationsButtonProps
   children?: (details: { hasUnread: boolean }) => ReactNode;
 }
 
-export const NotificationsButton = withSuspense(function NotificationsButton({
-  className,
-  children,
-  ...rest
-}: NotificationsButtonProps) {
-  const [open, setOpen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+export const NotificationsButton = withSuspense(
+  withOnlyLoggedIn(function NotificationsButton({
+    className,
+    children,
+    ...rest
+  }: NotificationsButtonProps) {
+    const [open, setOpen] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const PopoverImpl = isMobile ? Dialog : Popover;
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    const PopoverImpl = isMobile ? Dialog : Popover;
 
-  const [showRead, setShowRead] = useState(false);
+    const [showRead, setShowRead] = useState(false);
 
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    sdkHooks.useGetNotifications(
-      { status: showRead ? undefined : 'unread' },
-      { refetchOnWindowFocus: true },
-    );
-  const { results: notifications } = data || { results: [] };
-  const hasUnread = notifications?.some((n) => !n.readAt);
-  const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
+    const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
+      sdkHooks.useGetNotifications(
+        { status: showRead ? undefined : 'unread' },
+        { refetchOnWindowFocus: true },
+      );
+    const { results: notifications } = data || { results: [] };
+    const hasUnread = notifications?.some((n) => !n.readAt);
+    const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
 
-  useAutoReadNotifications(notifications);
+    useAutoReadNotifications(notifications);
 
-  return (
-    <PopoverImpl open={open} onOpenChange={setOpen}>
-      <PopoverImpl.Trigger asChild className={className}>
-        {children ? (
-          children({ hasUnread })
-        ) : (
-          <Button size="icon" color={hasUnread ? 'accent' : 'ghost'} {...rest}>
-            <Icon name="bell" />
-          </Button>
-        )}
-      </PopoverImpl.Trigger>
-      <PopoverImpl.Content className="min-h-500px sm:w-400px sm:p-md">
-        {!isMobile && <PopoverArrow />}
-        <Box gap items="center" justify="between" className="mb-md">
-          {isMobile ? (
-            <Dialog.Title className="!m-0 text-xl">Notifications</Dialog.Title>
+    return (
+      <PopoverImpl open={open} onOpenChange={setOpen}>
+        <PopoverImpl.Trigger asChild className={className}>
+          {children ? (
+            children({ hasUnread })
           ) : (
-            <H2>Notifications</H2>
-          )}
-          <Box gap items="center">
-            {!showSettings && (
-              <Button
-                size="icon"
-                color="ghost"
-                onClick={() => markAllRead.mutate(undefined)}
-              >
-                <Icon name="check" className="relative -left-3px" />
-                <Icon name="check" className="absolute left-13px" />
-              </Button>
-            )}
             <Button
-              color="ghost"
               size="icon"
-              onClick={() => {
-                setShowSettings((prev) => !prev);
-              }}
+              color={hasUnread ? 'accent' : 'ghost'}
+              {...rest}
             >
-              <Icon name={showSettings ? 'x' : 'gear'} />
+              <Icon name="bell" />
             </Button>
-          </Box>
-        </Box>
-        {showSettings ? (
-          <Suspense>
-            <NotificationSettings />
-          </Suspense>
-        ) : (
-          <>
-            {notifications?.length ? (
-              <ScrollArea className="max-h-800px flex-[1-0-auto]">
-                {notifications.map((notification) => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onClick={() => setOpen(false)}
-                  />
-                ))}
-                {hasNextPage && (
-                  <Button
-                    color="ghost"
-                    onClick={() => fetchNextPage()}
-                    loading={isFetchingNextPage}
-                    className="m-auto mt-lg"
-                  >
-                    {isFetchingNextPage ? 'Loading...' : 'Load more'}
-                  </Button>
-                )}
-              </ScrollArea>
+          )}
+        </PopoverImpl.Trigger>
+        <PopoverImpl.Content className="min-h-500px sm:w-400px sm:p-md">
+          {!isMobile && <PopoverArrow />}
+          <Box gap items="center" justify="between" className="mb-md">
+            {isMobile ? (
+              <Dialog.Title className="!m-0 text-xl">
+                Notifications
+              </Dialog.Title>
             ) : (
-              <Box
-                full
-                d="col"
-                layout="center center"
-                className="color-gray-dark flex-1"
-              >
-                <Icon name="bell" size={80} />
-                <span>Nothing to see here!</span>
-              </Box>
+              <H2>Notifications</H2>
             )}
-            {!showRead && (
-              <Box p layout="center center">
-                <Button color="ghost" onClick={() => setShowRead(true)}>
-                  Show Read
+            <Box gap items="center">
+              {!showSettings && (
+                <Button
+                  size="icon"
+                  color="ghost"
+                  onClick={() => markAllRead.mutate(undefined)}
+                >
+                  <Icon name="check" className="relative -left-3px" />
+                  <Icon name="check" className="absolute left-13px" />
                 </Button>
-              </Box>
-            )}
-          </>
-        )}
-        {isMobile && (
-          <Dialog.Actions>
-            <Dialog.Close />
-          </Dialog.Actions>
-        )}
-      </PopoverImpl.Content>
-    </PopoverImpl>
-  );
-});
+              )}
+              <Button
+                color="ghost"
+                size="icon"
+                onClick={() => {
+                  setShowSettings((prev) => !prev);
+                }}
+              >
+                <Icon name={showSettings ? 'x' : 'gear'} />
+              </Button>
+            </Box>
+          </Box>
+          {showSettings ? (
+            <Suspense>
+              <NotificationSettings />
+            </Suspense>
+          ) : (
+            <>
+              {notifications?.length ? (
+                <ScrollArea className="max-h-800px flex-[1-0-auto]">
+                  {notifications.map((notification) => (
+                    <NotificationItem
+                      key={notification.id}
+                      notification={notification}
+                      onClick={() => setOpen(false)}
+                    />
+                  ))}
+                  {hasNextPage && (
+                    <Button
+                      color="ghost"
+                      onClick={() => fetchNextPage()}
+                      loading={isFetchingNextPage}
+                      className="m-auto mt-lg"
+                    >
+                      {isFetchingNextPage ? 'Loading...' : 'Load more'}
+                    </Button>
+                  )}
+                </ScrollArea>
+              ) : (
+                <Box
+                  full
+                  d="col"
+                  layout="center center"
+                  className="color-gray-dark flex-1"
+                >
+                  <Icon name="bell" size={80} />
+                  <span>Nothing to see here!</span>
+                </Box>
+              )}
+              {!showRead && (
+                <Box p layout="center center">
+                  <Button color="ghost" onClick={() => setShowRead(true)}>
+                    Show Read
+                  </Button>
+                </Box>
+              )}
+            </>
+          )}
+          {isMobile && (
+            <Dialog.Actions>
+              <Dialog.Close />
+            </Dialog.Actions>
+          )}
+        </PopoverImpl.Content>
+      </PopoverImpl>
+    );
+  }),
+);
 
 function NotificationItem({
   notification,

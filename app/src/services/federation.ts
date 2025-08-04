@@ -1,0 +1,52 @@
+import {
+  registerPlugins,
+  type ModuleFederationRuntimePlugin,
+} from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+const runtimePlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeloadShare:', args);
+      return args;
+    },
+    async errorLoadRemote(args) {
+      console.error('errorLoadRemote:', args);
+      return args;
+    },
+  };
+};
+
+registerPlugins([
+  // runtimePlugin(),
+  RetryPlugin({
+    fetch: {
+      retryTimes: 3,
+      retryDelay: 300,
+    },
+    script: {
+      retryTimes: 3,
+      retryDelay: 800,
+    },
+  }),
+]);

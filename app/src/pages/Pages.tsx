@@ -42,6 +42,10 @@ const routes = makeRoutes([
     component: GameSessionPage,
   },
   {
+    path: '/hotseat/:sessionId',
+    component: lazy(() => import('./HotseatSessionPage.jsx')),
+  },
+  {
     path: '/gameInvite/:code',
     component: lazy(() => import('./GameInviteLinkPage.jsx')),
   },
@@ -62,6 +66,10 @@ const routes = makeRoutes([
   {
     path: '/settings',
     component: lazy(() => import('./SettingsPage.jsx')),
+  },
+  {
+    path: '/games/:gameId',
+    component: lazy(() => import('./PublicGamePage.jsx')),
   },
   {
     path: '/admin',
@@ -125,7 +133,7 @@ export const Pages = () => {
       }
     >
       <Router routes={routes} onNavigate={handleNavigate}>
-        <Box full className="flex-1" col>
+        <Box full="width" className="flex-1" col>
           <Outlet />
         </Box>
         <QuickBuyPopup />

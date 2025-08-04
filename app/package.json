@@ -16,6 +16,7 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "@long-game/notifications": "workspace:*",
+    "@module-federation/retry-plugin": "^0.17.1",
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
     "hono": "catalog:",

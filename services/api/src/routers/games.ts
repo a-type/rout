@@ -5,6 +5,7 @@ import {
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
+import { GameModule } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -14,24 +15,32 @@ import { createStripeGameProductCheckoutMetadata } from '../management/stripeMet
 import { sessionMiddleware, userStoreMiddleware } from '../middleware/index.js';
 import { getStripe } from '../services/stripe.js';
 
+function gameSummary(game: GameModule, env: ApiBindings) {
+  return {
+    id: game.id,
+    title: game.title,
+    description: game.description,
+    tags: game.tags,
+    creators: game.creators,
+    prerelease: game.prerelease,
+    url: getGameUrl(game, env),
+    latestVersion: game.versions[game.versions.length - 1].version,
+    minimumPlayers: game.versions[game.versions.length - 1].minimumPlayers,
+    maximumPlayers: game.versions[game.versions.length - 1].maximumPlayers,
+    versions: game.versions.map((def) => ({
+      version: def.version,
+      minimumPlayers: def.minimumPlayers,
+      maximumPlayers: def.maximumPlayers,
+    })),
+    screenshots: game.screenshots ?? [],
+  };
+}
+
 export const gamesRouter = new Hono<Env>()
   .get('/', async (ctx) => {
     const metadata = Object.entries(games)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([id, game]) => ({
-        id,
-        versions: game.versions.map((def) => ({
-          version: def.version,
-          minimumPlayers: def.minimumPlayers,
-          maximumPlayers: def.maximumPlayers,
-        })),
-        title: game.title,
-        description: game.description,
-        tags: game.tags,
-        creators: game.creators,
-        prerelease: game.prerelease,
-        url: getGameUrl(game, ctx.env),
-      }));
+      .map(([id, game]) => gameSummary(game, ctx.env));
     // returns a list of all games and some metadata
     return ctx.json(
       metadata.reduce(
@@ -43,6 +52,7 @@ export const gamesRouter = new Hono<Env>()
       ),
     );
   })
+
   // basically useful for correcting a lack of free games which should be
   // provided on signup
   .post('/applyFree', userStoreMiddleware, async (ctx) => {
@@ -51,8 +61,14 @@ export const gamesRouter = new Hono<Env>()
     await ctx.env.ADMIN_STORE.applyFreeGames(userId);
     return ctx.json({ success: true });
   })
-  .get('/owned', userStoreMiddleware, async (ctx) => {
-    const gameIds = await ctx.get('userStore').getOwnedGames();
+  .get('/owned', sessionMiddleware, async (ctx) => {
+    const session = ctx.get('session');
+    if (!session) {
+      return ctx.json([]);
+    }
+    const gameIds = await ctx.env.PUBLIC_STORE.getStoreForUser(
+      session.userId,
+    ).getOwnedGames();
     return ctx.json(wrapRpcData(gameIds));
   })
   .get(
@@ -184,5 +200,20 @@ export const gamesRouter = new Hono<Env>()
       }
 
       return ctx.redirect(checkout.url);
+    },
+  )
+  .get(
+    '/:id',
+    zValidator('param', z.object({ id: z.string() })),
+    async (ctx) => {
+      const id = ctx.req.valid('param').id;
+      const game = games[id];
+      if (!game) {
+        throw new LongGameError(
+          LongGameError.Code.NotFound,
+          `Game not found: ${id}`,
+        );
+      }
+      return ctx.json(gameSummary(game, ctx.env));
     },
   );

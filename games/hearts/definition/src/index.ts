@@ -16,6 +16,16 @@ export default {
     },
   ],
   devPort: 3302,
+  screenshots: [
+    {
+      file: 'screen1.png',
+      alt: `A player drafting three cards to pass to another player`,
+    },
+    {
+      file: 'screen2.png',
+      alt: `A player is about to play on a trick, the current card is the 2 of clubs`,
+    },
+  ],
 } satisfies GameModule;
 
 export { v1 };

@@ -43,7 +43,7 @@ export async function sendPushToAllUserDevices(
       },
     );
     try {
-      const result = await fetch(subscription.endpoint, payload);
+      const result = await fetch(subscription.endpoint, payload as any);
       if (!result.ok) {
         console.error(
           'Error sending push notification',

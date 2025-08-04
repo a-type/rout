@@ -16,14 +16,14 @@ export const RoundHistoryControl = withGame(
 
     const loadRound = (index: number) => {
       startTransition(async () => {
-        await suite.preloadRound(index);
+        await suite.loadRoundUnsuspended(index);
         suite.showRound(index);
         // preload adjacent rounds if any
         if (index > 0) {
-          suite.preloadRound(index - 1);
+          suite.loadRoundUnsuspended(index - 1);
         }
         if (index < latestRoundIndex) {
-          suite.preloadRound(index + 1);
+          suite.loadRoundUnsuspended(index + 1);
         }
       });
     };
