@@ -6,6 +6,7 @@ import {
 
 export type GlobalState = {
   secretNumber: number;
+  setupMessage: string;
 };
 
 export type PlayerState = {
@@ -26,14 +27,20 @@ export const gameDefinition: GameDefinition<{
   PlayerState: PlayerState;
   TurnData: MoveData;
   PublicTurnData: PublicMoveData;
+  SetupData: { message: string };
 }> = {
   version: 'v1.0',
   minimumPlayers: 1,
   maximumPlayers: 100,
 
-  getInitialGlobalState: ({ random }) => ({
+  getSetupData: () => ({
+    message: 'Welcome to the Number Guessing Game!',
+  }),
+
+  getInitialGlobalState: ({ random, setupData }) => ({
     secretNumber: random.int(0, 100),
     playerGuesses: {},
+    setupMessage: setupData.message,
   }),
 
   validateTurn: ({ turn }) => {

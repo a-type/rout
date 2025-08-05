@@ -21,7 +21,7 @@ export const CreateGame = withSuspense(
     const navigate = useNavigate();
 
     const create = async (ev: MouseEvent<HTMLButtonElement>) => {
-      const result = await mutation.mutateAsync({ gameId: gameId || 'empty' });
+      const result = await mutation.mutateAsync({ gameId });
       const gameSessionId = result?.sessionId;
       if (!gameSessionId) {
         throw new LongGameError(

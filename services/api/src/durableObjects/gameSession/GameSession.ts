@@ -16,6 +16,7 @@ import {
 } from '@long-game/common';
 import {
   BaseTurnData,
+  emptyGameDefinition,
   GameMember,
   GameStateCache,
   getLatestVersion,
@@ -38,8 +39,8 @@ export interface GameSessionBaseData {
   startedAt: string | null;
   endedAt: string | null;
   abandonedAt?: string | null;
-  gameId: string;
-  gameVersion: string;
+  gameId?: string;
+  gameVersion?: string;
   timezone: string;
   members: GameSessionMember[];
   createdBy?: PrefixedId<'u'>;
@@ -156,6 +157,13 @@ export class GameSession extends DurableObject<ApiBindings> {
     await this.ctx.storage.put('notifications', notifications);
     return notifications;
   }
+  async #getSetupData(): Promise<any> {
+    return this.ctx.storage.get('setupData');
+  }
+  async #setSetupData(setupData: any) {
+    await this.ctx.storage.put('setupData', setupData);
+    return setupData;
+  }
 
   // turns use the SQL API
   async #listTurns({
@@ -200,6 +208,10 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async getGameDefinition() {
     const { gameId, gameVersion } = await this.#getSessionData();
+    if (!gameId || !gameVersion) {
+      return emptyGameDefinition;
+    }
+
     const gameModule = games[gameId];
     if (!gameModule) {
       throw new LongGameError(
@@ -369,6 +381,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (this.#stateCache) return this.#stateCache;
     const sessionData = await this.#getSessionData();
     const gameDefinition = await this.getGameDefinition();
+    const setupData = await this.#getSetupData();
     if (!sessionData || !gameDefinition) {
       throw new LongGameError(
         LongGameError.Code.InternalServerError,
@@ -378,6 +391,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     const cache = new GameStateCache(gameDefinition, {
       randomSeed: sessionData.randomSeed,
       members: sessionData.members,
+      setupData,
     });
     this.#stateCache = cache;
     return cache;
@@ -500,6 +514,13 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     }
 
+    if (!sessionData.gameId || !sessionData.gameVersion) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot start game without game selected',
+      );
+    }
+
     // last chance to set game version before beginning
     const gameModule = games[sessionData.gameId];
     if (!gameModule) {
@@ -512,6 +533,13 @@ export class GameSession extends DurableObject<ApiBindings> {
     const gameDefinition = getLatestVersion(gameModule);
 
     await this.updateGame(sessionData.gameId, gameDefinition.version);
+    // lock in setup data, if available
+    if (gameDefinition.getSetupData) {
+      const setupData = gameDefinition.getSetupData({
+        members: sessionData.members,
+      });
+      await this.#setSetupData(setupData);
+    }
     await this.#updateStatus('active');
 
     await this.#checkForRoundChange();
@@ -1227,6 +1255,10 @@ export class GameSession extends DurableObject<ApiBindings> {
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
     const sessionData = await this.#getSessionData();
     console.info(`Notifying player ${playerId} of turn`);
+    if (!sessionData.gameId || !sessionData.gameVersion) {
+      console.warn(`No game in progress; cannot notify player of turn`);
+      return;
+    }
     await notifyUser(
       playerId,
       {

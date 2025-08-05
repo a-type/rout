@@ -15,6 +15,7 @@ import {
   ConfigInitialTurnData,
   ConfigPlayerState,
   ConfigPublicTurnData,
+  ConfigSetupData,
   ConfigTurnData,
   ConfigTurnError,
   GameDefinitionConfig,
@@ -114,11 +115,24 @@ export type GameDefinition<
   // compute holistic information - initial state and global state from initial.
 
   /**
+   * Optional: Create stored "setup data" which will be captured and stored
+   * at the start of the game. Setup data is *immutable* -- even if you modify
+   * this method later, games which have already been created will
+   * retain their setup data. This makes it useful for storing
+   * configuration which you may want to iterate on without disrupting
+   * ongoing games.
+   *
+   * TODO: setup input data provided from the players during game setup?
+   */
+  getSetupData?: (data: { members: GameMember[] }) => ConfigSetupData<Config>;
+
+  /**
    * This is the initial state of the game. It should be deterministic.
    */
   getInitialGlobalState: (data: {
     random: GameRandom;
     members: GameMember[];
+    setupData: ConfigSetupData<Config>;
   }) => ConfigGlobalState<Config>;
   /**
    * This is the player's view of the game state. It should be deterministically
@@ -212,6 +226,7 @@ export function getGameState(
   ctx: {
     random: GameRandom;
     members: GameMember[];
+    setupData: ConfigSetupData<GameDefinitionConfig>;
   },
 ) {
   const initialState = game.getInitialGlobalState(ctx);

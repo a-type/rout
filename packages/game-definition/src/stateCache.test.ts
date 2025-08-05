@@ -64,6 +64,7 @@ function createCache() {
     cache: new GameStateCache(game, {
       randomSeed,
       members: [testPlayer(1), testPlayer(2)],
+      setupData: null,
     }),
     game,
   };

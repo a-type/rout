@@ -1,4 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
+import { emptyGameDefinition } from '@long-game/game-definition';
 
 export function useGame(id: string) {
   const { data: allGames } = sdkHooks.useGetGames();
@@ -10,7 +11,7 @@ export function useGame(id: string) {
       tags: [],
       creators: [],
       prerelease: false,
-      versions: [],
+      versions: [emptyGameDefinition],
     }
   );
 }

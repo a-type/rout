@@ -30,12 +30,14 @@ export class GameStateCache {
     private details: {
       randomSeed: string;
       members: GameMember[];
+      setupData: any;
     },
   ) {
     const random = new GameRandom(this.details.randomSeed);
     const initialState = this.gameDefinition.getInitialGlobalState({
       random,
       members: this.details.members,
+      setupData: this.details.setupData,
     });
     const randomState = random.getState();
     this.initialState = {

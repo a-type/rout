@@ -60,26 +60,30 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
     zValidator(
       'json',
       z.object({
-        gameId: z.string(),
+        gameId: z.string().optional(),
       }),
     ),
     userStoreMiddleware,
     async (ctx) => {
       const { gameId } = ctx.req.valid('json');
-      const game = games[gameId];
+      let gameVersion: string | undefined;
+      if (gameId) {
+        const game = games[gameId];
 
-      if (!game) {
-        throw new LongGameError(
-          LongGameError.Code.BadRequest,
-          'Game not found',
-        );
+        if (!game) {
+          throw new LongGameError(
+            LongGameError.Code.BadRequest,
+            'Game not found',
+          );
+        }
+        const gameDefinition = getLatestVersion(game);
+        gameVersion = gameDefinition.version;
       }
-      const gameDefinition = getLatestVersion(game);
 
       const userStore = ctx.get('userStore');
       const gameSession = await userStore.createGameSession(
         gameId,
-        gameDefinition.version,
+        gameVersion,
       );
 
       const durableObjectId = ctx.env.GAME_SESSION.idFromName(gameSession.id);
@@ -89,8 +93,8 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       await sessionState.initialize({
         id: gameSession.id,
         randomSeed,
-        gameId: game.id,
-        gameVersion: gameDefinition.version,
+        gameId,
+        gameVersion,
         members: [
           {
             id: me.id,

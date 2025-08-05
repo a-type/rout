@@ -13,7 +13,13 @@ import { runInAction } from 'mobx';
 import { PublicSdk } from '../api/PublicSdk.js';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { AbstractGameSuite, GameSuiteBaseInit } from './AbstractGameSuite.js';
-import { getPlayers, getPostgame, getPublicRound, getSummary } from './api.js';
+import {
+  getDevModeTurns,
+  getPlayers,
+  getPostgame,
+  getPublicRound,
+  getSummary,
+} from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
 export const ROOT_CHAT_SCENE_ID = 'null' as const;
@@ -198,8 +204,8 @@ export class GameSessionSuite<
   protected getGameData = async () => {
     const summary = await getSummary(this.gameSessionId);
     const gameDefinition = await this.ctx.gameModules.getGameDefinition(
-      summary.gameId,
-      summary.gameVersion,
+      summary.gameId || 'empty',
+      summary.gameVersion || 'v1',
     );
     return {
       ...summary,
@@ -222,6 +228,16 @@ export class GameSessionSuite<
       'Switching players is not allowed as this is not a hotseat game. This is a bug!',
     );
   }
+
+  protected getDevModeTurns = async () => {
+    if (!this.gameSessionId) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Cannot get dev mode turns without a game session ID',
+      );
+    }
+    return getDevModeTurns(this.gameSessionId);
+  };
 
   #subscribeWindowEvents = () => {
     // FIXME: causing infinite suspense???

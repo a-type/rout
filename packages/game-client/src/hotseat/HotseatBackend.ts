@@ -44,6 +44,7 @@ export type HotseatGameDetails = {
   members: HotseatPlayer[];
   winnerIds: PrefixedId<'u'>[] | null;
   roundIndex: number;
+  setupData?: any; // optional setup data for the game, determined by the game definition
 };
 
 type HotseatTurn = Turn<any>;
@@ -239,6 +240,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     this.cache = new GameStateCache(this.gameDefinition, {
       randomSeed: gameDetails.randomSeed,
       members: gameDetails.members,
+      setupData: gameDetails.setupData,
     });
     this.ctx = ctx;
   }
@@ -334,6 +336,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     this.cache = new GameStateCache(this.gameDefinition, {
       randomSeed: details.randomSeed,
       members: details.members,
+      setupData: details.setupData,
     });
     return details;
   };
@@ -396,20 +399,21 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     const details = await this.getDetails();
     const version = await this.ctx.getGameLatestVersion(gameId);
     this.gameDefinition = await this.ctx.getGameDefinition(gameId, version);
+    // lock in setup data
+    const setupData = this.gameDefinition.getSetupData?.({
+      members: details.members,
+    });
     await this.updateDetails({
       gameId,
       gameVersion: version,
       randomSeed: Math.random().toString(36).substring(2, 15),
+      setupData,
     });
     if (details.members.length < this.gameDefinition.minimumPlayers) {
       await this.setMemberCount(this.gameDefinition.minimumPlayers);
     } else if (details.members.length > this.gameDefinition.maximumPlayers) {
       await this.setMemberCount(this.gameDefinition.maximumPlayers);
     }
-    this.cache = new GameStateCache(this.gameDefinition, {
-      randomSeed: details.randomSeed,
-      members: details.members,
-    });
     this.emit('gameChange', {
       type: 'gameChange',
     });
@@ -433,10 +437,6 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     }
     await this.updateDetails({
       randomSeed: seed,
-    });
-    this.cache = new GameStateCache(this.gameDefinition, {
-      randomSeed: seed,
-      members: details.members,
     });
     this.emit('gameChange', {
       type: 'gameChange',

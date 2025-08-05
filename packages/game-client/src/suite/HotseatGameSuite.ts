@@ -2,6 +2,7 @@ import {
   GameRoundSummary,
   GameSessionChatMessage,
   PrefixedId,
+  Turn,
 } from '@long-game/common';
 import {
   AnyGameDefinition,
@@ -170,6 +171,10 @@ export class HotseatGameSuite<
     localStorage.setItem(`hotseat-last-player:${this.gameSessionId}`, playerId);
     this.events.emit('playerChanged', playerId);
   };
+
+  protected getDevModeTurns(): Promise<Turn<any>[]> {
+    return this.ctx.backend.getTurns(this.latestRoundIndex);
+  }
 
   // not part of public interface, but usable in console
   setSeed = (seed: string): void => {

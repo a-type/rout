@@ -16,7 +16,7 @@ interface ApiBindings {
   VAPID_PRIVATE_KEY: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
-  GAME_SESSION: DurableObjectNamespace<import('./index').GameSession>;
+  GAME_SESSION: DurableObjectNamespace<import('./index.js').GameSession>;
   PUBLIC_STORE: Service<import('@long-game/service-db').PublicStore>;
   ADMIN_STORE: Service<import('@long-game/service-db').AdminStore>;
   AVATARS_BUCKET: R2Bucket;

@@ -188,7 +188,7 @@ export class PublicSdk extends BaseSdk {
   // yeah this is on the game session API, but it's
   // kind of more useful here.
   prepareGameSession = this.sdkMutation(this.apiRpc.gameSessions.$post, {
-    transformInput: (input: { gameId: string }) => ({
+    transformInput: (input: { gameId?: string }) => ({
       json: { gameId: input.gameId },
     }),
   });

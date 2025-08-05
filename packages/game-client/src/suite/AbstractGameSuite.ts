@@ -24,6 +24,7 @@ import {
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
   ServerTurnPlayedMessage,
+  Turn,
 } from '@long-game/common';
 import {
   AnyGameDefinition,
@@ -42,7 +43,6 @@ import {
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { GameLogItem } from '../types.js';
-import { getDevModeTurns } from './api.js';
 import { PlayerInfo } from './GameSessionSuite.js';
 
 const ROOT_CHAT_SCENE_ID = 'null' as const;
@@ -65,8 +65,8 @@ export type GameSuiteEvents = {
 export interface GameSuiteBaseInit {
   currentRoundIndex: number;
   playerStatuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus>;
-  gameId: string;
-  gameVersion: string;
+  gameId?: string;
+  gameVersion?: string;
   id: PrefixedId<'gs'>;
   playerId: PrefixedId<'u'>;
   members: GameMember[];
@@ -949,7 +949,9 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   protected abstract getGameData(): Promise<GameSuiteBaseInit>;
 
   @action private applyGameData = async (init: GameSuiteBaseInit) => {
-    this.gameModules.getGameDefinition(init.gameId, init.gameVersion).then(
+    const gameId = init.gameId || 'empty';
+    const gameVersion = init.gameVersion || 'v1';
+    this.gameModules.getGameDefinition(gameId, gameVersion).then(
       action((gameDefinition) => {
         this.gameDefinition = gameDefinition as TGame;
       }),
@@ -958,8 +960,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     this.latestRoundIndex = init.currentRoundIndex;
     this.localTurnData = undefined;
     this.playerStatuses = init.playerStatuses;
-    this.gameId = init.gameId;
-    this.gameVersion = init.gameVersion;
+    this.gameId = gameId;
+    this.gameVersion = gameVersion;
     this.members = init.members;
     this.gameStatus = init.status;
     this.startedAt = init.startedAt ? new Date(init.startedAt) : null;
@@ -1023,6 +1025,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
 
   abstract switchPlayer(playerId: PrefixedId<'u'>): void;
 
+  protected abstract getDevModeTurns(): Promise<Turn<any>[]>;
+
   debug = async () => {
     // try loading global state (works in dev mode)
     try {
@@ -1043,7 +1047,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       currentTurn: toJS(this.currentTurn),
       viewingTurn: toJS(this.viewingTurn),
       globalState: toJS(this.postgameGlobalState),
-      turns: await getDevModeTurns(this.gameSessionId),
+      turns: await this.getDevModeTurns(),
       viewingRound: toJS(this.viewingRound),
       rounds: toJS(this.rounds),
     };
