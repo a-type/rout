@@ -6,49 +6,52 @@ import { ReactNode } from 'react';
 
 export interface ReadyUpButtonProps {
   className?: string;
-  insufficientPlayers?: boolean;
   children?: ReactNode;
 }
 
 export const ReadyUpButton = withGame<ReadyUpButtonProps>(
-  function ReadyUpButton({
-    gameSuite,
-    className,
-    insufficientPlayers,
-    children,
-  }) {
+  function ReadyUpButton({ gameSuite, className, children }) {
     const amIReady = gameSuite.readyPlayers.includes(gameSuite.playerId);
+    const insufficientPlayers =
+      gameSuite.members.length < gameSuite.gameDefinition.minimumPlayers;
+    const tooManyPlayers =
+      gameSuite.members.length > gameSuite.gameDefinition.maximumPlayers;
+    const noGame = !gameSuite.gameId || gameSuite.gameId === 'empty';
+    const cannotStart = insufficientPlayers || tooManyPlayers || noGame;
 
     return (
-      <div className={`relative ${className}`}>
-        <TopographyButton
-          disabled={insufficientPlayers || gameSuite.gameId === 'empty'}
-          onClick={() => gameSuite.toggleReady()}
-          disableTopography={amIReady}
-          className="w-full"
-          wrapperClassName="justify-between w-full"
-        >
-          <Box gap>
-            <Icon name={insufficientPlayers || amIReady ? 'x' : 'check'} />
-            {children ||
-              (insufficientPlayers
-                ? 'Need more players'
-                : amIReady
-                  ? 'Ready!'
-                  : 'Ready Up!')}
-          </Box>
-          <AvatarList count={gameSuite.members.length}>
-            {gameSuite.members.map((member, i) => (
-              <AvatarList.ItemRoot index={i} key={member.id}>
-                <PlayerReadyAvatar
-                  playerId={member.id}
-                  ready={gameSuite.readyPlayers.includes(member.id)}
-                />
-              </AvatarList.ItemRoot>
-            ))}
-          </AvatarList>
-        </TopographyButton>
-      </div>
+      <TopographyButton
+        disabled={cannotStart}
+        onClick={() => gameSuite.toggleReady()}
+        disableTopography={amIReady}
+        color={cannotStart ? 'default' : 'primary'}
+        className={clsx('w-full', className)}
+        wrapperClassName="justify-between w-full"
+      >
+        <Box gap>
+          <Icon name={insufficientPlayers || amIReady ? 'x' : 'check'} />
+          {children ||
+            (insufficientPlayers
+              ? 'Need more players'
+              : tooManyPlayers
+                ? 'Too many players'
+                : noGame
+                  ? 'Select a game'
+                  : amIReady
+                    ? 'Ready!'
+                    : 'Ready Up!')}
+        </Box>
+        <AvatarList count={gameSuite.members.length}>
+          {gameSuite.members.map((member, i) => (
+            <AvatarList.ItemRoot index={i} key={member.id}>
+              <PlayerReadyAvatar
+                playerId={member.id}
+                ready={gameSuite.readyPlayers.includes(member.id)}
+              />
+            </AvatarList.ItemRoot>
+          ))}
+        </AvatarList>
+      </TopographyButton>
     );
   },
 );

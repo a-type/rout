@@ -3,7 +3,6 @@ import { LongGameError } from '@long-game/common';
 import { ZodError } from 'zod';
 
 export function handleError(reason: unknown): Response {
-  console.error(reason);
   if (LongGameError.isInstance(reason) || LongGameError.isRpcInstance(reason)) {
     const parsed = LongGameError.fromInstanceOrRpc(reason);
     if (parsed.code > LongGameError.Code.InternalServerError) {

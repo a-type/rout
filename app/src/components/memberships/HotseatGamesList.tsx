@@ -1,5 +1,5 @@
 import { useGame } from '@/hooks/useGame';
-import { Box, Button, Card, Chip, DropdownMenu, H2, Icon } from '@a-type/ui';
+import { Box, Button, Card, Chip, DropdownMenu, Icon } from '@a-type/ui';
 import {
   HotseatBackend,
   HotseatGameDetails,
@@ -8,6 +8,7 @@ import {
 } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
+import { CreateHotseat } from '../games/CreateHotseat';
 import { GameIcon } from '../games/GameIcon';
 import { GameSessionStatusChip } from './GameSessionStatusChip';
 
@@ -24,11 +25,19 @@ export const HotseatGamesList = withSuspense(function HotseatGamesList({
   });
 
   if (!data.length) {
-    return null;
+    return (
+      <Box col gap layout="center center" className="text-gray-dark">
+        <div>No hotseat games</div>
+        <div>Play unlimited games by passing around this device</div>
+        <CreateHotseat color="ghost" size="small">
+          Play Hotseat <Icon name="arrowRight" />
+        </CreateHotseat>
+      </Box>
+    );
   }
+
   return (
     <Box col gap>
-      <H2 className="font-300 text-md uppercase my-0 mx-4">Hotseat Games</H2>
       <Card.Grid>
         {data.map((session) => (
           <HotseatSummaryCard key={session.gameSessionId} session={session} />

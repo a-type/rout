@@ -1,15 +1,18 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card } from '@a-type/ui';
+import { Box, Button, Card, Icon } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
+import { ReactNode } from 'react';
 import { CreateGame } from '../games/CreateGame.js';
 import { GameSummaryCard } from './GameSummaryCard.js';
 
 export const MembershipsList = withSuspense(function MembershipsList({
   statusFilter,
   invitationStatus,
+  emptyState,
 }: {
   statusFilter?: ('active' | 'complete' | 'pending')[];
   invitationStatus?: 'pending' | 'accepted' | 'declined';
+  emptyState?: ReactNode;
 }) {
   const {
     data: { results: sessions },
@@ -22,11 +25,11 @@ export const MembershipsList = withSuspense(function MembershipsList({
     <Box d="col" gap full="width">
       {!sessions.length && (
         <Box full="width" layout="center center" p className="min-h-8">
-          <Box gap className="color-gray-dark" items="center">
-            Nothing here.
+          <Box col gap className="color-gray-dark" layout="center center">
+            {emptyState || "You're not a member of any online games."}
             {(!statusFilter || statusFilter.includes('active')) && (
-              <CreateGame color="unstyled" className="italic">
-                Start a new game?
+              <CreateGame size="small" color="ghost">
+                Start Playing <Icon name="arrowRight" />
               </CreateGame>
             )}
           </Box>

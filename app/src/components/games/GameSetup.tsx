@@ -46,10 +46,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         />
       </Box>
       <GameSetupInviteFriends />
-      <ReadyUpButton
-        insufficientPlayers={insufficientPlayers}
-        className="items-center justify-center"
-      />
+      <ReadyUpButton />
 
       <GameStartingNotice />
     </Box>

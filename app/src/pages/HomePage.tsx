@@ -11,6 +11,7 @@ import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import {
   Box,
   Button,
+  Divider,
   H2,
   Icon,
   PageContent,
@@ -40,29 +41,48 @@ export function HomePage({}: HomePageProps) {
         </Box>
         <AppInstallBanner />
         <IncomingInvites surface p />
-        <Box d="col" gap>
-          <H2 className="font-300 text-md uppercase my-0 mx-4">Live Games</H2>
-          <MembershipsList
-            invitationStatus="accepted"
-            statusFilter={['active']}
-          />
-          <HotseatGamesList status="active" />
-          <H2 className="font-300 text-md uppercase my-0 mx-4">
-            Upcoming Games
-          </H2>
-          <MembershipsList
-            invitationStatus="accepted"
-            statusFilter={['pending']}
-          />
-          <H2 className="font-300 text-md uppercase my-0 mx-4">Invitations</H2>
-          <MembershipsList
-            invitationStatus="pending"
-            statusFilter={['pending']}
-          />
-          <Button asChild color="ghost" className="mx-auto color-gray-dark">
+        <Box d="col" gap="lg">
+          <Box col gap>
+            <H2 className="font-300 text-md uppercase my-0 mx-4">
+              <Icon name="gamePiece" /> Live Games
+            </H2>
+            <MembershipsList
+              invitationStatus="accepted"
+              statusFilter={['active']}
+            />
+          </Box>
+          <Box col gap>
+            <H2 className="font-300 text-md uppercase my-0 mx-4">
+              <Icon name="phone" /> Hotseat Games
+            </H2>
+            <HotseatGamesList status="active" />
+          </Box>
+          <Box col gap>
+            <H2 className="font-300 text-md uppercase my-0 mx-4">
+              <Icon name="clock" /> Upcoming Games
+            </H2>
+            <MembershipsList
+              invitationStatus="accepted"
+              statusFilter={['pending']}
+              emptyState="No upcoming games"
+            />
+          </Box>
+          <Box col gap>
+            <H2 className="font-300 text-md uppercase my-0 mx-4">
+              Invitations
+            </H2>
+            <MembershipsList
+              invitationStatus="pending"
+              statusFilter={['pending']}
+              emptyState="No pending invitations"
+            />
+          </Box>
+          <Divider className="bg-gray" />
+          <Button asChild color="ghost" className="ml-auto color-gray-dark">
             <Link to="/history">
               <Icon name="calendar" />
               History
+              <Icon name="arrowRight" />
             </Link>
           </Button>
         </Box>

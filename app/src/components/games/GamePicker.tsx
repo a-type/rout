@@ -105,9 +105,11 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       className={clsx(className)}
       {...rest}
     >
-      <Box items="center" gap className="flex-wrap" surface="wash" p>
-        <Icon name="filter" />
-        Filter
+      <Box items="center" gap="lg" className="flex-wrap" surface p>
+        <Box items="center" gap>
+          <Icon name="filter" />
+          Filter
+        </Box>
         <Button
           size="small"
           color="accent"

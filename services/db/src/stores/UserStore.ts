@@ -567,7 +567,10 @@ export class UserStore extends RpcTarget {
 
     const endCursor = results[results.length - 1]?.createdAt ?? null;
     return {
-      results,
+      results: results.map((r) => ({
+        ...r,
+        canDelete: r.isFoundingMember && r.status === 'pending',
+      })),
       pageInfo: {
         hasNextPage,
         endCursor: endCursor ? this.#encodeCursor(endCursor) : null,
