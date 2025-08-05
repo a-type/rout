@@ -1,4 +1,6 @@
-const groupedWordBank: (string[] | string)[] = [
+import { exportWordBank, repeat } from './utils.js';
+
+export const groupedWordBank: (string[] | string)[] = [
   // blanks
   repeat('', 15),
 
@@ -449,37 +451,4 @@ const groupedWordBank: (string[] | string)[] = [
   repeat('$%@#', 3),
 ];
 
-// debugging
-let seen = new Set<string>();
-groupedWordBank.forEach((word) => {
-  if (Array.isArray(word)) {
-    if (seen.has(word[0])) {
-      console.warn(`Duplicate word: ${word[0]}`);
-    } else {
-      seen.add(word[0]);
-    }
-  } else {
-    if (seen.has(word)) {
-      console.warn(`Duplicate word: ${word}`);
-    } else {
-      seen.add(word);
-    }
-  }
-});
-
-export const wordBank = groupedWordBank.flat() as string[];
-
-export const freebieWords: string[] = [
-  '.',
-  '!',
-  '?',
-  '"',
-  'a',
-  'an',
-  'the',
-  'and',
-];
-
-function repeat(word: string, count: number): string[] {
-  return Array.from({ length: count }, () => word);
-}
+export const wordBank = exportWordBank(groupedWordBank);

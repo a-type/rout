@@ -11,7 +11,7 @@ import {
   StoryStep,
   WordItem,
 } from './sequences.js';
-import { wordBank } from './wordBank.js';
+import wordBanks from './wordBanks/index.js';
 import { isValidFreebie, isValidWriteIn, takeWords } from './words.js';
 
 export type GlobalState = {
@@ -41,6 +41,7 @@ export const gameDefinition: GameDefinition<{
   PublicTurnData: {};
   TurnError: TurnError;
   InitialTurnData: TurnData;
+  SetupData: { wordBank: keyof typeof wordBanks };
 }> = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -125,7 +126,12 @@ export const gameDefinition: GameDefinition<{
 
   // run on server
 
-  getInitialGlobalState: ({ members, random }) => {
+  getSetupData: () => ({
+    wordBank: 'v2',
+  }),
+
+  getInitialGlobalState: ({ members, random, setupData }) => {
+    const wordBank = wordBanks[setupData?.wordBank] || wordBanks.v1;
     let gameWordBank = random.shuffle(wordBank);
     let index = 0;
     // ensure each player has a unique set of words

@@ -40,7 +40,7 @@ export const gameDefinition: GameDefinition<{
   getInitialGlobalState: ({ random, setupData }) => ({
     secretNumber: random.int(0, 100),
     playerGuesses: {},
-    setupMessage: setupData.message,
+    setupMessage: setupData?.message,
   }),
 
   validateTurn: ({ turn }) => {
