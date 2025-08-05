@@ -229,45 +229,43 @@ const GamePickerItem = withGame<{
         </Card.Main>
       </GameDetailsDialog>
       <Card.Footer>
-        <Card.Actions>
-          {!owned && (
-            <Button
-              size="small"
-              color="accent"
-              onClick={() => openQuickBuy(gameId)}
-            >
-              <Icon name="cart" />
-              Buy
-            </Button>
-          )}
-          {owned && isGameLeader && (
-            <Button
-              size="small"
-              color="primary"
-              onClick={() => gameSuite.voteForGame(gameId)}
-              disabled={selected}
-            >
-              <Icon name="check" />
-              {selected ? 'Selected!' : 'Select'}
-            </Button>
-          )}
-          {owned && !isGameLeader && (
-            <Button
-              size="small"
-              color="primary"
-              onClick={() => {
-                if (votedForThisGame) {
-                  gameSuite.removeVoteForGame(gameId);
-                } else {
-                  gameSuite.voteForGame(gameId);
-                }
-              }}
-            >
-              <Icon name={votedForThisGame ? 'x' : 'plus'} />
-              {votedForThisGame ? 'Voted!' : 'Vote'}
-            </Button>
-          )}
-        </Card.Actions>
+        {!owned && (
+          <Button
+            className="w-full justify-center"
+            color="accent"
+            onClick={() => openQuickBuy(gameId)}
+          >
+            <Icon name="cart" />
+            Buy
+          </Button>
+        )}
+        {owned && isGameLeader && (
+          <Button
+            className="w-full justify-center"
+            color="primary"
+            onClick={() => gameSuite.voteForGame(gameId)}
+            disabled={selected}
+          >
+            <Icon name="check" />
+            {selected ? 'Selected!' : 'Select'}
+          </Button>
+        )}
+        {owned && !isGameLeader && (
+          <Button
+            className="w-full justify-center"
+            color="primary"
+            onClick={() => {
+              if (votedForThisGame) {
+                gameSuite.removeVoteForGame(gameId);
+              } else {
+                gameSuite.voteForGame(gameId);
+              }
+            }}
+          >
+            <Icon name={votedForThisGame ? 'x' : 'plus'} />
+            {votedForThisGame ? 'Voted!' : 'Vote'}
+          </Button>
+        )}
       </Card.Footer>
     </Card>
   );
