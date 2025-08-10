@@ -73,7 +73,7 @@ export function PushBanner({}: PushBannerProps) {
 
 const Banner = withProps(Box, {
   surface: 'primary',
-  elevated: 'lg',
+  elevated: 'xl',
   col: true,
   gap: true,
   p: true,

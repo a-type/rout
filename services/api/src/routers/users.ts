@@ -133,6 +133,12 @@ export const usersRouter = new Hono<Env>()
             push: z.boolean(),
           })
           .optional(),
+        'game-abandoned': z
+          .object({
+            email: z.boolean(),
+            push: z.boolean(),
+          })
+          .optional(),
       }),
     ),
     async (ctx) => {
