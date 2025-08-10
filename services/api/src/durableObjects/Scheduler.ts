@@ -1,5 +1,43 @@
 import { genericId } from '@long-game/common';
-import { db, ScheduledTask, SqlWrapper } from './gameSession/sql.js';
+import {
+  DummyDriver,
+  Kysely,
+  Selectable,
+  SqliteAdapter,
+  SqliteIntrospector,
+  SqliteQueryCompiler,
+} from 'kysely';
+import { SqlWrapper } from './SqlWrapper.js';
+
+export interface ScheduledTaskTable {
+  id: string;
+  createdAt: string;
+  type: string;
+  dataJSON: string;
+  scheduledAt: string;
+}
+export type ScheduledTask = Selectable<ScheduledTaskTable>;
+
+export const scheduledTaskMigration = `
+      CREATE TABLE IF NOT EXISTS ScheduledTask (
+        id TEXT PRIMARY KEY,
+        createdAt TEXT NOT NULL,
+        type TEXT NOT NULL,
+        dataJSON TEXT NOT NULL,
+        scheduledAt TEXT NOT NULL
+      );
+    `;
+
+const db = new Kysely<{
+  ScheduledTask: ScheduledTaskTable;
+}>({
+  dialect: {
+    createAdapter: () => new SqliteAdapter(),
+    createDriver: () => new DummyDriver(),
+    createIntrospector: (db) => new SqliteIntrospector(db),
+    createQueryCompiler: () => new SqliteQueryCompiler(),
+  },
+});
 
 export class Scheduler<Tasks extends { type: string; data?: any }> {
   constructor(
@@ -50,6 +88,16 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
 
   cancelTask = async (taskId: string): Promise<void> => {
     await this.sql.run(db.deleteFrom('ScheduledTask').where('id', '=', taskId));
+  };
+
+  hasTask = async (taskId: string): Promise<boolean> => {
+    const result = await this.sql.run<{ count: number }>(
+      db
+        .selectFrom('ScheduledTask')
+        .select(db.fn.count<number>('id').as('count'))
+        .where('id', '=', taskId),
+    );
+    return result[0]?.count > 0;
   };
 
   handleAlarm = async () => {

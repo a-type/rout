@@ -1,8 +1,6 @@
 import { PrefixedId, SystemChatAuthorId } from '@long-game/common';
 import { SQLMigrations } from 'durable-utils';
 import {
-  Compilable,
-  CompiledQuery,
   DummyDriver,
   Kysely,
   Selectable,
@@ -10,8 +8,9 @@ import {
   SqliteIntrospector,
   SqliteQueryCompiler,
 } from 'kysely';
+import { scheduledTaskMigration, ScheduledTaskTable } from '../Scheduler.js';
 
-interface Tables {
+export interface Tables {
   Turn: TurnTable;
   ChatMessage: ChatMessageTable;
   GameVote: GameVoteTable;
@@ -55,16 +54,7 @@ interface ReadyUpTable {
 }
 export type ReadyUp = Selectable<ReadyUpTable>;
 
-interface ScheduledTaskTable {
-  id: string;
-  createdAt: string;
-  type: string;
-  dataJSON: string;
-  scheduledAt: string;
-}
-export type ScheduledTask = Selectable<ScheduledTaskTable>;
-
-const migrations: SQLMigrations.SQLSchemaMigration[] = [
+export const migrations: SQLMigrations.SQLSchemaMigration[] = [
   {
     idMonotonicInc: 1,
     description: 'Add initial tables',
@@ -126,15 +116,7 @@ const migrations: SQLMigrations.SQLSchemaMigration[] = [
   {
     idMonotonicInc: 5,
     description: 'Add ScheduledTask table',
-    sql: `
-      CREATE TABLE IF NOT EXISTS ScheduledTask (
-        id TEXT PRIMARY KEY,
-        createdAt TEXT NOT NULL,
-        type TEXT NOT NULL,
-        dataJSON TEXT NOT NULL,
-        scheduledAt TEXT NOT NULL
-      );
-    `,
+    sql: scheduledTaskMigration,
   },
 ];
 
@@ -146,35 +128,3 @@ export const db = new Kysely<Tables>({
     createQueryCompiler: () => new SqliteQueryCompiler(),
   },
 });
-
-export type QueryRow<T extends CompiledQuery<unknown>> =
-  T extends CompiledQuery<infer R> ? R : never;
-
-export class SqlWrapper {
-  #sql;
-  #migrations;
-  constructor(storage: DurableObjectStorage) {
-    this.#sql = storage.sql;
-    this.#migrations = new SQLMigrations.SQLSchemaMigrations({
-      doStorage: storage,
-      migrations,
-    });
-  }
-
-  run = async <O extends Record<string, SqlStorageValue>>(
-    query: Compilable<O>,
-    {
-      debug,
-    }: {
-      debug?: boolean;
-    } = {},
-  ): Promise<O[]> => {
-    await this.#migrations.runAll();
-    const compiled = query.compile();
-    if (debug) {
-      console.log('SQL:', compiled.sql);
-      console.log('Parameters:', compiled.parameters);
-    }
-    return this.#sql.exec<O>(compiled.sql, ...compiled.parameters).toArray();
-  };
-}

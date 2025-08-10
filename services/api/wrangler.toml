@@ -36,6 +36,10 @@ bucket_name = "prod-long-game-avatars"
 name = "GAME_SESSION"
 class_name = "GameSession"
 
+[[durable_objects.bindings]]
+name = "NOTIFICATION_SCHEDULER"
+class_name = "NotificationScheduler"
+
 [[migrations]]
 tag = "v1"
 new_classes = ["GameSessionState"]
@@ -44,3 +48,7 @@ new_classes = ["GameSessionState"]
 tag = "v2"
 new_sqlite_classes = ["GameSession"]
 deleted_classes = ["GameSessionState"]
+
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["NotificationScheduler"]

@@ -49,6 +49,13 @@ export const notificationTypes = [
   'new-game',
   'game-abandoned',
 ] as const;
+export type NotificationType = (typeof notificationTypes)[number];
+
+export type NotificationsByType = {
+  [type in AnyNotification['type']]: NotificationConfig<
+    Extract<AnyNotification, { type: type }>
+  >;
+};
 
 export * from './turnReady.js';
 export * from './types.js';

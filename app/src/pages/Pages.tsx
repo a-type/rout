@@ -104,6 +104,10 @@ const routes = makeRoutes([
     ],
   },
   {
+    path: '/settings',
+    component: lazy(() => import('./SettingsPage.jsx')),
+  },
+  {
     path: '*',
     component: () => <div>404</div>,
   },

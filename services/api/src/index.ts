@@ -42,3 +42,4 @@ export default app;
 export type AppType = typeof app;
 
 export { GameSession } from './durableObjects/gameSession/GameSession.js';
+export { NotificationScheduler } from './durableObjects/notificationScheduler/NotificationScheduler.js';

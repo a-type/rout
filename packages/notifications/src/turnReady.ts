@@ -1,20 +1,26 @@
 import { PrefixedId } from '@long-game/common';
-import games from '@long-game/games';
 import { NotificationConfig } from './types.js';
 
 export interface TurnReadyNotification {
   type: 'turn-ready';
   id: PrefixedId<'no'>;
-  gameSessionId: PrefixedId<'gs'>;
-  // for referencing game details like name to use in notification
-  gameId: string;
+  turns: {
+    gameSessionId: PrefixedId<'gs'>;
+    gameTitle: string;
+    gameId: string;
+  }[];
 }
 
 export const turnReadyNotification: NotificationConfig<TurnReadyNotification> =
   {
     type: 'turn-ready',
     text(data, context) {
-      const gameName = games[data.gameId]?.title ?? 'Rout';
+      if (data.turns?.length > 1) {
+        return `You have ${data.turns.length} games waiting for your move.${
+          context === 'push' ? ' Tap to play!' : ''
+        }`;
+      }
+      const gameName = data.turns?.[0].gameTitle ?? 'Rout';
       return `Ready to make your move in ${gameName}?${
         context === 'push' ? ' Tap to play!' : ''
       }`;
@@ -23,6 +29,8 @@ export const turnReadyNotification: NotificationConfig<TurnReadyNotification> =
       return `Your turn!`;
     },
     link(data) {
-      return `/session/${data.gameSessionId}`;
+      return data.turns?.length === 1
+        ? `/session/${data.turns[0].gameSessionId}`
+        : '/';
     },
   };

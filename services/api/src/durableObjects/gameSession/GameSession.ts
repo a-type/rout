@@ -25,12 +25,14 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
-import { addSeconds } from 'date-fns';
+import { addDays, addSeconds, setHours, startOfDay } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
+import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
 import { Scheduler } from '../Scheduler.js';
+import { SqlWrapper } from '../SqlWrapper.js';
 import { GameSessionSocketHandler } from './GameSessionSocketHandler.js';
-import { ChatMessage, db, SqlWrapper } from './sql.js';
+import { ChatMessage, db, migrations } from './sql.js';
 
 export interface GameSessionBaseData {
   id: PrefixedId<'gs'>;
@@ -75,6 +77,9 @@ type ScheduledTasks =
     }
   | {
       type: 'startGame';
+    }
+  | {
+      type: 'turnReminders';
     };
 const startGameTaskId = '@@startGame';
 
@@ -86,7 +91,7 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
-    this.#sql = new SqlWrapper(ctx.storage);
+    this.#sql = new SqlWrapper(ctx.storage, migrations);
     this.#socketHandler = new GameSessionSocketHandler(this, ctx, env);
     this.#scheduler = new Scheduler(
       this.#sql,
@@ -1254,21 +1259,24 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
     const sessionData = await this.#getSessionData();
-    console.info(`Notifying player ${playerId} of turn`);
+    console.info(`Queueing notification for ${playerId} of turn`);
     if (!sessionData.gameId || !sessionData.gameVersion) {
       console.warn(`No game in progress; cannot notify player of turn`);
       return;
     }
-    await notifyUser(
-      playerId,
-      {
-        type: 'turn-ready',
-        gameId: sessionData.gameId,
-        gameSessionId: sessionData.id,
-        id: id('no'),
-      },
-      this.env,
-    );
+    const scheduler = await getNotificationScheduler(playerId, this.env);
+    const game = games[sessionData.gameId];
+    await scheduler.add(playerId, {
+      type: 'turn-ready',
+      turns: [
+        {
+          gameId: sessionData.gameId,
+          gameSessionId: sessionData.id,
+          gameTitle: game?.title ?? 'a game',
+        },
+      ],
+      id: id('no'),
+    });
   }
 
   /**
@@ -1332,6 +1340,9 @@ export class GameSession extends DurableObject<ApiBindings> {
         nextRoundCheckAt: roundState.checkAgainAt.toISOString(),
       });
     }
+    if (roundState.pendingTurns.length > 0) {
+      this.#scheduleTurnRemindersTask();
+    }
   };
   #sendGameRoundChangeMessages = async (roundIndex: number) => {
     // if game definition has a round change message, add it to chat
@@ -1366,6 +1377,33 @@ export class GameSession extends DurableObject<ApiBindings> {
       }
     }
   };
+  #scheduleTurnRemindersTask = () => {
+    // schedule a follow up for 7 AM the next day to remind players
+    // TODO: timezone! agh!
+    const sevenAm = setHours(startOfDay(addDays(new Date(), 1)), 7);
+    console.log(
+      `Scheduling turn reminders for ${sevenAm.toISOString()} (next day at 7 AM)`,
+    );
+    this.#scheduler.scheduleTask(
+      sevenAm,
+      { type: 'turnReminders' },
+      'turn-reminders',
+    );
+  };
+  #sendTurnReminders = async () => {
+    console.log(`Sending turn reminders to players`);
+    const roundState = await this.#getCurrentRoundState();
+    for (const playerId of roundState.pendingTurns) {
+      try {
+        await this.#notifyPlayerOfTurn(playerId);
+      } catch (err) {
+        console.error(`Failed to send turn reminder to ${playerId}`, err);
+      }
+    }
+    if (roundState.pendingTurns.length > 0) {
+      this.#scheduleTurnRemindersTask();
+    }
+  };
 
   async alarm() {
     this.#scheduler.handleAlarm();
@@ -1378,6 +1416,8 @@ export class GameSession extends DurableObject<ApiBindings> {
         if (await this.getAllPlayersReady()) {
           return this.startGame();
         }
+      case 'turnReminders':
+        return this.#sendTurnReminders();
     }
   };
 
