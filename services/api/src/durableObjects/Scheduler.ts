@@ -49,7 +49,30 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
         scheduledAt: Date;
       } & Tasks,
     ) => Promise<void> | void,
-  ) {}
+  ) {
+    this.storage.getAlarm().then((alarm) => {
+      if (alarm) {
+        if (alarm < Date.now()) {
+          // we might be triggering this alarm now, on wake up. so wait
+          // for a bit before setting it again
+          setTimeout(async () => {
+            const alarm = await this.storage.getAlarm();
+            if (alarm && alarm < Date.now()) {
+              // if the alarm is still in the past, reset it to now
+              console.warn(
+                `Scheduler alarm is set in the past (${new Date(alarm).toString()}); resetting to now.`,
+              );
+
+              this.storage.setAlarm(Date.now());
+            }
+          }, 5000);
+        }
+        console.log(
+          `Scheduler startup: current alarm is set for ${new Date(alarm).toString()}`,
+        );
+      }
+    });
+  }
 
   scheduleTask = async (
     time: Date,
@@ -80,6 +103,7 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     const existingAlarm = await this.storage.getAlarm();
     if (!existingAlarm || existingAlarm > time.getTime()) {
       // if no alarm is set or the new task is earlier, set the alarm
+      console.log(`Setting alarm for next task at ${time.toISOString()}`);
       await this.storage.setAlarm(time);
     }
 

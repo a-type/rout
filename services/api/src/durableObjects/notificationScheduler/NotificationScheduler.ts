@@ -1,5 +1,8 @@
 import { PrefixedId } from '@long-game/common';
-import { AnyNotification } from '@long-game/notifications';
+import {
+  AnyNotification,
+  TurnReadyNotification,
+} from '@long-game/notifications';
 import { DurableObject } from 'cloudflare:workers';
 import { notifyUser } from '../../services/notification.js';
 import { Scheduler } from '../Scheduler.js';
@@ -25,6 +28,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
   }
 
   #handleScheduledTask = (task: ScheduledTasks) => {
+    console.log(`Handling scheduled task: ${JSON.stringify(task)}`);
     if (task.type === 'flush') {
       return this.#sendNotifications();
     }
@@ -62,16 +66,30 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
         case 'turn-ready': {
           // collapse into one
           const turns = byType[type].flatMap((n) => n.notification.turns);
+          // just in case
+          if (turns.length === 0) continue;
+          // deduplicate game sessions
+          const byGameSession = turns.reduce(
+            (acc, turn) => {
+              acc[turn.gameSessionId] = turn;
+              return acc;
+            },
+            {} as Record<
+              PrefixedId<'gs'>,
+              TurnReadyNotification['turns'][number]
+            >,
+          );
           const userId = byType[type][0].userId as PrefixedId<'u'>;
           await notifyUser(
             userId,
             {
               type: 'turn-ready',
               id: byType[type][0].id,
-              turns,
+              turns: Object.values(byGameSession),
             },
             this.env,
           );
+          console.log(`Notified user ${userId} of ${turns.length} turns ready`);
           break;
         }
         default: {
@@ -82,8 +100,11 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
                 n.userId as PrefixedId<'u'>,
                 n.notification,
                 this.env,
-              ),
-                markSent.add(n.id);
+              );
+              markSent.add(n.id);
+              console.log(
+                `Notified user ${n.userId} of notification ${n.id} (${type})`,
+              );
             }),
           );
           break;
@@ -103,7 +124,8 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
     }
   };
 
-  add = async (userId: PrefixedId<'u'>, noti: AnyNotification) => {
+  async add(userId: PrefixedId<'u'>, noti: AnyNotification) {
+    console.log(`Buffering notification for user ${userId}:`, noti);
     await this.#sql.run(
       db
         .insertInto('Notification')
@@ -122,7 +144,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
       { type: 'flush' },
       'flush-notifications',
     );
-  };
+  }
 
   alarm(): void | Promise<void> {
     return this.#scheduler.handleAlarm();

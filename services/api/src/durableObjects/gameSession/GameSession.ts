@@ -1259,7 +1259,6 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
     const sessionData = await this.#getSessionData();
-    console.info(`Queueing notification for ${playerId} of turn`);
     if (!sessionData.gameId || !sessionData.gameVersion) {
       console.warn(`No game in progress; cannot notify player of turn`);
       return;
