@@ -117,6 +117,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   @observable accessor nextRoundCheckAt: Date | null = null;
   @observable accessor turnSubmitTimeout: ReturnType<typeof setTimeout> | null =
     null;
+  @observable accessor submittingTurn: boolean = false;
+  @observable accessor remoteTurnError: BaseTurnError | null = null;
   @observable accessor playerId!: PrefixedId<'u'>;
   @observable accessor members: GameMember[] = [];
 
@@ -704,12 +706,13 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
     }
+    this.submittingTurn = true;
     const submittingToRound = this.latestRoundIndex;
     try {
       const remoteError = await this.actuallySubmitTurn(toJS(data));
       if (remoteError) {
         console.info(`Turn submission invalid: ${remoteError.message}`);
-        return remoteError;
+        this.remoteTurnError = remoteError;
       }
       runInAction(() => {
         if (this.maybeGetRound(submittingToRound)) {
@@ -720,11 +723,16 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       this.events.emit('turnPlayed');
     } catch (e) {
       const msg = LongGameError.wrap(e as any).message;
+      console.error(e);
       this.events.emit(
         'error',
         new LongGameError(LongGameError.Code.Unknown, msg),
       );
-      return simpleError('Error submitting turn. Try again?');
+      runInAction(() => {
+        this.remoteTurnError = simpleError(msg) as BaseTurnError;
+      });
+    } finally {
+      this.submittingTurn = false;
     }
   };
 
@@ -732,8 +740,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     if (this.turnSubmitTimeout) {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
-      this.events.emit('turnSubmitCancelled');
     }
+    this.events.emit('turnSubmitCancelled');
   };
 
   @action sendChat = async (message: {
