@@ -1,4 +1,5 @@
 import { MainNav } from '@/components/nav/MainNav';
+import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { ColorModeToggle } from '@/components/settings/ColorModeToggle';
 import { GoldUpgrade } from '@/components/subscription/GoldUpgrade';
 import { ManageSubscription } from '@/components/subscription/ManageSubscription';
@@ -40,6 +41,9 @@ export function SettingsPage({}: SettingsPageProps) {
           <GoldUpgrade />
           <ManageSubscription />
           <Divider />
+          <H2>Notifications</H2>
+          <NotificationSettings />
+          <Divider />
           <form action={`${API_ORIGIN}/auth/logout`} method="post">
             <Button color="destructive" type="submit">
               Logout
@@ -61,7 +65,7 @@ export function SettingsPage({}: SettingsPageProps) {
           )}
         </Box>
       </PageContent>
-      <PageNav>
+      <PageNav className="bg-white/80 md:rounded-md">
         <MainNav />
       </PageNav>
     </PageRoot>

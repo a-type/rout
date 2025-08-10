@@ -3,6 +3,8 @@ import { sdkHooks } from '@/services/publicSdk';
 import { useCallback, useEffect, useState } from 'react';
 import { proxy, useSnapshot } from 'valtio';
 
+const SIMULATE = true;
+
 const subscribedState = proxy({
   subscribed: false,
 });
@@ -72,6 +74,12 @@ export function useSubscribeToPush() {
   const createPush = sdkHooks.useCreatePushSubscription();
   return [
     useCallback(async () => {
+      if (SIMULATE) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        subscribedState.subscribed = true;
+        return true;
+      }
+
       if (!VAPID_PUBLIC_KEY) {
         throw new Error('VAPID key is not set');
       }
@@ -115,6 +123,12 @@ export function useUnsubscribeFromPush() {
   const deletePush = sdkHooks.useDeletePushSubscription();
   return [
     useCallback(async () => {
+      if (SIMULATE) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        subscribedState.subscribed = false;
+        return;
+      }
+
       const endpoint = await unsubscibeFromPush();
       if (endpoint) {
         await deletePush.mutateAsync({
@@ -167,5 +181,8 @@ export function useCanSubscribeToPush() {
         setCanSubscribe(false);
       });
   }, []);
+  if (SIMULATE) {
+    return true;
+  }
   return canSubscribe;
 }

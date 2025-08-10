@@ -1,5 +1,15 @@
+import { MainNav } from '@/components/nav/MainNav';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, H1, Icon, P, PageContent, PageRoot } from '@a-type/ui';
+import {
+  Box,
+  Button,
+  H1,
+  Icon,
+  P,
+  PageContent,
+  PageNav,
+  PageRoot,
+} from '@a-type/ui';
 import { APP_NAME } from '@long-game/common';
 import { FriendshipInvitationPublicInfo, Self } from '@long-game/game-client';
 import { Link, useParams } from '@verdant-web/react-router';
@@ -20,6 +30,9 @@ const InvitePage = () => {
           )}
         </Box>
       </PageContent>
+      <PageNav className="bg-white/80 md:rounded-md">
+        <MainNav />
+      </PageNav>
     </PageRoot>
   );
 };

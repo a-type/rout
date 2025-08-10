@@ -1,3 +1,4 @@
+import { PushBanner } from '@/components/notifications/PushBanner.js';
 import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import { updateState } from '@/components/updates/updateState.js';
 import { checkForUpdate, skipWaiting } from '@/swRegister.js';
@@ -151,6 +152,7 @@ export const Pages = () => {
           <Outlet />
         </Box>
         <QuickBuyPopup />
+        <PushBanner />
       </Router>
     </ErrorBoundary>
   );

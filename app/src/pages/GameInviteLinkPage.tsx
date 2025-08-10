@@ -1,9 +1,18 @@
 import { Wordmark } from '@/components/brand/Wordmark';
+import { MainNav } from '@/components/nav/MainNav';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { UserAvatar } from '@/components/users/UserAvatar';
 import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, P, PageContent, PageRoot, toast } from '@a-type/ui';
+import {
+  Box,
+  Button,
+  P,
+  PageContent,
+  PageNav,
+  PageRoot,
+  toast,
+} from '@a-type/ui';
 import { TopographyBackground } from '@long-game/game-ui';
 import { Link, useNavigate, useParams } from '@verdant-web/react-router';
 
@@ -17,7 +26,7 @@ const GameInviteLinkPage = () => {
   const { data: publicInviteData } =
     sdkHooks.useGetPublicGameSessionFromInviteCode(code);
 
-  const game = useGame(publicInviteData.gameId);
+  const game = useGame(publicInviteData.gameId || 'empty');
 
   const navigate = useNavigate();
   const claimMutation = sdkHooks.useClaimPublicGameSessionLink();
@@ -89,6 +98,9 @@ const GameInviteLinkPage = () => {
           )}
         </Box>
       </PageContent>
+      <PageNav className="bg-white/80 md:rounded-md">
+        <MainNav />
+      </PageNav>
     </PageRoot>
   );
 };

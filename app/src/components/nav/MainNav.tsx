@@ -13,7 +13,7 @@ export function MainNav({}: MainNavProps) {
     routes.some((route) => route.path === '/library') ||
     routes.some((route) => route.path === '/store');
   return (
-    <NavBar className="!bg-white/80 md:rounded-md [scrollbar-gutter:initial]">
+    <NavBar className="md:rounded-md [scrollbar-gutter:initial]">
       <Wordmark className="hidden md:block font-[Knewave] text-center w-full p-2 text-xl" />
       <NavBar.Item asChild active={isHome}>
         <Link to="/">

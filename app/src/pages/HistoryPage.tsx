@@ -13,7 +13,7 @@ const HistoryPage = () => {
           <MembershipsList />
         </Box>
       </PageContent>
-      <PageNav>
+      <PageNav className="bg-white/80 md:rounded-md">
         <MainNav />
       </PageNav>
     </PageRoot>

@@ -16,7 +16,7 @@ const GameDetailsPage = () => {
         </Button>
         <GameManual gameId={gameId} />
       </PageContent>
-      <PageNav>
+      <PageNav className="bg-white/80 md:rounded-md">
         <MainNav />
       </PageNav>
     </PageRoot>

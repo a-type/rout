@@ -16,7 +16,7 @@ export function FriendsPage({}: FriendsPageProps) {
         <SendInvite />
         <FriendsList />
       </PageContent>
-      <PageNav>
+      <PageNav className="bg-white/80 md:rounded-md">
         <MainNav />
       </PageNav>
     </PageRoot>
