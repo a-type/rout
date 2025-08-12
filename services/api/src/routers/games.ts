@@ -38,7 +38,14 @@ function gameSummary(game: GameModule, env: ApiBindings) {
 
 export const gamesRouter = new Hono<Env>()
   .get('/', async (ctx) => {
+    const isAdmin = ctx.get('session')?.isProductAdmin ?? false;
     const metadata = Object.entries(games)
+      .filter(([, game]) => {
+        if (game.prerelease && !isAdmin) {
+          return false;
+        }
+        return game.versions.length > 0;
+      })
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([id, game]) => gameSummary(game, ctx.env));
     // returns a list of all games and some metadata

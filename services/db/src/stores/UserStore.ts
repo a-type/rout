@@ -784,10 +784,8 @@ export class UserStore extends RpcTarget {
       .executeTakeFirst();
 
     if (existingMembership) {
-      throw new LongGameError(
-        LongGameError.Code.BadRequest,
-        'You are already a member of this game session',
-      );
+      // fine! nothing to do.
+      return existingMembership;
     }
 
     // check that game is still pending

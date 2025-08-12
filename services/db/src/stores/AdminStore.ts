@@ -187,6 +187,9 @@ export class AdminStore extends WorkerEntrypoint<DbBindings> {
       .select('GameProduct.id')
       .execute();
     for (const product of freeGameProducts) {
+      if (games[product.id].prerelease) {
+        continue; // skip prerelease games
+      }
       await this.purchaseGameProduct(userId, product.id);
     }
   }

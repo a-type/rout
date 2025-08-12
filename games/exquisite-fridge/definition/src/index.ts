@@ -6,9 +6,14 @@ export default {
   title: 'Exquisite Fridge',
   description: `Our twist on a classic creative writing game. Use your fridge magnet words to craft unpredictable stories with your friends!`,
   versions: [v1],
-  tags: [],
-  creators: [],
-  prerelease: true,
+  tags: ['creative', 'collaborative', 'casual'],
+  creators: [
+    {
+      name: 'The Rout Team',
+      url: 'https://rout.games',
+    },
+  ],
+  prerelease: false,
   devPort: 3304,
   screenshots: [
     {
