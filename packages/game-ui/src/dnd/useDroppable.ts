@@ -62,6 +62,7 @@ export function useDroppable<T>({
 
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
+        console.log('droppable drop', id);
         const data = draggableDataRegistry.get(dragged);
         if (stableAccept({ id: dragged, data }, gesture)) {
           const region = boundsRegistry.getEntry(id)!;

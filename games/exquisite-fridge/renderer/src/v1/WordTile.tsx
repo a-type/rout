@@ -38,6 +38,9 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       }}
       movedBehavior={movedBehavior}
       disableChat={disableChat}
+      helpContent={
+        isBlank && <div>You can use these tiles to write your own words in</div>
+      }
     >
       <Box
         className={clsx(

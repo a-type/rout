@@ -22,7 +22,9 @@ import {
   PlayerName,
   RendererProvider,
   SpatialChatDraggable,
+  SpatialHelpDraggable,
 } from '@long-game/game-ui';
+import { Link } from '@verdant-web/react-router';
 import { startTransition, Suspense, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
@@ -101,6 +103,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
           version,
           'chat',
         ),
+        LinkComponent: Link,
       };
     }, [gameId, version]);
 
@@ -135,11 +138,18 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                 )}
               </Suspense>
               {gameSuite.gameStatus.status !== 'pending' && (
-                <ErrorBoundary>
-                  <Suspense>
-                    <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
-                  </Suspense>
-                </ErrorBoundary>
+                <>
+                  <ErrorBoundary>
+                    <Suspense>
+                      <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                    </Suspense>
+                  </ErrorBoundary>
+                  <ErrorBoundary>
+                    <Suspense>
+                      <SpatialHelpDraggable className="fixed anchor-to-gameMain right-[calc(anchor(right)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                    </Suspense>
+                  </ErrorBoundary>
+                </>
               )}
             </GameLayout.Main>
             <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />

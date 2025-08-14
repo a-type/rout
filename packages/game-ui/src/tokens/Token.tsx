@@ -4,7 +4,7 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { ChatSurface } from '../chat/ChatSurface.js';
 import {
   DefaultDraggedContainer,
@@ -13,6 +13,7 @@ import {
   DraggedContainerComponent,
 } from '../dnd/Draggable.js';
 import { DragGestureActivationConstraint } from '../dnd/useDragGesture.js';
+import { HelpSurface } from '../help/HelpSurface.js';
 import { useIsTokenInHand } from './TokenHand.js';
 import { useMaybeParentTokenSpace } from './TokenSpace.js';
 import { useTokenData } from './types.js';
@@ -20,6 +21,9 @@ import { useTokenData } from './types.js';
 export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
   disableChat?: boolean;
+  helpContent?: ReactNode;
+  // TODO: make mandatory
+  name?: string;
 }
 
 const tokenTags = ['token'];
@@ -30,6 +34,8 @@ export function Token({
   handleProps,
   disableChat,
   id,
+  helpContent,
+  name,
   ...rest
 }: TokenProps) {
   const tokenData = useTokenData(id, data);
@@ -58,14 +64,21 @@ export function Token({
       dropOnTag="token-space"
     >
       <ChatSurface disabled={disableChat} sceneId={id}>
-        <Draggable.Handle
-          activationConstraint={activationConstraint}
-          allowStartFromDragIn={isInHand}
-          className="w-full h-full"
-          {...handleProps}
+        <HelpSurface
+          disabled={!helpContent}
+          content={helpContent}
+          title={name}
+          id={id}
         >
-          {children}
-        </Draggable.Handle>
+          <Draggable.Handle
+            activationConstraint={activationConstraint}
+            allowStartFromDragIn={isInHand}
+            className="w-full h-full"
+            {...handleProps}
+          >
+            {children}
+          </Draggable.Handle>
+        </HelpSurface>
       </ChatSurface>
     </Draggable>
   );

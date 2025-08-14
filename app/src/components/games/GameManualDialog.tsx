@@ -1,5 +1,6 @@
 import { Button, ButtonProps, Dialog, Icon, Spinner } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
+import { useSearchParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { GameManual } from './GameManual.js';
 
@@ -7,8 +8,22 @@ export interface GameManualDialogProps extends ButtonProps {}
 
 export const GameManualDialog = withGame<GameManualDialogProps>(
   function GameManualDialog({ gameSuite, ...props }) {
+    const [params, setParams] = useSearchParams();
+    const open = params.get('rules');
     return (
-      <Dialog>
+      <Dialog
+        open={!!open}
+        onOpenChange={(o) => {
+          setParams((prev) => {
+            if (o) {
+              prev.set('rules', 'true');
+            } else {
+              prev.delete('rules');
+            }
+            return prev;
+          });
+        }}
+      >
         <Dialog.Trigger asChild>
           <Button
             color="ghost"
