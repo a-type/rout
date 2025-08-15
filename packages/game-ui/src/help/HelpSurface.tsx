@@ -1,4 +1,4 @@
-import { Button, clsx, Dialog, Icon } from '@a-type/ui';
+import { Box, Button, clsx, Icon, Popover } from '@a-type/ui';
 import { ReactNode, useState } from 'react';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { Droppable } from '../dnd/Droppable.js';
@@ -12,6 +12,7 @@ export interface HelpSurfaceProps {
   disabled?: boolean;
   content?: ReactNode;
   title?: ReactNode;
+  rulesId?: string;
 }
 
 const droppableTags = ['spatial-help-surface'];
@@ -24,20 +25,25 @@ export function HelpSurface({
   disabled,
   content,
   title = 'Info',
+  rulesId,
   ...rest
 }: HelpSurfaceProps) {
   const [open, setOpen] = useState(false);
+  const { LinkComponent, navigate } = useRendererContext();
+
   const handleDrop = (draggable: DraggableData) => {
     if (draggable.id !== 'spatial-help') return;
-    setOpen(true);
+    if (!content) {
+      navigate(`?help=true#${rulesId}`);
+    } else {
+      setOpen(true);
+    }
   };
   const isHelpDragging = useDndStore(
     (state) => state.dragging === 'spatial-help',
   );
 
-  const { LinkComponent } = useRendererContext();
-
-  if (disabled) {
+  if (disabled || (!content && !rulesId)) {
     return (
       <div className={className} {...rest}>
         {children}
@@ -46,36 +52,55 @@ export function HelpSurface({
   }
 
   return (
-    <Droppable
-      noParenting
-      id={id}
-      onDrop={handleDrop}
-      className={clsx(
-        'relative',
-        isHelpDragging &&
-          'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over=true]]:after:bg-white [&[data-over=true]]:ring-6',
-        className,
-      )}
-      asChild={asChild}
-      tags={droppableTags}
-      {...rest}
-    >
-      {children}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <Dialog.Content>
-          <Dialog.Title>{title}</Dialog.Title>
-          {content}
-          <Dialog.Actions className="justify-between">
-            <Button color="ghost" asChild onClick={() => setOpen(false)}>
-              <LinkComponent to="?rules=true">
-                <Icon name="book" />
-                All rules
-              </LinkComponent>
-            </Button>
-            <Dialog.Close />
-          </Dialog.Actions>
-        </Dialog.Content>
-      </Dialog>
-    </Droppable>
+    <Popover open={open} onOpenChange={setOpen}>
+      <Popover.Anchor asChild>
+        <Droppable
+          noParenting
+          id={id}
+          onDrop={handleDrop}
+          className={clsx(
+            'relative',
+            isHelpDragging &&
+              'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over=true]]:after:bg-white [&[data-over=true]]:ring-6',
+            className,
+          )}
+          asChild={asChild}
+          tags={droppableTags}
+          {...rest}
+        >
+          {children}
+          <Popover.Content className="p-md pb-sm">
+            <Popover.Arrow />
+            <h2 className="text-md font-bold capitalize mb-sm">{title}</h2>
+            {content}
+            <Box
+              items="center"
+              justify="between"
+              gap="sm"
+              className="flex-shrink-0 pt-md"
+            >
+              <Button
+                color="default"
+                size="small"
+                asChild
+                onClick={() => setOpen(false)}
+              >
+                <LinkComponent
+                  to={`?rules=true${rulesId ? `#${rulesId}` : ''}`}
+                >
+                  <Icon name="book" />
+                  All rules
+                </LinkComponent>
+              </Button>
+              <Popover.Close asChild>
+                <Button color="ghost" size="small" className="top-0 left-0">
+                  <Icon name="x" />
+                </Button>
+              </Popover.Close>
+            </Box>
+          </Popover.Content>
+        </Droppable>
+      </Popover.Anchor>
+    </Popover>
   );
 }

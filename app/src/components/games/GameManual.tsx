@@ -13,14 +13,18 @@ import { LongGameError } from '@long-game/common';
 import { fetch, queryClient, useSuspenseQuery } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
-import { lazy } from 'react';
+import { lazy, useLayoutEffect, useRef } from 'react';
 import type { Components } from 'react-markdown';
+import customHeaderId from 'remark-custom-header-id';
+import mdc from 'remark-mdc';
 
 const LazyMarkdown = lazy(() => import('react-markdown'));
 
 export interface GameManualProps {
   gameId: string;
 }
+
+const plugins = [mdc, customHeaderId];
 
 export const GameManual = withSuspense(
   function GameManual({ gameId }: GameManualProps) {
@@ -38,8 +42,21 @@ export const GameManual = withSuspense(
       queryClient,
     );
 
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+      const targetId = window.location.hash?.substring(1);
+      if (!targetId) return;
+      const targetElement = wrapperRef.current?.querySelector(
+        `[id="${targetId}"]`,
+      );
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetElement.classList.add('bg-accent-wash');
+      }
+    }, []);
+
     return (
-      <Box d="col" gap="lg">
+      <Box d="col" gap="lg" ref={wrapperRef}>
         <LazyMarkdown
           urlTransform={(url) => {
             const asUrl = new URL(url, window.location.href);
@@ -47,6 +64,7 @@ export const GameManual = withSuspense(
             return asUrl.toString();
           }}
           components={markdownComponents}
+          remarkPlugins={plugins}
         >
           {markdown}
         </LazyMarkdown>
@@ -55,6 +73,7 @@ export const GameManual = withSuspense(
   },
   <Spinner />,
 );
+export default GameManual;
 
 const markdownComponents: Components = {
   a: ({ node, ...props }) => {

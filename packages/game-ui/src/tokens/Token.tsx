@@ -22,6 +22,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   data?: Data;
   disableChat?: boolean;
   helpContent?: ReactNode;
+  rulesId?: string;
   // TODO: make mandatory
   name?: string;
 }
@@ -35,6 +36,7 @@ export function Token({
   disableChat,
   id,
   helpContent,
+  rulesId,
   name,
   ...rest
 }: TokenProps) {
@@ -69,6 +71,7 @@ export function Token({
           content={helpContent}
           title={name}
           id={id}
+          rulesId={rulesId}
         >
           <Draggable.Handle
             activationConstraint={activationConstraint}

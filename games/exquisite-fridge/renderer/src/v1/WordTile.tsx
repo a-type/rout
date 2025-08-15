@@ -38,9 +38,15 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       }}
       movedBehavior={movedBehavior}
       disableChat={disableChat}
+      name="Word Tile"
       helpContent={
-        isBlank && <div>You can use these tiles to write your own words in</div>
+        isBlank ? (
+          <div>You can use these tiles to write your own words in.</div>
+        ) : value.isNew ? (
+          <div>This word is new, it was just drawn this round.</div>
+        ) : null
       }
+      rulesId={isBlank ? 'blank-tiles' : value.isNew ? 'new-tiles' : undefined}
     >
       <Box
         className={clsx(

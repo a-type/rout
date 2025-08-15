@@ -23,6 +23,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-markdown": "^10.1.0",
+    "remark-custom-header-id": "^1.0.0",
+    "remark-mdc": "^3.6.0",
     "valtio": "catalog:"
   },
   "devDependencies": {

@@ -24,7 +24,7 @@ import {
   SpatialChatDraggable,
   SpatialHelpDraggable,
 } from '@long-game/game-ui';
-import { Link } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
@@ -108,9 +108,18 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
     }, [gameId, version]);
 
     const Renderer = getFederatedGameComponent(gameId, version, 'renderer');
+    const navigate = useNavigate();
+
+    const providerValue = useMemo(
+      () => ({
+        ...renderProviderValue,
+        navigate,
+      }),
+      [navigate],
+    );
 
     return (
-      <RendererProvider value={renderProviderValue}>
+      <RendererProvider value={providerValue}>
         <DndRoot className="w-full flex-1-0-0 min-h-0 flex flex-col">
           <GameLayout>
             <GameLayout.Main>

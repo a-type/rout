@@ -4,7 +4,7 @@ A classic creative writing game with a twist. Collaborate with friends to write 
 
 To start the game, you are given a set of word tiles. It's up to you to start your story! Drag tiles from your pile into the box to play them. You can rearrange the order of played tiles as you like, or drag them back to your hand.
 
-## Blank tiles
+## Blank tiles {#blank-tiles}
 
 Some tiles are blank. That means you get to decide what they say. Drag one of these tiles onto your play area to fill it in.
 
@@ -18,7 +18,7 @@ Now it's time to wait for the next round.
 
 ## Continuing the story
 
-After the first round, players pass around their stories. You will also receive new words to replace the ones you used last round (marked with a star).
+After the first round, players pass around their stories. [You will also receive new words to replace the ones you used last round (marked with a star).]{#new-tiles}
 
 You only get to see the latest section of the story, and who wrote it. Now, keep playing tiles from your hand to continue the narrative.
 
