@@ -41,7 +41,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       name="Word Tile"
       helpContent={
         isBlank ? (
-          <div>You can use these tiles to write your own words in.</div>
+          <div>You can use these special tiles to write your own words in.</div>
         ) : value.isNew ? (
           <div>This word is new, it was just drawn this round.</div>
         ) : null

@@ -1,10 +1,10 @@
-import { Box, Button, H4, Icon, Input, ScrollArea } from '@a-type/ui';
+import { Box, Button, H4, Icon, Input } from '@a-type/ui';
 import { useLocalStorage } from '@long-game/game-client';
 import {
   freebieWords,
   WordItem,
 } from '@long-game/game-exquisite-fridge-definition/v1';
-import { TokenSpace } from '@long-game/game-ui';
+import { HelpSurface, TokenSpace } from '@long-game/game-ui';
 import { useState } from 'react';
 import { hooks } from './gameClient.js';
 import { WordTile } from './WordTile.js';
@@ -33,7 +33,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
   const [filter, setFilter] = useState('');
 
   return (
-    <Box full="width" className={className} asChild>
+    <Box full="width" container="reset" className={className} asChild>
       <TokenSpace<WordItem>
         id="hand"
         onDrop={(token) => {
@@ -44,7 +44,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         disabled={gameSuite.turnWasSubmitted}
         priority={-1}
       >
-        <ScrollArea className="px-[50px] md:px-0 w-full h-full">
+        <Box col className="px-[50px] md:px-0 w-full h-full">
           <H4 className="text-center mb-xs">Free tiles</H4>
           <FreebieWords className="mb-md" />
           <H4 className="text-center mb-xs">Your pile</H4>
@@ -71,7 +71,13 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
               size={4}
             />
           </Box>
-          <Box gap wrap full="width" layout="center start" className="pb-md">
+          <Box
+            gap="md"
+            wrap
+            full="width"
+            layout="center start"
+            className="pb-md"
+          >
             {hand
               .filter((handWord) => !usedIds.has(handWord.id))
               .filter(
@@ -88,7 +94,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
                 <WordTile value={word} key={word.id} />
               ))}
           </Box>
-        </ScrollArea>
+        </Box>
       </TokenSpace>
     </Box>
   );
@@ -96,20 +102,34 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
 
 function FreebieWords({ className }: { className?: string }) {
   return (
-    <Box gap="sm" wrap full="width" layout="center start" className={className}>
-      {freebieWords.map((word) => (
-        <WordTile
-          key={word}
-          value={{
-            id: `freebie-${word}`,
-            text: word,
-            isWriteIn: false,
-            isNew: false,
-          }}
-          className="bg-yellow-200"
-          disableChat
-        />
-      ))}
-    </Box>
+    <HelpSurface
+      id="freebie-words"
+      rulesId="free-words"
+      content={<div>You can use as many of these as you like.</div>}
+      title="Free Tiles"
+      asChild
+    >
+      <Box
+        gap="md"
+        wrap
+        full="width"
+        layout="center start"
+        className={className}
+      >
+        {freebieWords.map((word) => (
+          <WordTile
+            key={word}
+            value={{
+              id: `freebie-${word}`,
+              text: word,
+              isWriteIn: false,
+              isNew: false,
+            }}
+            className="bg-yellow-200"
+            disableChat
+          />
+        ))}
+      </Box>
+    </HelpSurface>
   );
 }

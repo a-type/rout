@@ -16,7 +16,7 @@ Once you're happy with your section, press the _Submit turn_ button. You can onl
 
 Now it's time to wait for the next round.
 
-## Continuing the story
+## Continuing the story {#continuing-the-story}
 
 After the first round, players pass around their stories. [You will also receive new words to replace the ones you used last round (marked with a star).]{#new-tiles}
 

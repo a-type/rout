@@ -4,11 +4,17 @@ A classic creative writing game with a twist. Collaborate with friends to write 
 
 To start the game, you are given a set of word tiles. It's up to you to start your story! Drag tiles from your pile into the box to play them. You can rearrange the order of played tiles as you like, or drag them back to your hand.
 
+Each turn you must play between 5 and 20 words.
+
 ## Blank tiles {#blank-tiles}
 
 Some tiles are blank. That means you get to decide what they say. Drag one of these tiles onto your play area to fill it in.
 
 If you decide you don't want to play a filled in blank tile after all, drag it back to your hand and it will reset. You can also use this to change your word (or fix a typo).
+
+## Free words {#free-words}
+
+In addition to your word pool, you have always-available "free" words. These words can help you make a more coherent story, but they don't count toward the word minimum.
 
 ## Submitting a turn
 
@@ -16,7 +22,7 @@ Once you're happy with your section, press the _Submit turn_ button. You can onl
 
 Now it's time to wait for the next round.
 
-## Continuing the story
+## Continuing the story {#continuing-the-story}
 
 After the first round, players pass around their stories. [You will also receive new words to replace the ones you used last round (marked with a star).]{#new-tiles}
 

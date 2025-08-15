@@ -64,43 +64,41 @@ export function HelpSurface({
               'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over=true]]:after:bg-white [&[data-over=true]]:ring-6',
             className,
           )}
-          asChild={asChild}
           tags={droppableTags}
+          asChild={asChild}
           {...rest}
         >
           {children}
-          <Popover.Content className="p-md pb-sm">
-            <Popover.Arrow />
-            <h2 className="text-md font-bold capitalize mb-sm">{title}</h2>
-            {content}
-            <Box
-              items="center"
-              justify="between"
-              gap="sm"
-              className="flex-shrink-0 pt-md"
-            >
-              <Button
-                color="default"
-                size="small"
-                asChild
-                onClick={() => setOpen(false)}
-              >
-                <LinkComponent
-                  to={`?rules=true${rulesId ? `#${rulesId}` : ''}`}
-                >
-                  <Icon name="book" />
-                  All rules
-                </LinkComponent>
-              </Button>
-              <Popover.Close asChild>
-                <Button color="ghost" size="small" className="top-0 left-0">
-                  <Icon name="x" />
-                </Button>
-              </Popover.Close>
-            </Box>
-          </Popover.Content>
         </Droppable>
       </Popover.Anchor>
+      <Popover.Content className="p-md pb-sm max-w-400px">
+        <Popover.Arrow />
+        <h2 className="text-md font-bold capitalize mb-sm">{title}</h2>
+        {content}
+        <Box
+          items="center"
+          justify="between"
+          gap="sm"
+          className="flex-shrink-0 pt-md"
+        >
+          <Button
+            color="default"
+            size="small"
+            asChild
+            onClick={() => setOpen(false)}
+          >
+            <LinkComponent to={`?rules=true${rulesId ? `#${rulesId}` : ''}`}>
+              <Icon name="book" />
+              Read more
+            </LinkComponent>
+          </Button>
+          <Popover.Close asChild>
+            <Button color="ghost" size="small" className="top-0 left-0">
+              <Icon name="x" />
+            </Button>
+          </Popover.Close>
+        </Box>
+      </Popover.Content>
     </Popover>
   );
 }
