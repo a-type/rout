@@ -39,7 +39,7 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
                   ? 'Select a game'
                   : amIReady
                     ? 'Ready!'
-                    : 'Ready Up!')}
+                    : 'Ready to play!')}
         </Box>
         <AvatarList count={gameSuite.members.length}>
           {gameSuite.members.map((member, i) => (
