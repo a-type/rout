@@ -3,7 +3,7 @@
     "scope": "typescriptreact",
     "prefix": "rgc",
     "body": [
-      "import { hooks } from './gameClient';",
+      "import { hooks } from './gameClient.js';",
       "",
       "export interface ${2:${TM_FILENAME/(.*)\\..+$/$1/}}Props {",
       "  $3",

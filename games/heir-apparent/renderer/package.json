@@ -1,0 +1,31 @@
+{
+  "name": "@long-game/game-heir-apparent-renderer",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev-game": "rsbuild dev",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@long-game/game-heir-apparent-definition": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/game-ui": "workspace:*",
+    "@long-game/hex-map": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@long-game/scripts": "workspace:*",
+    "@long-game/bundler-config": "workspace:*",
+    "@long-game/uno-config": "workspace:*",
+    "@rsbuild/core": "catalog:"
+  }
+}

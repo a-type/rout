@@ -1,0 +1,6 @@
+{
+  "name": "@long-game/game-heir-apparent",
+  "scripts": {
+    "dev-game": "pnpm --filter \"./*\" --parallel --stream dev-game"
+  }
+}

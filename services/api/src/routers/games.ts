@@ -37,7 +37,7 @@ function gameSummary(game: GameModule, env: ApiBindings) {
 }
 
 export const gamesRouter = new Hono<Env>()
-  .get('/', async (ctx) => {
+  .get('/', sessionMiddleware, async (ctx) => {
     const isAdmin = ctx.get('session')?.isProductAdmin ?? false;
     const metadata = Object.entries(games)
       .filter(([, game]) => {

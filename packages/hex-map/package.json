@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/{{name}}",
+  "name": "@long-game/hex-map",
   "version": "0.0.1",
   "private": true,
   "exports": {
@@ -8,6 +8,12 @@
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "production": "./dist/react.js",
+      "workerd": "./src/react.ts",
+      "import": "./dist/react.js",
+      "types": "./dist/react.d.ts"
     }
   },
   "type": "module",
@@ -16,9 +22,12 @@
     "build": "tsc",
     "test": "vitest"
   },
-  "dependencies": {},
+  "peerDependencies": {
+    "react": "catalog:"
+  },
   "devDependencies": {
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@types/react": "catalog:"
   }
 }
