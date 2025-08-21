@@ -10,6 +10,26 @@
     },
     {
       "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "label": "📱 App Dev",
+      "path": "app"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "label": "💾 Services Dev",
+      "path": "services"
+    },
+    {
+      "type": "npm",
+      "script": "package:dev",
+      "label": "📦 Packages Dev",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
       "script": "dev-game",
       "path": "games/number-guess",
       "problemMatcher": ["$tsc-watch"],

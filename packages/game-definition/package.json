@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "package:dev": "pnpm dev"
   },
   "dependencies": {
     "@long-game/common": "workspace:*",

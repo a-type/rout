@@ -13,8 +13,8 @@
   "scripts": {
     "build": "pnpm build:ts",
     "build:ts": "tsc",
-    "dev": "pnpm run --filter @long-game/game-ui --parallel \"/^dev:.*/\"",
-    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev": "tsc -w --preserveWatchOutput",
+    "package:dev": "pnpm dev",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

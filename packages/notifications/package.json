@@ -14,7 +14,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "package:dev": "pnpm dev"
   },
   "dependencies": {
     "@long-game/common": "workspace:*"

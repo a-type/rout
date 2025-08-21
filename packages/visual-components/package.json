@@ -18,6 +18,7 @@
     "dev": "pnpm run --filter @long-game/visual-components --parallel \"/^dev:.*/\"",
     "dev:ts": "tsc -w --preserveWatchOutput",
     "dev:uno": "scripts uno ./dist -w",
+    "package:dev": "pnpm dev",
     "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",
     "build:uno": "scripts uno ./dist"

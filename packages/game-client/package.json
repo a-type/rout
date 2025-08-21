@@ -13,7 +13,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -w --preserveWatchOutput"
+    "dev": "tsc -w --preserveWatchOutput",
+    "package:dev": "pnpm dev"
   },
   "dependencies": {
     "@a-type/utils": "1.1.5",

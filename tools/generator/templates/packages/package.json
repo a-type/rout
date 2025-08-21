@@ -12,7 +12,8 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "tsc -w",
+    "dev": "tsc -w --preserveWatchOutput",
+    "package:dev": "pnpm dev",
     "build": "tsc",
     "test": "vitest"
   },

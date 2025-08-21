@@ -6,6 +6,7 @@
   "packageManager": "pnpm@9.7.1",
   "scripts": {
     "dev": "pnpm -r --parallel --stream dev",
+    "package:dev": "pnpm -r --parallel --stream package:dev",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
     "test": "turbo run test",

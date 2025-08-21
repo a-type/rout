@@ -59,7 +59,8 @@ export function ViewportContent({
           zoom.set(zoomValue);
         }
         if (internalRef.current) {
-          internalRef.current.style.setProperty('--zoom', zoomValue.toString());
+          // disabled: this is causing recalculate style :(
+          //internalRef.current.style.setProperty('--zoom', zoomValue.toString());
         }
       }),
     [viewport, zoom, internalRef],
