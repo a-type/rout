@@ -156,6 +156,22 @@ function DomHexMap({ children, ...props }: { children?: ReactNode }) {
           wrap: wrapHex,
         }}
       >
+        {/*
+          Hex layer optimization:
+
+          The goal of this grouping is to influence the browser to composite
+          all these hexes to as few layers as possible. This is reverse-engineering
+          some browser compositing optimizations based on the feedback from the
+          layers panel in devtools.
+
+          The overall approach here is to try to group hexes which do not overlap or touch
+          into separate elements. If touching/overlapping hexes are rendered inside the same
+          element, the browser composites them to individual layers due to the overlap. This
+          is particular to hexes because they inherently overlap their neighbors when rendered
+          as rectangles.
+
+          So we have 4 groups... separating adjacent hexes on both axes.
+        */}
         <HexLayerGroup ref={group1Ref} />
         <HexLayerGroup ref={group2Ref} />
         <HexLayerGroup ref={group3Ref} />
