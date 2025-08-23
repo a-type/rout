@@ -27,6 +27,10 @@ export interface ViewportProps {
   /** Get access to the viewport from outside this component */
   viewportRef?: RefObject<ViewportState | null>;
   controlContent?: ReactNode;
+  minZoom?: 'fit' | number;
+  maxZoom?: number;
+  defaultZoom?: number;
+  panLimitBuffer?: number;
 }
 
 export function Viewport({
@@ -38,17 +42,21 @@ export function Viewport({
   onCenterChange,
   viewportRef,
   controlContent,
+  minZoom = 'fit',
+  maxZoom = 3,
+  defaultZoom = 0.5,
+  panLimitBuffer = 100,
 }: ViewportProps) {
   const viewport = useState(
     () =>
       new ViewportState({
         panLimitMode: 'viewport',
         zoomLimits: {
-          min: 'fit',
-          max: 3,
+          min: minZoom,
+          max: maxZoom,
         },
-        defaultZoom: 0.5,
-        panLimitBuffer: 100,
+        defaultZoom,
+        panLimitBuffer,
         defaultCenter,
       }),
   )[0];
