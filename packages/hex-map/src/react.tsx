@@ -22,7 +22,7 @@ export function HexMap({
   layout,
   dimensions,
   children,
-  renderer,
+  renderer = 'svg',
   ...props
 }: HexMapProps) {
   const { size, orientation, origin } = layout;
@@ -58,7 +58,6 @@ function SvgHexMap({ children, ...props }: { children?: ReactNode }) {
       }}
       viewBox={`${(-width / 2) * wMult * size[0]} ${(-height / 2) * hMult * size[1]} ${width * wMult * size[0]} ${height * hMult * size[1]}`}
       preserveAspectRatio="xMidYMid meet"
-      transform={orientation === 'pointy' ? 'rotate(-30)' : 'rotate(0)'}
     >
       <HexRenderContext value="svg">{children}</HexRenderContext>
     </svg>
@@ -84,7 +83,7 @@ function DomHexMap({ children, ...props }: { children?: ReactNode }) {
         height: height * size[1] * hMult,
       }}
     >
-      <div className="absolute left-1/2 top-1/2">
+      <div className="absolute left-1/2 top-1/2 will-change-transform">
         <HexRenderContext value="dom">{children}</HexRenderContext>
       </div>
     </div>
@@ -114,10 +113,11 @@ function useTilePosition(coordinate: HexCoordinate) {
   const layout = useContext(HexContext);
   const center = coordinateToScreenCenter(coordinate, layout);
   const [hSize, vSize] = layout.size;
+  const renderer = useContext(HexRenderContext);
 
   return {
     center,
-    txCenter: `${center[0]}px, ${center[1]}px`,
+    txCenter: `${center[0]}${renderer === 'dom' ? 'px' : ''}, ${center[1]}${renderer === 'dom' ? 'px' : ''}`,
     polygonPath:
       layout.orientation === 'pointy'
         ? `
@@ -165,10 +165,11 @@ function DomHexTile({ coordinate, children }: HexTileProps) {
   return (
     <div
       style={{
-        position: 'absolute',
         transform: `translate3d(${txCenter}, 0px)`,
-        overflow: 'visible',
+        width: actualWidth,
+        height: actualHeight,
       }}
+      className="overflow-visible absolute contain-layout"
     >
       <svg
         viewBox={`${-actualWidth / 2} ${-actualHeight / 2} ${actualWidth} ${actualHeight}`}
