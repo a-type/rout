@@ -138,6 +138,11 @@ function useTilePosition(coordinate: HexCoordinate) {
 				`.replace('\n', ' '),
     actualWidth: layout.orientation === 'pointy' ? hSize * SQRT_3 : hSize * 2,
     actualHeight: layout.orientation === 'pointy' ? vSize * 2 : vSize * SQRT_3,
+    nonOverlappingWidth:
+      layout.orientation === 'pointy' ? hSize * SQRT_3 : hSize,
+    nonOverlappingHeight: layout.orientation === 'pointy' ? vSize : vSize * 2,
+    overlapX: layout.orientation === 'pointy' ? 0 : hSize * 0.5,
+    overlapY: layout.orientation === 'pointy' ? vSize * 0.5 : 0,
   };
 }
 
@@ -159,7 +164,7 @@ function SvgHexTile({ coordinate, children, className }: HexTileProps) {
 }
 
 function DomHexTile({ coordinate, children }: HexTileProps) {
-  const { actualWidth, actualHeight, txCenter, center, polygonPath } =
+  const { actualWidth, actualHeight, center, polygonPath } =
     useTilePosition(coordinate);
 
   return (
