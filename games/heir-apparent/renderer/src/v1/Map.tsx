@@ -9,7 +9,11 @@ export interface MapProps {}
 export const Map = hooks.withGame<MapProps>(function Map({ gameSuite }) {
   const { mapSize, tiles } = gameSuite.finalState;
   return (
-    <HexMap dimensions={[mapSize * 2, mapSize * 2]} layout={hexLayout}>
+    <HexMap
+      renderer="dom"
+      dimensions={[mapSize * 2, mapSize * 2]}
+      layout={hexLayout}
+    >
       {Object.entries(tiles).map(([serializedCoord, tile]) => (
         <MapTile
           key={serializedCoord}

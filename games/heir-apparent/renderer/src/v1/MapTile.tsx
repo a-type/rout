@@ -13,9 +13,5 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
   coordinate,
   tile,
 }) {
-  return (
-    <HexTile coordinate={coordinate}>
-      <text>{tile.type[0]}</text>
-    </HexTile>
-  );
+  return <HexTile coordinate={coordinate}>{tile.type[0]}</HexTile>;
 });

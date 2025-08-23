@@ -83,7 +83,7 @@ function DomHexMap({ children, ...props }: { children?: ReactNode }) {
         height: height * size[1] * hMult,
       }}
     >
-      <div className="absolute left-1/2 top-1/2 will-change-transform">
+      <div className="absolute left-1/2 top-1/2">
         <HexRenderContext value="dom">{children}</HexRenderContext>
       </div>
     </div>
@@ -159,22 +159,24 @@ function SvgHexTile({ coordinate, children, className }: HexTileProps) {
 }
 
 function DomHexTile({ coordinate, children }: HexTileProps) {
-  const { actualWidth, actualHeight, txCenter, polygonPath } =
+  const { actualWidth, actualHeight, txCenter, center, polygonPath } =
     useTilePosition(coordinate);
 
   return (
     <div
       style={{
-        transform: `translate3d(${txCenter}, 0px)`,
+        left: center[0] - actualWidth / 2,
+        top: center[1] - actualHeight / 2,
         width: actualWidth,
         height: actualHeight,
       }}
-      className="overflow-visible absolute contain-layout"
+      className="overflow-visible absolute contain-layout flex items-center justify-center"
     >
       <svg
         viewBox={`${-actualWidth / 2} ${-actualHeight / 2} ${actualWidth} ${actualHeight}`}
         width={actualWidth}
         height={actualHeight}
+        className="absolute inset-0"
       >
         <polygon
           points={polygonPath}
@@ -184,7 +186,7 @@ function DomHexTile({ coordinate, children }: HexTileProps) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div className="absolute top-1/2 left-1/2 -translate-1/2">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
