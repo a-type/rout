@@ -24,11 +24,13 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "@types/react": "catalog:"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
   }
 }

@@ -1,13 +1,26 @@
-import { createContext, ReactNode, SVGProps, useContext } from 'react';
+import {
+  createContext,
+  ReactNode,
+  RefObject,
+  SVGProps,
+  useCallback,
+  useContext,
+  useRef,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { HexCoordinate } from './coordinates.js';
 import { coordinateToScreenCenter, HexLayoutContext } from './rendering.js';
 
 const HexContext = createContext<
-  HexLayoutContext & { dimensions: [number, number] }
+  HexLayoutContext & {
+    dimensions: [number, number];
+    actualSize: [number, number];
+  }
 >({
   orientation: 'pointy',
   size: [60, 60],
   dimensions: [0, 0],
+  actualSize: [0, 0],
 });
 
 export const HexProvider = HexContext.Provider;
@@ -29,17 +42,42 @@ export function HexMap({
 
   const Impl = renderer === 'svg' ? SvgHexMap : DomHexMap;
 
+  const [width, height] = dimensions;
+  const wMult = orientation === 'pointy' ? Math.sqrt(3) : 2;
+  const hMult = orientation === 'pointy' ? 2 : Math.sqrt(3);
+
+  const actualWidth = width * size[0] * wMult;
+  const actualHeight = height * size[1] * hMult;
+
   return (
-    <HexProvider value={{ size, orientation, origin, dimensions }}>
+    <HexProvider
+      value={{
+        size,
+        orientation,
+        origin,
+        dimensions,
+        actualSize: [actualWidth, actualHeight],
+      }}
+    >
       <Impl {...props}>{children}</Impl>
     </HexProvider>
   );
 }
 
-const HexRenderContext = createContext<'dom' | 'svg'>('dom');
+const HexRenderContext = createContext<
+  | {
+      type: 'dom';
+      wrap: (children: ReactNode, coordinate: HexCoordinate) => ReactNode;
+    }
+  | {
+      type: 'svg';
+    }
+>({
+  type: 'svg',
+});
 
 function SvgHexMap({ children, ...props }: { children?: ReactNode }) {
-  const { orientation, size, dimensions } = useContext(HexContext);
+  const { orientation, size, dimensions, actualSize } = useContext(HexContext);
 
   const [width, height] = dimensions;
   const wMult = orientation === 'pointy' ? Math.sqrt(3) : 2;
@@ -53,23 +91,52 @@ function SvgHexMap({ children, ...props }: { children?: ReactNode }) {
       data-size-w={size[0]}
       data-size-h={size[1]}
       style={{
-        width: width * size[0] * wMult,
-        height: height * size[1] * hMult,
+        width: actualSize[0],
+        height: actualSize[1],
       }}
-      viewBox={`${(-width / 2) * wMult * size[0]} ${(-height / 2) * hMult * size[1]} ${width * wMult * size[0]} ${height * hMult * size[1]}`}
+      viewBox={`${-actualSize[0] / 2} ${-actualSize[1] / 2} ${actualSize[0]} ${actualSize[1]}`}
       preserveAspectRatio="xMidYMid meet"
     >
-      <HexRenderContext value="svg">{children}</HexRenderContext>
+      <HexRenderContext
+        value={{
+          type: 'svg',
+        }}
+      >
+        {children}
+      </HexRenderContext>
     </svg>
   );
 }
 
 function DomHexMap({ children, ...props }: { children?: ReactNode }) {
-  const { orientation, size, dimensions } = useContext(HexContext);
+  const {
+    orientation,
+    size,
+    dimensions: [width, height],
+    actualSize: [actualWidth, actualHeight],
+  } = useContext(HexContext);
 
-  const [width, height] = dimensions;
-  const wMult = orientation === 'pointy' ? Math.sqrt(3) : 2;
-  const hMult = orientation === 'pointy' ? 2 : Math.sqrt(3);
+  const group1Ref = useRef<HTMLDivElement>(null);
+  const group2Ref = useRef<HTMLDivElement>(null);
+  const group3Ref = useRef<HTMLDivElement>(null);
+  const group4Ref = useRef<HTMLDivElement>(null);
+
+  const wrapHex = useCallback((child: ReactNode, coordinate: HexCoordinate) => {
+    const groups = [
+      [group1Ref, group2Ref],
+      [group3Ref, group4Ref],
+    ];
+    const groupI = Math.abs(coordinate[1]) % groups.length;
+    const groupJ = Math.abs(coordinate[0]) % groups[groupI].length;
+    const layer = groups[groupI][groupJ];
+    if (!layer) {
+      throw new Error('Misconfigured layers');
+    }
+    if (layer.current) {
+      return createPortal(child, layer.current);
+    }
+    return child;
+  }, []);
 
   return (
     <div
@@ -79,16 +146,29 @@ function DomHexMap({ children, ...props }: { children?: ReactNode }) {
       data-size-w={size[0]}
       data-size-h={size[1]}
       style={{
-        width: width * size[0] * wMult,
-        height: height * size[1] * hMult,
+        width: actualWidth,
+        height: actualHeight,
       }}
     >
-      <div className="absolute left-1/2 top-1/2">
-        <HexRenderContext value="dom">{children}</HexRenderContext>
-      </div>
+      <HexRenderContext
+        value={{
+          type: 'dom',
+          wrap: wrapHex,
+        }}
+      >
+        <HexLayerGroup ref={group1Ref} />
+        <HexLayerGroup ref={group2Ref} />
+        <HexLayerGroup ref={group3Ref} />
+        <HexLayerGroup ref={group4Ref} />
+        {children}
+      </HexRenderContext>
     </div>
   );
 }
+
+const HexLayerGroup = ({ ref }: { ref: RefObject<HTMLDivElement | null> }) => (
+  <div ref={ref} className="hex-layer-group" />
+);
 
 export interface HexTileProps {
   coordinate: HexCoordinate;
@@ -100,9 +180,9 @@ const SQRT_3 = Math.sqrt(3);
 const SQRT_3_2 = Math.sqrt(3) / 2;
 
 export function HexTile(props: HexTileProps) {
-  const tech = useContext(HexRenderContext);
+  const { type } = useContext(HexRenderContext);
 
-  if (tech === 'svg') {
+  if (type === 'svg') {
     return <SvgHexTile {...props} />;
   } else {
     return <DomHexTile {...props} />;
@@ -113,7 +193,7 @@ function useTilePosition(coordinate: HexCoordinate) {
   const layout = useContext(HexContext);
   const center = coordinateToScreenCenter(coordinate, layout);
   const [hSize, vSize] = layout.size;
-  const renderer = useContext(HexRenderContext);
+  const { type: renderer } = useContext(HexRenderContext);
 
   return {
     center,
@@ -166,12 +246,20 @@ function SvgHexTile({ coordinate, children, className }: HexTileProps) {
 function DomHexTile({ coordinate, children }: HexTileProps) {
   const { actualWidth, actualHeight, center, polygonPath } =
     useTilePosition(coordinate);
+  const renderer = useContext(HexRenderContext);
+  const {
+    actualSize: [actualMapWidth, actualMapHeight],
+  } = useContext(HexContext);
 
-  return (
+  if (renderer.type !== 'dom') {
+    throw new Error('DomHexTile used outside of DomHexMap');
+  }
+
+  return renderer.wrap(
     <div
       style={{
-        left: center[0] - actualWidth / 2,
-        top: center[1] - actualHeight / 2,
+        left: center[0] - actualWidth / 2 + actualMapWidth / 2,
+        top: center[1] - actualHeight / 2 + actualMapHeight / 2,
         width: actualWidth,
         height: actualHeight,
       }}
@@ -185,13 +273,14 @@ function DomHexTile({ coordinate, children }: HexTileProps) {
       >
         <polygon
           points={polygonPath}
-          fill="transparent"
+          fill="none"
           stroke="black"
           strokeWidth={1}
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div>{children}</div>
-    </div>
+      <div className="relative">{children}</div>
+    </div>,
+    coordinate,
   );
 }
