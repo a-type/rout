@@ -62,16 +62,41 @@ function applyLayoutMatrix(coord: HexCoordinate, matrix: OrientationMatrix) {
   return [x, y];
 }
 
+function rotateAroundOrigin(
+  coord: [number, number],
+  origin: [number, number],
+  angleRad: number,
+) {
+  if (angleRad === 0) {
+    return coord;
+  }
+  const cos = Math.cos(angleRad);
+  const sin = Math.sin(angleRad);
+  const [x, y] = coord;
+  const [ox, oy] = origin;
+
+  coord[0] = cos * (x - ox) - sin * (y - oy) + ox;
+  coord[1] = sin * (x - ox) + cos * (y - oy) + oy;
+
+  return coord;
+}
+
 export function coordinateToScreenCenter(
   coord: HexCoordinate,
   ctx: HexLayoutContext,
 ) {
   const layout = layouts.pointy;
+  const origin = ctx.origin || [0, 0];
   const [x, y] = applyLayoutMatrix(coord, layout.forward);
-  return [
-    x * ctx.size[0] + (ctx.origin?.[0] || 0),
-    y * ctx.size[1] + (ctx.origin?.[1] || 0),
+  const withOriginAndSize = [
+    x * ctx.size[0] + (origin[0] || 0),
+    y * ctx.size[1] + (origin[1] || 0),
   ] as [number, number];
+  return rotateAroundOrigin(
+    withOriginAndSize,
+    origin,
+    ctx.orientation === 'pointy' ? 0 : Math.PI / 6,
+  );
 }
 
 /**
