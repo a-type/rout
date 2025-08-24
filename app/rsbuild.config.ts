@@ -1,3 +1,4 @@
+import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
 import { InjectManifest } from '@birchill/inject-manifest-plugin';
 import {
   ModuleFederationPlugin,
@@ -5,7 +6,7 @@ import {
 } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { UnoCSSRspackPlugin } from '@unocss/webpack/rspack';
+import path from 'node:path';
 
 const federationConfig = createModuleFederationConfig({
   name: 'long-game',
@@ -41,7 +42,16 @@ const federationConfig = createModuleFederationConfig({
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-  plugins: [pluginReact()],
+  plugins: [
+    pluginUnoCss({
+      enableIncludeCommentCheck: (file) =>
+        file.includes(path.join('@a-type', 'ui', 'dist')) ||
+        file.includes('@long-game'),
+      enableCacheExtractedCSS: (file) =>
+        file.includes('@long-game') ? false : file.includes('node_modules'),
+    }),
+    pluginReact(),
+  ],
   resolve: {
     alias: {
       '@': './src',
@@ -50,7 +60,6 @@ export default defineConfig(({ command }) => ({
   tools: {
     rspack: {
       plugins: [
-        UnoCSSRspackPlugin(),
         new InjectManifest({
           swDest: 'sw.js',
         }),
