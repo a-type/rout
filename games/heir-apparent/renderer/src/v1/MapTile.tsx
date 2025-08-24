@@ -1,6 +1,6 @@
 import { TileData } from '@long-game/game-heir-apparent-definition/v1';
 import { HexCoordinate } from '@long-game/hex-map';
-import { HexTile } from '@long-game/hex-map/react';
+import { DomHexTile } from '@long-game/hex-map/react';
 import { hooks } from './gameClient.js';
 
 export interface MapTileProps {
@@ -13,5 +13,13 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
   coordinate,
   tile,
 }) {
-  return <HexTile coordinate={coordinate}>{tile.type[0]}</HexTile>;
+  return (
+    <DomHexTile
+      coordinate={coordinate}
+      strokeWidth={1}
+      stroke="var(--color-gray-dark)"
+    >
+      {tile.type[0]}
+    </DomHexTile>
+  );
 });

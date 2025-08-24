@@ -28,7 +28,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
 }
 
 const tokenTags = ['token'];
-export function Token({
+function TokenDefault({
   children,
   data,
   className,
@@ -73,19 +73,24 @@ export function Token({
           id={id}
           rulesId={rulesId}
         >
-          <Draggable.Handle
+          <Draggable.ConditionalHandle
             activationConstraint={activationConstraint}
             allowStartFromDragIn={isInHand}
             className="w-full h-full"
+            disabled={rest.noHandle}
             {...handleProps}
           >
             {children}
-          </Draggable.Handle>
+          </Draggable.ConditionalHandle>
         </HelpSurface>
       </ChatSurface>
     </Draggable>
   );
 }
+
+export const Token = Object.assign(TokenDefault, {
+  Handle: Draggable.Handle,
+});
 
 const TokenContainer: DraggedContainerComponent = (props) => {
   const isInHand = useIsTokenInHand();

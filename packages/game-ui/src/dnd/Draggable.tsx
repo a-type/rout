@@ -188,6 +188,7 @@ const ConditionalHandle = ({
 
 export const Draggable = Object.assign(DraggableRoot, {
   Handle: DraggableHandle,
+  ConditionalHandle,
 });
 
 interface DndOverlayPortalProps extends HTMLMotionProps<'div'> {
