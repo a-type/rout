@@ -6,6 +6,7 @@ import {
   lineTraverser,
   rectangleTraverser,
   serializeCoordinate,
+  subtractCoordinates,
   triangleTraverser,
 } from '@long-game/hex-map';
 import { hexLayout } from './hex.js';
@@ -15,20 +16,23 @@ import {
   weightedFortressTileTypes,
 } from './tiles.js';
 
+// note: try to make sure these are balanced around 0,0 as the center
 const pieceShapes: HexCoordinate[][] = [
   // square
-  collectTraversals(rectangleTraverser(hexLayout, 2, 2)),
+  collectTraversals(rectangleTraverser(hexLayout, 2, 2)).map((c) =>
+    subtractCoordinates(c, [0, 1]),
+  ),
   // triangle
   collectTraversals(triangleTraverser(hexLayout, 2, 0)),
   // lines
   collectTraversals(lineTraverser([0, 0], [1, 0])),
-  collectTraversals(lineTraverser([0, 0], [2, 0])),
+  collectTraversals(lineTraverser([-1, 0], [1, 0])),
   // boomerangish shape
   [
     // line 2 to the right
-    ...collectTraversals(lineTraverser([0, 0], [1, 0])),
+    ...collectTraversals(lineTraverser([-1, 0], [0, 0])),
     // one below the end
-    [1, 1],
+    [0, 1],
   ],
 ];
 

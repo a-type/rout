@@ -491,6 +491,9 @@ importers:
       '@long-game/hex-map':
         specifier: workspace:*
         version: link:../../../packages/hex-map
+      motion:
+        specifier: 'catalog:'
+        version: 12.18.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react:
         specifier: 'catalog:'
         version: 19.1.1

@@ -105,9 +105,12 @@ const HexLayerGroup = ({ ref }: { ref: RefObject<HTMLDivElement | null> }) => (
 export function DomHexTileRoot({
   coordinate,
   children,
+  className = '',
+  ...rest
 }: {
   coordinate: HexCoordinate;
   children: ReactNode;
+  className?: string;
 }) {
   const { actualWidth, actualHeight, center } = useTilePosition(coordinate);
   const {
@@ -123,7 +126,13 @@ export function DomHexTileRoot({
         width: actualWidth,
         height: actualHeight,
       }}
-      className="overflow-visible absolute contain-layout flex items-center justify-center"
+      className={
+        'overflow-visible absolute contain-layout flex items-center justify-center ' +
+        className
+      }
+      data-q={coordinate[0]}
+      data-r={coordinate[1]}
+      {...rest}
     >
       {children}
     </div>,
@@ -142,7 +151,7 @@ export function DomHexTileShape({
       viewBox={`${-actualWidth / 2} ${-actualHeight / 2} ${actualWidth} ${actualHeight}`}
       width={actualWidth}
       height={actualHeight}
-      className="absolute inset-0"
+      className={`absolute inset-0`}
     >
       <polygon
         points={polygonPath}
@@ -171,12 +180,14 @@ export function DomHexTileDefault({
   stroke,
   strokeWidth,
   fill = 'none',
+  svgProps,
   ...props
 }: HTMLProps<HTMLDivElement> & {
   coordinate: HexCoordinate;
   stroke?: string;
   strokeWidth?: number;
   fill?: string;
+  svgProps?: SVGProps<SVGSVGElement>;
 }) {
   return (
     <DomHexTileRoot coordinate={coordinate} {...props}>
@@ -186,6 +197,7 @@ export function DomHexTileDefault({
         strokeWidth={strokeWidth}
         fill={fill}
         vectorEffect="non-scaling-stroke"
+        {...svgProps}
       />
       <DomHexTileContent className="relative">{children}</DomHexTileContent>
     </DomHexTileRoot>

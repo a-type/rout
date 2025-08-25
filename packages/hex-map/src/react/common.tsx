@@ -31,18 +31,20 @@ export function useHexMapDetails(
 ) {
   const { size, orientation } = layout;
 
-  const [width, height] = dimensions;
-  const wMult = orientation === 'pointy' ? Math.sqrt(3) : 2;
-  const hMult = orientation === 'pointy' ? 2 : Math.sqrt(3);
+  const [qSize, rSize] = dimensions;
+  const qMult = orientation === 'pointy' ? Math.sqrt(3) : 2;
+  const rMult = orientation === 'pointy' ? 2 : Math.sqrt(3);
+  const rOnQMult = orientation === 'pointy' ? Math.sqrt(3) / 2 : 0;
+  const qOnRMult = orientation === 'pointy' ? 0 : Math.sqrt(3) / 2;
 
-  const actualWidth = width * size[0] * wMult;
-  const actualHeight = height * size[1] * hMult;
+  const actualWidth = qSize * size[0] * qMult + rSize * size[1] * rOnQMult;
+  const actualHeight = rSize * size[1] * rMult + qSize * size[0] * qOnRMult;
 
   return {
     actualWidth,
     actualHeight,
-    wMult,
-    hMult,
+    qMult,
+    rMult,
   };
 }
 

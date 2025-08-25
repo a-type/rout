@@ -16,7 +16,8 @@
     "@long-game/game-ui": "workspace:*",
     "@long-game/hex-map": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "motion": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

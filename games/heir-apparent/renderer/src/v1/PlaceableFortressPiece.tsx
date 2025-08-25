@@ -1,3 +1,4 @@
+import { Box } from '@a-type/ui';
 import {
   FortressPiece,
   hexLayout,
@@ -5,7 +6,9 @@ import {
 import { Token, useIsDragPreview } from '@long-game/game-ui';
 import { deserializeCoordinate } from '@long-game/hex-map';
 import { DomHexMap, DomHexTile } from '@long-game/hex-map/react';
+import { motion } from 'motion/react';
 import { hooks } from './gameClient.js';
+import { zoomGlobal } from './viewportGlobals.js';
 
 export interface PlaceableFortressPieceProps {
   piece: FortressPiece;
@@ -27,19 +30,38 @@ function Content({ piece }: { piece: FortressPiece }) {
   const dimensions = usePieceMapDimensions(piece);
   const isDragging = useIsDragPreview();
 
-  return (
-    <DomHexMap layout={hexLayout} dimensions={dimensions}>
+  const content = (
+    <DomHexMap
+      layout={hexLayout}
+      dimensions={dimensions}
+      className="drop-shadow-lg"
+    >
       {Object.entries(piece.tiles).map(([sCoord, tile]) => (
         <DomHexTile
           key={sCoord}
           coordinate={deserializeCoordinate(sCoord)}
           stroke="black"
           strokeWidth={1}
+          fill="white"
         >
           {tile.type[0]}
         </DomHexTile>
       ))}
     </DomHexMap>
+  );
+
+  if (isDragging) {
+    return (
+      <motion.div style={{ scale: zoomGlobal, zIndex: 100 }}>
+        {content}
+      </motion.div>
+    );
+  }
+
+  return (
+    <Box surface p border>
+      {content}
+    </Box>
   );
 }
 

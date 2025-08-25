@@ -233,6 +233,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     managementDb: IDBPDatabase<GameManagerSchema>;
   }) {
     super();
+    console.log(gameDetails);
     this.sessionId = sessionId;
     this.db = db as any;
     this.managementDb = managementDb;
@@ -375,14 +376,21 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     );
     const gameStatus =
       details.status === 'active'
-        ? gameDefinition.getStatus({
-            globalState,
-            rounds: groupTurnsToRounds(turns),
-            members: details.members,
-          })
+        ? // edge case -- gameDefinition.getStatus could return 'pending'
+          // if there are no turns, but we already did start the game.
+          turns.length === 0
+          ? { status: 'active' }
+          : gameDefinition.getStatus({
+              globalState,
+              rounds: groupTurnsToRounds(turns),
+              members: details.members,
+            })
         : ({
             status: details.status,
           } as GameStatus);
+    if (gameStatus.status === 'pending' && details.status === 'active') {
+      debugger;
+    }
     return {
       id: details.gameSessionId,
       ...details,
