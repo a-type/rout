@@ -28,7 +28,7 @@
     "valtio": "catalog:"
   },
   "devDependencies": {
-    "@a-type/rsbuild-plugin-unocss": "^0.0.5",
+    "@a-type/rsbuild-plugin-unocss": "^0.0.8",
     "@birchill/inject-manifest-plugin": "^1.0.1",
     "@long-game/uno-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",

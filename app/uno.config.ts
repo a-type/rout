@@ -1,4 +1,4 @@
-import config from '@long-game/uno-config';
+import { config } from '@long-game/uno-config';
 import { defineConfig, extractorDefault } from 'unocss';
 
 export default defineConfig({
@@ -9,8 +9,7 @@ export default defineConfig({
         // include all .ts and .tsx source files we encounter
         '**/*.{ts,tsx}',
         // include the UI lib
-        '**/@a-type/ui/dist/**/*.{js,jsx}',
-        '**/game-ui/**/*.{js,jsx,ts,tsx}',
+        // '**/@a-type/ui/dist/**/*.{js,jsx}',
       ],
     },
     // include all .ts and .tsx files in all games
@@ -40,7 +39,7 @@ export default defineConfig({
       if (ctx.id && ctx.id.includes('game-ui')) {
         // console.log(ctx.id);
       }
-      return extractorDefault.extract(ctx);
+      return extractorDefault.extract!(ctx);
     },
   },
 });

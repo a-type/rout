@@ -379,7 +379,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
         ? // edge case -- gameDefinition.getStatus could return 'pending'
           // if there are no turns, but we already did start the game.
           turns.length === 0
-          ? { status: 'active' }
+          ? { status: 'active' as const }
           : gameDefinition.getStatus({
               globalState,
               rounds: groupTurnsToRounds(turns),

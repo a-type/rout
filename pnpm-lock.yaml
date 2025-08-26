@@ -19,8 +19,8 @@ catalogs:
       specifier: 1.1.1
       version: 1.1.1
     '@a-type/ui':
-      specifier: 2.8.0
-      version: 2.8.0
+      specifier: 2.8.5
+      version: 2.8.5
     '@a-type/utils':
       specifier: 1.1.5
       version: 1.1.5
@@ -157,7 +157,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@clack/prompts':
         specifier: 0.9.0
         version: 0.9.0
@@ -208,10 +208,10 @@ importers:
     dependencies:
       '@a-type/auth-ui':
         specifier: 'catalog:'
-        version: 1.1.0(@a-type/ui@2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.1.1)
+        version: 1.1.0(@a-type/ui@2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.1.1)
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../packages/common
@@ -259,8 +259,8 @@ importers:
         version: 2.1.5(@types/react@19.1.10)(react@19.1.1)
     devDependencies:
       '@a-type/rsbuild-plugin-unocss':
-        specifier: ^0.0.5
-        version: 0.0.5(@rsbuild/core@1.4.15)
+        specifier: ^0.0.8
+        version: 0.0.8(@rsbuild/core@1.4.15)
       '@birchill/inject-manifest-plugin':
         specifier: ^1.0.1
         version: 1.0.1(@rspack/core@1.4.11(@swc/helpers@0.5.17))
@@ -542,7 +542,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
@@ -752,7 +752,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/games':
         specifier: workspace:*
         version: link:../packages/games
@@ -976,7 +976,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@a-type/utils':
         specifier: 'catalog:'
         version: 1.1.5
@@ -1170,7 +1170,7 @@ importers:
     devDependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@unocss/transformer-variant-group':
         specifier: 'catalog:'
         version: 66.4.2
@@ -1182,7 +1182,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
@@ -1373,16 +1373,16 @@ packages:
     peerDependencies:
       kysely: ^0.27.2
 
-  '@a-type/rsbuild-plugin-unocss@0.0.5':
-    resolution: {integrity: sha512-fg+Gps5f3iHUW0HEp4gShHEwWHqNxTANOg6tylelqoCt4gQrVh3hTRz01eGuWEJ+lIKnouCA1wiRGy7IhV1irQ==}
+  '@a-type/rsbuild-plugin-unocss@0.0.8':
+    resolution: {integrity: sha512-gmW4V7EV0Vj9x4vWShka4rN19trD1CYel4h5THtPkAFy9FcCFOGErztigTAa/BD1Htx8r3l6jP4mUhv+ORfVAw==}
     peerDependencies:
       '@rsbuild/core': 1.x
     peerDependenciesMeta:
       '@rsbuild/core':
         optional: true
 
-  '@a-type/ui@2.8.0':
-    resolution: {integrity: sha512-bd+/IiOK7Tu8hrHapUQbltElIn3TVN5a6Hs8z0tX2Clll1pUU3MNlmpkjAtGU8EcNm8G0FmrF4Xmk2XtPmIlOg==}
+  '@a-type/ui@2.8.5':
+    resolution: {integrity: sha512-tJbFKWYq/riPT8SKvxz64H9JLi1thq7QpC5QCQvHIK09P5aX2tAZTwIzIGMf9lGoLw2hNEztuV0UwiQWcIfSFA==}
     peerDependencies:
       react: ^19
       react-dom: ^19
@@ -7596,9 +7596,9 @@ snapshots:
 
   '@a-type/auth-fetch@2.1.2': {}
 
-  '@a-type/auth-ui@1.1.0(@a-type/ui@2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.1.1)':
+  '@a-type/auth-ui@1.1.0(@a-type/ui@2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.1.1)':
     dependencies:
-      '@a-type/ui': 2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+      '@a-type/ui': 2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       react: 19.1.1
 
   '@a-type/auth@1.3.16(encoding@0.1.13)':
@@ -7618,7 +7618,7 @@ snapshots:
       bcrypt-ts: 5.0.3
       kysely: 0.27.6
 
-  '@a-type/rsbuild-plugin-unocss@0.0.5(@rsbuild/core@1.4.15)':
+  '@a-type/rsbuild-plugin-unocss@0.0.8(@rsbuild/core@1.4.15)':
     dependencies:
       '@jridgewell/remapping': 2.3.5
       '@unocss/config': 66.4.2
@@ -7632,7 +7632,7 @@ snapshots:
     optionalDependencies:
       '@rsbuild/core': 1.4.15
 
-  '@a-type/ui@2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.17.19)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@radix-ui/react-accordion': 1.2.2(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -7682,7 +7682,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@a-type/ui@2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@radix-ui/react-accordion': 1.2.2(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -7732,7 +7732,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@a-type/ui@2.8.0(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@2.8.5(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(unocss@66.4.2(@unocss/webpack@66.4.2(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.5.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@radix-ui/react-accordion': 1.2.2(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

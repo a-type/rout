@@ -20,7 +20,7 @@ export const presetOptions = {
   hardShadows: true,
 };
 
-export default (game = false) =>
+export const config = (game = false) =>
   defineConfig({
     content: {
       pipeline: {
@@ -35,3 +35,5 @@ export default (game = false) =>
     ],
     transformers: [variantGroup()],
   });
+
+export default config;

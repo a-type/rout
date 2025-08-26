@@ -40,15 +40,39 @@ const federationConfig = createModuleFederationConfig({
   },
 });
 
+const unoStats = {
+  invalidations: 0,
+  rebuilds: 0,
+  deliveries: 0,
+};
+
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [
     pluginUnoCss({
-      enableIncludeCommentCheck: (file) =>
-        file.includes(path.join('@a-type', 'ui', 'dist')) ||
-        file.includes('@long-game'),
+      enableIncludeCommentCheck: (file) => {
+        return file.includes(path.join('@a-type', 'ui', 'dist'));
+      },
+      // include tagging on monorepo dependencies is not set up
+      // || file.includes('@long-game'),
       enableCacheExtractedCSS: (file) =>
         file.includes('@long-game') ? false : file.includes('node_modules'),
+
+      events: {
+        onCssGenerated: () => {
+          unoStats.rebuilds++;
+        },
+        onCssInvalidated: () => {
+          unoStats.invalidations++;
+        },
+        onCssResolved: () => {
+          unoStats.deliveries++;
+          console.log(`UnoCSS plugin stats:`);
+          console.log(`  Invalidations: ${unoStats.invalidations}`);
+          console.log(`  Rebuilds: ${unoStats.rebuilds}`);
+          console.log(`  Deliveries: ${unoStats.deliveries}`);
+        },
+      },
     }),
     pluginReact(),
   ],
