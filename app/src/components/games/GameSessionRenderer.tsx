@@ -1,4 +1,8 @@
-import { gameModules, getFederatedGameComponent } from '@/services/games';
+import {
+  gameModules,
+  gamesReadyPromise,
+  getFederatedGameComponent,
+} from '@/services/games';
 import {
   Box,
   Button,
@@ -25,7 +29,7 @@ import {
   SpatialHelpDraggable,
 } from '@long-game/game-ui';
 import { Link, useNavigate } from '@verdant-web/react-router';
-import { startTransition, Suspense, useMemo } from 'react';
+import { startTransition, Suspense, use, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameAbandonedNotice } from './GameAbandonedNotice.js';
@@ -43,6 +47,7 @@ export function GameSessionRenderer({
   gameSessionId,
   hotseat = false,
 }: GameSessionRendererProps) {
+  use(gamesReadyPromise);
   const gameSuite = useCreateGameSuite(gameSessionId, gameModules, hotseat);
 
   return (

@@ -342,9 +342,9 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       if (!currentTurn) return viewingRound.initialPlayerState;
 
       return this.gameDefinition.getProspectivePlayerState({
-        playerState: viewingRound.initialPlayerState,
+        playerState: toJS(viewingRound.initialPlayerState),
         prospectiveTurn: {
-          data: currentTurn,
+          data: toJS(currentTurn),
           playerId: this.playerId,
         },
         playerId: this.playerId,

@@ -41,6 +41,15 @@ export type FortressPiece = {
   tiles: HexMap<Omit<FortressTileData, 'playerId'>>;
 };
 
+export function isFortressPiece(data: unknown): data is FortressPiece {
+  const piece = data as FortressPiece;
+  return (
+    typeof piece.id === 'string' &&
+    typeof piece.tiles === 'object' &&
+    !Array.isArray(piece.tiles)
+  );
+}
+
 function randomType(random: GameRandom) {
   return random.item(weightedFortressTileTypes);
 }
@@ -78,3 +87,9 @@ function randomPiece(random: GameRandom): FortressPiece {
     ),
   };
 }
+
+export type PiecePlacement = {
+  origin: HexCoordinate;
+  pieceId: string;
+  rotation: number;
+};

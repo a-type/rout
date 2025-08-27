@@ -5,5 +5,7 @@ export * from './gameDefinition.js';
 export { hexLayout } from './hex.js';
 export type * from './map.js';
 export type * from './pieces.js';
+export { isFortressPiece } from './pieces.js';
 export type * from './tiles.js';
 export type * from './units.js';
+export { isUnitData } from './units.js';

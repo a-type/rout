@@ -1,5 +1,6 @@
 import {
   createContext,
+  CSSProperties,
   HTMLProps,
   ReactNode,
   RefObject,
@@ -106,11 +107,13 @@ export function DomHexTileRoot({
   coordinate,
   children,
   className = '',
+  style,
   ...rest
 }: {
   coordinate: HexCoordinate;
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 }) {
   const { actualWidth, actualHeight, center } = useTilePosition(coordinate);
   const {
@@ -125,6 +128,7 @@ export function DomHexTileRoot({
         top: center[1] - actualHeight / 2 + actualMapHeight / 2,
         width: actualWidth,
         height: actualHeight,
+        ...style,
       }}
       className={
         'overflow-visible absolute contain-layout flex items-center justify-center ' +

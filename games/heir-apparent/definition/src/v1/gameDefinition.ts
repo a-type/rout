@@ -4,9 +4,13 @@ import {
   roundFormat,
   simpleError,
 } from '@long-game/game-definition';
-import { HexCoordinate, HexMap } from '@long-game/hex-map';
-import { generateRandomMap, getMapSize } from './map.js';
-import { FortressPiece, generatePieceOptions } from './pieces.js';
+import { HexMap } from '@long-game/hex-map';
+import { applyValidPlacement, generateRandomMap, getMapSize } from './map.js';
+import {
+  FortressPiece,
+  generatePieceOptions,
+  PiecePlacement,
+} from './pieces.js';
 import { isFortressTile, TileData } from './tiles.js';
 import {
   applyUnitAction,
@@ -34,11 +38,7 @@ export type PlayerState = {
 };
 
 export type TurnData = {
-  piecePlacement: {
-    origin: HexCoordinate;
-    pieceId: string;
-    rotation: number;
-  };
+  piecePlacement: PiecePlacement | null;
   unitActions: Record<string, UnitAction[]>;
 };
 
@@ -62,9 +62,7 @@ export const gameDefinition: GameDefinition<{
   TurnData: TurnData;
   PublicTurnData: TurnData;
   TurnError: TurnError;
-  InitialTurnData: Omit<TurnData, 'piecePlacement'> & {
-    piecePlacement: TurnData['piecePlacement'] | null;
-  };
+  InitialTurnData: TurnData;
 }> = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -72,7 +70,8 @@ export const gameDefinition: GameDefinition<{
   getRoundIndex: roundFormat.sync(),
   // run on both client and server
 
-  validateTurn: ({ playerState, turn }) => {
+  validateTurn: ({ playerState, turn }) => {},
+  validatePartialTurn: ({ playerState, turn }) => {
     for (const [unitId, actions] of Object.entries(turn.data.unitActions)) {
       const { unit, position } = findUnit(playerState.tiles, unitId) || {};
       if (!unit || !position) {
@@ -100,6 +99,17 @@ export const gameDefinition: GameDefinition<{
   // run on client
 
   getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+    if (prospectiveTurn.data.piecePlacement) {
+      applyValidPlacement({
+        map: playerState.tiles,
+        placement: prospectiveTurn.data.piecePlacement,
+        options: playerState.pieceOptions,
+        playerId: prospectiveTurn.playerId,
+      });
+      playerState.pieceOptions = playerState.pieceOptions.filter(
+        (option) => option.id !== prospectiveTurn.data.piecePlacement?.pieceId,
+      );
+    }
     // TODO: this is what the player sees as the game state
     // with their pending local moves applied after selecting them
     return playerState;

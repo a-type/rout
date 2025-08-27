@@ -113,7 +113,7 @@ async function registerFederatedGames() {
   );
 }
 
-registerFederatedGames();
+export const gamesReadyPromise = registerFederatedGames();
 
 function MissingRenderer() {
   return (

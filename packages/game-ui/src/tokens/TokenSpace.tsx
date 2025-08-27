@@ -28,6 +28,7 @@ export interface TokenSpaceProps<T = any>
    * Like onOver, but only for accepted tokens.
    */
   onOverAccepted?: (data: TokenDragData<T> | null) => void;
+  validationMessageClassName?: string;
 }
 
 const tokenSpaceTags = ['token-space'];
@@ -43,6 +44,7 @@ export function TokenSpace<T = any>({
   onOver,
   onOverAccepted,
   tags,
+  validationMessageClassName,
   ...rest
 }: TokenSpaceProps<T>) {
   const [overError, setOverError] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export function TokenSpace<T = any>({
       id={id}
       className={clsx(
         'relative',
-        '[&[data-over=true]]:(scale-102)',
+        '[&[data-over-accepted=true]]:(scale-102)',
         'transition-transform',
         className,
       )}
@@ -134,7 +136,12 @@ export function TokenSpace<T = any>({
       {...rest}
     >
       {children}
-      {overError && <TokenSpaceValidationMessage message={overError} />}
+      {overError && (
+        <TokenSpaceValidationMessage
+          message={overError}
+          className={validationMessageClassName}
+        />
+      )}
     </Droppable>
   );
 }
@@ -144,10 +151,21 @@ export interface TokenSpaceData {
   isTokenSpace: boolean;
 }
 
-function TokenSpaceValidationMessage({ message }: { message: string }) {
+function TokenSpaceValidationMessage({
+  message,
+  className,
+}: {
+  message: string;
+  className?: string;
+}) {
   if (!message) return null;
   return (
-    <div className="absolute bottom-100% left-1/2 translate-[-50%,0.5rem] w-600px flex justify-center">
+    <div
+      className={clsx(
+        'absolute z-100000 bottom-100% left-1/2 translate-[-50%,0.5rem] w-600px flex justify-center',
+        className,
+      )}
+    >
       <Box
         surface="attention"
         p="lg"

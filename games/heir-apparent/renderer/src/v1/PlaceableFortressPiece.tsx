@@ -8,6 +8,7 @@ import { deserializeCoordinate } from '@long-game/hex-map';
 import { DomHexMap, DomHexTile } from '@long-game/hex-map/react';
 import { motion } from 'motion/react';
 import { hooks } from './gameClient.js';
+import { tileColors } from './tileGraphics.js';
 import { zoomGlobal } from './viewportGlobals.js';
 
 export interface PlaceableFortressPieceProps {
@@ -40,9 +41,15 @@ function Content({ piece }: { piece: FortressPiece }) {
         <DomHexTile
           key={sCoord}
           coordinate={deserializeCoordinate(sCoord)}
-          stroke="black"
           strokeWidth={1}
-          fill="white"
+          stroke="var(--color-gray-dark)"
+          fill="var(--color-primary-light)"
+          style={
+            {
+              '--dyn-primary-source': tileColors[tile.type],
+            } as any
+          }
+          className="theme"
         >
           {tile.type[0]}
         </DomHexTile>

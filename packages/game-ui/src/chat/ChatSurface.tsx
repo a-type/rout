@@ -56,7 +56,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       className={clsx(
         'relative',
         isSpatialChatDragging &&
-          'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over=true]]:after:bg-white [&[data-over=true]]:ring-6',
+          'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
         className,
       )}
       asChild={asChild}

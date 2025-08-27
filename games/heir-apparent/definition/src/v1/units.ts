@@ -20,6 +20,19 @@ export type UnitData = {
   playerId: PrefixedId<'u'>;
 };
 
+export function isUnitData(data: unknown): data is UnitData {
+  const unit = data as UnitData;
+  return (
+    typeof unit.id === 'string' &&
+    typeof unit.type === 'string' &&
+    ['infantry', 'archer', 'cavalry'].includes(unit.type) &&
+    typeof unit.health === 'number' &&
+    (unit.diedRoundIndex === undefined ||
+      typeof unit.diedRoundIndex === 'number') &&
+    typeof unit.playerId === 'string'
+  );
+}
+
 export type UnitType = UnitData['type'];
 
 export const baseUnitDamage: Record<UnitType, number> = {

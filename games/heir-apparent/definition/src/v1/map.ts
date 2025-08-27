@@ -1,15 +1,20 @@
 import { PrefixedId } from '@long-game/common';
 import { GameRandom } from '@long-game/game-definition';
 import {
+  addCoordinates,
   collectTraversals,
   coord,
+  deserializeCoordinate,
   hexagonTraverser,
+  HexCoordinate,
   HexMap,
   rotateCoordinate,
+  serializeCoordinate,
   setCell,
   traverseMap,
 } from '@long-game/hex-map';
 import { hexLayout } from './hex.js';
+import { FortressPiece, PiecePlacement } from './pieces.js';
 import { newFortressTile, newTerrainTile, TileData } from './tiles.js';
 
 export function getMapSize(playerCount: number) {
@@ -95,4 +100,55 @@ export function getStartingAreas(playerIds: PrefixedId<'u'>[]) {
     };
   });
   return startingAreas;
+}
+
+/**
+ * Assumes you have already validated the placement
+ * is allowed.
+ */
+export function placeValidPiece({
+  map,
+  piece,
+  origin,
+  playerId,
+}: {
+  map: HexMap<TileData>;
+  piece: FortressPiece;
+  origin: HexCoordinate;
+  playerId: PrefixedId<'u'>;
+}) {
+  for (const [sCoord, tile] of Object.entries(piece.tiles)) {
+    const tileCoord = deserializeCoordinate(sCoord);
+    map[serializeCoordinate(addCoordinates(origin, tileCoord))] = {
+      ...tile,
+      playerId,
+    };
+  }
+  return map;
+}
+
+// wraps placeValidPiece for convenience
+export function applyValidPlacement({
+  map,
+  placement,
+  options,
+  playerId,
+}: {
+  map: HexMap<TileData>;
+  placement: PiecePlacement;
+  options: FortressPiece[];
+  playerId: PrefixedId<'u'>;
+}) {
+  const piece = options.find((opt) => opt.id === placement.pieceId);
+  if (!piece) {
+    throw new Error(
+      `Piece not found: ${placement.pieceId} (turn was not properly validated!)`,
+    );
+  }
+  placeValidPiece({
+    map,
+    piece,
+    origin: placement.origin,
+    playerId,
+  });
 }

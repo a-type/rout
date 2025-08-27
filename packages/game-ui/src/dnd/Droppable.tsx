@@ -45,12 +45,15 @@ export function Droppable<T = any>({
   priority,
   ...rest
 }: DroppableProps<T>) {
-  const {
-    isAcceptedOver: isOver,
-    rejected,
-    isAnyOver: isDraggedOverThisRegion,
-    draggedData,
-  } = useDroppable({ onDrop, onOver, accept, onReject, id, disabled, tags });
+  const { isAcceptedOver, isRejectedOver } = useDroppable({
+    onDrop,
+    onOver,
+    accept,
+    onReject,
+    id,
+    disabled,
+    tags,
+  });
   const bindBounds = useBindBounds(id, priority);
   const finalRef = useMergedRef<HTMLDivElement>(bindBounds, userRef);
   useEffect(() => droppableDataRegistry.register(id, data), [id, data]);
@@ -69,10 +72,8 @@ export function Droppable<T = any>({
     <SlotDiv
       data-role="droppable"
       ref={finalRef}
-      data-over={isOver}
-      data-over-rejected={rejected && isDraggedOverThisRegion}
-      data-dragged-rejected={rejected}
-      data-dragged-accepted={!!draggedData && !rejected}
+      data-over-accepted={isAcceptedOver}
+      data-over-rejected={isRejectedOver}
       asChild={asChild}
       {...rest}
     >

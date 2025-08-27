@@ -84,9 +84,13 @@ export function useDroppable<T>({
   const isAnyOver =
     useDndStore((state) => state.overRegion === id) && !disabled;
   const draggedData = useDraggedData();
-  const rejected =
-    !disabled && accept && draggedData && !accept(draggedData, gesture);
-  const isAcceptedOver = !disabled && isAnyOver && !rejected;
+  const isAcceptedOver =
+    !disabled &&
+    isAnyOver &&
+    draggedData &&
+    (!accept || accept(draggedData, gesture));
+  const isRejectedOver =
+    !disabled && isAnyOver && draggedData && !isAcceptedOver;
 
   const wasOverRef = useRef(false);
   useEffect(() => {
@@ -111,7 +115,7 @@ export function useDroppable<T>({
   return {
     isAcceptedOver,
     isAnyOver,
-    rejected,
+    isRejectedOver,
     draggedData,
   };
 }
