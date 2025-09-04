@@ -4,14 +4,17 @@ import {
   roundFormat,
   simpleError,
 } from '@long-game/game-definition';
-import { HexMap } from '@long-game/hex-map';
-import { applyValidPlacement, generateRandomMap, getMapSize } from './map.js';
+import {
+  applyValidPlacement,
+  GameMap,
+  generateRandomMap,
+  getMapSize,
+} from './map.js';
 import {
   FortressPiece,
   generatePieceOptions,
   PiecePlacement,
 } from './pieces.js';
-import { isFortressTile, TileData } from './tiles.js';
 import {
   applyUnitAction,
   findUnit,
@@ -21,7 +24,7 @@ import {
 
 export type GlobalState = {
   mapSize: number;
-  tiles: HexMap<TileData>;
+  tiles: GameMap;
   scores: Record<PrefixedId<'u'>, number>;
   // progress toward next artifact, 0-1
   progress: Record<PrefixedId<'u'>, number>;
@@ -30,7 +33,7 @@ export type GlobalState = {
 
 export type PlayerState = {
   mapSize: number;
-  tiles: HexMap<TileData>;
+  tiles: GameMap;
   scores: Record<PrefixedId<'u'>, number>;
   // only your own progress.
   progress: number;
@@ -201,8 +204,8 @@ export const gameDefinition: GameDefinition<{
           unit.diedRoundIndex = round.roundIndex;
         }
       }
-      if (isFortressTile(tile) && tile.health <= 0) {
-        tile.destroyedRoundIndex = round.roundIndex;
+      if (tile.fortress && tile.fortress.health <= 0) {
+        tile.fortress.destroyedRoundIndex = round.roundIndex;
       }
     }
 

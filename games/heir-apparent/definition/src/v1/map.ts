@@ -15,7 +15,30 @@ import {
 } from '@long-game/hex-map';
 import { hexLayout } from './hex.js';
 import { FortressPiece, PiecePlacement } from './pieces.js';
-import { newFortressTile, newTerrainTile, TileData } from './tiles.js';
+import {
+  FortressTileData,
+  newFortressTile,
+  newTerrainTile,
+  TerrainTileData,
+  TerrainTileType,
+} from './tiles.js';
+import { UnitData } from './units.js';
+
+export interface GameMapTileData {
+  terrain: TerrainTileData;
+  fortress: FortressTileData | null;
+  units: UnitData[];
+}
+
+export type GameMap = HexMap<GameMapTileData>;
+
+function newMapTile(terrainType: TerrainTileType, fortress?: FortressTileData) {
+  return {
+    terrain: newTerrainTile(terrainType),
+    fortress: fortress || null,
+    units: [],
+  } as GameMapTileData;
+}
 
 export function getMapSize(playerCount: number) {
   return playerCount * 10;
@@ -27,9 +50,9 @@ export function generateRandomMap(
 ) {
   const size = getMapSize(playerIds.length);
   // fill the map with plain to start
-  const map: HexMap<TileData> = {};
+  const map: GameMap = {};
   traverseMap(hexagonTraverser(hexLayout, size), (coord) =>
-    setCell(map, coord, newTerrainTile('plain')),
+    setCell(map, coord, newMapTile('plain')),
   );
 
   const startingAreas = getStartingAreas(playerIds);
@@ -54,9 +77,9 @@ export function generateRandomMap(
       ),
       (coord, i) => {
         if (i === depositIndex) {
-          setCell(map, coord, newTerrainTile('deposit'));
+          setCell(map, coord, newMapTile('deposit'));
         } else if (mountainIndices.includes(i)) {
-          setCell(map, coord, newTerrainTile('mountain'));
+          setCell(map, coord, newMapTile('mountain'));
         }
       },
     );
@@ -66,9 +89,13 @@ export function generateRandomMap(
   // owned by the player
   for (const { safeArea, center, playerId } of startingAreas) {
     for (const coord of safeArea) {
-      setCell(map, coord, newTerrainTile('plain'));
+      setCell(map, coord, newMapTile('plain'));
     }
-    setCell(map, center, { ...newFortressTile('workshop'), playerId });
+    setCell(
+      map,
+      center,
+      newMapTile('plain', newFortressTile('workshop', playerId, 1)),
+    );
   }
 
   return map;
@@ -112,14 +139,15 @@ export function placeValidPiece({
   origin,
   playerId,
 }: {
-  map: HexMap<TileData>;
+  map: GameMap;
   piece: FortressPiece;
   origin: HexCoordinate;
   playerId: PrefixedId<'u'>;
 }) {
   for (const [sCoord, tile] of Object.entries(piece.tiles)) {
     const tileCoord = deserializeCoordinate(sCoord);
-    map[serializeCoordinate(addCoordinates(origin, tileCoord))] = {
+    const mapCell = map[serializeCoordinate(addCoordinates(origin, tileCoord))];
+    mapCell.fortress = {
       ...tile,
       playerId,
     };
@@ -134,7 +162,7 @@ export function applyValidPlacement({
   options,
   playerId,
 }: {
-  map: HexMap<TileData>;
+  map: GameMap;
   placement: PiecePlacement;
   options: FortressPiece[];
   playerId: PrefixedId<'u'>;

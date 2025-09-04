@@ -1,20 +1,4 @@
 import { PrefixedId } from '@long-game/common';
-import { UnitData } from './units.js';
-
-export type TerrainTileData = {
-  type: TerrainTileType;
-  units: UnitData[];
-};
-export type FortressTileData = {
-  type: FortressTileType;
-  health: number;
-  destroyedRoundIndex?: number;
-  playerId: PrefixedId<'u'>;
-  units: UnitData[];
-};
-export type TileData = TerrainTileData | FortressTileData;
-
-export type TileType = TerrainTileType | FortressTileType;
 
 export const fortressTileTypes = [
   'lodging',
@@ -31,6 +15,20 @@ export const terrainTileTypes = [
   'deposit',
 ] as const;
 export type TerrainTileType = (typeof terrainTileTypes)[number];
+
+export type TerrainTileData = {
+  type: TerrainTileType;
+};
+export type FortressTileData = {
+  type: FortressTileType;
+  health: number;
+  destroyedRoundIndex?: number;
+  playerId: PrefixedId<'u'>;
+  /** 0-1, percent. */
+  buildProgress: number;
+};
+export type TileData = TerrainTileData | FortressTileData;
+export type TileType = TerrainTileType | FortressTileType;
 
 export function isFortressTile(tile: TileData): tile is FortressTileData {
   return fortressTileTypes.includes(tile.type as FortressTileType);
@@ -63,16 +61,28 @@ export const baseTileHealth: Record<FortressTileType, number> = {
   ballista: 4,
 };
 
-export function newFortressTile(type: FortressTileType) {
+export function newFortressTile(
+  type: FortressTileType,
+  playerId: PrefixedId<'u'>,
+  buildProgress?: number,
+): FortressTileData;
+export function newFortressTile(
+  type: FortressTileType,
+): Omit<FortressTileData, 'playerId'>;
+export function newFortressTile(
+  type: FortressTileType,
+  playerId?: PrefixedId<'u'>,
+  buildProgress?: number,
+) {
   return {
     type,
     health: baseTileHealth[type],
-    units: [],
-  } satisfies Omit<FortressTileData, 'playerId'>;
+    playerId,
+    buildProgress: buildProgress ?? 0,
+  };
 }
 export function newTerrainTile(type: TerrainTileType) {
   return {
     type,
-    units: [],
   } satisfies TerrainTileData;
 }

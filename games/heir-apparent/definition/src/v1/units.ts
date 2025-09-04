@@ -1,12 +1,7 @@
 import { PrefixedId } from '@long-game/common';
-import {
-  getCell,
-  HexCoordinate,
-  HexMap,
-  mapIterator,
-} from '@long-game/hex-map';
+import { getCell, HexCoordinate, mapIterator } from '@long-game/hex-map';
 import { TurnError } from './gameDefinition.js';
-import { TileData } from './tiles.js';
+import { GameMap } from './map.js';
 
 export type UnitData = {
   id: string;
@@ -46,7 +41,7 @@ export interface UnitAction {
   target: HexCoordinate;
 }
 
-export function findUnit(map: HexMap<TileData>, unitId: string) {
+export function findUnit(map: GameMap, unitId: string) {
   for (const [position, tile] of mapIterator(map)) {
     const unit = tile.units.find((u) => u.id === unitId);
     if (unit) {
@@ -73,7 +68,7 @@ export function validateUnitAction({
   unit: UnitData;
   position: HexCoordinate;
   action: UnitAction;
-  tiles: HexMap<TileData>;
+  tiles: GameMap;
 }): TurnError | void {
   if (unit.diedRoundIndex !== undefined) {
     return unitError(`Unit is dead and cannot act`, unit.id);
@@ -114,7 +109,7 @@ export function applyUnitAction({
   unit: UnitData;
   position: HexCoordinate;
   action: UnitAction;
-  tiles: HexMap<TileData>;
+  tiles: GameMap;
 }) {
   const fromTile = getCell(tiles, position)!;
   const toTile = getCell(tiles, action.target)!;
@@ -122,7 +117,10 @@ export function applyUnitAction({
     fromTile.units = fromTile.units.filter((u) => u !== unit);
     toTile.units.push(unit);
   } else if (action.action === 'attack') {
-    const damage = fromTile.type === 'ballista' ? 8 : baseUnitDamage[unit.type];
+    const isOnFriendlyBallista =
+      fromTile.fortress?.type === 'ballista' &&
+      fromTile.fortress.playerId === unit.playerId;
+    const damage = isOnFriendlyBallista ? 8 : baseUnitDamage[unit.type];
     const targetUnits = toTile.units.filter(
       (u) => u.playerId !== unit.playerId,
     );
