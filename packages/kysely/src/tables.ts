@@ -16,7 +16,7 @@ type DateColumnGenerated = ColumnType<
 >;
 
 export type NotificationSettings = Record<
-  AnyNotification['type'],
+  Exclude<AnyNotification['type'], 'test'>,
   { push: boolean; email: boolean }
 >;
 

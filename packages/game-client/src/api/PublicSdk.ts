@@ -561,6 +561,15 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['adminGetUsers']],
     },
   );
+
+  adminSendTestNotification = this.sdkMutation(
+    this.apiRpc.admin.notifications['send-test'][':userId'].$post,
+    {
+      transformInput: (input: { userId: PrefixedId<'u'> }) => ({
+        param: { userId: input.userId },
+      }),
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];

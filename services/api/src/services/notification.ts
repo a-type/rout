@@ -16,7 +16,9 @@ export async function notifyUser(
   await db.insertNotification(userId, notification);
   const notificationSettings = await db.getUserNotificationSettings(userId);
   const { push: sendPush, email: sendEmail } =
-    notificationSettings[notification.type];
+    notification.type === 'test'
+      ? { push: true, email: true }
+      : notificationSettings[notification.type];
   if (sendPush) {
     console.debug(`Sending push notification to user: ${userId}`);
     await sendPushToAllUserDevices(userId, notification, bindings);

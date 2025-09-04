@@ -15,7 +15,9 @@ export function NotificationSettings({}: NotificationSettingsProps) {
   const { data: notificationSettings } = sdkHooks.useGetNotificationSettings();
   const updateNotificationSettings = sdkHooks.useUpdateNotificationSettings();
 
-  const updateOneSettingFactory = (key: Notification['data']['type']) => {
+  const updateOneSettingFactory = (
+    key: Exclude<Notification['data']['type'], 'test'>,
+  ) => {
     return async (transport: 'email' | 'push', value: boolean) => {
       await updateNotificationSettings.mutateAsync({
         ...notificationSettings,

@@ -4,10 +4,12 @@ import { adminMiddleware } from '../../middleware/admin.js';
 import { loggedInMiddleware } from '../../middleware/index.js';
 import { adminGameProductsRouter } from './adminGameProductsRouter.js';
 import { adminGameSessionsRouter } from './adminGameSessions.js';
+import { adminNotificationsRouter } from './adminNotifications.js';
 import { adminUsersRouter } from './adminUsers.js';
 
 export const adminRouter = new Hono<Env>()
   .use(loggedInMiddleware, adminMiddleware)
   .route('/users', adminUsersRouter)
   .route('/gameSessions', adminGameSessionsRouter)
-  .route('/gameProducts', adminGameProductsRouter);
+  .route('/gameProducts', adminGameProductsRouter)
+  .route('/notifications', adminNotificationsRouter);

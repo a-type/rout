@@ -1001,10 +1001,15 @@ export class UserStore extends RpcTarget {
       .select(['User.notificationSettings'])
       .executeTakeFirstOrThrow();
 
-    const defaults = notificationTypes.reduce((acc, key) => {
-      acc[key] = { email: false, push: false };
-      return acc;
-    }, {} as NotificationSettings);
+    const defaults = notificationTypes.reduce(
+      (acc, key) => {
+        acc[key] = { email: false, push: false };
+        return acc;
+      },
+      {
+        test: { email: true, push: true },
+      } as Record<string, { email: boolean; push: boolean }>,
+    );
 
     return {
       ...defaults,

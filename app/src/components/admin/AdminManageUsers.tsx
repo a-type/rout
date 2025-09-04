@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, ConfirmedButton } from '@a-type/ui';
+import { Box, Button, ConfirmedButton, DropdownMenu, Icon } from '@a-type/ui';
 
 export interface AdminManageUsersProps {}
 
@@ -9,6 +9,7 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
     fetchNextPage,
   } = sdkHooks.useAdminGetUsers({});
   const deleteUser = sdkHooks.useAdminDeleteUser();
+  const sendTestNotification = sdkHooks.useAdminSendTestNotification();
 
   return (
     <Box col gap>
@@ -18,6 +19,20 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
             <Box>{user.displayName}</Box>
             <Box>{user.email}</Box>
           </Box>
+          <DropdownMenu>
+            <DropdownMenu.Trigger asChild>
+              <Button color="ghost">
+                <Icon name="dots" />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item
+                onClick={() => sendTestNotification.mutate({ userId: user.id })}
+              >
+                Send Test Notification
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu>
           <ConfirmedButton
             color="destructive"
             confirmText="Are you sure you want to delete this user?"
