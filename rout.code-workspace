@@ -1,0 +1,47 @@
+{
+  "folders": [
+    {
+      "path": "./app",
+      "name": "📱 App",
+    },
+    {
+      "path": "./services",
+      "name": "🛠️ Services",
+    },
+    {
+      "path": "./packages",
+      "name": "🔨 Packages",
+    },
+    {
+      "path": "./games/number-guess",
+      "name": "🎲 Number Guess",
+    },
+    {
+      "path": "./games/hearts",
+      "name": "💖 Hearts",
+    },
+    {
+      "path": "./games/scribble",
+      "name": "🖍️ Scribble",
+    },
+    {
+      "path": "./games/exquisite-fridge",
+      "name": "❄️ Exquisite Fridge",
+    },
+    {
+      "path": "./games/wizard-ball",
+      "name": "🧙‍♂️ Wizard Ball",
+    },
+    {
+      "path": "./games/heir-apparent",
+      "name": "👑 Heir Apparent",
+    },
+    {
+      "path": ".",
+      "name": "root",
+    },
+  ],
+  "settings": {
+    "unocss.exclude": ["./services"],
+  },
+}
