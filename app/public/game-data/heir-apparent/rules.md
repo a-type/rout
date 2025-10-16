@@ -18,6 +18,10 @@ At the beginning of the game, you spend the first round constructing a fortress.
 
 After the first round, the rest of the game begins. To start off every round, your Lodging tiles will produce one unit. You may assign each unit to an adjacent Tile. At the end of the round, Tiles occupied by units will produce an Effect, depending on the type of Tile.
 
+## Expanding your fortress
+
+Every 5 turns you can draft a new group of Construction Site tiles to add to your fortress. A unit must be assigned to each placed Construction Site tile to turn it into an actual fortress Tile.
+
 ## Game end
 
 When any number of players reach 12 Artifacts during a round, the game ends. All players who achieve 12 Artifacts are crowned as the new regents. You may have to share the throne...
@@ -69,6 +73,12 @@ Hides a Unit from rivals, even if they can see the Overgrowth Tile.
 
 When occupied by a Unit, that Unit gains 1 carried Gold. Each Unit can carry a limited amount of total Gold.
 
+## Construction Site Tiles
+
+A Construction Site Tile is a placeholder for a Fortress Tile, which must be built by an assigned Unit before it can be used. Construction Site Tiles can be destroyed by rival attacks before they are built.
+
+**Health:** 2
+
 # Units
 
 There are a couple types of Units. Lodging produces Infantry Units, but they can be incrementally upgraded by occupying a Lodging tile. If a Lodging tile is occupied, it cannot produce more Units.
@@ -94,6 +104,8 @@ Archers can attack other Units or Tiles up to 2 spaces away. They do minimal dam
 ## Cavalry
 
 Cavalry are powerful Units which do high damage to other Units and Tiles. They can also move two spaces per round, but they will stop short if they encounter a Fortress Tile. Cavalry can carry 3 Gold.
+
+Cavalry cannot hide in Overgrowth.
 
 **Damage:** 4
 **Health:** 16

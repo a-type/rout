@@ -22,7 +22,7 @@ import {
   TerrainTileData,
   TerrainTileType,
 } from './tiles.js';
-import { UnitData } from './units.js';
+import { createUnit, mineDeposit, UnitData, upgradeUnit } from './units.js';
 
 export interface GameMapTileData {
   terrain: TerrainTileData;
@@ -129,6 +129,23 @@ export function getStartingAreas(playerIds: PrefixedId<'u'>[]) {
   return startingAreas;
 }
 
+export function validatePlacement({
+  map,
+  piece,
+  origin,
+  playerId,
+}: {
+  map: GameMap;
+  piece: FortressPiece;
+  origin: HexCoordinate;
+  playerId: PrefixedId<'u'>;
+}) {
+  // TODO: implement:
+  // 1. no existing tiles in the way, unless those tiles are destroyed
+  // 2. no mountain terrain in the way
+  // 3. all tiles are on the map
+  // 4. no enemy units in the way
+}
 /**
  * Assumes you have already validated the placement
  * is allowed.
@@ -179,4 +196,58 @@ export function applyValidPlacement({
     origin: placement.origin,
     playerId,
   });
+}
+
+export function applyCellEffect({
+  cell,
+  random,
+  progress,
+}: {
+  cell: GameMapTileData;
+  random: GameRandom;
+  progress: Record<PrefixedId<'u'>, number>;
+}) {
+  // fortress effects override underlying terrain
+  if (cell.fortress) {
+    const friendlyUnit = cell.units.find(
+      (u) =>
+        u.playerId === cell.fortress?.playerId &&
+        u.diedRoundIndex === undefined,
+    );
+    if (cell.fortress.buildProgress < 1) {
+      if (friendlyUnit) {
+        // build the tile. right now this is instant.
+        cell.fortress.buildProgress = 1;
+      }
+    } else {
+      switch (cell.fortress.type) {
+        case 'lodging':
+          // spawn is blocked if any unit is present
+          if (
+            cell.units.filter((u) => u.diedRoundIndex !== undefined).length ===
+            0
+          ) {
+            // spawn infantry
+            cell.units.push(
+              createUnit(cell.fortress.playerId, 'infantry', random),
+            );
+          } else if (friendlyUnit) {
+            // upgrade the unit
+            upgradeUnit(friendlyUnit);
+          }
+          break;
+        case 'workshop':
+          if (friendlyUnit) {
+            progress[cell.fortress.playerId] += 0.2;
+          }
+          break;
+      }
+    }
+  } else {
+    switch (cell.terrain.type) {
+      case 'deposit':
+        cell.units.forEach(mineDeposit);
+        break;
+    }
+  }
 }

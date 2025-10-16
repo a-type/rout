@@ -1,4 +1,5 @@
 import { PrefixedId } from '@long-game/common';
+import { GameRandom } from '@long-game/game-definition';
 import { getCell, HexCoordinate, mapIterator } from '@long-game/hex-map';
 import { TurnError } from './gameDefinition.js';
 import { GameMap } from './map.js';
@@ -13,6 +14,7 @@ export type UnitData = {
   // differently after a unit is killed while attacks are being resolved
   diedRoundIndex?: number;
   playerId: PrefixedId<'u'>;
+  carryingGold: number;
 };
 
 export function isUnitData(data: unknown): data is UnitData {
@@ -36,6 +38,18 @@ export const baseUnitDamage: Record<UnitType, number> = {
   cavalry: 4,
 };
 
+export const unitHealth: Record<UnitType, number> = {
+  infantry: 12,
+  archer: 10,
+  cavalry: 16,
+};
+
+export const unitCarryingCapacity: Record<UnitType, number> = {
+  infantry: 5,
+  archer: 2,
+  cavalry: 3,
+};
+
 export interface UnitAction {
   action: 'move' | 'attack';
   target: HexCoordinate;
@@ -57,6 +71,46 @@ export function unitError(message: string, unitId: string) {
     message,
     data: { unitId },
   };
+}
+
+export function createUnit(
+  playerId: PrefixedId<'u'>,
+  type: UnitType,
+  random: GameRandom,
+) {
+  return {
+    playerId,
+    type,
+    health: unitHealth[type],
+    id: random.id(),
+    carryingGold: 0,
+  } satisfies UnitData;
+}
+
+export function upgradeUnit(unit: UnitData) {
+  if (unit.diedRoundIndex !== undefined || unit.health <= 0) return unit;
+
+  switch (unit.type) {
+    case 'infantry':
+      unit.type = 'archer';
+      unit.health = unitHealth.archer;
+      return unit;
+    case 'archer':
+      unit.type = 'cavalry';
+      unit.health = unitHealth.cavalry;
+      return unit;
+    case 'cavalry':
+      unit.health = unitHealth.cavalry;
+      return unit;
+  }
+}
+
+export function mineDeposit(unit: UnitData) {
+  if (unit.diedRoundIndex !== undefined || unit.health <= 0) return 0;
+  const capacity = unitCarryingCapacity[unit.type];
+  const amount = Math.min(capacity - unit.carryingGold, 1);
+  unit.carryingGold += amount;
+  return amount;
 }
 
 export function validateUnitAction({
@@ -124,14 +178,21 @@ export function applyUnitAction({
     const targetUnits = toTile.units.filter(
       (u) => u.playerId !== unit.playerId,
     );
-    const damagePer = Math.floor(damage / targetUnits.length);
+    const targetFortress =
+      toTile.fortress?.playerId !== unit.playerId ? toTile.fortress : null;
+    const totalTargets = targetUnits.length + (targetFortress ? 1 : 0);
+    const damagePer = Math.floor(damage / totalTargets);
     targetUnits.forEach((u) => {
       u.health -= damagePer;
       if (u.health <= 0) {
         u.health = 0;
       }
     });
-
-    // TODO: attacking tiles
+    if (toTile.fortress && toTile.fortress.playerId !== unit.playerId) {
+      toTile.fortress.health -= damagePer;
+      if (toTile.fortress.health <= 0) {
+        toTile.fortress.health = 0;
+      }
+    }
   }
 }

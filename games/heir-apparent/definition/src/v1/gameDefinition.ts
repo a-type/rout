@@ -5,6 +5,7 @@ import {
   simpleError,
 } from '@long-game/game-definition';
 import {
+  applyCellEffect,
   applyValidPlacement,
   GameMap,
   generateRandomMap,
@@ -63,7 +64,7 @@ export const gameDefinition: GameDefinition<{
   GlobalState: GlobalState;
   PlayerState: PlayerState;
   TurnData: TurnData;
-  PublicTurnData: TurnData;
+  PublicTurnData: { empty: true };
   TurnError: TurnError;
   InitialTurnData: TurnData;
 }> = {
@@ -209,7 +210,17 @@ export const gameDefinition: GameDefinition<{
       }
     }
 
-    // TODO: process other tile effects
+    // process other tile effects
+    for (const tile of Object.values(currentMap)) {
+      applyCellEffect({ cell: tile, random, progress: globalState.progress });
+    }
+
+    // convert player workshop progress to points
+    for (const member of members) {
+      const workshopProgress = globalState.progress[member.id];
+      globalState.scores[member.id] += Math.floor(workshopProgress);
+      globalState.progress[member.id] -= Math.floor(workshopProgress);
+    }
 
     return {
       ...globalState,
@@ -218,9 +229,7 @@ export const gameDefinition: GameDefinition<{
   },
 
   getPublicTurn: ({ turn }) => {
-    // TODO: process full turn data into what players can see
-    // (i.e. what should you know about other players' turns?)
-    return turn;
+    return { ...turn, data: { empty: true } };
   },
 
   getStatus: ({ globalState, rounds }) => {
