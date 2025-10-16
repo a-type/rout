@@ -168,7 +168,7 @@ function ProductItemField() {
                 key={gameId}
                 onClick={() => arrayHelpers.remove(values.indexOf(gameId))}
               >
-                {games[gameId].title}
+                {games[gameId]?.title ?? 'INVALID GAME'}
                 <Icon name="x" />
               </Chip>
             ))}
@@ -183,7 +183,7 @@ function ProductItemField() {
                 .filter((gameId) => !values.includes(gameId))
                 .map((gameId) => (
                   <Select.Item key={gameId} value={gameId}>
-                    {games[gameId].title}
+                    {games[gameId]?.title ?? 'INVALID GAME'}
                   </Select.Item>
                 ))}
             </Select.Content>
