@@ -16,7 +16,7 @@ export const adminNotificationsRouter = new Hono<Env>().post(
   async (ctx) => {
     const { userId } = ctx.req.valid('param');
     const scheduler = await getNotificationScheduler(userId, ctx.env);
-    scheduler.add(userId, {
+    await scheduler.add(userId, {
       type: 'test',
       id: id('no'),
     });
