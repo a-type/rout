@@ -129,11 +129,18 @@ export function rectangleTraverser(
 export function lineTraverser(
   start: HexCoordinate,
   end: HexCoordinate,
+  nudge: 1 | -1 = 1,
 ): HexTraverser {
   const distance = coordinateDistance(start, end);
   // prevents irregular rounding on edges
-  const startNudged: HexCoordinate = [start[0] + 1e-6, start[1] + 1e-6];
-  const endNudged: HexCoordinate = [end[0] + 1e-6, end[1] + 1e-6];
+  const startNudged: HexCoordinate = [
+    start[0] + 1e-6 * nudge,
+    start[1] + 1e-6 * nudge,
+  ];
+  const endNudged: HexCoordinate = [
+    end[0] + 1e-6 * nudge,
+    end[1] + 1e-6 * nudge,
+  ];
   const step = 1 / Math.max(1, distance);
   return function* () {
     for (let i = 0; i <= distance; i++) {
@@ -277,4 +284,46 @@ export function pathfind(
   }
 
   return path.reverse();
+}
+
+export function hasLineOfSight(
+  start: HexCoordinate,
+  end: HexCoordinate,
+  obstacleTest: (coord: HexCoordinate) => boolean,
+): boolean {
+  let line = lineTraverser(start, end, 1);
+  let first = true;
+  for (const coord of line()) {
+    if (first) {
+      first = false;
+      continue;
+    }
+    if (!coord) {
+      continue;
+    }
+    if (serializeCoordinate(coord) === serializeCoordinate(end)) {
+      break;
+    }
+    if (obstacleTest(coord)) {
+      return false;
+    }
+  }
+  line = lineTraverser(start, end, -1);
+  first = true;
+  for (const coord of line()) {
+    if (first) {
+      first = false;
+      continue;
+    }
+    if (!coord) {
+      continue;
+    }
+    if (serializeCoordinate(coord) === serializeCoordinate(end)) {
+      break;
+    }
+    if (obstacleTest(coord)) {
+      return false;
+    }
+  }
+  return true;
 }

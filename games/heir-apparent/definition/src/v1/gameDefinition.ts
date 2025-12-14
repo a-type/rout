@@ -10,6 +10,7 @@ import {
   GameMap,
   generateRandomMap,
   getMapSize,
+  validatePlacement,
 } from './map.js';
 import {
   FortressPiece,
@@ -93,6 +94,23 @@ export const gameDefinition: GameDefinition<{
         }
       }
     }
+    if (turn.data.piecePlacement) {
+      const piece = playerState.pieceOptions.find(
+        (opt) => opt.id === turn.data.piecePlacement?.pieceId,
+      );
+      if (!piece) {
+        return simpleError('You do not have that piece available to place');
+      }
+      const placementError = validatePlacement({
+        map: playerState.tiles,
+        piece,
+        origin: turn.data.piecePlacement.origin,
+        playerId: turn.playerId,
+      });
+      if (placementError) {
+        return placementError;
+      }
+    }
   },
 
   getInitialTurn: () => ({
@@ -125,8 +143,8 @@ export const gameDefinition: GameDefinition<{
     return {
       mapSize: getMapSize(members.length),
       pieceOptions: generatePieceOptions(random, 0),
-      progress: Object.fromEntries(members.map((id) => [id, 0] as const)),
-      scores: Object.fromEntries(members.map((id) => [id, 0] as const)),
+      progress: Object.fromEntries(members.map(({ id }) => [id, 0] as const)),
+      scores: Object.fromEntries(members.map(({ id }) => [id, 0] as const)),
       tiles: generateRandomMap(
         members.map(({ id }) => id),
         random,

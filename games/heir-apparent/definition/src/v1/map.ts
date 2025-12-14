@@ -1,10 +1,17 @@
 import { PrefixedId } from '@long-game/common';
-import { GameRandom } from '@long-game/game-definition';
+import {
+  BaseTurnError,
+  GameRandom,
+  simpleError,
+} from '@long-game/game-definition';
 import {
   addCoordinates,
   collectTraversals,
   coord,
+  coordinateDistance,
   deserializeCoordinate,
+  getCell,
+  hasLineOfSight,
   hexagonTraverser,
   HexCoordinate,
   HexMap,
@@ -28,6 +35,8 @@ export interface GameMapTileData {
   terrain: TerrainTileData;
   fortress: FortressTileData | null;
   units: UnitData[];
+  /** True if this tile, as seen by the viewing player, is in FOW */
+  fogOfWar?: boolean;
 }
 
 export type GameMap = HexMap<GameMapTileData>;
@@ -139,12 +148,34 @@ export function validatePlacement({
   piece: FortressPiece;
   origin: HexCoordinate;
   playerId: PrefixedId<'u'>;
-}) {
-  // TODO: implement:
+}): BaseTurnError | void {
   // 1. no existing tiles in the way, unless those tiles are destroyed
   // 2. no mountain terrain in the way
   // 3. all tiles are on the map
   // 4. no enemy units in the way
+
+  for (const [sCoord, tile] of Object.entries(piece.tiles)) {
+    const tileCoord = deserializeCoordinate(sCoord);
+    const mapCell = map[serializeCoordinate(addCoordinates(origin, tileCoord))];
+    if (!mapCell) {
+      return simpleError('Piece extends beyond map boundaries');
+    }
+    if (mapCell.terrain.type === 'mountain') {
+      return simpleError('Cannot place piece on mountain terrain');
+    }
+    if (
+      mapCell.fortress &&
+      mapCell.fortress.destroyedRoundIndex === undefined
+    ) {
+      return simpleError('Cannot place piece on existing fortress tiles');
+    }
+    const enemyUnit = mapCell.units.find(
+      (u) => u.playerId !== playerId && u.diedRoundIndex === undefined,
+    );
+    if (enemyUnit) {
+      return simpleError('Cannot place piece on enemy units');
+    }
+  }
 }
 /**
  * Assumes you have already validated the placement
@@ -248,6 +279,90 @@ export function applyCellEffect({
       case 'deposit':
         cell.units.forEach(mineDeposit);
         break;
+    }
+  }
+}
+
+export function applyFogOfWar({
+  map,
+  playerId,
+}: {
+  map: GameMap;
+  playerId: PrefixedId<'u'>;
+}) {
+  // FOW rules:
+  // 1. friendly fortress tiles can always see everything within 4 spaces
+  // 2. any fortress tile can be seen from 4 spaces away by a unit
+  // 3. units see other units within 2 spaces
+  // 4. units besides cavalry in overgrowth are hidden from enemy units and fortresses, unless a friendly unit is on the same tile,
+  //    or any fortress is built on that tile
+  // 5. Players cannot see across mountains
+  // 6. Players cannot see across enemy fortress tiles
+
+  // iterate over the map, evaluate rules, and set fortress to null or remove enemy units
+  // based on visibility
+  let fortressVisible = false;
+  let enemyUnitsVisible = false;
+  for (const [serializedCoordinate, cell] of Object.entries(map)) {
+    const coordinate = deserializeCoordinate(serializedCoordinate);
+    // all rules can be evaluated by checking a 4-radius ring around each cell
+    traverseMap(
+      hexagonTraverser(
+        {
+          ...hexLayout,
+          origin: coordinate,
+        },
+        4,
+      ),
+      (neighborCoord) => {
+        const neighborCell = getCell(map, neighborCoord);
+        if (!neighborCell) {
+          return;
+        }
+        // check that line of sight is available to the checked cell
+        if (
+          !hasLineOfSight(neighborCoord, coordinate, (visited) => {
+            const visitedCell = getCell(map, visited);
+            return !!(
+              visitedCell?.terrain.type === 'mountain' ||
+              (visitedCell?.fortress &&
+                visitedCell.fortress.playerId !== playerId)
+            );
+          })
+        ) {
+          return;
+        }
+        const distance = coordinateDistance(coordinate, neighborCoord);
+        const hasFriendlyUnit = neighborCell.units.some(
+          (u) => u.playerId === playerId && u.diedRoundIndex === undefined,
+        );
+        if (neighborCell.fortress?.playerId === playerId || hasFriendlyUnit) {
+          fortressVisible = true;
+          enemyUnitsVisible = true;
+        }
+        if (distance <= 2 && hasFriendlyUnit) {
+          enemyUnitsVisible = true;
+        }
+      },
+    );
+    // reassert invisibility of units in overgrowth
+    if (cell.terrain.type === 'overgrowth') {
+      const friendlyUnitOnTile =
+        cell.units.some(
+          (u) => u.playerId === playerId && u.diedRoundIndex === undefined,
+        ) || !!cell.fortress;
+      if (!friendlyUnitOnTile) {
+        enemyUnitsVisible = false;
+      }
+    }
+
+    if (!fortressVisible) {
+      cell.fortress = null;
+      cell.fogOfWar = true;
+    }
+    if (!enemyUnitsVisible) {
+      cell.units = cell.units.filter((u) => u.playerId === playerId);
+      cell.fogOfWar = true;
     }
   }
 }

@@ -60,7 +60,9 @@ export function GameSessionRenderer({
         }
       >
         <PlayerThemeWrapper>
-          <GameSessionRendererInner hotseat={hotseat} />
+          <ErrorBoundary fallback={<div>Game failed to load</div>}>
+            <GameSessionRendererInner hotseat={hotseat} />
+          </ErrorBoundary>
         </PlayerThemeWrapper>
       </Suspense>
     </GameSuiteProvider>
@@ -147,7 +149,9 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                 ) : (
                   <>
                     {hotseat && <HotseatBanner />}
-                    <Renderer />
+                    <ErrorBoundary>
+                      <Renderer />
+                    </ErrorBoundary>
                   </>
                 )}
               </Suspense>

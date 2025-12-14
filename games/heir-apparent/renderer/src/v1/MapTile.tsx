@@ -1,20 +1,20 @@
 import {
   FortressPiece,
+  GameMapTileData,
   isFortressPiece,
   isUnitData,
-  TileData,
   TurnData,
   UnitData,
 } from '@long-game/game-heir-apparent-definition/v1';
 import { TokenSpace } from '@long-game/game-ui';
 import { HexCoordinate, serializeCoordinate } from '@long-game/hex-map';
-import { DomHexTile } from '@long-game/hex-map/react';
+import { DomHexTile, DomHexTileShape } from '@long-game/hex-map/react';
 import { hooks } from './gameClient.js';
 import { tileColors } from './tileGraphics.js';
 
 export interface MapTileProps {
   coordinate: HexCoordinate;
-  tile: TileData;
+  tile: GameMapTileData;
 }
 
 export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
@@ -47,7 +47,7 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
       fill="var(--color-primary-light)"
       style={
         {
-          '--dyn-primary-source': tileColors[tile.type],
+          '--dyn-primary-source': tileColors[tile.terrain.type],
         } as any
       }
       className="theme"
@@ -82,7 +82,13 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
           }
         }}
       >
-        {tile.type[0]}
+        {tile.terrain.type[0]}
+        {tile.fortress && (
+          <DomHexTileShape
+            coordinate={coordinate}
+            className="fill-gray center"
+          />
+        )}
       </TokenSpace>
     </DomHexTile>
   );
