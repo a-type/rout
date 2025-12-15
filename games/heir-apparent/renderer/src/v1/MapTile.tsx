@@ -85,16 +85,21 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
           coordinate={coordinate}
           stroke="var(--color-gray-dark)"
           fill="var(--color-primary-light)"
-          className="center"
+          className="center stroke-gray-dark fill-primary-light"
         />
         <SvgHexTile.Content coordinate={coordinate} className="center">
-          {tile.terrain.type[0]}
+          <text>{tile.terrain.type[0]}</text>
         </SvgHexTile.Content>
         {tile.fortress && (
-          <SvgHexTile.Shape
-            coordinate={coordinate}
-            className="fill-gray center"
-          />
+          <>
+            <SvgHexTile.Shape
+              coordinate={coordinate}
+              className="fill-gray center"
+            />
+            <SvgHexTile.Content coordinate={coordinate} className="center">
+              <text>{tile.fortress.type[0]}</text>
+            </SvgHexTile.Content>
+          </>
         )}
       </SvgHexTile.Root>
     </TokenSpace>
