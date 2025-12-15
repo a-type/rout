@@ -148,9 +148,9 @@ class BoundsRegistry {
     }
   };
 
-  measureAll = (tag: string) => {
+  measureAll = (tag?: string) => {
     this.#entries.forEach((entry) => {
-      if (entry.visible && entry.tags[tag]) {
+      if (entry.visible && (!tag || entry.tags[tag])) {
         this.#measureElement(entry);
       }
     });

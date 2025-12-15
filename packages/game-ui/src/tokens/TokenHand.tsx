@@ -110,7 +110,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
   );
   const previewPosition = useFollowPointer({ x: 0, y: -80 });
   const transform = useMotionTemplate`translate3d(-50%, -100%, 0) translate3d(${previewPosition.x}px, ${previewPosition.y}px, 0)`;
-  const overlayEl = useDndStore((state) => state.overlayElement);
+  const overlayEl = useDndStore((state) => state.domOverlayElement);
 
   if (!candidate || !isToken(candidate)) {
     return null;

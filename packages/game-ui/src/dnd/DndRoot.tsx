@@ -10,7 +10,8 @@ export interface DndRootProps extends HTMLProps<HTMLDivElement> {
 }
 
 export function DndRoot({ children, debug, ...rest }: DndRootProps) {
-  const overlayRef = useDndStore((state) => state.overlayRef);
+  const overlayRef = useDndStore((state) => state.domOverlayRef);
+  const svgOverlayRef = useDndStore((state) => state.svgOverlayRef);
   useMonitorGlobalGesture();
   useEffect(() => boundsRegistry.setup(), []);
 
@@ -21,6 +22,18 @@ export function DndRoot({ children, debug, ...rest }: DndRootProps) {
         ref={overlayRef}
         className="fixed inset-0 z-50 pointer-events-none overflow-hidden"
       />
+      <svg
+        data-role="dnd-svg-overlay"
+        className="fixed inset-0 z-50 pointer-events-none overflow-hidden"
+        ref={svgOverlayRef}
+      >
+        <defs>
+          <clipPath id="dnd-clip-path">
+            <rect width="100%" height="100%" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#dnd-clip-path)" />
+      </svg>
       {children}
       {debug && <DebugView />}
       <DndAlly />

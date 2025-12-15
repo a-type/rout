@@ -1,5 +1,5 @@
-import { SlotDiv } from '@a-type/ui';
-import { createContext, HTMLProps, useContext, useEffect } from 'react';
+import { Slot } from '@a-type/ui';
+import { createContext, HTMLProps, Ref, useContext, useEffect } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef.js';
 import { useBindBounds } from './bounds.js';
 import { droppableDataRegistry } from './dataRegistry.js';
@@ -13,7 +13,7 @@ import {
 
 export type DroppableProps<T = any> = Omit<
   HTMLProps<HTMLDivElement>,
-  'onDrop' | 'accept'
+  'onDrop' | 'accept' | 'ref'
 > & {
   id: string;
   onDrop?: OnDropCb<T>;
@@ -27,6 +27,8 @@ export type DroppableProps<T = any> = Omit<
   /** Hides this droppable from any nested draggables */
   noParenting?: boolean;
   priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
+  svg?: boolean;
+  ref?: Ref<any>;
 };
 
 export function Droppable<T = any>({
@@ -43,6 +45,7 @@ export function Droppable<T = any>({
   data,
   noParenting,
   priority,
+  svg,
   ...rest
 }: DroppableProps<T>) {
   const { isAcceptedOver, isRejectedOver } = useDroppable({
@@ -55,30 +58,30 @@ export function Droppable<T = any>({
     tags,
   });
   const bindBounds = useBindBounds(id, priority);
-  const finalRef = useMergedRef<HTMLDivElement>(bindBounds, userRef);
+  const finalRef = useMergedRef<any>(bindBounds, userRef);
   useEffect(() => droppableDataRegistry.register(id, data), [id, data]);
 
+  const El = asChild ? Slot : svg ? 'g' : 'div';
+
   const content = disabled ? (
-    <SlotDiv
+    <El
       data-role="droppable"
       data-droppable-disabled
       ref={userRef}
-      asChild={asChild}
-      {...rest}
+      {...(rest as any)}
     >
       {children}
-    </SlotDiv>
+    </El>
   ) : (
-    <SlotDiv
+    <El
       data-role="droppable"
       ref={finalRef}
       data-over-accepted={isAcceptedOver}
       data-over-rejected={isRejectedOver}
-      asChild={asChild}
-      {...rest}
+      {...(rest as any)}
     >
       {children}
-    </SlotDiv>
+    </El>
   );
 
   if (noParenting) {

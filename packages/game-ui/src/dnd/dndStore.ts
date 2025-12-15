@@ -12,8 +12,11 @@ export type DraggableData<T = any> = {
 };
 
 export type DndStoreValue = {
-  overlayElement: HTMLElement | null;
-  overlayRef: (element: HTMLElement | null) => void;
+  domOverlayElement: HTMLElement | null;
+  domOverlayRef: (element: HTMLElement | null) => void;
+  svgOverlayElement: SVGSVGElement | null;
+  svgOverlayRef: (element: SVGSVGElement | null) => void;
+
   candidate: string | null;
   dragging: string | null;
   setCandidate: (id: string) => void;
@@ -28,14 +31,18 @@ export type DndStoreValue = {
 export const useDndStore = create<DndStoreValue>()(
   subscribeWithSelector(
     immer((set, get) => ({
-      overlayElement: null,
+      domOverlayElement: null,
+      svgOverlayElement: null,
       candidate: null,
       dragging: null,
       dragGesture: { x: 0, y: 0, xOffset: 0, yOffset: 0 },
       overRegion: null,
 
-      overlayRef: (element: HTMLElement | null) => {
-        set({ overlayElement: element });
+      domOverlayRef: (element: HTMLElement | null) => {
+        set({ domOverlayElement: element });
+      },
+      svgOverlayRef: (element: SVGSVGElement | null) => {
+        set({ svgOverlayElement: element });
       },
       setCandidate: (id: string | null) => {
         const current = get().candidate;

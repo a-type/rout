@@ -12,6 +12,73 @@ export interface SpatialChatThreadProps {
   onOpenChange?: (open: boolean) => void;
   sceneId: string;
   position?: { x: number; y: number };
+  svg?: boolean;
+}
+
+function SvgTrigger({
+  className,
+  latestMessage,
+}: {
+  className?: string;
+  latestMessage?: GameSessionChatMessage;
+}) {
+  if (latestMessage) {
+    return (
+      <Box
+        layout="center center"
+        className={clsx(
+          'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
+          className,
+        )}
+        asChild
+      >
+        <g>
+          <Box
+            surface="accent"
+            border
+            className={clsx(
+              /* Invisible outer area to increase touch target size */
+              'w-8px h-8px',
+            )}
+            asChild
+          >
+            <g />
+          </Box>
+        </g>
+      </Box>
+    );
+  }
+  return <g className={className} />;
+}
+
+function DomTrigger({
+  className,
+  latestMessage,
+}: {
+  className?: string;
+  latestMessage?: GameSessionChatMessage;
+}) {
+  if (latestMessage) {
+    return (
+      <Box
+        layout="center center"
+        className={clsx(
+          'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
+          className,
+        )}
+      >
+        <Box
+          surface="accent"
+          border
+          className={clsx(
+            /* Invisible outer area to increase touch target size */
+            'w-8px h-8px',
+          )}
+        />
+      </Box>
+    );
+  }
+  return <div className={className} />;
 }
 
 export const SpatialChatThread = withGame<SpatialChatThreadProps>(
@@ -22,31 +89,17 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
     onOpenChange,
     sceneId,
     position,
+    svg,
   }) {
     const latestMessage = chats[chats.length - 1];
 
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <Popover.Trigger asChild>
-          {latestMessage ? (
-            <Box
-              layout="center center"
-              className={clsx(
-                'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
-                className,
-              )}
-            >
-              <Box
-                surface="accent"
-                border
-                className={clsx(
-                  /* Invisible outer area to increase touch target size */
-                  'w-8px h-8px',
-                )}
-              />
-            </Box>
+          {svg ? (
+            <SvgTrigger className={className} latestMessage={latestMessage} />
           ) : (
-            <div className={className} />
+            <DomTrigger className={className} latestMessage={latestMessage} />
           )}
         </Popover.Trigger>
         <Suspense>

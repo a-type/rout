@@ -1,4 +1,4 @@
-import { Box, clsx } from '@a-type/ui';
+import { clsx, Popover } from '@a-type/ui';
 import { useMemo, useState } from 'react';
 import { droppableDataRegistry } from '../dnd/dataRegistry.js';
 import { DraggableData } from '../dnd/dndStore.js';
@@ -117,64 +117,45 @@ export function TokenSpace<T = any>({
   );
 
   return (
-    <Droppable<TokenDragData>
-      id={id}
-      className={clsx(
-        'relative',
-        '[&[data-over-accepted=true]]:(scale-102)',
-        'transition-transform',
-        className,
-      )}
-      onDrop={(droppable, gesture) =>
-        onDrop?.(droppable.data as TokenDragData<T>, gesture)
-      }
-      accept={wrappedAccept}
-      onReject={wrappedOnReject}
-      onOver={handleOver}
-      tags={tokenSpaceTags}
-      data={data}
-      {...rest}
-    >
-      {children}
-      {overError && (
-        <TokenSpaceValidationMessage
-          message={overError}
-          className={validationMessageClassName}
-        />
-      )}
-    </Droppable>
+    <Popover open={!!overError}>
+      <Popover.Anchor asChild>
+        <Droppable<TokenDragData>
+          id={id}
+          className={clsx(
+            'relative',
+            '[&[data-over-accepted=true]]:(scale-102)',
+            'transition-transform',
+            className,
+          )}
+          onDrop={(droppable, gesture) =>
+            onDrop?.(droppable.data as TokenDragData<T>, gesture)
+          }
+          accept={wrappedAccept}
+          onReject={wrappedOnReject}
+          onOver={handleOver}
+          tags={tokenSpaceTags}
+          data={data}
+          {...rest}
+        >
+          {children}
+        </Droppable>
+      </Popover.Anchor>
+      <Popover.Content
+        side="top"
+        align="center"
+        sideOffset={8}
+        className="theme-attention bg-attention-wash"
+      >
+        <Popover.Arrow />
+        {overError}
+      </Popover.Content>
+    </Popover>
   );
 }
 
 export interface TokenSpaceData {
   type?: string;
   isTokenSpace: boolean;
-}
-
-function TokenSpaceValidationMessage({
-  message,
-  className,
-}: {
-  message: string;
-  className?: string;
-}) {
-  if (!message) return null;
-  return (
-    <div
-      className={clsx(
-        'absolute z-100000 bottom-100% left-1/2 translate-[-50%,0.5rem] w-600px flex justify-center',
-        className,
-      )}
-    >
-      <Box
-        surface="attention"
-        p="lg"
-        className="text-wrap shadow-sm animate-pop-up animate-duration-200"
-      >
-        {message}
-      </Box>
-    </div>
-  );
 }
 
 export function useMaybeParentTokenSpace() {

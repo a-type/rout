@@ -11,6 +11,7 @@ export interface ChatSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
   asChild?: boolean;
   disabled?: boolean;
+  svg?: boolean;
 }
 
 const droppableTags = ['spatial-chat-surface'];
@@ -22,6 +23,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
   gameSuite,
   asChild,
   disabled,
+  svg,
   ...rest
 }) {
   const chats = gameSuite.getSceneChat(sceneId);
@@ -41,6 +43,13 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
   );
 
   if (disabled) {
+    if (svg) {
+      return (
+        <g className={className} {...(rest as any)}>
+          {children}
+        </g>
+      );
+    }
     return (
       <div className={className} {...rest}>
         {children}
@@ -61,6 +70,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       )}
       asChild={asChild}
       tags={droppableTags}
+      svg={svg}
     >
       {children}
       <SpatialChatThread
@@ -69,6 +79,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
         open={open}
         onOpenChange={setOpen}
         sceneId={sceneId}
+        svg={svg}
       />
     </Droppable>
   );

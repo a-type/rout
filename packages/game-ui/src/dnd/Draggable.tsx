@@ -3,6 +3,7 @@ import {
   AnimatePresence,
   HTMLMotionProps,
   motion,
+  MotionProps,
   useMotionTemplate,
   useTransform,
 } from 'motion/react';
@@ -41,6 +42,7 @@ export interface DraggableProps extends HTMLMotionProps<'div'> {
   movedBehavior?: 'remove' | 'fade';
   tags?: string[];
   dropOnTag?: string;
+  svg?: boolean;
 }
 
 function DraggableRoot({
@@ -52,22 +54,16 @@ function DraggableRoot({
   handleProps,
   tags,
   dropOnTag = TAGS.DROPPABLE,
+  svg = false,
   ...rest
 }: DraggableProps) {
-  const isDragged = useDndStore((state) => state.dragging === id);
-  const isCandidate = useDndStore((state) => state.candidate === id);
-
-  useEffect(() => draggableDataRegistry.register(id, data), [id, data]);
-
-  const ctxValue = useMemo(
-    () => ({
-      id,
-      data,
-      disabled,
-      dropOnTag,
-    }),
-    [id, disabled, dropOnTag],
-  );
+  const { isDragged, isCandidate, ctxValue } = useDraggableRoot({
+    id,
+    data,
+    disabled,
+    dropOnTag,
+    svg,
+  });
 
   return (
     <DraggableContext.Provider value={ctxValue}>
@@ -86,10 +82,43 @@ function DraggableRoot({
   );
 }
 
+function useDraggableRoot({
+  id,
+  data,
+  disabled,
+  dropOnTag,
+  svg,
+}: {
+  id: string;
+  data?: any;
+  disabled: boolean;
+  dropOnTag: string;
+  svg: boolean;
+}) {
+  const isDragged = useDndStore((state) => state.dragging === id);
+  const isCandidate = useDndStore((state) => state.candidate === id);
+
+  useEffect(() => draggableDataRegistry.register(id, data), [id, data]);
+
+  const ctxValue = useMemo(
+    () => ({
+      id,
+      data,
+      disabled,
+      dropOnTag,
+      svg,
+    }),
+    [id, disabled, dropOnTag, svg],
+  );
+
+  return { isDragged, isCandidate, ctxValue };
+}
+
 export interface DraggableContextValue {
   id: string;
   disabled: boolean;
   dropOnTag: string;
+  svg: boolean;
 }
 
 const DraggableContext = createContext<DraggableContextValue | null>(null);
@@ -101,6 +130,16 @@ export function useDraggableContext() {
     );
   }
   return context;
+}
+
+function DragMotion(
+  props: MotionProps & { ref?: Ref<any>; className?: string },
+) {
+  const { svg } = useDraggableContext();
+  if (svg) {
+    return <motion.g {...props} />;
+  }
+  return <motion.div {...props} />;
 }
 
 export interface DraggableHandleProps
@@ -122,7 +161,7 @@ function DraggableHandle({
   onTap,
   ...rest
 }: DraggableHandleProps) {
-  const { id, dropOnTag } = useDraggableContext();
+  const { id, dropOnTag, svg } = useDraggableContext();
   const { ref, isCandidate, isDragging, disabled } = useDragGesture({
     activationConstraint,
     allowStartFromDragIn,
@@ -136,7 +175,7 @@ function DraggableHandle({
   useTagBounds(id, allowDragInTags, !allowStartFromDragIn);
 
   return (
-    <motion.div
+    <DragMotion
       style={{
         touchAction: disabled ? 'initial' : 'none',
         pointerEvents: isCandidate ? 'none' : 'auto',
@@ -144,10 +183,10 @@ function DraggableHandle({
       onContextMenuCapture={
         disabled
           ? undefined
-          : (e) => {
+          : (((e: Event) => {
               e.preventDefault();
               e.stopPropagation();
-            }
+            }) as any)
       }
       ref={finalRef}
       role="button"
@@ -167,7 +206,7 @@ function DraggableHandle({
       {...rest}
     >
       {children}
-    </motion.div>
+    </DragMotion>
   );
 }
 
@@ -229,7 +268,10 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
   tags = defaultTags,
   ...rest
 }: DndOverlayPortalProps) {
-  const overlayEl = useDndStore((state) => state.overlayElement);
+  const { svg } = useDraggableContext();
+  const overlayEl = useDndStore((state) =>
+    svg ? state.svgOverlayElement : state.domOverlayElement,
+  );
 
   const isPortaling = enabled && !!overlayEl;
 
@@ -253,7 +295,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           </DraggedRoot>,
           overlayEl,
         )}
-      <motion.div
+      <DragMotion
         layoutId={isPortaling ? undefined : id}
         key={`${id}-${isPortaling}`}
         transition={flipTransition}
@@ -273,7 +315,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
         {...rest}
       >
         {children}
-      </motion.div>
+      </DragMotion>
     </>
   );
 });
@@ -319,7 +361,7 @@ const DraggedRoot = memo(function DraggedRoot({
         {...rest}
       >
         <AnimatePresence>
-          <motion.div
+          <DragMotion
             layoutId={dragged.id}
             transition={flipTransition}
             data-draggable-preview
@@ -327,7 +369,7 @@ const DraggedRoot = memo(function DraggedRoot({
             data-disabled={dragged.disabled}
           >
             {children}
-          </motion.div>
+          </DragMotion>
         </AnimatePresence>
       </ContainerImpl>
     </DraggedRootContext.Provider>
@@ -356,7 +398,7 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
 }) => {
   const transform = useCenteredDragTransform(gesture);
   return (
-    <motion.div
+    <DragMotion
       style={{
         position: 'absolute',
         transform,
@@ -366,7 +408,7 @@ export const DefaultDraggedContainer: DraggedContainerComponent = ({
       className={className}
     >
       {children}
-    </motion.div>
+    </DragMotion>
   );
 };
 

@@ -1,3 +1,4 @@
+export { boundsRegistry } from './bounds.js';
 export * from './dndEvents.js';
 export { DndRoot } from './DndRoot.js';
 export * from './Draggable.js';
