@@ -7,7 +7,7 @@ import {
 } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
-import type { GameSessionInvitation, UserStore } from '@long-game/service-db';
+import { GameSessionInvitation } from '@long-game/kysely';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
@@ -16,6 +16,7 @@ import { getSocketToken } from '../auth/socketTokens.js';
 import { Env } from '../config/ctx.js';
 import { GameSession } from '../durableObjects/gameSession/GameSession.js';
 import { SessionWithPrefixedIds } from '../middleware/index.js';
+import type { UserStore } from '../stores/UserStore.js';
 
 const openGameSessionMiddleware = createMiddleware<{
   Variables: {

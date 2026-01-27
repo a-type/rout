@@ -22,7 +22,8 @@ export const TurnError = withGame<TurnErrorProps<BaseTurnError>>(
           {err && renderError(err)}
           {showReset && (
             <Button
-              color="ghostDestructive"
+              color="attention"
+              emphasis="ghost"
               onClick={() => suite.prepareTurn(null)}
               className="ml-auto"
             >

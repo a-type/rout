@@ -1,12 +1,9 @@
-import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
-import { InjectManifest } from '@birchill/inject-manifest-plugin';
-import {
-  ModuleFederationPlugin,
-  createModuleFederationConfig,
-} from '@module-federation/enhanced/rspack';
+// import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
+import { InjectManifest } from '@aaroon/workbox-rspack-plugin';
+import { createModuleFederationConfig } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import path from 'node:path';
+// import path from 'node:path';
 
 const federationConfig = createModuleFederationConfig({
   name: 'long-game',
@@ -24,7 +21,7 @@ const federationConfig = createModuleFederationConfig({
     'react-markdown': {},
     '@a-type/ui': {
       singleton: true,
-      requiredVersion: '>2.0.0',
+      requiredVersion: '>5.0.0',
     },
     '@long-game/game-client': {
       singleton: true,
@@ -47,33 +44,33 @@ const unoStats = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, envMode }) => ({
   plugins: [
-    pluginUnoCss({
-      enableIncludeCommentCheck: (file) => {
-        return file.includes(path.join('@a-type', 'ui', 'dist'));
-      },
-      // include tagging on monorepo dependencies is not set up
-      // || file.includes('@long-game'),
-      enableCacheExtractedCSS: (file) =>
-        file.includes('@long-game') ? false : file.includes('node_modules'),
+    // pluginUnoCss({
+    //   enableIncludeCommentCheck: (file) => {
+    //     return file.includes(path.join('@a-type', 'ui', 'dist'));
+    //   },
+    //   // include tagging on monorepo dependencies is not set up
+    //   // || file.includes('@long-game'),
+    //   enableCacheExtractedCSS: (file) =>
+    //     file.includes('@long-game') ? false : file.includes('node_modules'),
 
-      events: {
-        onCssGenerated: () => {
-          unoStats.rebuilds++;
-        },
-        onCssInvalidated: () => {
-          unoStats.invalidations++;
-        },
-        onCssResolved: () => {
-          unoStats.deliveries++;
-          console.log(`UnoCSS plugin stats:`);
-          console.log(`  Invalidations: ${unoStats.invalidations}`);
-          console.log(`  Rebuilds: ${unoStats.rebuilds}`);
-          console.log(`  Deliveries: ${unoStats.deliveries}`);
-        },
-      },
-    }),
+    //   events: {
+    //     onCssGenerated: () => {
+    //       unoStats.rebuilds++;
+    //     },
+    //     onCssInvalidated: () => {
+    //       unoStats.invalidations++;
+    //     },
+    //     onCssResolved: () => {
+    //       unoStats.deliveries++;
+    //       console.log(`UnoCSS plugin stats:`);
+    //       console.log(`  Invalidations: ${unoStats.invalidations}`);
+    //       console.log(`  Rebuilds: ${unoStats.rebuilds}`);
+    //       console.log(`  Deliveries: ${unoStats.deliveries}`);
+    //     },
+    //   },
+    // }),
     pluginReact(),
   ],
   resolve: {
@@ -84,26 +81,23 @@ export default defineConfig(({ command }) => ({
   tools: {
     rspack: {
       plugins: [
-        new InjectManifest({
-          swDest: 'sw.js',
-        }),
-        new ModuleFederationPlugin(federationConfig),
-      ],
-      resolve: {
-        conditionNames:
-          command === 'build'
-            ? ['production', 'import', 'module', 'browser', 'default']
-            : ['development', 'import', 'module', 'browser', 'default'],
-      },
+        envMode === 'production'
+          ? new InjectManifest({
+              swSrc: './src/service-worker.ts',
+              injectionPoint: 'self.__WB_MANIFEST',
+              swDest: 'service-worker.ts',
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
+            })
+          : undefined,
+        // new ModuleFederationPlugin(federationConfig),
+      ].filter(Boolean),
+      // resolve: {
+      //   conditionNames:
+      //     command === 'build'
+      //       ? ['production', 'import', 'module', 'browser', 'default']
+      //       : ['development', 'import', 'module', 'browser', 'default'],
+      // },
       output: {
-        chunkFilename: (assetInfo) => {
-          // The service worker entrypoint needs to be fixed (i.e. not have a hash
-          // appended).
-          if (assetInfo.chunk?.name === 'sw') {
-            return '[name].js';
-          }
-          return '[name].[contenthash].js';
-        },
         uniqueName: 'long-game',
       },
       optimization: {
@@ -128,5 +122,28 @@ export default defineConfig(({ command }) => ({
       host: 'localhost',
     },
     progressBar: true,
+  },
+  environments: {
+    web: {
+      source: {
+        entry: {
+          index: './src/main.tsx',
+        },
+      },
+      output: {
+        target: 'web' as const,
+        distPath: {
+          root: 'dist',
+        },
+      },
+    },
+    node: {
+      output: {
+        target: 'node' as const,
+        distPath: {
+          root: 'dist/server',
+        },
+      },
+    },
   },
 }));

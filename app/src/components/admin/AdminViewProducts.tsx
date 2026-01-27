@@ -29,12 +29,10 @@ function AdminProductCard({ product }: { product: GameProduct }) {
           />
         ))}
       </Card.Image>
-      <Card.Main asChild>
-        <Link to={`?productId=${product.id}`}>
-          <Card.Title>{product.name}</Card.Title>
-          <Card.Content>${product.priceCents / 100}</Card.Content>
-          <Card.Content>{product.gameProductItems.length} games</Card.Content>
-        </Link>
+      <Card.Main render={<Link to={`?productId=${product.id}`} />}>
+        <Card.Title>{product.name}</Card.Title>
+        <Card.Content>${product.priceCents / 100}</Card.Content>
+        <Card.Content>{product.gameProductItems.length} games</Card.Content>
       </Card.Main>
     </Card>
   );

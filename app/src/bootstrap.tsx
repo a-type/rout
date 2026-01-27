@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.js';
-import './services/federation.js';
+// import './services/federation.js';
 
-import 'uno.css';
+// import 'uno.css';
 import './main.css';
 import { attachToPwaEvents } from './pwaEvents.js';
 import { registerServiceWorker } from './swRegister.js';

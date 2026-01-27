@@ -19,7 +19,7 @@ export const friendInviteNotification: NotificationConfig<FriendInviteNotificati
     title() {
       return `New friend invite!`;
     },
-    link(data) {
+    link(_data) {
       return '/friends';
     },
   };

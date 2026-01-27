@@ -174,14 +174,16 @@ export function Choices() {
   return (
     <div className="mb-4">
       <Dialog>
-        <Dialog.Trigger asChild>
-          <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded">
-            {selectedOption ? (
-              <Choice choice={selectedOption} />
-            ) : (
-              <span>Choose a boon!</span>
-            )}
-          </Button>
+        <Dialog.Trigger
+          render={
+            <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded" />
+          }
+        >
+          {selectedOption ? (
+            <Choice choice={selectedOption} />
+          ) : (
+            <span>Choose a boon!</span>
+          )}
         </Dialog.Trigger>
         <Dialog.Content className="bg-white p-4 rounded shadow-lg max-w-xl">
           <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
@@ -192,20 +194,23 @@ export function Choices() {
             <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
               {options.map((choice) => {
                 return (
-                  <Dialog.Close key={choice.id} asChild>
-                    <Button
-                      onClick={() => {
-                        setSelection(choice.id);
-                      }}
-                      className={clsx(
-                        'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
-                        selection === choice.id
-                          ? 'outline outline-4 outline-primary'
-                          : '',
-                      )}
-                    >
-                      <Choice choice={choice} />
-                    </Button>
+                  <Dialog.Close
+                    key={choice.id}
+                    render={
+                      <Button
+                        onClick={() => {
+                          setSelection(choice.id);
+                        }}
+                        className={clsx(
+                          'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
+                          selection === choice.id
+                            ? 'outline outline-4 outline-primary'
+                            : '',
+                        )}
+                      />
+                    }
+                  >
+                    <Choice choice={choice} />
                   </Dialog.Close>
                 );
               })}
@@ -239,17 +244,19 @@ export function LevelupChoices({ id }: { id: string }) {
     <div className="my-4 flex flex-col gap-4 items-start">
       {optionsGroups.map((options, idx) => (
         <Dialog key={idx}>
-          <Dialog.Trigger asChild>
-            <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded">
-              {selection[idx] ? (
-                <Choice
-                  choice={options.find((c) => c.id === selection[idx])!}
-                  id={id}
-                />
-              ) : (
-                <span>Choose a boon!</span>
-              )}
-            </Button>
+          <Dialog.Trigger
+            render={
+              <Button className="bg-white hover:bg-gray-wash px-4 py-2 rounded" />
+            }
+          >
+            {selection[idx] ? (
+              <Choice
+                choice={options.find((c) => c.id === selection[idx])!}
+                id={id}
+              />
+            ) : (
+              <span>Choose a boon!</span>
+            )}
           </Dialog.Trigger>
           <Dialog.Content className="bg-white p-4 rounded shadow-lg max-w-xl">
             <Dialog.Title className="mb-0">Choose a boon</Dialog.Title>
@@ -260,29 +267,32 @@ export function LevelupChoices({ id }: { id: string }) {
               <div className="flex flex-col gap-4 flex-wrap items-start mt-4">
                 {options.map((choice) => {
                   return (
-                    <Dialog.Close key={choice.id} asChild>
-                      <Button
-                        onClick={() => {
-                          setSelection((v) =>
-                            // update choice with index
-                            v[idx] === choice.id
-                              ? v.filter((c) => c !== choice.id)
-                              : [
-                                  ...v.slice(0, idx),
-                                  choice.id,
-                                  ...v.slice(idx + 1),
-                                ],
-                          );
-                        }}
-                        className={clsx(
-                          'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
-                          selection[idx] === choice.id
-                            ? 'outline outline-4 outline-primary'
-                            : '',
-                        )}
-                      >
-                        <Choice choice={choice} id={id} />
-                      </Button>
+                    <Dialog.Close
+                      key={choice.id}
+                      render={
+                        <Button
+                          onClick={() => {
+                            setSelection((v) =>
+                              // update choice with index
+                              v[idx] === choice.id
+                                ? v.filter((c) => c !== choice.id)
+                                : [
+                                    ...v.slice(0, idx),
+                                    choice.id,
+                                    ...v.slice(idx + 1),
+                                  ],
+                            );
+                          }}
+                          className={clsx(
+                            'flex flex-row gap-2 items-center justify-between bg-gray-wash px-2 py-4 rounded border-none',
+                            selection[idx] === choice.id
+                              ? 'outline outline-4 outline-primary'
+                              : '',
+                          )}
+                        />
+                      }
+                    >
+                      <Choice choice={choice} id={id} />
                     </Dialog.Close>
                   );
                 })}

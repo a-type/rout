@@ -62,7 +62,8 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       tags: prev.tags.filter((t) => t !== tag),
     }));
   };
-  const addTagFilter = (tag: string) => {
+  const addTagFilter = (tag: string | null) => {
+    if (!tag) return;
     setFilters((prev) => ({
       ...prev,
       tags: [...prev.tags, tag],
@@ -113,6 +114,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
         <Button
           size="small"
           color="accent"
+          emphasis="primary"
           toggled={filters.owned}
           onClick={toggleOwnedFilter}
         >
@@ -123,6 +125,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
             key={tag}
             size="small"
             color="accent"
+            emphasis="primary"
             className="cursor-pointer"
             onClick={() => {
               removeTagFilter(tag);
@@ -133,11 +136,9 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
           </Button>
         ))}
         <Select value="" onValueChange={addTagFilter}>
-          <Select.Trigger size="small" asChild>
-            <Chip>
-              <Icon name="plus" />
-              <Select.Value placeholder="Tag" />
-            </Chip>
+          <Select.Trigger size="small" render={<Chip />}>
+            <Icon name="plus" />
+            <Select.Value placeholder="Tag">{(tag) => tag}</Select.Value>
           </Select.Trigger>
           <Select.Content>
             {Array.from(allTags)
@@ -167,7 +168,11 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
             <Box d="col" items="center" gap>
               No games owned by a player match these filters.
               {filteredGamesIncludingUnowned.length ? (
-                <Button size="small" color="ghost" onClick={toggleOwnedFilter}>
+                <Button
+                  size="small"
+                  emphasis="ghost"
+                  onClick={toggleOwnedFilter}
+                >
                   But there are {filteredGamesIncludingUnowned.length} matching
                   games on the store <Icon name="arrowRight" />
                 </Button>
@@ -207,9 +212,7 @@ const GamePickerItem = withGame<{
         selected && 'ring ring-inset ring-accent ring-6',
       )}
     >
-      <Card.Image asChild>
-        <GameIcon gameId={gameId} />
-      </Card.Image>
+      <Card.Image render={<GameIcon gameId={gameId} />} />
       <GameDetailsDialog gameId={gameId}>
         <Card.Main nonInteractive={false}>
           <Card.Title className="text-sm md:text-md">
@@ -233,6 +236,7 @@ const GamePickerItem = withGame<{
           <Button
             className="w-full justify-center"
             color="accent"
+            emphasis="primary"
             onClick={() => openQuickBuy(gameId)}
           >
             <Icon name="cart" />
@@ -242,7 +246,7 @@ const GamePickerItem = withGame<{
         {owned && isGameLeader && (
           <Button
             className="w-full justify-center"
-            color="primary"
+            emphasis="primary"
             onClick={() => gameSuite.voteForGame(gameId)}
             disabled={selected}
           >
@@ -253,7 +257,7 @@ const GamePickerItem = withGame<{
         {owned && !isGameLeader && (
           <Button
             className="w-full justify-center"
-            color="primary"
+            emphasis="primary"
             onClick={() => {
               if (votedForThisGame) {
                 gameSuite.removeVoteForGame(gameId);

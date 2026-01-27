@@ -51,7 +51,7 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
             <span>Online</span>
           </Chip>
         ) : (
-          <Chip color="neutral" className="text-sm color-gray-dark">
+          <Chip color="gray" className="text-sm color-gray-dark">
             <Icon name="x" size={16} />
             <span>Offline</span>
           </Chip>
@@ -69,7 +69,7 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
           </Chip>
         )}
         {!hasPlayed && !isPendingTurn && (
-          <Chip color="neutral" className="text-sm color-black">
+          <Chip color="gray" className="text-sm color-black">
             <Icon name="x" size={16} />
             <span>Not playing this round</span>
           </Chip>
@@ -77,14 +77,14 @@ export const PlayerInfo = withGame<PlayerInfoProps>(function PlayerInfo({
         {!!playerInfo &&
           !isMe &&
           (isFriend ? (
-            <Chip color="neutral" className="text-sm">
+            <Chip color="gray" className="text-sm">
               <Icon name="smile" size={16} />
               <span>Friend</span>
             </Chip>
           ) : (
             <Button
               size="small"
-              color="primary"
+              emphasis="primary"
               className="text-sm"
               onClick={() => inviteMutation.mutateAsync({ userId: playerId })}
               disabled={inviteSent}

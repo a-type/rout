@@ -63,22 +63,22 @@ export function TokenHand<T = unknown>({
         d="row"
         full="width"
         className={clsx(className)}
-        asChild
+        render={
+          <TokenSpace
+            id={id || 'hand'}
+            type="hand"
+            onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
+            className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
+            priority={priority}
+          />
+        }
         {...rest}
       >
-        <TokenSpace
-          id={id || 'hand'}
-          type="hand"
-          onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
-          className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
-          priority={priority}
-        >
-          <AnimatePresence>
-            {Children.map(children, (child) => (
-              <HandItemWrapper>{child}</HandItemWrapper>
-            ))}
-          </AnimatePresence>
-        </TokenSpace>
+        <AnimatePresence>
+          {Children.map(children, (child) => (
+            <HandItemWrapper>{child}</HandItemWrapper>
+          ))}
+        </AnimatePresence>
       </Box>
       <AnimatePresence>
         {renderDetailed && (

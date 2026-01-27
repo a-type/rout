@@ -30,21 +30,18 @@ function SvgTrigger({
           'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
           className,
         )}
-        asChild
+        render={<g />}
       >
-        <g>
-          <Box
-            surface="accent"
-            border
-            className={clsx(
-              /* Invisible outer area to increase touch target size */
-              'w-8px h-8px',
-            )}
-            asChild
-          >
-            <g />
-          </Box>
-        </g>
+        <Box
+          color="accent"
+          surface
+          border
+          className={clsx(
+            /* Invisible outer area to increase touch target size */
+            'w-8px h-8px',
+          )}
+          render={<g />}
+        />
       </Box>
     );
   }
@@ -68,7 +65,8 @@ function DomTrigger({
         )}
       >
         <Box
-          surface="accent"
+          color="accent"
+          surface
           border
           className={clsx(
             /* Invisible outer area to increase touch target size */
@@ -95,13 +93,15 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
 
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
-        <Popover.Trigger asChild>
-          {svg ? (
-            <SvgTrigger className={className} latestMessage={latestMessage} />
-          ) : (
-            <DomTrigger className={className} latestMessage={latestMessage} />
-          )}
-        </Popover.Trigger>
+        <Popover.Trigger
+          render={
+            svg ? (
+              <SvgTrigger className={className} latestMessage={latestMessage} />
+            ) : (
+              <DomTrigger className={className} latestMessage={latestMessage} />
+            )
+          }
+        />
         <Suspense>
           <Popover.Content side="bottom" className="p-xs w-300px">
             <Popover.Arrow />

@@ -4,7 +4,13 @@
     "outDir": "./dist/esm",
     "declaration": true,
     "declarationDir": "./dist/typings",
-    "declarationMap": true
+    "declarationMap": true,
+    "composite": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../game-definition"
+    }
+  ]
 }

@@ -68,27 +68,30 @@ const PublicGamePage = () => {
             </Box>
           </Box>
 
-          <PageNowPlaying
-            unstyled
-            className="flex flex-row items-center justify-center"
-          >
+          <PageNowPlaying className="flex flex-row items-center justify-center">
             <CreateHotseat
               gameId={gameId}
-              color="default"
+              emphasis="default"
               className="shadow-md"
             >
               <Icon name="phone" /> Try Hotseat
             </CreateHotseat>
             {me ? (
-              <CreateGame gameId={gameId} color="primary" className="shadow-md">
+              <CreateGame
+                gameId={gameId}
+                emphasis="primary"
+                className="shadow-md"
+              >
                 <Icon name="gamePiece" /> Play with Friends
               </CreateGame>
             ) : (
-              <Button className="shadow-md" color="primary" asChild>
-                <Link to={`/login?returnTo=/games/${gameId}`}>
-                  Play with Friends
-                  <Icon name="arrowRight" />
-                </Link>
+              <Button
+                className="shadow-md"
+                emphasis="primary"
+                render={<Link to={`/login?returnTo=/games/${gameId}`} />}
+              >
+                Play with Friends
+                <Icon name="arrowRight" />
               </Button>
             )}
           </PageNowPlaying>

@@ -28,7 +28,8 @@ export function GameScreenshotGallery({
           <Button
             key={screenshot.file}
             onClick={() => setSelected(index)}
-            color={selected === index ? 'accent' : 'default'}
+            color="accent"
+            emphasis={selected === index ? 'primary' : 'default'}
             className={clsx('p-0 overflow-hidden')}
             visuallyFocused={selected === index}
           >

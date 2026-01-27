@@ -4,16 +4,10 @@
   "private": true,
   "exports": {
     ".": {
-      "development": "./src/index.ts",
-      "workerd": "./src/index.ts",
-      "production": "./dist/esm/index.js",
       "types": "./dist/typings/index.d.ts",
       "default": "./dist/esm/index.js"
     },
     "./colors": {
-      "development": "./src/colors.ts",
-      "workerd": "./src/colors.ts",
-      "production": "./dist/esm/colors.js",
       "types": "./dist/typings/colors.d.ts",
       "default": "./dist/esm/colors.js"
     }

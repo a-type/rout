@@ -74,7 +74,11 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
     return (
       <>
         {gameSuite.gameStatus.status === 'complete' && (
-          <Box surface="primary" className="rounded-none flex-shrink-0 py-xs">
+          <Box
+            color="primary"
+            surface
+            className="rounded-none flex-shrink-0 py-xs"
+          >
             <ScrollTicker>
               <span>Game Over!</span>
               <Icon name="flag" />
@@ -82,7 +86,11 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
           </Box>
         )}
         {gameSuite.gameStatus.status === 'abandoned' && (
-          <Box surface="attention" className="rounded-none flex-shrink-0 py-xs">
+          <Box
+            color="attention"
+            surface
+            className="rounded-none flex-shrink-0 py-xs"
+          >
             <ScrollTicker>
               <span>Game Abandoned 😢</span>
             </ScrollTicker>
@@ -203,7 +211,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
                 });
               }}
               className={clsx('p-0 rounded-full')}
-              color={
+              emphasis={
                 gameSuite.playerStatuses[member.id]?.pendingTurn
                   ? 'default'
                   : 'ghost'
@@ -241,7 +249,8 @@ const HotseatBanner = withGame<{ className?: string }>(function HotseatBanner({
 }) {
   return (
     <Box
-      surface="primary"
+      color="primary"
+      surface
       p
       gap
       justify="between"
@@ -251,9 +260,18 @@ const HotseatBanner = withGame<{ className?: string }>(function HotseatBanner({
       <div className="font-bold">Hotseat</div>
       <Select
         value={gameSuite.playerId}
-        onValueChange={(value) => gameSuite.switchPlayer(value)}
+        onValueChange={(value) => value && gameSuite.switchPlayer(value)}
       >
-        <Select.Trigger size="small" />
+        <Select.Trigger size="small">
+          <Select.Value>
+            {(playerId) => (
+              <Box gap="sm" items="center">
+                <PlayerAvatar playerId={playerId} size={24} />
+                <PlayerName disableYou playerId={playerId} />
+              </Box>
+            )}
+          </Select.Value>
+        </Select.Trigger>
         <Select.Content>
           {gameSuite.members.map((member) => (
             <Select.Item key={member.id} value={member.id}>

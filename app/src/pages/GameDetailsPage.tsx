@@ -8,11 +8,13 @@ const GameDetailsPage = () => {
   return (
     <PageRoot>
       <PageContent>
-        <Button asChild color="ghost" className="mr-auto my-md">
-          <Link to="/library">
-            <Icon name="arrowLeft" />
-            Back to library
-          </Link>
+        <Button
+          emphasis="ghost"
+          className="mr-auto my-md"
+          render={<Link to="/library" />}
+        >
+          <Icon name="arrowLeft" />
+          Back to library
         </Button>
         <GameManual gameId={gameId} />
       </PageContent>

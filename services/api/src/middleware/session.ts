@@ -1,10 +1,10 @@
 import { Session } from '@a-type/auth';
 import { assertPrefixedId, LongGameError, PrefixedId } from '@long-game/common';
-import type { UserStore } from '@long-game/service-db';
 import { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { sessions } from '../auth/session.js';
 import { Env } from '../config/ctx.js';
+import type { UserStore } from '../stores/UserStore.js';
 
 export type SessionWithPrefixedIds = Omit<Session, 'userId'> & {
   userId: PrefixedId<'u'>;

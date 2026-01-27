@@ -1,3 +1,4 @@
+import { PROPS } from '@a-type/ui';
 import {
   FortressPiece,
   GameMapTileData,
@@ -69,39 +70,37 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
           gameSuite.prepareTurn((cur) => placePiece(cur, data));
         }
       }}
-      asChild
-    >
-      <SvgHexTile.Root
-        coordinate={coordinate}
-        strokeWidth={1}
-        style={
-          {
-            '--dyn-primary-source': tileColors[tile.terrain.type],
-          } as any
-        }
-        className="theme"
-      >
-        <SvgHexTile.Shape
+      render={
+        <SvgHexTile.Root
           coordinate={coordinate}
-          stroke="var(--color-gray-dark)"
-          fill="var(--color-primary-light)"
-          className="center stroke-gray-dark fill-primary-light"
+          strokeWidth={1}
+          style={
+            {
+              [PROPS.USER.COLOR.PRIMARY_HUE]: tileColors[tile.terrain.type],
+            } as any
+          }
+          className="theme"
         />
-        <SvgHexTile.Content coordinate={coordinate} className="center">
-          <text>{tile.terrain.type[0]}</text>
-        </SvgHexTile.Content>
-        {tile.fortress && (
-          <>
-            <SvgHexTile.Shape
-              coordinate={coordinate}
-              className="fill-gray center"
-            />
-            <SvgHexTile.Content coordinate={coordinate} className="center">
-              <text>{tile.fortress.type[0]}</text>
-            </SvgHexTile.Content>
-          </>
-        )}
-      </SvgHexTile.Root>
+      }
+    >
+      <SvgHexTile.Shape
+        coordinate={coordinate}
+        className="center stroke-gray-dark fill-primary-light"
+      />
+      <SvgHexTile.Content coordinate={coordinate} className="center">
+        <text>{tile.terrain.type[0]}</text>
+      </SvgHexTile.Content>
+      {tile.fortress && (
+        <>
+          <SvgHexTile.Shape
+            coordinate={coordinate}
+            className="fill-gray center"
+          />
+          <SvgHexTile.Content coordinate={coordinate} className="center">
+            <text>{tile.fortress.type[0]}</text>
+          </SvgHexTile.Content>
+        </>
+      )}
     </TokenSpace>
   );
 });

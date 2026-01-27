@@ -29,7 +29,7 @@ export const HotseatGamesList = withSuspense(function HotseatGamesList({
       <Box col gap layout="center center" className="text-gray-dark">
         <div>No hotseat games</div>
         <div>Play unlimited games by passing around this device</div>
-        <CreateHotseat color="ghost" size="small">
+        <CreateHotseat emphasis="ghost" size="small">
           Play Hotseat <Icon name="arrowRight" />
         </CreateHotseat>
       </Box>
@@ -61,26 +61,24 @@ const HotseatSummaryCard = withSuspense(function HotseatSummaryCard({
           <div className="absolute inset-0 bg-gradient-to-b from-gray-dark/50 to-transparent opacity-50" />
         </Card.Image>
       )}
-      <Card.Main asChild>
-        <Link to={`/hotseat/${session.gameSessionId}`}>
-          <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
-          <Card.Content unstyled className="flex flex-row gap-sm">
-            <Chip color="accent">Hotseat</Chip>
-            <GameSessionStatusChip status={session.status as any} />
-          </Card.Content>
-        </Link>
+      <Card.Main render={<Link to={`/hotseat/${session.gameSessionId}`} />}>
+        <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
+        <Card.Content unstyled className="flex flex-row gap-sm">
+          <Chip color="accent">Hotseat</Chip>
+          <GameSessionStatusChip status={session.status as any} />
+        </Card.Content>
       </Card.Main>
       <Card.Footer>
         <Card.Menu>
           <DropdownMenu>
-            <DropdownMenu.Trigger asChild>
-              <Button size="small" color="default">
-                <Icon name="dots" />
-              </Button>
+            <DropdownMenu.Trigger
+              render={<Button size="small" emphasis="default" />}
+            >
+              <Icon name="dots" />
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
               <DropdownMenu.Item
-                color="destructive"
+                color="attention"
                 onClick={async () => {
                   await HotseatBackend.delete(session.gameSessionId);
                   queryClient.invalidateQueries({

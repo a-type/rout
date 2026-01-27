@@ -8,9 +8,9 @@ export function SendInvite() {
 
   if (showSent) {
     return (
-      <Box d="col" surface="primary" p gap>
+      <Box d="col" surface color="primary" p gap>
         Invite sent!
-        <Button color="ghost" onClick={() => setShowSent(false)}>
+        <Button emphasis="ghost" onClick={() => setShowSent(false)}>
           Invite someone else
         </Button>
       </Box>
@@ -18,7 +18,7 @@ export function SendInvite() {
   }
 
   return (
-    <Box d="col" surface="primary" p gap>
+    <Box d="col" surface color="primary" p gap>
       <FormikForm
         initialValues={{ email: '' }}
         onSubmit={async (values) => {

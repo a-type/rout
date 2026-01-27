@@ -1,5 +1,5 @@
 import games from '@long-game/games';
-import type { AdminStore } from '@long-game/service-db';
+import type { AdminStore } from '@long-game/service-api';
 
 interface BootstrapBindings {
   ADMIN_STORE: Service<AdminStore>;

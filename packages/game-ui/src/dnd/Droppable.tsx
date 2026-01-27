@@ -1,5 +1,12 @@
-import { Slot } from '@a-type/ui';
-import { createContext, HTMLProps, Ref, useContext, useEffect } from 'react';
+import { useRender } from '@a-type/ui';
+import {
+  createContext,
+  HTMLProps,
+  ReactElement,
+  Ref,
+  useContext,
+  useEffect,
+} from 'react';
 import { useMergedRef } from '../hooks/useMergedRef.js';
 import { useBindBounds } from './bounds.js';
 import { droppableDataRegistry } from './dataRegistry.js';
@@ -21,7 +28,7 @@ export type DroppableProps<T = any> = Omit<
   onReject?: OnRejectCb<T>;
   disabled?: boolean;
   accept?: Accept<T>;
-  asChild?: boolean;
+  render?: ReactElement;
   tags?: string[];
   data?: any;
   /** Hides this droppable from any nested draggables */
@@ -40,7 +47,7 @@ export function Droppable<T = any>({
   ref: userRef,
   accept,
   onReject,
-  asChild,
+  render,
   tags,
   data,
   noParenting,
@@ -61,28 +68,31 @@ export function Droppable<T = any>({
   const finalRef = useMergedRef<any>(bindBounds, userRef);
   useEffect(() => droppableDataRegistry.register(id, data), [id, data]);
 
-  const El = asChild ? Slot : svg ? 'g' : 'div';
-
-  const content = disabled ? (
-    <El
-      data-role="droppable"
-      data-droppable-disabled
-      ref={userRef}
-      {...(rest as any)}
-    >
-      {children}
-    </El>
-  ) : (
-    <El
-      data-role="droppable"
-      ref={finalRef}
-      data-over-accepted={isAcceptedOver}
-      data-over-rejected={isRejectedOver}
-      {...(rest as any)}
-    >
-      {children}
-    </El>
-  );
+  const content = useRender({
+    defaultTagName: svg ? 'g' : 'div',
+    render,
+    ref: disabled ? userRef : finalRef,
+    props: rest as any,
+    state: {
+      role: 'droppable',
+      droppableDisabled: disabled,
+      overAccepted: isAcceptedOver,
+      overRejected: isRejectedOver,
+    },
+    stateAttributesMapping: {
+      role: () => ({ 'data-role': 'droppable' }),
+      droppableDisabled: (value) =>
+        value ? { 'data-droppable-disabled': '' } : null,
+      overAccepted: (value) =>
+        value === null
+          ? null
+          : { 'data-over-accepted': value ? 'true' : 'false' },
+      overRejected: (value) =>
+        value === null
+          ? null
+          : { 'data-over-rejected': value ? 'true' : 'false' },
+    },
+  });
 
   if (noParenting) {
     return content;

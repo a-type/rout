@@ -85,7 +85,7 @@ export function GameDebugger({ ...props }: GameDebuggerProps) {
 
   return (
     <>
-      <Button size="icon" onClick={showDebugger} {...props}>
+      <Button onClick={showDebugger} {...props}>
         <Icon name="bug" />
       </Button>
       <Suspense>
@@ -202,7 +202,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
           <Box d="col">
             <H2>Current Turn</H2>
             {gameSuite.turnError && (
-              <Box surface="attention" d="col" p="sm">
+              <Box color="attention" surface d="col" p="sm">
                 <H2>Turn Validation Error</H2>
                 <pre className="text-xs">
                   {JSON.stringify(gameSuite.turnError, null, 2)}

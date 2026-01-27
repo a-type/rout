@@ -55,7 +55,7 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
           >
             {gameSuite.remoteTurnError ? (
               <>
-                <Button color="ghost" onClick={gameSuite.cancelSubmitTurn}>
+                <Button emphasis="ghost" onClick={gameSuite.cancelSubmitTurn}>
                   <Icon name="x" />
                 </Button>
                 <div className="font-bold color-attention-ink flex-1">
@@ -63,7 +63,7 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
                 </div>
                 <Button
                   loading={gameSuite.submittingTurn}
-                  color="default"
+                  emphasis="default"
                   onClick={() =>
                     gameSuite.submitTurn({
                       delay: 0,
@@ -81,6 +81,7 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
                 <Button
                   loading={gameSuite.submittingTurn}
                   color="accent"
+                  emphasis="primary"
                   onClick={gameSuite.cancelSubmitTurn}
                 >
                   Cancel

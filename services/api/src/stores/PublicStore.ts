@@ -9,10 +9,10 @@ export interface GameProductsFilter {
   includingGame?: string;
 }
 
-export class PublicStore extends WorkerEntrypoint<DbBindings> {
+export class PublicStore extends WorkerEntrypoint<ApiBindings> {
   #db: DB;
 
-  constructor(ctx: ExecutionContext, env: DbBindings) {
+  constructor(ctx: ExecutionContext, env: ApiBindings) {
     super(ctx, env);
     this.#db = createDb({ DB: env.D1 });
   }

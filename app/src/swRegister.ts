@@ -13,11 +13,7 @@ export async function registerServiceWorker() {
 
   try {
     const registration = await navigator.serviceWorker.register(
-      new URL(
-        /* webpackChunkName: "sw" */
-        './sw.ts',
-        import.meta.url,
-      ),
+      new URL('./service-worker.ts', import.meta.url),
     );
     if (!registration) {
       console.error(`Service worker registration failed`);
@@ -26,7 +22,9 @@ export async function registerServiceWorker() {
 
     console.info('Service worker registered', registration);
 
-    checkForUpdate = registration.update.bind(registration);
+    checkForUpdate = async () => {
+      await registration.update();
+    };
     skipWaiting = () => {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('Service worker updated, reloading page');
@@ -45,7 +43,9 @@ export async function registerServiceWorker() {
     setInterval(
       () => {
         registration.update();
-        checkForUpdate = registration.update.bind(registration);
+        checkForUpdate = async () => {
+          await registration.update();
+        };
       },
       60 * 60 * 1000,
     ); // hourly

@@ -18,7 +18,7 @@ export function CreateHotseat({
   const navigate = useNavigate();
   return (
     <Button
-      color="primary"
+      emphasis="primary"
       onClick={async () => {
         const sessionId: PrefixedId<'gs'> = `gs-hotseat-${genericId()}`;
         if (gameId) {

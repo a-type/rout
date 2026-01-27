@@ -22,10 +22,10 @@ export const ChatReactions = withGame<ChatReactionsProps>(
     return (
       <Box gap wrap className={clsx('rounded-2xl', className)}>
         <Popover>
-          <Popover.Trigger asChild>
-            <Button size="icon-small" color="ghost" className="p-xs">
-              <Icon name="smile" />
-            </Button>
+          <Popover.Trigger
+            render={<Button size="small" emphasis="ghost" className="p-xs" />}
+          >
+            <Icon name="smile" />
           </Popover.Trigger>
           <Popover.Content className="p-xs">
             <Popover.Arrow />
@@ -52,9 +52,10 @@ export const ChatReactions = withGame<ChatReactionsProps>(
               <Box
                 gap="sm"
                 items="center"
-                surface={
-                  users.includes(gameSuite.playerId) ? 'accent' : 'default'
+                color={
+                  users.includes(gameSuite.playerId) ? 'accent' : 'primary'
                 }
+                surface
                 className="cursor-pointer text-sm rounded-full py-xs px-sm"
                 onClick={() => gameSuite.toggleChatReaction(message, emoji)}
               >

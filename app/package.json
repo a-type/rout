@@ -3,8 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "pnpm build:app && pnpm build:copy-game-files",
+    "build": "pnpm build:typecheck && pnpm build:app && pnpm build:copy-game-files",
     "build:app": "rsbuild build",
+    "build:typecheck": "tsc --noEmit",
     "build:copy-game-files": "node scripts/copyGameFiles.mjs",
     "preview": "rsbuild preview"
   },
@@ -16,7 +17,7 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "@long-game/notifications": "workspace:*",
-    "@module-federation/retry-plugin": "^0.17.1",
+    "@module-federation/retry-plugin": "catalog:",
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
     "hono": "catalog:",
@@ -29,7 +30,7 @@
   },
   "devDependencies": {
     "@a-type/rsbuild-plugin-unocss": "^0.0.8",
-    "@birchill/inject-manifest-plugin": "^1.0.1",
+    "@aaroon/workbox-rspack-plugin": "^0.3.3",
     "@long-game/uno-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
@@ -38,7 +39,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@unocss/webpack": "catalog:",
-    "inject-manifest-plugin": "0.6.5",
     "unocss": "catalog:",
     "workbox-core": "^7.3.0",
     "workbox-expiration": "^7.3.0",
@@ -46,6 +46,6 @@
     "workbox-routing": "^7.3.0",
     "workbox-strategies": "^7.3.0",
     "workbox-window": "^7.3.0",
-    "wrangler": "^3.99.0"
+    "wrangler": "catalog:"
   }
 }

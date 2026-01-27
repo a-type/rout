@@ -8,7 +8,7 @@ export function TooltipPlus({
 }: {
   className?: string;
   content: React.ReactNode;
-  children: React.ReactNode;
+  children: React.ReactElement;
 }) {
   const [hovered, setHovered] = useState(false);
   const [active, setActive] = useState(false);
@@ -25,15 +25,14 @@ export function TooltipPlus({
   return (
     <Popover open={active}>
       <Popover.Trigger
-        asChild
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onTouchStart={() => setActive(true)}
         // Experimental - may be annoying
         onClick={(ev) => ev.stopPropagation()}
-      >
-        {children}
-      </Popover.Trigger>
+        render={children}
+      />
+
       <Popover.Content
         className={clsx(
           className,

@@ -4,8 +4,8 @@
     "noLib": false,
     "target": "ES2022",
     "sourceMap": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "lib": ["ESNext"],
     "skipLibCheck": true,
     "strict": true,
@@ -16,9 +16,7 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "isolatedModules": true,
-    "customConditions": ["development"],
-    "types": ["@cloudflare/workers-types"]
+    "isolatedModules": true
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

@@ -4,19 +4,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "import": "./dist/worker/index.js",
       "types": "./dist/typings/index.d.ts"
     }
   },
   "scripts": {
-    "dev": "wrangler dev -c wrangler.toml --port 3113 --inspector-port 9231 --ip 127.0.0.1 --test-scheduled"
+    "dev": "wrangler dev -c wrangler.toml --port 3113 --inspector-port 9231 --ip 127.0.0.1 --test-scheduled",
+    "types": "wrangler types --env-interface=BootstrapBindings --c wrangler.toml src/worker-types.d.ts"
   },
   "dependencies": {
     "@a-type/utils": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/games": "workspace:*",
-    "@long-game/service-db": "workspace:*",
+    "@long-game/service-api": "workspace:*",
     "hono": "catalog:",
     "zod": "catalog:"
   },

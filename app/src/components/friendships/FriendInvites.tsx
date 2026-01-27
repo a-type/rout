@@ -36,7 +36,7 @@ export function IncomingInvites(props: BoxProps) {
 function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
   return (
-    <Box d="col" surface="wash" gap p>
+    <Box d="col" surface="white" gap p>
       <Box items="center" gap>
         {invite.otherUser ? (
           <UserAvatar
@@ -50,7 +50,8 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
       </Box>
       <Box items="center" justify="end" gap>
         <Button
-          color="ghostDestructive"
+          color="attention"
+          emphasis="ghost"
           onClick={async () => {
             await respondMutation.mutateAsync({
               id: invite.id,
@@ -107,7 +108,7 @@ function OutgoingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
 
   return (
-    <Box items="center" surface="wash" gap p>
+    <Box items="center" surface="white" gap p>
       {invite.otherUser ? (
         <UserAvatar
           userId={invite.otherUser.id}

@@ -62,38 +62,36 @@ export const GameSummaryCard = withSuspense(
             <div className="absolute inset-0 bg-gradient-to-b from-gray-dark/50 to-transparent opacity-50" />
           </Card.Image>
         )}
-        <Card.Main asChild>
-          <Link to={`/session/${summary.id}`}>
-            <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
-            <Card.Content unstyled>
-              <Suspense
-                fallback={
-                  <AvatarList count={1}>
-                    <AvatarList.Item index={0} />
-                  </AvatarList>
-                }
-              >
-                <GameSummaryCardMembers sessionId={summary.id} />
-              </Suspense>
-            </Card.Content>
-            <Card.Content unstyled className="flex flex-row gap-sm">
-              {isMyTurn && (
-                <Chip color="accent" className="border-accent-dark">
-                  Your turn
-                </Chip>
-              )}
-              <GameSessionStatusChip status={summary.status} />
-            </Card.Content>
-          </Link>
+        <Card.Main render={<Link to={`/session/${summary.id}`} />}>
+          <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
+          <Card.Content unstyled>
+            <Suspense
+              fallback={
+                <AvatarList count={1}>
+                  <AvatarList.Item index={0} />
+                </AvatarList>
+              }
+            >
+              <GameSummaryCardMembers sessionId={summary.id} />
+            </Suspense>
+          </Card.Content>
+          <Card.Content unstyled className="flex flex-row gap-sm">
+            {isMyTurn && (
+              <Chip color="accent" className="border-accent-dark">
+                Your turn
+              </Chip>
+            )}
+            <GameSessionStatusChip status={summary.status} />
+          </Card.Content>
         </Card.Main>
         {showMenu && (
           <Card.Footer>
             <Card.Menu>
               <DropdownMenu>
-                <DropdownMenu.Trigger asChild>
-                  <Button size="icon-small" color="default">
-                    <Icon name="dots" />
-                  </Button>
+                <DropdownMenu.Trigger
+                  render={<Button size="small" emphasis="default" />}
+                >
+                  <Icon name="dots" />
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
                   {canDelete && (
@@ -101,7 +99,7 @@ export const GameSummaryCard = withSuspense(
                       onClick={() => {
                         deleteSession.mutate({ id: summary.id });
                       }}
-                      color="destructive"
+                      color="attention"
                     >
                       Delete
                       <DropdownMenu.ItemRightSlot>
@@ -119,7 +117,7 @@ export const GameSummaryCard = withSuspense(
                         await abandonSession.mutateAsync({ id: summary.id });
                         toast(`You abandoned this game.`);
                       }}
-                      color="destructive"
+                      color="attention"
                     >
                       Abandon
                       <DropdownMenu.ItemRightSlot>

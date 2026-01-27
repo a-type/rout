@@ -44,83 +44,84 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
 
     return (
       <Box
-        asChild
         className={className}
-        surface="primary"
+        color="primary"
+        surface
         p
         layout="center center"
-      >
-        <TokenSpace<CardData>
-          id="current-trick"
-          onDrop={(card) => {
-            if (isCard(card.id)) {
-              gameSuite.submitTurn({
-                data: {
-                  card: card.data,
-                },
-                delay: 5_000,
+        render={
+          <TokenSpace<CardData>
+            id="current-trick"
+            onDrop={(card) => {
+              if (isCard(card.id)) {
+                gameSuite.submitTurn({
+                  data: {
+                    card: card.data,
+                  },
+                  delay: 5_000,
+                });
+              }
+            }}
+            accept={(card) => {
+              if (!isCard(card.id)) {
+                return false;
+              }
+              const error = gameSuite.validateTurn({
+                card: card.data,
               });
-            }
-          }}
-          accept={(card) => {
-            if (!isCard(card.id)) {
-              return false;
-            }
-            const error = gameSuite.validateTurn({
-              card: card.data,
-            });
-            if (error) {
-              return error.message;
-            }
-            return true;
-          }}
-          onReject={(card) => {
-            if (!isCard(card.id)) {
-              return;
-            }
-            const error = gameSuite.validateTurn({
-              card: card.data,
-            });
-            if (error) {
-              toast.error(error);
-            } else {
-              toast.error('You cannot play that card right now.');
-            }
-          }}
-        >
-          <CardGrid>
-            {trickToShow.map((card) => (
-              <Token key={card.card} id={card.card} data={card.card} disabled>
-                <PlayingCard
-                  cardSuit={getCardSuit(card.card)}
-                  cardRank={getCardRank(card.card)}
-                  playerId={card.playerId}
-                />
-              </Token>
+              if (error) {
+                return (error as any).message;
+              }
+              return true;
+            }}
+            onReject={(card) => {
+              if (!isCard(card.id)) {
+                return;
+              }
+              const error = gameSuite.validateTurn({
+                card: card.data,
+              });
+              if (error) {
+                toast.error(error);
+              } else {
+                toast.error('You cannot play that card right now.');
+              }
+            }}
+          />
+        }
+      >
+        <CardGrid>
+          {trickToShow.map((card) => (
+            <Token key={card.card} id={card.card} data={card.card} disabled>
+              <PlayingCard
+                cardSuit={getCardSuit(card.card)}
+                cardRank={getCardRank(card.card)}
+                playerId={card.playerId}
+              />
+            </Token>
+          ))}
+          {new Array(gameSuite.members.length - trickToShow.length)
+            .fill(null)
+            .map((_, i) => (
+              <PlayingCard.Placeholder key={i}>
+                {i === 0 && (
+                  <Box gap layout="center center" d="col" full>
+                    <PlayerAvatar playerId={pendingPlayerId} size="60%" />
+                    <div className="p-sm text-center">
+                      {myTurn ? (
+                        'Your turn!'
+                      ) : (
+                        <>
+                          <PlayerName playerId={pendingPlayerId} />
+                          's turn
+                        </>
+                      )}
+                    </div>
+                  </Box>
+                )}
+              </PlayingCard.Placeholder>
             ))}
-            {new Array(gameSuite.members.length - trickToShow.length)
-              .fill(null)
-              .map((_, i) => (
-                <PlayingCard.Placeholder key={i}>
-                  {i === 0 && (
-                    <Box gap layout="center center" d="col" full>
-                      <PlayerAvatar playerId={pendingPlayerId} size="60%" />
-                      <div className="p-sm text-center">
-                        {myTurn ? (
-                          'Your turn!'
-                        ) : (
-                          <>
-                            <PlayerName playerId={pendingPlayerId} />
-                            's turn
-                          </>
-                        )}
-                      </div>
-                    </Box>
-                  )}
-                </PlayingCard.Placeholder>
-              ))}
-          </CardGrid>
-        </TokenSpace>
+        </CardGrid>
       </Box>
     );
   },

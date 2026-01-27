@@ -21,7 +21,7 @@ export class UserStore extends RpcTarget {
   #db: DB;
   #env;
 
-  constructor(userId: PrefixedId<'u'>, db: DB, env: DbBindings) {
+  constructor(userId: PrefixedId<'u'>, db: DB, env: ApiBindings) {
     super();
     this.#userId = userId;
     this.#db = db;
@@ -569,7 +569,8 @@ export class UserStore extends RpcTarget {
     return {
       results: results.map((r) => ({
         ...r,
-        canDelete: r.isFoundingMember && r.status === 'pending',
+        isFoundingMember: !!r.isFoundingMember,
+        canDelete: !!r.isFoundingMember && r.status === 'pending',
       })),
       pageInfo: {
         hasNextPage,

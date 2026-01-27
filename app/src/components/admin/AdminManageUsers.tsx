@@ -20,10 +20,8 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
             <Box>{user.email}</Box>
           </Box>
           <DropdownMenu>
-            <DropdownMenu.Trigger asChild>
-              <Button color="ghost">
-                <Icon name="dots" />
-              </Button>
+            <DropdownMenu.Trigger render={<Button emphasis="ghost" />}>
+              <Icon name="dots" />
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
               <DropdownMenu.Item
@@ -34,7 +32,8 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
             </DropdownMenu.Content>
           </DropdownMenu>
           <ConfirmedButton
-            color="destructive"
+            color="attention"
+            emphasis="primary"
             confirmText="Are you sure you want to delete this user?"
             onConfirm={async () => {
               return deleteUser.mutateAsync({ userId: user.id });
@@ -46,7 +45,7 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
       ))}
       {pageInfo.hasNextPage && (
         <Box layout="center center" p full="width">
-          <Button color="ghost" onClick={() => fetchNextPage()}>
+          <Button emphasis="ghost" onClick={() => fetchNextPage()}>
             Load more
           </Button>
         </Box>

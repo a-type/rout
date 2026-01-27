@@ -43,7 +43,7 @@ export const GameStartingNotice = withGame<GameStartingNoticeProps>(
           ...
         </P>
         <Spinner />
-        <Button color="ghost" onClick={() => gameSuite.unreadyUp()}>
+        <Button emphasis="ghost" onClick={() => gameSuite.unreadyUp()}>
           Not ready!
         </Button>
       </Box>

@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2020",
+    "target": "ES2023",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "rootDir": ".",
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -26,14 +26,24 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "customConditions": ["development"],
-
     "composite": true
   },
   "include": ["src"],
   "references": [
     {
       "path": "../packages/game-ui"
+    },
+    {
+      "path": "../packages/common"
+    },
+    {
+      "path": "../packages/game-definition"
+    },
+    {
+      "path": "../packages/notifications"
+    },
+    {
+      "path": "../packages/game-client"
     }
   ]
 }

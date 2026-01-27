@@ -24,15 +24,17 @@ export const GameManualDialog = withGame<GameManualDialogProps>(
           });
         }}
       >
-        <Dialog.Trigger asChild>
-          <Button
-            color="ghost"
-            size="icon-small"
-            aria-label="Open game manual"
-            {...props}
-          >
-            <Icon name="book" />
-          </Button>
+        <Dialog.Trigger
+          render={
+            <Button
+              emphasis="ghost"
+              size="small"
+              aria-label="Open game manual"
+              {...props}
+            />
+          }
+        >
+          <Icon name="book" />
         </Dialog.Trigger>
         <Dialog.Content width="md">
           <Dialog.Title>Game Manual</Dialog.Title>

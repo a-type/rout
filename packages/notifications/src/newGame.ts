@@ -15,7 +15,7 @@ export const newGameNotification: NotificationConfig<NewGameNotification> = {
       context === 'push' ? ' Tap to view your library.' : ''
     }`;
   },
-  title(data) {
+  title(_data) {
     return `You got a new game!`;
   },
   link(data: NewGameNotification) {

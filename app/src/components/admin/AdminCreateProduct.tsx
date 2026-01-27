@@ -21,7 +21,7 @@ export function AdminCreateProduct({ className }: AdminCreateProductProps) {
   };
 
   return (
-    <Button className={className} color="primary" onClick={createProduct}>
+    <Button className={className} emphasis="primary" onClick={createProduct}>
       Create Product
     </Button>
   );

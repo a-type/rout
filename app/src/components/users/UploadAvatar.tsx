@@ -25,8 +25,7 @@ export function UploadAvatar({ className }: UploadAvatarProps) {
       </ImageUploader.EmptyControls>
       <ImageUploader.Display crossOrigin="use-credentials" />
       <ImageUploader.FileButton
-        size="icon"
-        color="default"
+        emphasis="default"
         className="absolute top-sm right-sm"
       >
         <Icon name="upload" />

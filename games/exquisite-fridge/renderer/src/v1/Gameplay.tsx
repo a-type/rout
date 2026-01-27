@@ -25,7 +25,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       <Box container="reset" gap col className="max-w-700px w-full my-auto">
         <PromptDisplay className="w-full" />
         {gameSuite.latestRoundIndex === ROUND_COUNT - 1 && (
-          <Box surface="accent" p layout="center center">
+          <Box surface color="accent" p layout="center center">
             <P>Last round. Wrap up the story!</P>
           </Box>
         )}

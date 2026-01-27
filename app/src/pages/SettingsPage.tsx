@@ -1,6 +1,5 @@
 import { MainNav } from '@/components/nav/MainNav';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
-import { ColorModeToggle } from '@/components/settings/ColorModeToggle';
 import { GoldUpgrade } from '@/components/subscription/GoldUpgrade';
 import { ManageSubscription } from '@/components/subscription/ManageSubscription';
 import { EditProfileForm } from '@/components/users/EditProfile';
@@ -10,6 +9,7 @@ import { sdkHooks } from '@/services/publicSdk';
 import {
   Box,
   Button,
+  ColorModeToggle,
   Divider,
   H1,
   H2,
@@ -45,7 +45,7 @@ export function SettingsPage({}: SettingsPageProps) {
           <NotificationSettings />
           <Divider />
           <form action={`${API_ORIGIN}/auth/logout`} method="post">
-            <Button color="destructive" type="submit">
+            <Button color="attention" emphasis="primary" type="submit">
               Logout
             </Button>
           </form>
@@ -58,8 +58,8 @@ export function SettingsPage({}: SettingsPageProps) {
           {me?.isProductAdmin && (
             <>
               <Divider />
-              <Button asChild color="ghost">
-                <Link to="/admin">Admin</Link>
+              <Button emphasis="ghost" render={<Link to="/admin" />}>
+                Admin
               </Button>
             </>
           )}

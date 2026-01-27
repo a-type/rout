@@ -24,9 +24,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
+    "noUncheckedSideEffectImports": true
 
-    "customConditions": ["development"]
+    // "customConditions": ["development"]
   },
   "include": ["src"],
   "references": [{ "path": "../services/api" }]

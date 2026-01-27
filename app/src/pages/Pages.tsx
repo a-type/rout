@@ -16,27 +16,27 @@ const routes = makeRoutes([
   },
   {
     path: '/login',
-    component: lazy(() => import('./LoginPage.jsx')),
+    component: lazy(() => import('./LoginPage.js')),
   },
   {
     path: '/invite/:inviteId',
-    component: lazy(() => import('./InvitePage.jsx')),
+    component: lazy(() => import('./InvitePage.js')),
   },
   {
     path: '/verify',
-    component: lazy(() => import('./CompleteSignupPage.jsx')),
+    component: lazy(() => import('./CompleteSignupPage.js')),
   },
   {
     path: '/reset-password',
-    component: lazy(() => import('./ResetPasswordPage.jsx')),
+    component: lazy(() => import('./ResetPasswordPage.js')),
   },
   {
     path: '/friends',
-    component: lazy(() => import('./FriendsPage.jsx')),
+    component: lazy(() => import('./FriendsPage.js')),
   },
   {
     path: '/history',
-    component: lazy(() => import('./HistoryPage.jsx')),
+    component: lazy(() => import('./HistoryPage.js')),
   },
   {
     path: '/session/:sessionId',
@@ -44,11 +44,11 @@ const routes = makeRoutes([
   },
   {
     path: '/hotseat/:sessionId',
-    component: lazy(() => import('./HotseatSessionPage.jsx')),
+    component: lazy(() => import('./HotseatSessionPage.js')),
   },
   {
     path: '/gameInvite/:code',
-    component: lazy(() => import('./GameInviteLinkPage.jsx')),
+    component: lazy(() => import('./GameInviteLinkPage.js')),
   },
   {
     path: '/library',
@@ -60,7 +60,7 @@ const routes = makeRoutes([
       },
       {
         path: ':gameId',
-        component: lazy(() => import('./GameDetailsPage.jsx')),
+        component: lazy(() => import('./GameDetailsPage.js')),
       },
     ],
   },
@@ -74,17 +74,17 @@ const routes = makeRoutes([
       },
       {
         path: ':gameId',
-        component: lazy(() => import('./GameDetailsPage.jsx')),
+        component: lazy(() => import('./GameDetailsPage.js')),
       },
     ],
   },
   {
     path: '/games/:gameId',
-    component: lazy(() => import('./PublicGamePage.jsx')),
+    component: lazy(() => import('./PublicGamePage.js')),
   },
   {
     path: '/admin',
-    component: lazy(() => import('./admin/AdminPage.jsx')),
+    component: lazy(() => import('./admin/AdminPage.js')),
     children: [
       {
         index: true,
@@ -92,21 +92,21 @@ const routes = makeRoutes([
       },
       {
         path: 'products',
-        component: lazy(() => import('./admin/AdminGameProductsPage.jsx')),
+        component: lazy(() => import('./admin/AdminGameProductsPage.js')),
       },
       {
         path: 'sessions',
-        component: lazy(() => import('./admin/AdminGameSessionsPage.jsx')),
+        component: lazy(() => import('./admin/AdminGameSessionsPage.js')),
       },
       {
         path: 'users',
-        component: lazy(() => import('./admin/AdminUsersPage.jsx')),
+        component: lazy(() => import('./admin/AdminUsersPage.js')),
       },
     ],
   },
   {
     path: '/settings',
-    component: lazy(() => import('./SettingsPage.jsx')),
+    component: lazy(() => import('./SettingsPage.js')),
   },
   {
     path: '*',

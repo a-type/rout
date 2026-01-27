@@ -45,7 +45,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
     },
   }));
   return (
-    <Box asChild d="col" {...props}>
+    <Box d="col" {...props}>
       <FormikForm
         initialValues={{ text: '', recipientIds: [] as PrefixedId<'u'>[] }}
         onSubmit={(values, { resetForm }) => {
@@ -89,7 +89,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
               <Box gap>
                 <RecipientsField />
               </Box>
-              <SubmitButton size="icon" color="primary">
+              <SubmitButton emphasis="primary">
                 <Icon name="send" />
               </SubmitButton>
             </Box>
@@ -111,20 +111,18 @@ const RecipientsField = withGame(function RecipientsField({ gameSuite }) {
 
   return (
     <Popover>
-      <Popover.Trigger asChild>
-        <Button color="ghost" size="icon-small">
-          {selectedUsers.length > 0 ? (
-            <AvatarList count={selectedUsers.length}>
-              {selectedUsers.map(({ id }, index) => (
-                <AvatarList.ItemRoot index={index} key={id}>
-                  <PlayerAvatar playerId={id} />
-                </AvatarList.ItemRoot>
-              ))}
-            </AvatarList>
-          ) : (
-            <Icon name="globe" />
-          )}
-        </Button>
+      <Popover.Trigger render={<Button emphasis="ghost" size="small" />}>
+        {selectedUsers.length > 0 ? (
+          <AvatarList count={selectedUsers.length}>
+            {selectedUsers.map(({ id }, index) => (
+              <AvatarList.ItemRoot index={index} key={id}>
+                <PlayerAvatar playerId={id} />
+              </AvatarList.ItemRoot>
+            ))}
+          </AvatarList>
+        ) : (
+          <Icon name="globe" />
+        )}
       </Popover.Trigger>
       <Popover.Content>
         <Box container="reset" d="col" gap>

@@ -62,7 +62,7 @@ export const gameRsbuildConfig = (game) => {
         'react/': {},
         'react-dom': { singleton: true, requiredVersion: '>19.0.0' },
         'react-dom/': {},
-        '@a-type/ui': { singleton: true, requiredVersion: '>2.0.0' },
+        '@a-type/ui': { singleton: true, requiredVersion: '>5.0.0' },
         '@long-game/game-client': {
           singleton: true,
           requiredVersion: '>0.0.0',

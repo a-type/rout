@@ -101,7 +101,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
         {!turnWasSubmitted && (
           <Button
             size="small"
-            color="ghost"
+            emphasis="ghost"
             onClick={() => {
               gameSuite.prepareTurn(null);
             }}
@@ -112,7 +112,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
           </Button>
         )}
       </Box>
-      <TurnError surface="attention" p justify="center" />
+      <TurnError surface color="attention" p justify="center" />
     </Box>
   );
 });

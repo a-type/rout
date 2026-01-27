@@ -1,12 +1,12 @@
 import { useGame } from '@/hooks/useGame';
 import { Dialog } from '@a-type/ui';
-import { ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { GameIcon } from '../games/GameIcon';
 import { GameManual } from '../games/GameManual';
 
 export interface GameDetailsDialogProps {
   gameId: string;
-  children?: ReactNode;
+  children?: ReactElement;
 }
 
 export function GameDetailsDialog({
@@ -17,9 +17,9 @@ export function GameDetailsDialog({
 
   return (
     <Dialog>
-      <Dialog.Trigger asChild>
-        {children || <GameIcon gameId={gameId} className="w-12 h-12" />}
-      </Dialog.Trigger>
+      <Dialog.Trigger
+        render={children || <GameIcon gameId={gameId} className="w-12 h-12" />}
+      />
       <Dialog.Content width="md">
         <Dialog.Title>{game.title}</Dialog.Title>
         <Dialog.Description>{game?.description}</Dialog.Description>

@@ -98,21 +98,21 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
               <Box gap>
                 <Button
                   toggled={color === 'contrast'}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setColor('contrast')}
                 >
                   <div className="bg-black w-8 h-8 rounded-full" />
                 </Button>
                 <Button
                   toggled={color === 'dark'}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setColor('dark')}
                 >
                   <div className="bg-primary-dark w-8 h-8 rounded-full" />
                 </Button>
                 <Button
                   toggled={color === 'light'}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setColor('light')}
                 >
                   <div className="bg-primary-light w-8 h-8 rounded-full" />
@@ -121,21 +121,21 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
               <Box gap>
                 <Button
                   toggled={size === 1}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setSize(1)}
                 >
                   <div className="bg-black w-4px h-4px rounded-full" />
                 </Button>
                 <Button
                   toggled={size === 2}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setSize(2)}
                 >
                   <div className="bg-black w-8px h-8px rounded-full" />
                 </Button>
                 <Button
                   toggled={size === 8}
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => setSize(8)}
                 >
                   <div className="bg-black w-16px h-16px rounded-full" />

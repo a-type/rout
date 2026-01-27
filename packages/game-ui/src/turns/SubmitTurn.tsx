@@ -49,7 +49,7 @@ export const SubmitTurn = withSuspense(
         <Box className={clsx('rounded-lg', className)}>
           <TopographyButton
             className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray)"
-            color={turnError ? 'destructive' : 'primary'}
+            color={turnError ? 'attention' : 'primary'}
             disabled={isDisabled}
             onClick={() =>
               submitTurn({

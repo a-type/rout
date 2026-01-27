@@ -5,7 +5,13 @@
     "declaration": true,
     "declarationDir": "./dist",
     "declarationMap": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "composite": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
 }

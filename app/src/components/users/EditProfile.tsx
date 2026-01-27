@@ -54,7 +54,6 @@ function ColorPickerField() {
       {(Object.keys(colors) as (keyof typeof colors)[]).map((palette) => (
         <Button
           type="button"
-          size="icon"
           onClick={() => tools.setValue(palette)}
           className="w-6 h-6 p-0 bg-white items-center justify-center"
         >

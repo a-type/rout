@@ -8,5 +8,5 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "customConditions": []
   },
-  "include": ["src/hc.ts"]
+  "include": ["src"]
 }

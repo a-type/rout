@@ -21,7 +21,8 @@ export function UpdateBanner({}) {
       gap="sm"
       p="sm"
       full="width"
-      surface="accent"
+      surface
+      color="accent"
       className="rounded-none flex-shrink-0 relative z-10000"
     >
       <ScrollTicker>
@@ -32,6 +33,7 @@ export function UpdateBanner({}) {
         size="small"
         loading={loading}
         color="accent"
+        emphasis="primary"
         onClick={async () => {
           try {
             setLoading(true);

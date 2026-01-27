@@ -41,7 +41,7 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@paralleldrive/cuid2": "2.2.2",
-    "@tanstack/react-query": "5.53.3",
+    "@tanstack/react-query": "5.90.20",
     "@types/react": "catalog:",
     "hono": "catalog:",
     "typescript": "catalog:"

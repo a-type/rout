@@ -14,10 +14,10 @@ import {
 import { AnyNotification, notificationTypes } from '@long-game/notifications';
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
-export class AdminStore extends WorkerEntrypoint<DbBindings> {
+export class AdminStore extends WorkerEntrypoint<ApiBindings> {
   #db: DB;
 
-  constructor(ctx: ExecutionContext, env: DbBindings) {
+  constructor(ctx: ExecutionContext, env: ApiBindings) {
     super(ctx, env);
     this.#db = createDb({ DB: env.D1 });
   }

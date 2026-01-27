@@ -19,7 +19,7 @@ publicSdk.addEventListener('error', (ev) => {
         typeof window !== 'undefined' &&
         window.location.pathname.endsWith('/login');
       if (!isOnLoginPage) {
-        window.location.href = '/login';
+        // window.location.href = '/login';
       }
     } else {
       toast.error(asLongGameError.message, {

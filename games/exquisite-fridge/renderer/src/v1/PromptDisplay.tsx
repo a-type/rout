@@ -24,7 +24,7 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
     if (prompt.words.length === 0) {
       // first round, no prompt yet
       return (
-        <Box p surface="primary">
+        <Box p surface color="primary">
           Start your story using your own words!
         </Box>
       );
@@ -46,7 +46,8 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
         <Box
           col
           gap
-          surface="primary"
+          surface
+          color="primary"
           p
           style={theme.style}
           className={clsx(theme.className, className)}

@@ -52,7 +52,8 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
   const theme = usePlayerThemed(section.playerId);
   return (
     <Box
-      surface="primary"
+      surface
+      color="primary"
       p
       col
       gap
@@ -67,7 +68,8 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
       <Box
         gap
         layout="center center"
-        surface="primary"
+        surface
+        color="primary"
         p="sm"
         className="text-xs color-primary-dark absolute right-0 bottom-0"
       >

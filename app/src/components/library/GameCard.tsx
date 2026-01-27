@@ -47,7 +47,12 @@ export function GameCard({
       </Card.Main>
       {!owned && (
         <Card.Actions>
-          <OpenQuickBuyButton color="accent" size="small" gameId={gameId} />
+          <OpenQuickBuyButton
+            color="accent"
+            emphasis="primary"
+            size="small"
+            gameId={gameId}
+          />
         </Card.Actions>
       )}
     </Card>

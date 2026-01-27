@@ -18,7 +18,7 @@ export function GoldUpgrade({ className, ...props }: GoldUpgradeProps) {
       method="post"
       className={className}
     >
-      <Button type="submit" color="accent" {...props}>
+      <Button type="submit" color="lemon" emphasis="primary" {...props}>
         Upgrade to Gold
       </Button>
     </form>

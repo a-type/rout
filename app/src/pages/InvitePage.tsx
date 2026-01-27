@@ -40,7 +40,6 @@ const InvitePage = () => {
 export default InvitePage;
 
 function LoggedInInvite({
-  me,
   invite,
 }: {
   me: Self;
@@ -57,7 +56,8 @@ function LoggedInInvite({
       </P>
       <Box>
         <Button
-          color="ghostDestructive"
+          color="attention"
+          emphasis="ghost"
           onClick={() => {
             respondMutation.mutate({ response: 'declined', id: invite.id });
           }}
@@ -91,15 +91,16 @@ function LoggedOutInvite({
         Let the games begin! Create an account to start your ritual of play
         together.
       </P>
-      <Button asChild>
-        <Link to="/login?tab=signup">Sign Up</Link>
-      </Button>
+      <Button render={<Link to="/login?tab=signup" />}>Sign Up</Button>
       <Box className="color-gray-dark">
         Have an account already?{' '}
-        <Button asChild className="inline-flex" size="small" color="ghost">
-          <Link to="/login">
-            Log in <Icon name="arrowRight" />
-          </Link>
+        <Button
+          className="inline-flex"
+          size="small"
+          emphasis="ghost"
+          render={<Link to="/login" />}
+        >
+          Log in <Icon name="arrowRight" />
         </Button>
         .
       </Box>

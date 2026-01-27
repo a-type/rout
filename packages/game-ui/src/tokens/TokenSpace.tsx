@@ -1,5 +1,5 @@
 import { clsx, Popover } from '@a-type/ui';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { droppableDataRegistry } from '../dnd/dataRegistry.js';
 import { DraggableData } from '../dnd/dndStore.js';
 import {
@@ -8,6 +8,7 @@ import {
   useParentDroppable,
 } from '../dnd/Droppable.js';
 import { DragGestureContext } from '../dnd/gestureStore.js';
+import { useMergedRef } from '../hooks/useMergedRef.js';
 import { isToken, TokenDragData } from './types.js';
 
 export interface TokenSpaceProps<T = any>
@@ -45,6 +46,7 @@ export function TokenSpace<T = any>({
   onOverAccepted,
   tags,
   validationMessageClassName,
+  ref: userRef,
   ...rest
 }: TokenSpaceProps<T>) {
   const [overError, setOverError] = useState<string | null>(null);
@@ -116,31 +118,34 @@ export function TokenSpace<T = any>({
     [type],
   );
 
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const finalRef = useMergedRef<any>(anchorRef, userRef);
+
   return (
     <Popover open={!!overError}>
-      <Popover.Anchor asChild>
-        <Droppable<TokenDragData>
-          id={id}
-          className={clsx(
-            'relative',
-            '[&[data-over-accepted=true]]:(scale-102)',
-            'transition-transform',
-            className,
-          )}
-          onDrop={(droppable, gesture) =>
-            onDrop?.(droppable.data as TokenDragData<T>, gesture)
-          }
-          accept={wrappedAccept}
-          onReject={wrappedOnReject}
-          onOver={handleOver}
-          tags={tokenSpaceTags}
-          data={data}
-          {...rest}
-        >
-          {children}
-        </Droppable>
-      </Popover.Anchor>
+      <Droppable<TokenDragData>
+        id={id}
+        ref={finalRef}
+        className={clsx(
+          'relative',
+          '[&[data-over-accepted=true]]:(scale-102)',
+          'transition-transform',
+          className,
+        )}
+        onDrop={(droppable, gesture) =>
+          onDrop?.(droppable.data as TokenDragData<T>, gesture)
+        }
+        accept={wrappedAccept}
+        onReject={wrappedOnReject}
+        onOver={handleOver}
+        tags={tokenSpaceTags}
+        data={data}
+        {...rest}
+      >
+        {children}
+      </Droppable>
       <Popover.Content
+        anchor={anchorRef}
         side="top"
         align="center"
         sideOffset={8}

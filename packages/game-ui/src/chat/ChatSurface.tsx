@@ -1,6 +1,12 @@
 import { clsx } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
-import { HTMLAttributes, ReactNode, useEffect, useState } from 'react';
+import {
+  HTMLAttributes,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
 import { Droppable } from '../dnd/Droppable.js';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { SpatialChatThread } from './SpatialChatThread.js';
@@ -9,9 +15,9 @@ export interface ChatSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   sceneId: string;
   children?: ReactNode;
   className?: string;
-  asChild?: boolean;
   disabled?: boolean;
   svg?: boolean;
+  render?: ReactElement;
 }
 
 const droppableTags = ['spatial-chat-surface'];
@@ -21,9 +27,9 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
   children,
   className,
   gameSuite,
-  asChild,
   disabled,
   svg,
+  render,
   ...rest
 }) {
   const chats = gameSuite.getSceneChat(sceneId);
@@ -68,7 +74,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
           'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
         className,
       )}
-      asChild={asChild}
+      render={render}
       tags={droppableTags}
       svg={svg}
     >

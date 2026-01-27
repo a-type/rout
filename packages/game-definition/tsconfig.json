@@ -5,7 +5,13 @@
     "declaration": true,
     "declarationDir": "./dist/typings",
     "declarationMap": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "composite": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
 }

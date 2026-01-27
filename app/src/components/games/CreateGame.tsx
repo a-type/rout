@@ -36,7 +36,7 @@ export const CreateGame = withSuspense(
     return (
       <GameLimitUpsellWrapper enabled={remaining === 0}>
         <Button
-          color="primary"
+          emphasis="primary"
           onClick={remaining > 0 ? create : undefined}
           {...rest}
         >
@@ -50,7 +50,7 @@ export const CreateGame = withSuspense(
       </GameLimitUpsellWrapper>
     );
   },
-  <Button color="primary" disabled>
+  <Button emphasis="primary" disabled>
     <Icon name="plus" /> New Game
   </Button>,
 );

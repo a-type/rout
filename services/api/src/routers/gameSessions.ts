@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { LongGameError } from '@long-game/common';
+import { LongGameError, wrapRpcData } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { Hono } from 'hono';
@@ -41,13 +41,14 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       const userStore = ctx.get('userStore');
       const { invitationStatus, status, first, before } =
         ctx.req.valid('query');
-      const { results: filteredSessions, pageInfo } =
+      const { results: filteredSessions, pageInfo } = wrapRpcData(
         await userStore.getGameSessions({
           status,
           invitationStatus,
           first,
           before,
-        });
+        }),
+      );
 
       return ctx.json({
         results: filteredSessions,

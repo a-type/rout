@@ -6,7 +6,8 @@ export interface GameAbandonedNoticeProps {}
 export function GameAbandonedNotice({}: GameAbandonedNoticeProps) {
   return (
     <Box
-      surface="attention"
+      surface
+      color="attention"
       col
       gap
       className="fixed bottom-sm right-sm shadow-lg"
@@ -15,8 +16,8 @@ export function GameAbandonedNotice({}: GameAbandonedNoticeProps) {
     >
       <H2>Game Abandoned</H2>
       <P>One or more players left mid-game. Sorry, we can't keep playing.</P>
-      <Button size="small" className="self-end" asChild>
-        <Link to="/">Go home</Link>
+      <Button size="small" className="self-end" render={<Link to="/" />}>
+        Go home
       </Button>
     </Box>
   );

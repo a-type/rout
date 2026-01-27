@@ -1,5 +1,5 @@
 import { Box, Button, clsx, Icon, Popover } from '@a-type/ui';
-import { ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useRef, useState } from 'react';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { Droppable } from '../dnd/Droppable.js';
 import { useRendererContext } from '../RendererProvider.js';
@@ -8,7 +8,7 @@ export interface HelpSurfaceProps {
   id: string;
   children?: ReactNode;
   className?: string;
-  asChild?: boolean;
+  render?: ReactElement;
   disabled?: boolean;
   content?: ReactNode;
   title?: ReactNode;
@@ -21,7 +21,7 @@ export function HelpSurface({
   id,
   children,
   className,
-  asChild,
+  render,
   disabled,
   content,
   title = 'Info',
@@ -43,6 +43,8 @@ export function HelpSurface({
     (state) => state.dragging === 'spatial-help',
   );
 
+  const anchorRef = useRef<HTMLDivElement>(null);
+
   if (disabled || (!content && !rulesId)) {
     return (
       <div className={className} {...rest}>
@@ -53,25 +55,24 @@ export function HelpSurface({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Popover.Anchor asChild>
-        <Droppable
-          noParenting
-          id={id}
-          onDrop={handleDrop}
-          className={clsx(
-            'relative',
-            isHelpDragging &&
-              'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
-            className,
-          )}
-          tags={droppableTags}
-          asChild={asChild}
-          {...rest}
-        >
-          {children}
-        </Droppable>
-      </Popover.Anchor>
-      <Popover.Content className="p-md pb-sm max-w-400px">
+      <Droppable
+        ref={anchorRef}
+        noParenting
+        id={id}
+        onDrop={handleDrop}
+        className={clsx(
+          'relative',
+          isHelpDragging &&
+            'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
+          className,
+        )}
+        tags={droppableTags}
+        render={render}
+        {...rest}
+      >
+        {children}
+      </Droppable>
+      <Popover.Content anchor={anchorRef} className="p-md pb-sm max-w-400px">
         <Popover.Arrow />
         <h2 className="text-md font-bold capitalize mb-sm">{title}</h2>
         {content}
@@ -82,20 +83,24 @@ export function HelpSurface({
           className="flex-shrink-0 pt-md"
         >
           <Button
-            color="default"
+            emphasis="default"
             size="small"
-            asChild
             onClick={() => setOpen(false)}
+            render={
+              <LinkComponent
+                to={`?rules=true${rulesId ? `#${rulesId}` : ''}`}
+              />
+            }
           >
-            <LinkComponent to={`?rules=true${rulesId ? `#${rulesId}` : ''}`}>
-              <Icon name="book" />
-              Read more
-            </LinkComponent>
+            <Icon name="book" />
+            Read more
           </Button>
-          <Popover.Close asChild>
-            <Button color="ghost" size="small" className="top-0 left-0">
-              <Icon name="x" />
-            </Button>
+          <Popover.Close
+            render={
+              <Button emphasis="ghost" size="small" className="top-0 left-0" />
+            }
+          >
+            <Icon name="x" />
           </Popover.Close>
         </Box>
       </Popover.Content>

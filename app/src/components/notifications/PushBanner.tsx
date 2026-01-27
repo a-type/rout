@@ -40,7 +40,7 @@ export function PushBanner({}: PushBannerProps) {
             Notifications tell you when it's your turn and keep the game going.
           </p>
           <Box gap full="width" justify="between" items="center">
-            <Button color="ghost" onClick={() => setDismissed(true)}>
+            <Button emphasis="ghost" onClick={() => setDismissed(true)}>
               <Icon name="x" />
             </Button>
             <Button
@@ -72,7 +72,8 @@ export function PushBanner({}: PushBannerProps) {
 }
 
 const Banner = withProps(Box, {
-  surface: 'primary',
+  color: 'primary',
+  surface: true,
   elevated: 'xl',
   col: true,
   gap: true,

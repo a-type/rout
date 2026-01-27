@@ -536,7 +536,7 @@ export class PublicSdk extends BaseSdk {
       this.apiRpc.admin.users.$get({
         query: {
           before: cursor,
-          first: `${input.first ?? 20}`,
+          first: input.first ?? 20,
         },
       }),
     {

@@ -31,7 +31,7 @@ export const RoundHistoryControl = withGame(
     return (
       <Box layout="center center" gap="sm">
         <Button
-          size="icon-small"
+          size="small"
           onClick={() => {
             loadRound(roundIndex - 1);
           }}
@@ -44,12 +44,20 @@ export const RoundHistoryControl = withGame(
         <Select
           value={roundIndex.toString()}
           onValueChange={(v) => {
+            if (v === null) return;
             const asInt = parseInt(v, 10);
             loadRound(asInt);
           }}
         >
           <Select.Trigger size="small" className="px-md">
-            <Select.Value />
+            <Select.Value>
+              {(indexString) =>
+                suite.gameDefinition.getRoundLabel?.({
+                  roundIndex: parseInt(indexString, 10),
+                  members: suite.members,
+                }) ?? `Round ${parseInt(indexString, 10) + 1}`
+              }
+            </Select.Value>
             {transitioning ? <Spinner size={12} /> : <Select.Icon />}
           </Select.Trigger>
           <Select.Content>
@@ -65,7 +73,7 @@ export const RoundHistoryControl = withGame(
           </Select.Content>
         </Select>
         <Button
-          size="icon-small"
+          size="small"
           onClick={() => {
             if (isCurrent) {
               return;
@@ -78,7 +86,7 @@ export const RoundHistoryControl = withGame(
           <Icon name="next" size={10} />
         </Button>
         <Button
-          size="icon-small"
+          size="small"
           onClick={() => {
             loadRound(latestRoundIndex);
           }}

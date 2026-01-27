@@ -44,7 +44,7 @@ export function QuickBuyPopup({}: QuickBuyPopupProps) {
 }
 
 export function useOpenQuickBuy() {
-  const [search, setSearch] = useSearchParams();
+  const [, setSearch] = useSearchParams();
   const open = (gameId: string) => {
     setSearch((v) => {
       v.set('quickBuy', gameId);
@@ -109,16 +109,18 @@ function QuickBuyProductCard({ product }: { product: GameProduct }) {
         <Card.Content>{product.gameProductItems.length} games</Card.Content>
       </Card.Main>
       <Card.Actions className="flex-col items-start w-full">
-        <Button asChild size="small">
-          <Link to={`/library?productId=${product.id}`}>
-            View in store
-            <Icon name="arrowRight" />
-          </Link>
+        <Button
+          size="small"
+          render={<Link to={`/library?productId=${product.id}`} />}
+        >
+          View in store
+          <Icon name="arrowRight" />
         </Button>
         <BuyGameProduct
           productId={product.id}
           returnTo={window.location.href}
           color="accent"
+          emphasis="primary"
           size="small"
         >
           <Icon name="cart" />

@@ -5,7 +5,7 @@ import {
   GetPublicTurnData,
   GetTurnData,
 } from '@long-game/game-definition';
-import { hcWithType as apiHc } from '@long-game/service-api';
+import { hcWithType as apiHc } from '@long-game/service-api/client';
 import type { InferResponseType } from 'hono/client';
 import { API_ORIGIN } from '../config.js';
 import { fetch } from '../fetch.js';

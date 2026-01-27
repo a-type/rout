@@ -16,13 +16,13 @@ import { Notification } from '@long-game/game-client';
 import { useMediaQuery, withSuspense } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
-import { ReactNode, Suspense, useState } from 'react';
+import { ReactElement, Suspense, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings.js';
 import { useAutoReadNotifications } from './useAutoReadNotifications.js';
 
 export interface NotificationsButtonProps
   extends Omit<ButtonProps, 'children'> {
-  children?: (details: { hasUnread: boolean }) => ReactNode;
+  children?: (details: { hasUnread: boolean }) => ReactElement;
 }
 
 export const NotificationsButton = withSuspense(
@@ -52,19 +52,22 @@ export const NotificationsButton = withSuspense(
 
     return (
       <PopoverImpl open={open} onOpenChange={setOpen}>
-        <PopoverImpl.Trigger asChild className={className}>
-          {children ? (
-            children({ hasUnread })
-          ) : (
-            <Button
-              size="icon"
-              color={hasUnread ? 'accent' : 'ghost'}
-              {...rest}
-            >
-              <Icon name="bell" />
-            </Button>
-          )}
-        </PopoverImpl.Trigger>
+        <PopoverImpl.Trigger
+          className={className}
+          render={
+            children ? (
+              children({ hasUnread })
+            ) : (
+              <Button
+                color="accent"
+                emphasis={hasUnread ? 'primary' : 'ghost'}
+                {...rest}
+              >
+                <Icon name="bell" />
+              </Button>
+            )
+          }
+        />
         <PopoverImpl.Content className="min-h-500px sm:w-400px sm:p-md">
           {!isMobile && <PopoverArrow />}
           <Box gap items="center" justify="between" className="mb-md">
@@ -78,8 +81,7 @@ export const NotificationsButton = withSuspense(
             <Box gap items="center">
               {!showSettings && (
                 <Button
-                  size="icon"
-                  color="ghost"
+                  emphasis="ghost"
                   onClick={() => markAllRead.mutate(undefined)}
                 >
                   <Icon name="check" className="relative -left-3px" />
@@ -87,8 +89,7 @@ export const NotificationsButton = withSuspense(
                 </Button>
               )}
               <Button
-                color="ghost"
-                size="icon"
+                emphasis="ghost"
                 onClick={() => {
                   setShowSettings((prev) => !prev);
                 }}
@@ -114,7 +115,7 @@ export const NotificationsButton = withSuspense(
                   ))}
                   {hasNextPage && (
                     <Button
-                      color="ghost"
+                      emphasis="ghost"
                       onClick={() => fetchNextPage()}
                       loading={isFetchingNextPage}
                       className="m-auto mt-lg"
@@ -136,7 +137,7 @@ export const NotificationsButton = withSuspense(
               )}
               {!showRead && (
                 <Box p layout="center center">
-                  <Button color="ghost" onClick={() => setShowRead(true)}>
+                  <Button emphasis="ghost" onClick={() => setShowRead(true)}>
                     Show Read
                   </Button>
                 </Box>
@@ -176,11 +177,11 @@ function NotificationItem({
     <Box
       key={notification.id}
       gap
-      surface={notification.readAt ? 'default' : 'wash'}
+      surface={notification.readAt ? false : 'white'}
       items="center"
     >
       <Button
-        color="ghost"
+        emphasis="ghost"
         className="flex-1 font-normal items-start text-start p-sm"
         onClick={() => {
           if (!notification.readAt) {
@@ -201,8 +202,7 @@ function NotificationItem({
       </Button>
       {!notification.readAt && (
         <Button
-          color="ghost"
-          size="icon"
+          emphasis="ghost"
           onClick={() => {
             markRead.mutate({ id: notification.id, read: true });
           }}
@@ -211,8 +211,8 @@ function NotificationItem({
         </Button>
       )}
       <Button
-        color="ghostDestructive"
-        size="icon"
+        color="attention"
+        emphasis="ghost"
         className="flex-shrink-0"
         onClick={() => deleteSelf.mutate({ id: notification.id })}
       >

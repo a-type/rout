@@ -30,7 +30,8 @@ const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
     const isMe = gameSuite.playerId === playerId;
     return (
       <Box
-        surface="primary"
+        surface
+        color="primary"
         p="none"
         className={clsx(className)}
         style={style}

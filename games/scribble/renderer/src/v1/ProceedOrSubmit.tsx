@@ -39,7 +39,7 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
           </Box>
         )}
         <Button
-          color="primary"
+          emphasis="primary"
           onClick={() => {
             gameplayState.viewingIndex = index === 0 ? 1 : 0;
           }}

@@ -1,10 +1,10 @@
-import { Popover } from '@a-type/ui';
+import { Popover, useRender } from '@a-type/ui';
 import { preventDefault } from '@a-type/utils';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import { useWindowEvent } from '../hooks/useWindowEvent.js';
 
 export interface RuleTipProps {
-  children?: ReactNode;
+  children?: ReactElement;
   delay?: number;
   hintDelay?: number;
   cancelDistance?: number;
@@ -26,8 +26,6 @@ export function RuleTip({
   const pointerPrevRef = useRef<{ x: number; y: number; time: number } | null>(
     null,
   );
-
-  const anchorRef = useRef<HTMLDivElement>(null);
 
   // begin the delay timer
   const handleDown = () => {
@@ -92,21 +90,33 @@ export function RuleTip({
     disabled: status === 'open',
   });
 
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const anchor = useRender({
+    render: children,
+    ref: anchorRef,
+    props: {
+      className: 'touch-none',
+      onPointerDown: handleDown,
+      onContextMenu: preventDefault,
+    },
+  });
+
   return (
     <Popover
       open={status === 'open' || (hint && status !== 'canceled')}
       modal={false}
+      onOpenChange={(open, ev) => {
+        if (
+          ev.reason === 'outside-press' ||
+          ev.reason === 'escape-key' ||
+          ev.reason === 'focus-out'
+        ) {
+          cancel();
+        }
+      }}
     >
-      <Popover.Anchor
-        asChild
-        ref={anchorRef}
-        onPointerDown={handleDown}
-        onContextMenu={preventDefault}
-        className="touch-none"
-      >
-        {children}
-      </Popover.Anchor>
-      <Popover.Content onPointerDownOutside={cancel}>
+      {anchor}
+      <Popover.Content anchor={anchorRef}>
         <Popover.Arrow />
         {status === 'open' ? (
           content

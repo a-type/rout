@@ -51,13 +51,16 @@ const GameInviteLinkPage = () => {
             <P className="text-center">
               Before we get started, you need to log in or create a profile.
             </P>
-            <Button color="primary" asChild>
-              <Link
-                to={`/login?tab=signup&returnTo=${location.href}`}
-                preserveQuery
-              >
-                Get started
-              </Link>
+            <Button
+              emphasis="primary"
+              render={
+                <Link
+                  to={`/login?tab=signup&returnTo=${location.href}`}
+                  preserveQuery
+                />
+              }
+            >
+              Get started
             </Button>
           </Box>
         </PageContent>
@@ -89,7 +92,7 @@ const GameInviteLinkPage = () => {
             </Box>
           ) : (
             <Button
-              color="primary"
+              emphasis="primary"
               onClick={claim}
               loading={claimMutation.isPending}
             >

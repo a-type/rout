@@ -33,69 +33,65 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
   const [filter, setFilter] = useState('');
 
   return (
-    <Box full="width" container="reset" className={className} asChild>
-      <TokenSpace<WordItem>
-        id="hand"
-        onDrop={(token) => {
-          gameSuite.prepareTurn((cur) => ({
-            words: cur.words.filter((w) => w.id !== token.id),
-          }));
-        }}
-        disabled={gameSuite.turnWasSubmitted}
-        priority={-1}
-      >
-        <Box col className="px-[50px] md:px-0 w-full h-full">
-          <H4 className="text-center mb-xs">Free tiles</H4>
-          <FreebieWords className="mb-md" />
-          <H4 className="text-center mb-xs">Your pile</H4>
-          <Box surface="default" gap="sm" p="sm" wrap className="mb-sm">
-            <Button
-              size="small"
-              toggled={sortOrder === 'alpha-asc'}
-              toggleMode="state-only"
-              onClick={toggleSortOrder}
-            >
-              <Icon
-                name={sortOrder === 'alpha-asc' ? 'arrowUp' : 'arrowDown'}
-              />
-              {sortOrder === 'alpha-asc' ? 'a-z' : 'z-a'}
-            </Button>
-            <Input
-              placeholder="Filter..."
-              value={filter}
-              sizeVariant="small"
-              onChange={(e) => setFilter(e.target.value)}
-              className="flex-1 min-w-4ch"
-              aria-label="Filter words"
-              name="filter-words"
-              size={4}
-            />
-          </Box>
-          <Box
-            gap="md"
-            wrap
-            full="width"
-            layout="center start"
-            className="pb-md"
+    <Box
+      full="width"
+      container="reset"
+      className={className}
+      render={
+        <TokenSpace<WordItem>
+          id="hand"
+          onDrop={(token) => {
+            gameSuite.prepareTurn((cur) => ({
+              words: cur.words.filter((w) => w.id !== token.id),
+            }));
+          }}
+          disabled={gameSuite.turnWasSubmitted}
+          priority={-1}
+        />
+      }
+    >
+      <Box col className="px-[50px] md:px-0 w-full h-full">
+        <H4 className="text-center mb-xs">Free tiles</H4>
+        <FreebieWords className="mb-md" />
+        <H4 className="text-center mb-xs">Your pile</H4>
+        <Box surface gap="sm" p="sm" wrap className="mb-sm">
+          <Button
+            size="small"
+            toggled={sortOrder === 'alpha-asc'}
+            toggleMode="state-only"
+            onClick={toggleSortOrder}
           >
-            {hand
-              .filter((handWord) => !usedIds.has(handWord.id))
-              .filter(
-                (word) =>
-                  !filter ||
-                  word.text.toLowerCase().includes(filter.toLowerCase()),
-              )
-              .sort((a, b) =>
-                sortOrder === 'alpha-asc'
-                  ? a.text.localeCompare(b.text)
-                  : b.text.localeCompare(a.text),
-              )
-              .map((word) => (
-                <WordTile value={word} key={word.id} />
-              ))}
-          </Box>
+            <Icon name={sortOrder === 'alpha-asc' ? 'arrowUp' : 'arrowDown'} />
+            {sortOrder === 'alpha-asc' ? 'a-z' : 'z-a'}
+          </Button>
+          <Input
+            placeholder="Filter..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="flex-1 min-w-4ch"
+            aria-label="Filter words"
+            name="filter-words"
+            size={4}
+          />
         </Box>
-      </TokenSpace>
+        <Box gap="md" wrap full="width" layout="center start" className="pb-md">
+          {hand
+            .filter((handWord) => !usedIds.has(handWord.id))
+            .filter(
+              (word) =>
+                !filter ||
+                word.text.toLowerCase().includes(filter.toLowerCase()),
+            )
+            .sort((a, b) =>
+              sortOrder === 'alpha-asc'
+                ? a.text.localeCompare(b.text)
+                : b.text.localeCompare(a.text),
+            )
+            .map((word) => (
+              <WordTile value={word} key={word.id} />
+            ))}
+        </Box>
+      </Box>
     </Box>
   );
 });
@@ -107,29 +103,29 @@ function FreebieWords({ className }: { className?: string }) {
       rulesId="free-words"
       content={<div>You can use as many of these as you like.</div>}
       title="Free Tiles"
-      asChild
+      render={
+        <Box
+          gap="md"
+          wrap
+          full="width"
+          layout="center start"
+          className={className}
+        />
+      }
     >
-      <Box
-        gap="md"
-        wrap
-        full="width"
-        layout="center start"
-        className={className}
-      >
-        {freebieWords.map((word) => (
-          <WordTile
-            key={word}
-            value={{
-              id: `freebie-${word}`,
-              text: word,
-              isWriteIn: false,
-              isNew: false,
-            }}
-            className="bg-yellow-200"
-            disableChat
-          />
-        ))}
-      </Box>
+      {freebieWords.map((word) => (
+        <WordTile
+          key={word}
+          value={{
+            id: `freebie-${word}`,
+            text: word,
+            isWriteIn: false,
+            isNew: false,
+          }}
+          className="bg-yellow-200"
+          disableChat
+        />
+      ))}
     </HelpSurface>
   );
 }

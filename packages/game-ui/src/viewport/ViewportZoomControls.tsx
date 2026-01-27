@@ -26,13 +26,13 @@ export function ViewportZoomControls({ className, ...props }: BoxProps) {
       )}
       {...props}
     >
-      <Button color="ghost" size="icon-small" onClick={reset}>
+      <Button emphasis="ghost" size="small" onClick={reset}>
         <Icon name="maximize" />
       </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomIn}>
+      <Button emphasis="ghost" size="small" onClick={zoomIn}>
         <Icon name="zoomIn" />
       </Button>
-      <Button color="ghost" size="icon-small" onClick={zoomOut}>
+      <Button emphasis="ghost" size="small" onClick={zoomOut}>
         <Icon name="zoomOut" />
       </Button>
     </Box>

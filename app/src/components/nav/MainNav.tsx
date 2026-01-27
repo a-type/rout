@@ -15,23 +15,17 @@ export function MainNav({}: MainNavProps) {
   return (
     <NavBar className="md:rounded-md [scrollbar-gutter:initial]">
       <Wordmark className="hidden md:block font-[Knewave] text-center w-full p-2 text-xl" />
-      <NavBar.Item asChild active={isHome}>
-        <Link to="/">
-          <NavBar.ItemIcon name="home" />
-          <NavBar.ItemText>Home</NavBar.ItemText>
-        </Link>
+      <NavBar.Item active={isHome} render={<Link to="/" />}>
+        <NavBar.ItemIcon name="home" />
+        <NavBar.ItemText>Home</NavBar.ItemText>
       </NavBar.Item>
-      <NavBar.Item asChild active={isFriends}>
-        <Link to="/friends">
-          <NavBar.ItemIcon name="add_person" />
-          <NavBar.ItemText>Friends</NavBar.ItemText>
-        </Link>
+      <NavBar.Item active={isFriends} render={<Link to="/friends" />}>
+        <NavBar.ItemIcon name="add_person" />
+        <NavBar.ItemText>Friends</NavBar.ItemText>
       </NavBar.Item>
-      <NavBar.Item asChild active={isLibrary}>
-        <Link to="/library">
-          <NavBar.ItemIcon name="gamePiece" />
-          <NavBar.ItemText>Games</NavBar.ItemText>
-        </Link>
+      <NavBar.Item active={isLibrary} render={<Link to="/library" />}>
+        <NavBar.ItemIcon name="gamePiece" />
+        <NavBar.ItemText>Games</NavBar.ItemText>
       </NavBar.Item>
       <NotificationsButton>
         {({ hasUnread }) => (

@@ -1,21 +1,18 @@
-import { clsx, H1, Slot } from '@a-type/ui';
+import { clsx, H1 } from '@a-type/ui';
 
 export interface WordmarkProps {
-  asChild?: boolean;
   className?: string;
 }
 
-export function Wordmark({ asChild, className }: WordmarkProps) {
-  const Comp = asChild ? Slot : H1;
-
+export function Wordmark({ className }: WordmarkProps) {
   return (
-    <Comp
+    <H1
       className={clsx(
         'font-fancy layer-components:([font-size:12vmin] text-center relative z-1)',
         className,
       )}
     >
       rout!
-    </Comp>
+    </H1>
   );
 }

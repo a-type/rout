@@ -22,6 +22,7 @@ export function OwnedGameList({ className }: OwnedGameListProps) {
           onClick={() => applyFreeGames.mutate(undefined)}
           loading={applyFreeGames.isPending}
           color="accent"
+          emphasis="primary"
         >
           Get Free Games
         </Button>

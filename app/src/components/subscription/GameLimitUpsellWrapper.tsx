@@ -3,11 +3,11 @@ import {
   ENTITLEMENT_NAMES,
   MAX_ACTIVE_GAMES_BY_ENTITLEMENT,
 } from '@long-game/common';
-import { ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { GoldUpgrade } from './GoldUpgrade.js';
 
 export interface GameLimitUpsellWrapperProps {
-  children: ReactNode;
+  children: ReactElement;
   enabled?: boolean;
 }
 
@@ -20,7 +20,7 @@ export function GameLimitUpsellWrapper({
   }
   return (
     <Dialog>
-      <Dialog.Trigger asChild>{children}</Dialog.Trigger>
+      <Dialog.Trigger render={children} />
       <Dialog.Content>
         <Dialog.Title>Upgrade to Gold</Dialog.Title>
         <Dialog.Description>

@@ -99,23 +99,25 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
   return (
     <Box gap="xs" p="xs" items="center" {...props}>
       <Dialog open={open} onOpenChange={(o) => (localState.open = o)}>
-        <Dialog.Trigger asChild>
-          <Button
-            color="ghost"
-            size="small"
-            onClick={() => {
-              localState.open = true;
-              if (gameSuite.combinedLog.length === 0) {
-                setTimeout(() => {
-                  localState.focusChat = true;
-                }, 50);
-              }
-            }}
-            className="w-full font-normal h-32px rounded-xs p-0"
-            aria-label="Open Game Log"
-          >
-            <GameLogCollapsedTriggerContent />
-          </Button>
+        <Dialog.Trigger
+          render={
+            <Button
+              emphasis="ghost"
+              size="small"
+              onClick={() => {
+                localState.open = true;
+                if (gameSuite.combinedLog.length === 0) {
+                  setTimeout(() => {
+                    localState.focusChat = true;
+                  }, 50);
+                }
+              }}
+              className="w-full font-normal h-32px rounded-xs p-0"
+              aria-label="Open Game Log"
+            />
+          }
+        >
+          <GameLogCollapsedTriggerContent />
         </Dialog.Trigger>
         <Dialog.Content className={clsx('px-sm')} width="md">
           <Box
@@ -126,15 +128,17 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
             <ChatLog log={gameSuite.combinedLog} />
             <GameLogChatInput />
           </Box>
-          <Dialog.Close asChild>
-            <Button
-              size="icon-small"
-              color="ghost"
-              className="m-auto absolute top-md right-md"
-              aria-label="Close Game Log"
-            >
-              <Icon name="x" />
-            </Button>
+          <Dialog.Close
+            render={
+              <Button
+                size="small"
+                emphasis="ghost"
+                className="m-auto absolute top-md right-md"
+                aria-label="Close Game Log"
+              />
+            }
+          >
+            <Icon name="x" />
           </Dialog.Close>
         </Dialog.Content>
       </Dialog>

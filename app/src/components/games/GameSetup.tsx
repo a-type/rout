@@ -1,4 +1,3 @@
-import { useGame } from '@/hooks/useGame.js';
 import { sdkHooks } from '@/services/publicSdk.js';
 import { Box, Button, clsx, H1, P } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
@@ -23,11 +22,6 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
   const { data: pregame } = sdkHooks.useGetGameSessionPregame({
     id: gameSessionId,
   });
-  const game = useGame(gameSuite.gameId);
-  const insufficientPlayers =
-    pregame.members.length <
-    (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
-
   const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGames({
     id: gameSessionId,
   });
@@ -100,13 +94,7 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
   ];
 
   return (
-    <Box
-      d="col"
-      gap
-      surface="default"
-      p
-      className="sticky z-10 bottom-sm text-sm"
-    >
+    <Box d="col" gap surface p className="sticky z-10 bottom-sm text-sm">
       <Box d="col" gap="sm">
         <Box gap items="center">
           <div className="text-nowrap">Join link:</div>
@@ -123,7 +111,7 @@ const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
             {entries?.map((entry) => (
               <Button
                 key={entry.id}
-                color="ghost"
+                emphasis="ghost"
                 size="small"
                 onClick={() => {
                   inviteMutation.mutateAsync({

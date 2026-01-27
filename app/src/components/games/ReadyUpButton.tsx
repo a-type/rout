@@ -24,7 +24,7 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
         disabled={cannotStart}
         onClick={() => gameSuite.toggleReady()}
         disableTopography={amIReady}
-        color={cannotStart ? 'default' : 'primary'}
+        emphasis={cannotStart ? 'default' : 'primary'}
         className={clsx('w-full', className)}
         wrapperClassName="justify-between w-full"
       >

@@ -33,7 +33,8 @@ function GameSessionCard({ session }: { session: AdminGameSessionSummary }) {
       <Card.Footer>
         <Card.Actions>
           <ConfirmedButton
-            color="destructive"
+            color="attention"
+            emphasis="primary"
             confirmText="Sure?"
             size="small"
             onConfirm={() => deleteSession.mutate({ id: session.id })}

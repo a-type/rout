@@ -52,18 +52,13 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
           }}
         />
         <Box items="center" justify="between" gap="lg">
-          <Button
-            size="icon"
-            disabled={index === 0}
-            onClick={() => setIndex((i) => i - 1)}
-          >
+          <Button disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
             <Icon name="arrowLeft" />
           </Button>
           <Box className="text-2xl">
             {index + 1} / {task.tasksToRate.length}
           </Box>
           <Button
-            size="icon"
             disabled={index === task.tasksToRate.length - 1}
             onClick={() => setIndex((i) => i + 1)}
           >
@@ -182,8 +177,7 @@ function RatingPicker({
       {Object.keys(ratingEmoji).map((rating) => (
         <Button
           key={rating}
-          size="icon"
-          color="ghost"
+          emphasis="ghost"
           onClick={() => onChange(rating as Rating['rating'])}
           toggled={value === (rating as Rating['rating'])}
           className="font-size-inherit"

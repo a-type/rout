@@ -41,14 +41,14 @@ export function NotificationSettings({}: NotificationSettingsProps) {
     <Box d="col" gap container>
       <H3>Settings</H3>
       {canPush && !subscribedToPush && (
-        <Box surface="primary" d="col" gap p>
+        <Box surface color="primary" d="col" gap p>
           <div>
             <strong>Never miss a turn!</strong> Turn on notifications on this
             device.
           </div>
           <Button
             loading={isSubscribingToPush}
-            color="primary"
+            emphasis="primary"
             onClick={() => subscribeToPush()}
           >
             Enable Push Notifications

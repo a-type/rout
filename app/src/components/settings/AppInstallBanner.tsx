@@ -20,7 +20,8 @@ export function AppInstallBanner({ className }: AppInstallBannerProps) {
 
   return (
     <Box
-      surface="accent"
+      surface
+      color="accent"
       p
       col
       gap
@@ -37,12 +38,12 @@ export function AppInstallBanner({ className }: AppInstallBannerProps) {
       </Box>
       <Box gap items="center" justify="between">
         <Button
-          color="ghost"
+          emphasis="ghost"
           onClick={() => setDismissed(new Date().toISOString())}
         >
           No thanks
         </Button>
-        <Button color="contrast" onClick={() => triggerInstall()}>
+        <Button emphasis="contrast" onClick={() => triggerInstall()}>
           Get the app
         </Button>
       </Box>

@@ -139,14 +139,16 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
                       ))}
                     </AvatarList>
                   </Popover.Content>
-                  <Popover.Trigger asChild>
-                    <Button
-                      size="icon-small"
-                      className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
-                      color="ghost"
-                    >
-                      <Icon name="lock" />
-                    </Button>
+                  <Popover.Trigger
+                    render={
+                      <Button
+                        size="small"
+                        className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
+                        emphasis="ghost"
+                      />
+                    }
+                  >
+                    <Icon name="lock" />
                   </Popover.Trigger>
                 </Popover>
               )}

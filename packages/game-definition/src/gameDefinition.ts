@@ -213,7 +213,7 @@ export type GameDefinition<
 
 export type AnyGameDefinition = GameDefinition<GameDefinitionConfig>;
 
-export function validateGameDefinition(game: GameDefinition) {
+export function validateGameDefinition(_game: GameDefinition) {
   // no-op, for now
 }
 

@@ -1,11 +1,11 @@
 import { zValidator } from '@hono/zod-validator';
 import { id, isPrefixedId, PrefixedId, wrapRpcData } from '@long-game/common';
-import { UserStore } from '@long-game/service-db';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { userStoreMiddleware } from '../middleware/index.js';
 import { notifyUser } from '../services/notification.js';
+import { UserStore } from '../stores/UserStore.js';
 
 export const gameSessionInvitationsRouter = new Hono()
   .use(userStoreMiddleware)

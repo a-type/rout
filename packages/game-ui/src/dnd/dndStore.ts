@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/shallow';
 import { draggableDataRegistry } from './dataRegistry.js';
 import { dndEvents } from './dndEvents.js';
@@ -29,81 +28,77 @@ export type DndStoreValue = {
 };
 
 export const useDndStore = create<DndStoreValue>()(
-  subscribeWithSelector(
-    immer((set, get) => ({
-      domOverlayElement: null,
-      svgOverlayElement: null,
-      candidate: null,
-      dragging: null,
-      dragGesture: { x: 0, y: 0, xOffset: 0, yOffset: 0 },
-      overRegion: null,
+  subscribeWithSelector((set, get) => ({
+    domOverlayElement: null,
+    svgOverlayElement: null,
+    candidate: null,
+    dragging: null,
+    dragGesture: { x: 0, y: 0, xOffset: 0, yOffset: 0 },
+    overRegion: null,
 
-      domOverlayRef: (element: HTMLElement | null) => {
-        set({ domOverlayElement: element });
-      },
-      svgOverlayRef: (element: SVGSVGElement | null) => {
-        set({ svgOverlayElement: element });
-      },
-      setCandidate: (id: string | null) => {
-        const current = get().candidate;
-        if (current && current !== id) {
-          dndEvents.emit('cancel', current);
-        }
+    domOverlayRef: (element: HTMLElement | null) => {
+      set({ domOverlayElement: element });
+    },
+    svgOverlayRef: (element: SVGSVGElement | null) => {
+      set({ svgOverlayElement: element });
+    },
+    setCandidate: (id: string | null) => {
+      const current = get().candidate;
+      if (current && current !== id) {
+        dndEvents.emit('cancel', current);
+      }
 
-        set({ candidate: id, overRegion: null });
-        if (id) {
-          dndEvents.emit('candidate', id);
-        }
-      },
-      startDrag: (id: string | null) => {
-        const current = get().dragging;
-        if (current && current !== id) {
-          dndEvents.emit('cancel', current);
-        }
+      set({ candidate: id, overRegion: null });
+      if (id) {
+        dndEvents.emit('candidate', id);
+      }
+    },
+    startDrag: (id: string | null) => {
+      const current = get().dragging;
+      if (current && current !== id) {
+        dndEvents.emit('cancel', current);
+      }
 
-        set({
-          dragging: id,
-          candidate: null,
-          overRegion: null,
-        });
-        if (id) {
-          dndEvents.emit('start', id);
-        }
-      },
-      endDrag: (gesture: DragGestureContext) => {
-        const { dragging, overRegion } = get();
-        if (dragging) {
-          if (overRegion) {
-            dndEvents.emit('drop', dragging, overRegion, gesture);
-          } else {
-            dndEvents.emit('cancel', dragging);
-          }
-        }
-        set({
-          dragging: null,
-          overRegion: null,
-          candidate: null,
-        });
-      },
-      cancelDrag: () => {
-        const { dragging } = get();
-        if (dragging) {
+      set({
+        dragging: id,
+        candidate: null,
+        overRegion: null,
+      });
+      if (id) {
+        dndEvents.emit('start', id);
+      }
+    },
+    endDrag: (gesture: DragGestureContext) => {
+      const { dragging, overRegion } = get();
+      if (dragging) {
+        if (overRegion) {
+          dndEvents.emit('drop', dragging, overRegion, gesture);
+        } else {
           dndEvents.emit('cancel', dragging);
         }
-        set({
-          dragging: null,
-          candidate: null,
-          overRegion: null,
-        });
-      },
-      setOverRegion: (regionId: string | null) => {
-        if (get().overRegion === regionId) return;
-        set((state) => {
-          state.overRegion = regionId;
-        });
-      },
-    })),
-  ),
+      }
+      set({
+        dragging: null,
+        overRegion: null,
+        candidate: null,
+      });
+    },
+    cancelDrag: () => {
+      const { dragging } = get();
+      if (dragging) {
+        dndEvents.emit('cancel', dragging);
+      }
+      set({
+        dragging: null,
+        candidate: null,
+        overRegion: null,
+      });
+    },
+    setOverRegion: (regionId: string | null) => {
+      if (get().overRegion === regionId) return;
+      set({ overRegion: regionId });
+    },
+  })),
 );
 
 (window as any).dndStore = useDndStore; // For debugging in browser console

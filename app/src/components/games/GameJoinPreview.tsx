@@ -24,7 +24,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
     data: { count: remainingGames },
   } = sdkHooks.useGetRemainingGameSessions();
 
-  const game = useGame(pregame.session.gameId);
+  const game = useGame(pregame.session.gameId ?? '');
 
   const whoInvited = pregame.members.find((m) => m.id === myInvite.inviterId);
 
@@ -51,11 +51,10 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
           join a new game until you finish or leave another.
         </P>
         <MaybeSuggestGold />
-        <Button asChild>
-          <Link to="/">View active games</Link>
-        </Button>
+        <Button render={<Link to="/" />}>View active games</Button>
         <Button
-          color="ghostDestructive"
+          color="attention"
+          emphasis="ghost"
           onClick={async () => {
             await respondToInviteMutation.mutateAsync({
               response: 'declined',
@@ -90,7 +89,8 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
       </Box>
       <Box>
         <Button
-          color="ghostDestructive"
+          color="attention"
+          emphasis="ghost"
           onClick={async () => {
             await respondToInviteMutation.mutateAsync({
               response: 'declined',

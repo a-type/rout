@@ -32,11 +32,13 @@ export function HomePage({}: HomePageProps) {
       <TopographyBackground className="fixed" />
       <PageContent className="pb-25vh">
         <Box d="row" gap layout="center end" full="width">
-          <Button size="small" color="ghost" asChild>
-            <Link to="/settings">
-              <MyAvatar />
-              <Icon name="gear" />
-            </Link>
+          <Button
+            size="small"
+            emphasis="ghost"
+            render={<Link to="/settings" />}
+          >
+            <MyAvatar />
+            <Icon name="gear" />
           </Button>
         </Box>
         <AppInstallBanner />
@@ -78,22 +80,21 @@ export function HomePage({}: HomePageProps) {
             />
           </Box>
           <Divider className="bg-gray" />
-          <Button asChild color="ghost" className="ml-auto color-gray-dark">
-            <Link to="/history">
-              <Icon name="calendar" />
-              History
-              <Icon name="arrowRight" />
-            </Link>
+          <Button
+            emphasis="ghost"
+            className="ml-auto color-gray-dark"
+            render={<Link to="/history" />}
+          >
+            <Icon name="calendar" />
+            History
+            <Icon name="arrowRight" />
           </Button>
         </Box>
         <Suspense>
           <CompleteProfileDialog />
         </Suspense>
-        <PageNowPlaying
-          unstyled
-          className="flex-row gap-sm items-center justify-center"
-        >
-          <CreateHotseat color="default" />
+        <PageNowPlaying className="flex-row gap-sm items-center justify-center">
+          <CreateHotseat emphasis="default" />
           <CreateGame />
         </PageNowPlaying>
       </PageContent>

@@ -124,7 +124,8 @@ function AdminEditProductContent({
           <Dialog.Actions>
             <Dialog.Close>Cancel</Dialog.Close>
             <Button
-              color="destructive"
+              color="attention"
+              emphasis="primary"
               onClick={() => {
                 const ok = confirm(
                   'Are you sure you want to delete this product? If anyone owns it, it will only be unpublished',
@@ -141,11 +142,11 @@ function AdminEditProductContent({
               Delete Product
             </Button>
             {!initialProduct.publishedAt && (
-              <Button color="accent" onClick={publish}>
+              <Button color="accent" emphasis="primary" onClick={publish}>
                 Publish
               </Button>
             )}
-            <SubmitButton color="primary">Save</SubmitButton>
+            <SubmitButton emphasis="primary">Save</SubmitButton>
           </Dialog.Actions>
         </FormikForm>
       </Dialog.Content>
@@ -175,7 +176,9 @@ function ProductItemField() {
           </Box>
           <Select value="" onValueChange={arrayHelpers.push}>
             <Select.Trigger>
-              <Select.Value placeholder="Add Game" />
+              <Select.Value placeholder="Add Game">
+                {(gameId) => games[gameId]?.title ?? 'INVALID GAME'}
+              </Select.Value>
               <Select.Icon />
             </Select.Trigger>
             <Select.Content>

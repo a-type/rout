@@ -32,17 +32,18 @@ export function PushSubscriptionToggle({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <Button
-          toggled={!!subscribed}
-          toggleMode="state-only"
-          size="icon"
-          color={subscribed ? 'ghost' : 'contrast'}
-          {...rest}
-        >
-          <Icon name={subscribed ? 'bell' : 'bell'} />
-          {children}
-        </Button>
+      <Dialog.Trigger
+        render={
+          <Button
+            toggled={!!subscribed}
+            toggleMode="state-only"
+            emphasis={subscribed ? 'ghost' : 'contrast'}
+            {...rest}
+          />
+        }
+      >
+        <Icon name={subscribed ? 'bell' : 'bell'} />
+        {children}
       </Dialog.Trigger>
       <Dialog.Content>
         {subscribed ? (
@@ -55,7 +56,8 @@ export function PushSubscriptionToggle({
             <Dialog.Actions>
               <Dialog.Close>Cancel</Dialog.Close>
               <Button
-                color="destructive"
+                color="attention"
+                emphasis="primary"
                 onClick={unsubscribe}
                 loading={isUnsubscribing}
               >
@@ -73,7 +75,7 @@ export function PushSubscriptionToggle({
             <Dialog.Actions>
               <Dialog.Close>Cancel</Dialog.Close>
               <Button
-                color="primary"
+                emphasis="primary"
                 onClick={subscribe}
                 loading={isSubscribing}
               >

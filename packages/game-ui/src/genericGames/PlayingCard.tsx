@@ -73,7 +73,7 @@ function ExtremelySimpleCardContent({
       full
       p="xs"
       className="flex @[40px]:hidden rounded-xs"
-      surface="default"
+      surface
       border
     >
       <CardNumber cardRank={cardRank} />
@@ -96,7 +96,7 @@ function SimpleCardContent({
       full
       p="xs"
       className="hidden @[40px]:flex @[80px]:hidden rounded-sm"
-      surface="default"
+      surface
       border
     >
       <Box d="col" className="absolute left-2px top-2px">
@@ -215,7 +215,7 @@ function DetailedCardContent({
       layout="center center"
       full
       d="col"
-      surface="default"
+      surface
       border
       className="hidden @[80px]:flex"
     >

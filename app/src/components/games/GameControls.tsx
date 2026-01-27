@@ -32,18 +32,18 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
             <NotificationsButton />
             <GameManualDialog />
             <Suspense>
-              <GameDebugger size="icon-small" color="ghostAccent" />
+              <GameDebugger size="small" color="accent" emphasis="ghost" />
             </Suspense>
             <PlayerStatuses className="flex-shrink-1" />
           </Box>
           {!pregame && (
             <Popover>
-              <Popover.Trigger asChild>
-                <Button size="icon-small" color="ghost">
-                  <Icon name="next" />
-                  {gameSuite.viewingRoundIndex + 1}
-                  <Icon name="chevron" />
-                </Button>
+              <Popover.Trigger
+                render={<Button size="small" emphasis="ghost" />}
+              >
+                <Icon name="next" />
+                {gameSuite.viewingRoundIndex + 1}
+                <Icon name="chevron" />
               </Popover.Trigger>
               <Popover.Content>
                 <Popover.Arrow />
@@ -54,15 +54,16 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
         </Box>
         {!gameSuite.isViewingCurrentRound && (
           <Box
-            surface="accent"
+            color="accent"
+            surface
             layout="center between"
             className="px-md py-xs rounded-none -mx-md -mb-md text-xs"
             gap
           >
             <div>Viewing game history</div>
             <Button
-              size="icon-small"
-              color="ghost"
+              size="small"
+              emphasis="ghost"
               onClick={() => {
                 gameSuite.showRound(gameSuite.latestRoundIndex);
               }}

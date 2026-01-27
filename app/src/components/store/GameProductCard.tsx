@@ -46,35 +46,35 @@ export function GameProductCard({
           }
         }}
       >
-        <Dialog.Trigger asChild>
-          <Card.Main className="aspect-1">
-            <Card.Title>{product.name}</Card.Title>
-            <Card.Content
-              className={clsx(
-                'text-md font-bold',
-                product.isOwned && 'bg-accent-wash color-accent-ink',
-              )}
-            >
-              {product.isOwned
-                ? 'Owned'
-                : product.priceCents === 0
-                  ? 'Free'
-                  : `$${product.priceCents / 100}`}
-            </Card.Content>
-            <Card.Content>{product.gameProductItems.length} games</Card.Content>
-            {!product.publishedAt && (
-              <Card.Content className="text-xs flex-row">
-                <Icon name="eyeClosed" />
-                Admins only
-              </Card.Content>
+        <Dialog.Trigger render={<Card.Main className="aspect-1" />}>
+          <Card.Title>{product.name}</Card.Title>
+          <Card.Content
+            className={clsx(
+              'text-md font-bold',
+              product.isOwned && 'bg-accent-wash color-accent-ink',
             )}
+          >
+            {product.isOwned
+              ? 'Owned'
+              : product.priceCents === 0
+                ? 'Free'
+                : `$${product.priceCents / 100}`}
+          </Card.Content>
+          <Card.Content>{product.gameProductItems.length} games</Card.Content>
+          {!product.publishedAt && (
+            <Card.Content className="text-xs flex-row">
+              <Icon name="eyeClosed" />
+              Admins only
+            </Card.Content>
+          )}
 
-            <Button asChild className="absolute bottom-sm right-sm">
-              <div>
-                Details <Icon name="new_window" />
-              </div>
-            </Button>
-          </Card.Main>
+          <Button
+            tabIndex={-1}
+            className="absolute bottom-sm right-sm"
+            render={<div />}
+          >
+            Details <Icon name="new_window" />
+          </Button>
         </Dialog.Trigger>
         <Dialog.Content>
           <Dialog.Title>{product.name}</Dialog.Title>
@@ -83,6 +83,7 @@ export function GameProductCard({
             <Dialog.Close className="mr-auto" />
             <BuyGameProduct
               color="accent"
+              emphasis="primary"
               productId={product.id}
               disabled={product.isOwned}
               returnTo={returnToAfterPurchase}

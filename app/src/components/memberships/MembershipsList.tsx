@@ -28,7 +28,7 @@ export const MembershipsList = withSuspense(function MembershipsList({
           <Box col gap className="color-gray-dark" layout="center center">
             {emptyState || "You're not a member of any online games."}
             {(!statusFilter || statusFilter.includes('active')) && (
-              <CreateGame size="small" color="ghost">
+              <CreateGame size="small" emphasis="ghost">
                 Start Playing <Icon name="arrowRight" />
               </CreateGame>
             )}
@@ -36,13 +36,14 @@ export const MembershipsList = withSuspense(function MembershipsList({
         </Box>
       )}
       <Card.Grid>
-        {sessions?.map((session) => (
+        {/* FIXME: hc types screwed up */}
+        {sessions?.map((session: any) => (
           <GameSummaryCard key={session.id} session={session} />
         ))}
       </Card.Grid>
       {hasNextPage && (
         <Box full="width" d="row" layout="center center">
-          <Button color="ghost" onClick={() => fetchNextPage()}>
+          <Button emphasis="ghost" onClick={() => fetchNextPage()}>
             {isFetchingNextPage ? 'Loading...' : 'Load more'}
           </Button>
         </Box>

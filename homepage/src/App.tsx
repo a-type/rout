@@ -16,15 +16,18 @@ const App = () => {
       <Box
         gap
         p
-        surface="default"
+        surface
         justify="between"
         items="center"
         className="w-full max-w-600px z-1 px-lg"
       >
         <Wordmark className="text-2xl" />
         <Box gap>
-          <Button asChild color="primary">
-            <a href="https://play.rout.games">Play Now</a>
+          <Button
+            emphasis="primary"
+            render={<a href="https://play.rout.games" />}
+          >
+            Play Now
           </Button>
         </Box>
       </Box>
@@ -46,8 +49,12 @@ const App = () => {
         </P>
       </Container>
       <Container items="center">
-        <Button asChild color="primary" className="text-xl px-xl p-md">
-          <a href="https://play.rout.games">Play Now</a>
+        <Button
+          emphasis="primary"
+          className="text-xl px-xl p-md"
+          render={<a href="https://play.rout.games" />}
+        >
+          Play Now
         </Button>
       </Container>
       <Footer />

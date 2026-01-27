@@ -11,10 +11,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
-    conditions:
-      mode === 'production'
-        ? ['production', 'import', 'module', 'browser', 'default']
-        : ['development', 'import', 'module', 'browser', 'default'],
+    // conditions:
+    //   mode === 'production'
+    //     ? ['production', 'import', 'module', 'browser', 'default']
+    //     : ['development', 'import', 'module', 'browser', 'default'],
   },
   server: {
     port: 3099,
