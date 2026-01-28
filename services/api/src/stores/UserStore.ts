@@ -1168,7 +1168,7 @@ export class UserStore extends RpcTarget {
       .select(['GameProductItem.gameId'])
       .execute();
 
-    return games.map((game) => game.gameId);
+    return Array.from(new Set(games.map((game) => game.gameId)));
   }
 
   async getOwnedGameProducts() {

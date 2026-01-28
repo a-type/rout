@@ -6,6 +6,7 @@
 #root {
   flex: 1;
   min-height: 100vh;
+  isolation: isolate;
 }
 
 .font-fancy {

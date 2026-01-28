@@ -1,7 +1,7 @@
 import { Box, clsx, Popover } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { Suspense } from 'react';
+import { Ref, Suspense } from 'react';
 import { ChatForm } from './ChatForm.js';
 import { ChatLog } from './ChatLog.js';
 
@@ -18,9 +18,12 @@ export interface SpatialChatThreadProps {
 function SvgTrigger({
   className,
   latestMessage,
+  ref,
+  ...rest
 }: {
   className?: string;
   latestMessage?: GameSessionChatMessage;
+  ref?: Ref<SVGGElement>;
 }) {
   if (latestMessage) {
     return (
@@ -30,7 +33,8 @@ function SvgTrigger({
           'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
           className,
         )}
-        render={<g />}
+        render={<g ref={ref} />}
+        {...rest}
       >
         <Box
           color="accent"
@@ -45,15 +49,17 @@ function SvgTrigger({
       </Box>
     );
   }
-  return <g className={className} />;
+  return <g className={className} ref={ref} {...rest} />;
 }
 
 function DomTrigger({
   className,
   latestMessage,
+  ...rest
 }: {
   className?: string;
   latestMessage?: GameSessionChatMessage;
+  ref?: Ref<HTMLDivElement>;
 }) {
   if (latestMessage) {
     return (
@@ -63,6 +69,7 @@ function DomTrigger({
           'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
           className,
         )}
+        {...rest}
       >
         <Box
           color="accent"
@@ -76,7 +83,7 @@ function DomTrigger({
       </Box>
     );
   }
-  return <div className={className} />;
+  return <div className={className} {...rest} />;
 }
 
 export const SpatialChatThread = withGame<SpatialChatThreadProps>(

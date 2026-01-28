@@ -53,10 +53,10 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
           className={clsx(theme.className, className)}
         >
           <div className="text-xs">
-            <span className="[line-height:32px] [vertical-align:top]">
+            <span className="leading-24px [vertical-align:top]">
               The latest part of the story, written by
             </span>
-            <div className="inline-flex items-center gap-sm bg-primary-light py-xs px-sm rounded-full">
+            <div className="inline-flex items-center gap-sm bg-main-light pr-sm ml-sm rounded-full">
               <PlayerAvatar playerId={prompt.playerId} />
               <PlayerName playerId={prompt.playerId} />
             </div>

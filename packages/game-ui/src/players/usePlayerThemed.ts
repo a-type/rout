@@ -1,3 +1,4 @@
+import { PROPS } from '@a-type/ui';
 import {
   colors,
   PlayerColorName,
@@ -15,13 +16,11 @@ const byPalette: Record<
     name,
     {
       palette,
-      className: 'theme',
+      className: 'palette-primary',
       style: {
-        '--dyn-primary-source': palette.okHue,
-        '--dyn-accent-source': 160,
-        '--dyn-primary-sat-mult': palette.okSaturation,
-        '--dyn-primary-hue-rotate': palette.okRotate,
-        '--dyn-accent-hue-rotate': -2,
+        [PROPS.USER.COLOR.PRIMARY_HUE]: palette.okHue,
+        [PROPS.USER.COLOR.ACCENT_HUE]: 160,
+        [PROPS.USER.SATURATION]: palette.okSaturation,
       } as React.CSSProperties,
     },
   ]),
@@ -33,10 +32,10 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
   const player = playerId ? suite.getPlayer(playerId) : null;
   if (!player)
     return {
-      className: 'theme',
+      className: 'palette-primary',
       style: {
-        '--dyn-saturation': 0,
-        '--dyn-primary-source': 0,
+        [PROPS.USER.SATURATION]: 0,
+        [PROPS.USER.COLOR.PRIMARY_HUE]: 0,
       } as any,
       palette: colors.gray,
     };

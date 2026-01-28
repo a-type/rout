@@ -1,4 +1,4 @@
-import { Box } from '@a-type/ui';
+import { Box, PROPS } from '@a-type/ui';
 import {
   FortressPiece,
   hexLayout,
@@ -42,14 +42,12 @@ function Content({ piece }: { piece: FortressPiece }) {
           key={sCoord}
           coordinate={deserializeCoordinate(sCoord)}
           strokeWidth={1}
-          stroke="var(--color-gray-dark)"
-          fill="var(--color-primary-light)"
           style={
             {
-              '--dyn-primary-source': tileColors[tile.type],
+              [PROPS.USER.COLOR.PRIMARY_HUE]: tileColors[tile.type],
             } as any
           }
-          className="theme"
+          className="palette-main stroke-gray-dark fill-main-light"
         >
           {tile.type[0]}
         </DomHexTile>

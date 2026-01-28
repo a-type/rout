@@ -65,7 +65,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
       <Box
         d="col"
         className={clsx(
-          isSystem ? 'theme theme-salt' : themeClass,
+          isSystem ? 'palette-gray' : themeClass,
           isSelf ? 'ml-auto' : 'mr-auto',
           isFuture && 'opacity-50',
           compact && 'w-full',
@@ -79,7 +79,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
         {!isPreviousMessageSameAuthor && (
           <Box
             className={clsx(
-              'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-primary-wash bg-lighten-1 color-black z-1',
+              'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-main-wash bg-lighten-1 color-black z-1',
               isSelf ? 'right-0' : 'left-0',
             )}
             gap="sm"
@@ -100,7 +100,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           items="start"
           gap="sm"
           className={clsx(
-            'bg-primary-wash bg-lighten-2 color-black',
+            'bg-main-wash bg-lighten-2 color-black',
             'shadow-sm',
             'transition-opacity',
             'px-md py-sm',

@@ -74,7 +74,7 @@ function PlayerStatusAvatar({
         <div
           className={clsx(
             'absolute -top-1 -right-2px rounded-full w-16px h-16px flex items-center justify-center',
-            hasPlayed ? 'bg-accent-dark' : 'bg-gray-dark',
+            hasPlayed ? 'bg-success-dark' : 'bg-gray-dark',
           )}
         >
           <Icon

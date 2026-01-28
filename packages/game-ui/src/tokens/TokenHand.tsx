@@ -1,4 +1,4 @@
-import { Box, clsx, withClassName } from '@a-type/ui';
+import { Box, withClassName } from '@a-type/ui';
 import {
   AnimatePresence,
   motion,
@@ -58,27 +58,22 @@ export function TokenHand<T = unknown>({
 }: TokenHandProps<T>) {
   return (
     <TokenHandContext.Provider value={true}>
-      <Box
-        ref={userRef}
-        d="row"
-        full="width"
-        className={clsx(className)}
-        render={
-          <TokenSpace
-            id={id || 'hand'}
-            type="hand"
-            onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
-            className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
-            priority={priority}
-          />
-        }
-        {...rest}
-      >
-        <AnimatePresence>
-          {Children.map(children, (child) => (
-            <HandItemWrapper>{child}</HandItemWrapper>
-          ))}
-        </AnimatePresence>
+      <Box ref={userRef} full="width" className={className}>
+        <TokenSpace
+          id={id || 'hand'}
+          type="hand"
+          onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
+          className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
+          priority={priority}
+          // render={<Box ref={userRef} full="width" className={className} />}
+          {...rest}
+        >
+          <AnimatePresence>
+            {Children.map(children, (child) => (
+              <HandItemWrapper>{child}</HandItemWrapper>
+            ))}
+          </AnimatePresence>
+        </TokenSpace>
       </Box>
       <AnimatePresence>
         {renderDetailed && (

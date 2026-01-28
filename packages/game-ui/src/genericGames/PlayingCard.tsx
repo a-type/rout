@@ -37,12 +37,17 @@ const PlayingCardRoot = memo(function PlayingCardRoot({
   className,
   ...rest
 }: PlayingCardProps) {
+  const color = getCardColor(cardSuit);
   return (
     <CardRoot
-      data-color={getCardColor(cardSuit)}
+      data-color={color}
       data-suit={cardSuit}
       data-disabled={disabled}
-      className={clsx('playing-card', className)}
+      className={clsx(
+        'playing-card',
+        `palette-${color === 'red' ? 'tomato' : 'gray'}`,
+        className,
+      )}
       {...rest}
     >
       <ExtremelySimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
@@ -72,8 +77,7 @@ function ExtremelySimpleCardContent({
       layout="center center"
       full
       p="xs"
-      className="flex @[40px]:hidden rounded-xs"
-      surface
+      className="flex @[40px]:hidden rounded-xs bg-white"
       border
     >
       <CardNumber cardRank={cardRank} />
@@ -95,8 +99,7 @@ function SimpleCardContent({
       layout="center center"
       full
       p="xs"
-      className="hidden @[40px]:flex @[80px]:hidden rounded-sm"
-      surface
+      className="hidden @[40px]:flex @[80px]:hidden rounded-sm bg-white"
       border
     >
       <Box d="col" className="absolute left-2px top-2px">
@@ -215,9 +218,8 @@ function DetailedCardContent({
       layout="center center"
       full
       d="col"
-      surface
       border
-      className="hidden @[80px]:flex"
+      className="hidden @[80px]:flex bg-white"
     >
       <NumberSuitStack className="top-0 left-0">
         <CardNumber cardRank={cardRank} />
@@ -283,10 +285,8 @@ export const PlayingCard = Object.assign(PlayingCardRoot, {
 const CardRoot = withClassName(
   withProps(Box, { container: 'reset' }),
   'aspect-[3/4] flex-1 h-auto min-w-24px min-h-32px max-h-50vh select-none @container',
-  '[&[data-suit=s]]:(color-black)',
-  '[&[data-suit=c]]:(color-gray-ink)',
-  '[&[data-suit=h]]:(color-attention-ink)',
-  '[&[data-suit=d]]:(color-attention-dark color-lighten-1)',
+  '[&[data-suit=s],&[data-suit=h]]:(color-main-ink)',
+  '[&[data-suit=c],&[data-suit=d]]:(color-main-dark)',
 );
 
 function ScalingText({

@@ -174,10 +174,21 @@ function ProductItemField() {
               </Chip>
             ))}
           </Box>
-          <Select value="" onValueChange={arrayHelpers.push}>
+          <Select
+            value={null}
+            onValueChange={(v) => {
+              if (v) {
+                arrayHelpers.push(v);
+              }
+            }}
+          >
             <Select.Trigger>
               <Select.Value placeholder="Add Game">
-                {(gameId) => games[gameId]?.title ?? 'INVALID GAME'}
+                {(gameId) =>
+                  !gameId
+                    ? 'Select Game'
+                    : (games[gameId]?.title ?? 'INVALID GAME')
+                }
               </Select.Value>
               <Select.Icon />
             </Select.Trigger>

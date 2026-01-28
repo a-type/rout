@@ -89,7 +89,13 @@ export const GameSummaryCard = withSuspense(
             <Card.Menu>
               <DropdownMenu>
                 <DropdownMenu.Trigger
-                  render={<Button size="small" emphasis="default" />}
+                  render={
+                    <Button
+                      size="small"
+                      emphasis="default"
+                      className="min-h-0"
+                    />
+                  }
                 >
                   <Icon name="dots" />
                 </DropdownMenu.Trigger>

@@ -128,6 +128,7 @@ export class HotseatGameSuite<
     reaction: string,
   ): Promise<void> => {
     // not implemented
+    console.error('Chat reactions are not implemented in hotseat mode');
   };
   readyUp = (): void => {
     // start immediately.

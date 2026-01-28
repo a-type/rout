@@ -30,14 +30,14 @@ spawnSync(
     'execute',
     'prod-long-game-core',
     '-c',
-    './db/wrangler.toml',
+    './wrangler.toml',
     remote ? '--remote' : '--local',
     '--command',
     sql,
   ],
   {
     stdio: 'inherit',
-    cwd: join(process.cwd(), 'services'),
+    cwd: join(process.cwd(), 'services', 'api'),
   },
 );
 

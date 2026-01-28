@@ -13,7 +13,7 @@ export const PlayerScores = hooks.withGame<PlayerScoresProps>(
   function PlayerScores({ gameSuite, className }) {
     return (
       <Box col className={clsx('select-none overflow-y-auto', className)}>
-        <div className="text-xs text-bold color-gray-dark mb-sm">Scores</div>
+        <div className="text-xs font-bold color-gray-dark mb-sm">Scores</div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-sm items-start">
           {gameSuite.finalState.playerOrder.map((playerId) => (
             <PlayerScore playerId={playerId} key={playerId} />
@@ -48,6 +48,7 @@ const PlayerScore = hooks.withGame<{ playerId: PrefixedId<'u'> }>(
         <HorizontalList
           className="rounded-lg mt-sm mb-0"
           contentClassName="gap-xs"
+          openDirection="down"
         >
           <PlayerScoreDisplay
             playerId={playerId}

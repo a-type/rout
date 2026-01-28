@@ -196,7 +196,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
   const members = gameSuite.members;
 
   return (
-    <Box full col gap layout="center center">
+    <Box full col gap layout="center center" className="flex-grow">
       <Box col gap="xs">
         <div className="text-xs uppercase color-gray-dark">Hotseat</div>
         <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>

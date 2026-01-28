@@ -149,7 +149,7 @@ export function TokenSpace<T = any>({
         side="top"
         align="center"
         sideOffset={8}
-        className="theme-attention bg-attention-wash"
+        className="palette-attention bg-attention-wash"
       >
         <Popover.Arrow />
         {overError}

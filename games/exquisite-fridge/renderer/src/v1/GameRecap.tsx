@@ -71,7 +71,7 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
         surface
         color="primary"
         p="sm"
-        className="text-xs color-primary-dark absolute right-0 bottom-0"
+        className="text-xs color-main-dark absolute right-0 bottom-0"
       >
         <PlayerAvatar playerId={section.playerId} size={20} />
         <PlayerName playerId={section.playerId} />

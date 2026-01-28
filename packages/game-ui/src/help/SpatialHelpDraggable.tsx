@@ -40,7 +40,7 @@ export function SpatialHelpDraggable({ className }: SpatialHelpDraggableProps) {
           <div
             className={clsx(
               theme.className,
-              'bg-primary border border-primary-ink rounded-full rounded-tl-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
+              'bg-main border border-main-ink rounded-full rounded-tl-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
               '[[data-draggable-preview]_&]:(rotate--135 -translate-x-1/5 -translate-y-2/3)',
             )}
             style={theme.style}

@@ -2,22 +2,15 @@ import preset from '@a-type/ui/uno-preset';
 import variantGroup from '@unocss/transformer-variant-group';
 import { defineConfig } from 'unocss';
 
+/** @type import('@a-type/ui'). */
 export const presetOptions = {
-  borderScale: 1,
-  roundedness: 0.6,
-  scale: 'lg',
-  saturation: 100,
-  customTheme: {
-    primary: {
-      hue: 280,
-      hueRotate: -5,
-    },
-    accent: {
-      hue: 90,
-      hueRotate: 4,
-    },
-  },
-  hardShadows: true,
+  borderScale: 2,
+  cornerScale: 0.5,
+  spacingScale: 1.25,
+  saturation: 70,
+  primaryHue: 300,
+  accentHue: 90,
+  shadowSpread: 0,
 };
 
 export const config = (game = false) =>

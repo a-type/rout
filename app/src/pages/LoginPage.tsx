@@ -39,7 +39,7 @@ export function LoginPage({}: LoginPageProps) {
           defaultValue="login"
           render={<Box items="center" d="col" gap container="reset" />}
         >
-          <Tabs.List className="justify-center w-full" color="primary">
+          <Tabs.List className="justify-center" color="primary">
             <Tabs.Trigger value="login" render={<Link to="?tab=login" />}>
               Log in
             </Tabs.Trigger>

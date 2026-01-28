@@ -1,4 +1,4 @@
-import { Box, Button, H2, P, RelativeTime, Spinner } from '@a-type/ui';
+import { Box, Dialog, RelativeTime, Spinner } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { useEffect, useState } from 'react';
 
@@ -23,30 +23,33 @@ export const GameStartingNotice = withGame<GameStartingNoticeProps>(
     }
 
     return (
-      <Box
-        surface
-        elevated="xl"
-        p="lg"
-        col
-        gap
-        items="center"
-        className="fixed left-1/2 top-1/2 -translate-1/2 w-80vw max-w-400px z-1000"
+      <Dialog
+        open={!!startingAt}
+        onOpenChange={(open) => {
+          if (!open) {
+            gameSuite.unreadyUp();
+          }
+        }}
       >
-        <H2>Everyone's in!</H2>
-        <P>
-          Starting the game in{' '}
-          <RelativeTime
-            countdownSeconds
-            disableRelativeText
-            value={new Date(startingAt).getTime()}
-          />
-          ...
-        </P>
-        <Spinner />
-        <Button emphasis="ghost" onClick={() => gameSuite.unreadyUp()}>
-          Not ready!
-        </Button>
-      </Box>
+        <Dialog.Content>
+          <Box col gap="lg" items="center">
+            <Dialog.Title>Everyone's in!</Dialog.Title>
+            <Dialog.Description>
+              Starting the game in{' '}
+              <RelativeTime
+                countdownSeconds
+                disableRelativeText
+                value={new Date(startingAt).getTime()}
+              />
+              ...
+            </Dialog.Description>
+            <Spinner />
+          </Box>
+          <Dialog.Actions>
+            <Dialog.Close>Not ready!</Dialog.Close>
+          </Dialog.Actions>
+        </Dialog.Content>
+      </Dialog>
     );
   },
 );

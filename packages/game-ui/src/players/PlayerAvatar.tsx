@@ -68,8 +68,8 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
         }}
         className={clsx(
           'flex-shrink-0 aspect-1 overflow-hidden',
-          'border-solid border-2px',
-          status?.online ? 'border-primary-dark' : 'border-gray',
+          'border-solid border-2px color-main-dark bg-main-wash',
+          status?.online ? 'border-main-dark' : 'border-gray',
           themeClass,
           className,
         )}

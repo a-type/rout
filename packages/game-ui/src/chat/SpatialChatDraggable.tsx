@@ -37,11 +37,10 @@ export function SpatialChatDraggable({ className }: SpatialChatDraggableProps) {
           onTap={() => setTutorialOpen(true)}
           ref={anchorRef}
         >
-          {' '}
           <div
             className={clsx(
               theme.className,
-              'bg-primary border border-primary-ink rounded-full rounded-tr-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
+              'bg-main border border-main-ink rounded-full rounded-tr-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
               '[[data-draggable-preview]_&]:(rotate-135 -translate-x-1/5 -translate-y-2/3)',
             )}
             style={theme.style}
@@ -66,7 +65,11 @@ export function SpatialChatDraggable({ className }: SpatialChatDraggableProps) {
         <P className="md:hidden">(Tap the bar below to open the chat log)</P>
         <Popover.Close
           render={
-            <Button size="small" emphasis="primary" className="ml-auto" />
+            <Button
+              size="small"
+              emphasis="primary"
+              className="ml-auto color-black"
+            />
           }
         >
           Ok

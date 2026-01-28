@@ -5,6 +5,10 @@
       "name": "📱 App",
     },
     {
+      "path": "./homepage",
+      "name": "🏠 Homepage",
+    },
+    {
       "path": "./services",
       "name": "🛠️ Services",
     },

@@ -1,4 +1,4 @@
-import { Box, Button, clsx } from '@a-type/ui';
+import { Box, Button, clsx, PROPS } from '@a-type/ui';
 import { colors, PrefixedId } from '@long-game/common';
 import { Drawing } from '@long-game/game-scribble-definition/v1';
 import { getStroke, StrokeOptions } from 'perfect-freehand';
@@ -77,8 +77,8 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
         items="center"
         style={
           {
-            '--dyn-primary-source': palette.okHue,
-            '--dyn-accent-source': palette.okHue,
+            [PROPS.USER.COLOR.PRIMARY_HUE]: palette.okHue,
+            [PROPS.USER.COLOR.ACCENT_HUE]: palette.okHue,
           } as any
         }
         className={clsx('theme', 'override-light')}
@@ -108,14 +108,14 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
                   emphasis="ghost"
                   onClick={() => setColor('dark')}
                 >
-                  <div className="bg-primary-dark w-8 h-8 rounded-full" />
+                  <div className="bg-main-dark w-8 h-8 rounded-full" />
                 </Button>
                 <Button
                   toggled={color === 'light'}
                   emphasis="ghost"
                   onClick={() => setColor('light')}
                 >
-                  <div className="bg-primary-light w-8 h-8 rounded-full" />
+                  <div className="bg-main-light w-8 h-8 rounded-full" />
                 </Button>
               </Box>
               <Box gap>
@@ -207,8 +207,8 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
             <path
               d={pathData}
               className={clsx({
-                'fill-primary-light': color === 'light',
-                'fill-primary-dark': color === 'dark',
+                'fill-main-light': color === 'light',
+                'fill-main-dark': color === 'dark',
                 'fill-black': color === 'contrast',
               })}
             />
@@ -238,8 +238,8 @@ const Stroke = hooks.withGame<{
     <path
       d={pathData}
       className={clsx({
-        'fill-primary-light': stroke.color === 'light',
-        'fill-primary-dark': stroke.color === 'dark',
+        'fill-main-light': stroke.color === 'light',
+        'fill-main-dark': stroke.color === 'dark',
         'fill-black': stroke.color === 'contrast',
       })}
     />

@@ -1,5 +1,5 @@
 import { getFederatedGameComponent } from '@/services/games';
-import { Box, Button, clsx, Dialog, Icon } from '@a-type/ui';
+import { Box, Button, clsx, Dialog } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import {
   ChatForm,
@@ -65,7 +65,7 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
         className="absolute top-full left-0 right-xs"
         data-testid="game-log-collapsed-trigger"
       >
-        <div className="relative -top-32px w-full">
+        <div className="relative -top-34px -left-4px w-[calc(100%+16px)]">
           <ChatMessage
             message={latestMessage.chatMessage}
             previousMessage={null}
@@ -128,18 +128,6 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
             <ChatLog log={gameSuite.combinedLog} />
             <GameLogChatInput />
           </Box>
-          <Dialog.Close
-            render={
-              <Button
-                size="small"
-                emphasis="ghost"
-                className="m-auto absolute top-md right-md"
-                aria-label="Close Game Log"
-              />
-            }
-          >
-            <Icon name="x" />
-          </Dialog.Close>
         </Dialog.Content>
       </Dialog>
     </Box>

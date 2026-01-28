@@ -44,10 +44,11 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
               originY: 'top',
             }}
             className={clsx(
+              'palette-lemon',
               'fixed top-md max-w-90vw sm:max-w-500px w-full left-1/2 shadow-lg',
               'flex flex-row gap-md items-center px-md py-sm rounded-md z-10000 overflow-hidden',
               {
-                'bg-accent-wash': !gameSuite.remoteTurnError,
+                'bg-main-wash': !gameSuite.remoteTurnError,
                 'bg-attention-wash': gameSuite.remoteTurnError,
               },
               className,
@@ -75,12 +76,11 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
               </>
             ) : (
               <>
-                <div className="font-bold color-accent-ink flex-1">
+                <div className="font-bold color-main-ink flex-1">
                   Submitting turn...
                 </div>
                 <Button
                   loading={gameSuite.submittingTurn}
-                  color="accent"
                   emphasis="primary"
                   onClick={gameSuite.cancelSubmitTurn}
                 >
@@ -94,7 +94,7 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
                       duration: state.duration / 1000,
                       ease: 'linear',
                     }}
-                    className="h-full bg-accent"
+                    className="h-full bg-main"
                   />
                 </div>
               </>

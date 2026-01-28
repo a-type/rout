@@ -40,7 +40,6 @@ export type DroppableProps<T = any> = Omit<
 
 export function Droppable<T = any>({
   id,
-  children,
   onDrop,
   onOver,
   disabled,

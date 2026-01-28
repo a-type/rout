@@ -21,7 +21,7 @@ export function GameScreenshotGallery({
         key={screenshot.file}
         src={`/game-data/${game.id}/screenshots/${screenshot.file}`}
         alt={screenshot.alt}
-        className="object-contain bg-primary-wash min-w-0 w-auto h-auto rounded-md border border-default flex-[1-1-0]"
+        className="object-contain bg-main-wash min-w-0 w-auto h-auto rounded-md border border-default flex-[1-1-0]"
       />
       <Box col gap="sm" className="flex-[1-1-auto]">
         {game.screenshots.map((screenshot, index) => (

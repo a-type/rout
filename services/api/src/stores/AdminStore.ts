@@ -187,9 +187,6 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
       .select('GameProduct.id')
       .execute();
     for (const product of freeGameProducts) {
-      if (games[product.id].prerelease) {
-        continue; // skip prerelease games
-      }
       await this.purchaseGameProduct(userId, product.id);
     }
   }
@@ -400,17 +397,27 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
   }
 
   async addGameProductItem(gameProductId: PrefixedId<'gp'>, gameId: string) {
-    const gameProductItem = await this.#db
+    const created = await this.#db
       .insertInto('GameProductItem')
       .values({
         id: id('gpi'),
         gameProductId,
         gameId,
       })
+      .onConflict((oc) => oc.doNothing())
       .returning('id')
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
 
-    return gameProductItem;
+    if (created) {
+      return created;
+    }
+
+    return this.#db
+      .selectFrom('GameProductItem')
+      .where('gameProductId', '=', gameProductId)
+      .where('gameId', '=', gameId)
+      .selectAll()
+      .executeTakeFirstOrThrow();
   }
 
   async removeGameProductItem(gameProductItemId: PrefixedId<'gpi'>) {

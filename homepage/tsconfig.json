@@ -26,14 +26,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "customConditions": ["development"],
-
-    "composite": true
+    "customConditions": ["development"]
   },
-  "includes": ["src"],
-  "references": [
-    {
-      "path": "../packages/visual-components"
-    }
-  ]
+  "includes": ["src"]
 }

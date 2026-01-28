@@ -30,7 +30,9 @@ export const ChatReactions = withGame<ChatReactionsProps>(
           <Popover.Content className="p-xs">
             <Popover.Arrow />
             <EmojiPicker
-              onValueChange={(v) => gameSuite.toggleChatReaction(message, v)}
+              onValueChange={(v) => {
+                gameSuite.toggleChatReaction(message, v);
+              }}
             />
           </Popover.Content>
         </Popover>

@@ -19,7 +19,7 @@ export function GameIcons({}: GameIconsProps) {
       return (
         <Box
           key={game.id}
-          surface="wash"
+          surface="white"
           border
           className="aspect-1 w-200px flex-shrink-0 color-gray-dark"
           layout="center center"
@@ -35,7 +35,7 @@ export function GameIcons({}: GameIconsProps) {
     }
     return (
       <Box
-        surface="wash"
+        surface="white"
         border
         className="aspect-1 w-200px flex-shrink-0 color-primary-dark text-center"
         key={i}

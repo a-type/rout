@@ -85,7 +85,7 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
     >
       <SvgHexTile.Shape
         coordinate={coordinate}
-        className="center stroke-gray-dark fill-primary-light"
+        className="center stroke-gray-dark fill-main-light"
       />
       <SvgHexTile.Content coordinate={coordinate} className="center">
         <text>{tile.terrain.type[0]}</text>

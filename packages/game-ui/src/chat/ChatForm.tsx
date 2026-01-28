@@ -73,6 +73,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
               placeholder="Say something..."
               autoSize
               className="max-h-200px flex-1"
+              textAreaClassName="w-full"
               inputRef={fieldRef}
               autoFocus={autoFocus}
               onKeyDown={(ev) => {

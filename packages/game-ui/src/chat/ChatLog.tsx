@@ -1,10 +1,4 @@
-import {
-  Box,
-  clsx,
-  RelativeTime,
-  useStayScrolledToBottom,
-  withClassName,
-} from '@a-type/ui';
+import { Box, clsx, RelativeTime, useStayScrolledToBottom } from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
 import { ReactNode } from 'react';
 import { useRendererContext } from '../RendererProvider.js';
@@ -115,15 +109,3 @@ export function ChatLogTimestamp({ value }: { value: Date | number }) {
     </span>
   );
 }
-
-const ChatLogRoot = withClassName(
-  'div',
-  'flex flex-col gap-2 items-stretch w-full h-full min-h-0',
-);
-
-const ChatLogListRoot = withClassName(
-  'div',
-  'flex flex-col gap-1 items-stretch flex-1 min-h-300px',
-);
-
-const ChatLogItem = withClassName('div', 'flex flex-col gap-1 items-start');
