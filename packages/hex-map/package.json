@@ -4,12 +4,14 @@
   "private": true,
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "production": "./dist/index.js",
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./react": {
+      "development": "./src/react.ts",
       "production": "./dist/react.js",
       "workerd": "./src/react.ts",
       "import": "./dist/react.js",

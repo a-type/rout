@@ -5,8 +5,7 @@
     "declaration": true,
     "declarationDir": "./dist/typings",
     "declarationMap": true,
-    "baseUrl": ".",
-    "composite": true
+    "baseUrl": "."
   },
   "include": ["src"]
 }

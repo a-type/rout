@@ -10,7 +10,7 @@ export function App({}: AppProps) {
   return (
     <ErrorBoundary fallback={<div>Error</div>}>
       <SdkProvider value={publicSdk}>
-        <UiProvider disableTitleBarColor>
+        <UiProvider>
           <UpdateBanner />
           <Pages />
         </UiProvider>

@@ -31,6 +31,7 @@
   "devDependencies": {
     "@a-type/rsbuild-plugin-unocss": "^0.0.8",
     "@aaroon/workbox-rspack-plugin": "^0.3.3",
+    "@birchill/inject-manifest-plugin": "^1.0.1",
     "@long-game/uno-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",

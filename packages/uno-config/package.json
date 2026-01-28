@@ -4,6 +4,9 @@
   "private": true,
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "production": "./index.mjs",
+      "workerd": "./src/index.ts",
       "import": "./index.mjs",
       "types": "./index.d.ts"
     }

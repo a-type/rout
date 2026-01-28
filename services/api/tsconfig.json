@@ -2,26 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["./src/worker-types.d.ts"],
-    "composite": true
+    "declaration": false,
+    "types": ["./src/worker-types.d.ts", "@cloudflare/workers-types"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"],
-  "references": [
-    {
-      "path": "../../packages/common"
-    },
-    {
-      "path": "../../packages/game-definition"
-    },
-    {
-      "path": "../../packages/games"
-    },
-    {
-      "path": "../../packages/notifications"
-    },
-    {
-      "path": "../../packages/kysely"
-    }
-  ]
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

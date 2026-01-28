@@ -16,7 +16,8 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "customConditions": ["development"]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

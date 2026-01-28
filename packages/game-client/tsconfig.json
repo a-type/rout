@@ -12,10 +12,5 @@
     "composite": true
   },
   "include": ["./src"],
-  "exclude": ["node_modules", "./dist"],
-  "references": [
-    {
-      "path": "../../services/api"
-    }
-  ]
+  "exclude": ["node_modules", "./dist"]
 }

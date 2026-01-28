@@ -104,7 +104,6 @@ export function getFederatedGameComponent(
 }
 
 async function registerFederatedGames() {
-  return Promise.resolve();
   const games = await queryClient.fetchQuery(publicSdk.getGames());
   registerRemotes(
     Object.entries(games).map(([id, meta]) => ({

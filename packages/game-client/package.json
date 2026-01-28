@@ -4,6 +4,8 @@
   "private": true,
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "production": "./dist/index.js",
       "import": "./dist/index.js",
       "workerd": "./src/index.ts",
       "default": "./dist/index.js",

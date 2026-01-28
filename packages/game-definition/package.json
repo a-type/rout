@@ -4,10 +4,16 @@
   "private": true,
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "production": "./dist/esm/index.js",
+      "workerd": "./src/index.ts",
       "import": "./dist/esm/index.js",
       "types": "./dist/typings/index.d.ts"
     },
     "./test": {
+      "development": "./src/test.ts",
+      "production": "./dist/esm/test.js",
+      "workerd": "./src/test.ts",
       "import": "./dist/esm/test.js",
       "types": "./dist/typings/test.d.ts"
     }

@@ -13,7 +13,11 @@ export async function registerServiceWorker() {
 
   try {
     const registration = await navigator.serviceWorker.register(
-      new URL('./service-worker.ts', import.meta.url),
+      new URL(
+        /* webpackChunkName: "sw" */
+        './service-worker.ts',
+        import.meta.url,
+      ),
     );
     if (!registration) {
       console.error(`Service worker registration failed`);
