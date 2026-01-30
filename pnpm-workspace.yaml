@@ -10,7 +10,7 @@ packages:
   - 'jobs/*'
 
 catalog:
-  '@a-type/ui': ^5.0.4
+  '@a-type/ui': ^5.0.8
   '@a-type/react-space': 0.2.17
   '@a-type/auth-fetch': 2.1.2
   '@a-type/auth-ui': 2.0.0
