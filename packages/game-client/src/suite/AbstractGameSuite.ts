@@ -40,6 +40,7 @@ import {
   simpleError,
   TurnUpdater,
 } from '@long-game/game-definition';
+import { produce } from 'immer';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { GameLogItem } from '../types.js';
@@ -78,6 +79,34 @@ export interface GameSuiteBaseInit {
   nextRoundCheckAt?: Date | string | number | null;
 }
 
+export class LiveGameRoundSummary<TTurnData, TPublicTurnData, TPlayerState>
+  implements GameRoundSummary<TTurnData, TPublicTurnData, TPlayerState>
+{
+  @observable.ref accessor raw: GameRoundSummary<
+    TTurnData,
+    TPublicTurnData,
+    TPlayerState
+  >;
+
+  @observable accessor roundIndex: number;
+  @observable accessor initialPlayerState: TPlayerState;
+  @observable accessor yourTurnData: TTurnData | null;
+  @observable accessor turns: {
+    data: TPublicTurnData | null;
+    playerId: string;
+  }[];
+
+  constructor(
+    data: GameRoundSummary<TTurnData, TPublicTurnData, TPlayerState>,
+  ) {
+    this.roundIndex = data.roundIndex;
+    this.initialPlayerState = data.initialPlayerState;
+    this.yourTurnData = data.yourTurnData;
+    this.turns = data.turns;
+    this.raw = data;
+  }
+}
+
 export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   protected instanceId = Math.random().toString(36).slice(2);
 
@@ -103,7 +132,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   // are on the same device.
   @observable protected accessor rounds: Record<
     PrefixedId<'u'>,
-    GameRoundSummary<
+    LiveGameRoundSummary<
       GetTurnData<TGame>,
       GetPublicTurnData<TGame>,
       GetPlayerState<TGame>
@@ -196,7 +225,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     if (!this.rounds[playerId]) {
       this.rounds[playerId] = [];
     }
-    this.rounds[playerId][round.roundIndex] = round;
+    this.rounds[playerId][round.roundIndex] = new LiveGameRoundSummary(round);
   };
 
   // caching and suspense mechanisms which wrap loadRound
@@ -341,13 +370,15 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       // for current round, apply prospective turn to initial state
       if (!currentTurn) return viewingRound.initialPlayerState;
 
-      return this.gameDefinition.getProspectivePlayerState({
-        playerState: toJS(viewingRound.initialPlayerState),
-        prospectiveTurn: {
-          data: toJS(currentTurn),
-          playerId: this.playerId,
-        },
-        playerId: this.playerId,
+      const newState = viewingRound.raw.initialPlayerState;
+      return produce<GetPlayerState<TGame>>(newState, (draft) => {
+        this.gameDefinition.applyProspectiveTurnToPlayerState!({
+          playerState: draft,
+          prospectiveTurn: {
+            data: toJS(currentTurn),
+            playerId: this.playerId,
+          },
+        });
       });
     }
 

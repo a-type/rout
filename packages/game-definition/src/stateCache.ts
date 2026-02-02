@@ -11,6 +11,7 @@
  */
 
 import { GameRound, LongGameError } from '@long-game/common';
+import { produce } from 'immer';
 import { GameDefinition, GameMember } from './gameDefinition.js';
 import { GameRandom, GameRandomState } from './random.js';
 
@@ -105,14 +106,16 @@ export class GameStateCache {
 
     const startFrom = checkpoint.roundIndex + 1;
     const state = rounds.slice(startFrom).reduce((state, round, i) => {
-      return this.gameDefinition.applyRoundToGlobalState({
-        globalState: state,
-        round,
-        roundIndex: startFrom + i,
-        random,
-        members,
-      });
-    }, structuredClone(checkpoint.state));
+      return produce(state, (draft: any) =>
+        this.gameDefinition.applyRoundToGlobalState({
+          globalState: draft,
+          round,
+          roundIndex: startFrom + i,
+          random,
+          members,
+        }),
+      );
+    }, checkpoint.state);
 
     const roundIndex = rounds.length - 1;
     const newCheckpoint: StateCheckpoint = {

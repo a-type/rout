@@ -274,26 +274,19 @@ export const gameDefinition: GameDefinition<{
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  applyProspectiveTurnToPlayerState: ({ playerState, prospectiveTurn }) => {
     const turn = prospectiveTurn.data;
     if (isPassTurn(turn)) {
-      return {
-        ...playerState,
-        hand: playerState.hand.filter((card) => !turn.pass.includes(card)),
-      };
+      playerState.hand = playerState.hand.filter(
+        (card) => !turn.pass.includes(card),
+      );
+    } else {
+      playerState.hand = playerState.hand.filter((card) => card !== turn.card);
+      playerState.currentTrick.push({
+        playerId: prospectiveTurn.playerId,
+        card: turn.card,
+      });
     }
-
-    return {
-      ...playerState,
-      hand: playerState.hand.filter((card) => card !== turn.card),
-      currentTrick: [
-        ...playerState.currentTrick,
-        {
-          playerId: prospectiveTurn.playerId,
-          card: turn.card,
-        },
-      ],
-    };
   },
 
   // run on server
@@ -363,7 +356,6 @@ export const gameDefinition: GameDefinition<{
       // the provided cards to the target player. target player
       // changes based on which draft round this is.
 
-      const newHands = { ...globalState.hands };
       // which player you pass to is based on the drafting round,
       // player order, and your position in that order.
       for (const turn of round.turns) {
@@ -377,25 +369,24 @@ export const gameDefinition: GameDefinition<{
         const targetPlayerId = globalState.playerOrder[targetPlayerIndex];
         // remove passed cards from my hand
         const passedCards = turn.data.pass;
-        const myHand = newHands[playerId];
+        const myHand = globalState.hands[playerId];
         // pass the cards to the target player
-        newHands[playerId] = myHand.filter(
+        globalState.hands[playerId] = myHand.filter(
           (card) => !passedCards.includes(card),
         );
-        const targetPlayerHand = newHands[targetPlayerId];
-        newHands[targetPlayerId] = [...targetPlayerHand, ...passedCards];
+        const targetPlayerHand = globalState.hands[targetPlayerId];
+        globalState.hands[targetPlayerId] = [
+          ...targetPlayerHand,
+          ...passedCards,
+        ];
       }
-      return {
-        ...globalState,
-        hands: newHands,
-      };
+      return;
     }
 
     // rest of this is play rounds
 
     // only 1 turn per round in play rounds
     const turn = round.turns[0]!;
-
     const turnData = turn.data as PlayTurnData;
 
     // go ahead and remove the played card from the player's hand
@@ -414,10 +405,7 @@ export const gameDefinition: GameDefinition<{
         `Player ${playerId} played card ${cardPlayed} which must have been in their hand multiple times, because their hand was ${playerHand.length} cards and now is ${newPlayerHand.length} cards.`,
       );
     }
-    let newHands: Record<PrefixedId<'u'>, Card[]> = {
-      ...globalState.hands,
-      [playerId]: newPlayerHand,
-    };
+    globalState.hands[playerId] = newPlayerHand;
 
     const currentTrick = globalState.currentTrick;
     const currentTrickWithPlay = [
@@ -447,8 +435,10 @@ export const gameDefinition: GameDefinition<{
 
       // have we played all cards? hands will be empty
       const allCardsPlayed =
-        Object.values(newHands).reduce((acc, hand) => acc + hand.length, 0) ===
-        0;
+        Object.values(globalState.hands).reduce(
+          (acc, hand) => acc + hand.length,
+          0,
+        ) === 0;
 
       if (allCardsPlayed) {
         // reshuffle and deal again
@@ -464,46 +454,33 @@ export const gameDefinition: GameDefinition<{
           {} as Record<PrefixedId<'u'>, number>,
         );
 
-        return {
-          currentTrick: [],
-          hands: newHands,
-          leadPlayerId: getTrickLeader({
-            hands: newHands,
-            currentTrick: [],
-            isFirstTrickOfDeal: true,
-          }),
-          playerOrder: globalState.playerOrder,
-          scoredCards: makeEmptyScoredCards(members.map((m) => m.id)),
-          scores,
-          lastCompletedTrick: completedTrick,
-          isFirstTrickOfDeal: true,
-        };
+        globalState.currentTrick = [];
+        globalState.hands = newHands;
+        globalState.scoredCards = makeEmptyScoredCards(
+          members.map((m) => m.id),
+        );
+        globalState.scores = scores;
+        globalState.lastCompletedTrick = completedTrick;
+        globalState.isFirstTrickOfDeal = true;
+        return;
       }
 
       // otherwise, add scoring cards to the winning player's list
-      const newScoredCards = {
-        ...globalState.scoredCards,
-        [winningPlayerId]: [
-          ...globalState.scoredCards[winningPlayerId],
-          ...currentTrickWithPlay.map(({ card }) => card),
-        ],
-      };
-
-      return {
-        ...globalState,
-        currentTrick: [],
-        lastCompletedTrick: completedTrick,
-        hands: newHands,
-        scoredCards: newScoredCards,
-        isFirstTrickOfDeal: false,
-      };
+      globalState.scoredCards[winningPlayerId] = [
+        ...globalState.scoredCards[winningPlayerId],
+        ...currentTrickWithPlay.map(({ card }) => card),
+      ];
+      globalState.currentTrick = [];
+      globalState.lastCompletedTrick = completedTrick;
+      globalState.isFirstTrickOfDeal = false;
+      return;
     } else {
       // no, so we just need to update the current trick
-      return {
-        ...globalState,
-        currentTrick: currentTrickWithPlay,
-        hands: newHands,
-      };
+      globalState.currentTrick.push({
+        playerId: turn.playerId,
+        card: turnData.card,
+      });
+      return;
     }
   },
 

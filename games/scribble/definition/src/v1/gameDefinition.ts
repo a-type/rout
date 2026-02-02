@@ -171,14 +171,11 @@ export const gameDefinition: GameDefinition<{
 
   // run on client
 
-  getProspectivePlayerState: ({ playerId, playerState, prospectiveTurn }) => {
+  applyProspectiveTurnToPlayerState: ({ playerState, prospectiveTurn }) => {
     // match tasks to completions and add them to history
-    return {
-      ...playerState,
-      submitted: prospectiveTurn.data.taskCompletions.filter(
-        (c) => c && c.kind !== 'ratings-completion',
-      ),
-    };
+    playerState.submitted = prospectiveTurn.data.taskCompletions.filter(
+      (c) => c && c.kind !== 'ratings-completion',
+    );
   },
 
   // run on server
@@ -267,7 +264,7 @@ export const gameDefinition: GameDefinition<{
     members,
     random,
   }) => {
-    const sequences = [...globalState.sequences];
+    const sequences = globalState.sequences;
 
     if (roundIndex === RATING_ROUND) {
       round.turns.forEach((turn) => {
@@ -289,10 +286,7 @@ export const gameDefinition: GameDefinition<{
           }
         }
       });
-      return {
-        ...globalState,
-        sequences,
-      };
+      return;
     }
 
     // add the new turn to the sequences
@@ -316,11 +310,6 @@ export const gameDefinition: GameDefinition<{
         }
       });
     });
-
-    return {
-      ...globalState,
-      sequences,
-    };
   },
 
   getPublicTurn: ({ turn }) => {

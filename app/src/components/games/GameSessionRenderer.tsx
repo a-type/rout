@@ -200,7 +200,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
       <Box col gap="xs">
         <div className="text-xs uppercase color-gray-dark">Hotseat</div>
         <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>
-        <H1>Select Player</H1>
+        <H1 className="mb-sm">Select Player</H1>
         <Box className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
           {members.map((member) => (
             <Button
@@ -238,6 +238,15 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
             </Button>
           ))}
         </Box>
+        <Button
+          render={<Link to="/" />}
+          emphasis="ghost"
+          size="small"
+          className="mt-lg self-start"
+        >
+          <Icon name="arrowLeft" />
+          Back to Games
+        </Button>
       </Box>
     </Box>
   );

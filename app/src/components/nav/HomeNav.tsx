@@ -100,7 +100,7 @@ export function HomeNavTriggers({ className, ...rest }: HomeNavTriggersProps) {
   return (
     <nav
       className={clsx(
-        'sticky top-sm flex flex-row gap-xs z-10 justify-end flex-1',
+        'sticky top-sm flex flex-row gap-xs z-10 justify-end flex-1 max-w-300px',
         className,
       )}
       {...rest}
@@ -123,10 +123,6 @@ function HomeNavTrigger({
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-    setTimeout(() => {
-      // manually set - even if scroll doesn't reach it
-      activeState.activeSection = target;
-    }, 300);
   };
 
   const active = useSnapshot(activeState).activeSection === target;

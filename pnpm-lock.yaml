@@ -891,6 +891,9 @@ importers:
       idb:
         specifier: ^8.0.3
         version: 8.0.3
+      immer:
+        specifier: 'catalog:'
+        version: 10.1.1
       mobx:
         specifier: ^6.13.5
         version: 6.13.5
@@ -949,6 +952,9 @@ importers:
       date-fns:
         specifier: ^2.30.0
         version: 2.30.0
+      immer:
+        specifier: 'catalog:'
+        version: 10.1.1
       seedrandom:
         specifier: ^3.0.5
         version: 3.0.5

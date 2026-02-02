@@ -5,9 +5,11 @@ import {
   WordItem,
 } from '@long-game/game-exquisite-fridge-definition/v1';
 import { HelpSurface, TokenSpace } from '@long-game/game-ui';
-import { useState } from 'react';
+import { memo, startTransition, useState } from 'react';
 import { hooks } from './gameClient.js';
-import { WordTile } from './WordTile.js';
+import { WordTile as UnmemoizedWordTile } from './WordTile.js';
+
+const WordTile = memo(UnmemoizedWordTile);
 
 export interface WordHandProps {
   className?: string;
@@ -41,9 +43,11 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         <TokenSpace<WordItem>
           id="hand"
           onDrop={(token) => {
-            gameSuite.prepareTurn((cur) => ({
-              words: cur.words.filter((w) => w.id !== token.id),
-            }));
+            startTransition(() => {
+              gameSuite.prepareTurn((cur) => ({
+                words: cur.words.filter((w) => w.id !== token.id),
+              }));
+            });
           }}
           disabled={gameSuite.turnWasSubmitted}
           priority={-1}

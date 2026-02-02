@@ -79,7 +79,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
         {!isPreviousMessageSameAuthor && (
           <Box
             className={clsx(
-              'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-main-wash bg-lighten-1 color-black z-1',
+              'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-main-light color-black z-1',
               isSelf ? 'right-0' : 'left-0',
             )}
             gap="sm"

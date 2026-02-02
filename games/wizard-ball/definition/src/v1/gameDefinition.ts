@@ -96,7 +96,7 @@ export const gameDefinition: GameDefinition<{
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  applyProspectiveTurnToPlayerState: ({ playerState, prospectiveTurn }) => {
     const teamId = Object.keys(playerState.league.teamLookup).find(
       (teamId) =>
         playerState.league.teamLookup[teamId].ownerId ===
@@ -107,43 +107,22 @@ export const gameDefinition: GameDefinition<{
         `Could not find team for player ${prospectiveTurn.playerId}`,
       );
     }
-    const team = playerState.league.teamLookup[teamId];
-    return {
-      ...playerState,
-      league: {
-        ...playerState.league,
-        playerLookup: {
-          ...playerState.league.playerLookup,
-          ...Object.entries(
-            prospectiveTurn.data.nextItemAssignments ?? {},
-          ).reduce((acc, [playerId, itemIds]) => {
-            const player = playerState.league.playerLookup[playerId];
-            if (player) {
-              return {
-                ...acc,
-                [playerId]: {
-                  ...player,
-                  itemIds: itemIds ?? player.itemIds,
-                },
-              };
-            }
-            return acc;
-          }, {}),
-        },
-        teamLookup: {
-          ...playerState.league.teamLookup,
-          [teamId]: {
-            ...team,
-            battingOrder:
-              prospectiveTurn.data.nextBattingOrder ?? team.battingOrder,
-            positionChart:
-              prospectiveTurn.data.nextPositionChart ?? team.positionChart,
-            pitchingOrder:
-              prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder,
-          },
-        },
-      },
-    };
+    const league = playerState.league;
+    for (const [playerId, itemIds] of Object.entries(
+      prospectiveTurn.data.nextItemAssignments ?? {},
+    )) {
+      const player = playerState.league.playerLookup[playerId];
+      if (player) {
+        player.itemIds = itemIds ?? player.itemIds;
+      }
+    }
+    const team = league.teamLookup[teamId];
+    team.battingOrder =
+      prospectiveTurn.data.nextBattingOrder ?? team.battingOrder;
+    team.positionChart =
+      prospectiveTurn.data.nextPositionChart ?? team.positionChart;
+    team.pitchingOrder =
+      prospectiveTurn.data.nextPitchingOrder ?? team.pitchingOrder;
   },
 
   // run on server
@@ -319,21 +298,17 @@ export const gameDefinition: GameDefinition<{
       });
     });
 
-    const nextLeague: League = {
+    globalState.league = {
       ...globalState.league,
       gameResults: [...globalState.league.gameResults, results],
       currentWeek: globalState.league.currentWeek + 1,
     };
 
-    return {
-      ...globalState,
-      choices: generateChoices(
-        random,
-        members.map((m) => m.id),
-        nextLeague,
-      ),
-      league: nextLeague,
-    };
+    globalState.choices = generateChoices(
+      random,
+      members.map((m) => m.id),
+      globalState.league,
+    );
   },
 
   getPublicTurn: ({ turn }) => {

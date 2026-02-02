@@ -94,17 +94,16 @@ export type GameDefinition<
   getInitialTurn?: () => ConfigInitialTurnData<Config>;
 
   /**
-   * Returns the player state as it would be if the player made the move.
+   * Applies the player state as it would be if the player made the move.
    * This may not be the same as the final computed player state, since
    * we may not want to reveal information about the global state. But,
    * for example, if the player moves a game piece, we may want to show
    * the player the new position of the piece.
    */
-  getProspectivePlayerState: (data: {
-    playerId: PrefixedId<'u'>;
+  applyProspectiveTurnToPlayerState: (data: {
     playerState: ConfigPlayerState<Config>;
     prospectiveTurn: LocalTurn<ConfigTurnData<Config>>;
-  }) => ConfigPlayerState<Config>;
+  }) => void;
 
   // SERVER ONLY
 
@@ -162,7 +161,7 @@ export type GameDefinition<
     random: GameRandom;
     members: GameMember[];
     roundIndex: number;
-  }) => ConfigGlobalState<Config>;
+  }) => void;
 
   /**
    * This is the public view of a turn, visible to all players

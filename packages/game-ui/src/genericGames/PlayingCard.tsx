@@ -76,8 +76,7 @@ function ExtremelySimpleCardContent({
       d="col"
       layout="center center"
       full
-      p="xs"
-      className="flex @[40px]:hidden rounded-xs bg-white"
+      className="flex @[40px]:hidden rounded-xs bg-white py-1px"
       border
     >
       <CardNumber cardRank={cardRank} />

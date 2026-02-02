@@ -113,15 +113,11 @@ export const gameDefinition: GameDefinition<{
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  applyProspectiveTurnToPlayerState: ({ playerState, prospectiveTurn }) => {
     // remove used words from the player's hand
-    const newHand = playerState.hand.filter(
+    playerState.hand = playerState.hand.filter(
       (word) => !prospectiveTurn.data.words.some((w) => w.id === word.id),
     );
-    return {
-      ...playerState,
-      hand: newHand,
-    };
   },
 
   // run on server
@@ -244,8 +240,6 @@ export const gameDefinition: GameDefinition<{
       // add new words to the player's hand
       globalState.hands[turn.playerId] = [...hand, ...newWords];
     }
-
-    return globalState;
   },
 
   getPublicTurn: ({ turn }) => {

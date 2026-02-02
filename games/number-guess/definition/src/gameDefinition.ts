@@ -49,9 +49,7 @@ export const gameDefinition: GameDefinition<{
     }
   },
 
-  getProspectivePlayerState: ({ playerState }) => {
-    return playerState;
-  },
+  applyProspectiveTurnToPlayerState: ({ playerState }) => {},
 
   getPlayerState: ({ globalState, playerId, rounds }) => {
     const previousRound = rounds[rounds.length - 1];
@@ -75,9 +73,7 @@ export const gameDefinition: GameDefinition<{
     }
   },
 
-  applyRoundToGlobalState: ({ globalState }) => {
-    return globalState;
-  },
+  applyRoundToGlobalState: ({ globalState }) => {},
 
   getPublicTurn: ({ turn, globalState, viewerId }) => {
     if (viewerId !== turn.playerId) {

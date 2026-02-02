@@ -120,7 +120,7 @@ export const gameDefinition: GameDefinition<{
 
   // run on client
 
-  getProspectivePlayerState: ({ playerState, prospectiveTurn }) => {
+  applyProspectiveTurnToPlayerState: ({ playerState, prospectiveTurn }) => {
     if (prospectiveTurn.data.piecePlacement) {
       applyValidPlacement({
         map: playerState.tiles,
@@ -132,9 +132,6 @@ export const gameDefinition: GameDefinition<{
         (option) => option.id !== prospectiveTurn.data.piecePlacement?.pieceId,
       );
     }
-    // TODO: this is what the player sees as the game state
-    // with their pending local moves applied after selecting them
-    return playerState;
   },
 
   // run on server
@@ -182,8 +179,6 @@ export const gameDefinition: GameDefinition<{
       ({ action }) => action.action === 'attack',
     );
 
-    // before we begin, snapshot initial map
-    const initialMap = structuredClone(globalState.tiles);
     const currentMap = globalState.tiles;
 
     // moves are resolved first
@@ -239,11 +234,6 @@ export const gameDefinition: GameDefinition<{
       globalState.scores[member.id] += Math.floor(workshopProgress);
       globalState.progress[member.id] -= Math.floor(workshopProgress);
     }
-
-    return {
-      ...globalState,
-      tiles: currentMap,
-    };
   },
 
   getPublicTurn: ({ turn }) => {
