@@ -5,11 +5,11 @@ import { defineConfig } from 'unocss';
 /** @type import('@a-type/ui'). */
 export const presetOptions = {
   borderScale: 2,
-  cornerScale: 0.5,
+  cornerScale: 1,
   spacingScale: 1.25,
   saturation: 70,
-  primaryHue: 300,
-  accentHue: 90,
+  primaryHue: 286,
+  accentHue: 52,
   shadowSpread: 0,
 };
 

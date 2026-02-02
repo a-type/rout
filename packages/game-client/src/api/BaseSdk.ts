@@ -34,7 +34,6 @@ export type QueryFactoryInfinite<Output, Input> = {
     Output,
     Error,
     Output,
-    Output,
     any,
     string | undefined
   >;
@@ -224,7 +223,6 @@ export class BaseSdk extends EventTarget {
         Output,
         Error,
         Output,
-        Output,
         any,
         string | undefined
       >;
@@ -335,8 +333,8 @@ export class BaseSdk extends EventTarget {
     mutation: UseMutationOptions<Output, any, Input>,
     input: Input,
   ) => {
-    const result = await mutation.mutationFn!(input);
-    mutation.onSuccess?.(result, input, undefined);
+    const result = await mutation.mutationFn!(input, undefined as any);
+    mutation.onSuccess?.(result, input, undefined, undefined as any);
   };
 }
 

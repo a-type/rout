@@ -99,9 +99,10 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           surface
           items="start"
           gap="sm"
+          elevated="sm"
+          border
           className={clsx(
             'bg-main-wash bg-lighten-2 color-black',
-            'shadow-sm',
             'transition-opacity',
             'px-md py-sm',
             !isPreviousMessageSameAuthor &&

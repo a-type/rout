@@ -17,6 +17,10 @@
       "name": "🔨 Packages",
     },
     {
+      "path": "./jobs",
+      "name": "💼 Jobs",
+    },
+    {
       "path": "./games/number-guess",
       "name": "🎲 Number Guess",
     },

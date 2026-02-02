@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Button, ButtonProps, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { withSuspense } from '@long-game/game-ui';
+import { TopographyButton, withSuspense } from '@long-game/game-ui';
 import { useNavigate } from '@verdant-web/react-router';
 import { MouseEvent } from 'react';
 import { GameLimitUpsellWrapper } from '../subscription/GameLimitUpsellWrapper.js';
@@ -35,7 +35,7 @@ export const CreateGame = withSuspense(
 
     return (
       <GameLimitUpsellWrapper enabled={remaining === 0}>
-        <Button
+        <TopographyButton
           emphasis="primary"
           onClick={remaining > 0 ? create : undefined}
           {...rest}
@@ -46,7 +46,7 @@ export const CreateGame = withSuspense(
               <span>New Game</span>
             </>
           )}
-        </Button>
+        </TopographyButton>
       </GameLimitUpsellWrapper>
     );
   },

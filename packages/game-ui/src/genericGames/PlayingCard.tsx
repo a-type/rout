@@ -285,8 +285,9 @@ export const PlayingCard = Object.assign(PlayingCardRoot, {
 const CardRoot = withClassName(
   withProps(Box, { container: 'reset' }),
   'aspect-[3/4] flex-1 h-auto min-w-24px min-h-32px max-h-50vh select-none @container',
-  '[&[data-suit=s],&[data-suit=h]]:(color-main-ink)',
-  '[&[data-suit=c],&[data-suit=d]]:(color-main-dark)',
+  '[&[data-suit=s]]:(color-main-ink)',
+  '[&[data-suit=c],&[data-suit=d]]:(color-main-dark color-lighten-1)',
+  '[&[data-suit=h]]:(color-main-dark color-darken-2)',
 );
 
 function ScalingText({
@@ -396,9 +397,9 @@ function Slash() {
   return (
     <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 100 100">
       <line
-        x1="10"
+        x1="90"
         y1="-10"
-        x2="90"
+        x2="10"
         y2="110"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
