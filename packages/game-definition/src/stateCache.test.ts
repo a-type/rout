@@ -38,18 +38,14 @@ function createCache() {
     },
     applyRoundToGlobalState: vi.fn(
       ({ globalState, round, random, members, roundIndex }) => {
-        const newState = { ...globalState };
-        newState.playedRounds.push(roundIndex);
+        globalState.playedRounds.push(roundIndex);
         for (const turn of round.turns) {
-          newState.randomValues.push(random.int(0, 100));
-          newState.turnValues.push(turn.data.value);
+          globalState.randomValues.push(random.int(0, 100));
+          globalState.turnValues.push(turn.data.value);
         }
-        return newState;
       },
     ),
-    getProspectivePlayerState({ playerState }) {
-      return playerState;
-    },
+    applyProspectiveTurnToPlayerState({ playerState }) {},
     getPublicTurn({ turn }) {
       return turn;
     },

@@ -13,5 +13,5 @@ export const emptyGameDefinition: GameDefinition = {
   maximumPlayers: 100,
   minimumPlayers: 1,
   validateTurn: () => {},
-  getProspectivePlayerState: () => ({}),
+  applyProspectiveTurnToPlayerState: () => ({}),
 };
