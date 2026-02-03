@@ -49,7 +49,7 @@ export function HomePage({}: HomePageProps) {
         </PageFixedArea>
         <HomeNavRoot>
           <AppInstallBanner />
-          <IncomingInvites surface p />
+          <IncomingInvites surface color="accent" border p />
           <HomeNavSection id="live" title="Live Games">
             <MembershipsList
               invitationStatus="accepted"

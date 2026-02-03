@@ -27,11 +27,11 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
     );
 
     if (showSubmit) {
-      return <SubmitTurn />;
+      return <SubmitTurn className="sticky bottom-sm" />;
     }
 
     return (
-      <Box d="col" items="center" gap>
+      <Box d="col" items="center" gap className="sticky bottom-sm">
         {debouncedError && (
           <Box p gap items="center" className="color-attention-ink">
             <Icon name="lightbulb" />

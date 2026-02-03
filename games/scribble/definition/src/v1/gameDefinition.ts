@@ -1,5 +1,9 @@
 import { PrefixedId } from '@long-game/common';
-import { GameDefinition, roundFormat } from '@long-game/game-definition';
+import {
+  BaseTurnError,
+  GameDefinition,
+  roundFormat,
+} from '@long-game/game-definition';
 import { getPlayerSequenceIndexes } from './ordering.js';
 
 const PROMPT_ROUNDS = 8;
@@ -84,6 +88,8 @@ export const gameDefinition: GameDefinition<{
   PlayerState: PlayerState;
   TurnData: TurnData;
   PublicTurnData: {};
+  TurnError: BaseTurnError;
+  InitialTurnData: TurnData;
 }> = {
   version: 'v1.0',
   minimumPlayers: 2,
@@ -167,6 +173,11 @@ export const gameDefinition: GameDefinition<{
         }
       }
     }
+  },
+  getInitialTurn: () => {
+    return {
+      taskCompletions: [],
+    };
   },
 
   // run on client

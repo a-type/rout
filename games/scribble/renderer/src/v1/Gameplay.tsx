@@ -63,11 +63,12 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
       }}
       layout="center center"
       full="width"
+      grow
     >
       <Tabs
         value={viewingIndex.toString()}
         onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
-        className="w-full flex flex-col"
+        className="w-full flex flex-col items-center"
       >
         <ItemTabs items={initialState.tasks} />
         {initialState.tasks.map((task, index) => (

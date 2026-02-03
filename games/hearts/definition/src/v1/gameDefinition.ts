@@ -1,5 +1,9 @@
 import { isPrefixedId, PrefixedId } from '@long-game/common';
-import { GameDefinition, SystemChatMessage } from '@long-game/game-definition';
+import {
+  BaseTurnError,
+  GameDefinition,
+  SystemChatMessage,
+} from '@long-game/game-definition';
 import { shuffleHands } from './deck.js';
 import { getDraftingRound, getRoundIndex } from './rounds.js';
 import {
@@ -137,6 +141,7 @@ export const gameDefinition: GameDefinition<{
   PlayerState: PlayerState;
   TurnData: TurnData;
   PublicTurnData: TurnData;
+  TurnError: BaseTurnError;
 }> = {
   version: 'v1.0',
   minimumPlayers: 3,

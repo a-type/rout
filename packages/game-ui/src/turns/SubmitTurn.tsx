@@ -1,7 +1,7 @@
 import { Box, Button, clsx, Icon, RelativeTime, Tooltip } from '@a-type/ui';
 import { useGameSuite, withGame } from '@long-game/game-client';
 import { TopographyButton } from '@long-game/visual-components';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { PlayerStatuses } from '../players/PlayerStatuses.js';
 import { withSuspense } from '../withSuspense.js';
 
@@ -36,6 +36,13 @@ export const SubmitTurn = withSuspense(
           : 'arrowRight';
     const hideIcon = !hasLocalTurn && !turnWasSubmitted && !nextRoundCheckAt;
 
+    const [showProblemState, setShowProblem] = useState(false);
+    useEffect(() => {
+      if (!turnError) {
+        setShowProblem(false);
+      }
+    }, [turnError]);
+
     return (
       <Tooltip
         disabled={!turnError && !nextRoundCheckAt}
@@ -46,41 +53,60 @@ export const SubmitTurn = withSuspense(
             : turnError?.message
         }
       >
-        <Box className={clsx('rounded-lg', className)}>
-          <TopographyButton
-            className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray)"
-            color={turnError ? 'attention' : 'primary'}
-            disabled={isDisabled}
-            onClick={() =>
-              submitTurn({
-                delay,
-              })
-            }
-          >
-            {children ??
-              (!hasLocalTurn && turnWasSubmitted && nextRoundCheckAt ? (
-                <>
-                  <span>Next:</span>
-                  <RelativeTime
-                    countdownSeconds
-                    value={nextRoundCheckAt.getTime()}
-                    abbreviate
-                  />
-                </>
-              ) : turnError ? (
-                "Can't submit"
-              ) : turnWasSubmitted ? (
-                hasLocalTurn ? (
-                  `Update turn`
+        <Box
+          col
+          gap="lg"
+          items="center"
+          className={clsx('rounded-lg', className)}
+        >
+          <Box col>
+            <TopographyButton
+              className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray)"
+              color={turnError ? 'attention' : 'primary'}
+              visuallyDisabled={isDisabled}
+              onClick={() => {
+                if (isDisabled) {
+                  if (turnError) {
+                    setShowProblem(true);
+                  }
+                  return;
+                }
+                submitTurn({
+                  delay,
+                });
+              }}
+            >
+              {children ??
+                (!hasLocalTurn && turnWasSubmitted && nextRoundCheckAt ? (
+                  <>
+                    <span>Next:</span>
+                    <RelativeTime
+                      countdownSeconds
+                      value={nextRoundCheckAt.getTime()}
+                      abbreviate
+                    />
+                  </>
+                ) : turnError ? (
+                  "Can't submit"
+                ) : turnWasSubmitted ? (
+                  hasLocalTurn ? (
+                    `Update turn`
+                  ) : (
+                    'Ready for next!'
+                  )
                 ) : (
-                  'Ready for next!'
-                )
-              ) : (
-                `Submit turn`
-              ))}
-            {!children && !hideIcon && <Icon name={icon} />}
-          </TopographyButton>
-          <PlayerStatuses className="absolute z-100 pointer-events-none bottom-0 left-50% -translate-x-1/2 translate-y-2/3" />
+                  `Submit turn`
+                ))}
+              {!children && !hideIcon && <Icon name={icon} />}
+            </TopographyButton>
+            <PlayerStatuses className="absolute z-100 pointer-events-none bottom-0 left-50% -translate-x-1/2 translate-y-2/3" />
+          </Box>
+          {showProblemState && turnError && (
+            <Box rounded items="center" gap surface color="attention" p border>
+              <Icon name="warning" />
+              {turnError.message}
+            </Box>
+          )}
         </Box>
       </Tooltip>
     );

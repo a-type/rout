@@ -20,7 +20,17 @@ export function LoginPage({}: LoginPageProps) {
   return (
     <Box className="w-full h-full" layout="center center">
       <TopographyBackground className="fixed" />
-      <Box p className="flex-col lg:flex-row m-auto relative z-1" gap>
+      <Box
+        p
+        d={{
+          default: 'col',
+          lg: 'row',
+        }}
+        layout="center center"
+        className="m-auto relative z-1"
+        grow
+        gap
+      >
         <Box
           d={{
             sm: 'col-reverse',
@@ -59,7 +69,7 @@ export function LoginPage({}: LoginPageProps) {
             >
               Log in with Google
             </OAuthSigninButton>
-            <Box d="col" p gap surface>
+            <Box d="col" p gap surface="white">
               <H2>Log in with email</H2>
               <EmailSigninForm
                 endpoint={`${API_ORIGIN}/auth/email-login`}
@@ -80,7 +90,7 @@ export function LoginPage({}: LoginPageProps) {
             >
               Sign up with Google
             </OAuthSigninButton>
-            <Box d="col" p gap surface>
+            <Box d="col" p gap surface="white">
               <H2>Sign up with email</H2>
               <EmailSignupForm
                 endpoint={`${API_ORIGIN}/auth/begin-email-signup`}

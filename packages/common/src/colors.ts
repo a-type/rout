@@ -48,7 +48,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 23.9,
     okRotate: 1,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   crimson: {
     range: [
@@ -69,7 +69,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 1.3,
     okRotate: -2,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   plum: {
     range: [
@@ -90,7 +90,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 322.09,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   violet: {
     range: [
@@ -111,7 +111,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 288.1,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   indigo: {
     range: [
@@ -132,7 +132,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 267.08,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   blue: {
     range: [
@@ -153,7 +153,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 251.81,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   teal: {
     range: [
@@ -174,7 +174,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 182.01,
     okRotate: 4,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   lime: {
     range: [
@@ -195,7 +195,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 126.09,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   orange: {
     range: [
@@ -216,7 +216,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'white',
     okHue: 44.8,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   yellow: {
     range: [
@@ -237,7 +237,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'black',
     okHue: 102.14,
     okRotate: 6,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   mint: {
     range: [
@@ -258,7 +258,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     defaultText: 'black',
     okHue: 177.97,
     okRotate: 0,
-    okSaturation: 1,
+    okSaturation: 0.8,
   },
   gray: {
     range: [

@@ -38,8 +38,8 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
                 : noGame
                   ? 'Select a game'
                   : amIReady
-                    ? 'Ready!'
-                    : 'Ready to play!')}
+                    ? 'Waiting for others...'
+                    : "I'm ready!")}
         </Box>
         <AvatarList count={gameSuite.members.length}>
           {gameSuite.members.map((member, i) => (
@@ -69,8 +69,8 @@ function PlayerReadyAvatar({
       {ready ? (
         <div
           className={clsx(
-            'absolute -top-1 -right-2px rounded-full w-16px h-16px flex items-center justify-center',
-            'bg-accent-dark',
+            'absolute -top-1 -left-4px rounded-full w-16px h-16px flex items-center justify-center z-1',
+            'bg-success-dark',
           )}
         >
           <Icon name="check" className="w-10px h-10px color-white" />

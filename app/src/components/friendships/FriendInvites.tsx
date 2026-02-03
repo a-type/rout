@@ -24,7 +24,7 @@ export function IncomingInvites(props: BoxProps) {
   return (
     <Box col gap {...props}>
       <H2>Incoming Invites</H2>
-      <Box d="col" surface p gap>
+      <Box d="col" gap>
         {invites.map((invite) => (
           <IncomingInvite key={invite.id} invite={invite} />
         ))}

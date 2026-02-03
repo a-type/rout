@@ -42,7 +42,7 @@ const GameInviteLinkPage = () => {
       <PageRoot>
         <TopographyBackground className="fixed" />
         <PageContent>
-          <Box d="col" gap layout="center center" full>
+          <Box d="col" gap layout="center center" full grow>
             <Wordmark />
             <P className="text-center">
               You've been invited to join a game
@@ -74,7 +74,7 @@ const GameInviteLinkPage = () => {
     <PageRoot>
       <TopographyBackground />
       <PageContent>
-        <Box d="col" gap layout="center center" full>
+        <Box d="col" gap layout="center center" full grow>
           <UserAvatar userId={me.id} className="aspect-1 w-20vmin" />
           {me.displayName && (
             <P className="font-bold text-lg">Hey {me.displayName}!</P>

@@ -25,8 +25,11 @@ export const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
 
   return (
     <Box d="col" gap items="center" className="w-full" p>
-      <Tabs defaultValue="0">
-        <Tabs.List className="sticky top-[50px] ___ z-100 lg:top-sm">
+      <Tabs
+        defaultValue="0"
+        className="w-full flex flex-col gap-md items-center"
+      >
+        <Tabs.List className="sticky top-sm z-100">
           {postgameGlobalState.sequences.map((seq, index) => (
             <Tabs.Trigger key={index} value={index.toString()}>
               Sequence {index + 1}

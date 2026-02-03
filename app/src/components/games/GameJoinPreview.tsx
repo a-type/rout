@@ -44,7 +44,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
 
   if (remainingGames === 0) {
     return (
-      <Box direction="col" layout="center center" full gap>
+      <Box direction="col" layout="center center" full gap grow>
         <H1>Game limit reached</H1>
         <P>
           Sorry, looks like you've reached your active game limit. You can't
@@ -71,7 +71,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
   }
 
   return (
-    <Box direction="col" layout="center center" full gap>
+    <Box direction="col" layout="center center" full gap grow>
       <H1>Join Game</H1>
       <Box gap p="lg">
         <AvatarList count={pregame.members.length}>

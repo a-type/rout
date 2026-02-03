@@ -138,7 +138,9 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
         <Select value="" onValueChange={addTagFilter}>
           <Select.Trigger size="small" render={<Chip />}>
             <Icon name="plus" />
-            <Select.Value placeholder="Tag">{(tag) => tag}</Select.Value>
+            <Select.Value placeholder="Tag">
+              {(tag) => tag ?? 'Choose tag...'}
+            </Select.Value>
           </Select.Trigger>
           <Select.Content>
             {Array.from(allTags)
@@ -207,10 +209,7 @@ const GamePickerItem = withGame<{
 
   return (
     <Card
-      className={clsx(
-        'aspect-1 min-w-80px',
-        selected && 'ring ring-inset ring-accent ring-6',
-      )}
+      className={clsx('aspect-1 min-w-80px', selected && 'ring-accent ring-6')}
     >
       <Card.Image render={<GameIcon gameId={gameId} />} />
       <GameDetailsDialog gameId={gameId}>
@@ -218,8 +217,14 @@ const GamePickerItem = withGame<{
           <Card.Title className="text-sm md:text-md">
             <GameTitle gameId={gameId} />
           </Card.Title>
-          {voters?.length > 0 && (
+          {selected && (
             <Card.Content unstyled>
+              <Chip color="success">Selected</Chip>
+            </Card.Content>
+          )}
+          {voters?.length > 0 && (
+            <Card.Content className="flex flex-row gap-xs items-center">
+              <span>Votes</span>
               <AvatarList count={voters.length}>
                 {voters.map((voter, i) => (
                   <AvatarList.ItemRoot index={i} key={voter}>
@@ -251,7 +256,7 @@ const GamePickerItem = withGame<{
             disabled={selected}
           >
             <Icon name="check" />
-            {selected ? 'Selected!' : 'Select'}
+            Select
           </Button>
         )}
         {owned && !isGameLeader && (
