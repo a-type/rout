@@ -98,6 +98,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       ctx.storage,
       this.handleScheduledTask,
     );
+    this.#startup();
   }
 
   // socket delegation
@@ -126,7 +127,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   // these return promises but the inherent caching layer of DOs means
   // they should resolve immediately.
   async #getSessionData(): Promise<GameSessionBaseData> {
-    const data = await this.ctx.storage.get('sessionData');
+    const data = await this.#maybeGetSessionData();
     if (!data) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
@@ -135,8 +136,15 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     return data as GameSessionBaseData;
   }
+  async #maybeGetSessionData(): Promise<GameSessionBaseData | null> {
+    const data = await this.ctx.storage.get<GameSessionBaseData>('sessionData');
+    if (!data) {
+      return null;
+    }
+    return data;
+  }
   async #hasSessionData(): Promise<boolean> {
-    const data = await this.ctx.storage.get('sessionData');
+    const data = await this.#maybeGetSessionData();
     return Boolean(data);
   }
   async #setSessionData(data: GameSessionBaseData) {
@@ -168,6 +176,21 @@ export class GameSession extends DurableObject<ApiBindings> {
   async #setSetupData(setupData: any) {
     await this.ctx.storage.put('setupData', setupData);
     return setupData;
+  }
+
+  // things to do when the DO starts up - could happen on launch
+  // or restoring after hibernation
+  async #startup() {
+    console.info(`GameSession DO startup...`);
+    const { status } = await this.getStatus();
+    const maybeData = await this.#maybeGetSessionData();
+    console.log(
+      `Game status: ${status}. Game ID: ${maybeData?.id ?? '<not set>'}`,
+    );
+    if (status === 'active') {
+      await this.#scheduleTurnRemindersTask();
+      console.debug(`Scheduled turn reminders task.`);
+    }
   }
 
   // turns use the SQL API

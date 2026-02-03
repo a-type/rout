@@ -18,7 +18,6 @@ import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactElement, Suspense, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings.js';
-import { useAutoReadNotifications } from './useAutoReadNotifications.js';
 
 export interface NotificationsButtonProps
   extends Omit<ButtonProps, 'children'> {
@@ -37,21 +36,22 @@ export const NotificationsButton = withSuspense(
     const isMobile = useMediaQuery('(max-width: 768px)');
     const PopoverImpl = isMobile ? Dialog : Popover;
 
-    const [showRead, setShowRead] = useState(false);
-
     const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
-      sdkHooks.useGetNotifications(
-        { status: showRead ? undefined : 'unread' },
-        { refetchOnWindowFocus: true },
-      );
+      sdkHooks.useGetNotifications({}, { refetchOnWindowFocus: true });
     const { results: notifications } = data || { results: [] };
     const hasUnread = notifications?.some((n) => !n.readAt);
     const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
 
-    useAutoReadNotifications(notifications);
-
     return (
-      <PopoverImpl open={open} onOpenChange={setOpen}>
+      <PopoverImpl
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            markAllRead.mutate(undefined);
+          }
+          setOpen(isOpen);
+        }}
+      >
         <PopoverImpl.Trigger
           className={className}
           render={
@@ -133,13 +133,6 @@ export const NotificationsButton = withSuspense(
                 >
                   <Icon name="bell" size={80} />
                   <span>Nothing to see here!</span>
-                </Box>
-              )}
-              {!showRead && (
-                <Box p layout="center center">
-                  <Button emphasis="ghost" onClick={() => setShowRead(true)}>
-                    Show Read
-                  </Button>
                 </Box>
               )}
             </>
