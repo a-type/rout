@@ -31,6 +31,7 @@ import { notifyUser } from '../../services/notification.js';
 import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
 import { Scheduler } from '../Scheduler.js';
 import { SqlWrapper } from '../SqlWrapper.js';
+import { GameSessionPresence } from './GameSessionPresence.js';
 import { GameSessionSocketHandler } from './GameSessionSocketHandler.js';
 import { ChatMessage, db, migrations } from './sql.js';
 
@@ -88,10 +89,13 @@ export class GameSession extends DurableObject<ApiBindings> {
   #socketHandler: GameSessionSocketHandler;
   #stateCache: GameStateCache | undefined;
   #scheduler: Scheduler<ScheduledTasks>;
+  readonly presence: GameSessionPresence;
+  #cachedGameSessionId: PrefixedId<'gs'> | null = null;
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
     this.#sql = new SqlWrapper(ctx.storage, migrations);
+    this.presence = new GameSessionPresence(ctx);
     this.#socketHandler = new GameSessionSocketHandler(this, ctx, env);
     this.#scheduler = new Scheduler(
       this.#sql,
@@ -100,6 +104,10 @@ export class GameSession extends DurableObject<ApiBindings> {
     );
     this.#startup();
   }
+
+  log = (level: 'debug' | 'info' | 'warn' | 'error', ...args: any[]) => {
+    console[level](`[👾 ${this.#cachedGameSessionId ?? 'unknown'}]`, ...args);
+  };
 
   // socket delegation
   fetch(req: Request) {
@@ -181,10 +189,11 @@ export class GameSession extends DurableObject<ApiBindings> {
   // things to do when the DO starts up - could happen on launch
   // or restoring after hibernation
   async #startup() {
-    console.info(`GameSession DO startup...`);
+    this.log('info', `GameSession DO startup...`);
     const { status } = await this.getStatus();
     const maybeData = await this.#maybeGetSessionData();
-    console.log(
+    this.log(
+      'debug',
       `Game status: ${status}. Game ID: ${maybeData?.id ?? '<not set>'}`,
     );
     if (status === 'active') {
@@ -324,7 +333,7 @@ export class GameSession extends DurableObject<ApiBindings> {
         },
         startGameTaskId,
       );
-      console.log('All players ready. Starting game in 5 seconds');
+      this.log('debug', 'All players ready. Starting game in 5 seconds');
       this.#socketHandler.send({
         type: 'gameStarting',
         startsAt: startsAt.toISOString(),
@@ -706,7 +715,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     const statuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus> = {};
     for (const member of members) {
       statuses[member.id] = {
-        online: this.#socketHandler.getIsPlayerOnline(member.id),
+        online: await this.presence.getIsOnline(member.id),
         pendingTurn: roundState.pendingTurns.includes(member.id),
       };
     }
@@ -769,11 +778,13 @@ export class GameSession extends DurableObject<ApiBindings> {
       throw new LongGameError(LongGameError.Code.BadRequest, msg);
     }
 
-    console.log(
+    this.log(
+      'debug',
       `Adding turn for player ${playerId} in round ${currentRoundIndex}`,
     );
     await this.#applyTurn(turn, playerId, currentRoundIndex);
-    console.log(
+    this.log(
+      'debug',
       `Turn added for player ${playerId} in round ${currentRoundIndex}`,
     );
 
@@ -870,7 +881,7 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   // chat
   async addChatMessage(message: GameSessionChatMessage) {
-    console.log(`Chat message from ${message.authorId}`);
+    this.log('debug', `Chat message from ${message.authorId}`);
     const query = db
       .insertInto('ChatMessage')
       .values({
@@ -1042,13 +1053,14 @@ export class GameSession extends DurableObject<ApiBindings> {
       ...parsedReactions,
       [reaction]: Array.from(currentValue),
     };
-    console.log(
+    this.log(
+      'debug',
       `Setting reaction ${reaction} for player ${playerId} on message ${messageId}`,
       newReactions,
     );
     // be sure...
     if (chatReactionsShape.safeParse(newReactions).success === false) {
-      console.error(`Unexpected reaction data: ${newReactions}`);
+      this.log('error', `Unexpected reaction data: ${newReactions}`);
       throw new LongGameError(
         LongGameError.Code.InternalServerError,
         'Unexpected error when applying reaction',
@@ -1283,7 +1295,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
     const sessionData = await this.#getSessionData();
     if (!sessionData.gameId || !sessionData.gameVersion) {
-      console.warn(`No game in progress; cannot notify player of turn`);
+      this.log('warn', `No game in progress; cannot notify player of turn`);
       return;
     }
     const scheduler = await getNotificationScheduler(playerId, this.env);
@@ -1308,7 +1320,7 @@ export class GameSession extends DurableObject<ApiBindings> {
    */
   #checkForRoundChange = async () => {
     const roundState = await this.#getCurrentRoundState();
-    console.log(`Round state: ${JSON.stringify(roundState)}`);
+    this.log('debug', `Round state: ${JSON.stringify(roundState)}`);
     let notifications = await this.#getRoundState();
     if (roundState.roundIndex !== notifications.roundIndex) {
       // round index is out of date, reset
@@ -1343,17 +1355,21 @@ export class GameSession extends DurableObject<ApiBindings> {
           await this.#notifyPlayerOfTurn(playerId);
           await this.#markPlayerNotified(playerId);
         } catch (err) {
-          console.error(
+          this.log(
+            'error',
             `Failed to send player notification to ${playerId}`,
             err,
           );
         }
       } else {
-        console.log(`Player ${playerId} already notified of turn, skipping`);
+        this.log(
+          'debug',
+          `Player ${playerId} already notified of turn, skipping`,
+        );
       }
     }
     if (roundState.checkAgainAt) {
-      console.log(`Scheduling check again at ${roundState.checkAgainAt}`);
+      this.log('debug', `Scheduling check again at ${roundState.checkAgainAt}`);
       this.#scheduler.scheduleTask(roundState.checkAgainAt, {
         type: 'checkRound',
       });
@@ -1403,7 +1419,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     // schedule a follow up for 7 AM the next day to remind players
     // TODO: timezone! agh!
     const sevenAm = setHours(startOfDay(addDays(new Date(), 1)), 7);
-    console.log(
+    this.log(
+      'debug',
       `Scheduling turn reminders for ${sevenAm.toISOString()} (next day at 7 AM)`,
     );
     this.#scheduler.scheduleTask(
@@ -1413,13 +1430,13 @@ export class GameSession extends DurableObject<ApiBindings> {
     );
   };
   #sendTurnReminders = async () => {
-    console.log(`Sending turn reminders to players`);
+    this.log('debug', `Sending turn reminders to players`);
     const roundState = await this.#getCurrentRoundState();
     for (const playerId of roundState.pendingTurns) {
       try {
         await this.#notifyPlayerOfTurn(playerId);
       } catch (err) {
-        console.error(`Failed to send turn reminder to ${playerId}`, err);
+        this.log('error', `Failed to send turn reminder to ${playerId}`, err);
       }
     }
     if (roundState.pendingTurns.length > 0) {
@@ -1431,6 +1448,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     this.#scheduler.handleAlarm();
   }
   private handleScheduledTask = async (task: ScheduledTasks) => {
+    this.log('debug', `Handling scheduled task: ${task.type}`);
     switch (task.type) {
       case 'checkRound':
         return this.#checkForRoundChange();

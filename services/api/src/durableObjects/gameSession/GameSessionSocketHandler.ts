@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   ClientMessage,
+  ClientPingMessage,
   ClientRequestChatMessage,
   ClientResetGameMessage,
   ClientSendChatMessage,
@@ -10,6 +11,7 @@ import {
   PrefixedId,
   ServerChatMessage,
   ServerMessage,
+  ServerPongMessage,
   assertPrefixedId,
   clientMessageShape,
   id,
@@ -24,6 +26,7 @@ export interface SocketSessionInfo {
   userId: PrefixedId<'u'>;
   socketId: string;
   status: 'pending' | 'ready' | 'closed';
+  connectedAt: number;
 }
 
 export class GameSessionSocketHandler {
@@ -45,6 +48,13 @@ export class GameSessionSocketHandler {
         this.#socketInfo.set(ws, data);
       }
     });
+
+    ctx.setWebSocketAutoResponse(
+      new WebSocketRequestResponsePair(
+        JSON.stringify({ type: 'ping' } satisfies ClientPingMessage),
+        JSON.stringify({ type: 'pong' } satisfies ServerPongMessage),
+      ),
+    );
   }
 
   #createHono = () => {
@@ -77,7 +87,9 @@ export class GameSessionSocketHandler {
 
         const attachedSessionId = await this.gameSession.getId();
         if (gameSessionId !== attachedSessionId) {
-          console.warn(
+          this.gameSession.log(
+            'warn',
+            '[GameSessionSocketHandler]',
             `Socket token for wrong DO: given ${gameSessionId}, this session ID is ${this.ctx.id.name}`,
           );
           throw new LongGameError(
@@ -92,12 +104,17 @@ export class GameSessionSocketHandler {
         this.ctx.acceptWebSocket(server);
 
         // map the socket to the token info for later reference.
+        const socketId = crypto.randomUUID();
         this.#updateSocketInfo(server, {
           gameSessionId,
           userId,
           status: 'pending',
-          socketId: crypto.randomUUID(),
+          socketId,
+          connectedAt: Date.now(),
         });
+
+        // add presence entry
+        this.gameSession.presence.onSeen(userId, socketId).finally();
 
         (async () => {
           // send connection notice to other players
@@ -162,7 +179,9 @@ export class GameSessionSocketHandler {
         backlog.push(msg);
       } else if (status === 'closed') {
         this.#socketInfo.delete(ws);
-        console.error(
+        this.gameSession.log(
+          'error',
+          '[GameSessionSocketHandler]',
           `Cannot send message to closed socket: { userId: ${userId}, socketId: ${socketId} }`,
         );
       } else {
@@ -171,29 +190,26 @@ export class GameSessionSocketHandler {
     }
   };
 
-  getIsPlayerOnline = (userId: PrefixedId<'u'>) => {
-    const sockets = Array.from(this.#socketInfo.values());
-    for (const { userId: id, status } of sockets) {
-      if (id === userId) {
-        return status === 'ready';
-      }
-    }
-    return false;
-  };
-
-  onMessage = (ws: WebSocket, message: ArrayBuffer | string) => {
+  onMessage = async (ws: WebSocket, message: ArrayBuffer | string) => {
     // any message is sufficient to confirm the socket is open
     const info = this.#socketInfo.get(ws);
     if (!info) {
-      console.warn(
+      this.gameSession.log(
+        'warn',
+        '[GameSessionSocketHandler]',
         'Received message from untracked socket',
         ws.deserializeAttachment(),
       );
       return;
     }
+    // out-of-band update seen
+    this.gameSession.presence.onSeen(info.userId, info.socketId).finally();
+
     if (info.status === 'pending') {
       this.#updateSocketInfo(ws, { ...info, status: 'ready' });
-      console.log(
+      this.gameSession.log(
+        'debug',
+        '[GameSessionSocketHandler]',
         'Socket ready',
         info.socketId,
         info.userId,
@@ -207,7 +223,9 @@ export class GameSessionSocketHandler {
       const asObject = JSON.parse(message.toString());
       const parsed = clientMessageShape.safeParse(asObject);
       if (!parsed.success) {
-        console.error(
+        this.gameSession.log(
+          'error',
+          '[GameSessionSocketHandler]',
           'Invalid message',
           parsed.error,
           'at',
@@ -226,7 +244,9 @@ export class GameSessionSocketHandler {
         this.#onClientMessage(parsed.data, ws, info);
       }
     } catch (err) {
-      console.error(
+      this.gameSession.log(
+        'error',
+        '[GameSessionSocketHandler]',
         'Error parsing or handling message',
         err,
         message.toString(),
@@ -277,17 +297,30 @@ export class GameSessionSocketHandler {
             await this.gameSession.readyUp(info.userId);
           }
           break;
+        case 'disconnecting':
+          await this.gameSession.presence.onDisconnect(
+            info.userId,
+            info.socketId,
+          );
+          break;
       }
       // ack the message for the client
-      ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
+      if (msg.type !== 'ping' && msg.messageId) {
+        ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
+      }
     } catch (err) {
-      console.error('Error handling message', err);
+      this.gameSession.log(
+        'error',
+        '[GameSessionSocketHandler]',
+        'Error handling message',
+        err,
+      );
       const message = err instanceof Error ? err.message : 'An error occurred';
       ws.send(
         JSON.stringify({
           type: 'error',
           message,
-          responseTo: msg.messageId,
+          responseTo: (msg as any).messageId,
         }),
       );
     }
@@ -304,7 +337,12 @@ export class GameSessionSocketHandler {
   };
 
   async onError(ws: WebSocket, error: unknown) {
-    console.error('Websocket error', error);
+    this.gameSession.log(
+      'error',
+      '[GameSessionSocketHandler]',
+      'Websocket error',
+      error,
+    );
     this.#onWebSocketCloseOrError(ws);
   }
 

@@ -16,6 +16,11 @@ const baseServerMessageShape = z.object({
 });
 export type BaseServerMessage = z.infer<typeof baseServerMessageShape>;
 
+export const serverPongMessageShape = baseServerMessageShape.extend({
+  type: z.literal('pong'),
+});
+export type ServerPongMessage = z.infer<typeof serverPongMessageShape>;
+
 export const serverPlayerStatusChangeMessageShape =
   baseServerMessageShape.extend({
     type: z.literal('playerStatusChange'),
@@ -184,7 +189,7 @@ const baseClientMessageShape = z.object({
 });
 export type BaseClientMessage = z.infer<typeof baseClientMessageShape>;
 
-export const clientPingMessageShape = baseClientMessageShape.extend({
+export const clientPingMessageShape = z.object({
   type: z.literal('ping'),
 });
 export type ClientPingMessage = z.infer<typeof clientPingMessageShape>;
@@ -256,6 +261,13 @@ export type ClientVoteForGameMessage = z.infer<
   typeof clientVoteForGameMessageShape
 >;
 
+export const clientDisconnectingMessageShape = baseClientMessageShape.extend({
+  type: z.literal('disconnecting'),
+});
+export type ClientDisconnectingMessage = z.infer<
+  typeof clientDisconnectingMessageShape
+>;
+
 export const clientMessageShape = z.discriminatedUnion('type', [
   clientPingMessageShape,
   clientSendChatMessageShape,
@@ -265,6 +277,7 @@ export const clientMessageShape = z.discriminatedUnion('type', [
   clientToggleChatReactionMessageShape,
   clientReadyUpMessageShape,
   clientVoteForGameMessageShape,
+  clientDisconnectingMessageShape,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageShape>;
