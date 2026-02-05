@@ -24,7 +24,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
 }) {
   const { currentTurn, turnWasSubmitted } = gameSuite;
   return (
-    <Box col gap="sm" className={clsx('w-full', className)}>
+    <Box col gap="sm" items="center" className={clsx('w-full', className)}>
       <Box
         col
         layout="stretch start"
@@ -112,7 +112,13 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
           </Button>
         )}
       </Box>
-      <TurnError surface color="attention" p justify="center" />
+      <TurnError
+        surface
+        color="attention"
+        p="sm"
+        justify="center"
+        className="text-sm"
+      />
     </Box>
   );
 });

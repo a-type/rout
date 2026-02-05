@@ -61,7 +61,7 @@ export const SubmitTurn = withSuspense(
         >
           <Box col>
             <TopographyButton
-              className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray)"
+              className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray) data-[disabled=true]:(opacity-100 bg-wash color-gray-border-gray)"
               color={turnError ? 'attention' : 'primary'}
               visuallyDisabled={isDisabled}
               onClick={() => {

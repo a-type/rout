@@ -9,6 +9,7 @@ export interface SortableTokenListProps<T> extends BoxProps {
   onMove: (token: TokenDragData<T>, index: number) => void;
   debug?: boolean;
   priority?: number; // for sorting purposes, higher means higher priority when bounds overlap
+  disabled?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export function SortableTokenList<T = any>({
   onMove,
   debug,
   priority: droppablePriority,
+  disabled,
   ...rest
 }: SortableTokenListProps<T>) {
   const listId = useId();
@@ -39,6 +41,7 @@ export function SortableTokenList<T = any>({
       onDrop={(data) => onMove(data, Math.max(0, index))}
       debug={debug}
       priority={droppablePriority}
+      disabled={disabled}
     />,
     child,
   ]);
@@ -51,6 +54,7 @@ export function SortableTokenList<T = any>({
       last
       debug={debug}
       priority={droppablePriority}
+      disabled={disabled}
     />,
   );
 

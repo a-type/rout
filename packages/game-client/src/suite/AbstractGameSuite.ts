@@ -763,7 +763,9 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
         this.remoteTurnError = simpleError(msg) as BaseTurnError;
       });
     } finally {
-      this.submittingTurn = false;
+      runInAction(() => {
+        this.submittingTurn = false;
+      });
     }
   };
 

@@ -18,7 +18,7 @@ export const TopographyButton = ({
       className={clsx('relative z-10 overflow-hidden', className)}
     >
       {!props.disabled && !props.visuallyDisabled && !disableTopography && (
-        <TopographyBackground className="absolute opacity-50 [:hover>&]:[filter:brightness(1.25)]" />
+        <TopographyBackground className="absolute opacity-80 [:hover>&]:[filter:brightness(1.25)]" />
       )}
       <div
         className={clsx(

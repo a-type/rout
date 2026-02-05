@@ -16,7 +16,7 @@ export const sessions = new SessionManager<Context>({
     const ctx = baseCtx as Context<Env>;
     const apiUrl = new URL(ctx.env.API_ORIGIN);
     const refreshPath = apiUrl.pathname.replace(/\/$/, '') + '/auth/refresh';
-    const expiration = ctx.env.NODE_ENV === 'production' ? '1d' : '1m';
+    const expiration = ctx.env.NODE_ENV === 'production' ? '1d' : '15m';
     return {
       cookieName: 'lg-session',
       cookieOptions: {

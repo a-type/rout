@@ -172,7 +172,7 @@ export const colors: Record<string, PlayerColorPalette> = {
     ],
     default: teal.teal9,
     defaultText: 'white',
-    okHue: 182.01,
+    okHue: 170.01,
     okRotate: 4,
     okSaturation: 0.8,
   },

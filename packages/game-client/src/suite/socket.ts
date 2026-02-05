@@ -98,6 +98,7 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   }
 
   function disconnect() {
+    send({ type: 'disconnecting' });
     websocket.close();
   }
 

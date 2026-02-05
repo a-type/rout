@@ -19,6 +19,13 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
     const noGame = !gameSuite.gameId || gameSuite.gameId === 'empty';
     const cannotStart = insufficientPlayers || tooManyPlayers || noGame;
 
+    console.log(gameSuite.members.length, {
+      insufficientPlayers,
+      tooManyPlayers,
+      noGame,
+      cannotStart,
+    });
+
     return (
       <TopographyButton
         disabled={cannotStart}
