@@ -18,8 +18,9 @@ export function PushBanner({}: PushBannerProps) {
   );
   const [wasSubscribed, setWasSubscribed] = useState(false);
   const updateNotificationSettings = sdkHooks.useUpdateNotificationSettings();
+  const { data } = sdkHooks.useGetMe();
 
-  if (!canPush || isSubscribed || dismissed) {
+  if (!canPush || isSubscribed || dismissed || !data) {
     return null;
   }
 
