@@ -32,8 +32,12 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
         onClick={() => gameSuite.toggleReady()}
         disableTopography={amIReady}
         emphasis={cannotStart ? 'default' : 'primary'}
-        className={clsx('w-full', className)}
-        wrapperClassName="justify-between w-full"
+        className={clsx(
+          'w-full disabled:opacity-100 data-[disabled]:opacity-100',
+          className,
+        )}
+        color={cannotStart ? 'gray' : 'primary'}
+        wrapperClassName="justify-between w-full "
       >
         <Box gap>
           <Icon name={insufficientPlayers || amIReady ? 'x' : 'check'} />

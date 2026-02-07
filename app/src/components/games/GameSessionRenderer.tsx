@@ -10,6 +10,7 @@ import {
   ErrorBoundary,
   H1,
   Icon,
+  Popover,
   Select,
   Spinner,
 } from '@a-type/ui';
@@ -32,7 +33,6 @@ import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
-import { GameAbandonedNotice } from './GameAbandonedNotice.js';
 import { GameControls } from './GameControls.js';
 import { GameLayout } from './GameLayout.js';
 import { GameSetup } from './GameSetup.js';
@@ -94,6 +94,21 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
             <ScrollTicker>
               <span>Game Abandoned 😢</span>
             </ScrollTicker>
+            <Popover>
+              <Popover.Trigger
+                render={<Button size="small" emphasis="ghost" />}
+              >
+                <Icon name="info" />
+                What?
+              </Popover.Trigger>
+              <Popover.Content side="bottom" align="end">
+                <Popover.Title>Game Abandoned</Popover.Title>
+                <Popover.Description>
+                  One or more players left mid-game. Sorry, we can't keep
+                  playing.
+                </Popover.Description>
+              </Popover.Content>
+            </Popover>
           </Box>
         )}
         {gameSuite.gameStatus.status === 'active' && gameSuite.pickingPlayer ? (
@@ -180,9 +195,6 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
             </GameLayout.Main>
             <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
             <DelayedSubmitUndo />
-            {gameSuite.gameStatus.status === 'abandoned' && (
-              <GameAbandonedNotice />
-            )}
           </GameLayout>
         </DndRoot>
       </RendererProvider>

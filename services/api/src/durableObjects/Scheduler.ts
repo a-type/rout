@@ -49,6 +49,10 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
         scheduledAt: Date;
       } & Tasks,
     ) => Promise<void> | void,
+    private log: (
+      level: 'info' | 'debug' | 'warn' | 'error',
+      ...messages: any[]
+    ) => void,
   ) {
     this.storage.getAlarm().then((alarm) => {
       if (alarm) {
@@ -138,6 +142,10 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     const taskErrors: Error[] = [];
     for (const task of tasks) {
       try {
+        this.log(
+          'info',
+          `Processing scheduled task ${task.id} of type ${task.type}`,
+        );
         // process each task
         await this.onTask({
           id: task.id,
@@ -149,8 +157,9 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
         await this.sql.run(
           db.deleteFrom('ScheduledTask').where('id', '=', task.id),
         );
+        this.log('debug', `Processed and deleted task ${task.id}`);
       } catch (error) {
-        console.error(`Error processing task ${task.id}:`, error);
+        this.log('error', `Error processing task ${task.id}:`, error);
         if (error instanceof Error) {
           taskErrors.push(error);
         } else {
@@ -178,6 +187,10 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     );
 
     if (nextTask) {
+      this.log(
+        'info',
+        `Next scheduled task ${nextTask.id} of type ${nextTask.type} at ${nextTask.scheduledAt}`,
+      );
       // set the next alarm if there are more tasks
       await this.storage.setAlarm(new Date(nextTask.scheduledAt).getTime());
     }

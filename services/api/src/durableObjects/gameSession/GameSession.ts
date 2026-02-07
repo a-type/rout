@@ -101,6 +101,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       this.#sql,
       ctx.storage,
       this.handleScheduledTask,
+      this.log,
     );
     this.#startup();
   }
@@ -189,16 +190,10 @@ export class GameSession extends DurableObject<ApiBindings> {
   // things to do when the DO starts up - could happen on launch
   // or restoring after hibernation
   async #startup() {
-    this.log('info', `GameSession DO startup...`);
     const { status } = await this.getStatus();
-    const maybeData = await this.#maybeGetSessionData();
-    this.log(
-      'debug',
-      `Game status: ${status}. Game ID: ${maybeData?.id ?? '<not set>'}`,
-    );
     if (status === 'active') {
       await this.#scheduleTurnRemindersTask();
-      console.debug(`Scheduled turn reminders task.`);
+      this.log('info', `Scheduled turn reminders task.`);
     }
   }
 
@@ -1423,7 +1418,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       'debug',
       `Scheduling turn reminders for ${sevenAm.toISOString()} (next day at 7 AM)`,
     );
-    this.#scheduler.scheduleTask(
+    return this.#scheduler.scheduleTask(
       sevenAm,
       { type: 'turnReminders' },
       'turn-reminders',
