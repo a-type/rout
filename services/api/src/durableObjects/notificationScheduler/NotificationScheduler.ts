@@ -16,6 +16,12 @@ type ScheduledTasks = {
 export class NotificationScheduler extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #scheduler: Scheduler<ScheduledTasks>;
+  #log = (level: 'info' | 'debug' | 'warn' | 'error', ...messages: any[]) => {
+    console[level](
+      `[NotificationScheduler ${this.ctx.id.toString()}]`,
+      ...messages,
+    );
+  };
 
   constructor(ctx: DurableObjectState, env: ApiBindings) {
     super(ctx, env);
@@ -24,6 +30,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
       this.#sql,
       ctx.storage,
       this.#handleScheduledTask,
+      this.#log,
     );
   }
 
