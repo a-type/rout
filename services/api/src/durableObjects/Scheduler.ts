@@ -1,4 +1,5 @@
 import { genericId } from '@long-game/common';
+import { addSeconds } from 'date-fns';
 import {
   DummyDriver,
   Kysely,
@@ -133,12 +134,13 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
 
   handleAlarm = async () => {
     // get all tasks that are due
-    const now = Date.now();
+    const bufferSeconds = 5;
+    const now = addSeconds(new Date(), bufferSeconds);
     const tasks = await this.sql.run<ScheduledTask>(
       db
         .selectFrom('ScheduledTask')
         .selectAll()
-        .where('scheduledAt', '<=', new Date(now).toISOString())
+        .where('scheduledAt', '<=', now.toISOString())
         .orderBy('scheduledAt', 'asc'),
     );
 
@@ -173,6 +175,10 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
       }
     }
 
+    if (tasks.length === 0) {
+      this.log('warn', 'Alarm handled, but no tasks were due');
+    }
+
     if (taskErrors.length > 0) {
       // trigger alarm retry by throwing an error
       throw new Error(
@@ -183,7 +189,7 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     const [nextTask] = await this.sql.run<ScheduledTask>(
       db
         .selectFrom('ScheduledTask')
-        .select('scheduledAt')
+        .select(['scheduledAt', 'id', 'type'])
         .where('scheduledAt', '>', new Date().toISOString())
         .orderBy('scheduledAt', 'asc')
         .limit(1),

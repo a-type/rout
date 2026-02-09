@@ -1411,7 +1411,17 @@ export class GameSession extends DurableObject<ApiBindings> {
       }
     }
   };
+
+  #turnRemindersTaskId = 'turn-reminders';
   #scheduleTurnRemindersTask = async () => {
+    const hasScheduledTask = await this.#scheduler.hasTask(
+      this.#turnRemindersTaskId,
+    );
+    if (hasScheduledTask) {
+      this.log('debug', `Turn reminders task already scheduled, skipping`);
+      return;
+    }
+
     // schedule a follow up for 7 AM the next day to remind players
     // according to the specified timezone
     const gameData = await this.#getSessionData();
@@ -1435,7 +1445,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     return this.#scheduler.scheduleTask(
       sevenAm,
       { type: 'turnReminders' },
-      'turn-reminders',
+      this.#turnRemindersTaskId,
     );
   };
   #sendTurnReminders = async () => {
