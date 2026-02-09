@@ -92,7 +92,7 @@ export function HomePage({}: HomePageProps) {
           </PageNowPlaying>
         </HomeNavRoot>
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
+      <PageNav className="border-t border-t-black border-t-solid md:(rounded-md border-none)">
         <MainNav />
       </PageNav>
     </PageRoot>

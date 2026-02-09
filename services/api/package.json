@@ -52,6 +52,7 @@
     "@types/node": "^22.14.0",
     "delay-cli": "catalog:",
     "vitest": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "env-cmd": "catalog:"
   }
 }

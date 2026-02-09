@@ -96,6 +96,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
         randomSeed,
         gameId,
         gameVersion,
+        timezone: me.timezone ?? 'America/New_York',
         members: [
           {
             id: me.id,
@@ -103,8 +104,6 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
             color: me.color,
           },
         ],
-        // TODO: configurable / automatic detection
-        timezone: 'America/New_York',
         createdBy: me.id,
       });
 

@@ -37,6 +37,7 @@ export const usersRouter = new Hono<Env>()
           ],
         isCustomer: !!user.stripeCustomerId,
         isProductAdmin: !!user.isProductAdmin,
+        timezone: user.timezone,
       });
     } catch (e) {
       const err = LongGameError.fromInstanceOrRpc(e);
@@ -63,6 +64,7 @@ export const usersRouter = new Hono<Env>()
         color: z.string().optional(),
         imageUrl: z.string().optional(),
         sendEmailUpdates: z.boolean().optional(),
+        timezone: z.string().optional(),
       }),
     ),
     async (ctx) => {

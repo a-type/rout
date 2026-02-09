@@ -2,12 +2,16 @@ import { sdkHooks } from '@/services/publicSdk.js';
 import {
   Box,
   Button,
+  Combobox,
+  FieldLabel,
+  FieldRoot,
   FormikForm,
   SubmitButton,
   TextField,
   useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
+import { useId } from 'react';
 import { UploadAvatar } from './UploadAvatar.js';
 
 export interface EditProfileProps {
@@ -25,6 +29,7 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
       initialValues={{
         displayName: initial?.displayName ?? '',
         color: initial?.color ?? randomColor,
+        timezone: initial?.timezone ?? null,
       }}
       enableReinitialize
       onSubmit={async (values) => {
@@ -40,6 +45,7 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
         placeholder="What should we call you?"
       />
       <ColorPickerField />
+      <TimezoneField />
       <Box justify="end" className="w-full">
         <SubmitButton>Save</SubmitButton>
       </Box>
@@ -69,5 +75,58 @@ function ColorPickerField() {
         </Button>
       ))}
     </div>
+  );
+}
+
+const TimeZoneCombobox = Combobox.create<string | null>();
+
+function TimezoneField() {
+  const [{ value }, _, tools] = useField('timezone');
+  const id = useId();
+  return (
+    <FieldRoot>
+      <FieldLabel htmlFor={id}>Time zone</FieldLabel>
+      <TimeZoneCombobox
+        id={id}
+        value={value ?? null}
+        onValueChange={(value) => {
+          if (value) {
+            tools.setValue(value);
+          }
+        }}
+        name="timezone"
+        items={[null, ...Intl.supportedValuesOf('timeZone')]}
+      >
+        <TimeZoneCombobox.Input />
+        <TimeZoneCombobox.Content className="flex flex-col overflow-hidden">
+          <TimeZoneCombobox.List>
+            {(item) => (
+              <TimeZoneCombobox.Item
+                value={item}
+                disabled={item === null}
+                key={item ?? 'null'}
+                className="flex flex-col gap-xs items-start shrink-0"
+              >
+                <div>
+                  {item === null ? (
+                    <span className="text-gray-dark italic">No time zone</span>
+                  ) : (
+                    new Date().toLocaleTimeString('en-US', {
+                      timeZone: item,
+                      timeStyle: 'short',
+                    })
+                  )}
+                </div>
+                {item && (
+                  <div className="italic text-gray-dark text-sm">
+                    {item.replaceAll(/_/g, ' ').replaceAll(/\//g, ' / ')}
+                  </div>
+                )}
+              </TimeZoneCombobox.Item>
+            )}
+          </TimeZoneCombobox.List>
+        </TimeZoneCombobox.Content>
+      </TimeZoneCombobox>
+    </FieldRoot>
   );
 }

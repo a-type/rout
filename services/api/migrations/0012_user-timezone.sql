@@ -1,0 +1,3 @@
+-- Migration number: 0012 	 2026-02-09T01:16:10.990Z
+ALTER TABLE User
+ADD COLUMN timezone TEXT NULL;

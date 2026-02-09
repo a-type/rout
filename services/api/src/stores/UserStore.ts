@@ -51,6 +51,7 @@ export class UserStore extends RpcTarget {
       color: 'gray',
       displayName: 'Anonymous',
       imageUrl: null,
+      timezone: null,
       ...user,
     };
   };
@@ -68,6 +69,7 @@ export class UserStore extends RpcTarget {
         'User.stripeCustomerId',
         'User.isProductAdmin',
         'User.imageUrl',
+        'User.timezone',
       ])
       .select((eb) => eb('User.imageUrl', 'is not', null).as('hasAvatar'))
       .executeTakeFirst();
@@ -94,8 +96,6 @@ export class UserStore extends RpcTarget {
       };
     }
 
-    const user = await this.getPublicUserProfile(id);
-
     const friendship = await this.#db
       .selectFrom('Friendship')
       .where((eb) =>
@@ -113,9 +113,15 @@ export class UserStore extends RpcTarget {
       .selectAll()
       .executeTakeFirst();
 
+    const isFriend = !!friendship;
+
+    const user = isFriend
+      ? await this.getFriendProfile(id)
+      : await this.getPublicUserProfile(id);
+
     return this.#fillUserDefaults({
       id,
-      isFriend: !!friendship,
+      isFriend,
       isMe: false,
       ...user,
     });
@@ -131,16 +137,30 @@ export class UserStore extends RpcTarget {
     return user;
   }
 
+  /**
+   * Assumes you already validated the friendship connection.
+   */
+  async getFriendProfile(id: PrefixedId<'u'>) {
+    const query = this.#db
+      .selectFrom('User as u')
+      .where('u.id', '=', id)
+      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl', 'u.timezone']);
+    const user = await query.executeTakeFirst();
+    return user;
+  }
+
   async updateMe({
     displayName,
     color,
     imageUrl,
     sendEmailUpdates,
+    timezone,
   }: {
     displayName?: string;
     color?: string | null;
     imageUrl?: string | null;
     sendEmailUpdates?: boolean;
+    timezone?: string | null;
   }) {
     return this.#db
       .updateTable('User')
@@ -148,6 +168,7 @@ export class UserStore extends RpcTarget {
         displayName,
         color,
         imageUrl,
+        timezone,
         notificationSettings: {
           'turn-ready': {
             push: false,

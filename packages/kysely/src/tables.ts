@@ -55,6 +55,7 @@ export interface UserTable {
   >;
   subscriptionEntitlements: Record<string, boolean>;
   isProductAdmin: boolean;
+  timezone: string | null;
 }
 
 export type User = Selectable<UserTable>;

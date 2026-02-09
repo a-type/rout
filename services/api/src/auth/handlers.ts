@@ -62,8 +62,12 @@ export const authHandlers = createHandlers<Context<Env>>({
     insertAccount(account) {
       return ctx.env.ADMIN_STORE.insertAccount(account);
     },
-    insertUser(user) {
-      return ctx.env.ADMIN_STORE.insertUser(user);
+    async insertUser(user) {
+      const guessedTimezone = ctx.req.header('CF-TIMEZONE') || null;
+      return ctx.env.ADMIN_STORE.insertUser({
+        ...user,
+        timezone: guessedTimezone,
+      });
     },
     updateUser(userId, user) {
       return ctx.env.ADMIN_STORE.updateUser(userId, user);

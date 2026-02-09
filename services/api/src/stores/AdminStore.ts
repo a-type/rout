@@ -98,10 +98,12 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
     ...user
   }: Omit<AuthUser, 'id' | 'password'> & {
     plaintextPassword?: string | null;
+    timezone?: string | null;
   }) {
     const password = plaintextPassword
       ? await hashPassword(plaintextPassword)
       : undefined;
+
     const userResult = await this.#db
       .insertInto('User')
       .values({

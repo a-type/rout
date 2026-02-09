@@ -13,6 +13,7 @@ import {
   safeParse,
   safeParseMaybe,
   SYSTEM_CHAT_AUTHOR_ID,
+  withTimezone,
 } from '@long-game/common';
 import {
   BaseTurnData,
@@ -25,7 +26,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
-import { addDays, addSeconds, setHours, startOfDay } from 'date-fns';
+import { addDays, addSeconds, startOfDay } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
 import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
@@ -1410,10 +1411,23 @@ export class GameSession extends DurableObject<ApiBindings> {
       }
     }
   };
-  #scheduleTurnRemindersTask = () => {
+  #scheduleTurnRemindersTask = async () => {
     // schedule a follow up for 7 AM the next day to remind players
-    // TODO: timezone! agh!
-    const sevenAm = setHours(startOfDay(addDays(new Date(), 1)), 7);
+    // according to the specified timezone
+    const gameData = await this.#getSessionData();
+    const timezone = gameData.timezone || 'UTC';
+    const tomorrow = startOfDay(addDays(new Date(), 1));
+    const sevenAm = withTimezone(
+      {
+        year: tomorrow.getUTCFullYear(),
+        month: tomorrow.getUTCMonth(),
+        date: tomorrow.getUTCDate(),
+        hour: 7,
+        minute: 0,
+        second: 0,
+      },
+      timezone,
+    );
     this.log(
       'debug',
       `Scheduling turn reminders for ${sevenAm.toISOString()} (next day at 7 AM)`,

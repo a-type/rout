@@ -83,6 +83,9 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     task: Tasks,
     manualId?: string,
   ): Promise<string> => {
+    if (time.getTime() < Date.now()) {
+      throw new Error('Cannot schedule a task in the past');
+    }
     const id = manualId ?? genericId();
     await this.sql.run(
       db
