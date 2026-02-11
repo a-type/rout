@@ -51,7 +51,10 @@ export default defineConfig(({ command }) => ({
   plugins: [
     pluginUnoCss({
       enableIncludeCommentCheck: (file) => {
-        return file.includes(path.join('@a-type', 'ui', 'dist'));
+        return (
+          file.includes(path.join('@a-type', 'ui', 'dist')) ||
+          file.includes(path.join('@a-type', 'auth-ui', 'dist'))
+        );
       },
       // include tagging on monorepo dependencies is not set up
       // || file.includes('@long-game'),

@@ -5,8 +5,8 @@ import {
   EmailSignupForm,
   OAuthSigninButton,
 } from '@a-type/auth-ui';
-import { Box, H1, H2, Tabs } from '@a-type/ui';
-import { GameIllustration1, TopographyBackground } from '@long-game/game-ui';
+import { Box, H2, Tabs } from '@a-type/ui';
+import { TopographyBackground, Wordmark } from '@long-game/game-ui';
 import { Link, useSearchParams } from '@verdant-web/react-router';
 
 export interface LoginPageProps {}
@@ -18,32 +18,17 @@ export function LoginPage({}: LoginPageProps) {
   useThemedTitleBar();
 
   return (
-    <Box className="w-full h-full" layout="center center">
+    <Box full grow layout="center center">
       <TopographyBackground className="fixed" />
       <Box
         p
-        d={{
-          default: 'col',
-          lg: 'row',
-        }}
+        col
         layout="center center"
         className="m-auto relative z-1"
         grow
         gap
       >
-        <Box
-          d={{
-            sm: 'col-reverse',
-            lg: 'col',
-          }}
-          gap="none"
-          items="center"
-        >
-          <H1 className="!font-[Knewave] !text-4xl !font-medium">
-            Let's play!
-          </H1>
-          <GameIllustration1 className="h-15vh lg:h-40vh" />
-        </Box>
+        <Wordmark className="text-5xl" />
         <Tabs
           value={tab}
           defaultValue="login"
@@ -64,12 +49,12 @@ export function LoginPage({}: LoginPageProps) {
             <OAuthSigninButton
               endpoint={`${API_ORIGIN}/auth/provider/google/login`}
               returnTo={returnTo}
-              color="accent"
+              color="primary"
               emphasis="primary"
             >
               Log in with Google
             </OAuthSigninButton>
-            <Box d="col" p gap surface="white">
+            <Box d="col" p gap surface="white" border>
               <H2>Log in with email</H2>
               <EmailSigninForm
                 endpoint={`${API_ORIGIN}/auth/email-login`}
@@ -85,12 +70,12 @@ export function LoginPage({}: LoginPageProps) {
             <OAuthSigninButton
               endpoint={`${API_ORIGIN}/auth/provider/google/login`}
               returnTo={returnTo}
-              color="accent"
+              color="primary"
               emphasis="primary"
             >
               Sign up with Google
             </OAuthSigninButton>
-            <Box d="col" p gap surface="white">
+            <Box d="col" p gap surface="white" border>
               <H2>Sign up with email</H2>
               <EmailSignupForm
                 endpoint={`${API_ORIGIN}/auth/begin-email-signup`}
