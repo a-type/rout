@@ -529,6 +529,26 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+  adminUpdateGameSessionTimezone = this.sdkMutation(
+    this.apiRpc.admin.gameSessions[':sessionId'].timezone.$put,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'>; timezone: string }) => ({
+        param: { sessionId: input.id },
+        json: { timezone: input.timezone },
+      }),
+      invalidate: [['adminGetAllGameSessions']],
+    },
+  );
+  adminGetGameSessionDetails = this.sdkQuery(
+    'adminGetGameSessionDetails',
+    this.apiRpc.admin.gameSessions[':sessionId'].details.$get,
+    {
+      transformInput: (input: { id: PrefixedId<'gs'> }) => ({
+        param: { sessionId: input.id },
+      }),
+      enabled: (input) => !!input.id,
+    },
+  );
 
   adminGetUsers = this.sdkInfiniteQuery(
     'adminGetUsers',

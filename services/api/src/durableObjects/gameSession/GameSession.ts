@@ -111,9 +111,25 @@ export class GameSession extends DurableObject<ApiBindings> {
     console[level](`[👾 ${this.#cachedGameSessionId ?? 'unknown'}]`, ...args);
   };
 
-  // socket delegation
-  fetch(req: Request) {
-    return this.#socketHandler.fetch(req);
+  async fetch(req: Request) {
+    // socket delegation
+    if (req.headers.get('Upgrade')?.toLowerCase() === 'websocket') {
+      return this.#socketHandler.fetch(req);
+    }
+
+    const path = new URL(req.url).pathname;
+    if (path === '/dump') {
+      const dump = await this.dumpDb();
+      const res = new Response(JSON.stringify(dump, null, 2));
+      res.headers.set('Content-Type', 'application/json');
+      res.headers.set(
+        'Content-Disposition',
+        `attachment; filename="${this.#cachedGameSessionId ?? 'session'}.json"`,
+      );
+      return res;
+    }
+
+    return new Response('Not found', { status: 404 });
   }
   webSocketMessage(
     ws: WebSocket,
@@ -873,6 +889,11 @@ export class GameSession extends DurableObject<ApiBindings> {
     this.#socketHandler.send({
       type: 'gameChange',
     });
+  }
+  async updateTimezone(timezone: string) {
+    await this.#updateSessionData({ timezone });
+    await this.#checkForRoundChange();
+    await this.#scheduleTurnRemindersTask();
   }
 
   // chat
