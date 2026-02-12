@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   ButtonProps,
+  clsx,
   Dialog,
   H2,
   H5,
@@ -185,10 +186,15 @@ function NotificationItem({
         }}
       >
         <Box d="col" gap="sm">
-          <H5 className={notification.readAt ? 'font-normal' : ''}>
+          <H5
+            className={clsx(
+              'text-wrap',
+              notification.readAt ? 'font-normal' : '',
+            )}
+          >
             {config.title(notification.data, 'email')}
           </H5>
-          <div className="text-xs">
+          <div className="text-xs text-wrap">
             {config.text(notification.data, 'email')}
           </div>
         </Box>
