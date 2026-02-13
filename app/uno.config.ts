@@ -8,14 +8,16 @@ export default defineConfig({
       include: [
         // include all .ts and .tsx source files we encounter
         '**/*.{ts,tsx}',
+        '../packages/*/dist/**/*.js',
+        '../games/*/render/dist/**/*.js',
       ],
     },
     // include all .ts and .tsx files in all games
     filesystem: [
-      '**/games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
-      '**/games/*/renderer/dist/**/*.{ts,tsx,js,jsx}',
-      '**/packages/*/src/**/*.{ts,tsx,js,jsx}',
-      '**/packages/*/dist/**/*.{ts,tsx,js,jsx}',
+      '../games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+      '../games/*/renderer/dist/**/*.js',
+      '../packages/*/src/**/*.{ts,tsx,js,jsx}',
+      '../packages/*/dist/**/*.js',
     ],
   },
   preflights: [

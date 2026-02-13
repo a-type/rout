@@ -53,7 +53,8 @@ export default defineConfig(({ command }) => ({
       enableIncludeCommentCheck: (file) => {
         return (
           file.includes(path.join('@a-type', 'ui', 'dist')) ||
-          file.includes(path.join('@a-type', 'auth-ui', 'dist'))
+          file.includes(path.join('@a-type', 'auth-ui', 'dist')) ||
+          file.includes(path.join('@long-game'))
         );
       },
       // include tagging on monorepo dependencies is not set up
