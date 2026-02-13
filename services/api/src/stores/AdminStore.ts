@@ -339,6 +339,7 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
         userId,
         data: notification,
       })
+      .onConflict((oc) => oc.doNothing())
       .execute();
   }
 

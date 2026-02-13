@@ -8,14 +8,14 @@ export default defineConfig({
       include: [
         // include all .ts and .tsx source files we encounter
         '**/*.{ts,tsx}',
-        // include the UI lib
-        // '**/@a-type/ui/dist/**/*.{js,jsx}',
       ],
     },
     // include all .ts and .tsx files in all games
     filesystem: [
-      '../games/*/renderer/src/**/*.{ts,tsx}',
-      '../packages/*/src/**/*.{ts,tsx}',
+      '**/games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+      '**/games/*/renderer/dist/**/*.{ts,tsx,js,jsx}',
+      '**/packages/*/src/**/*.{ts,tsx,js,jsx}',
+      '**/packages/*/dist/**/*.{ts,tsx,js,jsx}',
     ],
   },
   preflights: [
@@ -37,7 +37,7 @@ export default defineConfig({
     extract(ctx) {
       // uncomment to log which files are being processed
       if (ctx.id && ctx.id.includes('game-ui')) {
-        // console.log(ctx.id);
+        console.log(ctx.id);
       }
       return extractorDefault.extract!(ctx);
     },

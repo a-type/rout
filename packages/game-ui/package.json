@@ -13,8 +13,9 @@
   },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts",
+    "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",
+    "build:uno": "scripts uno ./dist",
     "dev": "tsc -w --preserveWatchOutput",
     "package:dev": "pnpm dev",
     "storybook": "storybook dev -p 6006",
@@ -31,6 +32,7 @@
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/visual-components": "workspace:*",
+    "@long-game/scripts": "workspace:*",
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "@types/three": "catalog:",

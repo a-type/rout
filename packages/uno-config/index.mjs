@@ -1,6 +1,5 @@
 import preset from '@a-type/ui/uno-preset';
-import variantGroup from '@unocss/transformer-variant-group';
-import { defineConfig } from 'unocss';
+import { defineConfig, transformerVariantGroup } from 'unocss';
 
 /** @type import('@a-type/ui'). */
 export const presetOptions = {
@@ -26,7 +25,7 @@ export const config = (game = false) =>
         noPreflight: game,
       }),
     ],
-    transformers: [variantGroup()],
+    transformers: [transformerVariantGroup()],
   });
 
 export default config;

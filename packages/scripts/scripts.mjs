@@ -45,7 +45,7 @@ const commands = {
       await build({
         patterns: [`${distPath}/**/*.js`],
         outFile: `${distPath}/uno.css`,
-        writeTransformed: true,
+        rewrite: true,
         minify: true,
         watch,
         preflights: false,
