@@ -7,6 +7,7 @@ export function attachToPwaEvents() {
     return;
   }
   navigator.serviceWorker.addEventListener('message', (event) => {
+    console.log('Received message from service worker', event);
     if (event.data && event.data.type === 'pwa-notification-click') {
       const data = event.data.data;
       if (data) {
@@ -15,9 +16,10 @@ export function attachToPwaEvents() {
           console.error('Notification click without config', data);
           return;
         }
-        console.info('Turn ready push notification clicked', data);
+        const url = config.link(data);
+        console.info('Push notification clicked', url);
         // open the game session
-        window.history.pushState({}, '', config.link(data));
+        window.history.pushState({}, '', url);
       }
     }
   });
