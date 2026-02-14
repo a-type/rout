@@ -99,15 +99,21 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
           surface
           items="start"
           gap="sm"
-          elevated="sm"
-          border
+          elevated={compact ? undefined : 'sm'}
+          border={!compact}
           className={clsx(
             'bg-main-wash bg-lighten-2 color-black',
             'transition-opacity',
             'px-md py-sm',
-            !isPreviousMessageSameAuthor &&
-              (isSelf ? 'rounded-tr-0' : 'rounded-tl-0'),
-            isSelf ? 'rounded-br-0' : 'rounded-bl-0',
+            {
+              'rounded-tr-0':
+                !compact && isSelf && !isPreviousMessageSameAuthor,
+              'rounded-tl-0':
+                !compact && !isSelf && !isPreviousMessageSameAuthor,
+              'rounded-br-0': !compact && isSelf && !isNextMessageSameAuthor,
+              'rounded-bl-0': !compact && !isSelf && !isNextMessageSameAuthor,
+              'rounded-0': compact,
+            },
           )}
           {...rest}
         >

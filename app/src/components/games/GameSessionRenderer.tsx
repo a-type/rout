@@ -181,12 +181,12 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                     <GameSetup gameSessionId={sessionId} className="w-full" />
                   )
                 ) : (
-                  <>
+                  <div className="flex flex-col pb-lg flex-1 min-h-50vh">
                     {hotseat && <HotseatBanner />}
                     <ErrorBoundary>
                       <Renderer />
                     </ErrorBoundary>
-                  </>
+                  </div>
                 )}
               </Suspense>
               {gameSuite.gameStatus.status !== 'pending' && (

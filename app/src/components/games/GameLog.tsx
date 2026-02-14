@@ -30,7 +30,7 @@ export function GameLogChatInput() {
     [],
   );
 
-  return <ChatForm toolsRef={toolsRef} className="px-md" />;
+  return <ChatForm toolsRef={toolsRef} />;
 }
 
 const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
@@ -119,7 +119,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
         >
           <GameLogCollapsedTriggerContent />
         </Dialog.Trigger>
-        <Dialog.Content className={clsx('px-sm')} width="md">
+        <Dialog.Content width="md">
           <Box
             layout="stretch stretch"
             className={clsx('w-full h-70vh')}

@@ -25,7 +25,15 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   );
 
   return (
-    <Box full d="col" gap p className="bg-wash flex-1">
+    <Box
+      data-gameplay
+      full="width"
+      grow
+      d="col"
+      gap
+      p
+      className="bg-wash flex-1"
+    >
       <PlayerScores className="flex-[0_1_auto] min-h-80px" />
       <TurnError surface color="attention" p showReset />
       <Box
