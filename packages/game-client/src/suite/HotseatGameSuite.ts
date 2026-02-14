@@ -85,11 +85,12 @@ export class HotseatGameSuite<
   };
   protected actuallySubmitTurn = async (
     data: GetTurnData<TGame>,
+    playerId: PrefixedId<'u'>,
   ): Promise<BaseTurnError | void> => {
     console.log(`Submitting turn for round ${this.latestRoundIndex}`, data);
     const error = await this.ctx.backend.submitTurn({
       data,
-      playerId: this.playerId,
+      playerId,
       roundIndex: this.latestRoundIndex,
       createdAt: new Date().toISOString(),
     });
@@ -103,10 +104,11 @@ export class HotseatGameSuite<
   };
   protected actuallySendChat = async (
     message: Omit<GameSessionChatMessage, 'id' | 'createdAt' | 'reactions'>,
+    playerId: PrefixedId<'u'>,
   ): Promise<void> => {
     await this.ctx.backend.addChat({
       ...message,
-      authorId: this.playerId,
+      authorId: playerId,
       roundIndex: this.latestRoundIndex,
       reactions: {},
     });

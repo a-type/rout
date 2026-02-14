@@ -690,6 +690,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
     }
+    // capture current player ID - in hotseat this could change during the delay
+    const playerId = this.playerId;
     if (delay) {
       this.events.emit('turnSubmitDelayed', delay);
       return new Promise<BaseTurnError | void>((resolve) => {
@@ -698,7 +700,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
           if (this.turnSubmitTimeout) {
             clearTimeout(this.turnSubmitTimeout);
             this.turnSubmitTimeout = null;
-            await this.wrappedSubmitTurn(localTurnData);
+            await this.wrappedSubmitTurn(localTurnData, playerId);
             resolve();
           }
         };
@@ -718,21 +720,25 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
           this.turnSubmitTimeout = setTimeout(async () => {
             window.removeEventListener('beforeunload', beforeUnload);
             document.removeEventListener('visibilitychange', visibilityChange);
-            await this.wrappedSubmitTurn(localTurnData);
+            await this.wrappedSubmitTurn(localTurnData, playerId);
             resolve();
           }, delay);
         });
       });
     } else {
-      return this.wrappedSubmitTurn(localTurnData);
+      return this.wrappedSubmitTurn(localTurnData, playerId);
     }
   };
 
   // implement this in subclasses to actually submit the turn
   protected abstract actuallySubmitTurn(
     data: GetTurnData<TGame>,
+    playerId: PrefixedId<'u'>,
   ): Promise<BaseTurnError | void>;
-  @action private wrappedSubmitTurn = async (data: GetTurnData<TGame>) => {
+  @action private wrappedSubmitTurn = async (
+    data: GetTurnData<TGame>,
+    playerId: PrefixedId<'u'>,
+  ) => {
     if (this.turnSubmitTimeout) {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
@@ -740,7 +746,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     this.submittingTurn = true;
     const submittingToRound = this.latestRoundIndex;
     try {
-      const remoteError = await this.actuallySubmitTurn(toJS(data));
+      const remoteError = await this.actuallySubmitTurn(toJS(data), playerId);
       if (remoteError) {
         console.info(`Turn submission invalid: ${remoteError.message}`);
         this.remoteTurnError = remoteError;
@@ -796,10 +802,11 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       authorId: this.playerId,
     };
 
-    await this.actuallySendChat(messageWithRound);
+    await this.actuallySendChat(messageWithRound, this.playerId);
   };
   protected abstract actuallySendChat(
     message: Omit<GameSessionChatMessage, 'id' | 'createdAt' | 'reactions'>,
+    playerId: PrefixedId<'u'>,
   ): Promise<void>;
   loadMoreChat = async (sceneId?: string | null): Promise<void> => {
     const sceneChat = this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID];

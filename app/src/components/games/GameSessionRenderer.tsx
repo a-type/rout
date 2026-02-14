@@ -38,6 +38,14 @@ import { GameLayout } from './GameLayout.js';
 import { GameSetup } from './GameSetup.js';
 import { HotseatSetup } from './HotseatSetup.js';
 
+const debugDndSet =
+  typeof window !== 'undefined' && window.location.search.includes('debugDnd');
+if (debugDndSet) {
+  window.sessionStorage.setItem('debugDnd', 'true');
+}
+const debugDnd =
+  debugDndSet || window.sessionStorage.getItem('debugDnd') === 'true';
+
 export interface GameSessionRendererProps {
   gameSessionId: PrefixedId<'gs'>;
   hotseat?: boolean;
@@ -150,7 +158,10 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
 
     return (
       <RendererProvider value={providerValue}>
-        <DndRoot className="w-full flex-1-0-0 min-h-0 flex flex-col">
+        <DndRoot
+          debug={debugDnd}
+          className="w-full flex-1-0-0 min-h-0 flex flex-col"
+        >
           <GameLayout>
             <GameLayout.Main>
               <Suspense

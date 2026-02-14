@@ -127,6 +127,9 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
           .updateTable('Notification')
           .set({ sentAt: new Date().toISOString() })
           .where('id', 'in', Array.from(markSent)),
+        {
+          debug: true,
+        },
       );
     }
   };

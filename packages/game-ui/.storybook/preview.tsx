@@ -1,4 +1,3 @@
-import { Provider } from '@a-type/ui';
 import '@a-type/ui/main.css';
 import type { Preview } from '@storybook/react-vite';
 import 'virtual:uno.css';
@@ -15,11 +14,11 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <Provider>
-        <DndRoot>
-          <Story />
-        </DndRoot>
-      </Provider>
+      // <Provider disableTitleBarColor disableViewportOffset disableParticles>
+      <DndRoot>
+        <Story />
+      </DndRoot>
+      // </Provider>
     ),
   ],
 };
