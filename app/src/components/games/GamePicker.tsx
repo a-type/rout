@@ -136,11 +136,9 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
           </Button>
         ))}
         <Select value="" onValueChange={addTagFilter}>
-          <Select.Trigger size="small" render={<Chip />}>
+          <Select.Trigger size="small">
             <Icon name="plus" />
-            <Select.Value placeholder="Tag">
-              {(tag) => tag ?? 'Choose tag...'}
-            </Select.Value>
+            <Select.Value>{(tag) => tag || 'Choose tag...'}</Select.Value>
           </Select.Trigger>
           <Select.Content>
             {Array.from(allTags)

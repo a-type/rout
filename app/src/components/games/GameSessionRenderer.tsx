@@ -35,8 +35,8 @@ import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameControls } from './GameControls.js';
 import { GameLayout } from './GameLayout.js';
-import { GameSetup } from './GameSetup.js';
 import { HotseatSetup } from './HotseatSetup.js';
+import { GameSetup } from './setup/GameSetup.js';
 
 const debugDndSet =
   typeof window !== 'undefined' && window.location.search.includes('debugDnd');
