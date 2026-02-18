@@ -2,10 +2,11 @@ import { Box, clsx, H1, Tabs } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { useSearchParams } from '@verdant-web/react-router';
+import { startTransition } from 'react';
 import { GameStartingNotice } from '../GameStartingNotice.js';
-import { ReadyUpButton } from '../ReadyUpButton.js';
 import { GameMembersPage } from './GameMembersPage.js';
 import { GameSelectionBanner } from './GameSelectionBanner.js';
+import { ReadyUpButton } from './ReadyUpButton.js';
 import { SelectGamePage } from './SelectGamePage.js';
 
 export interface GameSetupProps {
@@ -26,12 +27,14 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         <H1 className="text-md font-bold uppercase">Game Setup</H1>
         <Tabs
           className="flex flex-col gap-md items-center"
-          onValueChange={(v) =>
-            setSearch((cur) => {
-              cur.set('tab', v);
-              return cur;
-            })
-          }
+          onValueChange={(v) => {
+            startTransition(() => {
+              setSearch((cur) => {
+                cur.set('tab', v);
+                return cur;
+              });
+            });
+          }}
           value={search.get('tab') || 'game'}
         >
           <Tabs.List>
@@ -47,9 +50,19 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         </Tabs>
       </Box>
 
-      <Box className="sticky bottom-sm z-1000" full="width" col gap="sm">
+      <Box
+        className="sticky bottom-sm z-1000 overflow-clip"
+        full="width"
+        col
+        gap="sm"
+        surface="white"
+        border
+        elevated="md"
+      >
         <GameSelectionBanner gameId={gameSuite.gameId} />
-        <ReadyUpButton />
+        <div className="p-sm">
+          <ReadyUpButton />
+        </div>
       </Box>
 
       <GameStartingNotice />

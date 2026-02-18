@@ -1,5 +1,6 @@
 import {
   GameRoundSummary,
+  GameSessionChatInit,
   GameSessionChatMessage,
   PrefixedId,
   Turn,
@@ -103,15 +104,9 @@ export class HotseatGameSuite<
     });
   };
   protected actuallySendChat = async (
-    message: Omit<GameSessionChatMessage, 'id' | 'createdAt' | 'reactions'>,
-    playerId: PrefixedId<'u'>,
+    message: GameSessionChatInit,
   ): Promise<void> => {
-    await this.ctx.backend.addChat({
-      ...message,
-      authorId: playerId,
-      roundIndex: this.latestRoundIndex,
-      reactions: {},
-    });
+    await this.ctx.backend.addChat(message);
   };
   actuallyLoadMoreChat = async (
     nextToken: string | null,

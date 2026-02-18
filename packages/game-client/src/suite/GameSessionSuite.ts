@@ -1,4 +1,5 @@
 import {
+  GameSessionChatInit,
   GameSessionChatMessage,
   LongGameError,
   PlayerColorName,
@@ -94,23 +95,10 @@ export class GameSessionSuite<
     }
   };
 
-  protected actuallySendChat = async (message: {
-    content: string;
-    recipientIds?: PrefixedId<'u'>[];
-    position?: { x: number; y: number };
-    sceneId?: string;
-    roundIndex?: number;
-  }) => {
-    const messageWithRound = {
-      ...message,
-      roundIndex:
-        message.roundIndex === undefined
-          ? this.latestRoundIndex
-          : message.roundIndex,
-    };
+  protected actuallySendChat = async (message: GameSessionChatInit) => {
     await this.ctx.socket.request({
       type: 'sendChat',
-      message: messageWithRound,
+      message: message,
     });
   };
 

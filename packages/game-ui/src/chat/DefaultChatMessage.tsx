@@ -17,6 +17,7 @@ import { PlayerAvatar } from '../players/PlayerAvatar.js';
 import { PlayerName } from '../players/PlayerName.js';
 import { usePlayerThemed } from '../players/usePlayerThemed.js';
 import { ChatReactions } from './ChatReactions.js';
+import { ChatTextWithTokens } from './ChatTextWithTokens.js';
 import { spatialChatState } from './spatialChatState.js';
 
 export interface ChatMessageProps extends BoxProps {
@@ -121,7 +122,7 @@ export const DefaultChatMessage = withGame<ChatMessageProps>(
             className={clsx('leading-relaxed whitespace-pre-wrap')}
             full="width"
           >
-            {message.content}
+            <ChatTextWithTokens>{message.content}</ChatTextWithTokens>
           </Box>
         </Box>
         {!compact && (

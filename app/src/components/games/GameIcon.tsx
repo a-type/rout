@@ -13,7 +13,7 @@ export function GameIcon({ gameId, className }: GameIconProps) {
     <img
       src={`/game-data/${gameId}/icon.png`}
       alt={`Icon for ${game.title}`}
-      className={clsx('object-cover', className)}
+      className={clsx('object-cover object-center', className)}
     />
   );
 }

@@ -9,9 +9,9 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { HotseatGameSuite, withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
-import { GamePicker } from './GamePicker';
 import { GameStartingNotice } from './GameStartingNotice';
-import { ReadyUpButton } from './ReadyUpButton';
+import { GamePicker } from './setup/GamePicker';
+import { ReadyUpButton } from './setup/ReadyUpButton';
 
 export interface HotseatSetupProps {
   gameSessionId: PrefixedId<'gs'>;

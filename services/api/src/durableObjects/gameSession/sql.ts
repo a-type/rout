@@ -38,6 +38,7 @@ interface ChatMessageTable {
   roundIndex: number;
   metadataJSON: string | null;
   reactionsJSON: string;
+  type: 'chat' | 'game-vote';
 }
 export type ChatMessage = Selectable<ChatMessageTable>;
 
@@ -117,6 +118,13 @@ export const migrations: SQLMigrations.SQLSchemaMigration[] = [
     idMonotonicInc: 5,
     description: 'Add ScheduledTask table',
     sql: scheduledTaskMigration,
+  },
+  {
+    idMonotonicInc: 6,
+    description: 'Add type column to ChatMessage',
+    sql: `
+      ALTER TABLE ChatMessage ADD COLUMN type TEXT NOT NULL DEFAULT 'chat';
+    `,
   },
 ];
 

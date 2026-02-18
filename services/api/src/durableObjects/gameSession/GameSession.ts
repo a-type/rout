@@ -1,9 +1,10 @@
 import {
   chatPositionShape,
   chatReactionsShape,
+  chatTokens,
   deduplicatePlayerColors,
   GameRound,
-  GameSessionChatMessage,
+  gameSessionChatMessageShape,
   GameSessionPlayerStatus,
   GameStatus,
   groupTurnsToRounds,
@@ -409,6 +410,18 @@ export class GameSession extends DurableObject<ApiBindings> {
       type: 'playerVoteForGame',
       playerId,
       votes: await this.getGameVotes(),
+    });
+
+    // add a chat message about the vote
+    await this.addChatMessage({
+      id: id('cm'),
+      authorId: playerId,
+      content: `Let's play ${chatTokens.gameTitle(gameId)}!`,
+      createdAt: new Date().toISOString(),
+      metadata: {
+        gameId,
+      },
+      type: 'game-vote',
     });
   }
   async removeVoteForGame(playerId: PrefixedId<'u'>, gameId: string) {
@@ -897,7 +910,8 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   // chat
-  async addChatMessage(message: GameSessionChatMessage) {
+  async addChatMessage(input: z.input<typeof gameSessionChatMessageShape>) {
+    const message = gameSessionChatMessageShape.parse(input);
     this.log('debug', `Chat message from ${message.authorId}`);
     const query = db
       .insertInto('ChatMessage')
@@ -918,6 +932,7 @@ export class GameSession extends DurableObject<ApiBindings> {
           : null,
         sceneId: message.sceneId,
         reactionsJSON: JSON.stringify(message.reactions),
+        type: message.type,
       })
       .onConflict((oc) => oc.column('id').doNothing());
     await this.#sql.run(query);
@@ -1020,18 +1035,27 @@ export class GameSession extends DurableObject<ApiBindings> {
         );
     }
     const result = await this.#sql.run(sql);
-    const messages = result.reverse().map((row) => {
+    const timeOrderedMessages = result.reverse().map((row) => {
       return this.#hydrateChatMessage(row);
     });
     const nextPageToken =
-      messages.length === limit + 1
-        ? this.#encodeChatPageToken(messages[0].createdAt)
+      timeOrderedMessages.length === limit + 1
+        ? this.#encodeChatPageToken(timeOrderedMessages[0].createdAt)
         : null;
     if (nextPageToken) {
-      messages.pop();
+      timeOrderedMessages.pop();
     }
+    // -1 round index should show up after the game ends - we order these messages
+    // in a separate group at the end
+    const endgameMessages = timeOrderedMessages.filter(
+      (m) => m.roundIndex === -1,
+    );
+    const otherMessages = timeOrderedMessages.filter(
+      (m) => m.roundIndex !== -1,
+    );
+    const finalMessages = [...otherMessages, ...endgameMessages];
     return {
-      messages,
+      messages: finalMessages,
       nextToken: nextPageToken,
     };
   }

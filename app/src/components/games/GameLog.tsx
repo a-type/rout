@@ -8,7 +8,7 @@ import {
   PlayerAvatar,
   useMediaQuery,
 } from '@long-game/game-ui';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { proxy, subscribe, useSnapshot } from 'valtio';
 
 const localState = proxy({
@@ -55,11 +55,14 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
 
   if (latestMessage.type === 'chat') {
     const ChatMessage =
-      getFederatedGameComponent(
-        gameSuite.gameId,
-        gameSuite.gameDefinition.version,
-        'chat',
-      ) || DefaultChatMessage;
+      // always use default message display for non-chat type messages (system messages)
+      latestMessage.chatMessage.type === 'chat'
+        ? getFederatedGameComponent(
+            gameSuite.gameId,
+            gameSuite.gameDefinition.version,
+            'chat',
+          ) || DefaultChatMessage
+        : DefaultChatMessage;
     return (
       <div
         className="absolute top-full left-0 right-xs"
@@ -117,7 +120,9 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
             />
           }
         >
-          <GameLogCollapsedTriggerContent />
+          <Suspense>
+            <GameLogCollapsedTriggerContent />
+          </Suspense>
         </Dialog.Trigger>
         <Dialog.Content width="md">
           <Box

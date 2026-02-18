@@ -7,7 +7,7 @@ import { GameManual } from './GameManual.js';
 export interface GameManualDialogProps extends ButtonProps {}
 
 export const GameManualDialog = withGame<GameManualDialogProps>(
-  function GameManualDialog({ gameSuite, ...props }) {
+  function GameManualDialog({ gameSuite, children, ...props }) {
     const [params, setParams] = useSearchParams();
     const open = params.get('rules');
     return (
@@ -34,7 +34,7 @@ export const GameManualDialog = withGame<GameManualDialogProps>(
             />
           }
         >
-          <Icon name="book" />
+          {children ?? <Icon name="book" />}
         </Dialog.Trigger>
         <Dialog.Content width="md">
           <Dialog.Title>Game Manual</Dialog.Title>

@@ -14,7 +14,7 @@ import {
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { RefObject, useImperativeHandle, useRef } from 'react';
+import { RefObject, useImperativeHandle, useRef, useTransition } from 'react';
 import { PlayerAvatar } from '../players/PlayerAvatar.js';
 import { PlayerName } from '../players/PlayerName.js';
 
@@ -44,25 +44,35 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
       fieldRef.current?.focus();
     },
   }));
+
+  const [sending, startTransition] = useTransition();
+
   return (
     <Box d="col" {...props}>
       <FormikForm
         initialValues={{ text: '', recipientIds: [] as PrefixedId<'u'>[] }}
-        onSubmit={(values, { resetForm }) => {
+        onSubmit={(values, { resetForm, setSubmitting }) => {
           const roundIndex =
             timing === 'endgame'
               ? -1
               : timing === 'round'
                 ? latestRoundIndex
                 : undefined;
-          gameSuite.sendChat({
-            content: values.text,
-            position,
-            sceneId,
-            roundIndex,
+          setSubmitting(true);
+          startTransition(async () => {
+            await gameSuite
+              .sendChat({
+                content: values.text,
+                position,
+                sceneId,
+                roundIndex,
+              })
+              .finally(() => {
+                setSubmitting(false);
+              });
+            resetForm();
+            onSent?.();
           });
-          resetForm();
-          onSent?.();
         }}
         className="!gap-0"
       >
@@ -90,7 +100,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
               <Box gap>
                 <RecipientsField />
               </Box>
-              <SubmitButton emphasis="primary">
+              <SubmitButton emphasis="primary" loading={sending}>
                 <Icon name="send" />
               </SubmitButton>
             </Box>

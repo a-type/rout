@@ -7,6 +7,8 @@
 import { EventSubscriber } from '@a-type/utils';
 import {
   GameRoundSummary,
+  GameSessionChatInit,
+  gameSessionChatInitShape,
   GameSessionChatMessage,
   GameSessionPlayerStatus,
   GameStatus,
@@ -179,6 +181,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
 
     this.setupLocalTurnStorage();
     this.applyGameData(init);
+    // chat is automatically sent on connection
 
     if (init.status.status === 'complete') {
       setTimeout(() => this.loadPostgame(), 0);
@@ -790,10 +793,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     sceneId?: string;
     roundIndex?: number;
   }) => {
-    const messageWithRound: Omit<
-      GameSessionChatMessage,
-      'id' | 'createdAt' | 'reactions'
-    > = {
+    const messageWithRound: GameSessionChatInit = {
       ...message,
       roundIndex:
         message.roundIndex === undefined
@@ -801,16 +801,28 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
           : message.roundIndex,
       authorId: this.playerId,
     };
+    const validated = gameSessionChatInitShape.safeParse(messageWithRound);
+    if (!validated.success) {
+      console.error('Invalid chat message', validated.error);
+      this.events.emit(
+        'error',
+        new LongGameError(
+          LongGameError.Code.BadRequest,
+          'Invalid chat message: ' + validated.error.message,
+        ),
+      );
+      return;
+    }
 
-    await this.actuallySendChat(messageWithRound, this.playerId);
+    await this.actuallySendChat(validated.data);
   };
   protected abstract actuallySendChat(
-    message: Omit<GameSessionChatMessage, 'id' | 'createdAt' | 'reactions'>,
-    playerId: PrefixedId<'u'>,
+    message: GameSessionChatInit,
   ): Promise<void>;
   loadMoreChat = async (sceneId?: string | null): Promise<void> => {
     const sceneChat = this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID];
     if (sceneChat?.empty) {
+      console.debug('No more chat to load for scene', sceneId);
       return;
     }
     this.actuallyLoadMoreChat(sceneChat?.nextToken, sceneId);

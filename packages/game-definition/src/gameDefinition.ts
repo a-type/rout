@@ -24,7 +24,10 @@ import {
 // back compat
 export type { BaseTurnData, LocalTurn, Turn };
 
-export type SystemChatMessage = Omit<GameSessionChatInit, 'roundIndex'>;
+export type SystemChatMessage = Omit<
+  GameSessionChatInit,
+  'authorId' | 'roundIndex'
+>;
 
 export type GameMember = {
   id: PrefixedId<'u'>;

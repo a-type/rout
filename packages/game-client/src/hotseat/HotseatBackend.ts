@@ -2,7 +2,9 @@ import { EventSubscriber } from '@a-type/utils';
 import {
   colorNames,
   GameRoundSummary,
+  GameSessionChatInit,
   GameSessionChatMessage,
+  gameSessionChatMessageShape,
   GameSessionPlayerStatus,
   GameStatus,
   groupTurnsToRounds,
@@ -620,7 +622,6 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
             await this.addChat({
               ...message,
               authorId: SYSTEM_CHAT_AUTHOR_ID,
-              reactions: {},
               roundIndex: roundInfo.roundIndex,
             });
           }
@@ -659,15 +660,13 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     await tx.done;
     return messages;
   };
-  addChat = async (
-    message: Omit<GameSessionChatMessage, 'id' | 'createdAt'>,
-  ) => {
-    const chatMessage: GameSessionChatMessage = {
+  addChat = async (message: GameSessionChatInit) => {
+    const chatMessage = gameSessionChatMessageShape.parse({
       ...message,
       id: id('cm'),
       createdAt: new Date().toISOString(),
       reactions: {},
-    };
+    });
     await this.db.put('chat', chatMessage);
     this.emit('chat', {
       type: 'chat',

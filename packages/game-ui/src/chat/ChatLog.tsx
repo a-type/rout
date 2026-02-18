@@ -1,6 +1,6 @@
 import { Box, clsx, RelativeTime, useStayScrolledToBottom } from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { useRendererContext } from '../RendererProvider.js';
 
 export interface ChatLogProps {
@@ -28,13 +28,14 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
       const previousMessage =
         previous?.type === 'chat' ? previous.chatMessage : null;
       items.push(
-        <ChatRenderer
-          message={entry.chatMessage}
-          key={entry.chatMessage.id}
-          nextMessage={nextMessage}
-          previousMessage={previousMessage}
-          compact={false}
-        />,
+        <Suspense key={entry.chatMessage.id}>
+          <ChatRenderer
+            message={entry.chatMessage}
+            nextMessage={nextMessage}
+            previousMessage={previousMessage}
+            compact={false}
+          />
+        </Suspense>,
       );
     } else {
       if (startRoundIndex === -1) {

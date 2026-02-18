@@ -11,6 +11,7 @@ export * from './genericGames/index.js';
 export * from './help/HelpSurface.js';
 export * from './help/SpatialHelpDraggable.js';
 export * from './history/RoundHistoryControl.js';
+export * from './hooks/useGame.js';
 export * from './hooks/useMediaQuery.js';
 export * from './players/PlayerAvatar.js';
 export * from './players/PlayerName.js';

@@ -2,7 +2,7 @@ import { sdkHooks } from '@/services/publicSdk';
 import { Box, H2, P } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { GamePicker } from '../GamePicker';
+import { GamePicker } from './GamePicker';
 
 export interface SelectGamePageProps {
   gameSessionId: PrefixedId<'gs'>;

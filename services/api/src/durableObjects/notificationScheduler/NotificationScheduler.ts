@@ -120,17 +120,24 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
       byType[type].map((n) => n.id).forEach((id) => markSent.add(id));
     }
 
-    // mark all sent
+    // mark all sent... in batches, I guess.
     if (markSent.size > 0) {
-      await this.#sql.run(
-        db
-          .updateTable('Notification')
-          .set({ sentAt: new Date().toISOString() })
-          .where('id', 'in', Array.from(markSent)),
-        {
-          debug: true,
-        },
-      );
+      const toMark = Array.from(markSent);
+      console.log(`Marking ${toMark.length} notifications as sent`);
+      const batchSize = 100;
+      for (let i = 0; i < toMark.length; i += batchSize) {
+        const batch = toMark.slice(i, i + batchSize);
+        console.log(`Marking batch of ${batch.length} notifications as sent`);
+        await this.#sql.run(
+          db
+            .updateTable('Notification')
+            .set({ sentAt: new Date().toISOString() })
+            .where('id', 'in', batch),
+          {
+            debug: true,
+          },
+        );
+      }
     }
   };
 

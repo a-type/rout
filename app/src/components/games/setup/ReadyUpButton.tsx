@@ -19,13 +19,6 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
     const noGame = !gameSuite.gameId || gameSuite.gameId === 'empty';
     const cannotStart = insufficientPlayers || tooManyPlayers || noGame;
 
-    console.log(gameSuite.members.length, {
-      insufficientPlayers,
-      tooManyPlayers,
-      noGame,
-      cannotStart,
-    });
-
     return (
       <TopographyButton
         disabled={cannotStart}
@@ -40,7 +33,9 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
         wrapperClassName="justify-between w-full "
       >
         <Box gap>
-          <Icon name={insufficientPlayers || amIReady ? 'x' : 'check'} />
+          <Icon
+            name={noGame || insufficientPlayers || amIReady ? 'x' : 'check'}
+          />
           {children ||
             (insufficientPlayers
               ? 'Need more players'

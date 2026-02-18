@@ -6,17 +6,19 @@ import {
   Card,
   Chip,
   clsx,
+  Collapsible,
   Icon,
   Select,
+  Switch,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
 import { useState } from 'react';
-import { GameDetailsDialog } from '../library/GameDetailsDialog.js';
-import { useOpenQuickBuy } from '../store/QuickBuyPopup.js';
-import { GameIcon } from './GameIcon.js';
-import { GameTitle } from './GameTitle.js';
+import { GameDetailsDialog } from '../../library/GameDetailsDialog.js';
+import { useOpenQuickBuy } from '../../store/QuickBuyPopup.js';
+import { GameIcon } from '../GameIcon.js';
+import { GameTitle } from '../GameTitle.js';
 
 export interface GamePickerProps {
   value: string;
@@ -106,50 +108,56 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       className={clsx(className)}
       {...rest}
     >
-      <Box items="center" gap="lg" className="flex-wrap" surface p>
-        <Box items="center" gap>
-          <Icon name="filter" />
-          Filter
-        </Box>
-        <Button
-          size="small"
-          color="accent"
-          emphasis="primary"
-          toggled={filters.owned}
-          onClick={toggleOwnedFilter}
-        >
-          Owned
-        </Button>
-        {filters.tags.map((tag) => (
-          <Button
-            key={tag}
-            size="small"
-            color="accent"
-            emphasis="primary"
-            className="cursor-pointer"
-            onClick={() => {
-              removeTagFilter(tag);
-            }}
+      <Box surface="white" p="lg">
+        <Collapsible className="w-full">
+          <Collapsible.Trigger
+            render={<Button size="small" emphasis="ghost" className="w-full" />}
           >
-            {tag}
-            <Icon name="x" />
-          </Button>
-        ))}
-        <Select value="" onValueChange={addTagFilter}>
-          <Select.Trigger size="small">
-            <Icon name="plus" />
-            <Select.Value>{(tag) => tag || 'Choose tag...'}</Select.Value>
-          </Select.Trigger>
-          <Select.Content>
-            {Array.from(allTags)
-              .filter((tag) => !filters.tags.includes(tag))
-              .map((tag) => (
-                <Select.Item key={tag} value={tag}>
+            <Icon name="filter" />
+            Filters
+          </Collapsible.Trigger>
+          <Collapsible.Content>
+            <Box d="col" gap="sm" p="sm" container="reset" full items="start">
+              <label className="flex items-center gap-xs cursor-pointer">
+                <Switch
+                  checked={filters.owned}
+                  onCheckedChange={toggleOwnedFilter}
+                />
+                Only show games owned by players
+              </label>
+              {filters.tags.map((tag) => (
+                <Button
+                  key={tag}
+                  size="small"
+                  color="accent"
+                  emphasis="primary"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    removeTagFilter(tag);
+                  }}
+                >
                   {tag}
-                </Select.Item>
+                  <Icon name="x" />
+                </Button>
               ))}
-          </Select.Content>
-        </Select>
+              <Select value="" onValueChange={addTagFilter}>
+                <Select.Trigger size="small">
+                  <Icon name="plus" />
+                  <Select.Value>{(tag) => tag || 'Choose tag...'}</Select.Value>
+                </Select.Trigger>
+                <Select.Content>
+                  {Array.from(allTags)
+                    .filter((tag) => !filters.tags.includes(tag))
+                    .map((tag) => (
+                      <Select.Item key={tag} value={tag}>
+                        {tag}
+                      </Select.Item>
+                    ))}
+                </Select.Content>
+              </Select>
+            </Box>
+          </Collapsible.Content>
+        </Collapsible>
       </Box>
       <Box className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md p-md">
         {filteredGames.map(([gameId]) => (
@@ -221,8 +229,11 @@ const GamePickerItem = withGame<{
             </Card.Content>
           )}
           {voters?.length > 0 && (
-            <Card.Content className="flex flex-row gap-xs items-center">
-              <span>Votes</span>
+            <Card.Content
+              unstyled
+              className="flex flex-row gap-xs items-center"
+            >
+              <Icon name="suitHeart" className="fill-attention" size={20} />
               <AvatarList count={voters.length}>
                 {voters.map((voter, i) => (
                   <AvatarList.ItemRoot index={i} key={voter}>
