@@ -58,6 +58,9 @@ export function useDragGesture(options?: DragGestureOptions) {
       // check for activation constraint
       if (!isDragging) {
         if (options?.activationConstraint?.(gesture)) {
+          console.debug(
+            `Activation constraint passed for ${draggable.id}, activating drag`,
+          );
           activateDrag();
         }
       }
@@ -191,6 +194,9 @@ export function useDragGesture(options?: DragGestureOptions) {
     }
 
     if (!options?.activationConstraint) {
+      console.debug(
+        `No activation constraint, activating drag immediately for ${draggable.id}`,
+      );
       return activateDrag();
     } else {
       setCandidate(draggable.id);
@@ -221,6 +227,7 @@ export function useDragGesture(options?: DragGestureOptions) {
           targetTag: options?.dropOnTag,
           droppableParentId: parentId,
         });
+        console.debug(`Keyboard drag activated for ${draggable.id}`);
         activateDrag();
       }
     },
