@@ -15,6 +15,7 @@ export interface PlayerAvatarProps {
   playerId?: PrefixedId<'u'> | SystemChatAuthorId;
   className?: string;
   size?: number | string;
+  interactive?: boolean;
 }
 
 export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
@@ -22,6 +23,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
   size,
   playerId,
   className,
+  interactive,
 }) {
   const onlyPlayerId =
     playerId && isPrefixedId(playerId) ? playerId : undefined;
@@ -42,6 +44,30 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
     imageUrl = urlRaw.toString();
   }
 
+  const content = (
+    <Avatar
+      name={
+        playerId === SYSTEM_CHAT_AUTHOR_ID
+          ? 'Game'
+          : (player?.displayName ?? 'Anonymous')
+      }
+      imageSrc={imageUrl}
+      style={{
+        ...style,
+        width: size ?? 24,
+      }}
+      className={clsx(
+        'flex-shrink-0 aspect-1 overflow-hidden',
+        'border-solid border-2px color-main-dark bg-main-wash',
+        status?.online ? 'border-main-dark' : 'border-gray',
+        themeClass,
+        className,
+      )}
+      popIn={false}
+      crossOrigin="use-credentials"
+    />
+  );
+
   return (
     <Tooltip
       color="white"
@@ -56,44 +82,28 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
       }
       disabled={!playerId || gameSuite.gameStatus.status === 'pending'}
     >
-      <Button
-        size="small"
-        emphasis="ghost"
-        className="p-0"
-        render={
-          playerId ? (
-            <Link
-              to={
-                playerId && isPrefixedId(playerId)
-                  ? `?playerId=${playerId}`
-                  : '#'
-              }
-            />
-          ) : undefined
-        }
-      >
-        <Avatar
-          name={
-            playerId === SYSTEM_CHAT_AUTHOR_ID
-              ? 'Game'
-              : (player?.displayName ?? 'Anonymous')
+      {interactive ? (
+        <Button
+          size="small"
+          emphasis="ghost"
+          className="p-0 min-w-0 min-h-0 border-0"
+          render={
+            playerId ? (
+              <Link
+                to={
+                  playerId && isPrefixedId(playerId)
+                    ? `?playerId=${playerId}`
+                    : '#'
+                }
+              />
+            ) : undefined
           }
-          imageSrc={imageUrl}
-          style={{
-            ...style,
-            width: size ?? 24,
-          }}
-          className={clsx(
-            'flex-shrink-0 aspect-1 overflow-hidden',
-            'border-solid border-2px color-main-dark bg-main-wash',
-            status?.online ? 'border-main-dark' : 'border-gray',
-            themeClass,
-            className,
-          )}
-          popIn={false}
-          crossOrigin="use-credentials"
-        />
-      </Button>
+        >
+          {content}
+        </Button>
+      ) : (
+        content
+      )}
     </Tooltip>
   );
 });

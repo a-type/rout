@@ -69,7 +69,7 @@ function PlayerStatusAvatar({
 }) {
   return (
     <div className={clsx('relative overflow-visible')}>
-      <PlayerAvatar playerId={player.id} />
+      <PlayerAvatar playerId={player.id} interactive />
       {hasPlayed || status?.pendingTurn ? (
         <div
           className={clsx(
