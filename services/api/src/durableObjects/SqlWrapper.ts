@@ -30,7 +30,11 @@ export class SqlWrapper {
     const compiled = query.compile();
     if (debug) {
       console.log('SQL:', compiled.sql);
-      console.log('Parameters:', compiled.parameters);
+      console.log(
+        'Parameters:',
+        `(${compiled.parameters.length})`,
+        compiled.parameters,
+      );
     }
     return this.#sql.exec<O>(compiled.sql, ...compiled.parameters).toArray();
   };

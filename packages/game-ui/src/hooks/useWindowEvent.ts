@@ -28,7 +28,9 @@ export function useElementEvent<TEvent extends keyof HTMLElementEventMap>(
 ) {
   const stableCb = useStableCallback(cb);
   useEffect(() => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
     const element = ref.current;
     if (!element) return;
     element.addEventListener(event, stableCb as EventListener, { capture });

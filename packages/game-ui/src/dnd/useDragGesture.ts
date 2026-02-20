@@ -199,6 +199,9 @@ export function useDragGesture(options?: DragGestureOptions) {
       );
       return activateDrag();
     } else {
+      console.debug(
+        `Activation constraint present, waiting for activation for ${draggable.id} (it is the candidate now)`,
+      );
       setCandidate(draggable.id);
       gesture.draggedFrom = parentId;
     }

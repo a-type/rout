@@ -4,7 +4,7 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode } from 'react';
 import { ChatSurface } from '../chat/ChatSurface.js';
 import {
   DefaultDraggedContainer,
@@ -44,15 +44,12 @@ function TokenDefault({
   const parent = useMaybeParentTokenSpace();
   const isInHand = parent?.type === 'hand';
 
-  const activationConstraint = useMemo<DragGestureActivationConstraint>(
-    () =>
-      isInHand
-        ? (ctx) => {
-            return Math.abs(ctx.delta.y.get()) > 50;
-          }
-        : undefined,
-    [isInHand],
-  );
+  const activationConstraint: DragGestureActivationConstraint | undefined =
+    isInHand
+      ? (ctx) => {
+          return Math.abs(ctx.delta.y.get()) > 50;
+        }
+      : undefined;
 
   return (
     <Draggable
