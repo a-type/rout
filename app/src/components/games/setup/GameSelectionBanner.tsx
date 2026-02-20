@@ -15,7 +15,7 @@ export function GameSelectionBanner({ gameId }: { gameId: string | null }) {
           className="-inset-10% w-120% h-auto absolute z-0 blur-lg"
         />
       </div>
-      <div className="w-full relative z-1 text-xl color-white flex gap-md items-center">
+      <div className="w-full relative z-1 text-lg md:text-xl color-white flex gap-md items-center">
         <GameIcon
           gameId={gameId}
           className="h-48px aspect-1 rounded-sm border-black border-thin border-solid"
@@ -38,7 +38,7 @@ export function GameSelectionBanner({ gameId }: { gameId: string | null }) {
           className={clsx(
             '-translate-y-1/2 md:(-translate-1/2 -rotate-30)',
             'bg-primary text-contrast rd-sm px-sm py-xs',
-            'text-sm font-bold border-thin border-solid border-main-ink shadow-lg',
+            'text-sm font-bold border-thin border-solid border-primary-ink shadow-lg',
           )}
         >
           Playing!
