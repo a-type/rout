@@ -211,7 +211,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     const { status } = await this.getStatus();
     if (status === 'active') {
       await this.#scheduleTurnRemindersTask();
-      this.log('info', `Scheduled turn reminders task.`);
     }
   }
 
@@ -1420,7 +1419,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       });
     }
     if (roundState.pendingTurns.length > 0) {
-      this.#scheduleTurnRemindersTask();
+      await this.#scheduleTurnRemindersTask();
     }
   };
   #sendGameRoundChangeMessages = async (roundIndex: number) => {
@@ -1510,7 +1509,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       }
     }
     if (roundState.pendingTurns.length > 0) {
-      this.#scheduleTurnRemindersTask();
+      await this.#scheduleTurnRemindersTask();
     }
   };
 
