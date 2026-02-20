@@ -1,5 +1,5 @@
 import { clsx, Popover } from '@a-type/ui';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { droppableDataRegistry } from '../dnd/dataRegistry.js';
 import { DraggableData } from '../dnd/dndStore.js';
 import {
@@ -165,14 +165,22 @@ export interface TokenSpaceData {
 
 export function useMaybeParentTokenSpace() {
   const parentId = useParentDroppable();
+
+  const data = useSyncExternalStore(
+    (cb) => droppableDataRegistry.subscribe(`update:${parentId}`, cb),
+    () => (parentId ? droppableDataRegistry.get(parentId) : null),
+    () => (parentId ? droppableDataRegistry.get(parentId) : null),
+  );
+
   if (!parentId) {
     console.debug('no parent id');
     return null;
   }
-  const data = droppableDataRegistry.get(parentId);
+
   if (!data || data.tokenSpace) {
     console.debug(`parent ${parentId} is not a token space:`, data);
     return null;
   }
+
   return data as TokenSpaceData;
 }
