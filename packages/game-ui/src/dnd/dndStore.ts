@@ -43,6 +43,7 @@ export const useDndStore = create<DndStoreValue>()(
       set({ svgOverlayElement: element });
     },
     setCandidate: (id: string | null) => {
+      console.debug(`Drag candidate set: ${id}`);
       const current = get().candidate;
       if (current && current !== id) {
         dndEvents.emit('cancel', current);
@@ -54,6 +55,7 @@ export const useDndStore = create<DndStoreValue>()(
       }
     },
     startDrag: (id: string | null) => {
+      console.debug(`Drag locked in by ${id}`);
       const current = get().dragging;
       if (current && current !== id) {
         dndEvents.emit('cancel', current);

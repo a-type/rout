@@ -310,7 +310,6 @@ export function useGesture(
         gesture.initialBounds.height = elPosition.height;
       }
       gestureEvents.emit('claim', id, gesture);
-      console.debug(`Gesture claimed by ${id}, targetTag: ${targetTag}`);
     },
     [],
   );
