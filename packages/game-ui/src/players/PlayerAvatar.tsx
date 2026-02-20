@@ -1,4 +1,4 @@
-import { Avatar, clsx, Tooltip } from '@a-type/ui';
+import { Avatar, Button, clsx, Tooltip } from '@a-type/ui';
 import {
   isHotseatPlayerId,
   isPrefixedId,
@@ -7,6 +7,7 @@ import {
   SystemChatAuthorId,
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { Link } from '@verdant-web/react-router';
 import { PlayerInfo } from './PlayerInfo.js';
 import { usePlayerThemed } from './usePlayerThemed.js';
 
@@ -55,27 +56,44 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
       }
       disabled={!playerId || gameSuite.gameStatus.status === 'pending'}
     >
-      <Avatar
-        name={
-          playerId === SYSTEM_CHAT_AUTHOR_ID
-            ? 'Game'
-            : (player?.displayName ?? 'Anonymous')
+      <Button
+        size="small"
+        emphasis="ghost"
+        className="p-0"
+        render={
+          playerId ? (
+            <Link
+              to={
+                playerId && isPrefixedId(playerId)
+                  ? `?playerId=${playerId}`
+                  : '#'
+              }
+            />
+          ) : undefined
         }
-        imageSrc={imageUrl}
-        style={{
-          ...style,
-          width: size ?? 24,
-        }}
-        className={clsx(
-          'flex-shrink-0 aspect-1 overflow-hidden',
-          'border-solid border-2px color-main-dark bg-main-wash',
-          status?.online ? 'border-main-dark' : 'border-gray',
-          themeClass,
-          className,
-        )}
-        popIn={false}
-        crossOrigin="use-credentials"
-      />
+      >
+        <Avatar
+          name={
+            playerId === SYSTEM_CHAT_AUTHOR_ID
+              ? 'Game'
+              : (player?.displayName ?? 'Anonymous')
+          }
+          imageSrc={imageUrl}
+          style={{
+            ...style,
+            width: size ?? 24,
+          }}
+          className={clsx(
+            'flex-shrink-0 aspect-1 overflow-hidden',
+            'border-solid border-2px color-main-dark bg-main-wash',
+            status?.online ? 'border-main-dark' : 'border-gray',
+            themeClass,
+            className,
+          )}
+          popIn={false}
+          crossOrigin="use-credentials"
+        />
+      </Button>
     </Tooltip>
   );
 });

@@ -32,6 +32,7 @@ import {
 import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
+import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameControls } from './GameControls.js';
 import { GameLayout } from './GameLayout.js';
@@ -72,6 +73,9 @@ export function GameSessionRenderer({
             <GameSessionRendererInner hotseat={hotseat} />
           </ErrorBoundary>
         </PlayerThemeWrapper>
+      </Suspense>
+      <Suspense>
+        <PlayerModal />
       </Suspense>
     </GameSuiteProvider>
   );
