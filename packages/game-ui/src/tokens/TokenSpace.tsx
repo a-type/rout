@@ -165,8 +165,14 @@ export interface TokenSpaceData {
 
 export function useMaybeParentTokenSpace() {
   const parentId = useParentDroppable();
-  if (!parentId) return null;
+  if (!parentId) {
+    console.debug('no parent id');
+    return null;
+  }
   const data = droppableDataRegistry.get(parentId);
-  if (!data || data.tokenSpace) return null;
+  if (!data || data.tokenSpace) {
+    console.debug(`parent ${parentId} is not a token space:`, data);
+    return null;
+  }
   return data as TokenSpaceData;
 }
