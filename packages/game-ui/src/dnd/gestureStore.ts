@@ -5,6 +5,7 @@ import { useWindowEvent } from '../hooks/useWindowEvent.js';
 import { boundsRegistry } from './bounds.js';
 import { useDndStore } from './dndStore.js';
 import { gestureEvents } from './gestureEvents.js';
+import { dndLogger } from './logger.js';
 import { TAGS } from './tags.js';
 
 export const gesture = {
@@ -89,7 +90,7 @@ export function useMonitorGlobalGesture() {
     gesture.initialBounds.height = 0;
 
     gestureEvents.emit('start', gesture);
-    console.debug(
+    dndLogger.debug(
       `Gesture started, type: ${event.type} ${gesture.type} at (${coordinate.x}, ${coordinate.y})`,
     );
   }
@@ -100,11 +101,11 @@ export function useMonitorGlobalGesture() {
     });
     if (overlapped.length > 0) {
       if (overlapped.length > 1) {
-        console.debug(
+        dndLogger.debug(
           `Multiple overlapping regions found, sorting by priority: ${overlapped.map((o) => `${o.id}: ${o.priority}`).join(', ')}`,
         );
         overlapped.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-        console.debug(`Selected region: ${overlapped[0].id}`);
+        dndLogger.debug(`Selected region: ${overlapped[0].id}`);
       }
       // find highest priority
       // set the first one as the over region

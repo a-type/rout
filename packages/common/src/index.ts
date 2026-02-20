@@ -7,6 +7,7 @@ export * from './entitlements.js';
 export * from './error.js';
 export * from './hotseat.js';
 export * from './ids.js';
+export * from './logger.js';
 export * from './objects.js';
 export * from './protocol.js';
 export * from './random.js';

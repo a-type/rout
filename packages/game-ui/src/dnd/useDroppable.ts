@@ -5,6 +5,7 @@ import { draggableDataRegistry } from './dataRegistry.js';
 import { dndEvents } from './dndEvents.js';
 import { DraggableData, useDndStore, useDraggedData } from './dndStore.js';
 import { DragGestureContext, gesture } from './gestureStore.js';
+import { dndLogger } from './logger.js';
 import { TAGS } from './tags.js';
 
 export interface DropInfo {
@@ -62,7 +63,7 @@ export function useDroppable<T>({
 
     return dndEvents.subscribe('drop', (dragged, targetId, gesture) => {
       if (targetId === id) {
-        console.log('droppable drop', id);
+        dndLogger.info('droppable drop', id);
         const data = draggableDataRegistry.get(dragged);
         if (stableAccept({ id: dragged, data }, gesture)) {
           const region = boundsRegistry.getEntry(id)!;

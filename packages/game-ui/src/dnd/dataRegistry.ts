@@ -1,4 +1,5 @@
 import { EventSubscriber } from '@a-type/utils';
+import { dndLogger } from './logger';
 
 export type DataRegistryEvents = {
   [K in `update:${string}`]: (data: any) => void;
@@ -30,7 +31,7 @@ class DataRegistry extends EventSubscriber<DataRegistryEvents> {
   register(id: string, data: any) {
     const existing = this.registry.get(id);
     if (existing) {
-      console.debug(
+      dndLogger.debug(
         `DataRegistry: incrementing refCount for ${id}, current refCount: ${existing.refCount}, new: ${existing.refCount + 1}`,
       );
       existing.refCount++;
@@ -40,7 +41,7 @@ class DataRegistry extends EventSubscriber<DataRegistryEvents> {
         this.emit(`update:${id}`, data);
       }
     } else {
-      console.debug(`DataRegistry: registering new data for ${id}`);
+      dndLogger.debug(`DataRegistry: registering new data for ${id}`);
       this.registry.set(id, { data, refCount: 1 });
       this.emit(`update:${id}`, data);
     }
@@ -48,12 +49,12 @@ class DataRegistry extends EventSubscriber<DataRegistryEvents> {
     return () => {
       const entry = this.registry.get(id);
       if (entry) {
-        console.debug(
+        dndLogger.debug(
           `DataRegistry: unregistering data for ${id}, current refCount: ${entry.refCount}`,
         );
         entry.refCount--;
         if (entry.refCount === 0) {
-          console.debug(
+          dndLogger.debug(
             `DataRegistry: removing entry for ${id} as refCount reached 0`,
           );
           this.registry.delete(id);

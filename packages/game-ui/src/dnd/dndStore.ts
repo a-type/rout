@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/shallow';
 import { draggableDataRegistry } from './dataRegistry.js';
 import { dndEvents } from './dndEvents.js';
 import { DragGestureContext } from './gestureStore.js';
+import { dndLogger } from './logger.js';
 
 export type DraggableData<T = any> = {
   id: string;
@@ -43,7 +44,7 @@ export const useDndStore = create<DndStoreValue>()(
       set({ svgOverlayElement: element });
     },
     setCandidate: (id: string | null) => {
-      console.debug(`Drag candidate set: ${id}`);
+      dndLogger.debug(`Drag candidate set: ${id}`);
       const current = get().candidate;
       if (current && current !== id) {
         dndEvents.emit('cancel', current);
@@ -55,7 +56,7 @@ export const useDndStore = create<DndStoreValue>()(
       }
     },
     startDrag: (id: string | null) => {
-      console.debug(`Drag locked in by ${id}`);
+      dndLogger.debug(`Drag locked in by ${id}`);
       const current = get().dragging;
       if (current && current !== id) {
         dndEvents.emit('cancel', current);

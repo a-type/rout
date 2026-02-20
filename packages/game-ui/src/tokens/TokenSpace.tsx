@@ -173,12 +173,10 @@ export function useMaybeParentTokenSpace() {
   );
 
   if (!parentId) {
-    console.debug('no parent id');
     return null;
   }
 
   if (!data || data.tokenSpace) {
-    console.debug(`parent ${parentId} is not a token space:`, data);
     return null;
   }
 

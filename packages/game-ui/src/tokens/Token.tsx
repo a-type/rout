@@ -4,7 +4,7 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { ChatSurface } from '../chat/ChatSurface.js';
 import {
   DefaultDraggedContainer,
@@ -44,9 +44,6 @@ function TokenDefault({
   const parent = useMaybeParentTokenSpace();
   const isInHand = parent?.type === 'hand';
 
-  useEffect(() => {
-    console.debug(`Token ${id} is in hand: ${isInHand}`);
-  }, [isInHand, id]);
   const activationConstraint: DragGestureActivationConstraint | undefined =
     isInHand
       ? (ctx) => {

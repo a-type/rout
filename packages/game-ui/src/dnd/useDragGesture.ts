@@ -11,6 +11,7 @@ import {
   setVector,
   useGesture,
 } from './gestureStore.js';
+import { dndLogger } from './logger.js';
 
 export interface DragGestureOptions {
   allowStartFromDragIn?: boolean;
@@ -58,7 +59,7 @@ export function useDragGesture(options?: DragGestureOptions) {
       // check for activation constraint
       if (!isDragging) {
         if (options?.activationConstraint?.(gesture)) {
-          console.debug(
+          dndLogger.debug(
             `Activation constraint passed for ${draggable.id}, activating drag`,
           );
           activateDrag();
@@ -86,7 +87,7 @@ export function useDragGesture(options?: DragGestureOptions) {
       if (!gesture.claimId) {
         // drag-in gestures must always start from a valid, claimed gesture started
         // with a standard pointer-down.
-        console.debug(
+        dndLogger.debug(
           draggable.id,
           'Not claiming drag-in because there is no active gesture claim',
         );
@@ -99,7 +100,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
-          console.debug(
+          dndLogger.debug(
             draggable.id,
             'Not claiming drag-in because gesture is not mostly horizontal',
           );
@@ -112,7 +113,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         const velocityXSign = Math.sign(gesture.velocity.x.get());
         // for 0 velocity, don't claim.
         if (velocityXSign === 0) {
-          console.debug(
+          dndLogger.debug(
             'Not claiming drag-in because gesture has no horizontal velocity',
           );
           return;
@@ -127,7 +128,7 @@ export function useDragGesture(options?: DragGestureOptions) {
         if (directionRelatedToPriorClaim === -velocityXSign) {
           beginDrag();
         } else {
-          console.debug(
+          dndLogger.debug(
             draggable.id,
             'Not claiming drag-in because gesture is moving in the opposite direction of the prior drag',
           );
@@ -194,12 +195,12 @@ export function useDragGesture(options?: DragGestureOptions) {
     }
 
     if (!options?.activationConstraint) {
-      console.debug(
+      dndLogger.debug(
         `No activation constraint, activating drag immediately for ${draggable.id}`,
       );
       return activateDrag();
     } else {
-      console.debug(
+      dndLogger.debug(
         `Activation constraint present, waiting for activation for ${draggable.id} (it is the candidate now)`,
       );
       setCandidate(draggable.id);
@@ -230,7 +231,7 @@ export function useDragGesture(options?: DragGestureOptions) {
           targetTag: options?.dropOnTag,
           droppableParentId: parentId,
         });
-        console.debug(`Keyboard drag activated for ${draggable.id}`);
+        dndLogger.debug(`Keyboard drag activated for ${draggable.id}`);
         activateDrag();
       }
     },
