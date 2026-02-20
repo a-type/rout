@@ -1494,6 +1494,12 @@ export class GameSession extends DurableObject<ApiBindings> {
     );
   };
   #sendTurnReminders = async () => {
+    const status = await this.getStatus();
+
+    if (status.status !== 'active') {
+      this.log('debug', `Game is not active, skipping turn reminders`);
+      return;
+    }
     this.log('debug', `Sending turn reminders to players`);
     const roundState = await this.#getCurrentRoundState();
     for (const playerId of roundState.pendingTurns) {
