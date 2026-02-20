@@ -89,6 +89,9 @@ export function useMonitorGlobalGesture() {
     gesture.initialBounds.height = 0;
 
     gestureEvents.emit('start', gesture);
+    console.debug(
+      `Gesture started, type: ${event.type} ${gesture.type} at (${coordinate.x}, ${coordinate.y})`,
+    );
   }
 
   const updateOver = () => {
