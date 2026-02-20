@@ -86,6 +86,13 @@ export const DelayedSubmitUndo = withGame<DelayedSubmitUndoProps>(
                 >
                   Cancel
                 </Button>
+                <Button
+                  disabled={gameSuite.submittingTurn}
+                  emphasis="ghost"
+                  onClick={() => gameSuite.submitTurn({ delay: 0 })}
+                >
+                  <Icon name="skipEnd" />
+                </Button>
                 <div className="absolute bottom-0 left-0 right-0 h-3px">
                   <motion.div
                     initial={{ width: 0 }}
