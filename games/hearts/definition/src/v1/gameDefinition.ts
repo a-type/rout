@@ -27,6 +27,7 @@ export const scoringCards = fullDeck.filter(
 );
 export const queenOfSpadesScore = 13;
 export const shootTheMoonScore = 13 + queenOfSpadesScore; // all 13 hearts + queen of spades
+export const losingScore = 100;
 
 export function isCard(card: string): card is Card {
   return fullDeck.includes(card as Card);
@@ -495,7 +496,7 @@ export const gameDefinition: GameDefinition<{
   getStatus: ({ globalState, members }) => {
     // calculate all player scores
     const largestPlayerScore = Math.max(...Object.values(globalState.scores));
-    if (largestPlayerScore >= 100) {
+    if (largestPlayerScore >= losingScore) {
       // sort by score, lowest wins
       const sortedScores = Object.entries(globalState.scores).sort(
         ([_, scoreA], [__, scoreB]) => {

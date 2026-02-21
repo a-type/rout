@@ -1,6 +1,6 @@
 import { Box, clsx, HorizontalList } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { getScore } from '@long-game/game-hearts-definition/v1';
+import { getScore, losingScore } from '@long-game/game-hearts-definition/v1';
 import { PlayerAvatar, PlayerName, usePlayerThemed } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 import { PlayerScoredCards } from './PlayerScoredCards.js';
@@ -13,7 +13,13 @@ export const PlayerScores = hooks.withGame<PlayerScoresProps>(
   function PlayerScores({ gameSuite, className }) {
     return (
       <Box col className={clsx('select-none overflow-y-auto', className)}>
-        <div className="text-xs font-bold color-gray-dark mb-sm">Scores</div>
+        <Box
+          layout="center between"
+          className="text-xs font-bold color-gray-dark mb-sm"
+        >
+          <div>Scores</div>
+          <div>(play to {losingScore})</div>
+        </Box>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-sm items-start">
           {gameSuite.finalState.playerOrder.map((playerId) => (
             <PlayerScore playerId={playerId} key={playerId} />
