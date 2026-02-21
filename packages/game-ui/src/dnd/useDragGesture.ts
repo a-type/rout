@@ -97,12 +97,15 @@ export function useDragGesture(options?: DragGestureOptions) {
         // horizontal.
         const deltaX = gesture.delta.x.get();
         const deltaY = gesture.delta.y.get();
-        const isMostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+        const deltaLength = Math.hypot(deltaX, deltaY);
+        const isMostlyHorizontal =
+          deltaLength < 2 || Math.abs(deltaX) > Math.abs(deltaY);
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
           dndLogger.debug(
             draggable.id,
             'Not claiming drag-in because gesture is not mostly horizontal',
+            `(deltaX: ${deltaX}, deltaY: ${deltaY})`,
           );
           return;
         }

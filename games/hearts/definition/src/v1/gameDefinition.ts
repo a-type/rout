@@ -25,7 +25,8 @@ export const fivePlayerDeck = fullDeck.filter((c) => c !== '2d' && c !== '2c');
 export const scoringCards = fullDeck.filter(
   (card) => getCardSuit(card) === 'h' || card === 'qs',
 );
-export const shootTheMoonScore = getScore(scoringCards);
+export const queenOfSpadesScore = 13;
+export const shootTheMoonScore = 13 + queenOfSpadesScore; // all 13 hearts + queen of spades
 
 export function isCard(card: string): card is Card {
   return fullDeck.includes(card as Card);
