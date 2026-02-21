@@ -9,7 +9,10 @@ import { GameRecap } from './GameRecap.js';
 // etc, prepare and submit turns, as well as view historical states
 
 export const Renderer = hooks.withGame(function Client({ gameSuite }) {
-  if (gameSuite.gameStatus.status === 'complete') {
+  if (
+    gameSuite.gameStatus.status === 'complete' &&
+    gameSuite.viewingRoundIndex === gameSuite.latestRoundIndex
+  ) {
     return <GameRecap />;
   }
 

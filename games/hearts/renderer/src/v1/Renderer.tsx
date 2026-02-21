@@ -10,7 +10,10 @@ import { PlayerScores } from './PlayerScores.js';
 // etc, prepare and submit turns, as well as view historical states
 
 export const Renderer = hooks.withGame(function Client({ gameSuite }) {
-  if (gameSuite.gameStatus.status === 'complete') {
+  if (
+    gameSuite.gameStatus.status === 'complete' &&
+    gameSuite.viewingRoundIndex === gameSuite.latestRoundIndex
+  ) {
     return <GameRecap />;
   }
 
@@ -27,9 +30,9 @@ const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
 
   return (
     <Box col gap>
-      <Box gap="sm">
+      <Box gap="sm" items="center" p>
         <PlayerAvatar playerId={winner} />
-        <PlayerName playerId={winner} /> wins!
+        <PlayerName disableYou playerId={winner} /> wins!
       </Box>
       <PlayerScores />
     </Box>
