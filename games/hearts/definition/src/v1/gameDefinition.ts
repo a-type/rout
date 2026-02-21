@@ -444,6 +444,14 @@ export const gameDefinition: GameDefinition<{
         cards: winningCards,
       };
 
+      // add scored cards to winner's list
+      globalState.scoredCards[winningPlayerId].push(
+        ...currentTrickWithPlay.map(({ card }) => card),
+      );
+
+      // reset the current trick
+      globalState.currentTrick = [];
+
       // have we played all cards? hands will be empty
       const allCardsPlayed =
         Object.values(globalState.hands).reduce(
@@ -461,7 +469,6 @@ export const gameDefinition: GameDefinition<{
           globalState.scores[member.id] += score;
         }
 
-        globalState.currentTrick = [];
         globalState.hands = newHands;
         globalState.scoredCards = makeEmptyScoredCards(
           members.map((m) => m.id),
@@ -471,11 +478,6 @@ export const gameDefinition: GameDefinition<{
         return;
       }
 
-      // otherwise, add scoring cards to the winning player's list
-      globalState.scoredCards[winningPlayerId].push(
-        ...currentTrickWithPlay.map(({ card }) => card),
-      );
-      globalState.currentTrick = [];
       globalState.lastCompletedTrick = completedTrick;
       globalState.isFirstTrickOfDeal = false;
       return;

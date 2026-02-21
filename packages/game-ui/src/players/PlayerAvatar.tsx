@@ -84,9 +84,8 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
     >
       {interactive ? (
         <Button
-          size="small"
+          size="wrapper"
           emphasis="ghost"
-          className="p-0 min-w-0 min-h-0 border-0"
           render={
             playerId ? (
               <Link
