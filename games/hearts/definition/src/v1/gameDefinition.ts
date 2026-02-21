@@ -22,6 +22,10 @@ export const fullDeck: Card[] = ranks.flatMap((rank) =>
 );
 export const threePlayerDeck = fullDeck.filter((c) => c !== '2d');
 export const fivePlayerDeck = fullDeck.filter((c) => c !== '2d' && c !== '2c');
+export const scoringCards = fullDeck.filter(
+  (card) => getCardSuit(card) === 'h' || card === 'qs',
+);
+export const shootTheMoonScore = getScore(scoringCards);
 
 export function isCard(card: string): card is Card {
   return fullDeck.includes(card as Card);
@@ -78,8 +82,8 @@ export function getScore(cards: Card[]): number {
   }, 0);
 
   // shoot the moon
-  if (total === 26) {
-    return -26;
+  if (total === shootTheMoonScore) {
+    return -shootTheMoonScore;
   }
   return total;
 }
@@ -449,32 +453,26 @@ export const gameDefinition: GameDefinition<{
         // reshuffle and deal again
         const newHands = shuffleHands({ members, random });
         // now it's time to score this deal
-        const scores = members.reduce(
-          (acc, member) => ({
-            ...acc,
-            [member.id]:
-              (acc[member.id] || 0) +
-              getScore(globalState.scoredCards[member.id]),
-          }),
-          {} as Record<PrefixedId<'u'>, number>,
-        );
+        for (const member of members) {
+          const scoredCards = globalState.scoredCards[member.id];
+          const score = getScore(scoredCards);
+          globalState.scores[member.id] += score;
+        }
 
         globalState.currentTrick = [];
         globalState.hands = newHands;
         globalState.scoredCards = makeEmptyScoredCards(
           members.map((m) => m.id),
         );
-        globalState.scores = scores;
         globalState.lastCompletedTrick = completedTrick;
         globalState.isFirstTrickOfDeal = true;
         return;
       }
 
       // otherwise, add scoring cards to the winning player's list
-      globalState.scoredCards[winningPlayerId] = [
-        ...globalState.scoredCards[winningPlayerId],
+      globalState.scoredCards[winningPlayerId].push(
         ...currentTrickWithPlay.map(({ card }) => card),
-      ];
+      );
       globalState.currentTrick = [];
       globalState.lastCompletedTrick = completedTrick;
       globalState.isFirstTrickOfDeal = false;
@@ -569,7 +567,10 @@ export const gameDefinition: GameDefinition<{
       const currentTrickEmpty = data.globalState.currentTrick.length === 0;
       const playerWithAllScoringCards = Object.entries(
         data.globalState.scoredCards,
-      ).find(([_, cards]) => cards.filter(isScoringCard).length === 26);
+      ).find(
+        ([_, cards]) =>
+          cards.filter(isScoringCard).length === scoringCards.length,
+      );
       const playerShotMoon =
         lastTrickHadScoring &&
         currentTrickEmpty &&
