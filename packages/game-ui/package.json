@@ -9,6 +9,20 @@
       "production": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./drawing": {
+      "development": "./src/drawing/index.ts",
+      "workerd": "./src/drawing/index.ts",
+      "production": "./dist/drawing/index.js",
+      "import": "./dist/drawing/index.js",
+      "types": "./dist/drawing/index.d.ts"
+    },
+    "./genericGames": {
+      "development": "./src/genericGames/index.ts",
+      "workerd": "./src/genericGames/index.ts",
+      "production": "./dist/genericGames/index.js",
+      "import": "./dist/genericGames/index.js",
+      "types": "./dist/genericGames/index.d.ts"
     }
   },
   "type": "module",
@@ -31,8 +45,8 @@
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/visual-components": "workspace:*",
     "@long-game/scripts": "workspace:*",
+    "@long-game/visual-components": "workspace:*",
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "@types/three": "catalog:",
@@ -40,6 +54,7 @@
     "@verdant-web/react-router": "catalog:",
     "immer": "catalog:",
     "motion": "catalog:",
+    "perfect-freehand": "^1.2.2",
     "react-flip-toolkit": "catalog:",
     "three": "catalog:",
     "valtio": "catalog:",
@@ -51,9 +66,9 @@
     "@storybook/react-vite": "^9.0.15",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@unocss/transformer-variant-group": "catalog:",
     "storybook": "^9.0.15",
     "typescript": "catalog:",
-    "unocss": "catalog:",
-    "@unocss/transformer-variant-group": "catalog:"
+    "unocss": "catalog:"
   }
 }
