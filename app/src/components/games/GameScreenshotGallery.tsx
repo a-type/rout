@@ -4,16 +4,24 @@ import { useState } from 'react';
 
 export interface GameScreenshotGalleryProps {
   gameId: string;
+  /** Optional, defaults to latest version */
+  version?: string;
   className?: string;
 }
 
 export function GameScreenshotGallery({
   gameId,
+  version: userVersion,
   className,
 }: GameScreenshotGalleryProps) {
   const game = useGame(gameId);
+  const version = userVersion ?? game?.latestVersion ?? 'v1';
   const [selected, setSelected] = useState<number>(0);
-  const screenshot = game.screenshots?.[selected];
+      const availableScreenshots = game.screenshots?.filter((screenshot) =>
+        !screenshot.version || screenshot.version === version,
+      );
+  const screenshot = availableScreenshots?.[selected];
+
 
   return (
     <Box gap className={clsx('', className)}>
@@ -24,7 +32,7 @@ export function GameScreenshotGallery({
         className="object-contain bg-main-wash min-w-0 w-auto h-auto rounded-md border border-default flex-[1-1-0]"
       />
       <Box col gap="sm" className="flex-[1-1-auto]">
-        {game.screenshots.map((screenshot, index) => (
+        {availableScreenshots.map((screenshot, index) => (
           <Button
             key={screenshot.file}
             onClick={() => setSelected(index)}

@@ -11,7 +11,7 @@ import {
 } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { fetch, queryClient, useSuspenseQuery } from '@long-game/game-client';
-import { withSuspense } from '@long-game/game-ui';
+import { useGame, withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
 import { lazy, useLayoutEffect, useRef } from 'react';
 import type { Components } from 'react-markdown';
@@ -28,11 +28,16 @@ const plugins = [mdc, customHeaderId];
 
 export const GameManual = withSuspense(
   function GameManual({ gameId }: GameManualProps) {
+    const game = useGame(gameId);
+    // version is major only
+    const latestVersion = (game?.latestVersion ?? 'v1').split('.')[0];
     const { data: markdown } = useSuspenseQuery(
       {
         queryKey: ['gameManual', gameId],
         queryFn: async () => {
-          const result = await fetch(`/game-data/${gameId}/rules.md`);
+          const result = await fetch(
+            `/game-data/${gameId}/${latestVersion}/rules.md`,
+          );
           if (!result.ok) {
             throw LongGameError.fromResponse(result);
           }

@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, H2, P } from '@a-type/ui';
+import { Box, H2 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { GamePicker } from './GamePicker';
@@ -21,7 +21,6 @@ export const SelectGamePage = withGame<SelectGamePageProps>(
     return (
       <Box col gap>
         <H2>Choose a game</H2>
-        <P>Start with a game to play. You can change this later!</P>
         <GamePicker
           value={gameSuite.gameId}
           loading={updateGameMutation.isPending}

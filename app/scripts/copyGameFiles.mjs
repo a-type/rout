@@ -27,10 +27,8 @@ gameDirs.forEach((gameDir) => {
       recursive: true,
     });
   }
-  copyGameFile(gameDir, 'icon.png');
-  copyGameFile(gameDir, 'rules.md');
-  copyGameDir(gameDir, 'assets');
-  copyGameDir(gameDir, 'screenshots');
+
+  copyGameDir(gameDir, 'meta', path.join(gamesMetaOutput, gameDir));
   copyGameDir(
     gameDir,
     'renderer/dist',
