@@ -1,14 +1,8 @@
 import { Box, Button, clsx } from '@a-type/ui';
+import { Drawing } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { getStroke, StrokeOptions } from 'perfect-freehand';
 import { CSSProperties, PointerEvent, useRef, useState } from 'react';
-
-export interface Drawing {
-  strokes: {
-    path: number[][];
-    color: 'light' | 'dark' | 'contrast';
-  }[];
-}
 
 export interface DrawCanvasProps {
   readonly?: boolean;

@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { Drawing, PrefixedId } from '@long-game/common';
 import {
   BaseTurnError,
   GameDefinition,
@@ -22,13 +22,6 @@ export interface DescriptionItem {
   description: string;
   playerId: PrefixedId<'u'>;
   ratings?: Rating[];
-}
-
-export interface Drawing {
-  strokes: {
-    path: number[][];
-    color: 'light' | 'dark' | 'contrast';
-  }[];
 }
 
 export interface DrawingItem {

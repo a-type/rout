@@ -1,3 +1,4 @@
+import sketchy from '@long-game/game-sketchy-definition';
 import { GameModule } from '@long-game/game-definition';
 import exquisiteFridge from '@long-game/game-exquisite-fridge-definition';
 import hearts from '@long-game/game-hearts-definition';
@@ -13,6 +14,7 @@ const games: Record<string, GameModule> = {
   [wizardBall.id]: wizardBall,
   [exquisiteFridge.id]: exquisiteFridge,
   [heirApparent.id]: heirApparent,
+  [sketchy.id]: sketchy,
   // GENERATED - DO NOT REMOVE THIS LINE
 };
 

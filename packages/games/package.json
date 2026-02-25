@@ -22,7 +22,8 @@
     "@long-game/game-hearts-definition": "workspace:*",
     "@long-game/game-wizard-ball-definition": "workspace:*",
     "@long-game/game-exquisite-fridge-definition": "workspace:*",
-    "@long-game/game-heir-apparent-definition": "workspace:*"
+    "@long-game/game-heir-apparent-definition": "workspace:*",
+    "@long-game/game-sketchy-definition": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"
