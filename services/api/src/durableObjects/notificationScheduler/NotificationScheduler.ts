@@ -124,7 +124,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
     if (markSent.size > 0) {
       const toMark = Array.from(markSent);
       console.log(`Marking ${toMark.length} notifications as sent`);
-      const batchSize = 100;
+      const batchSize = 20;
       for (let i = 0; i < toMark.length; i += batchSize) {
         const batch = toMark.slice(i, i + batchSize);
         console.log(`Marking batch of ${batch.length} notifications as sent`);
