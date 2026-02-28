@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/game-{{name}}-renderer",
+  "name": "@long-game/game-gridlock-renderer",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@long-game/game-{{name}}-definition": "workspace:*",
+    "@long-game/game-gridlock-definition": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",

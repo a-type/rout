@@ -678,6 +678,19 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
   };
 
   resetGame = async () => {
-    throw new Error('Method not implemented.');
+    const details = await this.getDetails();
+    const setupData = this.gameDefinition.getSetupData?.({
+      members: details.members,
+    });
+    await this.db.clear('turns');
+    await this.updateDetails({
+      status: 'pending',
+      startedAt: null,
+      roundIndex: -1,
+      setupData,
+    });
+    this.emit('gameChange', {
+      type: 'gameChange',
+    });
   };
 }

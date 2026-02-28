@@ -23,7 +23,7 @@
     "@long-game/game-wizard-ball-definition": "workspace:*",
     "@long-game/game-exquisite-fridge-definition": "workspace:*",
     "@long-game/game-heir-apparent-definition": "workspace:*",
-    "@long-game/game-sketchy-definition": "workspace:*"
+    "@long-game/game-gridlock-definition": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

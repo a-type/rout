@@ -216,7 +216,11 @@ const ConditionalHandle = ({
   ...rest
 }: { disabled?: boolean } & DraggableHandleProps) => {
   if (disabled) {
-    return <>{children}</>;
+    return (
+      <motion.div data-disabled-handle className="w-full h-full">
+        {children}
+      </motion.div>
+    );
   }
   return (
     <DraggableHandle className="w-full h-full" {...rest}>
@@ -305,7 +309,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
         ref={mainRef}
         className={className}
         animate={{
-          width: isPortaling && movedBehavior === 'remove' ? 0 : 'auto',
+          width: isPortaling && movedBehavior === 'remove' ? 0 : undefined,
         }}
         style={{
           opacity: isPortaling ? (movedBehavior === 'remove' ? 0 : 0.5) : 1,
@@ -367,6 +371,7 @@ const DraggedRoot = memo(function DraggedRoot({
             data-draggable-preview
             data-draggable-preview-id={dragged.id}
             data-disabled={dragged.disabled}
+            className="w-full h-full"
           >
             {children}
           </DragMotion>

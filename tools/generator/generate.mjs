@@ -16,12 +16,12 @@ const template = await select({
   message: 'What do you want to make?',
   options: [
     {
-      value: 'packages',
-      label: 'Package | Internal library',
-    },
-    {
       value: 'games',
       label: 'Game    | New game definition and renderer',
+    },
+    {
+      value: 'packages',
+      label: 'Package | Internal library',
     },
   ],
 });
@@ -99,6 +99,7 @@ if (template === 'games') {
   // to the game map.
   await addGameToGamesPackage();
   await addGameDevTask();
+  await addGameToWorkspace();
 }
 
 copySpinner.stop('Copying complete');
@@ -172,4 +173,23 @@ async function addGameDevTask() {
   tasksFileJson.tasks.push(newTask);
   await fs.writeFile(tasksFilePath, JSON.stringify(tasksFileJson, null, 2));
   console.log(`Added dev task for ${name} to .vscode/tasks.json`);
+}
+
+async function addGameToWorkspace() {
+  const workspaceFilePath = path.resolve(
+    __dirname,
+    '../../rout.code-workspace',
+  );
+  const workspaceFileContent = await fs.readFile(workspaceFilePath, 'utf-8');
+  const workspaceFileJson = JSON.parse(workspaceFileContent);
+  const newFolder = {
+    name: `🟩 ${titleName}`,
+    path: `./games/${name}`,
+  };
+  workspaceFileJson.folders.push(newFolder);
+  await fs.writeFile(
+    workspaceFilePath,
+    JSON.stringify(workspaceFileJson, null, 2),
+  );
+  console.log(`Added games/${name} to rout.code-workspace`);
 }

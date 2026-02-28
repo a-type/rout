@@ -47,7 +47,7 @@ export function HelpSurface({
 
   if (disabled || (!content && !rulesId)) {
     return (
-      <div className={className} {...rest}>
+      <div className={className} data-help-surface={id} data-no-help {...rest}>
         {children}
       </div>
     );
@@ -68,6 +68,7 @@ export function HelpSurface({
         )}
         tags={droppableTags}
         render={render}
+        data-help-surface={id}
         {...rest}
       >
         {children}

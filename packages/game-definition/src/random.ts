@@ -29,6 +29,10 @@ export class GameRandom {
     return Math.floor(this.float(min, max));
   }
 
+  bool() {
+    return this.random() < 0.5;
+  }
+
   item<T>(items: T[]) {
     return items[this.int(0, items.length)];
   }

@@ -62,13 +62,18 @@ function TokenDefault({
       tags={tokenTags}
       dropOnTag="token-space"
     >
-      <ChatSurface disabled={disableChat} sceneId={id}>
+      <ChatSurface
+        disabled={disableChat}
+        sceneId={id}
+        className="w-full h-full"
+      >
         <HelpSurface
           disabled={!helpContent}
           content={helpContent}
           title={name}
           id={id}
           rulesId={rulesId}
+          className="w-full h-full"
         >
           <Draggable.ConditionalHandle
             activationConstraint={activationConstraint}

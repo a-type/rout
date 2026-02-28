@@ -21,6 +21,10 @@
       "name": "💼 Jobs",
     },
     {
+      "path": "./tests",
+      "name": "🧪 Tests",
+    },
+    {
       "path": "./games/number-guess",
       "name": "🎲 Number Guess",
     },
@@ -43,6 +47,10 @@
     {
       "path": "./games/heir-apparent",
       "name": "👑 Heir Apparent",
+    },
+    {
+      "path": "./games/gridlock",
+      "name": "🚗 Gridlock",
     },
     {
       "path": ".",
