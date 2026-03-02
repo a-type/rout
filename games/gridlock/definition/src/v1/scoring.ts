@@ -1,5 +1,13 @@
 import { getAdjacent, isWithinBoard, PlayerBoard } from './board';
 
+// scoring a path - score increases more the longer you make it...
+// but not too much (exponential)... for each additional tile, we add
+// 1 more point than the previous tile, so 1 + 2 + 3 + ... n = n(n+1)/2
+export function scorePath(path: PathDetails) {
+  const n = path.cells.length;
+  return (n * (n + 1)) / 2;
+}
+
 export function scoreBoard(board: PlayerBoard) {
   const paths = getDistinctPaths(board);
   // all complete and unbroken paths score points for the number of tiles.
@@ -7,7 +15,7 @@ export function scoreBoard(board: PlayerBoard) {
   let score = 0;
   for (const path of paths) {
     if (path.isComplete && !path.brokenAt) {
-      score += path.cells.length;
+      score += scorePath(path);
     }
   }
   return score;
