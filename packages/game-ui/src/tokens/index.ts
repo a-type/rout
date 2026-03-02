@@ -6,3 +6,4 @@ export * from './TokenPresence.js';
 export * from './TokenRoot.js';
 export * from './TokenSpace.js';
 export * from './types.js';
+export * from './useDraggedToken.js';

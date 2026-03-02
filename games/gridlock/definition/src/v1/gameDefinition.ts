@@ -1,12 +1,21 @@
-import { PrefixedId } from '@long-game/common';
+import { isPrefixedId, PrefixedId } from '@long-game/common';
 import {
   GameDefinition,
   roundFormat,
   type BaseTurnError,
 } from '@long-game/game-definition';
 import { Placement, PlayerBoard } from './board';
+import { scoreBoard } from './scoring';
 import { generateTiles, Tile } from './tile';
-import { applyPlacement, handSize, playedTiles, turnsInGame } from './turns';
+import {
+  applyPlacement,
+  getRoundHand,
+  handSize,
+  hasAnyValidPlacement,
+  turnsInGame,
+  validatePathToTermination,
+  withPlacement,
+} from './turns';
 
 export type GlobalState = {
   playerBoards: Record<PrefixedId<'u'>, PlayerBoard>;
@@ -27,7 +36,11 @@ export type PublicTurnData = {
 };
 
 // optional: extend the validation error type with your own metadata
-export type TurnError = BaseTurnError;
+export type TurnErrorData = {
+  invalidCellKey?: string;
+};
+export type TurnErrorCodes = 'invalid_placement';
+export type TurnError = BaseTurnError<TurnErrorData, TurnErrorCodes>;
 
 export const gameDefinition: GameDefinition<{
   // Basic type configuration for a game. Do not remove any of these
@@ -59,9 +72,6 @@ export const gameDefinition: GameDefinition<{
 
   validateTurn: ({ playerState, turn }) => {},
   validatePartialTurn({ playerState, turn }) {
-    if (turn.data.placements.length > playedTiles) {
-      return `You can only place up to ${playedTiles} tiles per turn.`;
-    }
     for (const placement of turn.data.placements) {
       if (!playerState.hand.some((tile) => tile.id === placement.tileId)) {
         return `You don't have tile ${placement.tileId} in your hand.`;
@@ -69,6 +79,42 @@ export const gameDefinition: GameDefinition<{
       if (playerState.board[placement.cellKey]) {
         return `Cell ${placement.cellKey} is already occupied.`;
       }
+    }
+    const violatingPlacement = validatePathToTermination({
+      board: playerState.board,
+      placements: turn.data.placements,
+      hand: playerState.hand,
+    });
+    if (violatingPlacement) {
+      return {
+        message: `All tiles must connect to the edge of the board.`,
+        data: {
+          invalidCellKey: violatingPlacement.cellKey,
+        },
+        code: 'invalid_placement',
+      };
+    }
+    // players must play all tiles in their hand which have valid placement
+    // available.
+    const playedTileIds = turn.data.placements.map((p) => p.tileId);
+    const boardWithPlacements = turn.data.placements.reduce(
+      (board, placement) => {
+        return withPlacement({ board, placement, hand: playerState.hand })
+          .board;
+      },
+      playerState.board,
+    );
+    const unplayedTiles = playerState.hand.filter(
+      (tile) =>
+        !playedTileIds.includes(tile.id) &&
+        // check if tile has any valid placements
+        hasAnyValidPlacement({
+          board: boardWithPlacements,
+          tile,
+        }),
+    );
+    if (unplayedTiles.length > 0) {
+      return `You must play all tiles that have a valid placement. You have ${unplayedTiles.length} unplayed tile(s) that could be placed.`;
     }
   },
 
@@ -82,7 +128,6 @@ export const gameDefinition: GameDefinition<{
       applyPlacement({
         board: playerState.board,
         placement,
-        tileId: placement.tileId,
         hand: playerState.hand,
       });
     }
@@ -99,14 +144,14 @@ export const gameDefinition: GameDefinition<{
     };
   },
 
-  getPlayerState: ({ globalState, playerId }) => {
+  getPlayerState: ({ globalState, roundIndex, playerId }) => {
     return {
       board: globalState.playerBoards[playerId],
-      hand: globalState.drawPile.slice(0, handSize),
+      hand: getRoundHand({ globalState, roundIndex }),
     };
   },
 
-  applyRoundToGlobalState: ({ globalState, round }) => {
+  applyRoundToGlobalState: ({ globalState, round, roundIndex }) => {
     for (const turn of round.turns) {
       const board = globalState.playerBoards[turn.playerId];
       if (!board) {
@@ -118,8 +163,7 @@ export const gameDefinition: GameDefinition<{
         applyPlacement({
           board,
           placement,
-          tileId: placement.tileId,
-          hand: globalState.drawPile,
+          hand: getRoundHand({ globalState, roundIndex: roundIndex }),
         });
       }
     }
@@ -144,11 +188,27 @@ export const gameDefinition: GameDefinition<{
     };
   },
 
-  getStatus: ({ globalState, rounds }) => {
-    if (rounds.length >= turnsInGame) {
+  getStatus: ({ globalState, rounds, members }) => {
+    if (
+      rounds.length >= turnsInGame &&
+      members.every((m) =>
+        rounds[rounds.length - 1].turns.some((t) => t.playerId === m.id),
+      )
+    ) {
+      const playerScores = Object.entries(globalState.playerBoards).map(
+        ([playerId, board]) => {
+          const score = scoreBoard(board);
+          return { playerId, score };
+        },
+      );
+      const maxScore = Math.max(...playerScores.map((ps) => ps.score));
+      const winnerIds = playerScores
+        .filter((ps) => ps.score === maxScore)
+        .map((ps) => ps.playerId)
+        .filter((id) => isPrefixedId(id, 'u'));
       return {
         status: 'complete',
-        winnerIds: [], // TODO: implement win condition and return winner(s) here
+        winnerIds,
       };
     }
 

@@ -105,6 +105,13 @@ export const SubmitTurn = withSuspense(
             <Box rounded items="center" gap surface color="attention" p border>
               <Icon name="warning" />
               {turnError.message}
+              <Button
+                size="small"
+                emphasis="ghost"
+                onClick={() => setShowProblem(false)}
+              >
+                <Icon name="x" />
+              </Button>
             </Box>
           )}
         </Box>

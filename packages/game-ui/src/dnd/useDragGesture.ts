@@ -98,8 +98,11 @@ export function useDragGesture(options?: DragGestureOptions) {
         const deltaX = gesture.delta.x.get();
         const deltaY = gesture.delta.y.get();
         const deltaLength = Math.hypot(deltaX, deltaY);
+        // "mostly" is heuristic here - we're guessing user's intent to move
+        // horizontally by it being notably more horizontal than vertical, not
+        // just strictly >
         const isMostlyHorizontal =
-          deltaLength < 2 || Math.abs(deltaX) > Math.abs(deltaY);
+          deltaLength < 2 || Math.abs(deltaX) > Math.abs(deltaY) * 1.75;
         if (!isMostlyHorizontal) {
           // if the gesture is not mostly horizontal, we don't claim it.
           dndLogger.debug(

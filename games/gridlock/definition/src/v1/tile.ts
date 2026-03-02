@@ -21,3 +21,14 @@ export function generateTiles(count: number, random: GameRandom): Tile[] {
   }
   return tiles;
 }
+
+export function isEmptyTile(tile: Tile) {
+  return !tile.up && !tile.down && !tile.left && !tile.right;
+}
+
+export function isTerminatorTile(tile: Tile) {
+  const connections = [tile.up, tile.down, tile.left, tile.right].filter(
+    Boolean,
+  ).length;
+  return connections === 1;
+}

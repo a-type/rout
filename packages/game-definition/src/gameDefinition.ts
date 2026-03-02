@@ -35,8 +35,8 @@ export type GameMember = {
   color: PlayerColorName;
 };
 
-export type BaseTurnError<Data = Record<string, unknown>> = {
-  code: string;
+export type BaseTurnError<Data = Record<string, unknown>, Codes = string> = {
+  code: Codes;
   message: string;
   data?: Data;
 };

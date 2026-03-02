@@ -1,3 +1,4 @@
+import { SubmitTurn } from '@long-game/game-ui';
 import clsx from 'clsx';
 import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
@@ -11,10 +12,13 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
   return (
     <div
       data-gameplay
-      className={clsx('w-full grow flex flex-col gap-md p-md')}
+      className={clsx('w-full grow flex flex-col gap-md p-md items-center')}
     >
       <BoardRenderer />
-      <TileHand />
+      <div className="sticky bottom-xs w-full flex flex-col gap-xs items-center">
+        <TileHand />
+        <SubmitTurn />
+      </div>
     </div>
   );
 });
