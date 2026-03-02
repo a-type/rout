@@ -415,6 +415,23 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     return !!this.localTurnData;
   }
 
+  @computed get winners(): GameMember[] {
+    if (this.gameStatus.status !== 'complete') {
+      return [];
+    }
+    console.log(this.gameStatus);
+    return (
+      this.gameStatus.winnerIds?.map((winnerId) => {
+        const member = this.members.find((m) => m.id === winnerId);
+        if (!member) {
+          console.warn(`Winner with ID ${winnerId} not found among members`);
+          return { id: winnerId, displayName: '???', color: 'gray' };
+        }
+        return member;
+      }) ?? []
+    );
+  }
+
   /**
    * If the viewed round is the active round, this will
    * include a locally drafted turn. Otherwise, it will

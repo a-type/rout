@@ -14,8 +14,11 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       data-gameplay
       className={clsx('w-full grow flex flex-col gap-md p-md items-center')}
     >
-      <BoardRenderer />
-      <div className="sticky bottom-xs w-full flex flex-col gap-xs items-center">
+      <BoardRenderer
+        board={gameSuite.finalState.board}
+        className="shrink grow basis-0"
+      />
+      <div className="w-full flex flex-col gap-xs items-center shrink-0">
         <TileHand />
         <SubmitTurn />
       </div>

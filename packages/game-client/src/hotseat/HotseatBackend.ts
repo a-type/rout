@@ -387,9 +387,14 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
               rounds: groupTurnsToRounds(turns),
               members: details.members,
             })
-        : ({
-            status: details.status,
-          } as GameStatus);
+        : details.status === 'complete'
+          ? {
+              status: details.status,
+              winnerIds: details.winnerIds,
+            }
+          : ({
+              status: details.status,
+            } as GameStatus);
     if (gameStatus.status === 'pending' && details.status === 'active') {
       debugger;
     }

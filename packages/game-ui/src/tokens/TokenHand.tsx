@@ -65,7 +65,6 @@ export function TokenHand<T = unknown>({
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
           className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
           priority={priority}
-          // render={<Box ref={userRef} full="width" className={className} />}
           {...rest}
         >
           <AnimatePresence>

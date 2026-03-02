@@ -1,4 +1,4 @@
-import { PROPS } from '@a-type/ui';
+import { clsx, PROPS, useRender, UseRenderComponentProps } from '@a-type/ui';
 import {
   colors,
   PlayerColorName,
@@ -41,4 +41,21 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
     };
 
   return byPalette[player.color]!;
+}
+
+export function PlayerThemed({
+  playerId,
+  className,
+  style,
+  ...rest
+}: { playerId?: PrefixedId<'u'> | null } & UseRenderComponentProps<'div'>) {
+  const themed = usePlayerThemed(playerId);
+  return useRender({
+    defaultTagName: 'div',
+    props: {
+      className: clsx(themed.className, className),
+      style: { ...themed.style, ...style },
+      ...rest,
+    },
+  });
 }

@@ -140,7 +140,7 @@ export const gameDefinition: GameDefinition<{
       playerBoards: Object.fromEntries(
         members.map((member) => [member.id, {} as PlayerBoard]),
       ),
-      drawPile: generateTiles(turnsInGame * handSize, random),
+      drawPile: generateTiles(turnsInGame * handSize * 2, random),
     };
   },
 
