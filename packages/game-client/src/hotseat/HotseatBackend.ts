@@ -1,6 +1,7 @@
 import { EventSubscriber } from '@a-type/utils';
 import {
   colorNames,
+  deduplicatePlayerColors,
   GameRoundSummary,
   GameSessionChatInit,
   GameSessionChatMessage,
@@ -10,6 +11,7 @@ import {
   groupTurnsToRounds,
   id,
   LongGameError,
+  playerColorNames,
   PrefixedId,
   randomItem,
   ServerChatMessage,
@@ -287,11 +289,11 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
           id: playerId(i),
           displayName: `Player ${i + 1}`,
           index: i,
-          color: randomItem(colorNames),
+          color: randomItem(playerColorNames),
         });
       }
       await this.updateDetails({
-        members: [...details.members, ...newMembers],
+        members: deduplicatePlayerColors([...details.members, ...newMembers]),
       });
     }
     this.emit('membersChange', {

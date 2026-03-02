@@ -14,7 +14,7 @@ import { memo, useMemo } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { hooks } from '../gameClient.js';
 import { BoardGrid, BoardGridCell } from './BoardGrid.js';
-import { PathsBrokenMarkers } from './PathsBrokenMarkers.js';
+import { PathAnnotations } from './PathAnnotations.js';
 import { TileToken } from './TileToken.js';
 
 export interface BoardRendererProps {
@@ -44,14 +44,14 @@ export const BoardRenderer = hooks.withGame<BoardRendererProps>(
                   x={x}
                   y={y}
                   invalidPlacement={invalid}
-                  pathIsBroken={!!path?.brokenAt}
+                  pathIsBroken={path?.breaks.length > 0}
                   pathIsComplete={path?.isComplete}
                 />
               );
             })}
           </Fragment>
         ))}
-        <PathsBrokenMarkers paths={paths} />
+        <PathAnnotations paths={paths} />
       </BoardGrid>
     );
   },

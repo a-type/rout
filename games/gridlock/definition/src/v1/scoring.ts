@@ -1,4 +1,5 @@
 import { getAdjacent, isWithinBoard, PlayerBoard } from './board';
+import { isEmptyTile } from './tile';
 
 // scoring a path - score increases more the longer you make it...
 // but not too much (exponential)... for each additional tile, we add
@@ -14,7 +15,7 @@ export function scoreBoard(board: PlayerBoard) {
   // no other paths score.
   let score = 0;
   for (const path of paths) {
-    if (path.isComplete && !path.brokenAt) {
+    if (path.isComplete && !path.breaks.length) {
       score += scorePath(path);
     }
   }
@@ -25,8 +26,7 @@ export interface PathDetails {
   cells: string[];
   isComplete: boolean;
   /** If the path is broken, this points to the tile which it 'collided' with */
-  brokenAt?: string;
-  brokenAtDirection?: 'up' | 'down' | 'left' | 'right';
+  breaks: { cellKey: string; direction: 'up' | 'down' | 'left' | 'right' }[];
 }
 
 /**
@@ -50,20 +50,21 @@ export function getDistinctPaths(board: PlayerBoard): PathDetails[] {
     if (visitedCells.has(cellKey)) continue;
     const cell = board[cellKey];
     if (cell.kind === 'tile') {
+      if (isEmptyTile(cell.tile)) continue; // empty tiles don't form paths
       const path: PathDetails = {
         cells: [],
         isComplete: true, // easier to validate starting from assuming complete
-        brokenAt: undefined,
+        breaks: [],
       };
       const stack = [cellKey];
       while (stack.length > 0) {
         const currentCellKey = stack.pop()!;
         if (visitedCells.has(currentCellKey)) continue;
         visitedCells.add(currentCellKey);
-        path.cells.push(currentCellKey);
         const currentCell = board[currentCellKey];
         if (currentCell.kind !== 'tile') continue; // should never happen since we only add tile cells to stack
         const { tile } = currentCell;
+        path.cells.push(currentCellKey);
         for (const direction of ['up', 'down', 'left', 'right'] as const) {
           if (tile[direction]) {
             const adjacentKey = getAdjacent(currentCellKey, direction);
@@ -86,8 +87,10 @@ export function getDistinctPaths(board: PlayerBoard): PathDetails[] {
                 stack.push(adjacentKey);
               } else {
                 path.isComplete = false;
-                path.brokenAt = adjacentKey;
-                path.brokenAtDirection = oppositeDirection;
+                path.breaks.push({
+                  cellKey: adjacentKey,
+                  direction: oppositeDirection,
+                });
               }
             }
           }

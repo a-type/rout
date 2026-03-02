@@ -25,7 +25,7 @@ export const BrokenMarker = ({
       <div
         className={clsx(
           'absolute flex items-center justify-center color-white font-bold leading-none',
-          'bg-attention w-[16px] h-[16px] rounded-full',
+          'bg-attention w-[16px] h-[16px] rounded-full text-0.5em',
           direction === 'up' && 'top-0 left-1/2 -translate-x-1/2',
           direction === 'down' && 'bottom-0 left-1/2 -translate-x-1/2',
           direction === 'left' && 'left-0 top-1/2 -translate-y-1/2',

@@ -70,3 +70,28 @@ export function isWithinBoard(cellKey: string) {
   const { x, y } = fromCellKey(cellKey);
   return x >= 0 && x < boardSize && y >= 0 && y < boardSize;
 }
+
+export function getCenterCellKey(keys: string[]) {
+  const positions = keys.map(fromCellKey);
+  const avgX =
+    positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length;
+  const avgY =
+    positions.reduce((sum, pos) => sum + pos.y, 0) / positions.length;
+  return findClosest(keys, toCellKey(Math.round(avgX), Math.round(avgY)));
+}
+
+export function findClosest(keys: string[], target: string) {
+  const targetPos = fromCellKey(target);
+  let closestKey = keys[0];
+  let closestDistance = Infinity;
+  for (const key of keys) {
+    const pos = fromCellKey(key);
+    const distance =
+      Math.abs(pos.x - targetPos.x) + Math.abs(pos.y - targetPos.y);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestKey = key;
+    }
+  }
+  return closestKey;
+}

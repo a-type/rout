@@ -9,7 +9,7 @@ import {
 import { PlayerAvatar, PlayerName, PlayerThemed } from '@long-game/game-ui';
 import { Fragment } from 'react/jsx-runtime';
 import { BoardGrid, BoardGridCell } from './board/BoardGrid.js';
-import { PathsBrokenMarkers } from './board/PathsBrokenMarkers.js';
+import { PathAnnotations } from './board/PathAnnotations.js';
 import { TileRenderer } from './board/TileRenderer.js';
 import { hooks } from './gameClient.js';
 
@@ -95,7 +95,7 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
                   >
                     <TileRenderer
                       tile={cell.tile}
-                      pathIsBroken={!!path?.brokenAt}
+                      pathIsBroken={!!path?.breaks.length}
                       pathIsComplete={path?.isComplete}
                     />
                   </BoardGridCell>
@@ -103,7 +103,7 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
               })}
             </Fragment>
           ))}
-          <PathsBrokenMarkers paths={paths} anchorNamespace={player.id} />
+          <PathAnnotations paths={paths} anchorNamespace={player.id} />
         </BoardGrid>
       </PlayerThemed>
     );

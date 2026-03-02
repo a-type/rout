@@ -288,6 +288,9 @@ export const colorNames = Object.keys(colors) as [
   PlayerColorName,
   ...PlayerColorName[],
 ];
+export const playerColorNames = colorNames.filter(
+  (name) => name !== 'gray',
+) as PlayerColorName[];
 
 export function deduplicatePlayerColors<P extends { color: PlayerColorName }>(
   players: P[],
