@@ -299,8 +299,18 @@ function delayedRounds(advancementDelayMs: number = 10_000) {
 }
 
 export const roundFormat = {
+  /**
+   * Rounds advance periodically based on a fixed time interval.
+   * If more players still have to play by the time the interval expires,
+   * advancement is delayed until the turns are complete. If advancement was
+   * delayed past the normal interval, play will immediately 'catch up' with
+   * another round once all turns are in.
+   */
   periodic: periodicRounds,
+  /** Players play simultaneously, game advances when all turns are played. */
   sync: syncRounds,
+  /** Choose a different round format based on deployed environment. */
   perEnvironment,
+  /** Players play simultaneously, but the next round is delayed by a fixed time period once all turns are played. */
   delayedAdvance: delayedRounds,
 };
