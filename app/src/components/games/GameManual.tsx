@@ -1,14 +1,4 @@
-import {
-  Box,
-  clsx,
-  H1,
-  H2,
-  H3,
-  H4,
-  P,
-  Spinner,
-  withClassName,
-} from '@a-type/ui';
+import { Box, clsx, H1, H2, H3, H4, P, Spinner } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { fetch, queryClient, useSuspenseQuery } from '@long-game/game-client';
 import { useGame, withSuspense } from '@long-game/game-ui';
@@ -64,8 +54,8 @@ export const GameManual = withSuspense(
       <Box d="col" gap="lg" ref={wrapperRef}>
         <LazyMarkdown
           urlTransform={(url) => {
-            const asUrl = new URL(url, window.location.href);
-            asUrl.pathname = `/game-data/${gameId}${asUrl.pathname}`;
+            const asUrl = new URL(url, window.location.origin);
+            asUrl.pathname = `/game-data/${gameId}/${latestVersion}${asUrl.pathname}`;
             return asUrl.toString();
           }}
           components={markdownComponents}
@@ -86,7 +76,7 @@ const markdownComponents: Components = {
   },
   img: ({ node, className, ...props }) => {
     return (
-      <Box full="width" layout="center center">
+      <Box full="width" layout="center center" render={<span />}>
         <img
           {...props}
           className={clsx(
@@ -97,9 +87,23 @@ const markdownComponents: Components = {
       </Box>
     );
   },
-  h1: withClassName(H1, 'font-fancy'),
+  h1: H1,
   h2: H2,
   h3: H3,
   h4: H4,
   p: P,
+  blockquote: ({ node, className, ...props }) => {
+    return (
+      <Box
+        full="width"
+        surface
+        p="sm"
+        className={clsx(
+          'border-l-4 border-l-solid border-l-main-dark',
+          className,
+        )}
+        render={<blockquote {...props} />}
+      />
+    );
+  },
 };

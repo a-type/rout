@@ -6,7 +6,7 @@ import {
   PlayerBoard,
   toCellKey,
 } from '@long-game/game-gridlock-definition/v1';
-import { usePlayerThemed } from '@long-game/game-ui';
+import { HelpSurface, usePlayerThemed } from '@long-game/game-ui';
 import clsx from 'clsx';
 import { Fragment } from 'react/jsx-runtime';
 import { useSnapshot } from 'valtio';
@@ -25,16 +25,27 @@ export interface BoardRendererProps {
 }
 
 export const BoardRenderer = hooks.withGame<BoardRendererProps>(
-  function BoardRenderer({ board, className, readonly, playerId }) {
+  function BoardRenderer({ board, className, readonly, playerId, gameSuite }) {
     const paths = getDistinctPaths(board);
     const pathLookup = pathsToLookup(paths);
     const focusedPathId = useSnapshot(rendererState).focusPathId;
     const playerStyles = usePlayerThemed(playerId);
 
     return (
-      <BoardGrid
-        className={clsx(className, playerStyles.className)}
-        style={playerStyles.style}
+      <HelpSurface
+        id="board"
+        content={
+          gameSuite.playerId === playerId
+            ? 'This is your board. Drag tiles from your hand onto the board to create paths.'
+            : "This is another player's board. You can view it, but not interact with it."
+        }
+        priority={-1}
+        render={
+          <BoardGrid
+            className={clsx(className, playerStyles.className)}
+            style={playerStyles.style}
+          />
+        }
       >
         {new Array(boardSize).fill(0).map((_, y) => (
           <Fragment key={y}>
@@ -73,7 +84,7 @@ export const BoardRenderer = hooks.withGame<BoardRendererProps>(
           </Fragment>
         ))}
         <PathAnnotations paths={paths} anchorNamespace={playerId} />
-      </BoardGrid>
+      </HelpSurface>
     );
   },
 );

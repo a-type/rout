@@ -4,6 +4,7 @@ import {
   PathDetails,
   scorePath,
 } from '@long-game/game-gridlock-definition/v1';
+import { HelpSurface } from '@long-game/game-ui';
 import clsx from 'clsx';
 
 export interface PathScoresProps {
@@ -22,8 +23,10 @@ export function PathScores({
         const cellKey = getCenterCellKey(path.cells);
         const { x, y } = fromCellKey(cellKey);
         return (
-          <div
-            key={index}
+          <HelpSurface
+            id={`path-score-${path.id}`}
+            priority={1}
+            key={path.id}
             style={{
               positionAnchor: `--${anchorNamespace}-${x}-${y}`,
               top: 'anchor(center)',
@@ -39,9 +42,16 @@ export function PathScores({
                 'bg-gray': path.breaks.length > 0,
               },
             )}
+            content={
+              path.isComplete
+                ? `You scored ${score} points for this path!`
+                : path.breaks.length > 0
+                  ? `This path is broken, so it scores 0 points. Too bad!`
+                  : `This path is not complete yet, but it can score ${score} points so far.`
+            }
           >
-            <span>{score}</span>
-          </div>
+            <span>{path.breaks.length > 0 ? 0 : score}</span>
+          </HelpSurface>
         );
       })}
     </>

@@ -8,7 +8,12 @@ export interface BoardGridProps {
   style?: CSSProperties;
 }
 
-export function BoardGrid({ className, children, style }: BoardGridProps) {
+export function BoardGrid({
+  className,
+  children,
+  style,
+  ...rest
+}: BoardGridProps) {
   return (
     <div
       className={clsx(
@@ -20,6 +25,7 @@ export function BoardGrid({ className, children, style }: BoardGridProps) {
         gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
         gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
       }}
+      {...rest}
     >
       {children}
     </div>

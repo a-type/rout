@@ -97,6 +97,7 @@ export const LiveBoardCell = memo(
               className="layer-components:(w-full h-full)"
               pathIsBroken={pathIsBroken}
               pathIsComplete={pathIsComplete}
+              illegal={invalid}
             />
           )}
         </TokenSpace>

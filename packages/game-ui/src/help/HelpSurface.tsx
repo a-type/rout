@@ -1,5 +1,11 @@
 import { Box, Button, clsx, Icon, Popover } from '@a-type/ui';
-import { ReactElement, ReactNode, useRef, useState } from 'react';
+import {
+  CSSProperties,
+  ReactElement,
+  ReactNode,
+  useRef,
+  useState,
+} from 'react';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { Droppable } from '../dnd/Droppable.js';
 import { useRendererContext } from '../RendererProvider.js';
@@ -13,6 +19,8 @@ export interface HelpSurfaceProps {
   content?: ReactNode;
   title?: ReactNode;
   rulesId?: string;
+  priority?: number;
+  style?: CSSProperties;
 }
 
 const droppableTags = ['spatial-help-surface'];
@@ -61,7 +69,7 @@ export function HelpSurface({
         id={id}
         onDrop={handleDrop}
         className={clsx(
-          'relative',
+          'layer-components:relative',
           isHelpDragging &&
             'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
           className,
@@ -75,13 +83,14 @@ export function HelpSurface({
       </Droppable>
       <Popover.Content anchor={anchorRef} className="p-md pb-sm max-w-400px">
         <Popover.Arrow />
-        <h2 className="text-md font-bold capitalize mb-sm">{title}</h2>
+        <Popover.Title className="capitalize">{title}</Popover.Title>
         {content}
         <Box
           items="center"
           justify="between"
           gap="sm"
           className="flex-shrink-0 pt-md"
+          render={<Popover.Description />}
         >
           <Button
             emphasis="default"
@@ -96,14 +105,8 @@ export function HelpSurface({
             <Icon name="book" />
             Read more
           </Button>
-          <Popover.Close
-            render={
-              <Button emphasis="ghost" size="small" className="top-0 left-0" />
-            }
-          >
-            <Icon name="x" />
-          </Popover.Close>
         </Box>
+        <Popover.Close />
       </Popover.Content>
     </Popover>
   );
