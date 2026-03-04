@@ -18,6 +18,7 @@ import {
   ServerGameChangeMessage,
   ServerGameMembersChangeMessage,
   ServerGameStartingMessage,
+  ServerPlayerStatusChangeMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
   ServerTurnPlayedMessage,
@@ -97,6 +98,7 @@ export type HotseatBackendEvents = {
   turnPlayed: (msg: ServerTurnPlayedMessage) => void;
   statusChange: (msg: ServerStatusChangeMessage) => void;
   gameStarting: (msg: ServerGameStartingMessage) => void;
+  playerStatusChange: (msg: ServerPlayerStatusChangeMessage) => void;
 };
 
 function playerId(index: number): PrefixedId<'u'> {
@@ -345,6 +347,15 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     });
     return details;
   };
+  updatePublicRound = async (roundIndex: number) => {
+    const details = await this.getDetails();
+    if (roundIndex === details.roundIndex) {
+      return; // no change
+    }
+    await this.updateDetails({
+      roundIndex,
+    });
+  };
   getDetails = async () => {
     const details = await this.managementDb.get('sessions', this.sessionId);
     if (!details) {
@@ -392,7 +403,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
         : details.status === 'complete'
           ? {
               status: details.status,
-              winnerIds: details.winnerIds,
+              winnerIds: details.winnerIds!,
             }
           : ({
               status: details.status,
@@ -581,6 +592,14 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
         data: null,
       },
     });
+    this.emit('playerStatusChange', {
+      type: 'playerStatusChange',
+      playerId: turn.playerId,
+      playerStatus: {
+        online: true,
+        pendingTurn: false,
+      },
+    });
     this.checkRoundChange();
   };
 
@@ -599,6 +618,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       turns,
     });
     if (roundInfo.roundIndex > details.roundIndex) {
+      await this.updatePublicRound(roundInfo.roundIndex);
       this.emit('roundChange', {
         playerStatuses: Object.fromEntries(
           details.members.map((member) => [
@@ -645,7 +665,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
         type: 'statusChange',
         status,
       });
-      this.updateDetails({
+      await this.updateDetails({
         status: status.status,
         winnerIds: status.status === 'complete' ? status.winnerIds : [],
       });
@@ -658,18 +678,20 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     const tx = this.db.transaction('chat', 'readonly');
     const store = tx.objectStore('chat');
     const index = store.index('sceneId');
-    let cursor = await index.openCursor(IDBKeyRange.only(sceneId ?? null));
+    let cursor = await index.openCursor(IDBKeyRange.only(sceneId ?? 'null'));
     const messages: GameSessionChatMessage[] = [];
     while (cursor) {
       messages.push(cursor.value);
       cursor = await cursor.continue();
     }
     await tx.done;
+    console.log('loaded chats for scene', sceneId, messages);
     return messages;
   };
   addChat = async (message: GameSessionChatInit) => {
     const chatMessage = gameSessionChatMessageShape.parse({
       ...message,
+      sceneId: message.sceneId ?? 'null',
       id: id('cm'),
       createdAt: new Date().toISOString(),
       reactions: {},

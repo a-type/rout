@@ -5,7 +5,8 @@ import {
   type BaseTurnError,
 } from '@long-game/game-definition';
 import { Placement, PlayerBoard } from './board';
-import { scoreBoard } from './scoring';
+import { eventToChatMessage, PathEvent } from './events';
+import { getDistinctPaths, scoreBoard } from './scoring';
 import { generateTiles, Tile } from './tile';
 import {
   applyPlacement,
@@ -20,10 +21,12 @@ import {
 export type GlobalState = {
   playerBoards: Record<PrefixedId<'u'>, PlayerBoard>;
   drawPile: Tile[];
+  lastRoundEvents: PathEvent[];
 };
 
 export type PlayerState = {
   board: PlayerBoard;
+  otherPlayers: { playerId: PrefixedId<'u'>; board: PlayerBoard }[];
   hand: Tile[];
 };
 
@@ -31,9 +34,7 @@ export type TurnData = {
   placements: Placement[];
 };
 
-export type PublicTurnData = {
-  tiles: Tile[];
-};
+export type PublicTurnData = TurnData;
 
 // optional: extend the validation error type with your own metadata
 export type TurnErrorData = {
@@ -141,6 +142,7 @@ export const gameDefinition: GameDefinition<{
         members.map((member) => [member.id, {} as PlayerBoard]),
       ),
       drawPile: generateTiles(turnsInGame * handSize * 2, random),
+      lastRoundEvents: [],
     };
   },
 
@@ -148,12 +150,21 @@ export const gameDefinition: GameDefinition<{
     return {
       board: globalState.playerBoards[playerId],
       hand: getRoundHand({ globalState, roundIndex }),
+      otherPlayers: Object.entries(globalState.playerBoards)
+        .filter(([id]) => id !== playerId)
+        .map(([playerId, board]) => ({
+          playerId: playerId as PrefixedId<'u'>,
+          board,
+        })),
     };
   },
 
   applyRoundToGlobalState: ({ globalState, round, roundIndex }) => {
+    globalState.lastRoundEvents = []; // reset events for the new round
     for (const turn of round.turns) {
       const board = globalState.playerBoards[turn.playerId];
+      const originalBoard = { ...board };
+
       if (!board) {
         throw new Error(
           `Player ${turn.playerId} not found in global state. Not validated correctly?`,
@@ -166,26 +177,39 @@ export const gameDefinition: GameDefinition<{
           hand: getRoundHand({ globalState, roundIndex: roundIndex }),
         });
       }
+
+      // detect events from boards
+      const originalPathIds = new Set(
+        getDistinctPaths(originalBoard).map((p) => p.id),
+      );
+      const newPaths = getDistinctPaths(board);
+
+      const completedPaths = newPaths.filter(
+        (p) => p.isComplete && !originalPathIds.has(p.id),
+      );
+      const brokenPaths = newPaths.filter(
+        (p) => p.breaks.length > 0 && originalPathIds.has(p.id),
+      );
+
+      const events: PathEvent[] = [
+        ...completedPaths.map((p) => ({
+          type: 'completed' as const,
+          playerId: turn.playerId,
+          pathId: p.id,
+        })),
+        ...brokenPaths.map((p) => ({
+          type: 'broken' as const,
+          playerId: turn.playerId,
+          pathId: p.id,
+        })),
+      ];
+
+      globalState.lastRoundEvents.push(...events);
     }
   },
 
   getPublicTurn: ({ turn, globalState }) => {
-    return {
-      ...turn,
-      data: {
-        tiles: turn.data.placements.map((placement) => {
-          const tile = globalState.drawPile.find(
-            (tile) => tile.id === placement.tileId,
-          );
-          if (!tile) {
-            throw new Error(
-              `Tile ${placement.tileId} not found in turn data. Not validated correctly?`,
-            );
-          }
-          return tile;
-        }),
-      },
-    };
+    return turn;
   },
 
   getStatus: ({ globalState, rounds, members }) => {
@@ -215,5 +239,11 @@ export const gameDefinition: GameDefinition<{
     return {
       status: 'active',
     };
+  },
+
+  getRoundChangeMessages({ globalState }) {
+    return globalState.lastRoundEvents
+      .map((event) => eventToChatMessage(event, globalState))
+      .filter((m) => !!m);
   },
 };

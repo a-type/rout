@@ -28,6 +28,7 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
       className={clsx('aspect-1 relative', className)}
       draggedClassName="w-[48px] h-[48px] relative"
       movedBehavior="fade"
+      tags={['tile']}
     >
       <TileRenderer
         tile={tile}

@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "unocss": "catalog:",
+    "@a-type/rsbuild-plugin-unocss": "catalog:",
     "@unocss/webpack": "catalog:",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",

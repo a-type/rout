@@ -18,6 +18,7 @@ import { action, runInAction } from 'mobx';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { HotseatBackend } from '../hotseat/HotseatBackend.js';
 import { AbstractGameSuite, GameSuiteBaseInit } from './AbstractGameSuite.js';
+import { ROOT_CHAT_SCENE_ID } from './GameSessionSuite.js';
 
 export class HotseatGameSuite<
   TGame extends AnyGameDefinition,
@@ -28,17 +29,21 @@ export class HotseatGameSuite<
   ) => {
     const backend = await HotseatBackend.open(gameSessionId, gameModules);
     const details = await backend.getDetails();
+    const chat = await backend.getChats();
     return new HotseatGameSuite(
       {
         ...details,
         playerId: details.members[0].id, // Just start with the first player
+        chat,
       },
       { gameModules, backend },
     );
   };
 
   constructor(
-    init: GameSuiteBaseInit,
+    init: GameSuiteBaseInit & {
+      chat: GameSessionChatMessage[];
+    },
     private ctx: {
       backend: HotseatBackend;
       gameModules: GameModuleContext;
@@ -51,11 +56,19 @@ export class HotseatGameSuite<
           | PrefixedId<'u'>
           | undefined) || init.playerId;
       this.pickingPlayer = true; // show player picker on launch
+      // hotseat backend doesn't fire an initial chat event like the
+      // real one does, so we load it up here.
+      this.sceneChats[ROOT_CHAT_SCENE_ID] = {
+        messages: init.chat,
+        empty: false,
+        nextToken: null,
+      };
     });
     this.ctx.backend.subscribe('chat', this.onChat);
     this.ctx.backend.subscribe('gameChange', this.onGameChange);
     this.ctx.backend.subscribe('roundChange', this.onRoundChange);
     this.ctx.backend.subscribe('turnPlayed', this.onTurnPlayed);
+    this.ctx.backend.subscribe('playerStatusChange', this.onPlayerStatusChange);
     this.ctx.backend.subscribe('statusChange', this.onStatusChange);
     this.ctx.backend.subscribe('membersChange', this.onMembersChange);
     this.ctx.backend.subscribe('gameStarting', this.onGameStarting);
@@ -168,6 +181,7 @@ export class HotseatGameSuite<
     this.pickingPlayer = false;
     localStorage.setItem(`hotseat-last-player:${this.gameSessionId}`, playerId);
     this.events.emit('playerChanged', playerId);
+    console.log(`Switched to player ${playerId}`);
   };
 
   protected getDevModeTurns(): Promise<Turn<any>[]> {

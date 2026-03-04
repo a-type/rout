@@ -1,5 +1,10 @@
 import { useDraggedData } from '../dnd';
+import { isToken } from './types';
 
 export function useDraggedToken<Token>() {
-  return useDraggedData() as Token | null;
+  const data = useDraggedData();
+  if (!isToken(data?.data)) {
+    return null;
+  }
+  return data.data as Token;
 }

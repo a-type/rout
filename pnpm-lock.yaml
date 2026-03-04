@@ -18,9 +18,12 @@ catalogs:
     '@a-type/kysely':
       specifier: 1.1.1
       version: 1.1.1
+    '@a-type/rsbuild-plugin-unocss':
+      specifier: ^0.0.10
+      version: 0.0.10
     '@a-type/ui':
-      specifier: ^5.0.15
-      version: 5.0.15
+      specifier: ^5.0.16
+      version: 5.0.16
     '@a-type/utils':
       specifier: 1.1.9
       version: 1.1.9
@@ -160,7 +163,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@clack/prompts':
         specifier: 0.9.0
         version: 0.9.0
@@ -211,10 +214,10 @@ importers:
     dependencies:
       '@a-type/auth-ui':
         specifier: 'catalog:'
-        version: 2.0.2(@a-type/ui@5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.2.4)
+        version: 2.0.2(@a-type/ui@5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.2.4)
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../packages/common
@@ -262,8 +265,8 @@ importers:
         version: 2.3.0(@types/react@19.2.10)(react@19.2.4)
     devDependencies:
       '@a-type/rsbuild-plugin-unocss':
-        specifier: ^0.0.8
-        version: 0.0.8(@rsbuild/core@1.4.15)
+        specifier: 'catalog:'
+        version: 0.0.10(@rsbuild/core@1.4.15)
       '@aaroon/workbox-rspack-plugin':
         specifier: ^0.3.3
         version: 0.3.3(@rsbuild/core@1.4.15)(@rspack/core@1.7.3(@swc/helpers@0.5.18))(@types/babel__core@7.20.5)
@@ -406,6 +409,9 @@ importers:
 
   games/gridlock/renderer:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
@@ -430,6 +436,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
+      valtio:
+        specifier: 'catalog:'
+        version: 2.3.0(@types/react@19.2.10)(react@19.2.4)
     devDependencies:
       '@long-game/bundler-config':
         specifier: workspace:*
@@ -615,7 +624,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
@@ -825,7 +834,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/games':
         specifier: workspace:*
         version: link:../packages/games
@@ -909,6 +918,9 @@ importers:
 
   packages/bundler-config:
     devDependencies:
+      '@a-type/rsbuild-plugin-unocss':
+        specifier: 'catalog:'
+        version: 0.0.10(@rsbuild/core@1.4.15)
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
@@ -1055,7 +1067,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@a-type/utils':
         specifier: 'catalog:'
         version: 1.1.9
@@ -1255,7 +1267,7 @@ importers:
     devDependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@unocss/transformer-variant-group':
         specifier: 'catalog:'
         version: 66.6.0
@@ -1267,7 +1279,7 @@ importers:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+        version: 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
@@ -1397,16 +1409,16 @@ packages:
     peerDependencies:
       kysely: ^0.27.2
 
-  '@a-type/rsbuild-plugin-unocss@0.0.8':
-    resolution: {integrity: sha512-gmW4V7EV0Vj9x4vWShka4rN19trD1CYel4h5THtPkAFy9FcCFOGErztigTAa/BD1Htx8r3l6jP4mUhv+ORfVAw==}
+  '@a-type/rsbuild-plugin-unocss@0.0.10':
+    resolution: {integrity: sha512-rYCkKcnIZTKvk6LVM/sGy7o1XHxFqSozxxX/7Qcbh5yoJO3z8ky25zlG4XOrCbMTR2lU2lv+jgOE5BIKHo1unA==}
     peerDependencies:
       '@rsbuild/core': 1.x
     peerDependenciesMeta:
       '@rsbuild/core':
         optional: true
 
-  '@a-type/ui@5.0.15':
-    resolution: {integrity: sha512-krtNFbQ3eX+w429tdgktu5lOyvkywySHY1PwFbpyRO7xvyYjQiGDwz89Nylsqy/QMMAYd+6ft9dk79huWLI/tA==}
+  '@a-type/ui@5.0.16':
+    resolution: {integrity: sha512-qGYnp3Ea3s81tpk5YyugOqJNqsaahaoAZqPvk1JXut7C7lnmtzDyRPT9GyQbFjc7ceHHNTSCwI8f630O8wLsvA==}
     peerDependencies:
       react: ^19
       react-dom: ^19
@@ -3440,10 +3452,6 @@ packages:
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
 
-  '@quansync/fs@0.1.3':
-    resolution: {integrity: sha512-G0OnZbMWEs5LhDyqy2UL17vGhSVHkQIfVojMtEWVenvj0V5S84VBgy86kJIuNsGDp2p7sTKlpSIpBUWdC35OKg==}
-    engines: {node: '>=20.0.0'}
-
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
@@ -4261,19 +4269,12 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  '@unocss/config@66.4.2':
-    resolution: {integrity: sha512-plji1gNGSzlWjuV2Uh0q6Dt5ZlNkOKCHpgxekW9J458WghGAMBeXgB9uNpWg6flilqP1g0GJQv+XvJcSkYRGpQ==}
-    engines: {node: '>=14'}
-
   '@unocss/config@66.6.0':
     resolution: {integrity: sha512-YvNk/b9jGmT1TQGDbHR+0VALnTsPLzSTzw90t09ggny9YxeF0XnsP06M5+H0EJPwpmdigBC++KEIMaK8SYDsaQ==}
     engines: {node: '>=14'}
 
   '@unocss/core@65.4.2':
     resolution: {integrity: sha512-VmXy5D25por+pt9LBlKZ3gk4rOE5ldm80MyVOEnLcpaFb9LqB0g/8qUU9/Dk3TSA+ZPeoGm53Juo0p8LMFIigA==}
-
-  '@unocss/core@66.4.2':
-    resolution: {integrity: sha512-cYgMQrLhB9nRekv5c+yPDDa+5dzlMkA2UMQRil0s5D9Lb5n7NsCMcr6+nfxkcSYVLy92SbwDV45c6T7vIxFTOA==}
 
   '@unocss/core@66.5.4':
     resolution: {integrity: sha512-UDS2CRgyQCEFH+5kStDyJd7OFtgkIUZYn5Ahr5z7v3jc/pEfeOJ0mxsNAr+FgMS/xb17vy4sVFvx3jj/FwMZ1A==}
@@ -5327,14 +5328,6 @@ packages:
   fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
 
-  fdir@6.4.4:
-    resolution: {integrity: sha512-1NZP+GK4GfuAv3PqKvxQRDMjdSRZjnkq7KfhlNrCNNlZ0ygQFpebfrnfnq/W7fpUnAv9aGWmY1zKx7FYL3gwhg==}
-    peerDependencies:
-      picomatch: ^3 || ^4
-    peerDependenciesMeta:
-      picomatch:
-        optional: true
-
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -5942,10 +5935,6 @@ packages:
   jest-worker@27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
-
-  jiti@2.4.2:
-    resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
-    hasBin: true
 
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
@@ -6648,9 +6637,6 @@ packages:
     resolution: {integrity: sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==}
     engines: {node: '>=0.6'}
 
-  quansync@0.2.10:
-    resolution: {integrity: sha512-t41VRkMYbkHyCYmOvx/6URnN80H7k4X0lLdBMGsz+maAwrJQYB1djpV6vHrQIBE0WBSGqhtEHrK9U3DWWH8v7A==}
-
   quansync@1.0.0:
     resolution: {integrity: sha512-5xZacEEufv3HSTPQuchrvV6soaiACMFnq1H8wkVioctoH3TRha9Sz66lOxRwPK/qZj7HPiSveih9yAyh98gvqA==}
 
@@ -7298,10 +7284,6 @@ packages:
     resolution: {integrity: sha512-W/KYk+NFhkmsYpuHq5JykngiOCnxeVL8v8dFnqxSD8qEEdRfXk1SDM6JzNqcERbcGYj9tMrDQBYV9cjgnunFIg==}
     engines: {node: '>=18'}
 
-  tinyglobby@0.2.14:
-    resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
@@ -7491,9 +7473,6 @@ packages:
   unconfig-core@7.4.2:
     resolution: {integrity: sha512-VgPCvLWugINbXvMQDf8Jh0mlbvNjNC6eSUziHsBCMpxR05OPrNrvDnyatdMjRgcHaaNsCqz+wjNXxNw1kRLHUg==}
 
-  unconfig@7.3.2:
-    resolution: {integrity: sha512-nqG5NNL2wFVGZ0NA/aCFw0oJ2pxSf1lwg4Z5ill8wd7K4KX/rQbHlwbh+bjctXL5Ly1xtzHenHGOK0b+lG6JVg==}
-
   unconfig@7.4.2:
     resolution: {integrity: sha512-nrMlWRQ1xdTjSnSUqvYqJzbTBFugoqHobQj58B2bc8qxHKBBHMNNsWQFP3Cd3/JZK907voM2geYPWqD4VK3MPQ==}
 
@@ -7574,10 +7553,6 @@ packages:
         optional: true
       vite:
         optional: true
-
-  unplugin-utils@0.3.0:
-    resolution: {integrity: sha512-JLoggz+PvLVMJo+jZt97hdIIIZ2yTzGgft9e9q8iMrC4ewufl62ekeW7mixBghonn2gVb/ICjyvlmOCUBnJLQg==}
-    engines: {node: '>=20.19.0'}
 
   unplugin-utils@0.3.1:
     resolution: {integrity: sha512-5lWVjgi6vuHhJ526bI4nlCOmkCIF3nnfXkCMDeMJrtdvxTs6ZFCM8oNufGTsDbKv/tJ/xj8RpvXjRuPBZJuJog==}
@@ -8084,9 +8059,9 @@ snapshots:
 
   '@a-type/auth-fetch@2.1.3': {}
 
-  '@a-type/auth-ui@2.0.2(@a-type/ui@5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.2.4)':
+  '@a-type/auth-ui@2.0.2(@a-type/ui@5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))))(react@19.2.4)':
     dependencies:
-      '@a-type/ui': 5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
+      '@a-type/ui': 5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       react: 19.2.4
 
   '@a-type/auth@1.3.16(encoding@0.1.13)':
@@ -8106,21 +8081,21 @@ snapshots:
       bcrypt-ts: 5.0.3
       kysely: 0.27.6
 
-  '@a-type/rsbuild-plugin-unocss@0.0.8(@rsbuild/core@1.4.15)':
+  '@a-type/rsbuild-plugin-unocss@0.0.10(@rsbuild/core@1.4.15)':
     dependencies:
       '@jridgewell/remapping': 2.3.5
-      '@unocss/config': 66.4.2
-      '@unocss/core': 66.4.2
+      '@unocss/config': 66.6.0
+      '@unocss/core': 66.6.0
       chokidar: 4.0.3
-      magic-string: 0.30.17
+      magic-string: 0.30.21
       pathe: 2.0.3
       rsbuild-plugin-virtual-module: 0.3.1(@rsbuild/core@1.4.15)
-      tinyglobby: 0.2.14
-      unplugin-utils: 0.3.0
+      tinyglobby: 0.2.15
+      unplugin-utils: 0.3.1
     optionalDependencies:
       '@rsbuild/core': 1.4.15
 
-  '@a-type/ui@5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2(esbuild@0.25.3)))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@base-ui/react': 1.1.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -8147,7 +8122,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@a-type/ui@5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.0.5(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@base-ui/react': 1.1.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -8174,7 +8149,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@a-type/ui@5.0.15(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
+  '@a-type/ui@5.0.16(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(unocss@66.6.0(@unocss/webpack@66.6.0(webpack@5.100.2))(postcss@8.5.6)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))':
     dependencies:
       '@a-type/utils': 1.1.5
       '@base-ui/react': 1.1.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -10452,10 +10427,6 @@ snapshots:
 
   '@polka/url@1.0.0-next.28': {}
 
-  '@quansync/fs@0.1.3':
-    dependencies:
-      quansync: 0.2.10
-
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -11426,19 +11397,12 @@ snapshots:
       tinyglobby: 0.2.15
       unplugin-utils: 0.3.1
 
-  '@unocss/config@66.4.2':
-    dependencies:
-      '@unocss/core': 66.4.2
-      unconfig: 7.3.2
-
   '@unocss/config@66.6.0':
     dependencies:
       '@unocss/core': 66.6.0
       unconfig: 7.4.2
 
   '@unocss/core@65.4.2': {}
-
-  '@unocss/core@66.4.2': {}
 
   '@unocss/core@66.5.4': {}
 
@@ -12736,10 +12700,6 @@ snapshots:
     dependencies:
       reusify: 1.0.4
 
-  fdir@6.4.4(picomatch@4.0.2):
-    optionalDependencies:
-      picomatch: 4.0.2
-
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
@@ -13398,8 +13358,6 @@ snapshots:
       '@types/node': 22.14.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
-
-  jiti@2.4.2: {}
 
   jiti@2.6.1: {}
 
@@ -14174,8 +14132,6 @@ snapshots:
   qs@6.11.2:
     dependencies:
       side-channel: 1.0.6
-
-  quansync@0.2.10: {}
 
   quansync@1.0.0: {}
 
@@ -14973,11 +14929,6 @@ snapshots:
 
   tinyexec@1.0.2: {}
 
-  tinyglobby@0.2.14:
-    dependencies:
-      fdir: 6.4.4(picomatch@4.0.2)
-      picomatch: 4.0.2
-
   tinyglobby@0.2.15:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
@@ -15160,13 +15111,6 @@ snapshots:
     dependencies:
       '@quansync/fs': 1.0.0
       quansync: 1.0.0
-
-  unconfig@7.3.2:
-    dependencies:
-      '@quansync/fs': 0.1.3
-      defu: 6.1.4
-      jiti: 2.4.2
-      quansync: 0.2.10
 
   unconfig@7.4.2:
     dependencies:
@@ -15359,11 +15303,6 @@ snapshots:
     transitivePeerDependencies:
       - postcss
       - supports-color
-
-  unplugin-utils@0.3.0:
-    dependencies:
-      pathe: 2.0.3
-      picomatch: 4.0.3
 
   unplugin-utils@0.3.1:
     dependencies:

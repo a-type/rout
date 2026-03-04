@@ -1,16 +1,11 @@
+import { Button, Dialog } from '@a-type/ui';
 import { GameMember } from '@long-game/game-definition';
 import {
-  boardSize,
   getDistinctPaths,
-  pathsToLookup,
   scoreBoard,
-  toCellKey,
 } from '@long-game/game-gridlock-definition/v1';
 import { PlayerAvatar, PlayerName, PlayerThemed } from '@long-game/game-ui';
-import { Fragment } from 'react/jsx-runtime';
-import { BoardGrid, BoardGridCell } from './board/BoardGrid.js';
-import { PathAnnotations } from './board/PathAnnotations.js';
-import { TileRenderer } from './board/TileRenderer.js';
+import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
 
 export interface GameRecapProps {}
@@ -21,7 +16,7 @@ export const GameRecap = hooks.withGame<GameRecapProps>(function GameRecap({
   return (
     <div className="w-full flex flex-col items-center min-h-0">
       <Scoreboard />
-      <div className="p-md w-full grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-md">
+      <div className="p-md w-full grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-md">
         {gameSuite.members.map((member) => (
           <RecapPlayerBoard key={member.id} player={member} />
         ))}
@@ -64,48 +59,37 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
     const playerBoard = gameSuite.postgameGlobalState?.playerBoards[player.id];
     if (!playerBoard) return null;
     const paths = getDistinctPaths(playerBoard);
-    const pathLookup = pathsToLookup(paths);
     return (
-      <PlayerThemed
-        playerId={player.id}
-        className="bg-white border-default rd-md p-md w-full"
-      >
-        <div className="flex items-center gap-xs mb-sm">
-          <PlayerAvatar interactive playerId={player.id} size="40px" />
-          <PlayerName playerId={player.id} />
-          <span className="ml-auto font-bold">
-            Score: {scoreBoard(playerBoard)}
-          </span>
-        </div>
-        <BoardGrid className="w-full">
-          {new Array(boardSize).fill(0).map((_, y) => (
-            <Fragment key={y}>
-              {new Array(boardSize).fill(0).map((_, x) => {
-                const key = toCellKey(x, y);
-                const cell = playerBoard[key];
-                const path = pathLookup[key];
-                if (!cell) return null;
-                return (
-                  <BoardGridCell
-                    x={x}
-                    y={y}
-                    key={key}
-                    className="rd-sm bg-white"
-                    anchorNamespace={player.id}
-                  >
-                    <TileRenderer
-                      tile={cell.tile}
-                      pathIsBroken={!!path?.breaks.length}
-                      pathIsComplete={path?.isComplete}
-                    />
-                  </BoardGridCell>
-                );
-              })}
-            </Fragment>
-          ))}
-          <PathAnnotations paths={paths} anchorNamespace={player.id} />
-        </BoardGrid>
-      </PlayerThemed>
+      <Dialog>
+        <PlayerThemed
+          playerId={player.id}
+          className="bg-white border-default rd-md p-md w-full flex flex-col"
+        >
+          <div className="flex items-center gap-xs mb-sm">
+            <PlayerAvatar interactive playerId={player.id} size="40px" />
+            <PlayerName playerId={player.id} />
+            <span className="ml-auto font-bold">
+              Score: {scoreBoard(playerBoard)}
+            </span>
+          </div>
+          <Dialog.Trigger render={<Button emphasis="ghost" size="wrapper" />}>
+            <BoardRenderer
+              board={playerBoard}
+              playerId={player.id}
+              readonly
+              className="w-full"
+            />
+          </Dialog.Trigger>
+        </PlayerThemed>
+        <Dialog.Content disableSheet width="lg" className="max-w-3xl">
+          <BoardRenderer
+            board={playerBoard}
+            playerId={player.id}
+            readonly
+            className="w-full"
+          />
+        </Dialog.Content>
+      </Dialog>
     );
   },
 );

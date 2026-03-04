@@ -431,6 +431,9 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       }) ?? []
     );
   }
+  @computed get otherPlayers(): GameMember[] {
+    return this.members.filter((m) => m.id !== this.playerId);
+  }
 
   /**
    * If the viewed round is the active round, this will

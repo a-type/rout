@@ -9,6 +9,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@a-type/ui": "catalog:",
     "@long-game/game-{{name}}-definition": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/common": "workspace:*",

@@ -5,16 +5,12 @@ import {
   ChatForm,
   ChatLog,
   DefaultChatMessage,
+  gameLogState as localState,
   PlayerAvatar,
   useMediaQuery,
 } from '@long-game/game-ui';
 import { Suspense, useEffect, useRef } from 'react';
-import { proxy, subscribe, useSnapshot } from 'valtio';
-
-const localState = proxy({
-  focusChat: false,
-  open: false,
-});
+import { subscribe, useSnapshot } from 'valtio';
 
 export function GameLogChatInput() {
   const toolsRef = useRef<{ focus: () => void }>(null);

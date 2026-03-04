@@ -2,6 +2,7 @@ export * from './chat/ChatForm.js';
 export * from './chat/ChatLog.js';
 export * from './chat/ChatSurface.js';
 export * from './chat/DefaultChatMessage.js';
+export * from './chat/gameLogState.js';
 export * from './chat/SpatialChatDraggable.js';
 export * from './chat/SpatialChatThread.js';
 export * from './debugger/GameDebugger.js';

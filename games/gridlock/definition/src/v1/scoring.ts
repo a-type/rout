@@ -23,10 +23,15 @@ export function scoreBoard(board: PlayerBoard) {
 }
 
 export interface PathDetails {
+  id: string;
   cells: string[];
   isComplete: boolean;
   /** If the path is broken, this points to the tile which it 'collided' with */
   breaks: { cellKey: string; direction: 'up' | 'down' | 'left' | 'right' }[];
+}
+
+function makePathId(cellKeys: string[]) {
+  return cellKeys.sort().join('.');
 }
 
 /**
@@ -51,7 +56,7 @@ export function getDistinctPaths(board: PlayerBoard): PathDetails[] {
     const cell = board[cellKey];
     if (cell.kind === 'tile') {
       if (isEmptyTile(cell.tile)) continue; // empty tiles don't form paths
-      const path: PathDetails = {
+      const path: Omit<PathDetails, 'id'> = {
         cells: [],
         isComplete: true, // easier to validate starting from assuming complete
         breaks: [],
@@ -96,7 +101,10 @@ export function getDistinctPaths(board: PlayerBoard): PathDetails[] {
           }
         }
       }
-      paths.push(path);
+      paths.push({
+        id: makePathId(path.cells),
+        ...path,
+      });
     }
   }
   return paths;

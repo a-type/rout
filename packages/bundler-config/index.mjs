@@ -1,3 +1,4 @@
+import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
 import { idToFederationId } from '@long-game/common';
 import unoConfig from '@long-game/uno-config';
 import {
@@ -6,7 +7,6 @@ import {
 } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { UnoCSSRspackPlugin } from '@unocss/webpack/rspack';
 import * as fs from 'fs';
 import { fileURLToPath, URL } from 'url';
 
@@ -80,7 +80,12 @@ export const gameRsbuildConfig = (game) => {
         sourcemap: true,
         minify: false,
       },
-      plugins: [pluginReact()],
+      plugins: [
+        pluginReact(),
+        pluginUnoCss({
+          config: unoConfig(true),
+        }),
+      ],
       resolve: {
         alias: {
           '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -88,10 +93,7 @@ export const gameRsbuildConfig = (game) => {
       },
       tools: {
         rspack: {
-          plugins: [
-            UnoCSSRspackPlugin(unoConfig(true)),
-            new ModuleFederationPlugin(federationConfig),
-          ],
+          plugins: [new ModuleFederationPlugin(federationConfig)],
           resolve: {
             conditionNames:
               command === 'build'
