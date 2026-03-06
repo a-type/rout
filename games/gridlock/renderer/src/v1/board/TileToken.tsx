@@ -1,3 +1,4 @@
+import { PrefixedId } from '@long-game/common';
 import {
   isEmptyTile,
   isTerminatorTile,
@@ -13,19 +14,22 @@ export interface TileTokenProps extends TileRendererProps {
   className?: string;
   unplayable?: boolean;
   illegal?: boolean;
+  inHand?: boolean;
+  disabled?: boolean;
+  playerId: PrefixedId<'u'>;
 }
 
 export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
-  gameSuite,
   tile,
   className,
   unplayable,
   illegal,
+  inHand,
+  disabled: userDisabled,
+  playerId,
   ...rest
 }) {
-  const { hand } = gameSuite.initialState;
-  const isInHand = hand.some((t) => t.id === tile.id);
-  const disabled = unplayable || !isInHand;
+  const disabled = unplayable || !inHand || userDisabled;
 
   const rulesId = unplayable
     ? 'unplaceable-tiles'
@@ -50,8 +54,10 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
 
   return (
     <Token
-      id={tile.id}
+      id={`${playerId}-${tile.id}`}
       data={tile}
+      // differentiate tile chat threads per player
+      chatSceneId={`${playerId}-${tile.id}`}
       disabled={disabled}
       className={clsx('aspect-1 relative', className)}
       draggedClassName="w-[48px] h-[48px] relative"
@@ -59,11 +65,12 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
       tags={['tile']}
       rulesId={rulesId}
       helpContent={helpContent}
+      name="Tile"
     >
       <TileRenderer
         tile={tile}
         className={clsx(
-          isInHand && 'border-default bg-white',
+          inHand && 'border-default bg-white',
           unplayable && 'opacity-50',
         )}
         {...rest}

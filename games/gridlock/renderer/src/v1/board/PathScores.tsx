@@ -49,6 +49,7 @@ export function PathScores({
                   ? `This path is broken, so it scores 0 points. Too bad!`
                   : `This path is not complete yet, but it can score ${score} points so far.`
             }
+            title="Path Score"
           >
             <span>{path.breaks.length > 0 ? 0 : score}</span>
           </HelpSurface>

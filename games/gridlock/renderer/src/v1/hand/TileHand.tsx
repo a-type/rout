@@ -19,7 +19,7 @@ export const TileHand = hooks.withGame<TileHandProps>(function TileHand({
       onDrop={(tile) => {
         gameSuite.prepareTurn((cur) => {
           return {
-            placements: cur.placements.filter((p) => p.tileId !== tile.id),
+            placements: cur.placements.filter((p) => p.tileId !== tile.data.id),
           };
         });
       }}
@@ -39,6 +39,8 @@ export const TileHand = hooks.withGame<TileHandProps>(function TileHand({
             tile={tile}
             className="layer-components:h-[48px]"
             unplayable={unplayable}
+            inHand
+            playerId={gameSuite.playerId}
           />
         );
       })}

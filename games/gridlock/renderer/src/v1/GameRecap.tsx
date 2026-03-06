@@ -1,9 +1,6 @@
 import { Button, Dialog } from '@a-type/ui';
 import { GameMember } from '@long-game/game-definition';
-import {
-  getDistinctPaths,
-  scoreBoard,
-} from '@long-game/game-gridlock-definition/v1';
+import { scoreBoard } from '@long-game/game-gridlock-definition/v1';
 import { PlayerAvatar, PlayerName, PlayerThemed } from '@long-game/game-ui';
 import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
@@ -58,7 +55,6 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
   function RecapPlayerBoard({ player, gameSuite }) {
     const playerBoard = gameSuite.postgameGlobalState?.playerBoards[player.id];
     if (!playerBoard) return null;
-    const paths = getDistinctPaths(playerBoard);
     return (
       <Dialog>
         <PlayerThemed

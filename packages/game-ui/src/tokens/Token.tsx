@@ -23,6 +23,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
   disableChat?: boolean;
   helpContent?: ReactNode;
   rulesId?: string;
+  chatSceneId?: string;
   // TODO: make mandatory
   name?: string;
 }
@@ -38,6 +39,7 @@ function TokenDefault({
   helpContent,
   rulesId,
   name,
+  chatSceneId = id,
   ...rest
 }: TokenProps) {
   const tokenData = useTokenData(id, data);
@@ -64,7 +66,7 @@ function TokenDefault({
     >
       <ChatSurface
         disabled={disableChat}
-        sceneId={id}
+        sceneId={chatSceneId}
         className="w-full h-full"
       >
         <HelpSurface

@@ -5,7 +5,7 @@ import {
 } from '@long-game/game-gridlock-definition/v1';
 import clsx from 'clsx';
 import { BoardGridCell } from './BoardGrid';
-import { TileRenderer } from './TileRenderer';
+import { TileToken } from './TileToken';
 
 export interface ReadonlyBoardCellProps {
   cell: PlayerBoardCell | undefined;
@@ -31,7 +31,9 @@ export function ReadonlyBoardCell({
       className={clsx('rd-sm layer-components:bg-white', className)}
       anchorNamespace={playerId}
     >
-      {cell && <TileRenderer tile={cell.tile} {...rest} />}
+      {cell && (
+        <TileToken tile={cell.tile} playerId={playerId} disabled {...rest} />
+      )}
     </BoardGridCell>
   );
 }

@@ -30,6 +30,9 @@ export const LiveBoardCell = memo(
     playerId,
     className,
   }) {
+    const inHand = gameSuite.initialState.hand.some(
+      (t) => t.id === cell?.tile.id,
+    );
     const { x, y } = fromCellKey(cellKey);
     const invalid = gameSuite.turnError?.data?.invalidCellKey === cellKey;
     const draggedTile = useDraggedToken<Tile>();
@@ -80,7 +83,7 @@ export const LiveBoardCell = memo(
           }}
           onDrop={(token) => {
             if (cell) return;
-            const tileId = token.id;
+            const tileId = token.data.id;
             gameSuite.prepareTurn((cur) => {
               return {
                 placements: [
@@ -98,6 +101,8 @@ export const LiveBoardCell = memo(
               pathIsBroken={pathIsBroken}
               pathIsComplete={pathIsComplete}
               illegal={invalid}
+              inHand={inHand}
+              playerId={playerId || gameSuite.playerId}
             />
           )}
         </TokenSpace>
