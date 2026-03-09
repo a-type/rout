@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useWebHaptics } from 'web-haptics/react';
 import { useShallow } from 'zustand/shallow';
 import { useElementEvent } from '../hooks/useWindowEvent.js';
 import { boundsRegistry } from './bounds.js';
@@ -29,6 +30,8 @@ const tmpVec = { x: 0, y: 0 };
 export function useDragGesture(options?: DragGestureOptions) {
   const draggable = useDraggableContext();
   const ref = useRef<HTMLDivElement>(null);
+
+  const { trigger: buzz } = useWebHaptics();
 
   // when the pointer enters our element, if a touch our mouse is down,
   // and no other element is dragging, that counts as beginning candidacy
@@ -195,6 +198,9 @@ export function useDragGesture(options?: DragGestureOptions) {
       targetTag: options?.dropOnTag,
       droppableParentId: parentId,
     });
+
+    buzz([{ duration: 15 }], { intensity: 0.5 });
+
     document.body.classList.add('cursor-grabbing');
     if (gesture.type === 'touch' && options?.touchOffset) {
       setVector(gesture.offset, 0, options.touchOffset);
@@ -216,6 +222,7 @@ export function useDragGesture(options?: DragGestureOptions) {
 
   function activateDrag() {
     startDrag(draggable.id);
+    buzz([{ duration: 30 }], { intensity: 1 });
   }
 
   // when pointer down starts on our element, that marks it as the active

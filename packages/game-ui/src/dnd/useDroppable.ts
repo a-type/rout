@@ -1,5 +1,6 @@
 import { useStableCallback } from '@a-type/ui';
 import { useEffect, useRef } from 'react';
+import { useWebHaptics } from 'web-haptics/react';
 import { boundsRegistry, useTagBounds } from './bounds.js';
 import { draggableDataRegistry } from './dataRegistry.js';
 import { dndEvents } from './dndEvents.js';
@@ -58,6 +59,8 @@ export function useDroppable<T>({
   const stableAccept = useStableCallback(accept || defaultAccept);
   const stableOnReject = useStableCallback(onReject);
 
+  const { trigger: buzz } = useWebHaptics();
+
   useEffect(() => {
     if (disabled) return;
 
@@ -75,6 +78,7 @@ export function useDroppable<T>({
             droppableRect: region.bounds,
           };
           dropCb({ id: dragged, data }, gesture, dropInfo);
+          buzz([{ duration: 30 }, { delay: 60, duration: 40, intensity: 1 }]);
         } else if (stableOnReject) {
           stableOnReject({ id: dragged, data }, gesture);
         }
