@@ -1548,12 +1548,14 @@ export class GameSession extends DurableObject<ApiBindings> {
         error: `Failed to get global state: ${(err as Error).message}`,
       };
     }
+    const status = await this.getStatus();
     return {
       turns,
       chatMessages,
       sessionData,
       roundState,
       globalState,
+      status,
     };
   }
 }
