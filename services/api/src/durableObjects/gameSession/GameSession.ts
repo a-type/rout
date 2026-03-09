@@ -719,14 +719,16 @@ export class GameSession extends DurableObject<ApiBindings> {
     };
   }
   // users can get global state in dev mode or after game has ended
-  async getGlobalState(): Promise<unknown> {
+  async getGlobalState(): Promise<{}> {
+    const status = await this.getStatus();
     if (
-      !this.env.DEV_MODE &&
-      !((await this.getStatus()).status !== 'complete')
+      status.status !== 'complete' &&
+      status.status !== 'abandoned' &&
+      !this.env.DEV_MODE
     ) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
-        'Cannot get global state until game is over',
+        `Cannot get global state until game is over. Game status is currently ${status.status}.`,
       );
     }
     return await this.#getGlobalStateUnchecked();

@@ -136,7 +136,6 @@ export const gameSessionRouter = new Hono<Env>()
   })
   .get('/postgame', async (ctx) => {
     const state = ctx.get('gameSessionState');
-    // @ts-ignore - excessive... etc...
     const globalState = await state.getGlobalState();
     const rounds = await state.getRounds();
 
