@@ -13,6 +13,7 @@ import {
   GameSessionPlayerStatus,
   GameStatus,
   isPrefixedId,
+  Logger,
   LongGameError,
   PrefixedId,
   ServerChatMessage,
@@ -167,6 +168,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   startedAt: Date | null = null;
   timezone!: string;
   protected events = new EventSubscriber<GameSuiteEvents>();
+  logger = new Logger('👾', 'game');
 
   // non-reactive
   protected disposes: (() => void)[] = [];
@@ -260,7 +262,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     const promise = this.loadRound(roundIndex)
       .then(action(this.setRound))
       .catch((err) => {
-        console.error('Error loading round', roundIndex, err);
+        this.logger.fatal('Error loading round', roundIndex, err);
         this.events.emit(
           'error',
           new LongGameError(LongGameError.Code.Unknown, err.message),
@@ -268,7 +270,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
         throw new LongGameError(LongGameError.Code.Unknown, err.message);
       })
       .finally(() => {
-        console.log('loaded round', roundIndex);
+        this.logger.debug('loaded round', roundIndex);
       });
     this.cachedLoadRoundPromises[cacheKey] = promise;
     return promise;
@@ -419,12 +421,13 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     if (this.gameStatus.status !== 'complete') {
       return [];
     }
-    console.log(this.gameStatus);
     return (
       this.gameStatus.winnerIds?.map((winnerId) => {
         const member = this.members.find((m) => m.id === winnerId);
         if (!member) {
-          console.warn(`Winner with ID ${winnerId} not found among members`);
+          this.logger.warn(
+            `Winner with ID ${winnerId} not found among members`,
+          );
           return { id: winnerId, displayName: '???', color: 'gray' };
         }
         return member;
@@ -771,7 +774,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     try {
       const remoteError = await this.actuallySubmitTurn(toJS(data), playerId);
       if (remoteError) {
-        console.info(`Turn submission invalid: ${remoteError.message}`);
+        this.logger.info(`Turn submission invalid: ${remoteError.message}`);
         this.remoteTurnError = remoteError;
       }
       runInAction(() => {
@@ -783,7 +786,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       this.events.emit('turnPlayed');
     } catch (e) {
       const msg = LongGameError.wrap(e as any).message;
-      console.error(e);
+      this.logger.fatal(e);
       this.events.emit(
         'error',
         new LongGameError(LongGameError.Code.Unknown, msg),
@@ -823,7 +826,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     };
     const validated = gameSessionChatInitShape.safeParse(messageWithRound);
     if (!validated.success) {
-      console.error('Invalid chat message', validated.error);
+      this.logger.urgent('Invalid chat message', validated.error);
       this.events.emit(
         'error',
         new LongGameError(
@@ -842,7 +845,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   loadMoreChat = async (sceneId?: string | null): Promise<void> => {
     const sceneChat = this.sceneChats[sceneId ?? ROOT_CHAT_SCENE_ID];
     if (sceneChat?.empty) {
-      console.debug('No more chat to load for scene', sceneId);
+      this.logger.debug('No more chat to load for scene', sceneId);
       return;
     }
     this.actuallyLoadMoreChat(sceneChat?.nextToken, sceneId);
@@ -1112,7 +1115,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     try {
       await this.loadPostgame();
     } catch (e) {
-      console.error(
+      this.logger.fatal(
         'Error loading global postgame state. Are you running with DEV_MODE flag on backend?',
         e,
       );

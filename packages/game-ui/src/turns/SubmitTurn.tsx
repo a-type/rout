@@ -24,6 +24,7 @@ export const SubmitTurn = withSuspense(
       turnWasSubmitted,
       nextRoundCheckAt,
       canSubmitTurn,
+      isTurnSubmitDelayed,
     } = useGameSuite();
 
     const isDisabled = !!turnError || !hasLocalTurn || !canSubmitTurn;
@@ -64,6 +65,7 @@ export const SubmitTurn = withSuspense(
               className="items-center justify-center w-full h-full disabled:(opacity-100 bg-wash color-gray border-gray) data-[disabled=true]:(opacity-100 bg-wash color-gray-border-gray)"
               color={turnError ? 'attention' : 'primary'}
               visuallyDisabled={isDisabled}
+              loading={isTurnSubmitDelayed}
               onClick={() => {
                 if (isDisabled) {
                   if (turnError) {

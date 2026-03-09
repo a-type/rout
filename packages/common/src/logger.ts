@@ -1,13 +1,16 @@
 export class Logger {
   #showDebug;
-  constructor(private tag: string) {
+  constructor(
+    private tag: string,
+    private debugTag = tag,
+  ) {
     this.#showDebug =
       // @ts-ignore
       typeof window !== 'undefined' &&
       // @ts-ignore
       (window.localStorage.getItem('DEBUG') === 'true' ||
         // @ts-ignore
-        window.localStorage.getItem('DEBUG')?.includes(tag));
+        window.localStorage.getItem('DEBUG')?.includes(debugTag));
   }
 
   info = (...args: any[]) => {

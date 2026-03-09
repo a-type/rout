@@ -175,6 +175,7 @@ export const serverMessageShape = z.discriminatedUnion('type', [
   serverPlayerUnreadyMessageShape,
   serverPlayerVoteForGameMessageShape,
   serverGameStartingMessageShape,
+  serverPongMessageShape,
 ]);
 export type ServerMessage = z.infer<typeof serverMessageShape>;
 

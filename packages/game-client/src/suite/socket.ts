@@ -1,7 +1,8 @@
 import {
   clientMessageShape,
   ClientMessageWithoutId,
-  genericId,
+  ClientPingMessage,
+  Logger,
   LongGameError,
   PrefixedId,
   ServerMessage,
@@ -14,12 +15,15 @@ import { apiRpc } from './api.js';
 
 export type GameSocket = Awaited<ReturnType<typeof connectToSocket>>;
 
+const logger = new Logger('🌐', 'socket');
+
 export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
   const socketOrigin = API_ORIGIN.replace(/^http/, 'ws');
   const websocket = new ReconnectingWebsocket(
     `${socketOrigin}/socket`,
     gameSessionId,
   );
+
   const unsubRootMessages = websocket.onMessage((message) => {
     // console.debug('Received message', message); // too noisy
   });
@@ -29,7 +33,7 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     (message as any).messageId = Math.random().toString().slice(2);
     const result = clientMessageShape.safeParse(message);
     if (!result.success) {
-      console.error('Outgoing message validation failed', result.error);
+      logger.urgent('Outgoing message validation failed', result.error);
       throw new Error('Invalid message');
     }
     websocket.send(JSON.stringify(message));
@@ -61,7 +65,7 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
             }
           }
         } catch (e) {
-          console.error('Incoming message validation failed', e);
+          logger.urgent('Incoming message validation failed', e);
         }
       });
       unsubs.push(unsub);
@@ -80,7 +84,7 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
     const unsub = websocket.onMessage((message) => {
       const parsed = serverMessageShape.safeParse(message);
       if (!parsed.success) {
-        console.error('Incoming message validation failed', parsed.error);
+        logger.urgent('Incoming message validation failed', parsed.error);
         return;
       }
       if (parsed.data.type === type) {
@@ -149,15 +153,20 @@ class ReconnectingWebsocket {
   }
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private abortReconnect = false;
+  private heartbeat;
+  private reconnectInterval = 3000;
+  private reconnectAttempts = 0;
 
   constructor(
     private url: string,
     private gameSessionId: string,
-  ) {}
+  ) {
+    this.heartbeat = new Heartbeat(this);
+  }
 
   send = (message: string) => {
     if (this.#status === 'closed') {
-      console.log('Socket closed, cannot send', this.#id);
+      logger.warn('Socket closed, cannot send', this.#id);
       return;
     }
     if (this.websocket?.readyState === WebSocket.OPEN) {
@@ -188,8 +197,9 @@ class ReconnectingWebsocket {
   };
 
   close = () => {
+    this.heartbeat.stop();
     if (this.#status === 'reconnecting') {
-      console.log('Socket waiting for connect before close', this.#id);
+      logger.debug('Socket waiting for connect before close', this.#id);
       // wait for connection before closing
       this.abortReconnect = true;
     } else {
@@ -197,90 +207,152 @@ class ReconnectingWebsocket {
         clearTimeout(this.reconnectTimeout);
         this.reconnectTimeout = null;
       }
-      console.log('Socket closing', this.#id);
+      logger.info('Socket closing', this.#id);
       this.websocket?.close(1000, 'Closed by user');
     }
   };
 
   reconnect = async () => {
     if (this.abortReconnect) {
-      console.log('Cancelling abort due to explicit reconnect', this.#id);
+      logger.debug('Cancelling abort due to explicit reconnect', this.#id);
       this.abortReconnect = false;
     }
+    if (this.reconnectAttempts >= 5) {
+      logger.urgent('Max reconnect attempts reached, giving up', this.#id);
+      return;
+    }
     if (this.#status === 'reconnecting') {
+      logger.debug('Not initiating reconnect, already reconnecting', this.#id);
       return;
     }
     this.#status = 'reconnecting';
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
     }
-    const token = await getSocketToken(this.gameSessionId);
-    const url = new URL(this.url);
-    url.searchParams.set('token', token);
-    this.websocket?.close(1000, 'Forced reconnect');
-    const websocket = (this.websocket = new WebSocket(url));
+    try {
+      const token = await getSocketToken(this.gameSessionId);
+      const url = new URL(this.url);
+      url.searchParams.set('token', token);
+      this.websocket?.close(1000, 'Forced reconnect');
+      const websocket = (this.websocket = new WebSocket(url));
 
-    let pingInterval: ReturnType<typeof setInterval> | null = null;
+      websocket.addEventListener('open', () => {
+        if (this.abortReconnect) {
+          logger.debug('Socket closed during [re]connect', this.#id);
+          this.abortReconnect = false;
+          websocket.close(1000, 'Closed during reconnect');
+          return;
+        }
 
-    websocket.addEventListener('open', () => {
-      if (this.abortReconnect) {
-        console.log('Socket closed during [re]connect', this.#id);
-        this.abortReconnect = false;
-        websocket.close(1000, 'Closed during reconnect');
-        return;
-      }
+        logger.info('Socket connected', this.#id);
+        this.#status = 'open';
+        this.heartbeat.start();
+        this.reconnectAttempts = 0;
+        this.reconnectInterval = 3000;
 
-      console.log('Socket connected', this.#id);
-      this.#status = 'open';
+        if (this.backlog.length) {
+          this.backlog.forEach((msg) => websocket.send(msg));
+          this.backlog = [];
+        }
+      });
+      websocket.addEventListener('close', (ev) => {
+        this.#status = 'closed';
+        this.heartbeat.stop();
+        if (ev.code === 1000) {
+          logger.debug('Socket closed normally', this.#id, ev.code, ev.reason);
+          return;
+        }
 
-      websocket.send(JSON.stringify({ messageId: genericId(), type: 'ping' }));
-      pingInterval = setInterval(() => {
-        websocket.send(
-          JSON.stringify({ messageId: genericId(), type: 'ping' }),
+        logger.warn('Socket closed', this.#id, 'code', ev.code, ev.reason);
+        this.#queueReconnect();
+      });
+      websocket.addEventListener('message', (event) => {
+        this.messageEvents.dispatchEvent(
+          new MessageEvent('message', {
+            data: event.data,
+          }),
         );
-      }, 10000);
-
-      if (this.backlog.length) {
-        this.backlog.forEach((msg) => websocket.send(msg));
-        this.backlog = [];
-      }
-    });
-    websocket.addEventListener('close', (ev) => {
+      });
+      websocket.addEventListener('error', (event) => {
+        logger.urgent('Socket error', this.#id, event);
+        const err =
+          event instanceof ErrorEvent
+            ? event.error
+            : new Error('Unknown error');
+        this.errorEvents.dispatchEvent(
+          new ErrorEvent('error', {
+            error: err,
+          }),
+        );
+      });
+    } catch (e) {
+      logger.urgent('Failed to reconnect socket', this.#id, e);
       this.#status = 'closed';
-      if (pingInterval) {
-        clearInterval(pingInterval);
-        pingInterval = null;
-      }
-      if (ev.code === 1000) {
-        console.log('Socket closed normally', this.#id, ev.code, ev.reason);
-        return;
-      }
-
-      console.log(
-        'Socket closed, reconnecting in 3s...',
-        this.#id,
-        'code',
-        ev.code,
-        ev.reason,
-      );
-      this.reconnectTimeout = setTimeout(this.reconnect, 3000);
-    });
-    websocket.addEventListener('message', (event) => {
-      this.messageEvents.dispatchEvent(
-        new MessageEvent('message', {
-          data: event.data,
-        }),
-      );
-    });
-    websocket.addEventListener('error', (event) => {
-      console.error('Socket error', this.#id, event);
-      const err =
-        event instanceof ErrorEvent ? event.error : new Error('Unknown error');
-      this.errorEvents.dispatchEvent(
-        new ErrorEvent('error', {
-          error: err,
-        }),
-      );
-    });
+      this.#queueReconnect();
+    }
   };
+
+  #queueReconnect = () => {
+    if (this.reconnectTimeout) {
+      return;
+    }
+    logger.debug(
+      'Queueing socket reconnect',
+      this.#id,
+      'in',
+      this.reconnectInterval,
+      'ms',
+      'attempt',
+      this.reconnectAttempts + 1,
+    );
+    this.reconnectTimeout = setTimeout(this.reconnect, this.reconnectInterval);
+    this.reconnectAttempts++;
+    // Exponential backoff with a max of 30s
+    this.reconnectInterval = Math.min(
+      30000,
+      this.reconnectInterval * 2 ** this.reconnectAttempts,
+    );
+  };
+}
+
+class Heartbeat {
+  private interval: ReturnType<typeof setInterval> | null = null;
+  private lastPong = Date.now();
+
+  constructor(private socket: ReconnectingWebsocket) {
+    socket.onMessage((message) => {
+      if (message.type === 'pong') {
+        this.lastPong = Date.now();
+      }
+    });
+  }
+
+  start() {
+    if (this.interval) {
+      return;
+    }
+    this.interval = setInterval(() => {
+      this.#sendPing();
+    }, 5000);
+  }
+
+  #sendPing = () => {
+    this.socket.send(
+      JSON.stringify({ type: 'ping' } satisfies ClientPingMessage),
+    );
+    setTimeout(() => {
+      if (Date.now() - this.lastPong > 15000) {
+        logger.warn('No pong received, reconnecting socket');
+        this.socket.reconnect();
+      }
+    }, 5000);
+  };
+
+  stop() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
 }
