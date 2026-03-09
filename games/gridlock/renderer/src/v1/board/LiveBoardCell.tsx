@@ -59,9 +59,6 @@ export const LiveBoardCell = memo(
           id={toCellKey(x, y)}
           tags={['tile']}
           accept={(token) => {
-            if (cell && token.data.id !== cell.tile.id) {
-              return false;
-            }
             const valid = isValidPlacement({
               board: gameSuite.finalState.board,
               newPlacement: {
@@ -76,12 +73,13 @@ export const LiveBoardCell = memo(
             return true;
           }}
           onDrop={(token) => {
-            if (cell) return;
             const tileId = token.data.id;
             gameSuite.prepareTurn((cur) => {
               return {
                 placements: [
-                  ...cur.placements.filter((p) => p.tileId !== tileId),
+                  ...cur.placements.filter(
+                    (p) => p.tileId !== tileId && p.cellKey !== cellKey,
+                  ),
                   { tileId, cellKey: toCellKey(x, y) },
                 ],
               };
