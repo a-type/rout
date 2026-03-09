@@ -41,7 +41,7 @@ export const LiveBoardCell = memo(
         x={x}
         y={y}
         className={clsx(
-          'w-full h-full',
+   
           invalid && 'ring-attention ring-2',
           className,
         )}

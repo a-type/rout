@@ -850,6 +850,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
 
     const gameDefinition = await this.getGameDefinition();
+    // !!! Not sure if current or public is the right one here... but public
+    // was causing games not to complete, I guess it was getting stuck at the last round?
     const currentRoundIndex = await this.getCurrentRoundIndex();
     return gameDefinition.getStatus({
       globalState: await this.#getGlobalStateUnchecked(currentRoundIndex),

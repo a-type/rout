@@ -18,17 +18,23 @@ export function BoardGrid({
   return (
     <div
       className={clsx(
-        'grid min-h-300px max-h-100vmin max-w-100vmin bg-wash p-xs aspect-1',
+        'w-auto h-auto max-w-full max-h-full flex flex-col items-center justify-center @container aspect-1',
         className,
       )}
-      style={{
-        ...style,
-        gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
-        gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
-      }}
-      {...rest}
     >
-      {children}
+      <div
+        className={clsx(
+          'grid shrink bg-wash p-xs w-100cqmin h-100cqmin aspect-1',
+        )}
+        style={{
+          ...style,
+          gridTemplateColumns: `repeat(${boardSize}, 1fr)`,
+          gridTemplateRows: `repeat(${boardSize}, auto)`,
+        }}
+        {...rest}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -62,7 +68,7 @@ export function BoardGridCell({
         animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)',
         animationIterationCount: '1',
       }}
-      className={clsx('relative aspect-1', className)}
+      className={clsx('relative w-full', className)}
     >
       {children}
     </div>

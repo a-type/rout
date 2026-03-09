@@ -13,7 +13,7 @@ export interface PlayerSwitcherProps {
 
 const StyledBoardRenderer = withClassName(
   BoardRenderer,
-  'max-w-100vmin max-h-100vmin min-w-300px min-h-300px basis-0 grow',
+  'basis-0 min-w-300px min-h-300px grow',
 );
 
 const StyledTabsContent = withClassName(
@@ -53,7 +53,7 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
           >
             Your Board
           </Button>
-          <div className="ml-auto">
+          <div className="ml-auto flex flex-row gap-xs">
             {gameSuite.otherPlayers.map((player) => (
               <Button
                 size="small"
