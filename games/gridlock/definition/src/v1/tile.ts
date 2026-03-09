@@ -32,3 +32,13 @@ export function isTerminatorTile(tile: Tile) {
   ).length;
   return connections === 1;
 }
+
+export function serializeTile(tile: Omit<Tile, 'id'>): string {
+  const directions = [
+    tile.up ? 'U' : '',
+    tile.down ? 'D' : '',
+    tile.left ? 'L' : '',
+    tile.right ? 'R' : '',
+  ].join('');
+  return directions || '0';
+}

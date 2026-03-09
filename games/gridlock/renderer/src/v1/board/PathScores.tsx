@@ -33,10 +33,10 @@ export function PathScores({
               left: 'anchor(center)',
             }}
             className={clsx(
-              'fixed -translate-x-1/2 -translate-y-1/2 text-0.5em pointer-events-none flex items-center justify-center p-xs rd-full leading-0 aspect-1',
-              'color-contrast border-thin',
+              'fixed -translate-x-1/2 -translate-y-1/2 text-0.75em pointer-events-none flex items-center justify-center p-xs rd-full leading-0 aspect-1 z-1',
+              'color-contrast border-thin font-bold',
               {
-                'font-bold bg-success': path.isComplete,
+                'bg-success': path.isComplete,
                 'bg-main-wash border-main-dark border-dashed':
                   !path.isComplete && path.breaks.length === 0,
                 'bg-gray': path.breaks.length > 0,

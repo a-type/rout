@@ -69,10 +69,7 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
     >
       <TileRenderer
         tile={tile}
-        className={clsx(
-          inHand && 'border-default bg-white',
-          unplayable && 'opacity-50',
-        )}
+        className={clsx(inHand && 'border-default', unplayable && 'opacity-50')}
         {...rest}
       />
     </Token>

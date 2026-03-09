@@ -107,6 +107,7 @@ export const gameRsbuildConfig = (game) => {
       },
       server: {
         port: game.devPort,
+        strictPort: true,
       },
       source: {
         entry: {

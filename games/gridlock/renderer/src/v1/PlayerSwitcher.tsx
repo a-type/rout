@@ -67,7 +67,10 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
             ))}
           </div>
         </StyledTabsList>
-        <StyledTabsContent value={gameSuite.playerId}>
+        <StyledTabsContent
+          value={gameSuite.playerId}
+          className="flex flex-col gap-lg"
+        >
           <StyledBoardRenderer
             board={gameSuite.finalState.board}
             playerId={gameSuite.playerId}

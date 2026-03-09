@@ -28,7 +28,7 @@ export function ReadonlyBoardCell({
     <BoardGridCell
       x={x}
       y={y}
-      className={clsx('rd-sm layer-components:bg-white', className)}
+      className={clsx('layer-components:bg-white', className)}
       anchorNamespace={playerId}
     >
       {cell && (

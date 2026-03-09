@@ -6,10 +6,17 @@ import {
   Ref,
   useContext,
   useEffect,
+  useRef,
+  useState,
 } from 'react';
 import { useMergedRef } from '../hooks/useMergedRef.js';
 import { useBindBounds } from './bounds.js';
-import { droppableDataRegistry } from './dataRegistry.js';
+import {
+  draggableDataRegistry,
+  droppableDataRegistry,
+} from './dataRegistry.js';
+import { useDndStore } from './dndStore.js';
+import { gesture } from './gestureStore.js';
 import {
   Accept,
   OnDropCb,
@@ -64,7 +71,44 @@ export function Droppable<T = any>({
     tags,
   });
   const bindBounds = useBindBounds(id, priority);
-  const finalRef = useMergedRef<any>(bindBounds, userRef);
+  const [localEl, localRef] = useState<HTMLDivElement | SVGGElement | null>(
+    null,
+  );
+  const acceptStable = useRef(accept);
+  acceptStable.current = accept;
+  useEffect(() => {
+    return useDndStore.subscribe(
+      (state) => state.dragging,
+      (draggedId) => {
+        localEl?.setAttribute('data-dragging', draggedId ? 'true' : 'false');
+        if (draggedId) {
+          const data = draggableDataRegistry.get(draggedId);
+          if (data) {
+            console.log('Evaluating droppable accept with data', data);
+            const accepted =
+              !acceptStable.current ||
+              acceptStable.current(
+                {
+                  id: draggedId,
+                  data,
+                },
+                gesture,
+              );
+            localEl?.setAttribute(
+              'data-dragged-accepted',
+              accepted ? 'true' : 'false',
+            );
+          }
+        } else {
+          localEl?.removeAttribute('data-dragged-accepted');
+        }
+      },
+      {
+        fireImmediately: true,
+      },
+    );
+  }, [localEl]);
+  const finalRef = useMergedRef<any>(bindBounds, userRef, localRef);
   useEffect(() => droppableDataRegistry.register(id, data), [id, data]);
 
   const content = useRender({

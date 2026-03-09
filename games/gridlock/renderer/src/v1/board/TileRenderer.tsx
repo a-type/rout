@@ -1,31 +1,55 @@
-import { Tile } from '@long-game/game-gridlock-definition/v1';
+import {
+  isTerminatorTile,
+  serializeTile,
+  Tile,
+} from '@long-game/game-gridlock-definition/v1';
 import { clsx } from 'clsx';
+import { EndDecorations } from './tileImages/EndDecorations.js';
+import { tileImages } from './tileImages/index.js';
 
 export interface TileRendererProps {
   tile: Tile;
   className?: string;
-	pathIsBroken?: boolean;
-	pathIsComplete?: boolean;
+  pathIsBroken?: boolean;
+  pathIsComplete?: boolean;
 }
 
-export function TileRenderer({ tile, className, pathIsBroken, pathIsComplete }: TileRendererProps) {
+export function TileRenderer({
+  tile,
+  className,
+  pathIsBroken,
+  pathIsComplete,
+}: TileRendererProps) {
   const terminator =
     [tile.up, tile.down, tile.left, tile.right].filter(Boolean).length === 1;
+
+  const image = tileImages[serializeTile(tile)];
+
   return (
     <div
-      className={clsx('absolute inset-0', 'rounded-sm',
-				pathIsBroken && 'palette-gray',
-            pathIsComplete && 'palette-success',className)}
+      className={clsx(
+        'absolute inset-0',
+        'overflow-clip',
+        pathIsComplete ? 'bg-main-light' : 'bg-main-light',
+        pathIsBroken && 'palette-gray theme',
+        pathIsComplete && 'palette-success theme',
+        className,
+      )}
       data-left={tile.left}
       data-right={tile.right}
       data-up={tile.up}
       data-down={tile.down}
     >
-      {tile.down && <RoadPiece className="rotate-0" data-down />}
+      <image.Component
+        style={{ transform: `rotate(${image.rotation}deg)` }}
+        className="absolute inset-0 w-full h-full bg-filter-blend pointer-events-none stroke-3"
+      />
+      {isTerminatorTile(tile) && <EndDecorations />}
+      {/* {tile.down && <RoadPiece className="rotate-0" data-down />}
       {tile.up && <RoadPiece data-up className="rotate-180" />}
       {tile.left && <RoadPiece className="rotate-90" data-left />}
       {tile.right && <RoadPiece className="rotate-270" data-right />}
-      {terminator && <CenterPoint />}
+      {terminator && <CenterPoint />} */}
     </div>
   );
 }

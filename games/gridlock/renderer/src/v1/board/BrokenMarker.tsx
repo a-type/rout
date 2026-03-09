@@ -20,7 +20,7 @@ export const BrokenMarker = ({
         right: 'anchor(right)',
         bottom: 'anchor(bottom)',
       }}
-      className="fixed pointer-events-none"
+      className="fixed pointer-events-none z-1"
     >
       <div
         className={clsx(

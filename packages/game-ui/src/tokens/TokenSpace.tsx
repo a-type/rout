@@ -54,11 +54,13 @@ export function TokenSpace<T = any>({
   const wrappedAccept = (data: DraggableData, gesture: DragGestureContext) => {
     // only accept tokens
     if (!isToken(data.data)) {
+      console.log('not token', data.data);
       return false;
     }
 
     // do not accept tokens already in this space
     if (gesture.draggedFrom === id) {
+      console.log('dragged from here');
       return false;
     }
 

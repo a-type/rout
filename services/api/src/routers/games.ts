@@ -41,9 +41,12 @@ export const gamesRouter = new Hono<Env>()
     const isAdmin = ctx.get('session')?.isProductAdmin ?? false;
     const metadata = Object.entries(games)
       .filter(([, game]) => {
-        if (game.prerelease && !isAdmin) {
-          return false;
-        }
+        // if this filter is applied, non-admin players can't participate
+        // in pre-release games (this API is used to fetch game client
+        // federated bundles...)
+        // if (game.prerelease && !isAdmin) {
+        //   return false;
+        // }
         return game.versions.length > 0;
       })
       .sort(([a], [b]) => a.localeCompare(b))

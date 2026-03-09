@@ -99,7 +99,7 @@ const markdownComponents: Components = {
         surface
         p="sm"
         className={clsx(
-          'border-l-4 border-l-solid border-l-main-dark',
+          'border-l-4 border-l-solid border-l-main-dark ml-sm w-80%',
           className,
         )}
         render={<blockquote {...props} />}
