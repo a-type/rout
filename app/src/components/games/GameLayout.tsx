@@ -1,4 +1,4 @@
-import { withClassName } from '@a-type/ui';
+import { Box, Spinner, withClassName } from '@a-type/ui';
 
 export const GameLayoutRoot = withClassName(
   'div',
@@ -34,3 +34,15 @@ export const GameLayout = Object.assign(GameLayoutRoot, {
   Controls: GameLayoutControls,
   SecondaryControls: GameLayoutSecondaryControls,
 });
+
+export const GameLayoutSkeleton = () => (
+  <GameLayout>
+    <GameLayout.Main>
+      <Box full layout="center center">
+        <Spinner />
+      </Box>
+    </GameLayout.Main>
+    <GameLayout.Controls />
+    <GameLayout.SecondaryControls />
+  </GameLayout>
+);

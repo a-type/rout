@@ -18,7 +18,7 @@ export const PlayerHandleChatToken = withGame<PlayerHandleChatTokenProps>(
       <span
         className={clsx(
           playerThemed.className,
-          'bg-main-wash bg-darken-1 color-main-ink font-bold inline-flex px-xs rounded',
+          'bg-main-wash bg-darken-1 color-main-ink font-bold text-nowrap px-xs rounded',
         )}
         style={playerThemed.style}
       >

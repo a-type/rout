@@ -225,12 +225,14 @@ const DefaultChatMessageBubble = withGame<ChatMessageProps>(
 const DefaultChatMessageContent = withGame<ChatMessageProps>(
   function DefaultChatMessageContent({ message, className }) {
     return (
-      <Box
-        className={clsx('leading-relaxed whitespace-pre-wrap', className)}
-        full="width"
+      <div
+        className={clsx(
+          'w-full leading-relaxed whitespace-pre-wrap',
+          className,
+        )}
       >
         <ChatTextWithTokens>{message.content}</ChatTextWithTokens>
-      </Box>
+      </div>
     );
   },
 );

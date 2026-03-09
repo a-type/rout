@@ -35,7 +35,7 @@ import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameControls } from './GameControls.js';
-import { GameLayout } from './GameLayout.js';
+import { GameLayout, GameLayoutSkeleton } from './GameLayout.js';
 import { HotseatSetup } from './HotseatSetup.js';
 import { GameSetup } from './setup/GameSetup.js';
 
@@ -126,7 +126,9 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
         {gameSuite.gameStatus.status === 'active' && gameSuite.pickingPlayer ? (
           <HotseatPlayerSelector />
         ) : (
-          <GameplayRenderer hotseat={hotseat} />
+          <Suspense fallback={<GameLayoutSkeleton />}>
+            <GameplayRenderer hotseat={hotseat} />
+          </Suspense>
         )}
       </>
     );
