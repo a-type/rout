@@ -9,7 +9,9 @@ export default defineConfig({
         // include all .ts and .tsx source files we encounter
         '**/*.{ts,tsx}',
         '../packages/*/dist/**/*.js',
+        '../packages/*/src/**/*.{ts,tsx,js,jsx}',
         '../games/*/render/dist/**/*.js',
+        '../games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
       ],
     },
     // include all .ts and .tsx files in all games

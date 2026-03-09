@@ -1,5 +1,3 @@
-import 'uno.css';
-
 // Do not delete this file! The main app uses this to render the game.
 import { hooks } from './gameClient.js';
 import { Gameplay } from './Gameplay.js';
