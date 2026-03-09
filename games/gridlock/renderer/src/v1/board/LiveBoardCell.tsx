@@ -40,11 +40,7 @@ export const LiveBoardCell = memo(
       <BoardGridCell
         x={x}
         y={y}
-        className={clsx(
-   
-          invalid && 'ring-attention ring-2',
-          className,
-        )}
+        className={clsx(invalid && 'palette-attention', className)}
         style={{
           zIndex: cell ? 1 : 0,
         }}
@@ -52,8 +48,8 @@ export const LiveBoardCell = memo(
       >
         <TokenSpace<Tile>
           className={clsx(
-            'transition-all w-full h-full flex items-stretch justify-stretch',
-            'layer-components:(border-main border-thin border-solid)',
+            'transition-all w-full h-full aspect-1 flex items-stretch justify-stretch',
+            'layer-components:(border-main/50 border-1px border-solid)',
             'data-[over-accepted=true]:bg-main-light',
             'data-[dragged-accepted=false]:(opacity-50 border-transparent)',
             cell && 'layer-components:bg-white shadow-lg shadow-main',

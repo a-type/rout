@@ -3,6 +3,7 @@ import {
   PathDetails,
 } from '@long-game/game-gridlock-definition/v1';
 import { BrokenMarker } from './BrokenMarker.js';
+import { InvalidMarker } from './InvalidMarker.js';
 import { PathScores } from './PathScores.js';
 
 export interface PathsBrokenMarkersProps {
@@ -32,6 +33,7 @@ export function PathAnnotations({
         });
       })}
       <PathScores paths={paths} anchorNamespace={anchorNamespace} />
+      <InvalidMarker anchorNamespace={anchorNamespace} />
     </>
   );
 }
