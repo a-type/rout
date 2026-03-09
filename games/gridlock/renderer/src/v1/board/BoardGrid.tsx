@@ -18,7 +18,7 @@ export function BoardGrid({
   return (
     <div
       className={clsx(
-        'w-auto h-auto max-w-full max-h-full flex flex-col items-center justify-center @container aspect-1',
+        'layer-components:(w-auto h-auto max-w-full max-h-full flex flex-col items-center justify-center) @container aspect-1',
         className,
       )}
     >
