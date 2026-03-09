@@ -850,11 +850,11 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
 
     const gameDefinition = await this.getGameDefinition();
-    const publicRoundIndex = await this.getPublicRoundIndex();
+    const currentRoundIndex = await this.getCurrentRoundIndex();
     return gameDefinition.getStatus({
-      globalState: await this.#getGlobalStateUnchecked(publicRoundIndex),
+      globalState: await this.#getGlobalStateUnchecked(currentRoundIndex),
       rounds: await this.#getRoundsUnchecked({
-        upToAndIncluding: publicRoundIndex,
+        upToAndIncluding: currentRoundIndex,
       }),
       members: await this.getMembers(),
     });
