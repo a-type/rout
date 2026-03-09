@@ -227,7 +227,7 @@ const DefaultChatMessageContent = withGame<ChatMessageProps>(
     return (
       <div
         className={clsx(
-          'w-full leading-relaxed whitespace-pre-wrap',
+          'w-full leading-relaxed whitespace-pre-wrap text-start',
           className,
         )}
       >
