@@ -18,7 +18,7 @@ export function BoardGrid({
   return (
     <div
       className={clsx(
-        'grid min-h-300px max-h-100vmin max-w-100vmin bg-wash p-xs',
+        'grid min-h-300px max-h-100vmin max-w-100vmin bg-wash p-xs aspect-1',
         className,
       )}
       style={{
