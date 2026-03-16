@@ -53,7 +53,7 @@ export const LiveBoardCell = memo(
             'data-[over-accepted=true]:bg-main-light',
             'data-[dragged-accepted=false]:(opacity-50 border-transparent)',
             cell && 'layer-components:bg-white shadow-lg shadow-main',
-            cell && 'data-[dragging=true]:scale-80',
+            cell && 'data-[dragging="true"]:scale-80',
             'will-change-transform',
           )}
           id={toCellKey(x, y)}

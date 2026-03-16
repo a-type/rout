@@ -10,6 +10,12 @@
     },
     {
       "type": "npm",
+      "script": "free-ports",
+      "problemMatcher": [],
+      "label": "🔌 Free Ports"
+    },
+    {
+      "type": "npm",
       "script": "dev",
       "problemMatcher": [],
       "label": "📱 App Dev",
@@ -32,45 +38,35 @@
       "type": "npm",
       "script": "dev-game",
       "path": "games/number-guess",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "🔢 Number Guess Dev"
     },
     {
       "type": "npm",
       "script": "dev-game",
       "path": "games/hearts",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "♥️ Hearts Dev"
     },
     {
       "type": "npm",
       "script": "dev-game",
       "path": "games/scribble",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "✏️ Scribble Dev"
     },
     {
       "type": "npm",
       "script": "dev-game",
       "path": "games/wizard-ball",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "⚾ Wizard Ball Dev"
     },
     {
       "type": "npm",
       "script": "dev-game",
       "path": "games/exquisite-fridge",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "❄️ Exquisite Fridge Dev"
     },
     {
@@ -85,18 +81,14 @@
       "type": "npm",
       "script": "dev-game",
       "path": "games/heir-apparent",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "🏰 Heir Apparent Dev"
     },
     {
       "type": "npm",
       "script": "dev-game",
       "path": "games/gridlock",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "label": "🕹️ Gridlock Dev",
       "detail": "pnpm --filter \"./*\" dev"
     }
