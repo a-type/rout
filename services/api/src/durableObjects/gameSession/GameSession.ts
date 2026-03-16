@@ -27,7 +27,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
-import { addDays, addSeconds, startOfDay } from 'date-fns';
+import { addDays, addHours, addSeconds, startOfDay } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
 import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
@@ -83,6 +83,12 @@ type ScheduledTasks =
     }
   | {
       type: 'turnReminders';
+    }
+  | {
+      type: 'joinReminders';
+    }
+  | {
+      type: 'readyReminders';
     };
 const startGameTaskId = '@@startGame';
 
@@ -168,6 +174,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (!data) {
       return null;
     }
+    this.#cachedGameSessionId = data.id;
     return data;
   }
   async #hasSessionData(): Promise<boolean> {
@@ -176,6 +183,7 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
   async #setSessionData(data: GameSessionBaseData) {
     await this.ctx.storage.put('sessionData', data);
+    this.#cachedGameSessionId = data.id;
     // invalidate state cache -- if members or random seed change,
     // it's no longer valid and must be recomputed
     this.#stateCache = undefined;
@@ -211,6 +219,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const { status } = await this.getStatus();
     if (status === 'active') {
       await this.#scheduleTurnRemindersTask();
+    } else if (status === 'pending') {
+      await this.#scheduleJoinRemindersTask();
     }
   }
 
@@ -254,6 +264,14 @@ export class GameSession extends DurableObject<ApiBindings> {
   async getHasGameStarted(): Promise<boolean> {
     const sessionData = await this.#getSessionData();
     return Boolean(sessionData.startedAt);
+  }
+  async getGameModule() {
+    const { gameId } = await this.#getSessionData();
+    if (!gameId) {
+      return null;
+    }
+
+    return games[gameId] || null;
   }
   async getGameDefinition() {
     const { gameId, gameVersion } = await this.#getSessionData();
@@ -1506,6 +1524,15 @@ export class GameSession extends DurableObject<ApiBindings> {
     this.log('debug', `Sending turn reminders to players`);
     const roundState = await this.#getCurrentRoundState();
     for (const playerId of roundState.pendingTurns) {
+      // if player is online now, don't send notification.
+      if (await this.presence.getIsOnline(playerId)) {
+        this.log(
+          'debug',
+          `Player ${playerId} is online, skipping turn reminder notification`,
+        );
+        continue;
+      }
+
       try {
         await this.#notifyPlayerOfTurn(playerId);
       } catch (err) {
@@ -1514,6 +1541,56 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     if (roundState.pendingTurns.length > 0) {
       await this.#scheduleTurnRemindersTask();
+    }
+  };
+
+  #scheduleJoinRemindersTask = async () => {
+    const hasScheduledTask = await this.#scheduler.hasTask('invite-reminders');
+    if (hasScheduledTask) {
+      this.log('debug', `Invite reminders task already scheduled, skipping`);
+      return;
+    }
+    // schedule a follow up for 24 hours later to remind players to join
+    const reminderTime = addHours(new Date(), 24);
+    this.log(
+      'debug',
+      `Scheduling invite reminders for ${reminderTime.toISOString()} (24 hours from now)`,
+    );
+    return this.#scheduler.scheduleTask(
+      reminderTime,
+      { type: 'joinReminders' },
+      'invite-reminders',
+    );
+  };
+  #sendJoinReminders = async () => {
+    const status = await this.getStatus();
+    if (status.status !== 'pending') {
+      this.log('debug', `Game is not pending, skipping join reminders`);
+      return;
+    }
+    this.log('debug', `Sending join reminders to players`);
+    const sessionId = (await this.#getSessionData()).id;
+    const gameTitle = (await this.getGameModule())?.title;
+    const pendingInvites = await this.env.ADMIN_STORE.getInvitedPlayerIds(
+      sessionId,
+      { statusFilter: 'pending' },
+    );
+    for (const { userId: playerId, createdAt } of pendingInvites) {
+      try {
+        await notifyUser(
+          playerId,
+          {
+            type: 'game-invite-reminder',
+            gameSessionId: sessionId,
+            id: id('no'),
+            invitedAt: createdAt,
+            gameTitle,
+          },
+          this.env,
+        );
+      } catch (err) {
+        this.log('error', `Failed to send join reminder to ${playerId}`, err);
+      }
     }
   };
 
@@ -1531,6 +1608,10 @@ export class GameSession extends DurableObject<ApiBindings> {
         }
       case 'turnReminders':
         return this.#sendTurnReminders();
+      case 'joinReminders':
+        return this.#sendJoinReminders();
+      default:
+        this.log('error', `Unknown scheduled task type: ${(task as any).type}`);
     }
   };
 

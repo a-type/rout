@@ -535,4 +535,29 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
   async deleteGameSession(id: PrefixedId<'gs'>) {
     await this.#db.deleteFrom('GameSession').where('id', '=', id).execute();
   }
+
+  async getInvitedPlayerIds(
+    gameSessionId: PrefixedId<'gs'>,
+    {
+      statusFilter,
+    }: {
+      statusFilter?: 'pending' | 'accepted' | 'declined';
+    } = {},
+  ) {
+    const builder = this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', gameSessionId)
+      .select([
+        'GameSessionInvitation.userId',
+        'GameSessionInvitation.createdAt',
+        'GameSessionInvitation.status',
+        'GameSessionInvitation.expiresAt',
+      ]);
+
+    if (statusFilter) {
+      builder.where('status', '=', statusFilter);
+    }
+
+    return builder.execute();
+  }
 }
