@@ -14,7 +14,6 @@ export class PublicSdk extends BaseSdk {
       displayName?: string;
       color?: string;
       imageUrl?: string;
-      sendEmailUpdates?: boolean;
     }) => ({ json: input }),
     invalidate: [['getMe']],
   });

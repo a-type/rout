@@ -153,13 +153,11 @@ export class UserStore extends RpcTarget {
     displayName,
     color,
     imageUrl,
-    sendEmailUpdates,
     timezone,
   }: {
     displayName?: string;
     color?: string | null;
     imageUrl?: string | null;
-    sendEmailUpdates?: boolean;
     timezone?: string | null;
   }) {
     return this.#db
@@ -169,28 +167,6 @@ export class UserStore extends RpcTarget {
         color,
         imageUrl,
         timezone,
-        notificationSettings: {
-          'turn-ready': {
-            push: false,
-            email: sendEmailUpdates ?? false,
-          },
-          'friend-invite': {
-            push: false,
-            email: sendEmailUpdates ?? false,
-          },
-          'game-invite': {
-            push: false,
-            email: sendEmailUpdates ?? false,
-          },
-          'new-game': {
-            push: false,
-            email: sendEmailUpdates ?? false,
-          },
-          'game-abandoned': {
-            push: false,
-            email: sendEmailUpdates ?? false,
-          },
-        },
       })
       .where('id', '=', this.#userId)
       .returningAll()

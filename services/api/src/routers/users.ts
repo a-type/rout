@@ -63,7 +63,6 @@ export const usersRouter = new Hono<Env>()
         displayName: z.string().optional(),
         color: z.string().optional(),
         imageUrl: z.string().optional(),
-        sendEmailUpdates: z.boolean().optional(),
         timezone: z.string().optional(),
       }),
     ),
