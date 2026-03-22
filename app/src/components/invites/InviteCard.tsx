@@ -2,6 +2,7 @@ import { Box, Card, clsx, Icon } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
 import { Link } from '@verdant-web/react-router';
 import { GameIcon } from '../games/GameIcon';
+import { GameSessionMenu } from '../games/GameSessionMenu';
 import { GameTitle } from '../games/GameTitle';
 import { GameSessionMemberAvatars } from '../memberships/GameSessionMemberAvatars';
 
@@ -28,17 +29,22 @@ export function InviteCard({ session, className }: InviteCardProps) {
         className="flex flex-row justify-between items-center gap-md p-sm font-bold"
         compact
       >
-        <Box gap="sm" surface color="gray" items="center" p="sm">
-          <GameSessionMemberAvatars sessionId={session.id} />
-          {session.invitationStatus === 'pending' ? (
-            "You're invited!"
-          ) : session.gameId ? (
-            <span>
-              <GameTitle gameId={session.gameId} /> - Waiting...
-            </span>
-          ) : (
-            'Picking game...'
-          )}
+        <Box gap items="center">
+          <GameSessionMenu sessionId={session.id} emphasis="ghost" />
+          <Box gap="sm" col items="start">
+            <GameSessionMemberAvatars sessionId={session.id} />
+            <Box surface color="gray" p="sm">
+              {session.invitationStatus === 'pending' ? (
+                "You're invited!"
+              ) : session.gameId ? (
+                <span>
+                  <GameTitle gameId={session.gameId} /> - Waiting...
+                </span>
+              ) : (
+                'Picking game...'
+              )}
+            </Box>
+          </Box>
         </Box>
         <Box gap="sm" items="center" color="gray" surface p="sm">
           Join
