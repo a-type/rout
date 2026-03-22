@@ -1,7 +1,7 @@
 import { MainNav } from '@/components/nav/MainNav';
 import { GameStore } from '@/components/store/GameStore';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
-import { Box, H2, PageContent, PageNav, PageRoot, Tabs } from '@a-type/ui';
+import { Box, H2, PageContent, PageRoot, Tabs } from '@a-type/ui';
 import { useNavigate } from '@verdant-web/react-router';
 
 const LibraryPage = () => {
@@ -10,6 +10,7 @@ const LibraryPage = () => {
   return (
     <PageRoot>
       <PageContent>
+        <MainNav />
         <Box d="col" gap>
           <Tabs
             value="store"
@@ -28,9 +29,6 @@ const LibraryPage = () => {
           </Box>
         </Box>
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 };

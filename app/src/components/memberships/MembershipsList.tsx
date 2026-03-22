@@ -1,8 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card, Icon } from '@a-type/ui';
+import { Box, Button, Card } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
 import { ReactNode } from 'react';
-import { CreateGame } from '../games/CreateGame.js';
 import { GameSummaryCard } from './GameSummaryCard.js';
 
 export const MembershipsList = withSuspense(function MembershipsList({
@@ -27,11 +26,6 @@ export const MembershipsList = withSuspense(function MembershipsList({
         <Box full="width" layout="center center" p className="min-h-8">
           <Box col gap className="color-gray-dark" layout="center center">
             {emptyState || "You're not a member of any online games."}
-            {(!statusFilter || statusFilter.includes('active')) && (
-              <CreateGame size="small" emphasis="ghost">
-                Start Playing <Icon name="arrowRight" />
-              </CreateGame>
-            )}
           </Box>
         </Box>
       )}

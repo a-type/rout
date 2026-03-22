@@ -6,13 +6,13 @@ import { UserAvatar } from '../users/UserAvatar.js';
 export function FriendInvites() {
   return (
     <Box d="col" gap>
-      <IncomingInvites />
-      <OutgoingInvites />
+      <IncomingFriendRequests />
+      <OutgoingFriendRequests />
     </Box>
   );
 }
 
-export function IncomingInvites(props: BoxProps) {
+export function IncomingFriendRequests(props: BoxProps) {
   const { data: invites } = sdkHooks.useGetFriendshipInvites({
     direction: 'incoming',
   });
@@ -83,7 +83,7 @@ function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   );
 }
 
-export function OutgoingInvites(props: BoxProps) {
+export function OutgoingFriendRequests(props: BoxProps) {
   const { data: invites } = sdkHooks.useGetFriendshipInvites({
     direction: 'outgoing',
   });

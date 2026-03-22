@@ -5,16 +5,12 @@ import { HotseatBackend } from '@long-game/game-client';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode } from 'react';
 
-export interface CreateHotseatProps extends ButtonProps {
+export interface StartHotseatProps extends ButtonProps {
   children?: ReactNode;
   gameId?: string;
 }
 
-export function CreateHotseat({
-  children,
-  gameId,
-  ...rest
-}: CreateHotseatProps) {
+export function StartHotseat({ children, gameId, ...rest }: StartHotseatProps) {
   const navigate = useNavigate();
   return (
     <Button

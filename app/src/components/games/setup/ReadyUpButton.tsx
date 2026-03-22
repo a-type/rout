@@ -1,7 +1,7 @@
-import { AvatarList, Box, clsx, Icon } from '@a-type/ui';
+import { AvatarList, Box, Button, clsx, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { PlayerAvatar, TopographyButton } from '@long-game/game-ui';
+import { PlayerAvatar } from '@long-game/game-ui';
 import { ReactNode } from 'react';
 
 export interface ReadyUpButtonProps {
@@ -20,17 +20,15 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
     const cannotStart = insufficientPlayers || tooManyPlayers || noGame;
 
     return (
-      <TopographyButton
+      <Button
         disabled={cannotStart}
         onClick={() => gameSuite.toggleReady()}
-        disableTopography={amIReady}
         emphasis={cannotStart ? 'default' : 'primary'}
         className={clsx(
-          'w-full disabled:opacity-100 data-[disabled]:opacity-100',
+          'w-full disabled:opacity-100 data-[disabled]:opacity-100 justify-between',
           className,
         )}
         color={cannotStart ? 'gray' : 'primary'}
-        wrapperClassName="justify-between w-full "
       >
         <Box gap>
           <Icon
@@ -57,7 +55,7 @@ export const ReadyUpButton = withGame<ReadyUpButtonProps>(
             </AvatarList.ItemRoot>
           ))}
         </AvatarList>
-      </TopographyButton>
+      </Button>
     );
   },
 );

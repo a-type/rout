@@ -8,8 +8,8 @@ import {
 } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
-import { CreateHotseat } from '../games/CreateHotseat';
 import { GameIcon } from '../games/GameIcon';
+import { StartHotseat } from '../games/StartHotseat';
 import { GameSessionStatusChip } from './GameSessionStatusChip';
 
 export interface HotseatGamesListProps {
@@ -29,9 +29,9 @@ export const HotseatGamesList = withSuspense(function HotseatGamesList({
       <Box col gap layout="center center" className="text-gray-dark">
         <div>No hotseat games</div>
         <div>Play unlimited games by passing around this device</div>
-        <CreateHotseat emphasis="ghost" size="small">
+        <StartHotseat emphasis="ghost" size="small">
           Play Hotseat <Icon name="arrowRight" />
-        </CreateHotseat>
+        </StartHotseat>
       </Box>
     );
   }

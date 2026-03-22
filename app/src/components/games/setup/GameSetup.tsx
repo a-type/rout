@@ -1,6 +1,7 @@
 import { Box, clsx, H1, Tabs } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
+import { TopographyBackground } from '@long-game/game-ui';
 import { useSearchParams } from '@verdant-web/react-router';
 import { startTransition } from 'react';
 import { GameStartingNotice } from '../GameStartingNotice.js';
@@ -59,6 +60,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         border
         elevated="md"
       >
+        <TopographyBackground />
         <GameSelectionBanner gameId={gameSuite.gameId} />
         <div className="p-sm">
           <ReadyUpButton />

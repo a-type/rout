@@ -1,11 +1,12 @@
 import { MainNav } from '@/components/nav/MainNav';
-import { Box, H1, PageContent, PageNav, PageRoot } from '@a-type/ui';
+import { Box, H1, PageContent, PageRoot } from '@a-type/ui';
 import { Link, Outlet } from '@verdant-web/react-router';
 
 const AdminPage = () => {
   return (
     <PageRoot>
       <PageContent>
+        <MainNav />
         <H1>Admin</H1>
         <Box gap>
           <Link to="/admin/products">Products</Link>
@@ -14,9 +15,6 @@ const AdminPage = () => {
         </Box>
         <Outlet />
       </PageContent>
-      <PageNav>
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 };

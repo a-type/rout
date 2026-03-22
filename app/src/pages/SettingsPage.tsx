@@ -14,7 +14,6 @@ import {
   H1,
   H2,
   PageContent,
-  PageNav,
   PageRoot,
 } from '@a-type/ui';
 import { Link } from '@verdant-web/react-router';
@@ -28,6 +27,7 @@ export function SettingsPage({}: SettingsPageProps) {
   return (
     <PageRoot>
       <PageContent>
+        <MainNav />
         <Box d="col" gap>
           <H1>Settings</H1>
 
@@ -65,9 +65,6 @@ export function SettingsPage({}: SettingsPageProps) {
           )}
         </Box>
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 }

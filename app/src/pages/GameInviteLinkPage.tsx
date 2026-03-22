@@ -4,15 +4,7 @@ import { EditProfileForm } from '@/components/users/EditProfile';
 import { UserAvatar } from '@/components/users/UserAvatar';
 import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
-import {
-  Box,
-  Button,
-  P,
-  PageContent,
-  PageNav,
-  PageRoot,
-  toast,
-} from '@a-type/ui';
+import { Box, Button, P, PageContent, PageRoot, toast } from '@a-type/ui';
 import { TopographyBackground } from '@long-game/game-ui';
 import { Link, useNavigate, useParams } from '@verdant-web/react-router';
 
@@ -74,6 +66,7 @@ const GameInviteLinkPage = () => {
     <PageRoot>
       <TopographyBackground />
       <PageContent>
+        <MainNav />
         <Box d="col" gap layout="center center" full grow>
           <UserAvatar userId={me.id} className="aspect-1 w-20vmin" />
           {me.displayName && (
@@ -101,9 +94,6 @@ const GameInviteLinkPage = () => {
           )}
         </Box>
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 };

@@ -1,9 +1,9 @@
 import { Wordmark } from '@/components/brand/Wordmark';
-import { CreateGame } from '@/components/games/CreateGame';
-import { CreateHotseat } from '@/components/games/CreateHotseat';
 import { GameIcon } from '@/components/games/GameIcon';
 import { GameManual } from '@/components/games/GameManual';
 import { GameScreenshotGallery } from '@/components/games/GameScreenshotGallery';
+import { StartHotseat } from '@/components/games/StartHotseat';
+import { StartOnline } from '@/components/games/StartOnline';
 import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import {
@@ -69,21 +69,21 @@ const PublicGamePage = () => {
           </Box>
 
           <PageNowPlaying className="flex flex-row items-center justify-center">
-            <CreateHotseat
+            <StartHotseat
               gameId={gameId}
               emphasis="default"
               className="shadow-md"
             >
               <Icon name="phone" /> Try Hotseat
-            </CreateHotseat>
+            </StartHotseat>
             {me ? (
-              <CreateGame
+              <StartOnline
                 gameId={gameId}
                 emphasis="primary"
                 className="shadow-md"
               >
                 <Icon name="gamePiece" /> Play with Friends
-              </CreateGame>
+              </StartOnline>
             ) : (
               <Button
                 className="shadow-md"

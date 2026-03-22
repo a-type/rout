@@ -1,21 +1,11 @@
 import { sdkHooks } from '@/services/publicSdk';
-import {
-  AvatarList,
-  Button,
-  Card,
-  Chip,
-  clsx,
-  DropdownMenu,
-  Icon,
-  toast,
-} from '@a-type/ui';
-import { PrefixedId } from '@long-game/common';
+import { Card, Chip, clsx } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
-import { Suspense } from 'react';
 import { GameIcon } from '../games/GameIcon.js';
-import { UserAvatar } from '../users/UserAvatar.js';
+import { GameSessionMenu } from '../games/GameSessionMenu.js';
+import { GameSessionMemberAvatars } from './GameSessionMemberAvatars.js';
 import { GameSessionStatusChip } from './GameSessionStatusChip.js';
 
 export interface GameSummaryCardProps {
@@ -31,8 +21,6 @@ export const GameSummaryCard = withSuspense(
   }: GameSummaryCardProps) {
     const games = sdkHooks.useGetGames().data ?? {};
     const game = summary.gameId ? games[summary.gameId] : null;
-    const deleteSession = sdkHooks.useDeleteGameSession();
-    const abandonSession = sdkHooks.useAbandonGameSession();
     const { data: me } = sdkHooks.useGetMe();
     const { data: playerStatuses } =
       sdkHooks.useGetGameSessionPlayerStatusesLazy({
@@ -65,15 +53,7 @@ export const GameSummaryCard = withSuspense(
         <Card.Main render={<Link to={`/session/${summary.id}`} />}>
           <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
           <Card.Content unstyled>
-            <Suspense
-              fallback={
-                <AvatarList count={1}>
-                  <AvatarList.Item index={0} />
-                </AvatarList>
-              }
-            >
-              <GameSummaryCardMembers sessionId={summary.id} />
-            </Suspense>
+            <GameSessionMemberAvatars sessionId={summary.id} />
           </Card.Content>
           <Card.Content unstyled className="flex flex-row gap-sm">
             {isMyTurn && (
@@ -87,52 +67,11 @@ export const GameSummaryCard = withSuspense(
         {showMenu && (
           <Card.Footer>
             <Card.Menu>
-              <DropdownMenu>
-                <DropdownMenu.Trigger
-                  render={
-                    <Button
-                      size="small"
-                      emphasis="default"
-                      className="min-h-0"
-                    />
-                  }
-                >
-                  <Icon name="dots" />
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                  {canDelete && (
-                    <DropdownMenu.Item
-                      onClick={() => {
-                        deleteSession.mutate({ id: summary.id });
-                      }}
-                      color="attention"
-                    >
-                      Delete
-                      <DropdownMenu.ItemRightSlot>
-                        <Icon name="trash" />
-                      </DropdownMenu.ItemRightSlot>
-                    </DropdownMenu.Item>
-                  )}
-                  {canAbandon && (
-                    <DropdownMenu.Item
-                      onClick={async () => {
-                        const confirmed = confirm(
-                          'This will end the game for everyone. Other players will be notified the game is over. Are you sure you want to abandon this game?',
-                        );
-                        if (!confirmed) return;
-                        await abandonSession.mutateAsync({ id: summary.id });
-                        toast(`You abandoned this game.`);
-                      }}
-                      color="attention"
-                    >
-                      Abandon
-                      <DropdownMenu.ItemRightSlot>
-                        <Icon name="flag" />
-                      </DropdownMenu.ItemRightSlot>
-                    </DropdownMenu.Item>
-                  )}
-                </DropdownMenu.Content>
-              </DropdownMenu>
+              <GameSessionMenu
+                sessionId={summary.id}
+                canDelete={canDelete}
+                canAbandon={canAbandon}
+              />
             </Card.Menu>
           </Card.Footer>
         )}
@@ -141,22 +80,3 @@ export const GameSummaryCard = withSuspense(
   },
   <Card />,
 );
-
-const GameSummaryCardMembers = ({
-  sessionId,
-}: {
-  sessionId: PrefixedId<'gs'>;
-}) => {
-  const { data: members } = sdkHooks.useGetGameSessionMembers({
-    id: sessionId,
-  });
-  return (
-    <AvatarList count={members.length}>
-      {members.map((m, i) => (
-        <AvatarList.ItemRoot key={m.id} index={i}>
-          <UserAvatar userId={m.id} />
-        </AvatarList.ItemRoot>
-      ))}
-    </AvatarList>
-  );
-};

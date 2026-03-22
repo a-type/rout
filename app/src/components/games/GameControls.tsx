@@ -5,11 +5,13 @@ import {
   PlayerStatuses,
   RoundHistoryControl,
 } from '@long-game/game-ui';
+import { useNavigate } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { NotificationsButton } from '../notifications/NotificationsButton.js';
 import { GameLayout } from './GameLayout.js';
 import { GameLog } from './GameLog.js';
 import { GameManualDialog } from './GameManualDialog.js';
+import { GameSessionMenu } from './GameSessionMenu.js';
 import { NavigationControls } from './NavigationControls.js';
 
 export interface GameControlsProps {
@@ -20,6 +22,7 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
   pregame,
   gameSuite,
 }) {
+  const navigate = useNavigate();
   return (
     <>
       <GameLayout.Controls>
@@ -34,6 +37,13 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
             <Suspense>
               <GameDebugger size="small" color="accent" emphasis="ghost" />
             </Suspense>
+            <GameSessionMenu
+              emphasis="ghost"
+              sessionId={gameSuite.gameSessionId}
+              canAbandon
+              canDelete={pregame}
+              onDeleteOrAbandon={() => navigate('/')}
+            />
             <PlayerStatuses className="flex-shrink-1" />
           </Box>
           {!pregame && (

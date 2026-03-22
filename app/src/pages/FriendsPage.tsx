@@ -3,7 +3,7 @@ import { FriendsList } from '@/components/friendships/FriendsList';
 import { SendInvite } from '@/components/friendships/SendInvite';
 import { MainNav } from '@/components/nav/MainNav';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
-import { PageContent, PageNav, PageRoot } from '@a-type/ui';
+import { PageContent, PageRoot } from '@a-type/ui';
 
 export interface FriendsPageProps {}
 
@@ -12,13 +12,11 @@ export function FriendsPage({}: FriendsPageProps) {
   return (
     <PageRoot>
       <PageContent gap="lg">
+        <MainNav />
         <FriendInvites />
         <SendInvite />
         <FriendsList />
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 }

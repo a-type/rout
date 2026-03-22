@@ -138,8 +138,8 @@ const DEFAULT_COLORS = {
     gradient: [0xfd8fff, 0xf9f9ff],
   },
   dark: {
-    background: 0x29196e,
-    gradient: [0x622862, 0xb3b1d0],
+    background: 0x39297e,
+    gradient: [0x420842, 0x9391b0],
   },
 };
 
@@ -155,8 +155,8 @@ function paletteColors(palette: PlayerColorPalette, mode: 'light' | 'dark') {
   return {
     background: mode === 'light' ? colors[0] : colors[11],
     gradient: [
-      colors[Math.floor(colors.length * 0.1)],
-      colors[Math.floor(colors.length * 0.6)],
+      colors[Math.floor(colors.length * 0.5)],
+      colors[Math.floor(colors.length * 0.7)],
     ],
   };
 }

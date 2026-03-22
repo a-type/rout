@@ -1,6 +1,6 @@
 import { GameManual } from '@/components/games/GameManual';
 import { MainNav } from '@/components/nav/MainNav';
-import { Button, Icon, PageContent, PageNav, PageRoot } from '@a-type/ui';
+import { Button, Icon, PageContent, PageRoot } from '@a-type/ui';
 import { Link, useParams } from '@verdant-web/react-router';
 
 const GameDetailsPage = () => {
@@ -8,6 +8,7 @@ const GameDetailsPage = () => {
   return (
     <PageRoot>
       <PageContent>
+        <MainNav />
         <Button
           emphasis="ghost"
           className="mr-auto my-md"
@@ -18,9 +19,6 @@ const GameDetailsPage = () => {
         </Button>
         <GameManual gameId={gameId} />
       </PageContent>
-      <PageNav className="bg-white/80 md:rounded-md">
-        <MainNav />
-      </PageNav>
     </PageRoot>
   );
 };
