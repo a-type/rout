@@ -1,6 +1,6 @@
 import { gameModules } from '@/services/games.js';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, ButtonProps, Card, clsx, Icon, QuickAction } from '@a-type/ui';
+import { Box, ButtonProps, Card, clsx, Dialog, Icon } from '@a-type/ui';
 import { genericId, LongGameError, PrefixedId } from '@long-game/common';
 import { HotseatBackend } from '@long-game/game-client';
 import { TopographyBackground, withSuspense } from '@long-game/game-ui';
@@ -40,8 +40,8 @@ export const NewGameAction = withSuspense(function NewGameAction({
   };
 
   return (
-    <QuickAction>
-      <QuickAction.Trigger
+    <Dialog>
+      <Dialog.Trigger
         color="primary"
         className={clsx(
           'overflow-clip border-thick border-primary-dark w-[64px] aspect-1',
@@ -51,10 +51,20 @@ export const NewGameAction = withSuspense(function NewGameAction({
       >
         <TopographyBackground />
         <Icon name="plus" className="relative z-1 w-[24px] h-[24px] stroke-2" />
-      </QuickAction.Trigger>
-      <QuickAction.Content className="w-400px max-w-screen p-md">
+      </Dialog.Trigger>
+      <Dialog.Content
+        disableSheet
+        className={clsx(
+          'w-100lvw h-100vh max-w-unset max-h-unset',
+          'rd-none b-none inset-0',
+          'start-end:translate-x-full',
+          'translate-0',
+          'bg-primary-wash',
+        )}
+      >
         <TopographyBackground />
-        <Box col gap>
+        <Box col gap className="relative z-1">
+          <Dialog.Title>Start a New Game</Dialog.Title>
           <Suspense>
             <GameLimitUpsell />
             <Card>
@@ -77,7 +87,7 @@ export const NewGameAction = withSuspense(function NewGameAction({
             </Card>
           </Suspense>
         </Box>
-      </QuickAction.Content>
-    </QuickAction>
+      </Dialog.Content>
+    </Dialog>
   );
 });
