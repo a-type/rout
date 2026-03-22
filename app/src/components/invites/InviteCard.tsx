@@ -13,7 +13,9 @@ export interface InviteCardProps {
 
 export function InviteCard({ session, className }: InviteCardProps) {
   return (
-    <Card className={clsx(className)}>
+    <Card
+      className={clsx('flex flex-row items-center gap-sm pl-sm', className)}
+    >
       {session.gameId && (
         <Card.Image>
           <Card.Image>
@@ -24,13 +26,18 @@ export function InviteCard({ session, className }: InviteCardProps) {
           </Card.Image>
         </Card.Image>
       )}
+      <GameSessionMenu
+        sessionId={session.id}
+        emphasis="ghost"
+        canAbandon
+        canDelete={session.canDelete}
+      />
       <Card.Main
         render={<Link to={`/session/${session.id}`} />}
-        className="flex flex-row justify-between items-center gap-md p-sm font-bold"
+        className="flex flex-row justify-between items-center gap-md p-sm font-bold rd-lg"
         compact
       >
         <Box gap items="center">
-          <GameSessionMenu sessionId={session.id} emphasis="ghost" />
           <Box gap="sm" col items="start">
             <GameSessionMemberAvatars sessionId={session.id} />
             <Box surface color="gray" p="sm">
