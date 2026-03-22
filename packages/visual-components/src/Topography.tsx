@@ -138,8 +138,8 @@ const DEFAULT_COLORS = {
     gradient: [0xfd8fff, 0xf9f9ff],
   },
   dark: {
-    background: 0x39297e,
-    gradient: [0x420842, 0x9391b0],
+    background: 0x49398e,
+    gradient: [0x622862, 0xb3b1d0],
   },
 };
 
@@ -174,8 +174,13 @@ export function Topography({
   const ctx = useContext(TopographyContext);
   const palette = ctx.palette;
   const [state] = useState(() => ({ scale: 1 }));
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const ref = useSize<HTMLDivElement>(({ width, height }) => {
     state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
+    setTimeout(() => {
+      canvasRef.current?.style.setProperty('width', `${width}px`);
+      canvasRef.current?.style.setProperty('height', `${height}px`);
+    }, 100);
   });
 
   const detectedMode = useSyncExternalStore(subscribeToColorModeChange, () =>
@@ -215,6 +220,7 @@ export function Topography({
             near: -1,
             far: 1,
           }}
+          ref={canvasRef}
         >
           <color attach="background" args={[background]} />
           <TopographyMesh
@@ -274,7 +280,7 @@ function TopographyMesh({
           uSpeed: { value: uSpeed ?? 1 },
         }}
       />
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[3, 3]} />
     </mesh>
   );
 }

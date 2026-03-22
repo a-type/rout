@@ -4,7 +4,7 @@ import { Box, ButtonProps, Card, clsx, Dialog, Icon } from '@a-type/ui';
 import { genericId, LongGameError, PrefixedId } from '@long-game/common';
 import { HotseatBackend } from '@long-game/game-client';
 import { TopographyBackground, withSuspense } from '@long-game/game-ui';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate, useSearchParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { GameLimitUpsell } from '../subscription/GameLimitUpsell.js';
 
@@ -16,6 +16,7 @@ export const NewGameAction = withSuspense(function NewGameAction({
 }: ButtonProps & { gameId?: string }) {
   const mutation = sdkHooks.usePrepareGameSession();
   const navigate = useNavigate();
+  const [search, setSearch] = useSearchParams();
 
   const createLive = async () => {
     const result = await mutation.mutateAsync({ gameId });
@@ -40,7 +41,19 @@ export const NewGameAction = withSuspense(function NewGameAction({
   };
 
   return (
-    <Dialog>
+    <Dialog
+      open={search.get('newGame') === 'true'}
+      onOpenChange={(open) => {
+        setSearch((prev) => {
+          if (open) {
+            prev.set('newGame', 'true');
+          } else {
+            prev.delete('newGame');
+          }
+          return prev;
+        });
+      }}
+    >
       <Dialog.Trigger
         color="primary"
         className={clsx(
@@ -55,7 +68,7 @@ export const NewGameAction = withSuspense(function NewGameAction({
       <Dialog.Content
         disableSheet
         className={clsx(
-          'w-100lvw h-100vh max-w-unset max-h-unset',
+          'w-100lvw h-100lvh max-w-unset max-h-unset',
           'rd-none b-none inset-0',
           'start-end:translate-x-full',
           'translate-0',
