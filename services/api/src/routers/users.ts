@@ -109,38 +109,12 @@ export const usersRouter = new Hono<Env>()
     userStoreMiddleware,
     zValidator(
       'json',
-      z.object({
-        'turn-ready': z
-          .object({
-            email: z.boolean(),
-            push: z.boolean(),
-          })
-          .optional(),
-        'game-invite': z
-          .object({
-            email: z.boolean(),
-            push: z.boolean(),
-          })
-          .optional(),
-        'friend-invite': z
-          .object({
-            email: z.boolean(),
-            push: z.boolean(),
-          })
-          .optional(),
-        'new-game': z
-          .object({
-            email: z.boolean(),
-            push: z.boolean(),
-          })
-          .optional(),
-        'game-abandoned': z
-          .object({
-            email: z.boolean(),
-            push: z.boolean(),
-          })
-          .optional(),
-      }),
+      z.record(
+        z.object({
+          email: z.boolean(),
+          push: z.boolean(),
+        }),
+      ),
     ),
     async (ctx) => {
       const body = ctx.req.valid('json');
