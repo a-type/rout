@@ -83,8 +83,6 @@ export class PublicStore extends WorkerEntrypoint<ApiBindings> {
         .where('GameProduct.publishedAt', '<=', dateTime(new Date()));
     }
 
-    console.log(query.compile().sql);
-
     const results = await query.execute();
     const filteredProducts = filter
       ? results.filter((product) => {
@@ -116,5 +114,15 @@ export class PublicStore extends WorkerEntrypoint<ApiBindings> {
       .selectAll('GameProduct')
       .executeTakeFirst();
     return product;
+  }
+
+  async getPublicUserProfile(id: PrefixedId<'u'>) {
+    const query = this.#db
+      .selectFrom('User as u')
+      .where('u.id', '=', id)
+      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl'])
+      .select((eb) => eb('u.imageUrl', 'is not', null).as('hasAvatar'));
+    const user = await query.executeTakeFirst();
+    return user;
   }
 }

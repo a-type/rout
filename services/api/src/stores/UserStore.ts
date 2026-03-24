@@ -117,7 +117,7 @@ export class UserStore extends RpcTarget {
 
     const user = isFriend
       ? await this.getFriendProfile(id)
-      : await this.getPublicUserProfile(id);
+      : await this.#env.PUBLIC_STORE.getPublicUserProfile(id);
 
     return this.#fillUserDefaults({
       id,
@@ -125,16 +125,6 @@ export class UserStore extends RpcTarget {
       isMe: false,
       ...user,
     });
-  }
-
-  async getPublicUserProfile(id: PrefixedId<'u'>) {
-    const query = this.#db
-      .selectFrom('User as u')
-      .where('u.id', '=', id)
-      .select(['u.id', 'u.displayName', 'u.color', 'u.imageUrl'])
-      .select((eb) => eb('u.imageUrl', 'is not', null).as('hasAvatar'));
-    const user = await query.executeTakeFirst();
-    return user;
   }
 
   /**
