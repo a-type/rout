@@ -37,6 +37,7 @@
     "@module-federation/rsbuild-plugin": "catalog:",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
+    "@rsdoctor/rspack-plugin": "^1.5.5",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@unocss/webpack": "catalog:",

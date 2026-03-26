@@ -108,7 +108,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
       className={clsx(className)}
       {...rest}
     >
-      <Box surface="white" p="lg">
+      <Box surface="white">
         <Collapsible className="w-full">
           <Collapsible.Trigger
             render={<Button size="small" emphasis="ghost" className="w-full" />}
@@ -117,7 +117,7 @@ export const GamePicker = withGame<GamePickerProps>(function GamePicker({
             Filters
           </Collapsible.Trigger>
           <Collapsible.Content>
-            <Box d="col" gap="sm" p="sm" container="reset" full items="start">
+            <Box d="col" gap="sm" container="reset" full items="start">
               <label className="flex items-center gap-xs cursor-pointer">
                 <Switch
                   checked={filters.owned}

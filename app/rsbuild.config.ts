@@ -44,21 +44,21 @@ const unoStats = {
   invalidations: 0,
   rebuilds: 0,
   deliveries: 0,
+  lastInvalidationTime: 0,
 };
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [
     pluginUnoCss({
+      logLevel: 'info',
       enableIncludeCommentCheck: (file) => {
         return (
           file.includes(path.join('@a-type', 'ui', 'dist')) ||
           file.includes(path.join('@a-type', 'auth-ui', 'dist')) ||
-          file.includes(path.join('@long-game'))
+          file.includes('@long-game')
         );
       },
-      // include tagging on monorepo dependencies is not set up
-      // || file.includes('@long-game'),
       enableCacheExtractedCSS: (file) =>
         file.includes('@long-game') ? false : file.includes('node_modules'),
 
@@ -68,13 +68,17 @@ export default defineConfig(({ command }) => ({
         },
         onCssInvalidated: () => {
           unoStats.invalidations++;
+          unoStats.lastInvalidationTime = Date.now();
         },
         onCssResolved: () => {
           unoStats.deliveries++;
-          console.log(`UnoCSS plugin stats:`);
+          console.log(new Date().toTimeString(), `UnoCSS plugin stats:`);
           console.log(`  Invalidations: ${unoStats.invalidations}`);
           console.log(`  Rebuilds: ${unoStats.rebuilds}`);
           console.log(`  Deliveries: ${unoStats.deliveries}`);
+          console.log(
+            `  Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
+          );
         },
       },
     }),
@@ -88,12 +92,15 @@ export default defineConfig(({ command }) => ({
   tools: {
     rspack: {
       plugins: [
-        new InjectManifest({
-          swDest: 'sw.js',
-        }),
+        command === 'build'
+          ? new InjectManifest({
+              swDest: 'sw.js',
+            })
+          : null,
         new ModuleFederationPlugin(federationConfig),
-      ],
+      ].filter(Boolean),
       resolve: {
+        mainFields: ['browser', 'module', 'main'],
         conditionNames:
           command === 'build'
             ? ['production', 'import', 'module', 'browser', 'default']
