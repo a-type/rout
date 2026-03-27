@@ -7,19 +7,16 @@ export default defineConfig({
     pipeline: {
       include: [
         // include all .ts and .tsx source files we encounter
-        '**/*.{ts,tsx}',
-        '../packages/*/dist/**/*.js',
-        '../packages/*/src/**/*.{ts,tsx,js,jsx}',
-        '../games/*/render/dist/**/*.js',
-        '../games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+        './src/**/*.{ts,tsx}',
+        // it seems these need to appear in both pipeline and filesystem...
+        '**/games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+        '**/packages/*/src/**/*.{ts,tsx,js,jsx}',
       ],
     },
     // include all .ts and .tsx files in all games
     filesystem: [
       '../games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
-      '../games/*/renderer/dist/**/*.js',
       '../packages/*/src/**/*.{ts,tsx,js,jsx}',
-      '../packages/*/dist/**/*.js',
     ],
   },
   preflights: [
@@ -40,7 +37,10 @@ export default defineConfig({
     name: 'default-extractor-plus-logs',
     extract(ctx) {
       // uncomment to log which files are being processed
-      if (ctx.id && ctx.id.includes('game-ui')) {
+      if (
+        ctx.id &&
+        (ctx.id.includes('renderer') || ctx.id.includes('packages'))
+      ) {
         // console.log(ctx.id);
       }
       return extractorDefault.extract!(ctx);

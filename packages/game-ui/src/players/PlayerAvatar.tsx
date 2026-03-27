@@ -18,6 +18,8 @@ export interface PlayerAvatarProps {
   interactive?: boolean;
 }
 
+const apiOrigin = import.meta.env.PUBLIC_API_ORIGIN || 'http://localhost:3101';
+
 export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
   gameSuite,
   size,
@@ -39,7 +41,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
   } else if (playerId && isHotseatPlayerId(playerId)) {
     imageUrl = null;
   } else if (playerId) {
-    const urlRaw = new URL((window as any).LONG_GAME_CONFIG.API_ORIGIN);
+    const urlRaw = new URL(apiOrigin);
     urlRaw.pathname = `/users/${playerId}/avatar`;
     imageUrl = urlRaw.toString();
   }

@@ -33,21 +33,19 @@ const federationConfig = createModuleFederationConfig({
     '@long-game/game-ui': { singleton: true, requiredVersion: '>0.0.0' },
   },
   experiments: {
-    // asyncStartup: true,
-    // optimization: {
-    //   target: 'web',
-    // },
+    asyncStartup: true,
+    optimization: {
+      target: 'web',
+    },
   },
 });
 
 const unoStats = {
   invalidations: 0,
   rebuilds: 0,
-  deliveries: 0,
   lastInvalidationTime: 0,
 };
 
-// https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [
     pluginUnoCss({
@@ -65,20 +63,16 @@ export default defineConfig(({ command }) => ({
       events: {
         onCssGenerated: () => {
           unoStats.rebuilds++;
+          console.log(new Date().toTimeString(), `UnoCSS plugin stats:`);
+          console.log(`  Invalidations: ${unoStats.invalidations}`);
+          console.log(`  Rebuilds: ${unoStats.rebuilds}`);
+          console.log(
+            `  Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
+          );
         },
         onCssInvalidated: () => {
           unoStats.invalidations++;
           unoStats.lastInvalidationTime = Date.now();
-        },
-        onCssResolved: () => {
-          unoStats.deliveries++;
-          console.log(new Date().toTimeString(), `UnoCSS plugin stats:`);
-          console.log(`  Invalidations: ${unoStats.invalidations}`);
-          console.log(`  Rebuilds: ${unoStats.rebuilds}`);
-          console.log(`  Deliveries: ${unoStats.deliveries}`);
-          console.log(
-            `  Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
-          );
         },
       },
     }),
@@ -139,5 +133,9 @@ export default defineConfig(({ command }) => ({
       host: 'localhost',
     },
     progressBar: true,
+    // this breaks UnoCSS/federation/idk - but when turned on it
+    // causes an infinite loop of refreshing CSS.
+    lazyCompilation: false,
   },
+  logLevel: 'info',
 }));
