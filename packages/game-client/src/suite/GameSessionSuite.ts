@@ -20,6 +20,7 @@ import {
   getPostgame,
   getPublicRound,
   getSummary,
+  startGame,
 } from './api.js';
 import { connectToSocket, GameSocket } from './socket.js';
 
@@ -130,24 +131,8 @@ export class GameSessionSuite<
     return getPublicRound<TGame>(this.gameSessionId, roundIndex);
   };
 
-  readyUp = () => {
-    this.ctx.socket.send({
-      type: 'readyUp',
-      unready: false,
-    });
-  };
-  unreadyUp = () => {
-    this.ctx.socket.send({
-      type: 'readyUp',
-      unready: true,
-    });
-  };
-  toggleReady = () => {
-    if (this.readyPlayers.includes(this.playerId)) {
-      this.unreadyUp();
-    } else {
-      this.readyUp();
-    }
+  startGame = async (): Promise<void> => {
+    await startGame(this.gameSessionId);
   };
 
   voteForGame = (gameId: string) => {
@@ -174,8 +159,6 @@ export class GameSessionSuite<
     this.ctx.socket.subscribe('membersChange', this.onMembersChange);
     this.ctx.socket.subscribe('turnPlayed', this.onTurnPlayed);
     this.ctx.socket.subscribe('nextRoundScheduled', this.onNextRoundScheduled);
-    this.ctx.socket.subscribe('playerReady', this.onPlayerReady);
-    this.ctx.socket.subscribe('playerUnready', this.onPlayerUnready);
     this.ctx.socket.subscribe('playerVoteForGame', this.onPlayerVoteForGame);
     this.ctx.socket.subscribe('gameStarting', this.onGameStarting);
   };

@@ -15,8 +15,6 @@ export const PlayerModal = () => {
   const [search, setSearch] = useSearchParams();
   const rawPlayerId = search.get('playerId');
 
-  console.log(rawPlayerId);
-
   const playerId =
     rawPlayerId && isPrefixedId(rawPlayerId, 'u')
       ? (rawPlayerId as PrefixedId<'u'>)

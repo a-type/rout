@@ -31,6 +31,7 @@ export * from './viewport/Viewport.js';
 export { useViewport } from './viewport/ViewportContext.js';
 export type { ViewportState } from './viewport/ViewportState.js';
 export * from './viewport/ViewportZoomControls.js';
+export * from './withErrorBoundary.js';
 export * from './withSuspense.js';
 
 export * from '@long-game/visual-components';

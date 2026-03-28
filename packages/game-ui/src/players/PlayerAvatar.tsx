@@ -1,4 +1,4 @@
-import { Avatar, Button, clsx, Tooltip } from '@a-type/ui';
+import { Avatar, AvatarList, Button, clsx, Tooltip } from '@a-type/ui';
 import {
   isHotseatPlayerId,
   isPrefixedId,
@@ -114,3 +114,17 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
     </Tooltip>
   );
 });
+
+export const PlayerAvatars = withGame<{ className?: string }>(
+  function PlayerAvatars({ gameSuite, className }) {
+    return (
+      <AvatarList className={className} count={gameSuite.members.length}>
+        {gameSuite.members.map((member, index) => (
+          <AvatarList.ItemRoot index={index} key={member.id}>
+            <PlayerAvatar playerId={member.id} />
+          </AvatarList.ItemRoot>
+        ))}
+      </AvatarList>
+    );
+  },
+);

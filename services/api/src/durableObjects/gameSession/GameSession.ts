@@ -27,7 +27,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
-import { addDays, addHours, addSeconds, addWeeks, startOfDay } from 'date-fns';
+import { addDays, addWeeks, startOfDay } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
 import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
@@ -80,9 +80,6 @@ type ScheduledTasks =
       type: 'checkRound';
     }
   | {
-      type: 'startGame';
-    }
-  | {
       type: 'turnReminders';
     }
   | {
@@ -94,7 +91,6 @@ type ScheduledTasks =
   | {
       type: 'sessionExpiry';
     };
-const startGameTaskId = '@@startGame';
 const sessionExpiryTaskId = 'session-expiry';
 
 export class GameSession extends DurableObject<ApiBindings> {
@@ -270,6 +266,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   async getId(): Promise<PrefixedId<'gs'>> {
     return (await this.#getSessionData()).id;
   }
+  async getCreatorId(): Promise<PrefixedId<'u'> | undefined> {
+    return (await this.#getSessionData()).createdBy;
+  }
   async getHasGameStarted(): Promise<boolean> {
     const sessionData = await this.#getSessionData();
     return Boolean(sessionData.startedAt);
@@ -318,76 +317,6 @@ export class GameSession extends DurableObject<ApiBindings> {
           ...member,
         }),
       );
-  }
-
-  async getIsReady(playerId: PrefixedId<'u'>): Promise<boolean> {
-    const existingReadyUp = await this.#sql.run(
-      db
-        .selectFrom('ReadyUp')
-        .select('createdAt')
-        .where('userId', '=', playerId),
-    );
-    return !!existingReadyUp.length;
-  }
-
-  async getReadyPlayers(): Promise<PrefixedId<'u'>[]> {
-    const result = await this.#sql.run(
-      db.selectFrom('ReadyUp').select('userId'),
-    );
-    return result.map((row) => row.userId);
-  }
-  async getAllPlayersReady() {
-    const members = await this.getMembers();
-    const readyPlayers = await this.getReadyPlayers();
-    return members.length > 0 && members.length === readyPlayers.length;
-  }
-
-  async readyUp(playerId: PrefixedId<'u'>) {
-    if (await this.getIsReady(playerId)) {
-      // since this method sends a notification, check before continuing
-      // to avoid duplicate notifications.
-      return;
-    }
-    await this.#sql.run(
-      db
-        .insertInto('ReadyUp')
-        .values({ userId: playerId, createdAt: new Date().toISOString() })
-        // ... but still have redundancy
-        .onConflict((oc) => oc.column('userId').doNothing()),
-    );
-    this.#socketHandler.send({
-      type: 'playerReady',
-      playerId,
-    });
-
-    // if all players are ready, set a timer to start the game in 5 seconds
-    const readyPlayers = await this.getReadyPlayers();
-    const members = await this.getMembers();
-    if (readyPlayers.length === members.length) {
-      const startsAt = addSeconds(new Date(), 5);
-      this.#scheduler.scheduleTask(
-        startsAt,
-        {
-          type: 'startGame',
-        },
-        startGameTaskId,
-      );
-      this.log('debug', 'All players ready. Starting game in 5 seconds');
-      this.#socketHandler.send({
-        type: 'gameStarting',
-        startsAt: startsAt.toISOString(),
-      });
-    }
-  }
-  async unreadyUp(playerId: PrefixedId<'u'>) {
-    await this.#sql.run(
-      db.deleteFrom('ReadyUp').where('userId', '=', playerId),
-    );
-    this.#socketHandler.send({
-      type: 'playerUnready',
-      playerId,
-    });
-    this.#scheduler.cancelTask(startGameTaskId);
   }
 
   async getGameVotes(): Promise<Record<string, PrefixedId<'u'>[]>> {
@@ -624,9 +553,22 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     }
 
+    // update to latest version of chosen game
     const gameDefinition = getLatestVersion(gameModule);
-
     await this.updateGame(sessionData.gameId, gameDefinition.version);
+
+    // validate player count
+    const members = await this.getMembers();
+    if (
+      members.length < gameDefinition.minimumPlayers ||
+      members.length > gameDefinition.maximumPlayers
+    ) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Player count must be between ${gameDefinition.minimumPlayers} and ${gameDefinition.maximumPlayers}`,
+      );
+    }
+
     // lock in setup data, if available
     if (gameDefinition.getSetupData) {
       const setupData = gameDefinition.getSetupData({
@@ -634,8 +576,8 @@ export class GameSession extends DurableObject<ApiBindings> {
       });
       await this.#setSetupData(setupData);
     }
-    await this.#updateStatus('active');
 
+    await this.#updateStatus('active');
     await this.#checkForRoundChange();
   }
   async abandonGame(abandoningPlayerId: PrefixedId<'u'>) {
@@ -907,7 +849,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     const members = await this.getMembers();
     const playerStatuses = await this.getPlayerStatuses();
     const gameVotes = await this.getGameVotes();
-    const readyPlayers = await this.getReadyPlayers();
     return {
       id: sessionData.id,
       status,
@@ -922,7 +863,6 @@ export class GameSession extends DurableObject<ApiBindings> {
       playerStatuses,
       createdBy: sessionData.createdBy ?? null,
       gameVotes,
-      readyPlayers,
     };
   }
   async resetGame() {
@@ -1648,13 +1588,15 @@ export class GameSession extends DurableObject<ApiBindings> {
         this.env,
       );
     } catch (err) {
-      this.log('error', `Failed to send join reminder to leader ${leaderId}`, err);
+      this.log(
+        'error',
+        `Failed to send join reminder to leader ${leaderId}`,
+        err,
+      );
     }
-    
+
     // reschedule for 8 AM tomorrow to keep reminding until the game starts
-    if (pendingInvites.length > 0) {
-      await this.#scheduleJoinRemindersTask();
-    }
+    await this.#scheduleJoinRemindersTask();
   };
 
   #scheduleSessionExpiryTask = async () => {
@@ -1690,10 +1632,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     switch (task.type) {
       case 'checkRound':
         return this.#checkForRoundChange();
-      case 'startGame':
-        if (await this.getAllPlayersReady()) {
-          return this.startGame();
-        }
       case 'turnReminders':
         return this.#sendTurnReminders();
       case 'joinReminders':

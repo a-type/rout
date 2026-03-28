@@ -20,9 +20,7 @@ import {
   ServerGameMembersChangeMessage,
   ServerGameStartingMessage,
   ServerNextRoundScheduledMessage,
-  ServerPlayerReadyMessage,
   ServerPlayerStatusChangeMessage,
-  ServerPlayerUnreadyMessage,
   ServerPlayerVoteForGameMessage,
   ServerRoundChangeMessage,
   ServerStatusChangeMessage,
@@ -78,7 +76,6 @@ export interface GameSuiteBaseInit {
   startedAt: string | null;
   timezone: string;
   gameVotes: Record<string, PrefixedId<'u'>[]>;
-  readyPlayers: PrefixedId<'u'>[];
   nextRoundCheckAt?: Date | string | number | null;
 }
 
@@ -156,7 +153,6 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
 
   // pregame stuff
   @observable accessor gameVotes: Record<string, PrefixedId<'u'>[]> = {};
-  @observable accessor readyPlayers: PrefixedId<'u'>[] = [];
 
   // hotseat only
   @observable accessor pickingPlayer = false;
@@ -859,9 +855,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     reaction: string,
   ): Promise<void>;
 
-  abstract readyUp(): void;
-  abstract unreadyUp(): void;
-  abstract toggleReady(): void;
+  abstract startGame(): Promise<void>;
 
   abstract voteForGame(gameId: string): void;
   abstract removeVoteForGame(gameId: string): void;
@@ -975,14 +969,6 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     await this.loadMembers();
   };
 
-  @action protected onPlayerReady = (msg: ServerPlayerReadyMessage) => {
-    this.readyPlayers.push(msg.playerId);
-  };
-  @action protected onPlayerUnready = (msg: ServerPlayerUnreadyMessage) => {
-    this.readyPlayers = this.readyPlayers.filter((id) => id !== msg.playerId);
-    this.events.emit('gameStartingCancelled');
-  };
-
   @action protected onPlayerVoteForGame = (
     msg: ServerPlayerVoteForGameMessage,
   ) => {
@@ -1065,9 +1051,6 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       : null;
     if (init.gameVotes) {
       this.gameVotes = init.gameVotes;
-    }
-    if (init.readyPlayers) {
-      this.readyPlayers = init.readyPlayers;
     }
     // wait a tick... since this gets called from the constructor...
     // subclasses haven't defined methods yet :S

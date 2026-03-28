@@ -140,15 +140,8 @@ export class HotseatGameSuite<
     // not implemented
     console.error('Chat reactions are not implemented in hotseat mode');
   };
-  readyUp = (): void => {
-    // start immediately.
-    this.ctx.backend.startGame();
-  };
-  unreadyUp = (): void => {
-    // no-op, hotseat doesn't have a ready state
-  };
-  toggleReady = (): void => {
-    this.readyUp();
+  startGame = async () => {
+    await this.ctx.backend.startGame();
   };
   voteForGame = (gameId: string): void => {
     this.ctx.backend.setGame(gameId);

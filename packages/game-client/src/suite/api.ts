@@ -41,6 +41,15 @@ export async function getPlayers(gameSessionId: PrefixedId<'gs'>) {
   return await res.json();
 }
 
+export async function startGame(gameSessionId: PrefixedId<'gs'>) {
+  const res = await apiRpc.gameSessions[':id'].start.$post({
+    param: { id: gameSessionId },
+  });
+  if (!res.ok) {
+    throw LongGameError.fromResponse(res);
+  }
+}
+
 // unfortunately need to fix the type a bit here
 export type PublicRoundResponse = InferResponseType<
   (typeof apiRpc)['gameSessions'][':id']['rounds'][':index']['$get']
