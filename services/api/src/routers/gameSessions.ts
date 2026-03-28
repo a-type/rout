@@ -30,7 +30,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
               }
               return undefined;
             },
-            z.enum(['active', 'complete', 'pending', 'abandoned']).array(),
+            z.enum(['active', 'complete', 'pending', 'abandoned', 'expired']).array(),
           )
           .optional(),
         first: z.coerce.number().int().positive().optional(),

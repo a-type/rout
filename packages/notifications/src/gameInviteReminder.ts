@@ -7,12 +7,26 @@ export interface GameInviteReminderNotification {
   gameSessionId: PrefixedId<'gs'>;
   invitedAt: string; // ISO date string
   gameTitle?: string;
+  expiresAt?: string; // ISO date string
 }
 
 export const gameInviteReminderNotification: NotificationConfig<GameInviteReminderNotification> =
   {
     type: 'game-invite-reminder',
     text(data, context) {
+      if (data.expiresAt) {
+        const expiresAt = new Date(data.expiresAt);
+        const now = new Date();
+        const daysLeft = Math.ceil(
+          (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        if (daysLeft <= 0) {
+          return `Your ${data.gameTitle ?? 'game'} session has expired.`;
+        }
+        return `Your ${data.gameTitle ?? 'game'} session expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.${
+          context === 'push' ? ' Tap to start it!' : ''
+        }`;
+      }
       const invitedAt = new Date(data.invitedAt);
       const now = new Date();
       const daysAgo = Math.floor(

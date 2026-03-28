@@ -27,7 +27,7 @@ import {
 } from '@long-game/game-definition';
 import games from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
-import { addDays, addHours, addSeconds, startOfDay } from 'date-fns';
+import { addDays, addHours, addSeconds, addWeeks, startOfDay } from 'date-fns';
 import { z } from 'zod';
 import { notifyUser } from '../../services/notification.js';
 import { getNotificationScheduler } from '../notificationScheduler/NotificationScheduler.js';
@@ -44,6 +44,7 @@ export interface GameSessionBaseData {
   startedAt: string | null;
   endedAt: string | null;
   abandonedAt?: string | null;
+  expiredAt?: string | null;
   gameId?: string;
   gameVersion?: string;
   timezone: string;
@@ -89,8 +90,12 @@ type ScheduledTasks =
     }
   | {
       type: 'readyReminders';
+    }
+  | {
+      type: 'sessionExpiry';
     };
 const startGameTaskId = '@@startGame';
+const sessionExpiryTaskId = 'session-expiry';
 
 export class GameSession extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
@@ -221,6 +226,10 @@ export class GameSession extends DurableObject<ApiBindings> {
       await this.#scheduleTurnRemindersTask();
     } else if (status === 'pending') {
       await this.#scheduleJoinRemindersTask();
+      // Only schedule expiry if not already scheduled (don't reset the clock on restart)
+      if (!(await this.#scheduler.hasTask(sessionExpiryTaskId))) {
+        await this.#scheduleSessionExpiryTask();
+      }
     }
   }
 
@@ -520,6 +529,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     };
     await this.#setSessionData(sessionData);
     await this.#updateStatus('pending');
+    // Schedule expiry for 1 week from now
+    await this.#scheduleSessionExpiryTask();
     return sessionData;
   }
   async updateMembers(members: GameSessionMember[]): Promise<void> {
@@ -547,6 +558,10 @@ export class GameSession extends DurableObject<ApiBindings> {
           ).join(', ')}`,
         );
       }
+    } else {
+      // Refresh the expiry schedule whenever members change while game is pending
+      // (e.g., when a new member accepts an invite)
+      await this.#scheduleSessionExpiryTask();
     }
     // deduplicate colors - if a color has been used, reassign a random unused one.
     members = deduplicatePlayerColors(members);
@@ -863,6 +878,9 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     const sessionData = await this.#getSessionData();
     if (!sessionData.startedAt) {
+      if (sessionData.expiredAt) {
+        return { status: 'expired' };
+      }
       return { status: 'pending' };
     }
     if (sessionData.abandonedAt) {
@@ -1146,7 +1164,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   // private state
-  async #updateStatus(status: 'pending' | 'active' | 'complete' | 'abandoned') {
+  async #updateStatus(
+    status: 'pending' | 'active' | 'complete' | 'abandoned' | 'expired',
+  ) {
     const currentData = await this.#getSessionData();
     if (status === 'active') {
       if (!currentData.startedAt) {
@@ -1154,6 +1174,8 @@ export class GameSession extends DurableObject<ApiBindings> {
           startedAt: new Date().toISOString(),
         });
       }
+      // Cancel expiry when game becomes active
+      await this.#scheduler.cancelTask(sessionExpiryTaskId);
     } else if (status === 'complete' || status === 'abandoned') {
       if (!currentData.endedAt) {
         await this.#updateSessionData({
@@ -1176,6 +1198,15 @@ export class GameSession extends DurableObject<ApiBindings> {
             );
           }
         }
+      }
+      // Cancel expiry when game ends
+      await this.#scheduler.cancelTask(sessionExpiryTaskId);
+    } else if (status === 'expired') {
+      if (!currentData.expiredAt) {
+        await this.#updateSessionData({
+          expiredAt: new Date().toISOString(),
+          endedAt: new Date().toISOString(),
+        });
       }
     }
     // this updates in local state, but also writes to the entry in D1 for this session,
@@ -1568,30 +1599,61 @@ export class GameSession extends DurableObject<ApiBindings> {
       this.log('debug', `Game is not pending, skipping join reminders`);
       return;
     }
-    this.log('debug', `Sending join reminders to players`);
-    const sessionId = (await this.#getSessionData()).id;
+    this.log('debug', `Sending join reminder to game leader`);
+    const sessionData = await this.#getSessionData();
+    const sessionId = sessionData.id;
     const gameTitle = (await this.getGameModule())?.title;
-    const pendingInvites = await this.env.ADMIN_STORE.getInvitedPlayerIds(
-      sessionId,
-      { statusFilter: 'pending' },
-    );
-    for (const { userId: playerId, createdAt } of pendingInvites) {
-      try {
-        await notifyUser(
-          playerId,
-          {
-            type: 'game-invite-reminder',
-            gameSessionId: sessionId,
-            id: id('no'),
-            invitedAt: createdAt,
-            gameTitle,
-          },
-          this.env,
-        );
-      } catch (err) {
-        this.log('error', `Failed to send join reminder to ${playerId}`, err);
-      }
+    const leaderId = sessionData.createdBy;
+    if (!leaderId) {
+      this.log('debug', `No game leader found, skipping join reminders`);
+      return;
     }
+    // Get the actual expiry time from the scheduled task if available
+    const scheduledExpiresAt =
+      await this.#scheduler.getTaskScheduledAt(sessionExpiryTaskId);
+    const expiresAt =
+      scheduledExpiresAt ?? addWeeks(new Date(sessionData.createdAt), 1);
+    try {
+      await notifyUser(
+        leaderId,
+        {
+          type: 'game-invite-reminder',
+          gameSessionId: sessionId,
+          id: id('no'),
+          invitedAt: sessionData.createdAt,
+          gameTitle,
+          expiresAt: expiresAt.toISOString(),
+        },
+        this.env,
+      );
+    } catch (err) {
+      this.log('error', `Failed to send join reminder to leader ${leaderId}`, err);
+    }
+  };
+
+  #scheduleSessionExpiryTask = async () => {
+    const expiresAt = addWeeks(new Date(), 1);
+    this.log(
+      'debug',
+      `Scheduling session expiry for ${expiresAt.toISOString()} (1 week from now)`,
+    );
+    return this.#scheduler.scheduleTask(
+      expiresAt,
+      { type: 'sessionExpiry' },
+      sessionExpiryTaskId,
+    );
+  };
+  #expireSession = async () => {
+    const status = await this.getStatus();
+    if (status.status !== 'pending') {
+      this.log(
+        'debug',
+        `Game is not pending (status: ${status.status}), skipping expiry`,
+      );
+      return;
+    }
+    this.log('debug', `Expiring game session`);
+    await this.#updateStatus('expired');
   };
 
   async alarm() {
@@ -1610,6 +1672,8 @@ export class GameSession extends DurableObject<ApiBindings> {
         return this.#sendTurnReminders();
       case 'joinReminders':
         return this.#sendJoinReminders();
+      case 'sessionExpiry':
+        return this.#expireSession();
       default:
         this.log('error', `Unknown scheduled task type: ${(task as any).type}`);
     }

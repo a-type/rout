@@ -492,7 +492,7 @@ export class UserStore extends RpcTarget {
 
   async getGameSessions(
     filter: {
-      status?: ('pending' | 'active' | 'complete' | 'abandoned')[];
+      status?: ('pending' | 'active' | 'complete' | 'abandoned' | 'expired')[];
       invitationStatus?: 'pending' | 'accepted' | 'declined' | 'expired';
       first?: number;
       before?: string;

@@ -132,6 +132,16 @@ export class Scheduler<Tasks extends { type: string; data?: any }> {
     return result[0]?.count > 0;
   };
 
+  getTaskScheduledAt = async (taskId: string): Promise<Date | null> => {
+    const result = await this.sql.run<{ scheduledAt: string }>(
+      db
+        .selectFrom('ScheduledTask')
+        .select('scheduledAt')
+        .where('id', '=', taskId),
+    );
+    return result[0] ? new Date(result[0].scheduledAt) : null;
+  };
+
   handleAlarm = async () => {
     // get all tasks that are due
     const bufferSeconds = 5;

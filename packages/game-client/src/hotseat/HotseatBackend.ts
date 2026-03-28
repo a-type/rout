@@ -45,7 +45,7 @@ export type HotseatGameDetails = {
   randomSeed: string;
   createdAt: string;
   startedAt: string | null;
-  status: 'pending' | 'active' | 'complete' | 'abandoned';
+  status: 'pending' | 'active' | 'complete' | 'abandoned' | 'expired';
   members: HotseatPlayer[];
   winnerIds: PrefixedId<'u'>[] | null;
   roundIndex: number;
