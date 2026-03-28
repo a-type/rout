@@ -65,7 +65,7 @@ export function DomHexMap({
       }}
     >
       <div
-        {...props}
+        {...(props as any)}
         style={{
           width: actualWidth,
           height: actualHeight,
@@ -156,12 +156,9 @@ export function DomHexTileShape({
       width={actualWidth}
       height={actualHeight}
       className={`absolute inset-0`}
+      {...props}
     >
-      <polygon
-        points={polygonPath}
-        vectorEffect="non-scaling-stroke"
-        {...props}
-      />
+      <polygon points={polygonPath} vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }

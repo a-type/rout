@@ -18,6 +18,12 @@ export interface PlayerAvatarProps {
   interactive?: boolean;
 }
 
+declare global {
+  interface ImportMeta {
+    env: any;
+  }
+}
+
 const apiOrigin = import.meta.env.PUBLIC_API_ORIGIN || 'http://localhost:3101';
 
 export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
