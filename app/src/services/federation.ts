@@ -5,5 +5,5 @@ registerPlugins([
   RetryPlugin({
     retryTimes: 3,
     retryDelay: 300,
-  }),
+  }) as any,
 ]);

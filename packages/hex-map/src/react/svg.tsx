@@ -27,7 +27,7 @@ export function SvgHexMap({
       }}
     >
       <svg
-        {...props}
+        {...(props as any)}
         width={actualWidth}
         height={actualHeight}
         viewBox={`${-actualWidth / 2} ${-actualHeight / 2} ${actualWidth} ${actualHeight}`}
@@ -116,12 +116,12 @@ export function SvgHexTileDefault({
   fill = 'none',
   svgProps,
   ...props
-}: SVGProps<SVGGElement> & {
+}: SVGProps<SVGPolygonElement> & {
   coordinate: HexCoordinate;
   stroke?: string;
   strokeWidth?: number;
   fill?: string;
-  svgProps?: SVGProps<SVGSVGElement>;
+  svgProps?: SVGProps<SVGGElement>;
 }) {
   return (
     <SvgHexTileRoot coordinate={coordinate} {...props}>
