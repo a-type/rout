@@ -9,16 +9,11 @@
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./css.css": {
-      "default": "./dist/uno.css"
     }
   },
   "type": "module",
   "scripts": {
-    "dev": "pnpm run --filter @long-game/visual-components --parallel \"/^dev:.*/\"",
-    "dev:ts": "tsc -w --preserveWatchOutput",
-    "dev:uno": "scripts uno ./dist -w",
+    "dev": "tsc -w --preserveWatchOutput",
     "package:dev": "pnpm dev",
     "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",

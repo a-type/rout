@@ -544,7 +544,7 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
       statusFilter?: 'pending' | 'accepted' | 'declined';
     } = {},
   ) {
-    const builder = this.#db
+    let builder = this.#db
       .selectFrom('GameSessionInvitation')
       .where('gameSessionId', '=', gameSessionId)
       .select([
@@ -555,7 +555,7 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
       ]);
 
     if (statusFilter) {
-      builder.where('status', '=', statusFilter);
+      builder = builder.where('status', '=', statusFilter);
     }
 
     return builder.execute();

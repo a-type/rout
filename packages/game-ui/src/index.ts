@@ -34,5 +34,3 @@ export * from './viewport/ViewportZoomControls.js';
 export * from './withSuspense.js';
 
 export * from '@long-game/visual-components';
-
-import '@long-game/visual-components/css.css';

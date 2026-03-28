@@ -1581,14 +1581,35 @@ export class GameSession extends DurableObject<ApiBindings> {
       this.log('debug', `Invite reminders task already scheduled, skipping`);
       return;
     }
-    // schedule a follow up for 24 hours later to remind players to join
-    const reminderTime = addHours(new Date(), 24);
+    // schedule a follow up for 8 AM the next day (in the session timezone) to
+    // remind players to join. Repeats daily until the game session is no longer pending.
+    const sessionData = await this.#maybeGetSessionData();
+    if (!sessionData) {
+      this.log(
+        'debug',
+        'No session data yet, skipping join reminder scheduling',
+      );
+      return;
+    }
+    const timezone = sessionData.timezone || 'UTC';
+    const tomorrow = startOfDay(addDays(new Date(), 1));
+    const eightAm = withTimezone(
+      {
+        year: tomorrow.getUTCFullYear(),
+        month: tomorrow.getUTCMonth(),
+        date: tomorrow.getUTCDate(),
+        hour: 8,
+        minute: 0,
+        second: 0,
+      },
+      timezone,
+    );
     this.log(
       'debug',
-      `Scheduling invite reminders for ${reminderTime.toISOString()} (24 hours from now)`,
+      `Scheduling join reminders for ${eightAm.toISOString()} (next day at 8 AM)`,
     );
     return this.#scheduler.scheduleTask(
-      reminderTime,
+      eightAm,
       { type: 'joinReminders' },
       'invite-reminders',
     );
@@ -1628,6 +1649,11 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     } catch (err) {
       this.log('error', `Failed to send join reminder to leader ${leaderId}`, err);
+    }
+    
+    // reschedule for 8 AM tomorrow to keep reminding until the game starts
+    if (pendingInvites.length > 0) {
+      await this.#scheduleJoinRemindersTask();
     }
   };
 
