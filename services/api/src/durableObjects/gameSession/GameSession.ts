@@ -1550,11 +1550,30 @@ export class GameSession extends DurableObject<ApiBindings> {
       this.log('debug', `Invite reminders task already scheduled, skipping`);
       return;
     }
-    // schedule a follow up for 24 hours later to remind players to join
-    const reminderTime = addHours(new Date(), 24);
+    // schedule a follow up for 24 hours after session creation to remind players to join.
+    // using session creation time (rather than current time) ensures the reminder fires
+    // at the correct time even if the DO restarts, and prevents re-scheduling after the
+    // reminder has already been sent.
+    const sessionData = await this.#maybeGetSessionData();
+    if (!sessionData) {
+      this.log(
+        'debug',
+        'No session data yet, skipping join reminder scheduling',
+      );
+      return;
+    }
+    const now = new Date();
+    const reminderTime = addHours(new Date(sessionData.createdAt), 24);
+    if (reminderTime <= now) {
+      this.log(
+        'debug',
+        `Invite reminder time has already passed (${reminderTime.toISOString()}), skipping`,
+      );
+      return;
+    }
     this.log(
       'debug',
-      `Scheduling invite reminders for ${reminderTime.toISOString()} (24 hours from now)`,
+      `Scheduling invite reminders for ${reminderTime.toISOString()} (24 hours from session creation)`,
     );
     return this.#scheduler.scheduleTask(
       reminderTime,
