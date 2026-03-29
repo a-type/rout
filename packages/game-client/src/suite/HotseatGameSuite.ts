@@ -33,6 +33,7 @@ export class HotseatGameSuite<
     return new HotseatGameSuite(
       {
         ...details,
+        youAreLeader: true,
         playerId: details.members[0].id, // Just start with the first player
         chat,
       },
@@ -160,6 +161,7 @@ export class HotseatGameSuite<
     console.log('game details', data);
     return {
       ...data,
+      youAreLeader: true,
       playerId: this.playerId,
     };
   }

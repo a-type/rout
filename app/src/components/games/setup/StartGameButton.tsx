@@ -1,6 +1,4 @@
-import { sdkHooks } from '@/services/publicSdk.js';
 import { Box, Button, clsx, Dialog, Icon, P } from '@a-type/ui';
-import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatars } from '@long-game/game-ui';
 import { useState } from 'react';
@@ -8,15 +6,11 @@ import { GameIcon } from '../GameIcon';
 import { GameTitle } from '../GameTitle';
 
 export interface StartGameButtonProps {
-  gameSessionId: PrefixedId<'gs'>;
   className?: string;
 }
 
 export const StartGameButton = withGame<StartGameButtonProps>(
-  function StartGameButton({ gameSuite, gameSessionId, className }) {
-    const { data: pregame } = sdkHooks.useGetGameSessionPregame({
-      id: gameSessionId,
-    });
+  function StartGameButton({ gameSuite, className }) {
     const [starting, setStarting] = useState(false);
     const startGame = async () => {
       setStarting(true);
@@ -26,7 +20,6 @@ export const StartGameButton = withGame<StartGameButtonProps>(
         setStarting(false);
       }
     };
-    const isCreator = pregame?.session?.createdBy === gameSuite.playerId;
     const insufficientPlayers =
       gameSuite.members.length < gameSuite.gameDefinition.minimumPlayers;
     const tooManyPlayers =
@@ -34,7 +27,7 @@ export const StartGameButton = withGame<StartGameButtonProps>(
     const noGame = !gameSuite.gameId || gameSuite.gameId === 'empty';
     const cannotStart = insufficientPlayers || tooManyPlayers || noGame;
 
-    if (!isCreator) {
+    if (!gameSuite.youAreLeader) {
       return (
         <Box
           surface

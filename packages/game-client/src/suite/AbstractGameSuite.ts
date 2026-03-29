@@ -77,6 +77,7 @@ export interface GameSuiteBaseInit {
   timezone: string;
   gameVotes: Record<string, PrefixedId<'u'>[]>;
   nextRoundCheckAt?: Date | string | number | null;
+  youAreLeader: boolean;
 }
 
 export class LiveGameRoundSummary<TTurnData, TPublicTurnData, TPlayerState>
@@ -162,6 +163,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   gameSessionId!: PrefixedId<'gs'>;
   gameDefinition: TGame = emptyGameDefinition as any;
   startedAt: Date | null = null;
+  readonly youAreLeader: boolean;
   timezone!: string;
   protected events = new EventSubscriber<GameSuiteEvents>();
   logger = new Logger('👾', 'game');
@@ -178,6 +180,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     this.gameModules = gameModules;
 
     this.setupLocalTurnStorage();
+    this.youAreLeader = init.youAreLeader;
     this.applyGameData(init);
     // chat is automatically sent on connection
 

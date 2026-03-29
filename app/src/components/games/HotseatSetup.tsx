@@ -36,7 +36,7 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
         />
       </Box>
       <HotseatPlayerSetup />
-      <StartGameButton gameSessionId={gameSessionId} />
+      <StartGameButton />
     </Box>
   );
 });

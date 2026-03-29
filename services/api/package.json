@@ -19,7 +19,7 @@
     "build": "pnpm run --filter @long-game/service-api --parallel \"/^build:.*/\"",
     "build:api-client": "tsc -p tsconfig.client.json",
     "build:api": "wrangler deploy --dry-run --outdir dist --config wrangler.toml",
-    "test:run": "vitest",
+    "test:run": "vitest --passWithNoTests",
     "stripe": "stripe listen -f http://localhost:3101/stripe/webhook",
     "wrangler": "wrangler",
     "types": "wrangler types --env-interface=ApiBindings --c wrangler.toml src/worker-types.d.ts",

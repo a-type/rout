@@ -21,7 +21,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "bench": "vitest bench"
   },
   "dependencies": {

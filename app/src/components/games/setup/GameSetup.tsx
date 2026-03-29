@@ -62,7 +62,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         <TopographyBackground />
         <GameSelectionBanner gameId={gameSuite.gameId} />
         <div className="p-sm">
-          <StartGameButton gameSessionId={gameSessionId} />
+          <StartGameButton />
         </div>
       </Box>
     </Box>

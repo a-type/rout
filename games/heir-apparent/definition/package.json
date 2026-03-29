@@ -21,7 +21,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "dev-game": "tsc --watch"
   },
   "dependencies": {

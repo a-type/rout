@@ -88,6 +88,7 @@ export const gameSessionRouter = new Hono<Env>()
     const body = wrapRpcData({
       ...info,
       playerId: userId,
+      youAreLeader: info.createdBy === userId,
     });
     return ctx.json(body);
   })
