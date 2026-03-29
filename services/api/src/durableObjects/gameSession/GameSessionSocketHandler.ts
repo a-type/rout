@@ -161,6 +161,14 @@ export class GameSessionSocketHandler {
     msg: ServerMessage,
     { to, notTo }: { to?: PrefixedId<'u'>[]; notTo?: PrefixedId<'u'>[] } = {},
   ) => {
+    this.gameSession.log(
+      'debug',
+      '[GameSessionSocketHandler]',
+      'Sending message',
+      msg,
+      to ? `to ${to.join(',')}` : '',
+      notTo ? `not to ${notTo.join(',')}` : '',
+    );
     const sockets = Array.from(this.#socketInfo.entries());
     for (const [ws, { userId, status, socketId }] of sockets) {
       if (to && !to.includes(userId)) {
@@ -177,6 +185,13 @@ export class GameSessionSocketHandler {
           this.#messageBacklogs.set(socketId, backlog);
         }
         backlog.push(msg);
+        this.gameSession.log(
+          'debug',
+          '[GameSessionSocketHandler]',
+          `Socket pending, adding message to backlog (backlog length is now ${backlog.length})`,
+          socketId,
+          userId,
+        );
       } else if (status === 'closed') {
         this.#socketInfo.delete(ws);
         this.gameSession.log(
@@ -290,17 +305,24 @@ export class GameSessionSocketHandler {
             await this.gameSession.voteForGame(info.userId, msg.gameId);
           }
           break;
-        case 'readyUp':
-          if (msg.unready) {
-            await this.gameSession.unreadyUp(info.userId);
-          } else {
-            await this.gameSession.readyUp(info.userId);
-          }
-          break;
         case 'disconnecting':
           await this.gameSession.presence.onDisconnect(
             info.userId,
             info.socketId,
+          );
+          break;
+        case 'greeting':
+          // no-op, just used to trigger backlogged messages to send
+          break;
+        case 'ping':
+          // this doesn't actually reach us, it's handled by CF's socket auto-response
+          break;
+        default:
+          this.gameSession.log(
+            'warn',
+            '[GameSessionSocketHandler]',
+            'Received message with unknown type',
+            msg,
           );
           break;
       }

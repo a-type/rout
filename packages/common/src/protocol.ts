@@ -105,21 +105,6 @@ export type ServerGameMembersChangeMessage = z.infer<
   typeof serverGameMembersChangeMessageShape
 >;
 
-export const serverPlayerReadyMessageShape = baseServerMessageShape.extend({
-  type: z.literal('playerReady'),
-  playerId: idShapes.User,
-});
-export type ServerPlayerReadyMessage = z.infer<
-  typeof serverPlayerReadyMessageShape
->;
-export const serverPlayerUnreadyMessageShape = baseServerMessageShape.extend({
-  type: z.literal('playerUnready'),
-  playerId: idShapes.User,
-});
-export type ServerPlayerUnreadyMessage = z.infer<
-  typeof serverPlayerUnreadyMessageShape
->;
-
 export const serverGameStartingMessageShape = baseServerMessageShape.extend({
   type: z.literal('gameStarting'),
   startsAt: z.string().describe('ISO date string when the game starts'),
@@ -171,8 +156,6 @@ export const serverMessageShape = z.discriminatedUnion('type', [
   serverGameChangeMessageShape,
   serverGameMembersChangeMessageShape,
   serverNextRoundScheduledMessageShape,
-  serverPlayerReadyMessageShape,
-  serverPlayerUnreadyMessageShape,
   serverPlayerVoteForGameMessageShape,
   serverGameStartingMessageShape,
   serverPongMessageShape,
@@ -237,16 +220,6 @@ export type ClientToggleChatReactionMessage = z.infer<
   typeof clientToggleChatReactionMessageShape
 >;
 
-export const clientReadyUpMessageShape = baseClientMessageShape.extend({
-  type: z.literal('readyUp'),
-  unready: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('If true, the player will unready instead of readying up.'),
-});
-export type ClientReadyUpMessage = z.infer<typeof clientReadyUpMessageShape>;
-
 export const clientVoteForGameMessageShape = baseClientMessageShape.extend({
   type: z.literal('voteForGame'),
   gameId: z.string(),
@@ -269,6 +242,11 @@ export type ClientDisconnectingMessage = z.infer<
   typeof clientDisconnectingMessageShape
 >;
 
+export const clientGreetingMessageShape = baseClientMessageShape.extend({
+  type: z.literal('greeting'),
+});
+export type ClientGreetingMessage = z.infer<typeof clientGreetingMessageShape>;
+
 export const clientMessageShape = z.discriminatedUnion('type', [
   clientPingMessageShape,
   clientSendChatMessageShape,
@@ -276,9 +254,9 @@ export const clientMessageShape = z.discriminatedUnion('type', [
   clientRequestChatMessageShape,
   clientResetGameMessageShape,
   clientToggleChatReactionMessageShape,
-  clientReadyUpMessageShape,
   clientVoteForGameMessageShape,
   clientDisconnectingMessageShape,
+  clientGreetingMessageShape,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageShape>;

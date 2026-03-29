@@ -222,7 +222,7 @@ export interface GameSessionTable {
   id: PrefixedId<'gs'>;
   createdAt: DateColumnGenerated;
   updatedAt: DateColumnGenerated;
-  status: 'pending' | 'active' | 'complete' | 'abandoned';
+  status: 'pending' | 'active' | 'complete' | 'abandoned' | 'expired';
   gameId: string | null;
   gameVersion: string | null;
   winnerIdsJson: PrefixedId<'u'>[] | null;

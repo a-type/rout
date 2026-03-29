@@ -88,6 +88,7 @@ export const gameSessionRouter = new Hono<Env>()
     const body = wrapRpcData({
       ...info,
       playerId: userId,
+      youAreLeader: info.createdBy === userId,
     });
     return ctx.json(body);
   })
@@ -119,7 +120,6 @@ export const gameSessionRouter = new Hono<Env>()
     using invitations = await userStore.getInvitationsToGameSession(sessionId);
     using summary = await state.getDetails();
     using votes = await state.getGameVotes();
-    using readyPlayers = await state.getReadyPlayers();
 
     // while in pregame, double check that vital data is
     // synced to the DO...
@@ -131,7 +131,6 @@ export const gameSessionRouter = new Hono<Env>()
       myInvitation,
       session: wrapRpcData(summary),
       votes: wrapRpcData(votes),
-      readyPlayers: wrapRpcData(readyPlayers),
     });
   })
   .get('/postgame', async (ctx) => {
@@ -169,6 +168,17 @@ export const gameSessionRouter = new Hono<Env>()
   .post('/start', async (ctx) => {
     const id = ctx.get('gameSessionId');
     const state = ctx.get('gameSessionState');
+
+    // only the creator can start the game
+    const creatorId = await state.getCreatorId();
+    const userId = ctx.get('session').userId;
+    if (creatorId !== userId) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only the game session creator can start the game.',
+      );
+    }
+
     // make sure we've locked in the correct members
     const members = await ctx.get('userStore').getGameSessionMembers(id);
     await state.updateMembers(members);

@@ -108,6 +108,8 @@ export function connectToSocket(gameSessionId: PrefixedId<'gs'>) {
 
   function reconnect() {
     websocket.reconnect();
+    // will get backlogged for connect
+    send({ type: 'greeting' });
     return () => {
       websocket.close();
     };

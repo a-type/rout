@@ -14,7 +14,6 @@ export interface Tables {
   Turn: TurnTable;
   ChatMessage: ChatMessageTable;
   GameVote: GameVoteTable;
-  ReadyUp: ReadyUpTable;
   ScheduledTask: ScheduledTaskTable;
 }
 
@@ -48,12 +47,6 @@ interface GameVoteTable {
   createdAt: string;
 }
 export type GameVote = Selectable<GameVoteTable>;
-
-interface ReadyUpTable {
-  userId: PrefixedId<'u'>;
-  createdAt: string;
-}
-export type ReadyUp = Selectable<ReadyUpTable>;
 
 export const migrations: SQLMigrations.SQLSchemaMigration[] = [
   {
@@ -124,6 +117,13 @@ export const migrations: SQLMigrations.SQLSchemaMigration[] = [
     description: 'Add type column to ChatMessage',
     sql: `
       ALTER TABLE ChatMessage ADD COLUMN type TEXT NOT NULL DEFAULT 'chat';
+    `,
+  },
+  {
+    idMonotonicInc: 7,
+    description: 'Drop ReadyUp table',
+    sql: `
+      DROP TABLE IF EXISTS ReadyUp;
     `,
   },
 ];

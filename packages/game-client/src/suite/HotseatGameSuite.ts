@@ -33,6 +33,7 @@ export class HotseatGameSuite<
     return new HotseatGameSuite(
       {
         ...details,
+        youAreLeader: true,
         playerId: details.members[0].id, // Just start with the first player
         chat,
       },
@@ -140,15 +141,8 @@ export class HotseatGameSuite<
     // not implemented
     console.error('Chat reactions are not implemented in hotseat mode');
   };
-  readyUp = (): void => {
-    // start immediately.
-    this.ctx.backend.startGame();
-  };
-  unreadyUp = (): void => {
-    // no-op, hotseat doesn't have a ready state
-  };
-  toggleReady = (): void => {
-    this.readyUp();
+  startGame = async () => {
+    await this.ctx.backend.startGame();
   };
   voteForGame = (gameId: string): void => {
     this.ctx.backend.setGame(gameId);
@@ -167,6 +161,7 @@ export class HotseatGameSuite<
     console.log('game details', data);
     return {
       ...data,
+      youAreLeader: true,
       playerId: this.playerId,
     };
   }

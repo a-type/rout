@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rsbuild build",
     "dev-game": "rsbuild dev",
-    "test": "vitest"
+    "test": "vitest --passWithNoTests"
   },
   "dependencies": {
     "@long-game/game-exquisite-fridge-definition": "workspace:*",

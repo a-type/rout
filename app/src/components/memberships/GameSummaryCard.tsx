@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Card, Chip, clsx } from '@a-type/ui';
+import { Button, Card, Chip, clsx } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
@@ -80,3 +80,25 @@ export const GameSummaryCard = withSuspense(
   },
   <Card />,
 );
+
+export function FallbackGameSummaryCard({
+  sessionId: _,
+  refetch,
+}: {
+  sessionId: string;
+  refetch: () => void;
+}) {
+  return (
+    <Card>
+      <Card.Main>
+        <Card.Title>Failed to load game session</Card.Title>
+      </Card.Main>
+      <Card.Actions>
+        {/* TODO: abandon or delete */}
+        <Button onClick={refetch} className="text-sm text-primary underline">
+          Try again
+        </Button>
+      </Card.Actions>
+    </Card>
+  );
+}

@@ -9,9 +9,8 @@ import {
 import { PrefixedId } from '@long-game/common';
 import { HotseatGameSuite, withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
-import { GameStartingNotice } from './GameStartingNotice';
 import { GamePicker } from './setup/GamePicker';
-import { ReadyUpButton } from './setup/ReadyUpButton';
+import { StartGameButton } from './setup/StartGameButton';
 
 export interface HotseatSetupProps {
   gameSessionId: PrefixedId<'gs'>;
@@ -37,10 +36,7 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
         />
       </Box>
       <HotseatPlayerSetup />
-      <ReadyUpButton className="items-center justify-center">
-        Start game
-      </ReadyUpButton>
-      <GameStartingNotice />
+      <StartGameButton />
     </Box>
   );
 });

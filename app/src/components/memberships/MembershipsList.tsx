@@ -1,8 +1,8 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card } from '@a-type/ui';
+import { Box, Button, Card, ErrorBoundary } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
 import { ReactNode } from 'react';
-import { GameSummaryCard } from './GameSummaryCard.js';
+import { FallbackGameSummaryCard, GameSummaryCard } from './GameSummaryCard.js';
 
 export const MembershipsList = withSuspense(function MembershipsList({
   statusFilter,
@@ -18,6 +18,7 @@ export const MembershipsList = withSuspense(function MembershipsList({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    refetch,
   } = sdkHooks.useGetGameSessions({ status: statusFilter, invitationStatus });
 
   return (
@@ -30,9 +31,18 @@ export const MembershipsList = withSuspense(function MembershipsList({
         </Box>
       )}
       <Card.Grid>
-        {/* FIXME: hc types screwed up */}
-        {sessions?.map((session: any) => (
-          <GameSummaryCard key={session.id} session={session} />
+        {sessions?.map((session) => (
+          <ErrorBoundary
+            key={session.id}
+            fallback={
+              <FallbackGameSummaryCard
+                sessionId={session.id}
+                refetch={refetch}
+              />
+            }
+          >
+            <GameSummaryCard session={session} />
+          </ErrorBoundary>
         ))}
       </Card.Grid>
       {hasNextPage && (

@@ -15,7 +15,7 @@
     "dev": "tsc -w --preserveWatchOutput",
     "package:dev": "pnpm dev",
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest --passWithNoTests"
   },
   "dependencies": {},
   "devDependencies": {

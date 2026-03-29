@@ -4,11 +4,10 @@ import { withGame } from '@long-game/game-client';
 import { TopographyBackground } from '@long-game/game-ui';
 import { useSearchParams } from '@verdant-web/react-router';
 import { startTransition } from 'react';
-import { GameStartingNotice } from '../GameStartingNotice.js';
 import { GameMembersPage } from './GameMembersPage.js';
 import { GameSelectionBanner } from './GameSelectionBanner.js';
-import { ReadyUpButton } from './ReadyUpButton.js';
 import { SelectGamePage } from './SelectGamePage.js';
+import { StartGameButton } from './StartGameButton.js';
 
 export interface GameSetupProps {
   gameSessionId: PrefixedId<'gs'>;
@@ -63,11 +62,9 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         <TopographyBackground />
         <GameSelectionBanner gameId={gameSuite.gameId} />
         <div className="p-sm">
-          <ReadyUpButton />
+          <StartGameButton />
         </div>
       </Box>
-
-      <GameStartingNotice />
     </Box>
   );
 });
