@@ -8,3 +8,7 @@ export const updateState = proxy({
 export function useIsUpdateAvailable() {
   return useSnapshot(updateState).updateAvailable;
 }
+
+export function useIsUpdating() {
+  return useSnapshot(updateState).updating;
+}

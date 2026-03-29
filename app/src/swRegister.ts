@@ -35,6 +35,10 @@ export async function registerServiceWorker() {
         window.location.reload();
       });
 
+      if (!registration.waiting) {
+        throw new Error('No waiting service worker registration');
+      }
+
       registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
       updateState.updating = true;
     };

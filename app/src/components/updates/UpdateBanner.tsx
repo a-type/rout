@@ -2,12 +2,13 @@ import { skipWaiting, usePollForUpdates } from '@/swRegister.js';
 import { Box, Button, Icon } from '@a-type/ui';
 import { useState } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
-import { useIsUpdateAvailable } from './updateState.js';
+import { useIsUpdateAvailable, useIsUpdating } from './updateState.js';
 
 const TEST = false;
 
 export function UpdateBanner({}) {
   const updateAvailable = useIsUpdateAvailable();
+  const updating = useIsUpdating();
   usePollForUpdates(true, 60_000); // 1 minute
 
   const [loading, setLoading] = useState(false);
@@ -31,13 +32,15 @@ export function UpdateBanner({}) {
       </ScrollTicker>
       <Button
         size="small"
-        loading={loading}
+        loading={updating || loading}
         color="accent"
         emphasis="primary"
         onClick={async () => {
           try {
             setLoading(true);
             await skipWaiting();
+          } catch (err) {
+            console.error('Update failed', err);
           } finally {
             setLoading(false);
           }
