@@ -82,7 +82,7 @@ export const GameSummaryCard = withSuspense(
 );
 
 export function FallbackGameSummaryCard({
-  sessionId,
+  sessionId: _,
   refetch,
 }: {
   sessionId: string;
