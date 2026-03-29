@@ -79,8 +79,8 @@ test('can play a hotseat game', async ({ page }) => {
   await expect(startButton).toBeVisible();
   await startButton.click();
 
-  // skip game start countdown
-  await page.clock.fastForward(2000);
+  const confirmButton = page.getByRole('button', { name: "Let's go" });
+  await confirmButton.click();
 
   async function guess(player: 1 | 2, guess: number) {
     await expect(page.getByText('Select Player')).toBeVisible();
