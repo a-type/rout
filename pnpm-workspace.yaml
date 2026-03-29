@@ -10,7 +10,7 @@ packages:
   - 'jobs/*'
 
 catalog:
-  '@a-type/rsbuild-plugin-unocss': ^0.0.22
+  '@a-type/rsbuild-plugin-unocss': ^0.0.25
   '@a-type/ui': ^5.0.19
   '@a-type/react-space': 0.2.17
   '@a-type/auth-fetch': 2.1.3

@@ -61,19 +61,20 @@ export default defineConfig(({ command }) => ({
         file.includes('@long-game') ? false : file.includes('node_modules'),
 
       events: {
-        onCssGenerated: () => {
+        onCssGenerated: (result) => {
           unoStats.rebuilds++;
-          console.log(new Date().toTimeString(), `UnoCSS plugin stats:`);
-          console.log(`  Invalidations: ${unoStats.invalidations}`);
-          console.log(`  Rebuilds: ${unoStats.rebuilds}`);
+          console.log(`Invalidations: ${unoStats.invalidations}`);
+          console.log(`Rebuilds: ${unoStats.rebuilds}`);
           console.log(
-            `  Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
+            `Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
           );
         },
         onCssInvalidated: () => {
           unoStats.invalidations++;
           unoStats.lastInvalidationTime = Date.now();
         },
+        onCssExtracted: (id, tokens) => {},
+        onCssBuildBegan(tokenCount) {},
       },
     }),
     pluginReact(),

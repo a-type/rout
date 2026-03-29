@@ -19,8 +19,8 @@ catalogs:
       specifier: 1.1.1
       version: 1.1.1
     '@a-type/rsbuild-plugin-unocss':
-      specifier: ^0.0.22
-      version: 0.0.22
+      specifier: ^0.0.25
+      version: 0.0.25
     '@a-type/ui':
       specifier: ^5.0.19
       version: 5.0.19
@@ -266,7 +266,7 @@ importers:
     devDependencies:
       '@a-type/rsbuild-plugin-unocss':
         specifier: 'catalog:'
-        version: 0.0.22(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)
+        version: 0.0.25(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)
       '@aaroon/workbox-rspack-plugin':
         specifier: ^0.3.3
         version: 0.3.3(@rsbuild/core@1.7.4)(@rspack/core@1.7.10(@swc/helpers@0.5.18))(@types/babel__core@7.20.5)
@@ -923,7 +923,7 @@ importers:
     devDependencies:
       '@a-type/rsbuild-plugin-unocss':
         specifier: 'catalog:'
-        version: 0.0.22(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)
+        version: 0.0.25(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)
       '@long-game/common':
         specifier: workspace:*
         version: link:../common
@@ -1412,8 +1412,8 @@ packages:
     peerDependencies:
       kysely: ^0.27.2
 
-  '@a-type/rsbuild-plugin-unocss@0.0.22':
-    resolution: {integrity: sha512-a52lpUYz9GuwU7YPaTLL4vLqxIhg9cU2zT3lr64vNNtfUgInHfE46TzgJreVBBiKIlxP1rMJ6Ctz6Kf90MBGUA==}
+  '@a-type/rsbuild-plugin-unocss@0.0.25':
+    resolution: {integrity: sha512-cQEztQr40j1xFLROiZu3tBtcCmahAVtNSCnjEagvQeOEO4ZbD6RfrolCxI73lKOiZM8r/UTVQyJj7Rqh0txfXA==}
     peerDependencies:
       '@rsbuild/core': 1.x
     peerDependenciesMeta:
@@ -8239,7 +8239,7 @@ snapshots:
       bcrypt-ts: 5.0.3
       kysely: 0.27.6
 
-  '@a-type/rsbuild-plugin-unocss@0.0.22(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)':
+  '@a-type/rsbuild-plugin-unocss@0.0.25(@rsbuild/core@1.7.4)(@swc/helpers@0.5.18)':
     dependencies:
       '@jridgewell/remapping': 2.3.5
       '@rspack/core': 1.7.10(@swc/helpers@0.5.18)

@@ -6,6 +6,10 @@ export function configuredCors() {
       if (origin === ctx.env.UI_ORIGIN) {
         return origin;
       }
+      // integration tests
+      if (origin === 'http://localhost:3333') {
+        return origin;
+      }
       return null;
     },
     credentials: true,
