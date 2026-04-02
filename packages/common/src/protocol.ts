@@ -248,7 +248,6 @@ export const clientGreetingMessageShape = baseClientMessageShape.extend({
 export type ClientGreetingMessage = z.infer<typeof clientGreetingMessageShape>;
 
 export const clientMessageShape = z.discriminatedUnion('type', [
-  clientPingMessageShape,
   clientSendChatMessageShape,
   clientSubmitTurnMessageShape,
   clientRequestChatMessageShape,

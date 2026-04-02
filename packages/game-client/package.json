@@ -19,7 +19,8 @@
     "package:dev": "pnpm dev"
   },
   "dependencies": {
-    "@a-type/utils": "1.1.5",
+    "@a-type/dialogue": "catalog:",
+    "@a-type/utils": "catalog:",
     "@long-game/service-api": "workspace:*",
     "idb": "^8.0.3",
     "immer": "catalog:",
