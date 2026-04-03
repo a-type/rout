@@ -2,6 +2,10 @@
   font-family: 'Knewave';
   src: url('../public/fonts/Knewave-Regular.ttf');
 }
+@font-face {
+  font-family: 'Nunito';
+  src: url('../public/fonts/Nunito-VariableFont_wght.ttf');
+}
 
 #root {
   flex: 1;
