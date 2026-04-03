@@ -35,7 +35,11 @@ export const SubmitTurn = withSuspense(
         : !hasLocalTurn && turnWasSubmitted
           ? 'check'
           : 'arrowRight';
-    const hideIcon = !hasLocalTurn && !turnWasSubmitted && !nextRoundCheckAt;
+    const hideIcon =
+      // workaround button not detecting icon because TypographyButton wraps
+      // with a div...
+      isTurnSubmitDelayed ||
+      (!hasLocalTurn && !turnWasSubmitted && !nextRoundCheckAt);
 
     const [showProblemState, setShowProblem] = useState(false);
     useEffect(() => {
@@ -99,7 +103,11 @@ export const SubmitTurn = withSuspense(
                 ) : (
                   `Submit turn`
                 ))}
-              {!children && !hideIcon && <Icon name={icon} />}
+              {!children && !hideIcon && (
+                <Button.Icon>
+                  <Icon name={icon} />
+                </Button.Icon>
+              )}
             </TopographyButton>
             <PlayerStatuses className="absolute z-100 pointer-events-none bottom-0 left-50% -translate-x-1/2 translate-y-2/3" />
           </Box>
