@@ -1,5 +1,6 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, H2 } from '@a-type/ui';
+import { GameSummaryCard } from '../games/sessions/GameSummaryCard';
 import { InviteCard } from './InviteCard';
 
 export interface GameSessionInvitesProps {
@@ -27,12 +28,14 @@ export function GameSessionInvites({ className }: GameSessionInvitesProps) {
   return (
     <Box col gap full="width" items="stretch" className={className}>
       <H2>Game Invites</H2>
-      {inviteSessions.map((session) => (
-        <InviteCard key={session.id} session={session} />
-      ))}
-      {pendingSessions.map((session) => (
-        <InviteCard key={session.id} session={session} />
-      ))}
+      <GameSummaryCard.Grid>
+        {inviteSessions.map((session) => (
+          <InviteCard key={session.id} session={session} />
+        ))}
+        {pendingSessions.map((session) => (
+          <InviteCard key={session.id} session={session} />
+        ))}
+      </GameSummaryCard.Grid>
     </Box>
   );
 }

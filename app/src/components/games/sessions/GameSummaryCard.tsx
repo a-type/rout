@@ -76,7 +76,7 @@ export const GameSummaryCardDetails = withClassName(
     surface: true,
     border: true,
   }),
-  'relative z-1 shadow-md min-w-200px',
+  'relative z-1 shadow-md min-w-200px max-w-3/4',
   'transition-transform',
   'group-hover:-rotate-10 group-focus-within:-rotate-10',
 );
@@ -103,7 +103,7 @@ export function GameSummaryCardTrigger({ children }: { children?: ReactNode }) {
   );
 }
 
-export function GameSummaryCardIcon() {
+export function GameSummaryCardIcon({ className }: { className?: string }) {
   const { session } = useGameCardSummaryContext();
 
   return (
@@ -113,7 +113,7 @@ export function GameSummaryCardIcon() {
         {
           positionAnchor: `--${session.id}`,
           top: 'calc(anchor(top) + (anchor-size(height) * 1 / 2))',
-          left: 'calc(anchor(left) + (anchor-size(width) * 5 / 8))',
+          left: 'calc(anchor(left) + (anchor-size(width) * 3 / 4))',
           width: 'calc(anchor-size(height) * 5 / 4)',
         } as any
       }
@@ -123,6 +123,7 @@ export function GameSummaryCardIcon() {
         'fixed transform -translate-1/2 rotate-30',
         'group-hover:(rotate-40 scale-105) group-focus-within:(rotate-40 scale-105) transition-all',
         'shadow-md',
+        className,
       )}
     />
   );
@@ -141,7 +142,7 @@ export const GameSummaryCardMenu = withClassName(
 const GameSummaryCardGrid = withClassName(
   SlotDiv,
   'grid',
-  'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  'grid-cols-1 sm:grid-cols-2',
   'gap-md py-xl',
 );
 
