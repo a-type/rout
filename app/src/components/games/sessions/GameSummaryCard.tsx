@@ -76,7 +76,7 @@ export const GameSummaryCardDetails = withClassName(
     surface: true,
     border: true,
   }),
-  'relative z-1 shadow-md',
+  'relative z-1 shadow-md min-w-200px',
   'transition-transform',
   'group-hover:-rotate-10 group-focus-within:-rotate-10',
 );
