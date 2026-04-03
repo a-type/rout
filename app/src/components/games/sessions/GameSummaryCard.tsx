@@ -78,7 +78,7 @@ export const GameSummaryCardDetails = withClassName(
   }),
   'relative z-1 shadow-md min-w-200px max-w-3/4',
   'transition-transform',
-  'group-hover:-rotate-10 group-focus-within:-rotate-10',
+  'group-hover:-rotate-10 group-focus-visible/trigger:-rotate-10',
 );
 
 function GameSummaryCardTitle() {
@@ -96,7 +96,7 @@ export function GameSummaryCardTrigger({ children }: { children?: ReactNode }) {
       size="wrapper"
       emphasis="ghost"
       render={<Link to={`/${hotseat ? 'hotseat' : 'session'}/${session.id}`} />}
-      className={clsx('relative transition-all overflow-visible')}
+      className={clsx('group/trigger relative transition-all overflow-visible')}
     >
       {children}
     </Button>
@@ -121,7 +121,7 @@ export function GameSummaryCardIcon({ className }: { className?: string }) {
         'aspect-1',
         'object-cover border-solid border-default border-gray-dark rd-lg',
         'fixed transform -translate-1/2 rotate-30',
-        'group-hover:(rotate-40 scale-105) group-focus-within:(rotate-40 scale-105) transition-all',
+        'group-hover:(rotate-40 scale-105) group-focus-visible/trigger:(rotate-40 scale-105) transition-all',
         'shadow-md',
         className,
       )}
