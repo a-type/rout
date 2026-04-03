@@ -1,8 +1,9 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, Card, ErrorBoundary } from '@a-type/ui';
+import { Box, Button, ErrorBoundary } from '@a-type/ui';
 import { withSuspense } from '@long-game/game-ui';
 import { ReactNode } from 'react';
-import { FallbackGameSummaryCard, GameSummaryCard } from './GameSummaryCard.js';
+import { GameSummaryCard } from '../games/sessions/GameSummaryCard.js';
+import { LiveGameSummaryCard } from '../games/sessions/LiveGameSummaryCard.js';
 
 export const MembershipsList = withSuspense(function MembershipsList({
   statusFilter,
@@ -18,7 +19,6 @@ export const MembershipsList = withSuspense(function MembershipsList({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    refetch,
   } = sdkHooks.useGetGameSessions({ status: statusFilter, invitationStatus });
 
   return (
@@ -30,21 +30,16 @@ export const MembershipsList = withSuspense(function MembershipsList({
           </Box>
         </Box>
       )}
-      <Card.Grid>
+      <GameSummaryCard.Grid>
         {sessions?.map((session) => (
           <ErrorBoundary
             key={session.id}
-            fallback={
-              <FallbackGameSummaryCard
-                sessionId={session.id}
-                refetch={refetch}
-              />
-            }
+            fallback={<GameSummaryCard.Skeleton />}
           >
-            <GameSummaryCard session={session} />
+            <LiveGameSummaryCard session={session} />
           </ErrorBoundary>
         ))}
-      </Card.Grid>
+      </GameSummaryCard.Grid>
       {hasNextPage && (
         <Box full="width" d="row" layout="center center">
           <Button emphasis="ghost" onClick={() => fetchNextPage()}>

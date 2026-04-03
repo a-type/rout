@@ -615,3 +615,7 @@ export type GameProduct = InferReturnData<PublicSdk['getGameProducts']>[number];
 export type AdminGameSessionSummary = InferReturnData<
   PublicSdk['adminGetAllGameSessions']
 >['results'][number];
+export type GameDetails = InferReturnData<PublicSdk['getGame']>;
+export type GameListItemDetails = InferReturnData<
+  PublicSdk['getGames']
+>[number];

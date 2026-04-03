@@ -1,14 +1,12 @@
-import { useGame } from '@/hooks/useGame';
-import { Box, Button, Card, Chip, DropdownMenu, Icon } from '@a-type/ui';
+import { Box, Icon } from '@a-type/ui';
 import {
   HotseatBackend,
   HotseatGameDetails,
-  queryClient,
   useSuspenseQuery,
 } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
-import { Link } from '@verdant-web/react-router';
-import { GameIcon } from '../games/GameIcon';
+import { GameSummaryCard } from '../games/sessions/GameSummaryCard';
+import { HotseatGameSessionMenu } from '../games/sessions/HotseatGameSessionMenu';
 import { StartHotseat } from '../games/StartHotseat';
 import { GameSessionStatusChip } from './GameSessionStatusChip';
 
@@ -38,65 +36,41 @@ export const HotseatGamesList = withSuspense(function HotseatGamesList({
 
   return (
     <Box col gap>
-      <Card.Grid>
+      <GameSummaryCard.Grid>
         {data.map((session) => (
           <HotseatSummaryCard key={session.gameSessionId} session={session} />
         ))}
-      </Card.Grid>
+      </GameSummaryCard.Grid>
     </Box>
   );
 });
 
-const HotseatSummaryCard = withSuspense(function HotseatSummaryCard({
+const HotseatSummaryCard = function HotseatSummaryCard({
   session,
 }: {
   session: HotseatGameDetails;
 }) {
-  const game = useGame(session.gameId);
   return (
-    <Card>
-      {game && (
-        <Card.Image>
-          <GameIcon gameId={game.id} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-dark/50 to-transparent opacity-50" />
-        </Card.Image>
-      )}
-      <Card.Main render={<Link to={`/hotseat/${session.gameSessionId}`} />}>
-        <Card.Title>{game?.title ?? 'Choosing game...'}</Card.Title>
-        <Card.Content unstyled className="flex flex-row gap-sm">
-          <Chip color="accent">Hotseat</Chip>
-          <GameSessionStatusChip status={session.status as any} />
-        </Card.Content>
-      </Card.Main>
-      <Card.Footer>
-        <Card.Menu>
-          <DropdownMenu>
-            <DropdownMenu.Trigger
-              render={
-                <Button size="small" emphasis="default" className="min-h-0" />
-              }
-            >
-              <Icon name="dots" />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
-              <DropdownMenu.Item
-                color="attention"
-                onClick={async () => {
-                  await HotseatBackend.delete(session.gameSessionId);
-                  queryClient.invalidateQueries({
-                    queryKey: ['hotseatGames'],
-                  });
-                }}
-              >
-                Delete
-                <DropdownMenu.ItemRightSlot>
-                  <Icon name="trash" />
-                </DropdownMenu.ItemRightSlot>
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu>
-        </Card.Menu>
-      </Card.Footer>
-    </Card>
+    <GameSummaryCard
+      session={{
+        id: session.gameSessionId,
+        canDelete: true,
+        ...session,
+      }}
+      hotseat
+    >
+      <GameSummaryCard.Trigger>
+        <GameSummaryCard.Icon />
+        <GameSummaryCard.Details>
+          <GameSummaryCard.Title />
+          <Box gap items="center">
+            <GameSessionStatusChip status={session.status as any} />
+          </Box>
+        </GameSummaryCard.Details>
+      </GameSummaryCard.Trigger>
+      <GameSummaryCard.Menu>
+        <HotseatGameSessionMenu gameSessionId={session.gameSessionId} />
+      </GameSummaryCard.Menu>
+    </GameSummaryCard>
   );
-});
+};

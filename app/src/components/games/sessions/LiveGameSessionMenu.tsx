@@ -9,21 +9,21 @@ import {
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 
-export interface GameSessionMenuProps extends ButtonProps {
+export interface LiveGameSessionMenuProps extends ButtonProps {
   sessionId: PrefixedId<'gs'>;
   canDelete?: boolean;
   canAbandon?: boolean;
   onDeleteOrAbandon?: () => void;
 }
 
-export function GameSessionMenu({
+export function LiveGameSessionMenu({
   sessionId,
   canDelete,
   canAbandon,
   onDeleteOrAbandon,
   className,
   ...rest
-}: GameSessionMenuProps) {
+}: LiveGameSessionMenuProps) {
   const deleteSession = sdkHooks.useDeleteGameSession();
   const abandonSession = sdkHooks.useAbandonGameSession();
 

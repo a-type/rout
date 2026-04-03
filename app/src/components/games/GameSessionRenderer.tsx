@@ -36,8 +36,8 @@ import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameControls } from './GameControls.js';
 import { GameLayout, GameLayoutSkeleton } from './GameLayout.js';
-import { HotseatSetup } from './HotseatSetup.js';
 import { GameSetup } from './setup/GameSetup.js';
+import { HotseatSetup } from './setup/HotseatSetup.js';
 
 const debugDndSet =
   typeof window !== 'undefined' && window.location.search.includes('debugDnd');

@@ -59,7 +59,7 @@ export function HomePage({}: HomePageProps) {
         <Box
           gap
           justify="center"
-          className="sticky bottom-md pointer-events-none [&>*]:pointer-events-auto"
+          className="sticky z-100 bottom-md pointer-events-none [&>*]:pointer-events-auto"
         >
           <NewGameAction className="shadow-lg" />
         </Box>

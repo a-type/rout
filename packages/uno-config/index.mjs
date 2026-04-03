@@ -4,7 +4,7 @@ import { defineConfig, transformerVariantGroup } from 'unocss';
 /** @type import('@a-type/ui'). */
 export const presetOptions = {
   borderScale: 2,
-  cornerScale: 1,
+  cornerScale: 0.5,
   spacingScale: 1.25,
   saturation: 80,
   primaryHue: 286,

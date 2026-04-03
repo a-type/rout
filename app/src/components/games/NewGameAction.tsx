@@ -7,48 +7,27 @@ import { TopographyBackground, withSuspense } from '@long-game/game-ui';
 import { useNavigate, useSearchParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { GameLimitUpsell } from '../subscription/GameLimitUpsell.js';
+import { GameList } from './GameList.js';
 
 export const NewGameAction = withSuspense(function NewGameAction({
   children,
-  gameId,
   className,
   ...rest
-}: ButtonProps & { gameId?: string }) {
-  const mutation = sdkHooks.usePrepareGameSession();
-  const navigate = useNavigate();
+}: ButtonProps) {
   const [search, setSearch] = useSearchParams();
-
-  const createLive = async () => {
-    const result = await mutation.mutateAsync({ gameId });
-    const gameSessionId = result?.sessionId;
-    if (!gameSessionId) {
-      throw new LongGameError(
-        LongGameError.Code.Unknown,
-        'Failed to create game session',
-      );
-    }
-    navigate(`/session/${gameSessionId}`);
-  };
-
-  const createHotseat = async () => {
-    const sessionId: PrefixedId<'gs'> = `gs-hotseat-${genericId()}`;
-    if (gameId) {
-      const version = await gameModules.getGameLatestVersion(gameId);
-      const definition = await gameModules.getGameDefinition(gameId, version);
-      await HotseatBackend.preSetGame(sessionId, gameId, definition);
-    }
-    navigate(`/hotseat/${sessionId}`);
-  };
+  const open = search.get('newGame') === 'true';
+  const mode = search.get('mode') as 'hotseat' | 'live' | null;
 
   return (
     <Dialog
-      open={search.get('newGame') === 'true'}
+      open={!!open}
       onOpenChange={(open) => {
         setSearch((prev) => {
           if (open) {
             prev.set('newGame', 'true');
           } else {
             prev.delete('newGame');
+            prev.delete('mode');
           }
           return prev;
         });
@@ -57,7 +36,7 @@ export const NewGameAction = withSuspense(function NewGameAction({
       <Dialog.Trigger
         color="primary"
         className={clsx(
-          'overflow-clip border-thick border-primary-dark w-[64px] aspect-1',
+          'overflow-clip border-thick border-primary-dark w-[64px] aspect-1 color-black',
           className,
         )}
         {...rest}
@@ -74,33 +53,112 @@ export const NewGameAction = withSuspense(function NewGameAction({
           'translate-0',
           'bg-primary-wash',
         )}
+        innerClassName="grow h-full"
       >
         <TopographyBackground />
-        <Box col gap className="relative z-1">
-          <Dialog.Title>Start a New Game</Dialog.Title>
-          <Suspense>
-            <GameLimitUpsell />
-            <Card>
-              <Card.Main onClick={createLive}>
-                <Card.Title>Play Online</Card.Title>
-                <Card.Content>
-                  Play against your friends online. Take turns at your own pace
-                  or play in real-time.
-                </Card.Content>
-              </Card.Main>
-            </Card>
-            <Card>
-              <Card.Main onClick={createHotseat}>
-                <Card.Title>Play Hotseat</Card.Title>
-                <Card.Content>
-                  Take turns passing around this device. Great for road trips or
-                  trying out a new game.
-                </Card.Content>
-              </Card.Main>
-            </Card>
-          </Suspense>
-        </Box>
+        <Suspense>
+          {mode ? <SelectGameContent /> : <SelectModeContent />}
+        </Suspense>
       </Dialog.Content>
     </Dialog>
   );
 });
+
+function SelectModeContent() {
+  const [_, setSearch] = useSearchParams();
+
+  return (
+    <Box col gap className="relative z-1 grow" full>
+      <Dialog.Title>Start a New Game</Dialog.Title>
+      <Suspense>
+        <GameLimitUpsell />
+        <Card className="grow">
+          <Card.Main
+            onClick={() =>
+              setSearch((prev) => {
+                prev.set('mode', 'live');
+                return prev;
+              })
+            }
+          >
+            <Card.Title>Play Online</Card.Title>
+            <Card.Content>
+              Play against your friends online. Take turns at your own pace or
+              play in real-time.
+            </Card.Content>
+          </Card.Main>
+        </Card>
+        <Card className="grow">
+          <Card.Main
+            onClick={() =>
+              setSearch((prev) => {
+                prev.set('mode', 'hotseat');
+                return prev;
+              })
+            }
+          >
+            <Card.Title>Play Hotseat</Card.Title>
+            <Card.Content>
+              Take turns passing around this device. Great for road trips or
+              trying out a new game.
+            </Card.Content>
+          </Card.Main>
+        </Card>
+      </Suspense>
+    </Box>
+  );
+}
+
+function SelectGameContent() {
+  const [search] = useSearchParams();
+  const mode = search.get('mode') as 'hotseat' | 'live' | null;
+  const mutation = sdkHooks.usePrepareGameSession();
+  const navigate = useNavigate();
+
+  const createLive = async (gameId: string) => {
+    const result = await mutation.mutateAsync({ gameId });
+    const gameSessionId = result?.sessionId;
+    if (!gameSessionId) {
+      throw new LongGameError(
+        LongGameError.Code.Unknown,
+        'Failed to create game session',
+      );
+    }
+    navigate(`/session/${gameSessionId}`);
+  };
+
+  const createHotseat = async (gameId: string) => {
+    const sessionId: PrefixedId<'gs'> = `gs-hotseat-${genericId()}`;
+    if (gameId) {
+      const version = await gameModules.getGameLatestVersion(gameId);
+      const definition = await gameModules.getGameDefinition(gameId, version);
+      await HotseatBackend.preSetGame(sessionId, gameId, definition);
+    }
+    navigate(`/hotseat/${sessionId}`);
+  };
+
+  if (!mode) return null;
+
+  return (
+    <GameList hotseat={mode === 'hotseat'}>
+      {({ games }) =>
+        games.map((game) => (
+          <GameList.Item
+            gameId={game.id}
+            key={game.id}
+            canSelect
+            owned={game.ownedByPlayer}
+            onSelect={() => {
+              if (mode === 'hotseat') {
+                createHotseat(game.id);
+              } else {
+                createLive(game.id);
+              }
+            }}
+            selected={false}
+          />
+        ))
+      }
+    </GameList>
+  );
+}

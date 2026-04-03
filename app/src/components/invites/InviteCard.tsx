@@ -2,8 +2,8 @@ import { Box, Card, clsx, Icon } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
 import { Link } from '@verdant-web/react-router';
 import { GameIcon } from '../games/GameIcon';
-import { GameSessionMenu } from '../games/GameSessionMenu';
 import { GameTitle } from '../games/GameTitle';
+import { LiveGameSessionMenu } from '../games/sessions/LiveGameSessionMenu';
 import { GameSessionMemberAvatars } from '../memberships/GameSessionMemberAvatars';
 
 export interface InviteCardProps {
@@ -26,7 +26,7 @@ export function InviteCard({ session, className }: InviteCardProps) {
           </Card.Image>
         </Card.Image>
       )}
-      <GameSessionMenu
+      <LiveGameSessionMenu
         sessionId={session.id}
         emphasis="ghost"
         canAbandon

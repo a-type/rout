@@ -19,6 +19,7 @@ export default defineConfig({
       '../packages/*/src/**/*.{ts,tsx,js,jsx}',
     ],
   },
+  configDeps: ['../packages/uno-config/index.mjs'],
   preflights: [
     {
       getCSS: () => `

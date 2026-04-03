@@ -11,8 +11,8 @@ import { NotificationsButton } from '../notifications/NotificationsButton.js';
 import { GameLayout } from './GameLayout.js';
 import { GameLog } from './GameLog.js';
 import { GameManualDialog } from './GameManualDialog.js';
-import { GameSessionMenu } from './GameSessionMenu.js';
 import { NavigationControls } from './NavigationControls.js';
+import { LiveGameSessionMenu } from './sessions/LiveGameSessionMenu.js';
 
 export interface GameControlsProps {
   pregame?: boolean;
@@ -37,7 +37,7 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
             <Suspense>
               <GameDebugger size="small" color="accent" emphasis="ghost" />
             </Suspense>
-            <GameSessionMenu
+            <LiveGameSessionMenu
               emphasis="ghost"
               sessionId={gameSuite.gameSessionId}
               canAbandon

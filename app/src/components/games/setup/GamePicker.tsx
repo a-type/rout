@@ -1,32 +1,13 @@
-import { sdkHooks } from '@/services/publicSdk';
-import {
-  AvatarList,
-  Box,
-  Button,
-  Card,
-  Chip,
-  clsx,
-  Collapsible,
-  Icon,
-  Select,
-  Switch,
-} from '@a-type/ui';
-import { PrefixedId } from '@long-game/common';
+import { AvatarList, Card, Icon } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
-import { useState } from 'react';
-import { GameDetailsDialog } from '../../library/GameDetailsDialog.js';
-import { useOpenQuickBuy } from '../../store/QuickBuyPopup.js';
-import { GameIcon } from '../GameIcon.js';
-import { GameTitle } from '../GameTitle.js';
+import { GameList } from '../GameList.js';
 
 export interface GamePickerProps {
   value: string;
   id?: string;
   className?: string;
   loading?: boolean;
-  gameSessionId: PrefixedId<'gs'>;
-  sessionCreator: PrefixedId<'u'> | null;
   hotseat?: boolean;
   availableGames?: string[];
 }
@@ -34,257 +15,65 @@ export interface GamePickerProps {
 export const GamePicker = withGame<GamePickerProps>(function GamePicker({
   value,
   loading,
-  gameSessionId,
   className,
   gameSuite,
-  sessionCreator,
-  hotseat,
-  availableGames,
   ...rest
 }) {
-  const canSelectGame =
-    !sessionCreator || sessionCreator === gameSuite.playerId;
-
-  const { data: games } = sdkHooks.useGetGames();
-  const allTags = new Set<string>();
-  for (const game of Object.values(games)) {
-    for (const tag of game.tags) {
-      allTags.add(tag);
-    }
-  }
-
-  const [filters, setFilters] = useState({
-    tags: [] as string[],
-    owned: hotseat ? false : true,
-  });
-
-  const removeTagFilter = (tag: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
-    }));
-  };
-  const addTagFilter = (tag: string | null) => {
-    if (!tag) return;
-    setFilters((prev) => ({
-      ...prev,
-      tags: [...prev.tags, tag],
-    }));
-  };
-  const toggleOwnedFilter = () => {
-    setFilters((prev) => ({
-      ...prev,
-      owned: !prev.owned,
-    }));
-  };
-
-  const { data: me } = sdkHooks.useGetMe();
-  const isAdmin = me?.isProductAdmin;
-
-  const filteredGamesIncludingUnowned = Object.entries(games)
-    .filter(([_, game]) => isAdmin || !game.prerelease)
-    .filter(([_, game]) => {
-      if (filters.tags.length > 0) {
-        return filters.tags.some((tag) => game.tags.includes(tag));
-      }
-      return true;
-    });
-  const filteredGames = filteredGamesIncludingUnowned.filter(([gameId]) => {
-    if (!availableGames) {
-      return true;
-    }
-    if (filters.owned && !availableGames?.includes(gameId)) {
-      return false;
-    }
-    return true;
-  });
-
   return (
-    <Box
-      d="col"
-      gap
-      items="stretch"
-      full="width"
-      className={clsx(className)}
-      {...rest}
-    >
-      <Box surface="white">
-        <Collapsible className="w-full">
-          <Collapsible.Trigger
-            render={<Button size="small" emphasis="ghost" className="w-full" />}
-          >
-            <Icon name="filter" />
-            Filters
-          </Collapsible.Trigger>
-          <Collapsible.Content>
-            <Box d="col" gap="sm" container="reset" full items="start">
-              <label className="flex items-center gap-xs cursor-pointer">
-                <Switch
-                  checked={filters.owned}
-                  onCheckedChange={toggleOwnedFilter}
-                />
-                Only show games owned by players
-              </label>
-              {filters.tags.map((tag) => (
-                <Button
-                  key={tag}
-                  size="small"
-                  color="accent"
-                  emphasis="primary"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    removeTagFilter(tag);
-                  }}
-                >
-                  {tag}
-                  <Icon name="x" />
-                </Button>
-              ))}
-              <Select value="" onValueChange={addTagFilter}>
-                <Select.Trigger size="small">
-                  <Icon name="plus" />
-                  <Select.Value>{(tag) => tag || 'Choose tag...'}</Select.Value>
-                </Select.Trigger>
-                <Select.Content>
-                  {Array.from(allTags)
-                    .filter((tag) => !filters.tags.includes(tag))
-                    .map((tag) => (
-                      <Select.Item key={tag} value={tag}>
-                        {tag}
-                      </Select.Item>
-                    ))}
-                </Select.Content>
-              </Select>
-            </Box>
-          </Collapsible.Content>
-        </Collapsible>
-      </Box>
-      <Box className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md p-md">
-        {filteredGames.map(([gameId]) => (
+    <GameList {...rest}>
+      {({ games }) =>
+        games.map((game) => (
           <GamePickerItem
-            gameId={gameId}
-            owned={!availableGames || !!availableGames?.includes(gameId)}
-            isGameLeader={canSelectGame}
-            key={gameId}
-            selected={value === gameId}
+            gameId={game.id}
+            owned={game.ownedByPlayer}
+            key={game.id}
+            selected={value === game.id}
           />
-        ))}
-      </Box>
-      {!filteredGames.length && (
-        <Box full="width" layout="center center" className="color-gray-dark">
-          {filters.owned ? (
-            <Box d="col" items="center" gap>
-              No games owned by a player match these filters.
-              {filteredGamesIncludingUnowned.length ? (
-                <Button
-                  size="small"
-                  emphasis="ghost"
-                  onClick={toggleOwnedFilter}
-                >
-                  But there are {filteredGamesIncludingUnowned.length} matching
-                  games on the store <Icon name="arrowRight" />
-                </Button>
-              ) : (
-                ''
-              )}
-            </Box>
-          ) : (
-            <>No games match these filters.</>
-          )}
-        </Box>
-      )}
-    </Box>
+        ))
+      }
+    </GameList>
   );
 });
 
-const GamePickerItem = withGame<{
+export const GamePickerItem = withGame<{
   gameId: string;
   owned: boolean;
-  isGameLeader: boolean;
   selected: boolean;
-}>(function GamePickerItem({
-  gameId,
-  owned,
-  gameSuite,
-  isGameLeader,
-  selected,
-}) {
-  const openQuickBuy = useOpenQuickBuy();
+}>(function GamePickerItem({ gameId, owned, gameSuite, selected }) {
   const voters = gameSuite.gameVotes[gameId];
   const votedForThisGame = voters?.includes(gameSuite.playerId);
 
   return (
-    <Card
-      className={clsx('aspect-1 min-w-80px', selected && 'ring-accent ring-6')}
+    <GameList.Item
+      gameId={gameId}
+      canSelect={gameSuite.youAreLeader}
+      owned={owned}
+      selected={selected}
+      onSelect={() => {
+        gameSuite.voteForGame(gameId);
+      }}
+      voted={votedForThisGame}
+      onVote={(voted) => {
+        if (voted) {
+          gameSuite.voteForGame(gameId);
+        } else {
+          gameSuite.removeVoteForGame(gameId);
+        }
+      }}
+      canVote={!gameSuite.youAreLeader}
     >
-      <Card.Image render={<GameIcon gameId={gameId} />} />
-      <GameDetailsDialog gameId={gameId}>
-        <Card.Main nonInteractive={false}>
-          <Card.Title className="text-sm md:text-md">
-            <GameTitle gameId={gameId} />
-          </Card.Title>
-          {selected && (
-            <Card.Content unstyled>
-              <Chip color="success">Selected</Chip>
-            </Card.Content>
-          )}
-          {voters?.length > 0 && (
-            <Card.Content
-              unstyled
-              className="flex flex-row gap-xs items-center"
-            >
-              <Icon name="suitHeart" className="fill-attention" size={20} />
-              <AvatarList count={voters.length}>
-                {voters.map((voter, i) => (
-                  <AvatarList.ItemRoot index={i} key={voter}>
-                    <PlayerAvatar playerId={voter} />
-                  </AvatarList.ItemRoot>
-                ))}
-              </AvatarList>
-            </Card.Content>
-          )}
-        </Card.Main>
-      </GameDetailsDialog>
-      <Card.Footer>
-        {!owned && (
-          <Button
-            className="w-full justify-center"
-            color="accent"
-            emphasis="primary"
-            onClick={() => openQuickBuy(gameId)}
-          >
-            <Icon name="cart" />
-            Buy
-          </Button>
-        )}
-        {owned && isGameLeader && (
-          <Button
-            className="w-full justify-center"
-            emphasis="primary"
-            onClick={() => gameSuite.voteForGame(gameId)}
-            disabled={selected}
-          >
-            <Icon name="check" />
-            Select
-          </Button>
-        )}
-        {owned && !isGameLeader && (
-          <Button
-            className="w-full justify-center"
-            emphasis="primary"
-            onClick={() => {
-              if (votedForThisGame) {
-                gameSuite.removeVoteForGame(gameId);
-              } else {
-                gameSuite.voteForGame(gameId);
-              }
-            }}
-          >
-            <Icon name={votedForThisGame ? 'x' : 'plus'} />
-            {votedForThisGame ? 'Voted!' : 'Vote'}
-          </Button>
-        )}
-      </Card.Footer>
-    </Card>
+      {voters?.length > 0 && (
+        <Card.Content unstyled className="flex flex-row gap-xs items-center">
+          <Icon name="suitHeart" className="fill-attention" size={20} />
+          <AvatarList count={voters.length}>
+            {voters.map((voter, i) => (
+              <AvatarList.ItemRoot index={i} key={voter}>
+                <PlayerAvatar playerId={voter} />
+              </AvatarList.ItemRoot>
+            ))}
+          </AvatarList>
+        </Card.Content>
+      )}
+    </GameList.Item>
   );
 });
