@@ -6,9 +6,16 @@ import {
   ConfirmedButton,
   Dialog,
   ErrorBoundary,
+  FieldLabel,
+  FieldRoot,
+  Select,
   toast,
 } from '@a-type/ui';
-import { AdminGameSessionSummary } from '@long-game/game-client';
+import { PrefixedId } from '@long-game/common';
+import {
+  AdminGameSessionDetails,
+  AdminGameSessionSummary,
+} from '@long-game/game-client';
 import { useState } from 'react';
 import { TimezoneField } from '../general/TimeZoneField.js';
 import { GameSessionStatusChip } from '../memberships/GameSessionStatusChip.js';
@@ -95,7 +102,7 @@ function EditGameSession({ session }: { session: AdminGameSessionSummary }) {
   });
 
   return (
-    <Box>
+    <Box col gap>
       <TimezoneField
         value={details.timezone}
         onValueChange={async (value) => {
@@ -106,6 +113,42 @@ function EditGameSession({ session }: { session: AdminGameSessionSummary }) {
           toast.success('Timezone updated');
         }}
       />
+      <PickLeader details={details} />
     </Box>
+  );
+}
+
+function PickLeader({ details }: { details: AdminGameSessionDetails }) {
+  const members = details.members.map((m) => ({
+    value: m.id,
+    label: m.displayName,
+  }));
+  const setLeader = sdkHooks.useAdminSetGameSessionLeader();
+
+  return (
+    <FieldRoot>
+      <FieldLabel htmlFor="leader">Leader</FieldLabel>
+      <Select
+        id="leader"
+        value={details.createdBy ?? null}
+        disabled={setLeader.isPending}
+        onValueChange={(memberId) => {
+          setLeader.mutate({
+            sessionId: details.id,
+            leaderId: memberId as PrefixedId<'u'>,
+          });
+        }}
+        items={members}
+      >
+        <Select.Trigger />
+        <Select.Content>
+          {members.map((m) => (
+            <Select.Item key={m.value} value={m.value}>
+              {m.label}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select>
+    </FieldRoot>
   );
 }

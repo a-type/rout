@@ -887,6 +887,17 @@ export class GameSession extends DurableObject<ApiBindings> {
     await this.#checkForRoundChange();
     await this.#scheduleTurnRemindersTask();
   }
+  async setLeader(leaderId: PrefixedId<'u'>) {
+    const members = await this.getMembers();
+    if (!members.find((m) => m.id === leaderId)) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        'Leader must be a member of the game session',
+      );
+    }
+    await this.#updateSessionData({ createdBy: leaderId });
+    await this.#checkForRoundChange();
+  }
 
   // chat
   async addChatMessage(input: z.input<typeof gameSessionChatMessageShape>) {

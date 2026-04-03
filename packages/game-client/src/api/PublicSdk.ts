@@ -589,6 +589,20 @@ export class PublicSdk extends BaseSdk {
       }),
     },
   );
+
+  adminSetGameSessionLeader = this.sdkMutation(
+    this.apiRpc.admin.gameSessions[':sessionId'].leader.$put,
+    {
+      transformInput: (input: {
+        sessionId: PrefixedId<'gs'>;
+        leaderId: PrefixedId<'u'>;
+      }) => ({
+        param: { sessionId: input.sessionId },
+        json: { leaderId: input.leaderId },
+      }),
+      invalidate: [['adminGetGameSessionDetails']],
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];
@@ -615,6 +629,9 @@ export type GameProduct = InferReturnData<PublicSdk['getGameProducts']>[number];
 export type AdminGameSessionSummary = InferReturnData<
   PublicSdk['adminGetAllGameSessions']
 >['results'][number];
+export type AdminGameSessionDetails = InferReturnData<
+  PublicSdk['adminGetGameSessionDetails']
+>;
 export type GameDetails = InferReturnData<PublicSdk['getGame']>;
 export type GameListItemDetails = InferReturnData<
   PublicSdk['getGames']

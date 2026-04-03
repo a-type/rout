@@ -92,4 +92,22 @@ export const adminGameSessionsRouter = new Hono<Env>()
       await gameSession.updateTimezone(timezone);
       return ctx.json({ ok: true });
     },
+  )
+  .put(
+    '/:sessionId/leader',
+    zValidator('param', z.object({ sessionId: idShapes.GameSession })),
+    zValidator(
+      'json',
+      z.object({
+        leaderId: idShapes.User,
+      }),
+    ),
+    async (ctx) => {
+      const sessionId = ctx.req.valid('param').sessionId;
+      const doId = ctx.env.GAME_SESSION.idFromName(sessionId);
+      const { leaderId } = ctx.req.valid('json');
+      const gameSession = ctx.env.GAME_SESSION.get(doId);
+      await gameSession.setLeader(leaderId);
+      return ctx.json({ ok: true });
+    },
   );
