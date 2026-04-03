@@ -1,7 +1,6 @@
-import { sdkHooks } from '@/services/publicSdk';
 import { Button, DropdownMenu, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
-import { HotseatBackend } from '@long-game/game-client';
+import { HotseatBackend, queryClient } from '@long-game/game-client';
 
 export interface HotseatGameSessionMenuProps {
   gameSessionId: PrefixedId<'gs'>;
@@ -10,7 +9,6 @@ export interface HotseatGameSessionMenuProps {
 export function HotseatGameSessionMenu({
   gameSessionId,
 }: HotseatGameSessionMenuProps) {
-  const queryClient = sdkHooks.useQueryClient();
   return (
     <DropdownMenu>
       <DropdownMenu.Trigger

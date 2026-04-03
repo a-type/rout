@@ -314,6 +314,7 @@ export class GameSessionSocketHandler {
         case 'greeting':
           // no-op, just used to trigger backlogged messages to send
           break;
+        // @ts-ignore
         case 'ping':
           // this doesn't actually reach us, it's handled by CF's socket auto-response
           break;
@@ -327,7 +328,7 @@ export class GameSessionSocketHandler {
           break;
       }
       // ack the message for the client
-      if (msg.type !== 'ping' && msg.messageId) {
+      if ((msg.type as any) !== 'ping' && msg.messageId) {
         ws.send(JSON.stringify({ type: 'ack', responseTo: msg.messageId }));
       }
     } catch (err) {

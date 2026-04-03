@@ -179,10 +179,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
               >
                 {gameSuite.gameStatus.status === 'pending' ? (
                   hotseat ? (
-                    <HotseatSetup
-                      gameSessionId={sessionId}
-                      className="w-full"
-                    />
+                    <HotseatSetup className="w-full" />
                   ) : (
                     <GameSetup gameSessionId={sessionId} className="w-full" />
                   )

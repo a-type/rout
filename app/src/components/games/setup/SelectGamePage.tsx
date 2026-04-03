@@ -11,9 +11,6 @@ export interface SelectGamePageProps {
 export const SelectGamePage = withGame<SelectGamePageProps>(
   function SelectGamePage({ gameSuite, gameSessionId }) {
     const updateGameMutation = sdkHooks.useUpdateGameSession();
-    const { data: pregame } = sdkHooks.useGetGameSessionPregame({
-      id: gameSessionId,
-    });
     const { data: sessionAvailableGames } = sdkHooks.useGetAvailableGames({
       id: gameSessionId,
     });
@@ -24,8 +21,6 @@ export const SelectGamePage = withGame<SelectGamePageProps>(
         <GamePicker
           value={gameSuite.gameId}
           loading={updateGameMutation.isPending}
-          gameSessionId={gameSessionId}
-          sessionCreator={pregame.session.createdBy}
           availableGames={sessionAvailableGames}
         />
       </Box>

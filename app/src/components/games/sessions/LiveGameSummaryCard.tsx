@@ -27,7 +27,7 @@ export const LiveGameSummaryCard = withSuspense(
     const showMenu = canDelete || canAbandon;
 
     return (
-      <GameSummaryCard session={session}>
+      <GameSummaryCard session={session} {...rest}>
         <GameSummaryCard.Trigger>
           <GameSummaryCard.Icon />
           <GameSummaryCard.Details color={isMyTurn ? 'accent' : undefined}>

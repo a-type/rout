@@ -13,13 +13,11 @@ import { GamePicker } from './GamePicker';
 import { StartGameButton } from './StartGameButton';
 
 export interface HotseatSetupProps {
-  gameSessionId: PrefixedId<'gs'>;
   className?: string;
 }
 
 export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
   gameSuite,
-  gameSessionId,
   className,
 }) {
   return (
@@ -30,8 +28,6 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
           id="game-picker"
           value={gameSuite.gameId}
           loading={false}
-          gameSessionId={gameSessionId}
-          sessionCreator={null}
           hotseat
         />
       </Box>
