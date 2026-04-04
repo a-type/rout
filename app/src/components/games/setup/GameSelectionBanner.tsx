@@ -1,45 +1,53 @@
-import { Box, clsx, Icon } from '@a-type/ui';
+import { Box, Button, Dialog, Icon } from '@a-type/ui';
+import { withGame } from '@long-game/game-client';
+import { Suspense } from 'react';
 import { GameIcon } from '../GameIcon.js';
-import { GameManualDialog } from '../GameManualDialog.js';
 import { GameTitle } from '../GameTitle.js';
+import { GamePicker } from './GamePicker.js';
 
-export function GameSelectionBanner({ gameId }: { gameId: string | null }) {
+export const GameSelectionBanner = withGame(function GameSelectionBanner({
+  gameSuite,
+}) {
+  const gameId = gameSuite.gameId;
+
   if (!gameId || gameId === 'empty') {
     return null;
   }
+
   return (
-    <Box p className="anchor-gameselection">
-      <div className="w-full relative z-1 text-lg md:text-xl color-white flex flex-col sm:flex-row gap-md sm:items-center">
-        <div className="flex flex-row gap-md items-center">
-          <GameIcon
-            gameId={gameId}
-            className="h-48px aspect-1 rounded-sm border-black border-thin border-solid"
-          />
-          <div className="bg-black px-sm py-xs rounded-sm">
-            <GameTitle gameId={gameId} />
-          </div>
-        </div>
-        <GameManualDialog className="ml-auto" emphasis="contrast" size="small">
-          <Icon name="book" />
-          How to play
-        </GameManualDialog>
-      </div>
-      <div
-        className={clsx(
-          'anchor-to-gameselection fixed top-[anchor(top)] left-[anchor(left)] z-100',
-          'animate-bounce',
-        )}
-      >
-        <div
-          className={clsx(
-            '-translate-y-1/2 md:(-translate-1/2 -rotate-30)',
-            'bg-primary text-contrast rd-sm px-sm py-xs',
-            'text-sm font-bold border-thin border-solid border-primary-ink shadow-lg',
-          )}
-        >
-          Playing!
+    <Box
+      items="center"
+      justify="between"
+      full="width"
+      gap="sm"
+      className="z-1 text-lg md:text-xl"
+    >
+      <div className="flex flex-row gap-md items-center">
+        <GameIcon
+          gameId={gameId}
+          className="h-48px aspect-1 rounded-sm border-black border-thin border-solid"
+        />
+        <div className="bg-white px-sm py-xs rounded-sm">
+          <GameTitle gameId={gameId} />
         </div>
       </div>
+      {gameSuite.youAreLeader && (
+        <Dialog>
+          <Dialog.Trigger render={<Button size="small" emphasis="light" />}>
+            <Icon name="convert" />
+            Change
+          </Dialog.Trigger>
+          <Dialog.Content width="lg">
+            <Dialog.Title>Change Game</Dialog.Title>
+            <Suspense>
+              <GamePicker hotseat={gameSuite.isHotseat} value={gameId} />
+            </Suspense>
+            <Dialog.Actions>
+              <Dialog.Close />
+            </Dialog.Actions>
+          </Dialog.Content>
+        </Dialog>
+      )}
     </Box>
   );
-}
+});

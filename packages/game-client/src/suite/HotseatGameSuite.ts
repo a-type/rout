@@ -41,6 +41,8 @@ export class HotseatGameSuite<
     );
   };
 
+  readonly isHotseat: boolean = true;
+
   constructor(
     init: GameSuiteBaseInit & {
       chat: GameSessionChatMessage[];

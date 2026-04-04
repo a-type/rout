@@ -189,6 +189,8 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     }
   }
 
+  abstract readonly isHotseat: boolean;
+
   abstract connect(): () => void;
   abstract disconnect(): void;
 

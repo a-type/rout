@@ -77,7 +77,7 @@ export const StartGameButton = withGame<StartGameButtonProps>(
           <Box col items="center" p>
             <GameIcon
               gameId={gameSuite.gameId}
-              className="w-full max-h-50vmin aspect-1"
+              className="w-full max-h-50vmin aspect-1 object-contain"
             />
             <div className="text-lg font-bold">
               <GameTitle gameId={gameSuite.gameId} />

@@ -6,8 +6,8 @@ import {
   Chip,
   clsx,
   Collapsible,
+  HorizontalList,
   Icon,
-  Select,
   Switch,
 } from '@a-type/ui';
 import { GameListItemDetails } from '@long-game/game-client';
@@ -114,16 +114,18 @@ export function GameListRoot({
       className={clsx(className)}
       {...rest}
     >
-      <Box surface="white">
-        <Collapsible className="w-full">
-          <Collapsible.Trigger
-            render={<Button size="small" emphasis="ghost" className="w-full" />}
-          >
-            <Icon name="filter" />
-            Filters
-          </Collapsible.Trigger>
-          <Collapsible.Content>
-            <Box d="col" gap="sm" container="reset" full items="start">
+      <Box>
+        <Collapsible className="w-full flex flex-col">
+          <div className="bg-white rd-t-sm mr-auto [&:has([aria-expanded=false])]:rd-b-sm">
+            <Collapsible.Trigger
+              render={<Button size="small" emphasis="ghost" />}
+            >
+              <Icon name="filter" />
+              Filters
+            </Collapsible.Trigger>
+          </div>
+          <Collapsible.Content className="bg-white">
+            <Box d="col" gap="sm" p="sm" container="reset" full items="start">
               <label className="flex items-center gap-xs cursor-pointer">
                 <Switch
                   checked={filters.available}
@@ -131,36 +133,24 @@ export function GameListRoot({
                 />
                 Only show games owned by players
               </label>
-              {filters.tags.map((tag) => (
-                <Button
-                  key={tag}
-                  size="small"
-                  color="accent"
-                  emphasis="primary"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    removeTagFilter(tag);
-                  }}
-                >
-                  {tag}
-                  <Icon name="x" />
-                </Button>
-              ))}
-              <Select value="" onValueChange={addTagFilter}>
-                <Select.Trigger size="small">
-                  <Icon name="plus" />
-                  <Select.Value>{(tag) => tag || 'Choose tag...'}</Select.Value>
-                </Select.Trigger>
-                <Select.Content>
-                  {Array.from(allTags)
-                    .filter((tag) => !filters.tags.includes(tag))
-                    .map((tag) => (
-                      <Select.Item key={tag} value={tag}>
-                        {tag}
-                      </Select.Item>
-                    ))}
-                </Select.Content>
-              </Select>
+              <HorizontalList>
+                {Array.from(allTags).map((tag) => (
+                  <Button
+                    size="small"
+                    toggled={filters.tags.includes(tag)}
+                    key={tag}
+                    onClick={() => {
+                      if (filters.tags.includes(tag)) {
+                        removeTagFilter(tag);
+                      } else {
+                        addTagFilter(tag);
+                      }
+                    }}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+              </HorizontalList>
             </Box>
           </Collapsible.Content>
         </Collapsible>

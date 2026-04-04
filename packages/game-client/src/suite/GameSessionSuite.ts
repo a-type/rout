@@ -52,6 +52,8 @@ export class GameSessionSuite<
     });
   };
 
+  readonly isHotseat: boolean = false;
+
   constructor(
     init: GameSuiteBaseInit,
     private ctx: {

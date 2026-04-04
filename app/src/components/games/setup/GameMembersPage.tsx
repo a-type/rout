@@ -1,4 +1,4 @@
-import { Box, H2, HorizontalList } from '@a-type/ui';
+import { Box, HorizontalList } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
@@ -13,13 +13,12 @@ export const GameMembersPage = withGame<GameMembersPageProps>(
   function GameMembersPage({ gameSessionId, gameSuite }) {
     return (
       <Box col gap>
-        <H2>Who's playing?</H2>
+        <PublicInviteLinkSection sessionId={gameSessionId} />
         <HorizontalList>
           {Object.values(gameSuite.players).map((player) => (
-            <PlayerAvatar playerId={player.id} key={player.id} />
+            <PlayerAvatar playerId={player.id} key={player.id} size={80} />
           ))}
         </HorizontalList>
-        <PublicInviteLinkSection sessionId={gameSessionId} />
         <GameSetupInviteFriends />
       </Box>
     );
