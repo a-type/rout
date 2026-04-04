@@ -35,7 +35,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         p
       >
         <TopographyBackground />
-        <GameSelectionBanner gameId={gameSuite.gameId} />
+        <GameSelectionBanner />
         <GameManualDialog
           emphasis="contrast"
           size="small"
