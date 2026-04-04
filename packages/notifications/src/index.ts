@@ -14,6 +14,10 @@ import {
   GameInviteReminderNotification,
   gameInviteReminderNotification,
 } from './gameInviteReminder.js';
+import {
+  GameStartReminderNotification,
+  gameStartReminderNotification,
+} from './gameStartReminder.js';
 import { newGameNotification, NewGameNotification } from './newGame.js';
 import { TestNotification, testNotification } from './test.js';
 import { turnReadyNotification, TurnReadyNotification } from './turnReady.js';
@@ -23,6 +27,7 @@ export type AnyNotification =
   | TurnReadyNotification
   | GameInviteNotification
   | GameInviteReminderNotification
+  | GameStartReminderNotification
   | FriendInviteNotification
   | NewGameNotification
   | GameAbandonedNotification
@@ -36,6 +41,8 @@ export function getNotificationConfig(
       return gameInviteNotification;
     case 'game-invite-reminder':
       return gameInviteReminderNotification;
+    case 'game-start-reminder':
+      return gameStartReminderNotification;
     case 'friend-invite':
       return friendInviteNotification;
     case 'turn-ready':
@@ -56,6 +63,7 @@ export function getNotificationConfig(
 export const notificationTypes = [
   'game-invite',
   'game-invite-reminder',
+  'game-start-reminder',
   'friend-invite',
   'turn-ready',
   'new-game',
