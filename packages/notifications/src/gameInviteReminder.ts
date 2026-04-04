@@ -32,12 +32,12 @@ export const gameInviteReminderNotification: NotificationConfig<GameInviteRemind
       const daysAgo = Math.floor(
         (now.getTime() - invitedAt.getTime()) / (1000 * 60 * 60 * 24),
       );
-      return `You were invited to play ${data.gameTitle ?? 'a game'} ${daysAgo} days ago.${
-        context === 'push' ? ' Tap to join!' : ''
+      return `You created ${data.gameTitle ?? 'a game'} ${daysAgo} days ago.${
+        context === 'push' ? ' Tap to start!' : ''
       }`;
     },
     title(data) {
-      return `Reminder: Join ${data.gameTitle ?? 'a game on Rout'}!`;
+      return `Reminder: Start ${data.gameTitle ?? 'a game on Rout'}!`;
     },
     link(data) {
       return `/session/${data.gameSessionId}`;
