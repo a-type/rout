@@ -121,7 +121,7 @@ self.addEventListener('notificationclick', (event) => {
           includeUncontrolled: true,
         });
         let client = allClients.find(
-          (c) => c.url === '/' && 'focus' in c,
+          (c) => c.type === 'window' && 'focus' in c,
         ) as WindowClient | null;
         if (client) {
           client.postMessage({
@@ -130,8 +130,9 @@ self.addEventListener('notificationclick', (event) => {
           });
           await client.focus();
           await client.navigate(config.link(data));
+        } else {
+          await self.clients.openWindow(config.link(data));
         }
-        await self.clients.openWindow(config.link(data));
       })(),
     );
   }
