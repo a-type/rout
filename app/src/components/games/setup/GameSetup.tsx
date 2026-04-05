@@ -16,7 +16,6 @@ export interface GameSetupProps {
 export const GameSetup = withGame<GameSetupProps>(function GameSetup({
   gameSessionId,
   className,
-  gameSuite,
 }) {
   return (
     <Box p d="col" gap grow className={clsx('m-auto max-w-800px', className)}>
@@ -35,7 +34,7 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         p
       >
         <TopographyBackground />
-        <GameSelectionBanner gameId={gameSuite.gameId} />
+        <GameSelectionBanner />
         <GameManualDialog
           emphasis="contrast"
           size="small"

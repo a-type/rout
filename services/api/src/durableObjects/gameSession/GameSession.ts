@@ -1571,7 +1571,6 @@ export class GameSession extends DurableObject<ApiBindings> {
       this.log('debug', `Game is not pending, skipping join reminders`);
       return;
     }
-    this.log('debug', `Sending join reminder to game leader`);
     const sessionData = await this.#getSessionData();
     const sessionId = sessionData.id;
     const gameTitle = (await this.getGameModule())?.title;
@@ -1585,14 +1584,17 @@ export class GameSession extends DurableObject<ApiBindings> {
       await this.#scheduler.getTaskScheduledAt(sessionExpiryTaskId);
     const expiresAt =
       scheduledExpiresAt ?? addWeeks(new Date(sessionData.createdAt), 1);
+
+    // Send start reminder to the game leader
+    this.log('debug', `Sending start reminder to game leader ${leaderId}`);
     try {
       await notifyUser(
         leaderId,
         {
-          type: 'game-invite-reminder',
+          type: 'game-start-reminder',
           gameSessionId: sessionId,
           id: id('no'),
-          invitedAt: sessionData.createdAt,
+          createdAt: sessionData.createdAt,
           gameTitle,
           expiresAt: expiresAt.toISOString(),
         },
@@ -1601,9 +1603,40 @@ export class GameSession extends DurableObject<ApiBindings> {
     } catch (err) {
       this.log(
         'error',
-        `Failed to send join reminder to leader ${leaderId}`,
+        `Failed to send start reminder to leader ${leaderId}`,
         err,
       );
+    }
+
+    // Send invite reminders to any pending invitees who haven't joined yet
+    const pendingInvites = await this.env.ADMIN_STORE.getInvitedPlayerIds(
+      sessionId,
+      { statusFilter: 'pending' },
+    );
+    this.log(
+      'debug',
+      `Sending invite reminders to ${pendingInvites.length} pending invitees`,
+    );
+    for (const invite of pendingInvites) {
+      try {
+        await notifyUser(
+          invite.userId,
+          {
+            type: 'game-invite-reminder',
+            gameSessionId: sessionId,
+            id: id('no'),
+            invitedAt: invite.createdAt,
+            gameTitle,
+          },
+          this.env,
+        );
+      } catch (err) {
+        this.log(
+          'error',
+          `Failed to send invite reminder to invitee ${invite.userId}`,
+          err,
+        );
+      }
     }
 
     // reschedule for 8 AM tomorrow to keep reminding until the game starts
