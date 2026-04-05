@@ -114,6 +114,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification.data;
   if (data) {
+    const config = getNotificationConfig(data);
     event.waitUntil(
       (async function () {
         const allClients = await self.clients.matchAll({
@@ -127,13 +128,10 @@ self.addEventListener('notificationclick', (event) => {
             type: 'pwa-notification-click',
             data,
           });
-          return client.focus();
+          await client.focus();
+          await client.navigate(config.link(data));
         }
-        client = await self.clients.openWindow('/');
-        client?.postMessage({
-          type: 'pwa-notification-click',
-          data,
-        });
+        await self.clients.openWindow(config.link(data));
       })(),
     );
   }
