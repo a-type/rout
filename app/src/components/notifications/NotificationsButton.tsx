@@ -69,7 +69,10 @@ export const NotificationsButton = withSuspense(
             )
           }
         />
-        <PopoverImpl.Content className="min-h-500px sm:w-400px sm:p-md">
+        <PopoverImpl.Content
+          sticky
+          className="min-h-400px max-h-80vh sm:w-400px sm:p-md flex flex-col"
+        >
           {!isMobile && <PopoverArrow />}
           <Box gap items="center" justify="between" className="mb-md">
             {isMobile ? (
@@ -106,7 +109,7 @@ export const NotificationsButton = withSuspense(
           ) : (
             <>
               {notifications?.length ? (
-                <ScrollArea className="max-h-800px flex-[1-0-auto]">
+                <ScrollArea className="max-h-800px min-h-0 grow shrink">
                   {notifications.map((notification) => (
                     <NotificationItem
                       key={notification.id}
