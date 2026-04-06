@@ -17,6 +17,7 @@
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "@long-game/notifications": "workspace:*",
+    "@long-game/visual-components": "workspace:*",
     "@module-federation/retry-plugin": "catalog:",
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
@@ -26,6 +27,7 @@
     "react-markdown": "^10.1.0",
     "remark-custom-header-id": "^1.0.0",
     "remark-mdc": "^3.6.0",
+    "unplugin-typegpu": "catalog:",
     "valtio": "catalog:"
   },
   "devDependencies": {
@@ -36,9 +38,9 @@
     "@module-federation/enhanced": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
     "@rsbuild/core": "catalog:",
-    "@rspack/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
     "@rsdoctor/rspack-plugin": "^1.5.5",
+    "@rspack/core": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "unocss": "catalog:",

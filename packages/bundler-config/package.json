@@ -17,6 +17,7 @@
     "@module-federation/rsbuild-plugin": "catalog:",
     "@module-federation/enhanced": "catalog:",
     "@long-game/common": "workspace:*",
-    "@long-game/uno-config": "workspace:*"
+    "@long-game/uno-config": "workspace:*",
+    "unplugin-typegpu": "catalog:"
   }
 }

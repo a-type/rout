@@ -7,6 +7,7 @@ import {
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'node:path';
+import typegpuPlugin from 'unplugin-typegpu/rspack';
 
 const federationConfig = createModuleFederationConfig({
   name: 'long-game',
@@ -87,6 +88,7 @@ export default defineConfig(({ command }) => ({
   tools: {
     rspack: {
       plugins: [
+        typegpuPlugin({}),
         command === 'build'
           ? new InjectManifest({
               swDest: 'sw.js',

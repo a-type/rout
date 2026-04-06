@@ -25,13 +25,11 @@
     "react-dom": "catalog:"
   },
   "dependencies": {
-    "@react-three/drei": "catalog:",
-    "@react-three/fiber": "catalog:",
-    "three": "catalog:",
-    "@long-game/common": "workspace:*"
+    "@long-game/common": "workspace:*",
+    "typegpu": "catalog:",
+    "@typegpu/noise": "catalog:"
   },
   "devDependencies": {
-    "@types/three": "catalog:",
     "typescript": "5.5.4",
     "@types/react": "catalog:",
     "@long-game/scripts": "workspace:*"

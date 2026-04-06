@@ -70,3 +70,6 @@ catalog:
   '@rspack/core': ^1.7.10
   date-fns: ^4.1.0
   clsx: ^2.1.1
+  unplugin-typegpu: ^0.10.0
+  typegpu: ^0.10.0
+  '@typegpu/noise': ^0.10.0

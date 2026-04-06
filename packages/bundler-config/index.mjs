@@ -8,6 +8,7 @@ import {
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import * as fs from 'fs';
+import typegpuPlugin from 'unplugin-typegpu/rspack';
 import { fileURLToPath, URL } from 'url';
 
 export const gameRsbuildConfig = (game) => {
@@ -93,7 +94,10 @@ export const gameRsbuildConfig = (game) => {
       },
       tools: {
         rspack: {
-          plugins: [new ModuleFederationPlugin(federationConfig)],
+          plugins: [
+            typegpuPlugin({}),
+            new ModuleFederationPlugin(federationConfig),
+          ],
           resolve: {
             conditionNames:
               command === 'build'
