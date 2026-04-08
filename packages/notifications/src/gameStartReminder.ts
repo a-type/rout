@@ -13,6 +13,10 @@ export interface GameStartReminderNotification {
 export const gameStartReminderNotification: NotificationConfig<GameStartReminderNotification> =
   {
     type: 'game-start-reminder',
+    name: 'Game Start Reminder',
+    description:
+      'Reminds you to start a game session that you created. Game sessions expire after a few days if not begun.',
+    defaultEnabled: true,
     text(data, context) {
       if (data.expiresAt) {
         const expiresAt = new Date(data.expiresAt);

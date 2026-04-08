@@ -5,7 +5,6 @@ import {
   Button,
   ButtonProps,
   clsx,
-  Dialog,
   H2,
   H5,
   Icon,
@@ -14,7 +13,7 @@ import {
   ScrollArea,
 } from '@a-type/ui';
 import { Notification } from '@long-game/game-client';
-import { useMediaQuery, withSuspense } from '@long-game/game-ui';
+import { withSuspense } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactElement, Suspense, useState } from 'react';
@@ -34,9 +33,6 @@ export const NotificationsButton = withSuspense(
     const [open, setOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
 
-    const isMobile = useMediaQuery('(max-width: 768px)');
-    const PopoverImpl = isMobile ? Dialog : Popover;
-
     const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
       sdkHooks.useGetNotifications({}, { refetchOnWindowFocus: true });
     const { results: notifications } = data || { results: [] };
@@ -44,7 +40,7 @@ export const NotificationsButton = withSuspense(
     const markAllRead = sdkHooks.useMarkAllNotificationsAsRead();
 
     return (
-      <PopoverImpl
+      <Popover
         open={open}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
@@ -53,7 +49,7 @@ export const NotificationsButton = withSuspense(
           setOpen(isOpen);
         }}
       >
-        <PopoverImpl.Trigger
+        <Popover.Trigger
           className={className}
           render={
             children ? (
@@ -69,19 +65,13 @@ export const NotificationsButton = withSuspense(
             )
           }
         />
-        <PopoverImpl.Content
+        <Popover.Content
           sticky
-          className="min-h-400px max-h-80vh sm:w-400px sm:p-md flex flex-col"
+          className="min-h-400px max-h-80vh w-500px max-w-90vw p-md flex flex-col"
         >
-          {!isMobile && <PopoverArrow />}
+          <PopoverArrow />
           <Box gap items="center" justify="between" className="mb-md">
-            {isMobile ? (
-              <Dialog.Title className="!m-0 text-xl">
-                Notifications
-              </Dialog.Title>
-            ) : (
-              <H2>Notifications</H2>
-            )}
+            <H2>Notifications</H2>
             <Box gap items="center">
               {!showSettings && (
                 <Button
@@ -102,52 +92,49 @@ export const NotificationsButton = withSuspense(
               </Button>
             </Box>
           </Box>
-          {showSettings ? (
-            <Suspense>
-              <NotificationSettings />
-            </Suspense>
-          ) : (
-            <>
-              {notifications?.length ? (
-                <ScrollArea className="max-h-800px min-h-0 grow shrink">
-                  {notifications.map((notification) => (
-                    <NotificationItem
-                      key={notification.id}
-                      notification={notification}
-                      onClick={() => setOpen(false)}
-                    />
-                  ))}
-                  {hasNextPage && (
-                    <Button
-                      emphasis="ghost"
-                      onClick={() => fetchNextPage()}
-                      loading={isFetchingNextPage}
-                      className="m-auto mt-lg"
-                    >
-                      {isFetchingNextPage ? 'Loading...' : 'Load more'}
-                    </Button>
-                  )}
-                </ScrollArea>
-              ) : (
-                <Box
-                  full
-                  d="col"
-                  layout="center center"
-                  className="color-gray-dark flex-1"
-                >
-                  <Icon name="bell" size={80} />
-                  <span>Nothing to see here!</span>
-                </Box>
-              )}
-            </>
-          )}
-          {isMobile && (
-            <Dialog.Actions>
-              <Dialog.Close />
-            </Dialog.Actions>
-          )}
-        </PopoverImpl.Content>
-      </PopoverImpl>
+          <ScrollArea className="max-h-800px min-h-0 grow shrink">
+            {showSettings ? (
+              <Suspense>
+                <NotificationSettings />
+              </Suspense>
+            ) : (
+              <>
+                {notifications?.length ? (
+                  <>
+                    {notifications.map((notification) => (
+                      <NotificationItem
+                        key={notification.id}
+                        notification={notification}
+                        onClick={() => setOpen(false)}
+                      />
+                    ))}
+                    {hasNextPage && (
+                      <Button
+                        emphasis="ghost"
+                        onClick={() => fetchNextPage()}
+                        loading={isFetchingNextPage}
+                        className="m-auto mt-lg"
+                      >
+                        {isFetchingNextPage ? 'Loading...' : 'Load more'}
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <Box
+                    full
+                    d="col"
+                    layout="center center"
+                    className="color-gray-dark flex-1"
+                  >
+                    <Icon name="bell" size={80} />
+                    <span>Nothing to see here!</span>
+                  </Box>
+                )}
+              </>
+            )}
+          </ScrollArea>
+        </Popover.Content>
+      </Popover>
     );
   }),
 );

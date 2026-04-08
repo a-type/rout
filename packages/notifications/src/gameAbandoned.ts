@@ -10,6 +10,10 @@ export interface GameAbandonedNotification {
 export const gameAbandonedNotification: NotificationConfig<GameAbandonedNotification> =
   {
     type: 'game-abandoned',
+    name: 'Game Abandoned',
+    description:
+      'Sent when a game you were in has ended after one of the players dropped out.',
+    defaultEnabled: false,
     text(_data: GameAbandonedNotification, _context: 'push' | 'email') {
       return `A game you were in has ended after one of the players dropped out.`;
     },

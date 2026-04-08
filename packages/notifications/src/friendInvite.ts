@@ -11,6 +11,10 @@ export interface FriendInviteNotification {
 export const friendInviteNotification: NotificationConfig<FriendInviteNotification> =
   {
     type: 'friend-invite',
+    name: 'Friend Invite',
+    description: 'Sent when someone invites you to be friends on Rout.',
+    emailRequired: true,
+    defaultEnabled: true,
     text(data, context) {
       return `${data.inviterName} sent you a friend invite.${
         context === 'push' ? ' Tap to respond!' : ''

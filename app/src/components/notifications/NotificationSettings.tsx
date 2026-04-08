@@ -4,34 +4,25 @@ import {
   useIsSubscribedToPush,
   useSubscribeToPush,
 } from '@/services/push';
-import { Box, Button, H3, Switch, toast, Tooltip } from '@a-type/ui';
-import { Notification } from '@long-game/game-client';
-import { notificationTypes } from '@long-game/notifications';
-import { sentenceCase } from 'change-case';
+import {
+  Box,
+  Button,
+  H3,
+  Icon,
+  toast,
+  ToggleGroup,
+  withClassName,
+} from '@a-type/ui';
+import {
+  getNotificationConfigByType,
+  NotificationType,
+  notificationTypes,
+} from '@long-game/notifications';
 
 export interface NotificationSettingsProps {}
 
 export function NotificationSettings({}: NotificationSettingsProps) {
   const { data: notificationSettings } = sdkHooks.useGetNotificationSettings();
-  const updateNotificationSettings = sdkHooks.useUpdateNotificationSettings();
-
-  const updateOneSettingFactory = (
-    key: Exclude<Notification['data']['type'], 'test'>,
-  ) => {
-    return async (transport: 'email' | 'push', value: boolean) => {
-      await updateNotificationSettings.mutateAsync({
-        ...notificationSettings,
-        [key]: {
-          push: false,
-          email: false,
-          ...(notificationSettings[key] as
-            | { email: boolean; push: boolean }
-            | undefined),
-          [transport]: value,
-        },
-      });
-    };
-  };
 
   const canPush = useCanSubscribeToPush();
   const subscribedToPush = useIsSubscribedToPush();
@@ -57,13 +48,11 @@ export function NotificationSettings({}: NotificationSettingsProps) {
       )}
       <Box d="col" gap>
         {notificationTypes.map((key) => {
-          const updateOneSetting = updateOneSettingFactory(key as any);
           return (
             <NotificationSettingsRow
               key={key}
-              label={key}
-              value={notificationSettings[key] ?? { push: false, email: false }}
-              update={updateOneSetting}
+              notificationType={key}
+              notificationSettings={notificationSettings}
             />
           );
         })}
@@ -73,67 +62,95 @@ export function NotificationSettings({}: NotificationSettingsProps) {
 }
 
 function NotificationSettingsRow({
-  label,
-  value,
-  update,
+  notificationType,
+  notificationSettings,
 }: {
-  label: string;
-  value: { email: boolean; push: boolean };
-  update: (transport: 'email' | 'push', value: boolean) => Promise<void>;
+  notificationType: NotificationType;
+  notificationSettings: Record<
+    NotificationType,
+    { push: boolean; email: boolean }
+  >;
 }) {
+  const config = getNotificationConfigByType(notificationType as any);
   const canPush = useCanSubscribeToPush();
   const subscribedToPush = useIsSubscribedToPush();
-  const [subscribeToPush, isSubscribingToPush] = useSubscribeToPush();
+  const [subscribeToPush, subscribingToPush] = useSubscribeToPush();
 
-  const togglePush = async (checked: boolean) => {
+  const ensurePushEnabled = async () => {
+    if (subscribedToPush) return;
     if (canPush) {
       const result = await subscribeToPush();
       if (!result) {
         alert(
-          `Looks like you cancelled or something went wrong. Can't subscribe to push notifications.`,
+          `You rejected push notifications, or something went wrong. Can't subscribe.`,
         );
-        return;
-      } else {
-        await update('push', checked);
       }
     } else {
       toast.error('Push notifications are not supported on this device');
     }
   };
-  const toggleEmail = async () => {
-    await update('email', !value.email);
-  };
+
+  const updateNotificationSettings = sdkHooks.useUpdateNotificationSettings();
+
+  const value = [] as string[];
+  if (
+    notificationSettings[notificationType]?.push &&
+    canPush &&
+    subscribedToPush
+  )
+    value.push('push');
+  if (notificationSettings[notificationType]?.email || config.emailRequired)
+    value.push('email');
+
+  const key = notificationType as keyof typeof notificationSettings;
+
+  const loading = subscribingToPush || updateNotificationSettings.isPending;
 
   return (
     <Box d="row" gap items="center" justify="between">
-      <Box>{sentenceCase(label)}</Box>
-      <Box items="center" gap>
-        {canPush && (
-          <Box d="col" gap="sm" layout="center center">
-            <Tooltip
-              disabled={!!canPush}
-              content="Push notifications are not supported on this device"
-              color="contrast"
-            >
-              <Switch
-                checked={value.push && subscribedToPush}
-                onCheckedChange={togglePush}
-                disabled={isSubscribingToPush || !canPush}
-                className={!canPush ? 'opacity-50' : 'cursor-pointer'}
-              />
-            </Tooltip>
-            <span className="text-xs">Push</span>
-          </Box>
+      <Box col gap="sm">
+        <div>{config.name}</div>
+        <div className="text-sm italic color-gray-dark">
+          {config.description}
+        </div>
+        {config.emailRequired && (
+          <div className="text-sm italic color-gray-dark">
+            Email notifications are required.
+          </div>
         )}
-        <Box d="col" gap="sm" layout="center center">
-          <Switch
-            checked={value.email}
-            onCheckedChange={toggleEmail}
-            className="cursor-pointer"
-          />
-          <span className="text-xs">Email</span>
-        </Box>
       </Box>
+      <ToggleGroup
+        multiple
+        onValueChange={async (values) => {
+          const asSettings = {
+            push: values.includes('push'),
+            email: values.includes('email'),
+          };
+          if (asSettings.push) {
+            await ensurePushEnabled();
+          }
+          await updateNotificationSettings.mutateAsync({
+            ...notificationSettings,
+            [key]: asSettings,
+          });
+        }}
+        value={value}
+      >
+        <StyledToggleItem value="push" disabled={!canPush}>
+          <Icon name={canPush ? 'phone' : 'x'} loading={loading} /> Push
+        </StyledToggleItem>
+        <StyledToggleItem value="email" disabled={config.emailRequired}>
+          <Icon name="email" loading={loading} /> Email
+        </StyledToggleItem>
+      </ToggleGroup>
     </Box>
   );
 }
+
+const StyledToggleItem = withClassName(
+  ToggleGroup.Item,
+  'flex flex-row gap-xs items-center',
+  'disabled:(!bg-gray-light !color-gray-darker)',
+  'disabled:hover:!bg-gray-light',
+  'disabled:focus:!bg-gray-light',
+);

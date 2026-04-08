@@ -14,6 +14,9 @@ export interface TurnReadyNotification {
 export const turnReadyNotification: NotificationConfig<TurnReadyNotification> =
   {
     type: 'turn-ready',
+    name: 'Turn Ready',
+    description: "Sent when it's your turn in a game.",
+    defaultEnabled: true,
     text(data, context) {
       if (data.turns?.length > 1) {
         return `You have ${data.turns.length} games waiting for your move.${

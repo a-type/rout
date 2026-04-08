@@ -36,7 +36,12 @@ export type AnyNotification =
 export function getNotificationConfig(
   notification: AnyNotification,
 ): NotificationConfig<AnyNotification> {
-  switch (notification.type) {
+  return getNotificationConfigByType(notification.type);
+}
+export function getNotificationConfigByType<T extends AnyNotification['type']>(
+  type: T,
+): NotificationConfig<AnyNotification> {
+  switch (type) {
     case 'game-invite':
       return gameInviteNotification;
     case 'game-invite-reminder':
@@ -54,9 +59,7 @@ export function getNotificationConfig(
     case 'test':
       return testNotification;
     default:
-      throw new Error(
-        `Unknown notification type: ${(notification as any).type}`,
-      );
+      throw new Error(`Unknown notification type: ${type}`);
   }
 }
 

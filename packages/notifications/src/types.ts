@@ -6,4 +6,8 @@ export interface NotificationConfig<DataShape extends { type: string }> {
   html?(data: DataShape, context: NotificationContext): string;
   link(data: DataShape): string;
   type: DataShape['type'];
+  emailRequired?: boolean;
+  defaultEnabled?: boolean;
+  name: string;
+  description: string;
 }

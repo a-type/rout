@@ -12,6 +12,10 @@ export interface GameInviteReminderNotification {
 export const gameInviteReminderNotification: NotificationConfig<GameInviteReminderNotification> =
   {
     type: 'game-invite-reminder',
+    name: 'Game Invite Reminder',
+    description:
+      "Reminds you that you have a pending game invitation that you haven't responded to yet.",
+    defaultEnabled: true,
     text(data, context) {
       const invitedAt = new Date(data.invitedAt);
       const now = new Date();

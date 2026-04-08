@@ -12,6 +12,10 @@ export interface GameInviteNotification {
 export const gameInviteNotification: NotificationConfig<GameInviteNotification> =
   {
     type: 'game-invite',
+    name: 'Game Invite',
+    description: 'Sent when someone invites you to play a game on Rout.',
+    emailRequired: true,
+    defaultEnabled: true,
     text(data: GameInviteNotification, context: 'push' | 'email') {
       return `${data.inviterName} invited you to play a game.${
         context === 'push' ? ' Tap to join!' : ''

@@ -13,7 +13,11 @@ import {
   NotificationSettings,
   sql,
 } from '@long-game/kysely';
-import { notificationTypes } from '@long-game/notifications';
+import {
+  getNotificationConfigByType,
+  NotificationType,
+  notificationTypes,
+} from '@long-game/notifications';
 import { RpcTarget } from 'cloudflare:workers';
 
 export class UserStore extends RpcTarget {
@@ -989,20 +993,27 @@ export class UserStore extends RpcTarget {
       .select(['User.notificationSettings'])
       .executeTakeFirstOrThrow();
 
-    const defaults = notificationTypes.reduce(
+    const merged = notificationTypes.reduce(
       (acc, key) => {
+        const config = getNotificationConfigByType(key as NotificationType);
         acc[key] = { email: false, push: false };
+        if (user.notificationSettings?.[key]) {
+          acc[key] = user.notificationSettings[key];
+        } else {
+          acc[key] = {
+            email: !!config.defaultEnabled,
+            push: !!config.defaultEnabled,
+          };
+        }
+        if (config.emailRequired) {
+          acc[key].email = true;
+        }
         return acc;
       },
-      {
-        test: { email: true, push: true },
-      } as Record<string, { email: boolean; push: boolean }>,
+      {} as Record<string, { email: boolean; push: boolean }>,
     );
 
-    return {
-      ...defaults,
-      ...user.notificationSettings,
-    } as NotificationSettings;
+    return merged as NotificationSettings;
   }
 
   async updateNotificationSettings(settings: Partial<NotificationSettings>) {
