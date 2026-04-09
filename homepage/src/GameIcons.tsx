@@ -1,12 +1,10 @@
 import { Box, useAnimationFrame } from '@a-type/ui';
-import gameMetadata from '@long-game/games';
+import { allGames } from '@long-game/games';
 import { Children, useEffect, useRef } from 'react';
 
 export interface GameIconsProps {}
 
-const publicGames = Object.values(gameMetadata).filter(
-  (game) => !game.prerelease,
-);
+const publicGames = allGames.filter((game) => !game.prerelease);
 
 export function GameIcons({}: GameIconsProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -23,7 +21,7 @@ export function GameIcons({}: GameIconsProps) {
           border
           className="aspect-1 w-200px flex-shrink-0 color-gray-dark"
           layout="center center"
-          href={`/games/${game.id}`}
+          render={<a href={`/games/${game.id}`} className="underline-none" />}
         >
           <img
             src={`https://play.rout.games/game-data/${game.id}/icon.png`}

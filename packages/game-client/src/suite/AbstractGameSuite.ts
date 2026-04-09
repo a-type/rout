@@ -43,6 +43,7 @@ import {
 } from '@long-game/game-definition';
 import { produce } from 'immer';
 import { action, autorun, computed, observable, runInAction, toJS } from 'mobx';
+import { publicSdk } from '../api/index.js';
 import { GameModuleContext } from '../federation/gameModuleContext.js';
 import { GameLogItem } from '../types.js';
 import { PlayerInfo } from './GameSessionSuite.js';
@@ -1023,18 +1024,27 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   protected abstract getGameData(): Promise<GameSuiteBaseInit>;
 
   @action private applyGameData = async (init: GameSuiteBaseInit) => {
-    const gameId = init.gameId || 'empty';
+    this.gameId = init.gameId || 'empty';
+    // immediately attempt to resolve a real id
+    if (init.gameId) {
+      publicSdk.getResolvedGameIdFromAlias.run({ aliasId: init.gameId }).then(
+        action((id) => {
+          this.gameId = id;
+          this.gameModules.getGameDefinition(id, gameVersion).then(
+            action((gameDefinition) => {
+              this.gameDefinition = gameDefinition as TGame;
+            }),
+          );
+        }),
+      );
+    } else {
+      this.gameDefinition = emptyGameDefinition as any;
+    }
     const gameVersion = init.gameVersion || 'v1';
-    this.gameModules.getGameDefinition(gameId, gameVersion).then(
-      action((gameDefinition) => {
-        this.gameDefinition = gameDefinition as TGame;
-      }),
-    );
     this.viewingRoundIndex = init.currentRoundIndex;
     this.latestRoundIndex = init.currentRoundIndex;
     this.localTurnData = undefined;
     this.playerStatuses = init.playerStatuses;
-    this.gameId = gameId;
     this.gameVersion = gameVersion;
     this.members = init.members;
     this.gameStatus = init.status;

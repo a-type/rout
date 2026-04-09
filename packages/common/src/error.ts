@@ -67,11 +67,18 @@ export class LongGameError extends Error {
     }
   };
 
-  static wrap = (err: Error): LongGameError => {
+  static wrap = (err: unknown): LongGameError => {
     if (LongGameError.isInstance(err)) {
       return err;
     }
-    return new LongGameError(LongGameErrorCode.Unknown, err.message, err);
+    if (err instanceof Error) {
+      return new LongGameError(LongGameErrorCode.Unknown, err.message, err);
+    }
+    return new LongGameError(
+      LongGameErrorCode.Unknown,
+      'An unexpected error occurred',
+      err,
+    );
   };
 
   constructor(

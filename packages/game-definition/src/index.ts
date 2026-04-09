@@ -11,6 +11,8 @@ export type * from './utilTypes.js';
 export interface GameModule {
   versions: GameDefinition<any>[];
   id: string;
+  /** Old / prototype IDs that should still route to the game */
+  aliasIds?: string[];
   title: string;
   description?: string;
   tags: string[];

@@ -6,7 +6,7 @@ import {
   wrapRpcData,
 } from '@long-game/common';
 import { GameModule } from '@long-game/game-definition';
-import games from '@long-game/games';
+import { allGames, getGame } from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { Env } from '../config/ctx.js';
@@ -39,18 +39,18 @@ function gameSummary(game: GameModule, env: ApiBindings) {
 export const gamesRouter = new Hono<Env>()
   .get('/', sessionMiddleware, async (ctx) => {
     const isAdmin = ctx.get('session')?.isProductAdmin ?? false;
-    const metadata = Object.entries(games)
-      .filter(([, game]) => {
+    const metadata = allGames
+      .filter((game) => {
         // if this filter is applied, non-admin players can't participate
         // in pre-release games (this API is used to fetch game client
         // federated bundles...)
-        // if (game.prerelease && !isAdmin) {
+        // if (game.prerelease && !ilsAdmin) {
         //   return false;
         // }
         return game.versions.length > 0;
       })
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([id, game]) => gameSummary(game, ctx.env));
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((game) => gameSummary(game, ctx.env));
     // returns a list of all games and some metadata
     return ctx.json(
       metadata.reduce(
@@ -217,13 +217,15 @@ export const gamesRouter = new Hono<Env>()
     zValidator('param', z.object({ id: z.string() })),
     async (ctx) => {
       const id = ctx.req.valid('param').id;
-      const game = games[id];
-      if (!game) {
-        throw new LongGameError(
-          LongGameError.Code.NotFound,
-          `Game not found: ${id}`,
-        );
-      }
+      const game = getGame(id);
       return ctx.json(gameSummary(game, ctx.env));
+    },
+  )
+  .get(
+    '/resolveAlias/:aliasId',
+    zValidator('param', z.object({ aliasId: z.string() })),
+    async (ctx) => {
+      const game = getGame(ctx.req.valid('param').aliasId);
+      return ctx.json(game.id);
     },
   );

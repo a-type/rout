@@ -1,0 +1,39 @@
+import { PrefixedId } from '@long-game/common';
+import {
+  fromCellKey,
+  PlayerBoardCell,
+} from '@long-game/game-garden-path-definition/v1';
+import clsx from 'clsx';
+import { BoardGridCell } from './BoardGrid';
+import { TileToken } from './TileToken';
+
+export interface ReadonlyBoardCellProps {
+  cell: PlayerBoardCell | undefined;
+  playerId: PrefixedId<'u'>;
+  cellKey: string;
+  pathIsBroken?: boolean;
+  pathIsComplete?: boolean;
+  className?: string;
+}
+
+export function ReadonlyBoardCell({
+  cell,
+  cellKey,
+  playerId,
+  className,
+  ...rest
+}: ReadonlyBoardCellProps) {
+  const { x, y } = fromCellKey(cellKey);
+  return (
+    <BoardGridCell
+      x={x}
+      y={y}
+      className={clsx('layer-components:bg-white', className)}
+      anchorNamespace={playerId}
+    >
+      {cell && (
+        <TileToken tile={cell.tile} playerId={playerId} disabled {...rest} />
+      )}
+    </BoardGridCell>
+  );
+}

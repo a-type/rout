@@ -1,5 +1,5 @@
 import { PrefixedId } from '@long-game/common';
-import games from '@long-game/games';
+import { getGame } from '@long-game/games';
 import { DB, createDb, dateTime, jsonArrayFrom } from '@long-game/kysely';
 import { WorkerEntrypoint } from 'cloudflare:workers';
 import { UserStore } from './UserStore.js';
@@ -91,7 +91,7 @@ export class PublicStore extends WorkerEntrypoint<ApiBindings> {
           }
           const productTags = product.gameProductItems
             .map((item) => item.gameId)
-            .map((gameId) => games[gameId]?.tags ?? [])
+            .map((gameId) => getGame(gameId).tags ?? [])
             .flat();
           return filter.tags.every((tag) => productTags.includes(tag));
         })

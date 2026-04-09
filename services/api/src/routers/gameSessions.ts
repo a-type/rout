@@ -1,7 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
-import { LongGameError, wrapRpcData } from '@long-game/common';
+import { wrapRpcData } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
-import games from '@long-game/games';
+import { getGame } from '@long-game/games';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { EnvWith } from '../config/ctx.js';
@@ -30,7 +30,9 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
               }
               return undefined;
             },
-            z.enum(['active', 'complete', 'pending', 'abandoned', 'expired']).array(),
+            z
+              .enum(['active', 'complete', 'pending', 'abandoned', 'expired'])
+              .array(),
           )
           .optional(),
         first: z.coerce.number().int().positive().optional(),
@@ -69,14 +71,7 @@ export const gameSessionsRouter = new Hono<EnvWith<'session'>>()
       const { gameId } = ctx.req.valid('json');
       let gameVersion: string | undefined;
       if (gameId) {
-        const game = games[gameId];
-
-        if (!game) {
-          throw new LongGameError(
-            LongGameError.Code.BadRequest,
-            'Game not found',
-          );
-        }
+        const game = getGame(gameId);
         const gameDefinition = getLatestVersion(game);
         gameVersion = gameDefinition.version;
       }

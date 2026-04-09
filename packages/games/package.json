@@ -17,6 +17,7 @@
     "dev": "tsc --watch --preserveWatchOutput"
   },
   "dependencies": {
+    "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "@long-game/game-number-guess-definition": "workspace:*",
     "@long-game/game-scribble-definition": "workspace:*",
@@ -24,7 +25,7 @@
     "@long-game/game-wizard-ball-definition": "workspace:*",
     "@long-game/game-exquisite-fridge-definition": "workspace:*",
     "@long-game/game-heir-apparent-definition": "workspace:*",
-    "@long-game/game-gridlock-definition": "workspace:*"
+    "@long-game/game-garden-path-definition": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

@@ -1,0 +1,6 @@
+{
+  "name": "@long-game/game-garden-path",
+  "scripts": {
+    "dev-game": "pnpm --filter \"./*\" --parallel --stream dev-game"
+  }
+}

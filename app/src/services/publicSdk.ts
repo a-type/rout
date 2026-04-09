@@ -1,9 +1,13 @@
 import { toast } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
-import { hookifySdk, PublicSdk, SdkHooks } from '@long-game/game-client';
+import {
+  hookifySdk,
+  PublicSdk,
+  publicSdk,
+  SdkHooks,
+} from '@long-game/game-client';
+export { publicSdk } from '@long-game/game-client';
 export type { BaseSdk, PublicSdk } from '@long-game/game-client';
-
-export const publicSdk = new PublicSdk();
 
 export const sdkHooks: SdkHooks<PublicSdk> = hookifySdk<PublicSdk>();
 

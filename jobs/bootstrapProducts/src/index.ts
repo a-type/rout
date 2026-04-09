@@ -1,4 +1,4 @@
-import games from '@long-game/games';
+import { gamesById } from '@long-game/games';
 import type { AdminStore } from '@long-game/service-api';
 
 interface BootstrapBindings {
@@ -19,7 +19,7 @@ export default {
     env: BootstrapBindings,
     ctx: ExecutionContext,
   ) {
-    const gameIds = Object.keys(games);
+    const gameIds = Object.keys(gamesById);
 
     // find any existing products with only 1 item
     const existingProducts = await env.ADMIN_STORE.getSingleGameProducts();
@@ -32,8 +32,8 @@ export default {
     // create a new product for each gameId remaining
     for (const gameId of gameIdsToCreate) {
       const product = await env.ADMIN_STORE.createGameProduct({
-        name: games[gameId].title,
-        description: `Get ${games[gameId].title} a la carte`,
+        name: gamesById[gameId].title,
+        description: `Get ${gamesById[gameId].title} a la carte`,
         priceCents: 0,
         publishedAt: null,
       });

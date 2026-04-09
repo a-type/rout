@@ -25,7 +25,7 @@ import {
   RoundIndexResult,
   Turn,
 } from '@long-game/game-definition';
-import games from '@long-game/games';
+import { getGame } from '@long-game/games';
 import { DurableObject } from 'cloudflare:workers';
 import { addDays, addWeeks, startOfDay } from 'date-fns';
 import { z } from 'zod';
@@ -279,7 +279,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       return null;
     }
 
-    return games[gameId] || null;
+    return getGame(gameId);
   }
   async getGameDefinition() {
     const { gameId, gameVersion } = await this.#getSessionData();
@@ -287,13 +287,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       return emptyGameDefinition;
     }
 
-    const gameModule = games[gameId];
-    if (!gameModule) {
-      throw new LongGameError(
-        LongGameError.Code.NotFound,
-        `Game ${gameId} not found`,
-      );
-    }
+    const gameModule = getGame(gameId);
     const gameDefinition = gameModule.versions.find(
       (g) => g.version === gameVersion,
     );
@@ -341,7 +335,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     // we select the game immediately
     const sessionData = await this.#getSessionData();
     if (!sessionData.createdBy || sessionData.createdBy === playerId) {
-      await this.updateGame(gameId, getLatestVersion(games[gameId]).version);
+      await this.updateGame(gameId, getLatestVersion(getGame(gameId)).version);
       return;
     }
 
@@ -545,14 +539,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
 
     // last chance to set game version before beginning
-    const gameModule = games[sessionData.gameId];
-    if (!gameModule) {
-      throw new LongGameError(
-        LongGameError.Code.NotFound,
-        `Game ${sessionData.gameId} not found`,
-      );
-    }
-
+    const gameModule = getGame(sessionData.gameId);
     // update to latest version of chosen game
     const gameDefinition = getLatestVersion(gameModule);
     await this.updateGame(sessionData.gameId, gameDefinition.version);
@@ -1343,7 +1330,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       return;
     }
     const scheduler = await getNotificationScheduler(playerId, this.env);
-    const game = games[sessionData.gameId];
+    const game = getGame(sessionData.gameId);
     await scheduler.add(playerId, {
       type: 'turn-ready',
       turns: [

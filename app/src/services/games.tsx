@@ -5,7 +5,7 @@
 import { checkForUpdate, skipWaiting } from '@/swRegister.js';
 import { Box, Button, H2, Icon, P } from '@a-type/ui';
 import { idToFederationId } from '@long-game/common';
-import { GameModuleContext, queryClient } from '@long-game/game-client';
+import { GameModuleContext } from '@long-game/game-client';
 import {
   emptyGameDefinition,
   GameDefinition,
@@ -104,7 +104,7 @@ export function getFederatedGameComponent(
 }
 
 async function registerFederatedGames() {
-  const games = await queryClient.fetchQuery(publicSdk.getGames());
+  const games = await publicSdk.getGames.run();
   registerRemotes(
     Object.entries(games).map(([id, meta]) => ({
       name: idToFederationId(id),

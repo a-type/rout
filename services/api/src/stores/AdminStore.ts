@@ -1,6 +1,6 @@
 import { AuthAccount, AuthUser, AuthVerificationCode } from '@a-type/auth';
 import { PrefixedId, assertPrefixedId, id } from '@long-game/common';
-import games from '@long-game/games';
+import { getGame } from '@long-game/games';
 import {
   DB,
   GameProductUpdate,
@@ -218,7 +218,7 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
     );
 
     for (const gameId of deduplicatedGameItems) {
-      const game = games[gameId];
+      const game = getGame(gameId);
       await this.insertNotification(userId, {
         type: 'new-game',
         gameTitle: game.title,

@@ -17,6 +17,7 @@ import {
 } from './dataRegistry.js';
 import { useDndStore } from './dndStore.js';
 import { gesture } from './gestureStore.js';
+import { dndLogger } from './logger.js';
 import {
   Accept,
   OnDropCb,
@@ -84,7 +85,7 @@ export function Droppable<T = any>({
         if (draggedId) {
           const data = draggableDataRegistry.get(draggedId);
           if (data) {
-            console.log('Evaluating droppable accept with data', data);
+            dndLogger.debug('Evaluating droppable accept with data', data);
             const accepted =
               !acceptStable.current ||
               acceptStable.current(

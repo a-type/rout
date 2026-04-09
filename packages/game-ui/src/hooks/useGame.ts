@@ -19,11 +19,13 @@ const emptyGame = (id: string) =>
   }) as GameListItemDetails;
 
 export function useGame(id: string | undefined | null) {
-  const { data: allGames } = sdkHooks.useGetGames();
+  const { data: gameData } = sdkHooks.useGetGame({
+    id: id ?? '',
+  });
   if (!id) {
     return emptyGame('empty');
   }
-  return allGames[id] ?? emptyGame(id);
+  return gameData ?? emptyGame(id);
 }
 
 export function useGameVersion(id: string, version: string) {

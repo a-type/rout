@@ -72,12 +72,16 @@ export class BaseSdk extends EventTarget {
       getKey,
       enabled,
       defaults,
+      ignoreError,
+      emptyResponse,
     }: {
       transformInput?: (input: Input) => TReq;
       transformOutput?: (output: TRes) => Output;
       getKey?: (input: Input) => any[];
       enabled?: (input: Input) => boolean;
       defaults?: Partial<QueryOptions>;
+      ignoreError?: (error: LongGameError) => boolean;
+      emptyResponse?: Output;
     } = {},
   ): QueryFactory<Output, Input> => {
     const factory = (...args: EraseEmptyArg<Input>) => {
@@ -90,6 +94,9 @@ export class BaseSdk extends EventTarget {
           const res = await fn(
             transformInput ? transformInput(input) : (undefined as any),
           );
+          if (res.status === 404 && emptyResponse !== undefined) {
+            return emptyResponse;
+          }
           LongGameError.throwIfError(res);
           const body = (await res.json()) as TRes;
           const result = transformOutput
@@ -99,14 +106,13 @@ export class BaseSdk extends EventTarget {
           return result;
         } catch (e) {
           console.error(e);
-          this.dispatchEvent(new ErrorEvent('error', { error: e }));
-          if (LongGameError.isInstance(e)) {
-            throw e;
+          const asLongGameError = LongGameError.wrap(e);
+          if (!ignoreError?.(asLongGameError)) {
+            this.dispatchEvent(
+              new ErrorEvent('error', { error: asLongGameError }),
+            );
           }
-          throw new LongGameError(
-            LongGameError.Code.Unknown,
-            'An error occurred. Please try again later.',
-          );
+          throw asLongGameError;
         }
       };
       const subkey = getKey ? getKey(input) : [input];

@@ -1,12 +1,13 @@
 import { zValidator } from '@hono/zod-validator';
 import {
   assertPrefixedId,
+  GameRound,
   LongGameError,
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
 import { getLatestVersion } from '@long-game/game-definition';
-import games from '@long-game/games';
+import { getGame } from '@long-game/games';
 import { GameSessionInvitation } from '@long-game/kysely';
 import { RpcStub } from 'cloudflare:workers';
 import { Hono } from 'hono';
@@ -139,8 +140,11 @@ export const gameSessionRouter = new Hono<Env>()
     const rounds = await state.getRounds();
 
     return ctx.json({
-      globalState: wrapRpcData(globalState as Disposable),
+      globalState: wrapRpcData(globalState as Disposable) as any,
       rounds: wrapRpcData(rounds),
+    } as {
+      globalState: any;
+      rounds: GameRound<any>[];
     });
   })
   // dev mode only
@@ -199,7 +203,7 @@ export const gameSessionRouter = new Hono<Env>()
       const state = ctx.get('gameSessionState');
       await state.updateGame(
         gameId,
-        getLatestVersion(games[gameId]).version,
+        getLatestVersion(getGame(gameId)).version,
         ctx.get('session').userId,
       );
       const summary = await state.getDetails();

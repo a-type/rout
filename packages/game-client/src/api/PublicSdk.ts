@@ -1,4 +1,5 @@
-import { PrefixedId } from '@long-game/common';
+import { LongGameError, PrefixedId } from '@long-game/common';
+import { emptyGameDefinition } from '@long-game/game-definition';
 import { BaseSdk, InferReturnData } from './BaseSdk.js';
 
 export class PublicSdk extends BaseSdk {
@@ -182,7 +183,42 @@ export class PublicSdk extends BaseSdk {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     },
+    enabled(input) {
+      return !!input.id;
+    },
+    ignoreError(err) {
+      return err.code === LongGameError.Code.NotFound;
+    },
+    emptyResponse: {
+      id: 'empty',
+      creators: [],
+      title: 'Unknown Game',
+      latestVersion: 'v1',
+      versions: [emptyGameDefinition],
+      minimumPlayers: 0,
+      maximumPlayers: 100,
+      screenshots: [],
+      tags: [],
+      url: '',
+    },
   });
+  getResolvedGameIdFromAlias = this.sdkQuery(
+    'getResolvedGameIdFromAlias',
+    this.apiRpc.games.resolveAlias[':aliasId'].$get,
+    {
+      transformInput: (input: { aliasId: string }) => ({
+        param: { aliasId: input.aliasId },
+      }),
+      defaults: {
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
+      enabled(input) {
+        return !!input.aliasId;
+      },
+    },
+  );
 
   // yeah this is on the game session API, but it's
   // kind of more useful here.
@@ -286,6 +322,22 @@ export class PublicSdk extends BaseSdk {
         return ['getGameSessionPlayerStatuses', input.id];
       },
       enabled: (input) => input.enabled !== false,
+    },
+  );
+  getGameSessionRound = this.sdkQuery(
+    'getGameSessionRound',
+    this.apiRpc['gameSessions'][':id'].rounds[':index'].$get,
+    {
+      transformInput: (input: { id: string; index: number }) => ({
+        param: { id: input.id, index: input.index.toString() },
+      }),
+    },
+  );
+  getGameSessionPostgame = this.sdkQuery(
+    'getGameSessionPostgame',
+    this.apiRpc.gameSessions[':id'].postgame.$get,
+    {
+      transformInput: (input: { id: string }) => ({ param: { id: input.id } }),
     },
   );
   getAvailableGames = this.sdkQuery(
@@ -621,6 +673,9 @@ export type FriendshipInvitationPublicInfo = InferReturnData<
 >;
 export type GameSessionPregame = InferReturnData<
   PublicSdk['getGameSessionPregame']
+>;
+export type GameSessionRound = InferReturnData<
+  PublicSdk['getGameSessionRound']
 >;
 export type Notification = InferReturnData<
   PublicSdk['getNotifications']
