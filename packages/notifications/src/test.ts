@@ -8,6 +8,8 @@ export interface TestNotification {
 
 export const testNotification: NotificationConfig<TestNotification> = {
   type: 'test',
+  name: 'Test notification',
+  description: 'Internal test notification for verifying notification delivery.',
   text() {
     return `Test notification, please ignore`;
   },
