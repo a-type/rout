@@ -880,6 +880,9 @@ importers:
       three-stdlib:
         specifier: ^2.35.15
         version: 2.35.15(three@0.175.0)
+      unplugin-typegpu:
+        specifier: 'catalog:'
+        version: 0.10.2(typegpu@0.10.2)
     devDependencies:
       '@long-game/uno-config':
         specifier: workspace:*
@@ -1154,7 +1157,7 @@ importers:
         version: 0.0.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       zustand:
         specifier: 'catalog:'
-        version: 5.0.8(@types/react@19.2.14)(immer@10.1.1)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        version: 5.0.8(@types/react@19.2.14)(immer@10.1.1)(react@19.2.4)(use-sync-external-store@1.4.0(react@19.2.4))
     devDependencies:
       '@long-game/uno-config':
         specifier: workspace:*
@@ -16281,11 +16284,11 @@ snapshots:
       react: 19.2.4
       use-sync-external-store: 1.4.0(react@19.2.4)
 
-  zustand@5.0.8(@types/react@19.2.14)(immer@10.1.1)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
+  zustand@5.0.8(@types/react@19.2.14)(immer@10.1.1)(react@19.2.4)(use-sync-external-store@1.4.0(react@19.2.4)):
     optionalDependencies:
       '@types/react': 19.2.14
       immer: 10.1.1
       react: 19.2.4
-      use-sync-external-store: 1.6.0(react@19.2.4)
+      use-sync-external-store: 1.4.0(react@19.2.4)
 
   zwitch@2.0.4: {}

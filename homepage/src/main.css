@@ -34,5 +34,6 @@ button {
 }
 
 .font-heading {
-  font-family: 'Knewave', system-ui;
+  font-family: 'Nunito', system-ui;
+  font-weight: 700;
 }

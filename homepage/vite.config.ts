@@ -1,12 +1,13 @@
 import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'path';
 import UnoCSS from 'unocss/vite';
+import tgpu from 'unplugin-typegpu/vite';
 import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [UnoCSS(), react()],
+  plugins: [UnoCSS(), react(), tgpu({})],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

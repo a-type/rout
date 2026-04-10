@@ -151,7 +151,10 @@ export function Topography({
       ref={ref}
       {...rest}
     >
-      <canvas className="animate-fade-in animate-duration-1s" ref={canvasRef} />
+      <canvas
+        className="animate-fade-in animate-duration-1s motion-reduce:hidden"
+        ref={canvasRef}
+      />
     </div>
   );
 }

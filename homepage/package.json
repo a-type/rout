@@ -17,7 +17,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "three": "catalog:",
-    "three-stdlib": "^2.35.15"
+    "three-stdlib": "^2.35.15",
+    "unplugin-typegpu": "catalog:"
   },
   "devDependencies": {
     "@long-game/uno-config": "workspace:*",

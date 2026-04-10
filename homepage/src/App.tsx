@@ -19,19 +19,20 @@ const App = () => {
         surface
         justify="between"
         items="center"
-        className="w-full max-w-600px z-1 px-lg"
+        className="sticky top-sm w-full max-w-600px z-1 px-lg"
       >
         <Wordmark className="text-2xl" />
         <Box gap>
           <Button
             emphasis="primary"
+            color="accent"
             render={<a href="https://play.rout.games" />}
           >
             Play Now
           </Button>
         </Box>
       </Box>
-      <TopographyBackground colorMode="dark" className="fixed" />
+      <TopographyBackground colorMode="dark" className="fixed inset-0" />
       <GameIcons />
       <Container items="center" className="text-center py-xl">
         <H2 className="text-6xl font-medium font-heading text-shadow text-shadow-lg text-shadow-color-primary">
@@ -45,7 +46,7 @@ const App = () => {
           No more scheduling. Every day is game night.
         </P>
         <P className="text-lg color-gray-ink">
-          Rout games are social party games you play like a daily crossword.
+          Rout games are social board games you play like a daily crossword.
         </P>
       </Container>
       <Container items="center">
