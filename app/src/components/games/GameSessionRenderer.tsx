@@ -35,6 +35,7 @@ import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { GameControls } from './GameControls.js';
+import { GameIcon } from './GameIcon.js';
 import { GameLayout, GameLayoutSkeleton } from './GameLayout.js';
 import { GameSetup } from './setup/GameSetup.js';
 import { HotseatSetup } from './setup/HotseatSetup.js';
@@ -226,8 +227,12 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
       <Box col gap="xs">
         <div className="text-xs uppercase color-gray-dark">Hotseat</div>
         <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>
+        <GameIcon gameId={gameSuite.gameId} className="w-[200px] rd-md" />
         <H1 className="mb-sm">Select Player</H1>
-        <Box className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
+        <Box
+          gap="sm"
+          className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
+        >
           {members.map((member) => (
             <Button
               key={member.id}
@@ -236,7 +241,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
                   gameSuite.switchPlayer(member.id);
                 });
               }}
-              className={clsx('p-0 rounded-full')}
+              className={clsx('rounded-lg p-xs')}
               emphasis={
                 gameSuite.playerStatuses[member.id]?.pendingTurn
                   ? 'default'
@@ -246,7 +251,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
               <PlayerAvatar
                 playerId={member.id}
                 size={40}
-                className="rounded-full"
+                className="rounded-md"
               />
               <Box gap="sm" col items="start">
                 <PlayerName playerId={member.id} disableYou />
