@@ -175,6 +175,11 @@ export class PublicSdk extends BaseSdk {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     },
+    transformInput: (input?: { prerelease?: boolean }) => ({
+      query: {
+        prerelease: input?.prerelease ? ('true' as const) : ('false' as const),
+      },
+    }),
   });
   getGame = this.sdkQuery('getGame', this.apiRpc.games[':id'].$get, {
     transformInput: (input: { id: string }) => ({ param: { id: input.id } }),

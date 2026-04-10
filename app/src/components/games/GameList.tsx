@@ -46,7 +46,7 @@ export function GameListRoot({
   ...rest
 }: GameListProps) {
   const { data: owned } = sdkHooks.useGetOwnedGames();
-  const { data: games } = sdkHooks.useGetGames();
+  const { data: games } = sdkHooks.useGetGames({ prerelease: true });
   const allTags = new Set<string>();
   for (const game of Object.values(games)) {
     for (const tag of game.tags) {

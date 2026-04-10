@@ -156,7 +156,7 @@ function AdminEditProductContent({
 
 function ProductItemField() {
   const values = (useValues() as any)['items'] as string[];
-  const games = sdkHooks.useGetGames().data || {};
+  const games = sdkHooks.useGetGames({ prerelease: true }).data || {};
 
   return (
     <FieldArray name="items">

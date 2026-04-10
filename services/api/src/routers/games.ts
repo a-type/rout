@@ -37,31 +37,38 @@ function gameSummary(game: GameModule, env: ApiBindings) {
 }
 
 export const gamesRouter = new Hono<Env>()
-  .get('/', sessionMiddleware, async (ctx) => {
-    const isAdmin = ctx.get('session')?.isProductAdmin ?? false;
-    const metadata = allGames
-      .filter((game) => {
-        // if this filter is applied, non-admin players can't participate
-        // in pre-release games (this API is used to fetch game client
-        // federated bundles...)
-        // if (game.prerelease && !ilsAdmin) {
-        //   return false;
-        // }
-        return game.versions.length > 0;
-      })
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((game) => gameSummary(game, ctx.env));
-    // returns a list of all games and some metadata
-    return ctx.json(
-      metadata.reduce(
-        (acc, game) => {
-          acc[game.id] = game;
-          return acc;
-        },
-        {} as Record<string, (typeof metadata)[number]>,
-      ),
-    );
-  })
+  .get(
+    '/',
+    zValidator(
+      'query',
+      z.object({
+        prerelease: z.enum(['true', 'false']).optional(),
+      }),
+    ),
+    sessionMiddleware,
+    async (ctx) => {
+      const includePrerelease = ctx.req.valid('query').prerelease === 'true';
+      const metadata = allGames
+        .filter((game) => {
+          if (game.prerelease && !includePrerelease) {
+            return false;
+          }
+          return game.versions.length > 0;
+        })
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map((game) => gameSummary(game, ctx.env));
+      // returns a list of all games and some metadata
+      return ctx.json(
+        metadata.reduce(
+          (acc, game) => {
+            acc[game.id] = game;
+            return acc;
+          },
+          {} as Record<string, (typeof metadata)[number]>,
+        ),
+      );
+    },
+  )
 
   // basically useful for correcting a lack of free games which should be
   // provided on signup

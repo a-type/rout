@@ -104,7 +104,9 @@ export function getFederatedGameComponent(
 }
 
 async function registerFederatedGames() {
-  const games = await publicSdk.getGames.run();
+  const games = await publicSdk.getGames.run({
+    prerelease: true,
+  });
   registerRemotes(
     Object.entries(games).map(([id, meta]) => ({
       name: idToFederationId(id),

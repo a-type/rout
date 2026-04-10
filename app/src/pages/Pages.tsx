@@ -79,8 +79,18 @@ const routes = makeRoutes([
     ],
   },
   {
-    path: '/games/:gameId',
-    component: lazy(() => import('./PublicGamePage.js')),
+    path: '/games',
+    component: Outlet,
+    children: [
+      {
+        index: true,
+        component: lazy(() => import('./PublicGameListPage.js')),
+      },
+      {
+        path: '/games/:gameId',
+        component: lazy(() => import('./PublicGamePage.js')),
+      },
+    ],
   },
   {
     path: '/admin',
