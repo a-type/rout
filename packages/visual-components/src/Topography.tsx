@@ -68,28 +68,13 @@ export const TopographyProvider = TopographyContext.Provider;
 
 const modulePromise = import('./topographyGpu.js');
 
-export function Topography({
-  className,
-  colorMode: overrideColorMode,
-  ...rest
-}: TopographyProps) {
-  const webgpuModule = use(modulePromise);
-  const [instance] = useState(() => webgpuModule.createInstance());
-
+function useColors({
+  overrideColorMode,
+}: {
+  overrideColorMode?: 'light' | 'dark';
+}) {
   const ctx = useContext(TopographyContext);
   const palette = ctx.palette;
-  const [state] = useState(() => ({ scale: 1 }));
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ref = useSize<HTMLDivElement>(({ width, height }) => {
-    state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
-    setTimeout(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.width = width * devicePixelRatio;
-      canvas.height = height * devicePixelRatio;
-      instance.updateSize(width, height);
-    }, 100);
-  });
 
   const detectedMode = useSyncExternalStore(subscribeToColorModeChange, () =>
     getResolvedColorMode(),
@@ -103,6 +88,51 @@ export function Topography({
       };
   const background = resolveColor(fromPalette.background);
   const gradient = fromPalette.gradient.map(resolveColor);
+
+  return {
+    background,
+    gradient,
+    fromPalette,
+  };
+}
+
+const TopographyFallback = (props: TopographyProps) => {
+  const { fromPalette } = useColors({
+    overrideColorMode: props.colorMode,
+  });
+  return (
+    <div
+      className={props.className}
+      style={{ background: toHexColor(fromPalette.background) }}
+      {...props}
+    />
+  );
+};
+
+export function Topography({
+  className,
+  colorMode: overrideColorMode,
+  ...rest
+}: TopographyProps) {
+  const webgpuModule = use(modulePromise);
+  const [instance] = useState(() => webgpuModule.createInstance());
+
+  const [state] = useState(() => ({ scale: 1 }));
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ref = useSize<HTMLDivElement>(({ width, height }) => {
+    state.scale = Math.max(0, (2000 - Math.max(width, height)) / 1000) * 0.5;
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.width = width * devicePixelRatio;
+      canvas.height = height * devicePixelRatio;
+      instance.updateSize(width, height);
+    }, 100);
+  });
+
+  const { background, gradient, fromPalette } = useColors({
+    overrideColorMode,
+  });
 
   useEffect(() => {
     instance.updateColors(gradient[0], gradient[1], background);
@@ -121,14 +151,13 @@ export function Topography({
       ref={ref}
       {...rest}
     >
-      <ErrorBoundary fallback={null}>
-        <canvas
-          className="animate-fade-in animate-duration-1s"
-          ref={canvasRef}
-        />
-      </ErrorBoundary>
+      <canvas className="animate-fade-in animate-duration-1s" ref={canvasRef} />
     </div>
   );
 }
 
-export default Topography;
+export default (props: TopographyProps) => (
+  <ErrorBoundary fallback={<TopographyFallback {...props} />}>
+    <Topography {...props} />
+  </ErrorBoundary>
+);

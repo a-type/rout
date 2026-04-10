@@ -18,7 +18,7 @@ import {
   PageNowPlaying,
   PageRoot,
 } from '@a-type/ui';
-import { ScrollTicker, TopographyBackground } from '@long-game/game-ui';
+import { ScrollTicker } from '@long-game/game-ui';
 import { Link, useParams } from '@verdant-web/react-router';
 
 const PublicGamePage = () => {
@@ -29,20 +29,14 @@ const PublicGamePage = () => {
   return (
     <>
       <PageRoot className="h-auto">
-        <TopographyBackground className="fixed" />
         <PageContent>
           <Box gap p>
             <Link to="https://rout.games">
               <Wordmark className="text-lg" />
             </Link>
           </Box>
-          {!!game.screenshots?.length && (
-            <GameScreenshotGallery
-              gameId={gameId}
-              className="w-full max-h-60vh mb-xl"
-            />
-          )}
-          <Box gap>
+
+          <Box gap items="end">
             <GameIcon
               gameId={gameId}
               className="w-32 h-32 border border-default rounded-md"
@@ -52,6 +46,12 @@ const PublicGamePage = () => {
               <P>{game.description}</P>
             </Box>
           </Box>
+          {!!game.screenshots?.length && (
+            <GameScreenshotGallery
+              gameId={gameId}
+              className="w-full max-h-60vh mb-xl"
+            />
+          )}
           <H2>How to play</H2>
           <ErrorBoundary fallback={<P>Failed to load game manual.</P>}>
             <GameManual gameId={gameId} />

@@ -8,8 +8,24 @@
   src: url('/fonts/ArchivoNarrow-VariableFont_wght.ttf');
 }
 
+@font-face {
+  font-family: 'Nunito';
+  src: url('../public/fonts/Nunito-VariableFont_wght.ttf');
+}
+
 #root {
   min-height: 0;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button {
+  font-family: 'Nunito', system-ui;
 }
 
 .font-fancy {

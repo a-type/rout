@@ -1,6 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
-import { Button, ButtonProps, Icon } from '@a-type/ui';
+import { ButtonProps, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
+import { TopographyButton } from '@long-game/visual-components';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactNode } from 'react';
 
@@ -26,13 +27,13 @@ export function StartOnline({ children, gameId, ...rest }: StartOnlineProps) {
   };
 
   return (
-    <Button emphasis="primary" onClick={createLive} {...rest}>
+    <TopographyButton emphasis="primary" onClick={createLive} {...rest}>
       {children ?? (
         <>
           <Icon name="gamePiece" />
           <span>Play Online</span>
         </>
       )}
-    </Button>
+    </TopographyButton>
   );
 }

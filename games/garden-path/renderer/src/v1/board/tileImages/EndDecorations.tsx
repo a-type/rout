@@ -7,7 +7,7 @@ export function EndDecorations({}: EndDecorationsProps) {
 
   return (
     <svg
-      viewBox="0 0 44 44	"
+      viewBox="0 0 44 44"
       className="absolute left-1/2 top-2/5 -translate-x-1/2 -translate-y-1/2 stroke-3 override-light"
     >
       {selection ? <Fountain /> : <Tree />}

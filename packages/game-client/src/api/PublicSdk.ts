@@ -193,6 +193,8 @@ export class PublicSdk extends BaseSdk {
       id: 'empty',
       creators: [],
       title: 'Unknown Game',
+      description: '',
+      prerelease: false,
       latestVersion: 'v1',
       versions: [emptyGameDefinition],
       minimumPlayers: 0,

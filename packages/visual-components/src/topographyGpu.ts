@@ -1,14 +1,23 @@
 import { perlin3d } from '@typegpu/noise';
-import tgpu, { common, d } from 'typegpu';
+import tgpu, { common, d, TgpuRoot } from 'typegpu';
 import { abs, fract, fwidth, mix, mul, smoothstep } from 'typegpu/std';
 
-export const root = await tgpu.init();
+let root: TgpuRoot;
+try {
+  root = await tgpu.init();
+} catch (e) {
+  console.error('Failed to initialize WebGPU:', e);
+  throw e;
+}
 
 const perlinCacheConfig = perlin3d.dynamicCacheConfig();
 const dynamicLayout = tgpu.bindGroupLayout({ ...perlinCacheConfig.layout });
 const perlinCache = perlinCacheConfig.instance(root, d.vec3u(4, 4, 10));
 
 export function createInstance() {
+  if (!root) {
+    throw new Error('WebGPU is not supported in this environment.');
+  }
   const time = root.createUniform(d.f32, 0);
   const startColor = root.createUniform(d.vec3f, d.vec3f(1, 0, 0));
   const endColor = root.createUniform(d.vec3f, d.vec3f(0, 0, 1));

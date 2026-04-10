@@ -6,8 +6,11 @@ export interface PathProps {
 export function Path({ path, dirt }: PathProps) {
   return (
     <g>
-      <path d={dirt} className="fill-main-dark stroke-main-dark stroke-5" />
-      <path d={path} className="fill-white stroke-white stroke-3" />
+      <path
+        d={dirt}
+        className="fill-main-dark stroke-main-dark stroke-5 opacity-50"
+      />
+      <path d={path} className="fill-white stroke-black stroke-1" />
     </g>
   );
 }
