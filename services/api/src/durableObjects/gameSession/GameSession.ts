@@ -1036,6 +1036,14 @@ export class GameSession extends DurableObject<ApiBindings> {
       nextToken: nextPageToken,
     };
   }
+
+  async #getAllChatMessages() {
+    const result = await this.#sql.run(
+      db.selectFrom('ChatMessage').selectAll().orderBy('createdAt', 'asc'),
+    );
+    return result.map(this.#hydrateChatMessage);
+  }
+
   async toggleChatReaction(
     playerId: PrefixedId<'u'>,
     messageId: PrefixedId<'cm'>,
@@ -1682,6 +1690,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     );
     const sessionData = await this.#getSessionData();
     const roundState = await this.#getRoundState();
+    const setupData = await this.#getSetupData();
     let globalState: {} = {};
     try {
       globalState = await this.#getGlobalStateUnchecked();
@@ -1698,6 +1707,62 @@ export class GameSession extends DurableObject<ApiBindings> {
       roundState,
       globalState,
       status,
+      setupData,
+    };
+  }
+
+  /**
+   * Used for analytics and survey feedback on games.
+   * Provides all the data needed to replay the game session
+   * without linking to the actual identities of players.
+   */
+  async getAnonymizedSummary() {
+    const sessionData = await this.#getSessionData();
+    const rounds = await this.#getRoundsUnchecked({
+      upToAndIncluding: await this.getCurrentRoundIndex(),
+    });
+    const members = await this.getMembers();
+    const setupData = await this.#getSetupData();
+    const chat = await this.#getAllChatMessages();
+
+    const anonymizedPlayerIdMap = members.reduce(
+      (acc, member, index) => {
+        acc[member.id] = `player${index + 1}`;
+        return acc;
+      },
+      {} as Record<PrefixedId<'u'>, string>,
+    );
+    const anonymizedMembers = members.map((m, index) => ({
+      id: anonymizedPlayerIdMap[m.id],
+      displayName: `Player ${index + 1}`,
+    }));
+    const anonymizedChat = chat.map((message) =>
+      message.authorId === 'system'
+        ? message
+        : {
+            ...message,
+            authorId: anonymizedPlayerIdMap[message.authorId] || 'unknown',
+            content: '<redacted>',
+          },
+    );
+
+    return {
+      gameId: sessionData.gameId,
+      gameVersion: sessionData.gameVersion,
+      createdAt: sessionData.createdAt,
+      endedAt: sessionData.endedAt,
+      abandonedAt: sessionData.abandonedAt,
+      randomSeed: sessionData.randomSeed,
+      setupData,
+      members: anonymizedMembers,
+      rounds: rounds.map((r) => ({
+        roundIndex: r.roundIndex,
+        turns: r.turns.map((t) => ({
+          playerId: anonymizedPlayerIdMap[t.playerId] || 'unknown',
+          data: t.data,
+        })),
+      })),
+      chat: anonymizedChat,
     };
   }
 }
