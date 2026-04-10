@@ -34,6 +34,6 @@ export const turnReadyNotification: NotificationConfig<TurnReadyNotification> =
     link(data) {
       return data.turns?.length === 1
         ? `/session/${data.turns[0].gameSessionId}`
-        : '/';
+        : '/#online-games';
     },
   };

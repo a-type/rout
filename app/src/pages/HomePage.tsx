@@ -29,18 +29,18 @@ export function HomePage({}: HomePageProps) {
         <MainNav />
         <AppInstallBanner />
         <IncomingFriendRequests surface color="accent" border p />
-        <Box full="width" items="stretch">
+        <Box full="width" items="stretch" id="game-invites">
           <GameSessionInvites />
         </Box>
         <Box col gap full="width" items="stretch">
-          <H2>Online Games</H2>
+          <H2 id="online-games">Online Games</H2>
           <MembershipsList
             invitationStatus="accepted"
             statusFilter={['active']}
           />
         </Box>
         <Box col gap full="width" items="stretch">
-          <H2>Hotseat Games</H2>
+          <H2 id="hotseat-games">Hotseat Games</H2>
           <HotseatGamesList status="active" />
         </Box>
         <Divider className="bg-gray" />
