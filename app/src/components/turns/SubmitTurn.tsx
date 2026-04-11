@@ -161,9 +161,9 @@ const MainContent = withGame<{
     <Box col gap="lg" items="center" className={className}>
       <Box col>
         <TopographyButton
-          className="items-center justify-center w-full h-full shadow-lg disabled:(opacity-100 bg-wash color-gray border-gray) data-[disabled=true]:(opacity-100 bg-wash color-gray-border-gray)"
+          className="items-center justify-center w-full h-full shadow-lg disabled:(opacity-100 bg-wash color-gray border-gray) data-[disabled=true]:(opacity-100 bg-wash color-gray-border-gray) data-[disabled=true]:hover:ring-none"
           color={gameSuite.turnError ? 'attention' : 'primary'}
-          visuallyDisabled={cannotSubmit && !showNextSteps}
+          visuallyDisabled={cannotSubmit && !gameSuite.turnWasSubmitted}
           disableTopography={cannotSubmit}
           emphasis={cannotSubmit ? 'light' : 'primary'}
           loading={gameSuite.isTurnSubmitDelayed}
