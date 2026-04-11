@@ -87,7 +87,7 @@ const routes = makeRoutes([
         component: lazy(() => import('./PublicGameListPage.js')),
       },
       {
-        path: '/games/:gameId',
+        path: ':gameId',
         component: lazy(() => import('./PublicGamePage.js')),
       },
     ],
