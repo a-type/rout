@@ -1,5 +1,5 @@
 import { Button, Tabs, clsx, withClassName } from '@a-type/ui';
-import { PlayerAvatar, SubmitTurn } from '@long-game/game-ui';
+import { PlayerAvatar } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { BoardRenderer } from './board/BoardRenderer.js';
@@ -78,7 +78,6 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
           />
           <div className="w-full flex flex-col gap-xs items-center shrink-0">
             <TileHand />
-            <SubmitTurn />
           </div>
         </StyledTabsContent>
         {gameSuite.finalState.otherPlayers.map(({ board, playerId }) => (

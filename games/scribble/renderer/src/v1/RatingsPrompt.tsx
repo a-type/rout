@@ -43,9 +43,7 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
           index={index}
           onRated={() => {
             setTimeout(() => {
-              if (index === task.tasksToRate.length - 1) {
-                gameSuite.submitTurn();
-              } else {
+              if (index <= task.tasksToRate.length - 1) {
                 setIndex(index + 1);
               }
             }, 2500);

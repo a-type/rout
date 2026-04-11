@@ -699,6 +699,11 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
     data: override,
     delay = 5000,
   }: {
+    /**
+     * @deprecated - call prepareTurn with your data when the user
+     * makes changes. submitTurn() is only meant to be used by the
+     * main turn submit button.
+     */
     data?: GetTurnData<TGame> | null;
     delay?: number;
   } = {}): Promise<BaseTurnError | void> => {

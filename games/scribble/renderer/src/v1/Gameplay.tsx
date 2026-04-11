@@ -1,9 +1,5 @@
-import { Box, Tabs } from '@a-type/ui';
-import {
-  SequenceItem,
-  Task,
-  TaskCompletion,
-} from '@long-game/game-scribble-definition/v1';
+import { Box } from '@a-type/ui';
+import { Task, TaskCompletion } from '@long-game/game-scribble-definition/v1';
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { DescriptionResult } from './DescriptionResult.js';
@@ -32,25 +28,12 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     }
 
     return (
-      <Box layout="center center" className="px-sm py-lg lg:px-lg" full="width">
-        <Tabs
-          value={viewingIndex.toString()}
-          onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
-          className="w-full h-auto flex flex-col"
-        >
-          <ItemTabs items={initialState.tasks} />
-          {initialState.tasks.map((task, index) => (
-            <Tabs.Content
-              key={index}
-              value={index.toString()}
-              className="w-full flex-1"
-            >
-              <Box d="col" gap p>
-                <ItemRenderer item={taskCompletions[index]} prompt={task} />
-              </Box>
-            </Tabs.Content>
-          ))}
-        </Tabs>
+      <Box items="center" gap col className="px-sm py-lg lg:px-lg" full="width">
+        {initialState.tasks.map((task, index) => (
+          <Box d="col" gap p key={index}>
+            <ItemRenderer item={taskCompletions[index]} prompt={task} />
+          </Box>
+        ))}
       </Box>
     );
   }
@@ -61,61 +44,18 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
         default: 'sm',
         lg: 'lg',
       }}
-      layout="center center"
+      items="center"
       full="width"
       grow
+      col
+      gap
     >
-      <Tabs
-        value={viewingIndex.toString()}
-        onValueChange={(v) => (gameplayState.viewingIndex = parseInt(v, 10))}
-        className="w-full flex flex-col items-center"
-      >
-        <ItemTabs items={initialState.tasks} />
-        {initialState.tasks.map((task, index) => (
-          <Tabs.Content
-            key={index}
-            value={index.toString()}
-            className="w-full flex-1"
-          >
-            <TaskRenderer index={index} task={task} />
-          </Tabs.Content>
-        ))}
-      </Tabs>
+      {initialState.tasks.map((task, index) => (
+        <TaskRenderer index={index} task={task} key={index} />
+      ))}
     </Box>
   );
 });
-
-function ItemTab({
-  index,
-  item,
-}: {
-  index: number;
-  item: SequenceItem | Task;
-}) {
-  return (
-    <Tabs.Trigger key={index} value={index.toString()}>
-      {item.kind === 'description'
-        ? 'Draw'
-        : item.kind === 'drawing'
-          ? 'Describe'
-          : item.kind === 'ratings'
-            ? 'Rate'
-            : item.type === 'drawing'
-              ? 'Draw'
-              : 'Write'}
-    </Tabs.Trigger>
-  );
-}
-
-function ItemTabs({ items }: { items: (SequenceItem | Task)[] }) {
-  return (
-    <Tabs.List className="sticky top-[0px] bg-inherit justify-center z-10">
-      {items.map((item, index) => (
-        <ItemTab key={index} index={index} item={item} />
-      ))}
-    </Tabs.List>
-  );
-}
 
 function ItemRenderer({
   item,

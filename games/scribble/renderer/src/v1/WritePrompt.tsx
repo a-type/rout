@@ -2,7 +2,6 @@ import { Box, H2, TextArea } from '@a-type/ui';
 import { DrawingItem } from '@long-game/game-scribble-definition/v1';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
-import { ProceedOrSubmit } from './ProceedOrSubmit.js';
 
 export interface WritePromptProps {
   prompt?: DrawingItem;
@@ -66,7 +65,6 @@ export const WritePrompt = hooks.withGame<WritePromptProps>(
               });
             }}
           />
-          <ProceedOrSubmit taskIndex={taskIndex} />
         </Box>
       </Box>
     );

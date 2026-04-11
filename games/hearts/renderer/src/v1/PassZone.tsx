@@ -56,14 +56,6 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
                 pass: [cardId],
               };
             });
-            const currentTurn = gameSuite.currentTurn;
-            if (
-              currentTurn &&
-              isPassTurn(currentTurn) &&
-              currentTurn.pass.length === 3
-            ) {
-              gameSuite.submitTurn({ delay: 5_000 });
-            }
           }}
           className="m-auto"
         />

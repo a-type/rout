@@ -1,9 +1,8 @@
-import { Box, H2 } from '@a-type/ui';
+import { Box, H2, H3 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
-import { ProceedOrSubmit } from './ProceedOrSubmit.js';
 
 export interface DrawPromptProps {
   prompt: string;
@@ -31,7 +30,8 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
 
   return (
     <Box d="col" gap items="center">
-      <H2 className="text-3xl italic text-center">"{prompt}"</H2>
+      <H2>Draw this:</H2>
+      <H3 className="text-3xl italic text-center">"{prompt}"</H3>
       {byPlayerId && (
         <Box gap items="center">
           Prompt by <PlayerAvatar playerId={byPlayerId} />
@@ -56,7 +56,6 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
           });
         }}
       />
-      <ProceedOrSubmit taskIndex={taskIndex} />
     </Box>
   );
 });

@@ -28,6 +28,7 @@ import {
   RendererProvider,
   SpatialChatDraggable,
   SpatialHelpDraggable,
+  SubmitTurn,
 } from '@long-game/game-ui';
 import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
@@ -189,6 +190,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                     {hotseat && <HotseatBanner />}
                     <ErrorBoundary>
                       <Renderer />
+                      <SubmitTurn className="sticky bottom-sm" />
                     </ErrorBoundary>
                   </div>
                 )}

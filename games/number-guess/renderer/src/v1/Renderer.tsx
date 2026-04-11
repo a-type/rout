@@ -1,7 +1,6 @@
 import { Box, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
 import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
-import { SubmitTurn } from '@long-game/game-ui';
 import { useEffect } from 'react';
 
 const hooks = typedHooks<typeof gameDefinition>();
@@ -53,7 +52,6 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
         autoFocus
         id="guess"
       />
-      <SubmitTurn />
     </Box>
   );
 });

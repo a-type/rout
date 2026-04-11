@@ -1,6 +1,5 @@
 import { Box, P } from '@a-type/ui';
 import { ROUND_COUNT } from '@long-game/game-exquisite-fridge-definition/v1';
-import { SubmitTurn } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 import { InputZone } from './InputZone.js';
 import { PromptDisplay } from './PromptDisplay.js';
@@ -31,10 +30,6 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
         )}
         <InputZone className="sticky w-full top-0 z-1" />
         <WordHand className="w-full" />
-        <SubmitTurn
-          className="sticky bottom-lg mx-auto shadow-lg"
-          delay={5000}
-        />
       </Box>
       <WriteInDialog />
     </Box>
