@@ -38,14 +38,6 @@ export const SubmitTurn = withSuspense(
         nextStepsManualState === 'show-manual');
 
     const delayedShowNextSteps = useDebounced(canShowNextSteps, 400);
-    console.log({
-      canShowNextSteps,
-      turnWasSubmitted: gameSuite.turnWasSubmitted,
-      isHotseat: gameSuite.isHotseat,
-      gameStatus: gameSuite.gameStatus.status,
-      nextStepsManualState,
-      delayedShowNextSteps,
-    });
 
     const [delayedSubmitState, setDelayedSubmitState] = useState<{
       startedAt: number;
