@@ -27,11 +27,25 @@ export const SubmitTurn = withSuspense(
     delay,
     gameSuite,
   }) {
-    const [hideNextSteps, setHideNextSteps] = useState(false);
+    const [nextStepsManualState, setNextStepsManualState] = useState<
+      'hide' | 'show-auto' | 'show-manual'
+    >('hide');
     const canShowNextSteps =
-      gameSuite.turnWasSubmitted && !gameSuite.isHotseat && !hideNextSteps;
+      gameSuite.turnWasSubmitted &&
+      !gameSuite.isHotseat &&
+      ((gameSuite.gameStatus.status === 'active' &&
+        nextStepsManualState !== 'hide') ||
+        nextStepsManualState === 'show-manual');
 
     const delayedShowNextSteps = useDebounced(canShowNextSteps, 400);
+    console.log({
+      canShowNextSteps,
+      turnWasSubmitted: gameSuite.turnWasSubmitted,
+      isHotseat: gameSuite.isHotseat,
+      gameStatus: gameSuite.gameStatus.status,
+      nextStepsManualState,
+      delayedShowNextSteps,
+    });
 
     const [delayedSubmitState, setDelayedSubmitState] = useState<{
       startedAt: number;
@@ -87,7 +101,7 @@ export const SubmitTurn = withSuspense(
               <MainContent
                 delay={delay}
                 className="m-auto"
-                showNextSteps={() => setHideNextSteps(false)}
+                showNextSteps={() => setNextStepsManualState('show-manual')}
               >
                 {children}
               </MainContent>
@@ -95,13 +109,15 @@ export const SubmitTurn = withSuspense(
           </Box>
         </Tooltip>
         <Dialog
-          open={delayedShowNextSteps && !hideNextSteps}
-          onOpenChange={(show) => setHideNextSteps(!show)}
+          open={delayedShowNextSteps && nextStepsManualState !== 'hide'}
+          onOpenChange={(show) =>
+            setNextStepsManualState(show ? 'show-auto' : 'hide')
+          }
         >
           <Dialog.Content width="md">
             <SubmitNextSteps
               className="grow"
-              onHide={() => setHideNextSteps(true)}
+              onHide={() => setNextStepsManualState('hide')}
             />
           </Dialog.Content>
         </Dialog>
