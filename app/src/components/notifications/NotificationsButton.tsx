@@ -67,7 +67,7 @@ export const NotificationsButton = withSuspense(
         />
         <Popover.Content
           sticky
-          className="min-h-400px max-h-80vh w-500px max-w-90vw p-md flex flex-col"
+          className="min-h-400px max-h-80vh w-500px max-w-90vw p-md flex flex-col bg-darken-1"
         >
           <PopoverArrow />
           <Box gap items="center" justify="between" className="mb-md">
