@@ -21,20 +21,19 @@ import {
   withGame,
 } from '@long-game/game-client';
 import {
-  DelayedSubmitUndo,
   DndRoot,
   PlayerAvatar,
   PlayerName,
   RendererProvider,
   SpatialChatDraggable,
   SpatialHelpDraggable,
-  SubmitTurn,
 } from '@long-game/game-ui';
 import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
 import { ScrollTicker } from '../general/ScrollTicker.js';
 import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
+import { SubmitTurn } from '../turns/SubmitTurn.js';
 import { GameControls } from './GameControls.js';
 import { GameIcon } from './GameIcon.js';
 import { GameLayout, GameLayoutSkeleton } from './GameLayout.js';
@@ -190,7 +189,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                     {hotseat && <HotseatBanner />}
                     <ErrorBoundary>
                       <Renderer />
-                      <SubmitTurn className="sticky bottom-sm" />
+                      <SubmitTurn />
                     </ErrorBoundary>
                   </div>
                 )}
@@ -211,7 +210,6 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
               )}
             </GameLayout.Main>
             <GameControls pregame={gameSuite.gameStatus.status === 'pending'} />
-            <DelayedSubmitUndo />
           </GameLayout>
         </DndRoot>
       </RendererProvider>

@@ -22,6 +22,7 @@
     "@verdant-web/react-router": "catalog:",
     "change-case": "^5.4.4",
     "hono": "catalog:",
+    "motion": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-markdown": "^10.1.0",

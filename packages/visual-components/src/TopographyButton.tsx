@@ -13,8 +13,8 @@ export const TopographyButton = ({
 }) => {
   return (
     <Button
-      {...props}
       emphasis="primary"
+      {...props}
       className={clsx('relative z-10 overflow-hidden', className)}
     >
       {!props.disabled && !props.visuallyDisabled && !disableTopography && (
