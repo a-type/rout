@@ -45,7 +45,7 @@ export type GameDefinition<
   Config extends GameDefinitionConfig = GameDefinitionConfig,
 > = {
   // Metadata
-  version: `v${number}.${number}`;
+  version: `v${number}`;
   minimumPlayers: number;
   maximumPlayers: number;
   getRoundLabel?: (data: {
@@ -176,7 +176,7 @@ export type GameDefinition<
     turn: Turn<ConfigTurnData<Config>>;
     globalState: ConfigGlobalState<Config>;
     viewerId: PrefixedId<'u'>;
-  }) => Turn<ConfigPublicTurnData<Config>>;
+  }) => Turn<ConfigPublicTurnData<Config>>['data'];
   /**
    * globalState is the computed current state. moves are provided
    * for reference only, you do not need to recompute the current

@@ -23,14 +23,9 @@ function gameSummary(game: GameModule, env: ApiBindings) {
     tags: game.tags,
     creators: game.creators,
     prerelease: game.prerelease,
-    url: getGameUrl(game, env),
-    latestVersion: game.versions[game.versions.length - 1].version,
-    minimumPlayers: game.versions[game.versions.length - 1].minimumPlayers,
-    maximumPlayers: game.versions[game.versions.length - 1].maximumPlayers,
-    versions: game.versions.map((def) => ({
-      version: def.version,
-      minimumPlayers: def.minimumPlayers,
-      maximumPlayers: def.maximumPlayers,
+    versions: game.versions.map((version) => ({
+      version,
+      url: getGameUrl(game, version, env),
     })),
     screenshots: game.screenshots ?? [],
   };

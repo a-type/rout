@@ -108,10 +108,14 @@ async function registerFederatedGames() {
     prerelease: true,
   });
   registerRemotes(
-    Object.entries(games).map(([id, meta]) => ({
-      name: idToFederationId(id),
-      entry: `${meta.url}/mf-manifest.json`,
-    })),
+    Object.entries(games)
+      .map(([id, meta]) =>
+        meta.versions.map((version) => ({
+          name: idToFederationId(id, version.version),
+          entry: `${version.url}/mf-manifest.json`,
+        })),
+      )
+      .flat(),
   );
 }
 

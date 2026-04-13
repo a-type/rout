@@ -1,7 +1,7 @@
 import { Box, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
-import { v1 as gameDefinition } from '@long-game/game-number-guess-definition';
 import { useEffect } from 'react';
+import gameDefinition from './definition';
 
 const hooks = typedHooks<typeof gameDefinition>();
 

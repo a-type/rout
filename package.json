@@ -6,6 +6,7 @@
   "packageManager": "pnpm@9.7.1",
   "scripts": {
     "dev": "pnpm -r --parallel --stream dev",
+    "core:dev": "pnpm -r --parallel --stream core:dev",
     "package:dev": "pnpm -r --parallel --stream package:dev",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
@@ -38,6 +39,7 @@
     "change-case": "5.4.4",
     "@long-game/uno-config": "workspace:*",
     "@playwright/test": "^1.54.2",
-    "@types/node": "^24.1.0"
+    "@types/node": "^24.1.0",
+    "@vitest/coverage-v8": "catalog:"
   }
 }

@@ -80,6 +80,32 @@ export const idShapes = Object.entries(resourceIdTypes).reduce(
   },
 );
 
-export function idToFederationId(id: string): string {
-  return id.replace(/-/g, '_');
+function normalizeGameId(
+  id: string,
+  version: string | number,
+  delimiter: '_' | '-',
+): string {
+  let normalVersion = !version.toString().startsWith('v')
+    ? `v${version}`
+    : version.toString();
+  if (normalVersion.includes('.')) {
+    normalVersion = normalVersion.split('.')[0];
+  }
+  return `${id.replace(/-/g, delimiter)}${delimiter}${normalVersion}`;
+}
+
+export function idToFederationId(id: string, version: string): string {
+  return normalizeGameId(id, version, '_');
+}
+
+export function getGameUiOrigin(
+  gameId: string,
+  version: string | number,
+  devPort: number,
+  isDev = false,
+) {
+  if (isDev) {
+    return `http://localhost:${devPort}`;
+  }
+  return `https://${normalizeGameId(gameId, version, '-')}.games.rout.games`;
 }

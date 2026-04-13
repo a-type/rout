@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
+    "core:dev": "pnpm run dev",
     "build": "pnpm build:typecheck && pnpm build:app && pnpm build:copy-game-files",
     "build:app": "rsbuild build",
     "build:typecheck": "tsc --noEmit",

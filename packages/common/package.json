@@ -21,6 +21,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -w --preserveWatchOutput",
+    "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
     "build": "tsc",
     "test": "vitest --passWithNoTests"

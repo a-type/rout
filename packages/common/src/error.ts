@@ -87,7 +87,7 @@ export class LongGameError extends Error {
     cause?: unknown,
   ) {
     // @ts-ignore
-    super(message ? `${message} (code: ${code})` : `Error (code: ${code})`, {
+    super(message ? `${message}` : `Error (code: ${code})`, {
       cause,
     });
     this.name = 'LongGameError';

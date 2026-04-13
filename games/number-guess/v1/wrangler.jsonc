@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "game--number-guess--v1",
+  "main": "worker/index.ts",
+  // Set this to today's date
+  "compatibility_date": "2026-04-12",
+  "assets": {
+    "directory": "./ui-dist",
+    "binding": "ASSETS",
+  },
+}

@@ -317,10 +317,7 @@ export const gameDefinition: GameDefinition<{
   },
 
   getPublicTurn: ({ turn }) => {
-    return {
-      ...turn,
-      data: {},
-    };
+    return {};
   },
 
   getStatus: ({ globalState, rounds }) => {

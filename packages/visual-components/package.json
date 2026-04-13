@@ -14,6 +14,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -w --preserveWatchOutput",
+    "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
     "build": "pnpm build:ts && pnpm build:uno",
     "build:ts": "tsc",

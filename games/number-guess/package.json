@@ -1,6 +1,11 @@
 {
   "name": "@long-game/game-number-guess",
+  "type": "module",
+  "module": "manifest.ts",
   "scripts": {
-    "dev": "pnpm --filter \"./*\" --parallel --stream dev-game"
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
+  },
+  "dependencies": {
+    "@long-game/game-definition": "workspace:*"
   }
 }

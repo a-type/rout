@@ -3,7 +3,7 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "dev",
+      "script": "core:dev",
       "problemMatcher": [],
       "label": "💽 Core Dev",
       "detail": "turbo run dev"

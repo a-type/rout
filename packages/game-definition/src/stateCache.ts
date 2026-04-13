@@ -1,4 +1,9 @@
 /**
+ * NOTE: since moving to worker-per-game, this cache has lost its
+ * meaning a bit. The worker can't make this a meaningful cache,
+ * but it can preload a cached state to compute from using the
+ * same API... for now that's all.
+ *
  * Implements caching logic for computed game state from round data.
  * Game history is immutable, so we can safely cache computed rounds
  * which are completed. However, we can't necessarily safely cache
@@ -15,7 +20,7 @@ import { produce } from 'immer';
 import { GameDefinition, GameMember } from './gameDefinition.js';
 import { GameRandom, GameRandomState } from './random.js';
 
-type StateCheckpoint = {
+export type StateCheckpoint = {
   state: any;
   randomState: GameRandomState;
   turnCount: number;
@@ -49,14 +54,18 @@ export class GameStateCache {
     };
   }
 
+  preload = (checkpoint: StateCheckpoint) => {
+    this.cache[checkpoint.roundIndex] = checkpoint;
+  };
+
   /**
    * Get the cached or computed game state for the given rounds.
    * @param rounds The full round history to use, from 0 to the current round you want to compute. In case of a cache hit, not all rounds will be used, but we still need them for consistency.
    */
-  getState = (rounds: GameRound<any>[]) => {
+  getState = (rounds: GameRound<any>[]): StateCheckpoint => {
     const latestRoundIndex = rounds.length - 1;
     if (latestRoundIndex < 0) {
-      return this.initialState.state;
+      return this.initialState;
     }
 
     const latestRound = rounds[latestRoundIndex]!;
@@ -87,7 +96,7 @@ export class GameStateCache {
     }
     if (cachedIndex === latestRoundIndex) {
       // cache hit! we can return the cached state
-      return this.cache[cachedIndex]!.state;
+      return this.cache[cachedIndex]!;
     }
 
     // cache miss, we need to compute the state from the cached checkpoint
@@ -126,6 +135,6 @@ export class GameStateCache {
     };
 
     this.cache[roundIndex] = newCheckpoint;
-    return newCheckpoint.state;
+    return newCheckpoint;
   };
 }

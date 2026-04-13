@@ -1,21 +1,19 @@
 {
-  "name": "@long-game/hex-map",
+  "name": "@long-game/game-api",
   "version": "0.0.1",
   "private": true,
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "production": "./dist/index.js",
       "workerd": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./react": {
-      "development": "./src/react.ts",
-      "production": "./dist/react.js",
-      "workerd": "./src/react.ts",
-      "import": "./dist/react.js",
-      "types": "./dist/react.d.ts"
+    "./client": {
+      "production": "./dist/client.js",
+      "workerd": "./src/client.ts",
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
     }
   },
   "type": "module",
@@ -26,14 +24,17 @@
     "build": "tsc",
     "test": "vitest --passWithNoTests"
   },
-  "peerDependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
+  "dependencies": {
+    "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@hono/node-server": "^1.19.14",
+    "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:"
+    "vitest": "catalog:"
   }
 }

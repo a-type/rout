@@ -1,18 +1,23 @@
 {
-  "name": "@long-game/game-number-guess-renderer",
+  "name": "@long-game/game-number-guess-v1",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rsbuild build",
-    "dev-game": "rsbuild dev",
+    "build": "pnpm run build:ui && pnpm run build:worker",
+    "build:ui": "rsbuild build",
+    "build:worker": "wrangler build --config ./wrangler.jsonc",
+    "dev": "pnpm run --filter @long-game/game-number-guess-v1 --parallel \"/dev:.*/\"",
+    "dev:ui": "rsbuild dev",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --ip 127.0.0.1 --port 3500",
+    "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests"
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
-    "@long-game/game-number-guess-definition": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
+    "@long-game/game-api": "workspace:*",
     "@long-game/game-ui": "workspace:*",
     "@long-game/game-definition": "workspace:*",
     "react": "catalog:",
@@ -25,6 +30,7 @@
     "@long-game/scripts": "workspace:*",
     "@long-game/uno-config": "workspace:*",
     "@long-game/bundler-config": "workspace:*",
-    "@rsbuild/core": "catalog:"
+    "@rsbuild/core": "catalog:",
+    "wrangler": "catalog:"
   }
 }

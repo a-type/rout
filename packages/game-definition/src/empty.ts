@@ -6,7 +6,7 @@ export const emptyGameDefinition: GameDefinition = {
   applyRoundToGlobalState: () => ({}),
   getInitialGlobalState: () => ({}),
   getPlayerState: () => ({}),
-  getPublicTurn: ({ turn }) => turn,
+  getPublicTurn: ({ turn }) => ({}),
   getStatus: () => ({
     status: 'pending',
   }),

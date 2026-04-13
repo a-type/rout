@@ -77,20 +77,17 @@ export const gameDefinition: GameDefinition<{
 
   getPublicTurn: ({ turn, globalState, viewerId }) => {
     if (viewerId !== turn.playerId) {
-      return turn;
+      return turn.data;
     }
 
     return {
-      ...turn,
-      data: {
-        guess: turn.data.guess,
-        result:
-          turn.data.guess === globalState.secretNumber
-            ? 'correct'
-            : turn.data.guess < globalState.secretNumber
-              ? 'tooLow'
-              : 'tooHigh',
-      },
+      guess: turn.data.guess,
+      result:
+        turn.data.guess === globalState.secretNumber
+          ? 'correct'
+          : turn.data.guess < globalState.secretNumber
+            ? 'tooLow'
+            : 'tooHigh',
     };
   },
 

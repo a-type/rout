@@ -80,7 +80,7 @@ export const gameDefinition: GameDefinition<{
   getPublicTurn: ({ turn }) => {
     // TODO: process full turn data into what players can see
     // (i.e. what should you know about other players' turns?)
-    return turn;
+    return turn.data;
   },
 
   getStatus: ({ globalState, rounds }) => {

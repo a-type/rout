@@ -16,12 +16,12 @@ import {
   SYSTEM_CHAT_AUTHOR_ID,
   withTimezone,
 } from '@long-game/common';
+import { GameApiClient } from '@long-game/game-api/client';
 import {
   BaseTurnData,
-  emptyGameDefinition,
   GameMember,
-  GameStateCache,
   getLatestVersion,
+  getVersion,
   RoundIndexResult,
   Turn,
 } from '@long-game/game-definition';
@@ -96,7 +96,6 @@ const sessionExpiryTaskId = 'session-expiry';
 export class GameSession extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #socketHandler: GameSessionSocketHandler;
-  #stateCache: GameStateCache | undefined;
   #scheduler: Scheduler<ScheduledTasks>;
   readonly presence: GameSessionPresence;
   #cachedGameSessionId: PrefixedId<'gs'> | null = null;
@@ -185,9 +184,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   async #setSessionData(data: GameSessionBaseData) {
     await this.ctx.storage.put('sessionData', data);
     this.#cachedGameSessionId = data.id;
-    // invalidate state cache -- if members or random seed change,
+    // invalidate client -- if members or random seed change,
     // it's no longer valid and must be recomputed
-    this.#stateCache = undefined;
+    this.#invalidateGame();
     return data;
   }
   async #updateSessionData(updates: Partial<GameSessionBaseData>) {
@@ -281,24 +280,7 @@ export class GameSession extends DurableObject<ApiBindings> {
 
     return getGame(gameId);
   }
-  async getGameDefinition() {
-    const { gameId, gameVersion } = await this.#getSessionData();
-    if (!gameId || !gameVersion) {
-      return emptyGameDefinition;
-    }
 
-    const gameModule = getGame(gameId);
-    const gameDefinition = gameModule.versions.find(
-      (g) => g.version === gameVersion,
-    );
-    if (!gameDefinition) {
-      throw new LongGameError(
-        LongGameError.Code.NotFound,
-        `Game ${gameId} version ${gameVersion} not found`,
-      );
-    }
-    return gameDefinition;
-  }
   /** Guarantees stable ordering once game is underway */
   async getMembers(): Promise<GameSessionMember[]> {
     return (await this.#getSessionData()).members
@@ -388,24 +370,40 @@ export class GameSession extends DurableObject<ApiBindings> {
     });
   }
 
-  async #getStateCache(): Promise<GameStateCache> {
-    if (this.#stateCache) return this.#stateCache;
+  #gameApiClient: GameApiClient | null = null;
+  async #getGameApi(): Promise<GameApiClient> {
+    if (this.#gameApiClient) return this.#gameApiClient;
     const sessionData = await this.#getSessionData();
-    const gameDefinition = await this.getGameDefinition();
-    const setupData = await this.#getSetupData();
-    if (!sessionData || !gameDefinition) {
+    if (!sessionData.gameId || !sessionData.gameVersion) {
       throw new LongGameError(
-        LongGameError.Code.InternalServerError,
-        `Cannot get game state before session is initialized`,
+        LongGameError.Code.BadRequest,
+        'Cannot get game API before game is selected',
       );
     }
-    const cache = new GameStateCache(gameDefinition, {
+    const gameManifest = getGame(sessionData.gameId);
+    const gameVersion = getVersion(gameManifest, sessionData.gameVersion);
+    if (!gameVersion) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        `Cannot get game API for unknown game version ${sessionData.gameVersion} of ${sessionData.gameId}`,
+      );
+    }
+    this.#gameApiClient = new GameApiClient({
+      gameId: sessionData.gameId,
+      version: sessionData.gameVersion,
+      devPort: gameVersion?.devPort,
+      isDev: !!this.env.DEV_MODE,
+      members: await this.getMembers(),
       randomSeed: sessionData.randomSeed,
-      members: sessionData.members,
-      setupData,
+      sessionId: sessionData.id,
+      setupData: await this.#getSetupData(),
+      timeZone: sessionData.timezone,
     });
-    this.#stateCache = cache;
-    return cache;
+    return this.#gameApiClient;
+  }
+
+  #invalidateGame() {
+    this.#gameApiClient = null;
   }
 
   async delete() {
@@ -544,25 +542,24 @@ export class GameSession extends DurableObject<ApiBindings> {
     const gameDefinition = getLatestVersion(gameModule);
     await this.updateGame(sessionData.gameId, gameDefinition.version);
 
+    const client = await this.#getGameApi();
+    const details = await client.getDetails();
+
     // validate player count
     const members = await this.getMembers();
     if (
-      members.length < gameDefinition.minimumPlayers ||
-      members.length > gameDefinition.maximumPlayers
+      members.length < details.minimumPlayers ||
+      members.length > details.maximumPlayers
     ) {
       throw new LongGameError(
         LongGameError.Code.BadRequest,
-        `Player count must be between ${gameDefinition.minimumPlayers} and ${gameDefinition.maximumPlayers}`,
+        `Player count must be between ${details.minimumPlayers} and ${details.maximumPlayers}`,
       );
     }
 
     // lock in setup data, if available
-    if (gameDefinition.getSetupData) {
-      const setupData = gameDefinition.getSetupData({
-        members: sessionData.members,
-      });
-      await this.#setSetupData(setupData);
-    }
+    const setupData = await client.generateSetupData();
+    await this.#setSetupData(setupData);
 
     await this.#updateStatus('active');
     await this.#checkForRoundChange();
@@ -652,12 +649,19 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     }
     const round = await this.#getRound(roundIndex);
-    const gameDefinition = await this.getGameDefinition();
-    const globalState = await this.#getGlobalStateUnchecked(roundIndex);
+    const rounds = await this.#getRoundsUnchecked({
+      upToAndIncluding: roundIndex,
+    });
     const initialPlayerState: any = await this.#getPlayerStateUnchecked(
       playerId,
       roundIndex - 1,
     );
+    const client = await this.#getGameApi();
+    const publicTurns = await client.computePublicTurns({
+      turns: round.turns,
+      rounds,
+    });
+
     return {
       ...round,
       initialPlayerState: initialPlayerState as {},
@@ -672,11 +676,7 @@ export class GameSession extends DurableObject<ApiBindings> {
             data: null,
           };
         }
-        return gameDefinition.getPublicTurn({
-          turn,
-          globalState,
-          viewerId: playerId,
-        });
+        return publicTurns[turn.playerId];
       }),
     };
   }
@@ -738,32 +738,27 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     }
 
-    const gameDefinition = await this.getGameDefinition();
-    const members = await this.getMembers();
     const currentRoundIndex = await this.getCurrentRoundIndex();
-    const playerState = await this.#getPlayerStateUnchecked(
-      playerId,
-      currentRoundIndex - 1,
-    );
+    const rounds = await this.#getRoundsUnchecked({
+      upToAndIncluding: currentRoundIndex,
+    });
 
-    const params = {
+    const client = await this.#getGameApi();
+
+    const validationResult = await client.validateTurn({
       turn: {
         data: turn,
         playerId,
+        roundIndex: currentRoundIndex,
       },
-      playerState,
-      roundIndex: currentRoundIndex,
-      members,
-    };
-    const validationError =
-      gameDefinition.validatePartialTurn?.(params) ||
-      gameDefinition.validateTurn(params);
-    if (validationError) {
-      const msg =
-        typeof validationError === 'string'
-          ? validationError
-          : validationError.message;
-      throw new LongGameError(LongGameError.Code.BadRequest, msg);
+      rounds,
+    });
+
+    if (validationResult.message) {
+      throw new LongGameError(
+        LongGameError.Code.BadRequest,
+        validationResult.message,
+      );
     }
 
     this.log(
@@ -816,17 +811,17 @@ export class GameSession extends DurableObject<ApiBindings> {
       return { status: 'abandoned' };
     }
 
-    const gameDefinition = await this.getGameDefinition();
     // !!! Not sure if current or public is the right one here... but public
     // was causing games not to complete, I guess it was getting stuck at the last round?
     const currentRoundIndex = await this.getCurrentRoundIndex();
-    return gameDefinition.getStatus({
-      globalState: await this.#getGlobalStateUnchecked(currentRoundIndex),
-      rounds: await this.#getRoundsUnchecked({
-        upToAndIncluding: currentRoundIndex,
-      }),
-      members: await this.getMembers(),
+    const rounds = await this.#getRoundsUnchecked({
+      upToAndIncluding: currentRoundIndex,
     });
+    const client = await this.#getGameApi();
+    const statusResult = await client.computeStatus({
+      rounds,
+    });
+    return statusResult;
   }
 
   async getDetails() {
@@ -845,7 +840,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       startedAt: sessionData.startedAt,
       timezone: sessionData.timezone,
       endedAt: sessionData.endedAt,
-      nextRoundCheckAt: roundData.checkAgainAt?.toISOString() ?? null,
+      nextRoundCheckAt: roundData.checkAgainAt ?? null,
       currentRoundIndex: roundData.roundIndex,
       playerStatuses,
       createdBy: sessionData.createdBy ?? null,
@@ -1186,8 +1181,8 @@ export class GameSession extends DurableObject<ApiBindings> {
     const rounds = await this.#getRoundsUnchecked({
       upToAndIncluding: roundIndex,
     });
-    const cache = await this.#getStateCache();
-    return cache.getState(rounds);
+    const client = await this.#getGameApi();
+    return client.computeGlobalState(rounds);
   }
   async #getPlayerStateUnchecked(
     playerId: PrefixedId<'u'>,
@@ -1202,23 +1197,18 @@ export class GameSession extends DurableObject<ApiBindings> {
 
     const resolvedRoundIndex =
       upToAndIncludingRoundIndex ?? (await this.getPublicRoundIndex());
-    const globalState = await this.#getGlobalStateUnchecked(resolvedRoundIndex);
     const rounds = await this.#getRoundsUnchecked({
       upToAndIncluding: resolvedRoundIndex,
     });
     const playerTurn =
       rounds[resolvedRoundIndex]?.turns.find((t) => t.playerId === playerId) ||
       null;
-    const gameDefinition = await this.getGameDefinition();
-    const members = await this.getMembers();
-    return gameDefinition.getPlayerState({
-      globalState,
+    const client = await this.#getGameApi();
+    return client.computePlayerState({
       playerId,
-      members,
-      roundIndex: rounds.length,
-      rounds,
       playerTurn,
-    }) as unknown;
+      rounds,
+    });
   }
   async #getRound(roundIndex: number): Promise<GameRound<GameSessionTurn>> {
     const turns = await this.#listTurns({ roundIndex });
@@ -1228,7 +1218,9 @@ export class GameSession extends DurableObject<ApiBindings> {
       turns: round,
     };
   }
-  async #getCurrentRoundState(): Promise<RoundIndexResult> {
+  async #getCurrentRoundState(): Promise<
+    Omit<RoundIndexResult, 'checkAgainAt'> & { checkAgainAt?: string | null }
+  > {
     const sessionData = await this.#getSessionData();
     if (!sessionData.startedAt) {
       return {
@@ -1237,25 +1229,12 @@ export class GameSession extends DurableObject<ApiBindings> {
       };
     }
     const turns = await this.#listTurns();
-    const latestRoundFromTurns = Math.max(0, ...turns.map((t) => t.roundIndex));
-    const gameDefinition = await this.getGameDefinition();
-    const members = await this.getMembers();
-    const currentTime = new Date();
-    const startedAt = new Date(sessionData.startedAt);
-    const gameTimeZone = sessionData.timezone;
-    // TODO: we already have turns in scope, we could compute this without
-    // dipping back.
-    const globalState =
-      await this.#getGlobalStateUnchecked(latestRoundFromTurns);
-    return gameDefinition.getRoundIndex({
+    const client = await this.#getGameApi();
+    const result = await client.computeRoundIndex({
       turns,
-      members,
-      startedAt,
-      currentTime,
-      gameTimeZone,
-      globalState,
-      environment: this.env.DEV_MODE ? 'development' : 'production',
+      startedAt: sessionData.startedAt,
     });
+    return result;
   }
 
   // Turn changes
@@ -1409,12 +1388,12 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     if (roundState.checkAgainAt) {
       this.log('debug', `Scheduling check again at ${roundState.checkAgainAt}`);
-      this.#scheduler.scheduleTask(roundState.checkAgainAt, {
+      this.#scheduler.scheduleTask(new Date(roundState.checkAgainAt), {
         type: 'checkRound',
       });
       this.#socketHandler.send({
         type: 'nextRoundScheduled',
-        nextRoundCheckAt: roundState.checkAgainAt.toISOString(),
+        nextRoundCheckAt: roundState.checkAgainAt,
       });
     }
     if (roundState.pendingTurns.length > 0) {
@@ -1422,35 +1401,25 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
   };
   #sendGameRoundChangeMessages = async (roundIndex: number) => {
-    // if game definition has a round change message, add it to chat
-    const gameDefinition = await this.getGameDefinition();
-    if (gameDefinition.getRoundChangeMessages) {
-      // FIXME: redundant global state calculation with rounds
-      const globalState = await this.#getGlobalStateUnchecked(roundIndex);
-      const rounds = await this.#getRoundsUnchecked({
-        upToAndIncluding: roundIndex,
-      });
-      const members = await this.getMembers();
-      const roundChangeMessages = gameDefinition.getRoundChangeMessages({
-        globalState,
-        roundIndex: roundIndex,
-        members,
-        rounds,
-        newRound: rounds[roundIndex],
-        completedRound: roundIndex > 0 ? rounds[roundIndex - 1] : null,
-      });
-      if (roundChangeMessages) {
-        // not Promise.all because we want to keep intended ordering
-        for (const message of roundChangeMessages) {
-          await this.addChatMessage({
-            ...message,
-            id: id('cm'),
-            createdAt: new Date().toISOString(),
-            authorId: SYSTEM_CHAT_AUTHOR_ID,
-            roundIndex: roundIndex,
-            reactions: {},
-          });
-        }
+    const client = await this.#getGameApi();
+    const rounds = await this.#getRoundsUnchecked({
+      upToAndIncluding: roundIndex,
+    });
+    const messages = await client.computeRoundChangeMessages({
+      rounds,
+      roundIndex,
+    });
+    if (messages) {
+      // not Promise.all because we want to keep intended ordering
+      for (const message of messages) {
+        await this.addChatMessage({
+          ...message,
+          id: id('cm'),
+          createdAt: new Date().toISOString(),
+          authorId: SYSTEM_CHAT_AUTHOR_ID,
+          roundIndex: roundIndex,
+          reactions: {},
+        });
       }
     }
   };

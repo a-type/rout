@@ -209,7 +209,7 @@ export const gameDefinition: GameDefinition<{
   },
 
   getPublicTurn: ({ turn, globalState }) => {
-    return turn;
+    return turn.data;
   },
 
   getStatus: ({ globalState, rounds, members }) => {
