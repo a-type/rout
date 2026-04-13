@@ -102,6 +102,7 @@ if (template === 'games') {
   await addGameToGamesPackage();
   await addGameDevTask();
   await addGameToWorkspace();
+  await addGameCI();
 }
 
 copySpinner.stop('Copying complete');
@@ -194,4 +195,50 @@ async function addGameToWorkspace() {
     JSON.stringify(workspaceFileJson, null, 2),
   );
   console.log(`Added games/${name} to rout.code-workspace`);
+}
+
+async function addGameCI() {
+  const workflowContent = `name: "[Game] Deploy ${titleName} v1"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm i --filter "@long-game/game-${name}-v1..."
+
+      - name: Build game
+        run: pnpm --filter "@long-game/game-${name}-v1..." run build
+        env:
+          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy Game Service
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+          packageManager: pnpm
+          workingDirectory: ./games/${name}/v1
+          command: deploy -c ./wrangler.jsonc
+  `;
+
+  const workflowPath = path.resolve(
+    import.meta.dirname,
+    `../../.github/workflows/deploy-${camelName}-v1.yaml`,
+  );
+
+  await fs.writeFile(workflowPath, workflowContent);
 }
