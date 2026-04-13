@@ -1,7 +1,11 @@
 {
   "name": "@long-game/game-number-guess",
   "type": "module",
-  "module": "manifest.ts",
+  "exports": {
+    ".": {
+      "import": "./manifest.ts"
+    }
+  },
   "scripts": {
     "dev": "pnpm --filter \"./*\" --parallel --stream dev"
   },

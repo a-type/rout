@@ -1,5 +1,5 @@
 // Do not remove! Re-exports the game definition for the renderer.
-import { v1 as definition } from '@long-game/game-{{name}}-definition';
+import { gameDefinition as definition } from '../definition/index';
 
 export { definition };
 export default definition;
