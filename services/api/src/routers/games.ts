@@ -24,7 +24,7 @@ function gameSummary(game: GameModule, env: ApiBindings) {
     creators: game.creators,
     prerelease: game.prerelease,
     versions: game.versions.map((version) => ({
-      version,
+      version: version.version,
       url: getGameUrl(game, version, env),
     })),
     screenshots: game.screenshots ?? [],

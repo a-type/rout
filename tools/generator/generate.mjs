@@ -64,7 +64,8 @@ if (exists) {
 // count number of games in the games dir
 const gameCount = (await fs.readdir(path.resolve(__dirname, '../../games')))
   .length;
-const devPort = 3300 + gameCount; // start at 3300 and increment for each game
+const defUIPort = 3400 + gameCount; // start at 3400 and increment for each game
+const defAPIPort = 3500 + gameCount; // start at 3500 and increment for each game
 
 const copySpinner = spinner();
 
@@ -82,7 +83,8 @@ const copyConfig = {
     '{{name}}': name,
     '{{titleName}}': titleName,
     '{{camelName}}': camelName,
-    '{{devPort}}': devPort,
+    '{{devUIPort}}': defUIPort,
+    '{{devAPIPort}}': defAPIPort,
   },
   gitingore: true,
   exclude: dontCopy,

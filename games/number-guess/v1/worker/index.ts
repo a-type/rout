@@ -1,4 +1,5 @@
 import { createGameApi } from '@long-game/game-api';
-import { gameDefinition } from '../definition/index.js';
+import manifest from '@long-game/game-number-guess';
+import { gameDefinition } from '../definition/index';
 
-export default createGameApi(gameDefinition);
+export default createGameApi(manifest, gameDefinition);

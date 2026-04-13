@@ -57,7 +57,7 @@ export class LongGameError extends Error {
     }
     const code = Number(res.headers.get('X-Long-Game-Error')) || 0;
     const message = res.headers.get('X-Long-Game-Message') || 'Unknown error';
-    return new LongGameError(code, message);
+    return new LongGameError(code, message, res);
   };
 
   static throwIfError = (res: Response): void => {
@@ -95,6 +95,9 @@ export class LongGameError extends Error {
   }
 
   get statusCode() {
+    if (this.code === 0) {
+      return 500;
+    }
     return Math.floor(this.code / 100);
   }
 

@@ -12,7 +12,7 @@ export interface GameModule {
   id: string;
   /** IDs that should still route to the game */
   aliasIds?: string[];
-  versions: { version: `v${string}`; devPort: number }[];
+  versions: { version: `v${string}`; devUIPort: number; devAPIPort: number }[];
   title: string;
   description?: string;
   tags: string[];
@@ -29,6 +29,10 @@ export function normalizeGameVersion(version: string | number) {
     return `v${version}`;
   }
   if (typeof version === 'string') {
+    // remove "x.y" minor versions... no longer used.
+    if (version.includes('.')) {
+      version = version.split('.')[0];
+    }
     if (!version.startsWith('v')) {
       return `v${version}`;
     }

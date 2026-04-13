@@ -9,12 +9,13 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-number-guess-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --ip 127.0.0.1 --port 3500",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3500",
     "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests"
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
+    "@long-game/game-number-guess": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/game-api": "workspace:*",

@@ -4,7 +4,7 @@
       "name": "Debug API",
       "type": "node",
       "request": "attach",
-      "port": 9229,
+      "port": 9230,
       "cwd": "/",
       "resolveSourceMapLocations": null,
       "attachExistingChildren": false,

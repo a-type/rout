@@ -3,13 +3,13 @@ import { GameModule } from '@long-game/game-definition';
 
 export function getGameUrl(
   game: GameModule,
-  version: { version: `v${string}`; devPort: number },
+  version: { version: `v${string}`; devUIPort: number },
   env: ApiBindings,
 ): string {
   return getGameUiOrigin(
     game.id,
     version.version,
-    version.devPort,
+    version.devUIPort,
     !!env.DEV_MODE,
   );
 }

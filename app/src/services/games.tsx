@@ -55,7 +55,7 @@ export function getFederatedGameComponent(
     }
   }
   const majorVersion = version.split('.')[0];
-  const federatedPath = `${idToFederationId(gameId)}/${majorVersion}/${componentName}`;
+  const federatedPath = `${idToFederationId(gameId, majorVersion)}/${componentName}`;
   if (cache.has(federatedPath)) {
     return cache.get(federatedPath)!;
   }

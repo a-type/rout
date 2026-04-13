@@ -13,6 +13,7 @@ export type GameDetails = InferResponseType<Client['api']['details']['$get']>;
 import {
   getGameUiOrigin,
   groupTurnsToRounds,
+  Logger,
   LongGameError,
   PrefixedId,
 } from '@long-game/common';
@@ -30,7 +31,7 @@ interface GameApiClientInit {
     color: string;
   }[];
   setupData: any;
-  devPort: number;
+  devApiPort: number;
   isDev: boolean;
   timeZone: string;
   fetch?: typeof fetch;
@@ -38,13 +39,17 @@ interface GameApiClientInit {
 
 export class GameApiClient {
   #apiClient: ReturnType<typeof createClient>;
+  #logger = new Logger('💫', 'game-api-client');
 
   constructor(private init: GameApiClientInit) {
     const origin = getGameUiOrigin(
       init.gameId,
       init.version,
-      init.devPort,
+      init.devApiPort,
       init.isDev,
+    );
+    this.#logger.info(
+      `Initializing GameApiClient for ${init.gameId} with origin ${origin}`,
     );
     this.#apiClient = createClient(origin, {
       fetch: init.fetch,
@@ -58,11 +63,16 @@ export class GameApiClient {
   /** v8 ignore stop -- @preserve */
 
   #unwrapJson = async <T>(req: Promise<ClientResponse<T>>): Promise<T> => {
-    const response = await req;
-    if (!response.ok) {
-      throw LongGameError.fromResponse(response);
+    try {
+      const response = await req;
+      if (!response.ok) {
+        throw LongGameError.fromResponse(response);
+      }
+      return response.json() as T;
+    } catch (err) {
+      this.#logger.urgent('API request threw an error', err);
+      throw LongGameError.wrap(err);
     }
-    return response.json() as T;
   };
 
   // when we see a global state computed for a round index, keep it around.

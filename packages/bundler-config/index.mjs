@@ -21,7 +21,7 @@ export const gameRsbuildConfig = (game) => {
       name: idToFederationId(game.id, game.version),
       manifest: true,
       dts: false,
-      getPublicPath: `function() { return "${getGameUiOrigin(game.id, game.version, game.devPort, command !== 'build')}"; }`,
+      getPublicPath: `function() { return "${getGameUiOrigin(game.id, game.version, game.devPort, command !== 'build')}/"; }`,
       exposes: {
         './renderer': `./ui/Renderer.tsx`,
         './chat': `./ui/ChatMessage.tsx`,
@@ -82,6 +82,7 @@ export const gameRsbuildConfig = (game) => {
           // arbitrary
           index: './ui/Renderer.tsx',
         },
+        tsconfigPath: './tsconfig.ui.json',
       },
       dev: {
         assetPrefix: `http://localhost:${game.devPort}/`,

@@ -25,7 +25,7 @@ beforeEach(() => {
   spiedFetch.mockClear();
 
   client = new GameApiClient({
-    devPort: 7777,
+    devApiPort: 7777,
     gameId: 'test-game',
     version: 'v1',
     sessionId: 'gs-test-session',

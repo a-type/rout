@@ -1,5 +1,4 @@
 import { GameListItemDetails } from '@long-game/game-client';
-import { emptyGameDefinition } from '@long-game/game-definition';
 import { sdkHooks } from '../sdkHooks';
 
 const emptyGame = (id: string) =>
@@ -10,12 +9,13 @@ const emptyGame = (id: string) =>
     tags: [],
     creators: [],
     prerelease: false,
-    versions: [emptyGameDefinition],
-    latestVersion: emptyGameDefinition.version,
-    maximumPlayers: emptyGameDefinition.maximumPlayers,
-    minimumPlayers: emptyGameDefinition.minimumPlayers,
+    versions: [
+      {
+        version: 'v1',
+        url: 'http://localhost:3100/noop',
+      },
+    ],
     screenshots: [],
-    url: '',
   }) as GameListItemDetails;
 
 export function useGame(id: string | undefined | null) {
