@@ -5,6 +5,7 @@ import {
   PrefixedId,
   wrapRpcData,
 } from '@long-game/common';
+import { fetchGameDetails } from '@long-game/game-api/client';
 import { GameModule } from '@long-game/game-definition';
 import { allGames, getGame } from '@long-game/games';
 import { Hono } from 'hono';
@@ -212,6 +213,30 @@ export const gamesRouter = new Hono<Env>()
       }
 
       return ctx.redirect(checkout.url);
+    },
+  )
+  .get(
+    '/:id/:version/details',
+    zValidator('param', z.object({ id: z.string(), version: z.string() })),
+    async (ctx) => {
+      const { id, version } = ctx.req.valid('param');
+      const game = getGame(id);
+      const gameVersion = game.versions.find((v) => v.version === version);
+      if (!gameVersion) {
+        throw new LongGameError(
+          LongGameError.Code.NotFound,
+          `Game version not found: ${id} ${version}`,
+        );
+      }
+
+      return ctx.json(
+        await fetchGameDetails(
+          id,
+          version,
+          gameVersion.devAPIPort,
+          ctx.env.DEV_MODE === 'true',
+        ),
+      );
     },
   )
   .get(

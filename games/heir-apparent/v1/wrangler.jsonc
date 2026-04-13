@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "game--heir-apparent--v1",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-04-12",
+  "assets": {
+    "directory": "./ui-dist",
+    "binding": "ASSETS",
+  },
+}

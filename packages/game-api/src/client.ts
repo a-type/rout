@@ -37,6 +37,31 @@ interface GameApiClientInit {
   fetch?: typeof fetch;
 }
 
+/**
+ * Convenience function for just getting the static details metadata
+ * without having to setup a whole client
+ */
+export async function fetchGameDetails(
+  gameId: string,
+  version: string,
+  devApiPort: number,
+  isDev: boolean,
+): Promise<GameDetails> {
+  const origin = getGameUiOrigin(gameId, version, devApiPort, isDev);
+  const apiClient = createClient(origin);
+  try {
+    const response = await apiClient.api.details.$get();
+    if (!response.ok) {
+      throw LongGameError.fromResponse(response);
+    }
+    return response.json();
+  } catch (err) {
+    const logger = new Logger('💫', 'fetchGameDetails');
+    logger.urgent('Failed to fetch game details', err);
+    throw LongGameError.wrap(err);
+  }
+}
+
 export class GameApiClient {
   #apiClient: ReturnType<typeof createClient>;
   #logger = new Logger('💫', 'game-api-client');

@@ -29,7 +29,7 @@ export const gameDefinition: GameDefinition<{
   PublicTurnData: PublicMoveData;
   SetupData: { message: string };
 }> = {
-  version: 'v1.0',
+  version: 'v1',
   minimumPlayers: 1,
   maximumPlayers: 100,
 

@@ -22,8 +22,19 @@ jobs:
           echo "PUBLIC_API_ORIGIN=${{ vars.PUBLIC_API_ORIGIN }}" >> ./app/.env
           echo "PUBLIC_APP_ORIGIN=${{ vars.APP_ORIGIN }}" >> ./app/.env
           echo "PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> ./app/.env
-      - name: Build everything
-        run: pnpm run build
+
+      - name: Build API and dependencies
+        run: pnpm --filter "@long-game/service-api..." run build
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Build App and dependencies
+        run: pnpm --filter "@long-game/app..." run build
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Build Homepage and dependencies
+        run: pnpm --filter "@long-game/homepage..." run build
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 

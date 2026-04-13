@@ -15,13 +15,13 @@ export function GameScreenshotGallery({
   className,
 }: GameScreenshotGalleryProps) {
   const game = useGame(gameId);
-  const version = userVersion ?? game?.latestVersion ?? 'v1';
+  const latestGameVersion = game.versions.at(-1);
+  const version = userVersion ?? latestGameVersion?.version ?? 'v1';
   const [selected, setSelected] = useState<number>(0);
-      const availableScreenshots = game.screenshots?.filter((screenshot) =>
-        !screenshot.version || screenshot.version === version,
-      );
+  const availableScreenshots = game.screenshots?.filter(
+    (screenshot) => !screenshot.version || screenshot.version === version,
+  );
   const screenshot = availableScreenshots?.[selected];
-
 
   return (
     <Box gap className={clsx('', className)}>

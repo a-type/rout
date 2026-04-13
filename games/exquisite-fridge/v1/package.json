@@ -1,0 +1,38 @@
+{
+  "name": "@long-game/game-exquisite-fridge-v1",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run build:ui && pnpm run build:worker",
+    "build:ui": "rsbuild build",
+    "build:worker": "wrangler build --config ./wrangler.jsonc",
+    "dev": "pnpm run --filter @long-game/game-exquisite-fridge-v1 --parallel \"/dev:.*/\"",
+    "dev:ui": "rsbuild dev",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3504",
+    "core:dev": "pnpm dev",
+    "test": "vitest --passWithNoTests"
+  },
+  "dependencies": {
+    "@a-type/ui": "catalog:",
+    "@long-game/game-exquisite-fridge": "workspace:*",
+    "@long-game/game-client": "workspace:*",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-api": "workspace:*",
+    "@long-game/game-ui": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@long-game/scripts": "workspace:*",
+    "@long-game/uno-config": "workspace:*",
+    "@long-game/bundler-config": "workspace:*",
+    "@rsbuild/core": "catalog:",
+    "wrangler": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -41,7 +41,7 @@ export const gameDefinition: GameDefinition<{
   // NOT retroactively change setup data for running sessions.
   // SetupData: {};
 }> = {
-  version: 'v1.0',
+  version: 'v1',
   minimumPlayers: 2,
   maximumPlayers: 10,
   getRoundIndex: roundFormat.sync(),

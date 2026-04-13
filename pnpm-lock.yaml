@@ -352,38 +352,32 @@ importers:
         specifier: 'catalog:'
         version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/exquisite-fridge: {}
-
-  games/exquisite-fridge/definition:
+  games/exquisite-fridge:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/exquisite-fridge/renderer:
+  games/exquisite-fridge/v1:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.21(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(unocss@66.6.7(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-exquisite-fridge-definition':
+      '@long-game/game-exquisite-fridge':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
@@ -418,26 +412,17 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/garden-path: {}
-
-  games/garden-path/definition:
+  games/garden-path:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/garden-path/renderer:
+  games/garden-path/v1:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
@@ -445,15 +430,18 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-garden-path-definition':
+      '@long-game/game-garden-path':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
@@ -494,39 +482,36 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/hearts: {}
-
-  games/hearts/definition:
+  games/hearts:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/hearts/renderer:
+  games/hearts/v1:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.21(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(unocss@66.6.7(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-hearts-definition':
+      '@long-game/game-hearts':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
@@ -561,42 +546,36 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/heir-apparent: {}
-
-  games/heir-apparent/definition:
+  games/heir-apparent:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-      '@long-game/hex-map':
-        specifier: workspace:*
-        version: link:../../../packages/hex-map
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/heir-apparent/renderer:
+  games/heir-apparent/v1:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.21(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(unocss@66.6.7(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-heir-apparent-definition':
+      '@long-game/game-heir-apparent':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
@@ -637,6 +616,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
   games/number-guess:
     dependencies:
@@ -699,38 +681,32 @@ importers:
         specifier: 'catalog:'
         version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/scribble: {}
-
-  games/scribble/definition:
+  games/scribble:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/scribble/renderer:
+  games/scribble/v1:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.21(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(unocss@66.6.7(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-scribble-definition':
+      '@long-game/game-scribble':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
@@ -771,27 +747,21 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/wizard-ball: {}
-
-  games/wizard-ball/definition:
+  games/wizard-ball:
     dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../../packages/common
       '@long-game/game-definition':
         specifier: workspace:*
-        version: link:../../../packages/game-definition
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+        version: link:../../packages/game-definition
 
-  games/wizard-ball/renderer:
+  games/wizard-ball/v1:
     dependencies:
+      '@a-type/ui':
+        specifier: 'catalog:'
+        version: 5.0.21(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(unocss@66.6.7(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)))
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -807,6 +777,9 @@ importers:
       '@long-game/common':
         specifier: workspace:*
         version: link:../../../packages/common
+      '@long-game/game-api':
+        specifier: workspace:*
+        version: link:../../../packages/game-api
       '@long-game/game-client':
         specifier: workspace:*
         version: link:../../../packages/game-client
@@ -816,9 +789,9 @@ importers:
       '@long-game/game-ui':
         specifier: workspace:*
         version: link:../../../packages/game-ui
-      '@long-game/game-wizard-ball-definition':
+      '@long-game/game-wizard-ball':
         specifier: workspace:*
-        version: link:../definition
+        version: link:..
       '@verdant-web/react-router':
         specifier: 'catalog:'
         version: 0.8.0(react@19.2.5)
@@ -859,6 +832,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      wrangler:
+        specifier: 'catalog:'
+        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
   homepage:
     dependencies:
@@ -1232,9 +1208,27 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../game-definition
+      '@long-game/game-exquisite-fridge':
+        specifier: workspace:*
+        version: link:../../games/exquisite-fridge
+      '@long-game/game-garden-path':
+        specifier: workspace:*
+        version: link:../../games/garden-path
+      '@long-game/game-hearts':
+        specifier: workspace:*
+        version: link:../../games/hearts
+      '@long-game/game-heir-apparent':
+        specifier: workspace:*
+        version: link:../../games/heir-apparent
       '@long-game/game-number-guess':
         specifier: workspace:*
         version: link:../../games/number-guess
+      '@long-game/game-scribble':
+        specifier: workspace:*
+        version: link:../../games/scribble
+      '@long-game/game-wizard-ball':
+        specifier: workspace:*
+        version: link:../../games/wizard-ball
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -10058,7 +10052,7 @@ snapshots:
   '@dnd-kit/accessibility@3.1.1(react@19.2.5)':
     dependencies:
       react: 19.2.5
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   '@dnd-kit/core@6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
@@ -10066,26 +10060,26 @@ snapshots:
       '@dnd-kit/utilities': 3.2.2(react@19.2.5)
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   '@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@dnd-kit/utilities': 3.2.2(react@19.2.5)
       react: 19.2.5
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   '@dnd-kit/sortable@10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@dnd-kit/utilities': 3.2.2(react@19.2.5)
       react: 19.2.5
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   '@dnd-kit/utilities@3.2.2(react@19.2.5)':
     dependencies:
       react: 19.2.5
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   '@emnapi/core@1.8.1':
     dependencies:

@@ -209,6 +209,19 @@ export class PublicSdk extends BaseSdk {
       url: '',
     },
   });
+  getGameVersionDetails = this.sdkQuery(
+    'getGameVersionDetails',
+    this.apiRpc.games[':id'][':version'].details.$get,
+    {
+      transformInput: (input: { id?: string; version?: string }) => ({
+        param: { id: input.id ?? 'empty', version: input.version ?? 'v1' },
+      }),
+      enabled(input) {
+        return !!input.id && !!input.version;
+      },
+    },
+  );
+
   getResolvedGameIdFromAlias = this.sdkQuery(
     'getResolvedGameIdFromAlias',
     this.apiRpc.games.resolveAlias[':aliasId'].$get,
