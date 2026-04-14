@@ -155,6 +155,6 @@ export const gameModules: GameModuleContext = {
     if (!data) {
       throw new Error(`Game not found: ${gameId}`);
     }
-    return data.latestVersion;
+    return data.versions.at(-1)?.version ?? 'v1';
   },
 };
