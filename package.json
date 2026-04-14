@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel --stream dev",
     "core:dev": "pnpm -r --parallel --stream core:dev",
+    "core:dev:ci": "pnpm -r --parallel core:dev",
     "package:dev": "pnpm -r --parallel --stream package:dev",
     "build": "turbo run build",
     "initialize": "node ./tools/initialize.mjs",
