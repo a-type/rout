@@ -23,8 +23,8 @@ jobs:
 
       - name: Write .env to app dir
         run: |
-          echo "PUBLIC_API_ORIGIN=${{ vars.PUBLIC_API_ORIGIN }}" >> ./app/.env
-          echo "PUBLIC_APP_ORIGIN=${{ vars.APP_ORIGIN }}" >> ./app/.env
+          echo "PUBLIC_API_ORIGIN=http://localhost:3101" >> ./app/.env
+          echo "PUBLIC_APP_ORIGIN=http://localhost:3100" >> ./app/.env
           echo "PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> ./app/.env
 
       - name: Build everything
