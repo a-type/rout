@@ -27,6 +27,13 @@ jobs:
           echo "PUBLIC_APP_ORIGIN=http://localhost:3100" >> ./app/.env
           echo "PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> ./app/.env
 
+      - name: Write dev.vars to api dir
+        run: |
+          echo "UI_ORIGIN=http://localhost:3100" >> ./services/api/dev.vars
+          echo "API_ORIGIN=http://localhost:3101" >> ./services/api/dev.vars
+          echo "SESSION_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/dev.vars
+          echo "SOCKET_TOKEN_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/dev.vars
+
       - name: Build everything
         run: pnpm run build
         env:
