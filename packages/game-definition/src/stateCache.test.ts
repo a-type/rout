@@ -72,7 +72,7 @@ describe('StateCache', () => {
   it('returns initial state with no rounds', () => {
     const { cache } = createCache();
     const state = cache.getState([]);
-    expect(state).toEqual({
+    expect(state.state).toEqual({
       randomValues: [],
       turnValues: [],
       initialRandomValue,
@@ -108,7 +108,7 @@ describe('StateCache', () => {
 
     const { game, cache } = createCache();
     const state = cache.getState(rounds);
-    expect(state).toEqual({
+    expect(state.state).toEqual({
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
@@ -120,7 +120,7 @@ describe('StateCache', () => {
     (game.applyRoundToGlobalState as Mock).mockClear();
 
     const cachedState = cache.getState(rounds);
-    expect(cachedState).toEqual(state);
+    expect(cachedState.state).toEqual(state.state);
     expect(game.getInitialGlobalState).not.toHaveBeenCalled();
     expect(game.applyRoundToGlobalState).not.toHaveBeenCalled();
   });
@@ -153,7 +153,7 @@ describe('StateCache', () => {
 
     const { game, cache } = createCache();
     const state = cache.getState(rounds);
-    expect(state).toEqual({
+    expect(state.state).toEqual({
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
@@ -194,7 +194,7 @@ describe('StateCache', () => {
       },
     ];
     const updatedState = cache.getState(updatedRounds);
-    expect(updatedState).toEqual({
+    expect(updatedState.state).toEqual({
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
@@ -233,7 +233,7 @@ describe('StateCache', () => {
 
     const { game, cache } = createCache();
     const state = cache.getState(firstRounds);
-    expect(state).toEqual({
+    expect(state.state).toEqual({
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
@@ -280,7 +280,7 @@ describe('StateCache', () => {
     ];
 
     const nextState = cache.getState(nextRounds);
-    expect(nextState).toEqual({
+    expect(nextState.state).toEqual({
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
@@ -324,7 +324,7 @@ describe('StateCache', () => {
     cache.getState(rounds.slice(0, 1));
 
     const state = cache.getState(rounds);
-    expect(state).toEqual({
+    expect(state.state).toEqual({
       randomValues: [41, 75],
       turnValues: ['a', 'b'],
       initialRandomValue,
@@ -365,7 +365,7 @@ describe('StateCache', () => {
       },
     ];
     const updatedState = cache.getState(updatedRounds);
-    expect(updatedState).toEqual({
+    expect(updatedState.state).toEqual({
       randomValues: [41, 75, 17],
       turnValues: ['a', 'b', 'c'],
       initialRandomValue,
