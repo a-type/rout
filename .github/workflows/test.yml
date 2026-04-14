@@ -33,7 +33,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Run unit tests
-        run: pnpm test
+        run: pnpm core:test:ci
 
       - name: Run local migrations
         run: pnpm --filter "@long-game/service-api" run migrations:apply:local
