@@ -11,6 +11,7 @@ import {
   GameMember,
   GameModule,
   GameStateCache,
+  StateCheckpoint,
 } from '@long-game/game-definition';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -137,7 +138,7 @@ export function createGameApi(
           });
         }
         const state = stateCache.getState(rounds);
-        return ctx.json(state);
+        return ctx.json(state as StateCheckpoint<any>);
       },
     )
     .post(

@@ -20,8 +20,8 @@ import { produce } from 'immer';
 import { GameDefinition, GameMember } from './gameDefinition.js';
 import { GameRandom, GameRandomState } from './random.js';
 
-export type StateCheckpoint = {
-  state: any;
+export type StateCheckpoint<T = unknown> = {
+  state: T;
   randomState: GameRandomState;
   turnCount: number;
   roundIndex: number;

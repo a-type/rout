@@ -156,7 +156,7 @@ export class HotseatGameSuite<
     const { globalState } = await this.ctx.backend.getGlobalState(
       this.latestRoundIndex,
     );
-    return globalState.state;
+    return globalState as GetGlobalState<TGame>;
   };
   protected async getGameData(): Promise<GameSuiteBaseInit> {
     const data = await this.ctx.backend.getDetails();

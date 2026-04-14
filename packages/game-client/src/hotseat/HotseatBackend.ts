@@ -367,7 +367,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
       details.gameVersion,
     );
     const turns = await this.db.getAll('turns');
-    const globalState = this.cache.getState(groupTurnsToRounds(turns));
+    const globalState = this.cache.getState(groupTurnsToRounds(turns)).state;
     const { roundIndex, pendingTurns } =
       details.status === 'pending'
         ? { roundIndex: -1, pendingTurns: [] }
@@ -514,7 +514,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
   getGlobalState = async (roundIndex: number) => {
     const turns = await this.#getTurnsUpToRound(roundIndex);
     const rounds = groupTurnsToRounds(turns);
-    const globalState = this.cache.getState(rounds);
+    const globalState = this.cache.getState(rounds).state;
     return { rounds, globalState };
   };
   getPlayerState = async (playerId: PrefixedId<'u'>, roundIndex: number) => {
@@ -607,7 +607,7 @@ export class HotseatBackend extends EventSubscriber<HotseatBackendEvents> {
     const turns = await this.db.getAll('turns');
     const rounds = groupTurnsToRounds(turns);
     const details = await this.getDetails();
-    const globalState = await this.cache.getState(rounds);
+    const globalState = this.cache.getState(rounds).state;
     const roundInfo = this.gameDefinition.getRoundIndex({
       currentTime: new Date(),
       environment: 'production',
