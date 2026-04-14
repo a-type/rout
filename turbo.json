@@ -13,6 +13,10 @@
     "bench": {
       "outputs": [],
       "inputs": ["**/*.bench.ts"]
+    },
+    "core:test:ci": {
+      "outputs": [],
+      "inputs": ["**/*.test.tsx", "**/*.test.ts", "vitest.config.ts"]
     }
   }
 }

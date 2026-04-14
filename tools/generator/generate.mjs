@@ -226,6 +226,9 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Run tests
+        run: pnpm --filter "@long-game/game-{{name}}-v1..." run test --run
+
       - name: Deploy Game Service
         uses: cloudflare/wrangler-action@v3
         with:

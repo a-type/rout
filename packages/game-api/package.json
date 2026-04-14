@@ -22,7 +22,8 @@
     "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
     "build": "tsc",
-    "test": "vitest --passWithNoTests"
+    "test": "vitest --passWithNoTests",
+    "core:test:ci": "vitest --passWithNoTests --run"
   },
   "dependencies": {
     "@hono/zod-validator": "catalog:",

@@ -1,9 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "declaration": false,
-    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"]
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"],
+    "rootDir": "."
   },
-  "include": ["*.ts", "../api/src/worker-types.d.ts"]
+  "include": ["*.ts", "../src/worker-types.d.ts"],
+  "exclude": ["../node_modules"]
 }
