@@ -4,10 +4,6 @@ const api = spawn(
   'pnpm',
   ['--filter', '@long-game/service-api', 'run', 'dev'],
   {
-    env: {
-      UI_ORIGIN: 'http://localhost:3100',
-      ...process.env,
-    },
     stdio: 'inherit',
   },
 );
