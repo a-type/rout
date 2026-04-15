@@ -33,6 +33,7 @@ jobs:
           echo "API_ORIGIN=http://localhost:3101" >> ./services/api/.dev.vars
           echo "SESSION_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/.dev.vars
           echo "SOCKET_TOKEN_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/.dev.vars
+          echo "DEV_MODE=true" >> ./services/api/.dev.vars
 
       - name: Build everything
         run: pnpm run build
