@@ -5,6 +5,12 @@ const api = spawn(
   ['--filter', '@long-game/service-api', 'run', 'dev'],
   {
     stdio: 'inherit',
+    env: {
+      ...process.env,
+      DEV_MODE: true,
+      UI_ORIGIN: 'http://localhost:3100',
+      API_ORIGIN: 'http://localhost:3101',
+    },
   },
 );
 const ui = spawn('pnpm', ['--filter', '@long-game/app', 'run', 'preview'], {
@@ -12,9 +18,14 @@ const ui = spawn('pnpm', ['--filter', '@long-game/app', 'run', 'preview'], {
 });
 const numberGuess = spawn(
   'pnpm',
-  ['--filter', '@long-game/game-number-guess-v1', 'run', 'dev'],
+  ['--filter', '@long-game/game-number-guess-v1', 'run', 'browser-test:run'],
   {
     stdio: 'inherit',
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      DEV_MODE: true,
+    },
   },
 );
 console.log('Test servers started. Press Ctrl+C to stop.');

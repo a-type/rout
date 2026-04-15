@@ -16,12 +16,13 @@ export const gameRsbuildConfig = (game) => {
     );
   }
 
-  return defineConfig(({ command }) => {
+  return defineConfig(({ command, envMode }) => {
+    const devMode = envMode === 'test' || command !== 'build';
     const federationConfig = createModuleFederationConfig({
       name: idToFederationId(game.id, game.version),
       manifest: true,
       dts: false,
-      getPublicPath: `function() { return "${getGameUiOrigin(game.id, game.version, game.devPort, command !== 'build')}/"; }`,
+      getPublicPath: `function() { return "${getGameUiOrigin(game.id, game.version, game.devPort, devMode)}/"; }`,
       exposes: {
         './renderer': `./ui/Renderer.tsx`,
         './chat': `./ui/ChatMessage.tsx`,
@@ -94,6 +95,7 @@ export const gameRsbuildConfig = (game) => {
       },
       output: {
         distPath: 'ui-dist',
+        assetPrefix: devMode ? `http://localhost:${game.devPort}/` : undefined,
       },
     };
   });

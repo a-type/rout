@@ -35,10 +35,16 @@ jobs:
           echo "SOCKET_TOKEN_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/.dev.vars
           echo "DEV_MODE=true" >> ./services/api/.dev.vars
 
-      - name: Build everything
-        run: pnpm run build
+      - name: Build API
+        run: pnpm --filter "@long-game/service-api..." run build
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Build UI
+        run: pnpm --filter "@long-game/app..." run build
+
+      - name: Build Number Guess test game
+        run: pnpm --filter "@long-game/game-number-guess-v1" run browser-test:build
 
       - name: Run unit tests
         run: pnpm core:test:ci

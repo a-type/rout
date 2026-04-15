@@ -11,7 +11,11 @@
     "dev:ui": "rsbuild dev",
     "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3500",
     "core:dev": "pnpm dev",
-    "test": "vitest --passWithNoTests"
+    "test": "vitest --passWithNoTests",
+    "browser-test:build": "rsbuild build --env-mode=test",
+    "browser-test:run": "pnpm --filter @long-game/game-number-guess-v1 run \"/browser-test:run:.*/\"",
+    "browser-test:run:ui": "rsbuild preview",
+    "browser-test:run:worker": "pnpm dev:worker"
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
