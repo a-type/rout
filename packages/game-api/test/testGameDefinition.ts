@@ -77,7 +77,8 @@ export const testGameDefinition: GameDefinition<{
   },
   getPlayerState: ({ globalState, playerId, roundIndex, rounds }) => {
     const turnThisRound =
-      rounds[roundIndex]?.turns.filter((t) => t.playerId === playerId) ?? [];
+      rounds[roundIndex - 1]?.turns.filter((t) => t.playerId === playerId) ??
+      [];
     return {
       lastMove: turnThisRound[0]?.data.move ?? null,
     };
