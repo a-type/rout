@@ -193,7 +193,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     const data = await this.#getSessionData();
     return this.#setSessionData({ ...data, ...updates });
   }
-  async #getRoundState(): Promise<GameSessionRoundState> {
+  async #getNotificationState(): Promise<GameSessionRoundState> {
     return (
       (await this.ctx.storage.get('notifications')) || {
         playersNotified: {},
@@ -201,9 +201,20 @@ export class GameSession extends DurableObject<ApiBindings> {
       }
     );
   }
-  async #setRoundState(notifications: GameSessionRoundState) {
+  async #setNotificationState(notifications: GameSessionRoundState) {
     await this.ctx.storage.put('notifications', notifications);
     return notifications;
+  }
+  /**
+   * When round state is computed, we cache which players still need to
+   * play their turn so we don't have to round trip back to recalculate to
+   * show this on the homescreen.
+   */
+  async #getCachedPendingTurns(): Promise<PrefixedId<'u'>[] | null> {
+    return (await this.ctx.storage.get('pendingTurns')) || null;
+  }
+  async #setCachedPendingTurns(pendingTurns: PrefixedId<'u'>[] | null) {
+    await this.ctx.storage.put('pendingTurns', pendingTurns);
   }
   async #getSetupData(): Promise<any> {
     return this.ctx.storage.get('setupData');
@@ -311,7 +322,6 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     return votes;
   }
-
   async voteForGame(playerId: PrefixedId<'u'>, gameId: string) {
     // if this is the game leader, or if the game has no leader,
     // we select the game immediately
@@ -407,15 +417,6 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   async delete() {
-    if (await this.getIsInitialized()) {
-      const sessionData = await this.#getSessionData();
-      // if (sessionData.startedAt) {
-      //   throw new LongGameError(
-      //     LongGameError.Code.BadRequest,
-      //     'Cannot delete a game session that has started',
-      //   );
-      // }
-    }
     return this.#delete();
   }
   async #delete() {
@@ -695,23 +696,32 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
     return await this.#getGlobalStateUnchecked();
   }
+  async #getPendingTurnsCachedOrCompute(): Promise<PrefixedId<'u'>[]> {
+    let pendingTurns = await this.#getCachedPendingTurns();
+    if (!pendingTurns) {
+      const roundState = await this.#getCurrentRoundState();
+      pendingTurns = roundState.pendingTurns;
+      await this.#setCachedPendingTurns(pendingTurns);
+    }
+    return pendingTurns || [];
+  }
   async getPlayerStatuses(): Promise<
     Record<PrefixedId<'u'>, GameSessionPlayerStatus>
   > {
     const members = await this.getMembers();
-    const roundState = await this.#getCurrentRoundState();
+    const pendingTurns = await this.#getPendingTurnsCachedOrCompute();
     const statuses: Record<PrefixedId<'u'>, GameSessionPlayerStatus> = {};
     for (const member of members) {
       statuses[member.id] = {
         online: await this.presence.getIsOnline(member.id),
-        pendingTurn: roundState.pendingTurns.includes(member.id),
+        pendingTurn: pendingTurns.includes(member.id),
       };
     }
     return statuses;
   }
   async getPlayerIsPendingTurn(playerId: PrefixedId<'u'>) {
-    const roundState = await this.#getCurrentRoundState();
-    return roundState.pendingTurns.includes(playerId);
+    const pendingTurns = await this.#getPendingTurnsCachedOrCompute();
+    return pendingTurns.includes(playerId);
   }
   async getPlayerLatestPlayedRoundIndex(
     playerId: PrefixedId<'u'>,
@@ -860,7 +870,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       );
     }
     await this.#sql.run(db.deleteFrom('Turn'));
-    await this.#setRoundState({
+    await this.#setNotificationState({
       roundIndex: -1,
       playersNotified: {},
     });
@@ -1239,6 +1249,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       turns,
       startedAt: sessionData.startedAt,
     });
+    this.#setCachedPendingTurns(result.pendingTurns);
     return result;
   }
 
@@ -1276,6 +1287,8 @@ export class GameSession extends DurableObject<ApiBindings> {
       playerId,
     };
     await this.#insertTurn(newTurn);
+    // invalidate cached pending turns
+    this.#setCachedPendingTurns(null);
     // send turn played notification to all players except the one who played
     await this.#socketHandler.send(
       {
@@ -1310,9 +1323,9 @@ export class GameSession extends DurableObject<ApiBindings> {
 
   // Player notifications
   async #markPlayerNotified(playerId: PrefixedId<'u'>) {
-    const state = await this.#getRoundState();
+    const state = await this.#getNotificationState();
     state.playersNotified[playerId] = new Date().toISOString();
-    await this.#setRoundState(state);
+    await this.#setNotificationState(state);
   }
 
   async #notifyPlayerOfTurn(playerId: PrefixedId<'u'>) {
@@ -1344,10 +1357,10 @@ export class GameSession extends DurableObject<ApiBindings> {
   #checkForRoundChange = async () => {
     const roundState = await this.#getCurrentRoundState();
     this.log('debug', `Round state: ${JSON.stringify(roundState)}`);
-    let notifications = await this.#getRoundState();
+    let notifications = await this.#getNotificationState();
     if (roundState.roundIndex !== notifications.roundIndex) {
       // round index is out of date, reset
-      notifications = await this.#setRoundState({
+      notifications = await this.#setNotificationState({
         roundIndex: roundState.roundIndex,
         playersNotified: {},
       });
@@ -1663,7 +1676,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       db.selectFrom('ChatMessage').selectAll(),
     );
     const sessionData = await this.#getSessionData();
-    const roundState = await this.#getRoundState();
+    const roundState = await this.#getNotificationState();
     const setupData = await this.#getSetupData();
     let globalState: {} = {};
     try {
