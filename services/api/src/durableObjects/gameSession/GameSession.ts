@@ -1322,6 +1322,9 @@ export class GameSession extends DurableObject<ApiBindings> {
   };
 
   // Player notifications
+
+  // TODO: clear up what 'notified' means in context - this does not refer to
+  // turn reminders, just notifications during the initial change of rounds...
   async #markPlayerNotified(playerId: PrefixedId<'u'>) {
     const state = await this.#getNotificationState();
     state.playersNotified[playerId] = new Date().toISOString();
