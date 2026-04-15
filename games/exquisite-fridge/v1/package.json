@@ -9,8 +9,7 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-exquisite-fridge-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3504",
-    "core:dev": "pnpm dev",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3504 --inspector-port 33504",
     "test": "vitest --passWithNoTests"
   },
   "dependencies": {

@@ -9,8 +9,7 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-wizard-ball-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3503",
-    "core:dev": "pnpm dev",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3503 --inspector-port 33503",
     "test": "vitest --passWithNoTests",
     "bench": "vitest bench"
   },

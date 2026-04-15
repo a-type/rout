@@ -9,7 +9,7 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-number-guess-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3500",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3500 --inspector-port 33500",
     "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests",
     "browser-test:build": "rsbuild build --env-mode=test",

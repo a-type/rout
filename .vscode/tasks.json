@@ -5,8 +5,7 @@
       "type": "npm",
       "script": "core:dev",
       "problemMatcher": [],
-      "label": "💽 Core Dev",
-      "detail": "turbo run dev"
+      "label": "💽 Core Dev"
     },
     {
       "type": "npm",

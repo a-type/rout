@@ -9,8 +9,7 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-scribble-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3502",
-    "core:dev": "pnpm dev",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3502 --inspector-port 33502",
     "test": "vitest --passWithNoTests"
   },
   "dependencies": {

@@ -739,8 +739,13 @@ export class GameSession extends DurableObject<ApiBindings> {
     }
 
     const currentRoundIndex = await this.getCurrentRoundIndex();
+    // when validating we apply the turn to the last settled round, not the
+    // live current round. this is important... if not, the bug looks like
+    // the game trying to validate against the next round, i.e. errors like
+    // "you don't have that card in your hand" etc.
+    const latestSettledRoundIndex = currentRoundIndex - 1;
     const rounds = await this.#getRoundsUnchecked({
-      upToAndIncluding: currentRoundIndex,
+      upToAndIncluding: latestSettledRoundIndex,
     });
 
     const client = await this.#getGameApi();
@@ -749,7 +754,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       turn: {
         data: turn,
         playerId,
-        roundIndex: currentRoundIndex,
+        roundIndex: latestSettledRoundIndex,
       },
       rounds,
     });

@@ -9,7 +9,7 @@
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-{{name}}-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
-    "dev:worker": "wrangler dev --config ./wrangler.jsonc --ip 127.0.0.1 --port {{devAPIPort}}",
+    "dev:worker": "wrangler dev --config ./wrangler.jsonc --ip 127.0.0.1 --port {{devAPIPort}} --inspector-port 3{{devAPIPort}}",
     "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests"
   },

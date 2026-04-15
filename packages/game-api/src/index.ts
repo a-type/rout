@@ -113,7 +113,6 @@ export function createGameApi(
           sessionId,
           checkpoint,
         } = ctx.req.valid('json');
-        assert(!!setupData, 'setupData is required');
         assert(members.length > 0, 'At least one member is required');
         const stateCache = initializeStateCache(definition, {
           sessionId,
@@ -170,7 +169,7 @@ export function createGameApi(
         const playerState = definition.getPlayerState({
           playerId,
           globalState,
-          roundIndex: rounds.length - 1,
+          roundIndex: rounds.length,
           members,
           rounds,
           playerTurn,

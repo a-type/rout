@@ -87,7 +87,7 @@ export const SubmitTurn = withSuspense(
               />
             }
           >
-            {gameSuite.isTurnSubmitDelayed ? (
+            {gameSuite.isTurnSubmitDelayed || gameSuite.remoteTurnError ? (
               <CancelContent duration={delayedSubmitState?.duration ?? 5000} />
             ) : (
               <MainContent
@@ -239,7 +239,7 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
       gap="lg"
       items="center"
       surface
-      color="accent"
+      color={gameSuite.remoteTurnError ? 'attention' : 'accent'}
       elevated="lg"
       p="sm"
       border
@@ -249,8 +249,9 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
     >
       {gameSuite.remoteTurnError ? (
         <>
-          <Button emphasis="ghost" onClick={gameSuite.cancelSubmitTurn}>
-            <Icon name="x" />
+          <Button emphasis="ghost" onClick={() => gameSuite.prepareTurn(null)}>
+            <Icon name="refresh" />
+            Reset
           </Button>
           <div className="font-bold color-attention-ink flex-1">
             {gameSuite.remoteTurnError.message}

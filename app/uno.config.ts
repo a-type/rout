@@ -9,13 +9,13 @@ export default defineConfig({
         // include all .ts and .tsx source files we encounter
         './src/**/*.{ts,tsx}',
         // it seems these need to appear in both pipeline and filesystem...
-        '**/games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+        '**/games/*/*/ui/**/*.{ts,tsx,js,jsx}',
         '**/packages/*/src/**/*.{ts,tsx,js,jsx}',
       ],
     },
     // include all .ts and .tsx files in all games
     filesystem: [
-      '../games/*/renderer/src/**/*.{ts,tsx,js,jsx}',
+      '../games/*/*/ui/**/*.{ts,tsx,js,jsx}',
       '../packages/*/src/**/*.{ts,tsx,js,jsx}',
     ],
   },
