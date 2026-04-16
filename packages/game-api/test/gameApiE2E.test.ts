@@ -25,7 +25,7 @@ beforeEach(() => {
   spiedFetch.mockClear();
 
   client = new GameApiClient({
-    devApiPort: 7777,
+    gameRegistryOrigin: 'http://localhost:7777',
     gameId: 'test-game',
     version: 'v1',
     sessionId: 'gs-test-session',
@@ -55,7 +55,8 @@ it('should fetch game details and cache them', async () => {
     minimumPlayers: 1,
     versions: [
       {
-        devPort: 7777,
+        devAPIPort: 7777,
+        devUIPort: 7778,
         version: 'v1',
       },
     ],

@@ -1,9 +1,11 @@
 import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
 import { createGameApi } from '../src';
 import { testGameDefinition } from './testGameDefinition';
 
+// mocks the game registry API
 export default () => {
-  const app = createGameApi(
+  const registryApi = createGameApi(
     {
       id: 'test-game',
       creators: [],
@@ -13,7 +15,8 @@ export default () => {
       versions: [
         {
           version: 'v1',
-          devPort: 7777,
+          devAPIPort: 7777,
+          devUIPort: 7778,
         },
       ],
       aliasIds: [],
@@ -22,6 +25,9 @@ export default () => {
     },
     testGameDefinition,
   );
+
+  // like the registry, we host on a path... just hardcoded...
+  const app = new Hono().route('/test-game/v1', registryApi);
 
   const server = serve({
     fetch: app.fetch,
