@@ -11,7 +11,6 @@ export const createClient = (
 export type GameDetails = InferResponseType<Client['api']['details']['$get']>;
 
 import {
-  getGameUiOrigin,
   groupTurnsToRounds,
   Logger,
   LongGameError,
@@ -31,10 +30,10 @@ interface GameApiClientInit {
     color: string;
   }[];
   setupData: any;
-  devApiPort: number;
-  isDev: boolean;
+  gameRegistryOrigin: string;
   timeZone: string;
   fetch?: typeof fetch;
+  isDev?: boolean;
 }
 
 /**
@@ -44,10 +43,9 @@ interface GameApiClientInit {
 export async function fetchGameDetails(
   gameId: string,
   version: string,
-  devApiPort: number,
-  isDev: boolean,
+  gameRegistryOrigin: string,
 ): Promise<GameDetails> {
-  const origin = getGameUiOrigin(gameId, version, devApiPort, isDev);
+  const origin = `${gameRegistryOrigin}/${gameId}/${version}`;
   const apiClient = createClient(origin);
   try {
     const response = await apiClient.api.details.$get();
@@ -67,12 +65,7 @@ export class GameApiClient {
   #logger = new Logger('💫', 'game-api-client');
 
   constructor(private init: GameApiClientInit) {
-    const origin = getGameUiOrigin(
-      init.gameId,
-      init.version,
-      init.devApiPort,
-      init.isDev,
-    );
+    const origin = `${init.gameRegistryOrigin}/${init.gameId}/${init.version}`;
     this.#logger.info(
       `Initializing GameApiClient for ${init.gameId} with origin ${origin}`,
     );

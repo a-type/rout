@@ -80,17 +80,23 @@ export const idShapes = Object.entries(resourceIdTypes).reduce(
   },
 );
 
-function normalizeGameId(
+export function normalizeVersion(version: string | number): string {
+  let normalVersion = version.toString();
+  if (!normalVersion.startsWith('v')) {
+    normalVersion = `v${normalVersion}`;
+  }
+  if (normalVersion.includes('.')) {
+    normalVersion = normalVersion.split('.')[0];
+  }
+  return normalVersion;
+}
+
+export function normalizeGameId(
   id: string,
   version: string | number,
   delimiter: '_' | '-',
 ): string {
-  let normalVersion = !version.toString().startsWith('v')
-    ? `v${version}`
-    : version.toString();
-  if (normalVersion.includes('.')) {
-    normalVersion = normalVersion.split('.')[0];
-  }
+  const normalVersion = normalizeVersion(version);
   return `${id.replace(/-/g, delimiter)}${delimiter}${normalVersion}`;
 }
 
@@ -98,7 +104,7 @@ export function idToFederationId(id: string, version: string): string {
   return normalizeGameId(id, version, '_');
 }
 
-export function getGameUiOrigin(
+export function getGameOrigin(
   gameId: string,
   version: string | number,
   devPort: number,

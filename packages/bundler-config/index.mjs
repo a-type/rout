@@ -1,5 +1,5 @@
 import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
-import { getGameUiOrigin, idToFederationId } from '@long-game/common';
+import { idToFederationId } from '@long-game/common';
 import unoConfig from '@long-game/uno-config';
 import {
   createModuleFederationConfig,
@@ -16,13 +16,21 @@ export const gameRsbuildConfig = (game) => {
     );
   }
 
+  const gameRegistryOrigin =
+    process.env.GAME_REGISTRY_ORIGIN || 'http://localhost:3102';
+
   return defineConfig(({ command, envMode }) => {
     const devMode = envMode === 'test' || command !== 'build';
+    // in dev, load assets straight from the rsbuild server. in prod, they're
+    // proxied through the registry worker.
+    const baseUrl = devMode
+      ? `http://localhost:${game.devPort}/`
+      : `${gameRegistryOrigin}/${game.id}/${game.version}/`;
     const federationConfig = createModuleFederationConfig({
       name: idToFederationId(game.id, game.version),
       manifest: true,
       dts: false,
-      getPublicPath: `function() { return "${getGameUiOrigin(game.id, game.version, game.devPort, devMode)}/"; }`,
+      getPublicPath: `function() { return "${baseUrl}"; }`,
       exposes: {
         './renderer': `./ui/Renderer.tsx`,
         './chat': `./ui/ChatMessage.tsx`,
@@ -95,7 +103,7 @@ export const gameRsbuildConfig = (game) => {
       },
       output: {
         distPath: 'ui-dist',
-        assetPrefix: devMode ? `http://localhost:${game.devPort}/` : undefined,
+        assetPrefix: baseUrl,
       },
     };
   });

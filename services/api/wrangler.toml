@@ -12,6 +12,7 @@ invocation_logs = false
 [vars]
 UI_ORIGIN = "https://play.rout.games"
 API_ORIGIN = "https://api.rout.games"
+GAME_REGISTRY_ORIGIN = "https://registry.rout.games"
 NODE_ENV = "production"
 EMAIL_FROM = "noreply@rout.games"
 # ! removes some state constraints - like letting client see global state for debuggin

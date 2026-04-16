@@ -157,6 +157,24 @@ export class GameSessionSocketHandler {
     return this.#hono.fetch(req);
   };
 
+  #sanitizeLoggedMessage = (msg: ServerMessage) => {
+    if (msg.type === 'chat') {
+      return {
+        ...msg,
+        messages: `[redacted (length: ${msg.messages.length})]`,
+      };
+    } else if (msg.type === 'turnPlayed') {
+      return {
+        ...msg,
+        turn: {
+          ...msg.turn,
+          data: '[truncated]',
+        },
+      };
+    }
+    return msg;
+  };
+
   send = async (
     msg: ServerMessage,
     { to, notTo }: { to?: PrefixedId<'u'>[]; notTo?: PrefixedId<'u'>[] } = {},
@@ -165,7 +183,7 @@ export class GameSessionSocketHandler {
       'debug',
       '[GameSessionSocketHandler]',
       'Sending message',
-      msg,
+      this.#sanitizeLoggedMessage(msg),
       to ? `to ${to.join(',')}` : '',
       notTo ? `not to ${notTo.join(',')}` : '',
     );

@@ -4,7 +4,6 @@ packages:
   - 'tests/*'
   - 'games/**/*'
   - 'app'
-  - 'services'
   - 'services/*'
   - 'homepage'
   - 'jobs/*'

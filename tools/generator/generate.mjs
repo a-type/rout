@@ -205,6 +205,9 @@ on:
     branches:
       - main
 
+env:
+  GAME_REGISTRY_ORIGIN: \${{ vars.GAME_REGISTRY_ORIGIN }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

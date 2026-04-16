@@ -47,3 +47,5 @@ for (const freeGame of freeGames) {
     );
   }
 }
+
+export { getVersion } from '@long-game/game-definition';
