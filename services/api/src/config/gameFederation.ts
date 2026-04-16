@@ -1,4 +1,3 @@
-import { getGameOrigin } from '@long-game/common';
 import { GameModule } from '@long-game/game-definition';
 
 export function getGameUrl(
@@ -6,10 +5,8 @@ export function getGameUrl(
   version: { version: `v${string}`; devUIPort: number },
   env: ApiBindings,
 ): string {
-  return getGameOrigin(
-    game.id,
-    version.version,
-    version.devUIPort,
-    !!env.DEV_MODE,
-  );
+  if (env.DEV_MODE) {
+    return `http://localhost:${version.devUIPort}`;
+  }
+  return `${env.GAME_REGISTRY_ORIGIN}/${game.id}/${version.version}`;
 }

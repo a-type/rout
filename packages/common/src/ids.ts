@@ -103,15 +103,3 @@ export function normalizeGameId(
 export function idToFederationId(id: string, version: string): string {
   return normalizeGameId(id, version, '_');
 }
-
-export function getGameOrigin(
-  gameId: string,
-  version: string | number,
-  devPort: number,
-  isDev = false,
-) {
-  if (isDev) {
-    return `http://localhost:${devPort}`;
-  }
-  return `https://${normalizeGameId(gameId, version, '-')}.games.rout.games`;
-}
