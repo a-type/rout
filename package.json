@@ -18,7 +18,7 @@
     "become-admin": "node ./tools/becomeAdmin.mjs",
     "browser-test:run": "playwright test --config=playwright.config.ts",
     "browser-test:ui": "pnpm browser-test:run --ui",
-    "browser-test:servers": "node ./tools/testServer.mjs",
+    "browser-test:servers": "pnpm run --parallel --stream \"/browser-test:server/\"",
     "free-ports": "pnpx kill-port 9229 3099 3100 3101 3300 3301 3302 3303 3304 3305 3306 3307 3308 3309 3310"
   },
   "keywords": [],

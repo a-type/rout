@@ -8,7 +8,8 @@
     "build:app": "rsbuild build",
     "build:typecheck": "tsc --noEmit",
     "build:copy-game-files": "node scripts/copyGameFiles.mjs",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "browser-test:server": "pnpm run preview"
   },
   "dependencies": {
     "@a-type/auth-ui": "catalog:",

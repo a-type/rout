@@ -7,7 +7,8 @@
     "core:dev": "pnpm run dev",
     "build": "wrangler deploy --dry-run --outdir dist --config wrangler.jsonc",
     "types": "wrangler types --env-interface=GameRegistryBindings -c wrangler.jsonc src/worker-types.d.ts",
-    "sync-games": "node ./scripts/syncGameBindings.ts"
+    "sync-games": "node ./scripts/syncGameBindings.ts",
+    "browser-test:server": "pnpm run dev"
   },
   "dependencies": {
     "@long-game/common": "workspace:*",

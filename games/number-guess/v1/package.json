@@ -13,9 +13,9 @@
     "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests",
     "browser-test:build": "rsbuild build --env-mode=test",
-    "browser-test:run": "pnpm --filter @long-game/game-number-guess-v1 run \"/browser-test:run:.*/\"",
-    "browser-test:run:ui": "rsbuild preview",
-    "browser-test:run:worker": "pnpm dev:worker"
+    "browser-test:server": "pnpm --filter @long-game/game-number-guess-v1 run \"/browser-test:run:.*/\"",
+    "browser-test:server:ui": "rsbuild preview",
+    "browser-test:server:worker": "pnpm dev:worker"
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
