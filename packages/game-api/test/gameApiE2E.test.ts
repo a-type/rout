@@ -225,7 +225,7 @@ it('should support a configurable cache for global state checkpoints', async () 
   ];
   await clientWithCustomCache.computeGlobalState(rounds);
 
-  expect(customCache.get).toHaveBeenCalledWith(0);
+  expect(customCache.has).toHaveBeenCalledWith(0);
   expect(customCache.set).toHaveBeenCalledWith(0, {
     randomState: expect.anything(),
     roundIndex: 0,
