@@ -207,6 +207,7 @@ on:
     paths:
       - "games/${name}/v1/**"
       - "packages/game-api/**"
+      - ".github/workflows/deploy-${camelName}-v1.yaml"
 
 env:
   GAME_REGISTRY_ORIGIN: \${{ vars.GAME_REGISTRY_ORIGIN }}
