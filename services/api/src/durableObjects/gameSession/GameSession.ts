@@ -16,7 +16,7 @@ import {
   SYSTEM_CHAT_AUTHOR_ID,
   withTimezone,
 } from '@long-game/common';
-import { GameApiClient } from '@long-game/game-api/client';
+import { GameApiClient, StateCache } from '@long-game/game-api/client';
 import {
   BaseTurnData,
   GameMember,
@@ -381,6 +381,23 @@ export class GameSession extends DurableObject<ApiBindings> {
   }
 
   #gameApiClient: GameApiClient | null = null;
+  #stateCheckpointCache: StateCache = {
+    has: async (roundIndex) => {
+      return (
+        (await this.ctx.storage.get(`stateCheckpoint/${roundIndex}`)) !==
+        undefined
+      );
+    },
+    get: async (roundIndex) => {
+      return (
+        (await this.ctx.storage.get(`stateCheckpoint/${roundIndex}`)) || null
+      );
+    },
+    set: async (roundIndex, checkpoint) => {
+      return this.ctx.storage.put(`stateCheckpoint/${roundIndex}`, checkpoint);
+    },
+  };
+
   async #getGameApi(): Promise<GameApiClient> {
     if (this.#gameApiClient) return this.#gameApiClient;
     const sessionData = await this.#getSessionData();
@@ -408,6 +425,7 @@ export class GameSession extends DurableObject<ApiBindings> {
       sessionId: sessionData.id,
       setupData: await this.#getSetupData(),
       timeZone: sessionData.timezone,
+      stateCache: this.#stateCheckpointCache,
     });
     return this.#gameApiClient;
   }

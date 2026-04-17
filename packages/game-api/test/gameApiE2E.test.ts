@@ -191,8 +191,9 @@ it('should compute and cache global state according to game rules', async () => 
 
 it('should support a configurable cache for global state checkpoints', async () => {
   const customCache = {
-    get: vi.fn(),
-    set: vi.fn(),
+    get: vi.fn(async () => null as any),
+    set: vi.fn(async () => {}),
+    has: vi.fn(async () => false),
   };
   const clientWithCustomCache = new GameApiClient({
     ...clientInit,

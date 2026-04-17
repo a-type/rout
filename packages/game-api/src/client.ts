@@ -20,17 +20,21 @@ import { StateCheckpoint } from '@long-game/game-definition';
 import { ClientResponse, InferRequestType } from 'hono/client';
 
 export interface StateCache {
-  get: (roundIndex: number) => StateCheckpoint | null;
-  set: (roundIndex: number, checkpoint: StateCheckpoint) => void;
+  get: (roundIndex: number) => Promise<StateCheckpoint | null>;
+  has: (roundIndex: number) => Promise<boolean>;
+  set: (roundIndex: number, checkpoint: StateCheckpoint) => Promise<void>;
 }
 
 const createInMemoryStateCache = (): StateCache => {
   const cache: Record<number, StateCheckpoint> = {};
   return {
-    get: (roundIndex: number) => {
+    has: async (roundIndex: number) => {
+      return roundIndex in cache;
+    },
+    get: async (roundIndex: number) => {
       return cache[roundIndex] || null;
     },
-    set: (roundIndex: number, checkpoint: StateCheckpoint) => {
+    set: async (roundIndex: number, checkpoint: StateCheckpoint) => {
       cache[roundIndex] = checkpoint;
     },
   };
@@ -151,9 +155,9 @@ export class GameApiClient {
     let checkpointToUse: StateCheckpoint | null = null;
     // iterate down to -1 -- the initial state is cached as roundIndex===-1
     for (let i = latestRoundIndex; i >= -1; i--) {
-      const checkpoint = this.#stateCheckpointCache.get(i);
-      if (checkpoint) {
-        checkpointToUse = checkpoint;
+      const hasCheckpoint = await this.#stateCheckpointCache.has(i);
+      if (hasCheckpoint) {
+        checkpointToUse = await this.#stateCheckpointCache.get(i);
         break;
       }
     }
@@ -178,7 +182,7 @@ export class GameApiClient {
     // if we got a state back, cache it for later
     // v8 ignore else -- @preserve
     if (result) {
-      this.#stateCheckpointCache.set(latestRoundIndex, result);
+      await this.#stateCheckpointCache.set(latestRoundIndex, result);
     }
     return result.state;
   };
