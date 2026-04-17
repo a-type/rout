@@ -4,7 +4,12 @@
   "compatibility_date": "2026-04-12",
   "main": "src/index.ts",
   "account_id": "5f843fcad78a2f4e1fee091c1d6c21ab",
-
+  "vars": {
+    "NODE_ENV": "production",
+    "UI_ORIGIN": "https://play.rout.games",
+    "API_ORIGIN": "https://api.rout.games",
+    "DEV_MODE": false,
+  },
   "routes": [
     {
       "pattern": "registry.rout.games",
