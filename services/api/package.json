@@ -46,7 +46,7 @@
     "hono": "catalog:",
     "jose": "^5.9.6",
     "kysely": "catalog:",
-    "stripe": "^18.0.0",
+    "stripe": "^22.0.2",
     "zod": "catalog:"
   },
   "devDependencies": {
