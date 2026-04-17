@@ -401,7 +401,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     this.#gameApiClient = new GameApiClient({
       gameId: sessionData.gameId,
       version: sessionData.gameVersion,
-      gameRegistryOrigin: this.env.GAME_REGISTRY_ORIGIN,
+      fetch: this.env.GAME_REGISTRY.fetch.bind(this.env.GAME_REGISTRY),
       isDev: !!this.env.DEV_MODE,
       members: await this.getMembers(),
       randomSeed: sessionData.randomSeed,

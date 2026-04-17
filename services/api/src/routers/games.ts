@@ -230,7 +230,11 @@ export const gamesRouter = new Hono<Env>()
       }
 
       return ctx.json(
-        await fetchGameDetails(id, version, ctx.env.GAME_REGISTRY_ORIGIN),
+        await fetchGameDetails(
+          id,
+          version,
+          ctx.env.GAME_REGISTRY.fetch.bind(ctx.env.GAME_REGISTRY),
+        ),
       );
     },
   )

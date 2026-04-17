@@ -30,9 +30,8 @@ interface GameApiClientInit {
     color: string;
   }[];
   setupData: any;
-  gameRegistryOrigin: string;
   timeZone: string;
-  fetch?: typeof fetch;
+  fetch: typeof fetch;
   isDev?: boolean;
 }
 
@@ -43,10 +42,10 @@ interface GameApiClientInit {
 export async function fetchGameDetails(
   gameId: string,
   version: string,
-  gameRegistryOrigin: string,
+  registryFetch: typeof fetch,
 ): Promise<GameDetails> {
-  const origin = `${gameRegistryOrigin}/${gameId}/${version}`;
-  const apiClient = createClient(origin);
+  const origin = `http://game-registry/${gameId}/${version}`;
+  const apiClient = createClient(origin, { fetch: registryFetch });
   try {
     const response = await apiClient.api.details.$get();
     if (!response.ok) {
@@ -65,7 +64,7 @@ export class GameApiClient {
   #logger = new Logger('💫', 'game-api-client');
 
   constructor(private init: GameApiClientInit) {
-    const origin = `${init.gameRegistryOrigin}/${init.gameId}/${init.version}`;
+    const origin = `http://game-registry/${init.gameId}/${init.version}`;
     this.#logger.info(
       `Initializing GameApiClient for ${init.gameId} with origin ${origin}`,
     );
