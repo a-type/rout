@@ -256,7 +256,7 @@ importers:
         version: link:../packages/visual-components
       '@module-federation/retry-plugin':
         specifier: 'catalog:'
-        version: 2.3.0
+        version: 2.3.0(node-fetch@2.7.0(encoding@0.1.13))
       '@verdant-web/react-router':
         specifier: 'catalog:'
         version: 0.8.0(react@19.2.5)
@@ -416,13 +416,13 @@ importers:
         specifier: 'catalog:'
         version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
 
-  games/garden-path:
+  games/gridlock:
     dependencies:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../packages/game-definition
 
-  games/garden-path/v1:
+  games/gridlock/v1:
     dependencies:
       '@a-type/ui':
         specifier: 'catalog:'
@@ -439,7 +439,7 @@ importers:
       '@long-game/game-definition':
         specifier: workspace:*
         version: link:../../../packages/game-definition
-      '@long-game/game-garden-path':
+      '@long-game/game-gridlock':
         specifier: workspace:*
         version: link:..
       '@long-game/game-ui':
@@ -1211,9 +1211,9 @@ importers:
       '@long-game/game-exquisite-fridge':
         specifier: workspace:*
         version: link:../../games/exquisite-fridge
-      '@long-game/game-garden-path':
+      '@long-game/game-gridlock':
         specifier: workspace:*
-        version: link:../../games/garden-path
+        version: link:../../games/gridlock
       '@long-game/game-hearts':
         specifier: workspace:*
         version: link:../../games/hearts
@@ -1452,25 +1452,6 @@ importers:
       jsonc-morph:
         specifier: ^0.3.3
         version: 0.3.3
-      wrangler:
-        specifier: 'catalog:'
-        version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
-
-  services/gameRegistry:
-    dependencies:
-      '@long-game/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@long-game/games':
-        specifier: workspace:*
-        version: link:../../packages/games
-      hono:
-        specifier: 'catalog:'
-        version: 4.7.11
-    devDependencies:
-      '@types/node':
-        specifier: ^22.14.0
-        version: 22.14.0
       wrangler:
         specifier: 'catalog:'
         version: 4.82.2(@cloudflare/workers-types@4.20260413.1)
@@ -10969,7 +10950,7 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
-  '@module-federation/retry-plugin@2.3.0':
+  '@module-federation/retry-plugin@2.3.0(node-fetch@2.7.0(encoding@0.1.13))':
     dependencies:
       '@module-federation/sdk': 2.3.0(node-fetch@2.7.0(encoding@0.1.13))
     transitivePeerDependencies:
