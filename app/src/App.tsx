@@ -10,7 +10,7 @@ export function App({}: AppProps) {
   return (
     <ErrorBoundary fallback={<div>Error</div>}>
       <SdkProvider value={publicSdk}>
-        <UiProvider>
+        <UiProvider manifestPath="/manifest.webmanifest">
           <UpdateBanner />
           <Pages />
         </UiProvider>
