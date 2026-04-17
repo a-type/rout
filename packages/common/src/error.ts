@@ -13,6 +13,7 @@ export enum LongGameErrorCode {
 export class LongGameError extends Error {
   static Code = LongGameErrorCode;
   name = 'LongGameError';
+  response?: Response;
 
   static isInstance = (err: unknown): err is LongGameError => {
     if (err instanceof LongGameError) return true;
@@ -92,6 +93,9 @@ export class LongGameError extends Error {
     });
     this.name = 'LongGameError';
     this.code = code;
+    if (cause instanceof Response) {
+      this.response = cause;
+    }
   }
 
   get statusCode() {
@@ -120,4 +124,18 @@ export class LongGameError extends Error {
         ...this.headers,
       },
     });
+
+  toLogs = async () => [
+    `LongGameError: ${this.message} (code: ${this.code})`,
+    ...(this.response
+      ? [
+          `Response status: ${this.response.status}`,
+          `Response headers: ${JSON.stringify(
+            Object.fromEntries(this.response.headers.entries()),
+          )}`,
+          `Response body: ${this.response.bodyUsed ? '[used]' : await this.response.text()}`,
+        ]
+      : []),
+    ...(this.stack ? [this.stack] : []),
+  ];
 }

@@ -112,12 +112,12 @@ export class GameApiClient {
       }
       return response.json() as T;
     } catch (err) {
+      const wrapped = LongGameError.wrap(err);
       this.#logger.urgent(
         'API request threw an error',
-        err,
-        (err as Error)?.cause,
+        ...(await wrapped.toLogs()),
       );
-      throw LongGameError.wrap(err);
+      throw wrapped;
     }
   };
 
