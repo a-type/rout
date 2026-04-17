@@ -1,8 +1,8 @@
 import { GameModule } from '@long-game/game-definition';
 
 export default {
-  id: 'garden-path',
-  aliasIds: ['gridlock'],
+  id: 'gridlock',
+  aliasIds: ['garden-path'],
   title: 'Garden Path',
   description:
     'A cozy, competitive puzzle game where you place tiles to complete long, winding paths.',
