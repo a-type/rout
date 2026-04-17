@@ -73,7 +73,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           packageManager: pnpm
           workingDirectory: ./services/game-registry
-          command: deploy -c ./wrangler.toml
+          command: deploy -c ./wrangler.jsonc
 
       - name: Deploy App
         uses: cloudflare/wrangler-action@v3
