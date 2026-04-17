@@ -19,7 +19,24 @@ import {
 import { StateCheckpoint } from '@long-game/game-definition';
 import { ClientResponse, InferRequestType } from 'hono/client';
 
-interface GameApiClientInit {
+export interface StateCache {
+  get: (roundIndex: number) => StateCheckpoint | null;
+  set: (roundIndex: number, checkpoint: StateCheckpoint) => void;
+}
+
+const createInMemoryStateCache = (): StateCache => {
+  const cache: Record<number, StateCheckpoint> = {};
+  return {
+    get: (roundIndex: number) => {
+      return cache[roundIndex] || null;
+    },
+    set: (roundIndex: number, checkpoint: StateCheckpoint) => {
+      cache[roundIndex] = checkpoint;
+    },
+  };
+};
+
+export interface GameApiClientInit {
   gameId: string;
   version: string;
   sessionId: PrefixedId<'gs'>;
@@ -33,6 +50,7 @@ interface GameApiClientInit {
   timeZone: string;
   fetch: typeof fetch;
   isDev?: boolean;
+  stateCache?: StateCache;
 }
 
 /**
@@ -62,6 +80,8 @@ export async function fetchGameDetails(
 export class GameApiClient {
   #apiClient: ReturnType<typeof createClient>;
   #logger = new Logger('💫', 'game-api-client');
+  #detailsCache: GameDetails | null = null;
+  #stateCheckpointCache: StateCache;
 
   constructor(private init: GameApiClientInit) {
     const origin = `http://game-registry/${init.gameId}/${init.version}`;
@@ -71,6 +91,7 @@ export class GameApiClient {
     this.#apiClient = createClient(origin, {
       fetch: init.fetch,
     });
+    this.#stateCheckpointCache = init.stateCache ?? createInMemoryStateCache();
   }
 
   /** v8 ignore start -- @preserve */
@@ -91,10 +112,6 @@ export class GameApiClient {
       throw LongGameError.wrap(err);
     }
   };
-
-  // when we see a global state computed for a round index, keep it around.
-  #stateCheckpointCache: StateCheckpoint[] = [];
-  #detailsCache: GameDetails | null = null;
 
   /**
    * Fetch game details - basic metadata
@@ -134,7 +151,7 @@ export class GameApiClient {
     let checkpointToUse: StateCheckpoint | null = null;
     // iterate down to -1 -- the initial state is cached as roundIndex===-1
     for (let i = latestRoundIndex; i >= -1; i--) {
-      const checkpoint = this.#stateCheckpointCache[i];
+      const checkpoint = this.#stateCheckpointCache.get(i);
       if (checkpoint) {
         checkpointToUse = checkpoint;
         break;
@@ -161,7 +178,7 @@ export class GameApiClient {
     // if we got a state back, cache it for later
     // v8 ignore else -- @preserve
     if (result) {
-      this.#stateCheckpointCache[latestRoundIndex] = result;
+      this.#stateCheckpointCache.set(latestRoundIndex, result);
     }
     return result.state;
   };

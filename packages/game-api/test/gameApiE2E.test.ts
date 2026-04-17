@@ -1,12 +1,19 @@
 import { GameRound, LongGameError } from '@long-game/common';
 import { GameMember } from '@long-game/game-definition';
 import { beforeAll, beforeEach, expect, it, vi } from 'vitest';
-import { GameApiClient } from '../src/client';
+import { GameApiClient, GameApiClientInit } from '../src/client';
 import testServer from './testServer';
 
 beforeAll(testServer);
 
-const spiedFetch = vi.fn(globalThis.fetch);
+const shimmedFetch: typeof fetch = (url, init) => {
+  const replacedUrl = (url as string).replace(
+    'http://game-registry',
+    'http://localhost:7777',
+  );
+  return fetch(replacedUrl, init);
+};
+const spiedFetch = vi.fn(shimmedFetch);
 const members: GameMember[] = [
   {
     id: 'u-1',
@@ -21,24 +28,25 @@ const members: GameMember[] = [
 ];
 let client!: GameApiClient;
 
+const clientInit: GameApiClientInit = {
+  gameId: 'test-game',
+  version: 'v1',
+  sessionId: 'gs-test-session',
+  randomSeed: 'test-seed',
+  isDev: true,
+  timeZone: 'UTC',
+  members,
+  setupData: {
+    members,
+  },
+
+  fetch: spiedFetch,
+};
+
 beforeEach(() => {
   spiedFetch.mockClear();
 
-  client = new GameApiClient({
-    gameRegistryOrigin: 'http://localhost:7777',
-    gameId: 'test-game',
-    version: 'v1',
-    sessionId: 'gs-test-session',
-    randomSeed: 'test-seed',
-    isDev: true,
-    timeZone: 'UTC',
-    members,
-    setupData: {
-      members,
-    },
-
-    fetch: spiedFetch,
-  });
+  client = new GameApiClient(clientInit);
 });
 
 it('should fetch game details and cache them', async () => {
@@ -78,7 +86,7 @@ it('should compute setup data', async () => {
 it('should skip computing setup data if game details indicate it is not supported', async () => {
   // mock getDetails API to return hasSetupData: false
   spiedFetch.mockImplementationOnce(async (req, init) => {
-    const actualRes = await fetch(req, init);
+    const actualRes = await shimmedFetch(req, init);
     const body = (await actualRes.json()) as any;
     return {
       ok: true,
@@ -179,6 +187,54 @@ it('should compute and cache global state according to game rules', async () => 
     winner: 'u-1',
   });
   expect(spiedFetch).toHaveBeenCalledTimes(3);
+});
+
+it('should support a configurable cache for global state checkpoints', async () => {
+  const customCache = {
+    get: vi.fn(),
+    set: vi.fn(),
+  };
+  const clientWithCustomCache = new GameApiClient({
+    ...clientInit,
+    stateCache: customCache,
+  });
+
+  const rounds: GameRound<any>[] = [
+    {
+      roundIndex: 0,
+      turns: [
+        {
+          playerId: 'u-1',
+          data: {
+            move: 'reroll',
+          },
+          createdAt: new Date().toISOString(),
+          roundIndex: 0,
+        },
+        {
+          playerId: 'u-2',
+          data: {
+            move: 'none',
+          },
+          createdAt: new Date().toISOString(),
+          roundIndex: 0,
+        },
+      ],
+    },
+  ];
+  await clientWithCustomCache.computeGlobalState(rounds);
+
+  expect(customCache.get).toHaveBeenCalledWith(0);
+  expect(customCache.set).toHaveBeenCalledWith(0, {
+    randomState: expect.anything(),
+    roundIndex: 0,
+    turnCount: 2,
+    state: {
+      randomNumber: expect.any(Number),
+      members,
+      winner: null,
+    },
+  });
 });
 
 it('should compute player state according to game rules', async () => {
@@ -492,7 +548,7 @@ it('should compute round change messages according to game rules', async () => {
 it('should not compute round change messages if game details indicate they are not supported', async () => {
   // mock getDetails API to return hasRoundChangeMessages: false
   spiedFetch.mockImplementationOnce(async (req, init) => {
-    const actualRes = await fetch(req, init);
+    const actualRes = await shimmedFetch(req, init);
     const body = (await actualRes.json()) as any;
     return {
       ok: true,
