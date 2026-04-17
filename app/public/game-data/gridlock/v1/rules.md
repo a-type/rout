@@ -1,4 +1,4 @@
-Gridlock is a game of spatial logic and strategic thinking. All players must play the same deck of tiles onto their boards - who will plan their moves to rack up the most points without pushing things too far?
+Garden Path is a game of spatial logic and strategic thinking. All players must play the same deck of tiles onto their boards - who will plan their moves to rack up the most points without pushing things too far?
 
 ![](./1-board.png)
 

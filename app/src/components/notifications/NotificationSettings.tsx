@@ -121,7 +121,7 @@ function NotificationSettingsRow({
       </Box>
       <ToggleGroup
         multiple
-        onValueChange={async (values) => {
+        onValueChange={async (values: string[]) => {
           const asSettings = {
             push: values.includes('push'),
             email: values.includes('email'),
