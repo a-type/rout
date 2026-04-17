@@ -204,6 +204,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "games/${name}/v1/**"
+      - "packages/game-api/**"
 
 env:
   GAME_REGISTRY_ORIGIN: \${{ vars.GAME_REGISTRY_ORIGIN }}
