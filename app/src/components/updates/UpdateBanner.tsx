@@ -41,6 +41,8 @@ export function UpdateBanner({}) {
             await skipWaiting();
           } catch (err) {
             console.error('Update failed', err);
+            // reload anyway
+            window.location.reload();
           } finally {
             setLoading(false);
           }
