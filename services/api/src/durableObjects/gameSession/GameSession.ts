@@ -243,6 +243,7 @@ export class GameSession extends DurableObject<ApiBindings> {
     if (data?.gameId) {
       const game = getGame(data.gameId);
       if (game.id !== data.gameId) {
+        this.log('info', `Repairing mixed up game ID for session ${data.id}`);
         // repair mixed up alias IDs
         await this.#updateSessionData({ gameId: game.id });
       }
