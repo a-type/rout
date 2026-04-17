@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "game--garden-path--v1",
+  "name": "game--gridlock--v1",
   "main": "worker/index.ts",
   "compatibility_date": "2026-04-12",
   "assets": {

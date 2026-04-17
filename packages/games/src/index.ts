@@ -1,7 +1,7 @@
 import { LongGameError } from '@long-game/common';
 import { GameModule } from '@long-game/game-definition';
 import exquisiteFridge from '@long-game/game-exquisite-fridge';
-import gardenPath from '@long-game/game-garden-path';
+import gardenPath from '@long-game/game-gridlock';
 import hearts from '@long-game/game-hearts';
 import heirApparent from '@long-game/game-heir-apparent';
 import numberGuess from '@long-game/game-number-guess';

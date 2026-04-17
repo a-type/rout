@@ -1,5 +1,5 @@
 {
-  "name": "@long-game/game-garden-path-v1",
+  "name": "@long-game/game-gridlock-v1",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -7,14 +7,14 @@
     "build": "pnpm run build:ui && pnpm run build:worker",
     "build:ui": "rsbuild build",
     "build:worker": "wrangler build --config ./wrangler.jsonc",
-    "dev": "pnpm run --filter @long-game/game-garden-path-v1 --parallel \"/dev:.*/\"",
+    "dev": "pnpm run --filter @long-game/game-gridlock-v1 --parallel \"/dev:.*/\"",
     "dev:ui": "rsbuild dev",
     "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3506 --inspector-port 33506",
     "test": "vitest --passWithNoTests"
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
-    "@long-game/game-garden-path": "workspace:*",
+    "@long-game/game-gridlock": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/common": "workspace:*",
     "@long-game/game-api": "workspace:*",

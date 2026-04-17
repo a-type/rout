@@ -86,7 +86,7 @@
     {
       "type": "npm",
       "script": "dev",
-      "path": "games/garden-path",
+      "path": "games/gridlock",
       "problemMatcher": ["$tsc-watch"],
       "label": "🌿 Garden Path Dev",
       "detail": "pnpm --filter \"./*\" dev"

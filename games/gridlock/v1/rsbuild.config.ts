@@ -1,7 +1,7 @@
 import { gameRsbuildConfig } from '@long-game/bundler-config';
 
 export default gameRsbuildConfig({
-  id: 'garden-path',
+  id: 'gridlock',
   devPort: 3406,
   version: 'v1',
 });
