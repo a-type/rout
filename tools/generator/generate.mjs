@@ -7,8 +7,11 @@ import { cpTpl } from 'cp-tpl';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as url from 'url';
+import { promisify } from 'util';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+const execPromise = promisify(exec);
 
 intro('Generate something...');
 
@@ -111,13 +114,17 @@ const installSpinner = spinner();
 
 installSpinner.start('Installing dependencies...');
 
-const install = exec('pnpm install', { cwd: location });
-
-await new Promise((resolve) => {
-  install.on('close', resolve);
-});
+await execPromise('pnpm install', { cwd: location });
 
 installSpinner.stop('Dependencies installed');
+
+const syncSpinner = spinner();
+
+syncSpinner.start('Syncing game registry...');
+await execPromise(
+  'pnpm --filter "@long-game/service-game-registry" run sync-games',
+);
+syncSpinner.stop('Game registry synced');
 
 outro('Done!');
 
@@ -251,4 +258,8 @@ jobs:
   );
 
   await fs.writeFile(workflowPath, workflowContent);
+}
+
+async function syncGameRegistry() {
+  execSy;
 }
