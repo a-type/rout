@@ -1,7 +1,5 @@
-import { defineWorkspace } from 'vitest/config';
-
-export default defineWorkspace([
+export default [
   'games/*/definition/vitest.config.ts',
   'packages/*',
   'services/*/vitest.config.ts',
-]);
+];

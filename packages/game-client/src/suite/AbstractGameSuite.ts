@@ -692,6 +692,10 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
       clearTimeout(this.turnSubmitTimeout);
       this.turnSubmitTimeout = null;
     }
+    // if we had a remote turn error, clear it
+    if (this.remoteTurnError) {
+      this.remoteTurnError = null;
+    }
     this.events.emit('turnPrepared');
   };
 
@@ -789,6 +793,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
           this.rounds[this.playerId][submittingToRound].yourTurnData = data;
         }
         this.localTurnData = undefined;
+        this.remoteTurnError = null;
       });
       this.events.emit('turnPlayed');
     } catch (e) {

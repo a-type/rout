@@ -80,6 +80,26 @@ export const idShapes = Object.entries(resourceIdTypes).reduce(
   },
 );
 
-export function idToFederationId(id: string): string {
-  return id.replace(/-/g, '_');
+export function normalizeVersion(version: string | number): string {
+  let normalVersion = version.toString();
+  if (!normalVersion.startsWith('v')) {
+    normalVersion = `v${normalVersion}`;
+  }
+  if (normalVersion.includes('.')) {
+    normalVersion = normalVersion.split('.')[0];
+  }
+  return normalVersion;
+}
+
+export function normalizeGameId(
+  id: string,
+  version: string | number,
+  delimiter: '_' | '-',
+): string {
+  const normalVersion = normalizeVersion(version);
+  return `${id.replace(/-/g, delimiter)}${delimiter}${normalVersion}`;
+}
+
+export function idToFederationId(id: string, version: string): string {
+  return normalizeGameId(id, version, '_');
 }

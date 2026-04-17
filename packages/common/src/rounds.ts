@@ -8,11 +8,27 @@ export interface LocalTurn<TurnData extends BaseTurnData> {
   data: TurnData;
 }
 
+export const localTurnShape = <TurnData extends BaseTurnData>(
+  turnDataShape: z.ZodType<TurnData> = z.any(),
+) =>
+  z.object({
+    playerId: idShapes.User,
+    data: turnDataShape,
+  });
+
 export interface Turn<TurnData extends BaseTurnData>
   extends LocalTurn<TurnData> {
   createdAt: string;
   roundIndex: number;
 }
+
+export const turnShape = <TurnData extends BaseTurnData>(
+  turnDataShape: z.ZodType<TurnData> = z.any(),
+) =>
+  localTurnShape(turnDataShape).extend({
+    createdAt: z.string(),
+    roundIndex: z.number(),
+  });
 
 /**
  * Gets the start and end of the round for a given day.

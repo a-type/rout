@@ -19,8 +19,7 @@ const plugins = [mdc, customHeaderId];
 export const GameManual = withSuspense(
   function GameManual({ gameId }: GameManualProps) {
     const game = useGame(gameId);
-    // version is major only
-    const latestVersion = (game?.latestVersion ?? 'v1').split('.')[0];
+    const latestVersion = game?.versions.at(-1)?.version ?? 'v1';
     const { data: markdown } = useSuspenseQuery(
       {
         queryKey: ['gameManual', gameId],

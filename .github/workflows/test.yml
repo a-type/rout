@@ -1,0 +1,76 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  DEV_MODE: true
+  UI_ORIGIN: http://localhost:3100
+  API_ORIGIN: http://localhost:3101
+  GAME_REGISTRY_ORIGIN: http://localhost:3102
+  PUBLIC_API_ORIGIN: http://localhost:3101
+  PUBLIC_APP_ORIGIN: http://localhost:3100
+  PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+  SESSION_SECRET: notsecretnotsecretnotsecretnotsecret
+  SOCKET_TOKEN_SECRET: notsecretnotsecretnotsecretnotsecret
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run unit tests
+        run: pnpm core:test:ci
+
+      - name: Build UI
+        run: pnpm --filter "@long-game/app..." run build
+
+      - name: Build Number Guess test game
+        run: pnpm --filter "@long-game/game-number-guess-v1" run browser-test:build
+
+      - name: Write .env to app dir
+        run: |
+          echo "PUBLIC_API_ORIGIN=http://localhost:3101" >> ./app/.env
+          echo "PUBLIC_APP_ORIGIN=http://localhost:3100" >> ./app/.env
+          echo "PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}" >> ./app/.env
+
+      - name: Write .dev.vars to api dir
+        run: |
+          echo "UI_ORIGIN=http://localhost:3100" >> ./services/api/.dev.vars
+          echo "API_ORIGIN=http://localhost:3101" >> ./services/api/.dev.vars
+          echo "SESSION_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/.dev.vars
+          echo "SOCKET_TOKEN_SECRET=notsecretnotsecretnotsecretnotsecret" >> ./services/api/.dev.vars
+          echo "DEV_MODE=true" >> ./services/api/.dev.vars
+
+      - name: Write .dev.vars to game registry dir
+        run: |
+          echo "DEV_MODE=true" >> ./services/game-registry/.dev.vars
+
+      - name: Run local migrations
+        run: pnpm --filter "@long-game/service-api" run migrations:apply:local
+
+      - name: Run Playwright tests
+        run: pnpm run browser-test:run
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

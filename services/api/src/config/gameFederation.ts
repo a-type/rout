@@ -1,11 +1,12 @@
-import { idToFederationId } from '@long-game/common';
+import { GameModule } from '@long-game/game-definition';
 
 export function getGameUrl(
-  game: { id: string; devPort: number },
+  game: GameModule,
+  version: { version: `v${string}`; devUIPort: number },
   env: ApiBindings,
 ): string {
   if (env.DEV_MODE) {
-    return `http://localhost:${game.devPort}`;
+    return `http://localhost:${version.devUIPort}`;
   }
-  return `${env.UI_ORIGIN}/game-modules/${idToFederationId(game.id)}`;
+  return `${env.GAME_REGISTRY_ORIGIN}/${game.id}/${version.version}`;
 }

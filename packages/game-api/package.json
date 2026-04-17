@@ -1,0 +1,41 @@
+{
+  "name": "@long-game/game-api",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "production": "./dist/index.js",
+      "workerd": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "production": "./dist/client.js",
+      "workerd": "./src/client.ts",
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -w --preserveWatchOutput",
+    "core:dev": "pnpm dev",
+    "package:dev": "pnpm dev",
+    "build": "tsc",
+    "test": "vitest --passWithNoTests",
+    "core:test:ci": "vitest --passWithNoTests --run"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "catalog:",
+    "@long-game/common": "workspace:*",
+    "@long-game/game-definition": "workspace:*",
+    "hono": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@hono/node-server": "^1.19.14",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

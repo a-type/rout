@@ -14,18 +14,19 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "core:dev": "pnpm dev"
   },
   "dependencies": {
     "@long-game/common": "workspace:*",
     "@long-game/game-definition": "workspace:*",
-    "@long-game/game-number-guess-definition": "workspace:*",
-    "@long-game/game-scribble-definition": "workspace:*",
-    "@long-game/game-hearts-definition": "workspace:*",
-    "@long-game/game-wizard-ball-definition": "workspace:*",
-    "@long-game/game-exquisite-fridge-definition": "workspace:*",
-    "@long-game/game-heir-apparent-definition": "workspace:*",
-    "@long-game/game-garden-path-definition": "workspace:*"
+    "@long-game/game-number-guess": "workspace:*",
+    "@long-game/game-hearts": "workspace:*",
+    "@long-game/game-scribble": "workspace:*",
+    "@long-game/game-exquisite-fridge": "workspace:*",
+    "@long-game/game-wizard-ball": "workspace:*",
+    "@long-game/game-heir-apparent": "workspace:*",
+    "@long-game/game-garden-path": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

@@ -64,7 +64,8 @@ if (exists) {
 // count number of games in the games dir
 const gameCount = (await fs.readdir(path.resolve(__dirname, '../../games')))
   .length;
-const devPort = 3300 + gameCount; // start at 3300 and increment for each game
+const defUIPort = 3400 + gameCount; // start at 3400 and increment for each game
+const defAPIPort = 3500 + gameCount; // start at 3500 and increment for each game
 
 const copySpinner = spinner();
 
@@ -82,7 +83,8 @@ const copyConfig = {
     '{{name}}': name,
     '{{titleName}}': titleName,
     '{{camelName}}': camelName,
-    '{{devPort}}': devPort,
+    '{{devUIPort}}': defUIPort,
+    '{{devAPIPort}}': defAPIPort,
   },
   gitingore: true,
   exclude: dontCopy,
@@ -100,6 +102,7 @@ if (template === 'games') {
   await addGameToGamesPackage();
   await addGameDevTask();
   await addGameToWorkspace();
+  await addGameCI();
 }
 
 copySpinner.stop('Copying complete');
@@ -192,4 +195,56 @@ async function addGameToWorkspace() {
     JSON.stringify(workspaceFileJson, null, 2),
   );
   console.log(`Added games/${name} to rout.code-workspace`);
+}
+
+async function addGameCI() {
+  const workflowContent = `name: "[Game] Deploy ${titleName} v1"
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GAME_REGISTRY_ORIGIN: \${{ vars.GAME_REGISTRY_ORIGIN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm i --filter "@long-game/game-${name}-v1..."
+
+      - name: Build game
+        run: pnpm --filter "@long-game/game-${name}-v1..." run build
+        env:
+          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Run tests
+        run: pnpm --filter "@long-game/game-{{name}}-v1..." run test --run
+
+      - name: Deploy Game Service
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+          packageManager: pnpm
+          workingDirectory: ./games/${name}/v1
+          command: deploy -c ./wrangler.jsonc
+  `;
+
+  const workflowPath = path.resolve(
+    import.meta.dirname,
+    `../../.github/workflows/deploy-${camelName}-v1.yaml`,
+  );
+
+  await fs.writeFile(workflowPath, workflowContent);
 }

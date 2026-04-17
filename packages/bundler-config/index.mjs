@@ -7,57 +7,35 @@ import {
 } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import * as fs from 'fs';
 import typegpuPlugin from 'unplugin-typegpu/rspack';
-import { fileURLToPath, URL } from 'url';
 
 export const gameRsbuildConfig = (game) => {
-  if (!game || !game.id || !game.versions || !game.devPort) {
+  if (!game || !game.id || !game.devPort) {
     throw new Error(
-      'Invalid game configuration provided. Must have id, versions, and devPort defined.',
+      'Invalid game configuration provided. Must have id and devPort defined.',
     );
   }
-  // check that all federated module files exist
-  game.versions.forEach(({ version }) => {
-    const majorVersion = version.split('.')[0];
-    const rendererPath = `./src/${majorVersion}/Renderer.tsx`;
-    const chatPath = `./src/${majorVersion}/ChatMessage.tsx`;
-    const definitionPath = `./src/${majorVersion}/definition.ts`;
-    if (!fs.existsSync(rendererPath)) {
-      throw new Error(
-        `Renderer file not found: ${rendererPath}. Please create this file.`,
-      );
-    }
-    if (!fs.existsSync(chatPath)) {
-      throw new Error(
-        `ChatMessage file not found: ${chatPath}. Please create this file.`,
-      );
-    }
-    if (!fs.existsSync(definitionPath)) {
-      throw new Error(
-        `Definition file not found: ${definitionPath}. Please create this file.`,
-      );
-    }
-  });
 
-  return defineConfig(({ command }) => {
+  const gameRegistryOrigin =
+    process.env.GAME_REGISTRY_ORIGIN || 'http://localhost:3102';
+
+  return defineConfig(({ command, envMode }) => {
+    const devMode = envMode === 'test' || command !== 'build';
+    // in dev, load assets straight from the rsbuild server. in prod, they're
+    // proxied through the registry worker.
+    const baseUrl = devMode
+      ? `http://localhost:${game.devPort}/`
+      : `${gameRegistryOrigin}/${game.id}/${game.version}/`;
     const federationConfig = createModuleFederationConfig({
-      name: idToFederationId(game.id),
+      name: idToFederationId(game.id, game.version),
       manifest: true,
       dts: false,
-      getPublicPath:
-        command === 'build'
-          ? undefined // in prod, we serve federated modules from the same origin as the app
-          : `function() { return "http://localhost:${game.devPort}/"; }`,
-      exposes: game.versions.reduce((map, { version }) => {
-        const majorVersion = version.split('.')[0];
-        map[`./${majorVersion}/renderer`] =
-          `./src/${majorVersion}/Renderer.tsx`;
-        map[`./${majorVersion}/chat`] = `./src/${majorVersion}/ChatMessage.tsx`;
-        map[`./${majorVersion}/definition`] =
-          `./src/${majorVersion}/definition.ts`;
-        return map;
-      }, {}),
+      getPublicPath: `function() { return "${baseUrl}"; }`,
+      exposes: {
+        './renderer': `./ui/Renderer.tsx`,
+        './chat': `./ui/ChatMessage.tsx`,
+        './definition': `./ui/definition.ts`,
+      },
       shared: {
         react: { singleton: true, requiredVersion: '>19.0.0' },
         'react/': {},
@@ -87,11 +65,6 @@ export const gameRsbuildConfig = (game) => {
           config: unoConfig(true),
         }),
       ],
-      resolve: {
-        alias: {
-          '@': fileURLToPath(new URL('./src', import.meta.url)),
-        },
-      },
       tools: {
         rspack: {
           plugins: [
@@ -116,8 +89,9 @@ export const gameRsbuildConfig = (game) => {
       source: {
         entry: {
           // arbitrary
-          index: './src/v1/Renderer.tsx',
+          index: './ui/Renderer.tsx',
         },
+        tsconfigPath: './tsconfig.ui.json',
       },
       dev: {
         assetPrefix: `http://localhost:${game.devPort}/`,
@@ -128,7 +102,8 @@ export const gameRsbuildConfig = (game) => {
         },
       },
       output: {
-        assetPrefix: `/game-modules/${idToFederationId(game.id)}/`,
+        distPath: 'ui-dist',
+        assetPrefix: baseUrl,
       },
     };
   });

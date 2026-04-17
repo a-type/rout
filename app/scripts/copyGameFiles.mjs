@@ -29,11 +29,6 @@ gameDirs.forEach((gameDir) => {
   }
 
   copyGameDir(gameDir, 'meta', path.join(gamesMetaOutput, gameDir));
-  copyGameDir(
-    gameDir,
-    'renderer/dist',
-    path.join(federatedOutput, gameFederatedId),
-  );
 });
 
 function copyGameFile(gameDir, fileName) {

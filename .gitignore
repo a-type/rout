@@ -1,5 +1,7 @@
 node_modules
 dist/
+ui-dist/
+worker-dist/
 *.sqlite
 *.db
 *.sqlite3
@@ -23,3 +25,5 @@ storybook-static
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+coverage/

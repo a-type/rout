@@ -1,48 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-const API_ORIGIN = process.env.API_ORIGIN || 'http://localhost:3101';
-
-const numberGuessGameData = {
-  url: 'http://localhost:3333/game-modules/number_guess',
-  id: 'number-guess',
-  title: 'Number Guess',
-  description: 'Guess the number between 1 and 100',
-  latestVersion: 'v1',
-  minimumPlayers: 1,
-  maximumPlayers: 100,
-  tags: [],
-  versions: [
-    {
-      version: 'v1',
-      minimumPlayers: 1,
-      maximumPlayers: 100,
-    },
-  ],
-};
-
 test.beforeEach(async ({ page }) => {
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
       console.error(`Console error: ${msg.text()}`);
     }
-  });
-  // mock games API
-  await page.route(`${API_ORIGIN}/games`, async (route) => {
-    await route.fulfill({
-      json: {
-        'number-guess': numberGuessGameData,
-      },
-    });
-  });
-  await page.route(`${API_ORIGIN}/games/number-guess`, async (route) => {
-    await route.fulfill({
-      json: numberGuessGameData,
-    });
-  });
-  await page.route(`${API_ORIGIN}/users/me`, async (route) => {
-    await route.fulfill({
-      json: null, // no user logged in
-    });
   });
   await page.goto('/games/number-guess');
   await page.clock.install();

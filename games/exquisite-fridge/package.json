@@ -1,6 +1,15 @@
 {
   "name": "@long-game/game-exquisite-fridge",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./manifest.ts"
+    }
+  },
   "scripts": {
-    "dev-game": "pnpm --filter \"./*\" --parallel --stream dev-game"
+    "dev": "pnpm --filter \"./*\" --parallel --stream dev"
+  },
+  "dependencies": {
+    "@long-game/game-definition": "workspace:*"
   }
 }

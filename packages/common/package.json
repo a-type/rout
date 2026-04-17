@@ -21,9 +21,11 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -w --preserveWatchOutput",
+    "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
     "build": "tsc",
-    "test": "vitest --passWithNoTests"
+    "test": "vitest --passWithNoTests",
+    "core:test:ci": "vitest --passWithNoTests --run"
   },
   "dependencies": {
     "date-fns-tz": "3.1.3",

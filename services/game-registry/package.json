@@ -1,0 +1,27 @@
+{
+  "name": "@long-game/service-game-registry",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --config wrangler.jsonc --port 3102 --inspector-port 9234",
+    "core:dev": "pnpm run dev",
+    "build": "wrangler deploy --dry-run --outdir dist --config wrangler.jsonc",
+    "types": "wrangler types --env-interface=GameRegistryBindings -c wrangler.jsonc src/worker-types.d.ts",
+    "sync-games": "node ./scripts/syncGameBindings.ts",
+    "browser-test:server": "pnpm run dev"
+  },
+  "dependencies": {
+    "@long-game/common": "workspace:*",
+    "@long-game/games": "workspace:*",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "jsonc": "^2.0.0",
+    "jsonc-morph": "^0.3.3",
+    "wrangler": "catalog:"
+  },
+  "volta": {
+    "node": "24.14.1"
+  }
+}

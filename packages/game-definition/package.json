@@ -23,7 +23,9 @@
     "build": "tsc",
     "test": "vitest --passWithNoTests",
     "dev": "tsc --watch --preserveWatchOutput",
-    "package:dev": "pnpm dev"
+    "core:dev": "pnpm dev",
+    "package:dev": "pnpm dev",
+    "core:test:ci": "vitest --passWithNoTests --run"
   },
   "dependencies": {
     "@long-game/common": "workspace:*",

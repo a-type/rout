@@ -1,5 +1,5 @@
 import { LongGameError, PrefixedId } from '@long-game/common';
-import { emptyGameDefinition } from '@long-game/game-definition';
+import { InferResponseType } from 'hono/client';
 import { BaseSdk, InferReturnData } from './BaseSdk.js';
 
 export class PublicSdk extends BaseSdk {
@@ -200,15 +200,24 @@ export class PublicSdk extends BaseSdk {
       title: 'Unknown Game',
       description: '',
       prerelease: false,
-      latestVersion: 'v1',
-      versions: [emptyGameDefinition],
-      minimumPlayers: 0,
-      maximumPlayers: 100,
+      versions: [{ version: 'v1', url: '' }],
       screenshots: [],
       tags: [],
-      url: '',
-    },
+    } satisfies InferResponseType<(typeof this.apiRpc.games)[':id']['$get']>,
   });
+  getGameVersionDetails = this.sdkQuery(
+    'getGameVersionDetails',
+    this.apiRpc.games[':id'][':version'].details.$get,
+    {
+      transformInput: (input: { id?: string; version?: string }) => ({
+        param: { id: input.id ?? 'empty', version: input.version ?? 'v1' },
+      }),
+      enabled(input) {
+        return !!input.id && !!input.version;
+      },
+    },
+  );
+
   getResolvedGameIdFromAlias = this.sdkQuery(
     'getResolvedGameIdFromAlias',
     this.apiRpc.games.resolveAlias[':aliasId'].$get,

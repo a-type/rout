@@ -25,6 +25,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
   } = sdkHooks.useGetRemainingGameSessions();
 
   const game = useGame(pregame.session.gameId ?? '');
+  const latestVersion = game?.versions.at(-1)?.version ?? 'v1';
 
   const whoInvited = pregame.members.find((m) => m.id === myInvite.inviterId);
 
@@ -36,9 +37,13 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
       }`
     : `${pregame.members.length} people are`;
 
+  const { data: versionDetails } = sdkHooks.useGetGameVersionDetails({
+    id: pregame.session.gameId,
+    version: latestVersion,
+  });
+
   const insufficientPlayers =
-    pregame.members.length <
-    (game?.versions[game.versions.length - 1].minimumPlayers ?? 0);
+    pregame.members.length < (versionDetails.minimumPlayers ?? 0);
 
   const navigate = useNavigate();
 
