@@ -16,8 +16,7 @@ export default {
   ],
   creators: [
     {
-      name: 'Grant Forrest',
-      role: 'Creator',
+      name: 'The Rout Team',
       url: 'https://rout.games',
     },
   ],
