@@ -37,9 +37,5 @@
       "binding": "game--scribble--v1",
       "service": "game--scribble--v1",
     },
-    {
-      "binding": "game--wizard-ball--v1",
-      "service": "game--wizard-ball--v1",
-    },
   ],
 }

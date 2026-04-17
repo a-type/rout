@@ -4,6 +4,8 @@ import { parse } from 'jsonc-morph';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
+const exclude = ['wizard-ball'];
+
 const gamesContent = await fs.readdir(
   path.join(import.meta.dirname, '..', '..', '..', 'games'),
   {
@@ -11,7 +13,9 @@ const gamesContent = await fs.readdir(
   },
 );
 
-const gameRoots = gamesContent.filter((entry) => entry.isDirectory());
+const gameRoots = gamesContent.filter(
+  (entry) => entry.isDirectory() && !exclude.includes(entry.name),
+);
 
 const gamesAndVersions = (
   await Promise.all(
