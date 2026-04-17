@@ -130,9 +130,6 @@ export class LongGameError extends Error {
     ...(this.response
       ? [
           `Response status: ${this.response.status}`,
-          `Response headers: ${JSON.stringify(
-            Object.fromEntries(this.response.headers.entries()),
-          )}`,
           `Response body: ${this.response.bodyUsed ? '[used]' : await this.response.text()}`,
         ]
       : []),
