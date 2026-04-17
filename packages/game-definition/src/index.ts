@@ -9,8 +9,12 @@ export * from './stateCache.js';
 export type * from './utilTypes.js';
 
 export interface GameModule {
+  /** The canonical game ID - this must never change. */
   id: string;
-  /** IDs that should still route to the game */
+  /**
+   * Alternate IDs that should still route to the game. Makes URLs prettier if the game name changes.
+   * The first listed alias is considered the preferred ID for public display.s
+   */
   aliasIds?: string[];
   versions: { version: `v${string}`; devUIPort: number; devAPIPort: number }[];
   title: string;

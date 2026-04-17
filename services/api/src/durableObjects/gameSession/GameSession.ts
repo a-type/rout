@@ -237,6 +237,16 @@ export class GameSession extends DurableObject<ApiBindings> {
         await this.#scheduleSessionExpiryTask();
       }
     }
+
+    // temporary: repair mixed up alias IDs
+    const data = await this.#maybeGetSessionData();
+    if (data?.gameId) {
+      const game = getGame(data.gameId);
+      if (game.id !== data.gameId) {
+        // repair mixed up alias IDs
+        await this.#updateSessionData({ gameId: game.id });
+      }
+    }
   }
 
   // turns use the SQL API

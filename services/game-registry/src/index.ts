@@ -13,7 +13,7 @@ export default new Hono<{
 
   const binding = c.env[bindingKey as keyof GameRegistryBindings] as Fetcher;
   if (!binding) {
-    return c.text('Game not found', 404);
+    return c.text(`Game not found: ${gameId} ${normalizedVersion}`, 404);
   }
 
   // forward to the appropriate game worker API
