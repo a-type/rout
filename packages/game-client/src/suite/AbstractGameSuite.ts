@@ -162,7 +162,7 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
   // static
   gameModules: GameModuleContext;
   gameSessionId!: PrefixedId<'gs'>;
-  gameDefinition: TGame = emptyGameDefinition as any;
+  @observable accessor gameDefinition: TGame = emptyGameDefinition as any;
   startedAt: Date | null = null;
   readonly youAreLeader: boolean;
   timezone!: string;
@@ -417,6 +417,10 @@ export abstract class AbstractGameSuite<TGame extends AnyGameDefinition> {
 
   @computed get hasLocalTurn(): boolean {
     return !!this.localTurnData;
+  }
+
+  @computed get playerStatus(): GameSessionPlayerStatus {
+    return this.playerStatuses[this.playerId];
   }
 
   @computed get winners(): GameMember[] {

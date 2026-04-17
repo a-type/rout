@@ -60,7 +60,6 @@ export function TokenSpace<T = any>({
 
     // do not accept tokens already in this space
     if (gesture.draggedFrom === id) {
-      console.log('dragged from here');
       return false;
     }
 

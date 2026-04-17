@@ -189,7 +189,8 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                     {hotseat && <HotseatBanner />}
                     <ErrorBoundary>
                       <Renderer />
-                      <SubmitTurn />
+                      {/* using key to reset state when changing games */}
+                      <SubmitTurn key={sessionId} />
                     </ErrorBoundary>
                   </div>
                 )}

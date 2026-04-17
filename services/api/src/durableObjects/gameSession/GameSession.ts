@@ -1348,6 +1348,15 @@ export class GameSession extends DurableObject<ApiBindings> {
         to: [playerId],
       },
     );
+    // update player status
+    this.#socketHandler.send({
+      type: 'playerStatusChange',
+      playerId,
+      playerStatus: {
+        online: await this.presence.getIsOnline(playerId),
+        pendingTurn: await this.getPlayerIsPendingTurn(playerId),
+      },
+    });
   };
 
   // Player notifications

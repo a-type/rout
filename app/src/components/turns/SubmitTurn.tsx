@@ -7,7 +7,7 @@ import {
   RelativeTime,
   Tooltip,
 } from '@a-type/ui';
-import { useDebounced, withGame } from '@long-game/game-client';
+import { withGame } from '@long-game/game-client';
 import { PlayerStatuses, withSuspense } from '@long-game/game-ui';
 import { TopographyButton } from '@long-game/visual-components';
 import { motion } from 'motion/react';
@@ -28,16 +28,12 @@ export const SubmitTurn = withSuspense(
     gameSuite,
   }) {
     const [nextStepsManualState, setNextStepsManualState] = useState<
-      'hide' | 'show-auto' | 'show-manual'
-    >('show-auto');
+      'hide' | 'show'
+    >(() => (gameSuite.turnWasSubmitted ? 'show' : 'hide'));
     const canShowNextSteps =
-      gameSuite.turnWasSubmitted &&
       !gameSuite.isHotseat &&
-      ((gameSuite.gameStatus.status === 'active' &&
-        nextStepsManualState !== 'hide') ||
-        nextStepsManualState === 'show-manual');
-
-    const delayedShowNextSteps = useDebounced(canShowNextSteps, 400);
+      gameSuite.gameStatus.status === 'active' &&
+      nextStepsManualState !== 'hide';
 
     const [delayedSubmitState, setDelayedSubmitState] = useState<{
       startedAt: number;
@@ -57,6 +53,7 @@ export const SubmitTurn = withSuspense(
     useEffect(() => {
       return gameSuite.subscribe('turnPlayed', () => {
         setDelayedSubmitState(null);
+        setNextStepsManualState('show');
       });
     }, [gameSuite]);
 
@@ -93,7 +90,7 @@ export const SubmitTurn = withSuspense(
               <MainContent
                 delay={delay}
                 className="m-auto"
-                showNextSteps={() => setNextStepsManualState('show-manual')}
+                showNextSteps={() => setNextStepsManualState('show')}
               >
                 {children}
               </MainContent>
@@ -101,9 +98,9 @@ export const SubmitTurn = withSuspense(
           </Box>
         </Tooltip>
         <Dialog
-          open={delayedShowNextSteps && nextStepsManualState !== 'hide'}
+          open={canShowNextSteps}
           onOpenChange={(show) =>
-            setNextStepsManualState(show ? 'show-auto' : 'hide')
+            setNextStepsManualState(show ? 'show' : 'hide')
           }
         >
           <Dialog.Content width="md">

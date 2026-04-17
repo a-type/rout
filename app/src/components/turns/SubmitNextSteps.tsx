@@ -39,6 +39,17 @@ export const SubmitNextSteps = withGame<SubmitNextStepsProps>(
         )}
 
         <H2>Your next move...</H2>
+        {gameSuite.playerStatus.pendingTurn && (
+          <>
+            <div className="grow w-full flex items-center justify-center">
+              <Button onClick={onHide} emphasis="primary">
+                Next turn
+                <Icon name="arrowRight" />
+              </Button>
+            </div>
+            <Divider />
+          </>
+        )}
         <div className="w-full grow">
           <P>Go to another game</P>
           <MembershipsList
@@ -48,12 +59,16 @@ export const SubmitNextSteps = withGame<SubmitNextStepsProps>(
           />
         </div>
         <Divider />
-        <div className="grow w-full flex items-center justify-center">
-          <Button onClick={onHide} emphasis="light">
-            <Icon name="arrowLeft" /> View current game
-          </Button>
-        </div>
-        <Divider />
+        {!gameSuite.playerStatus.pendingTurn && (
+          <>
+            <div className="grow w-full flex items-center justify-center">
+              <Button onClick={onHide} emphasis="light">
+                <Icon name="arrowLeft" /> View current game
+              </Button>
+            </div>
+            <Divider />
+          </>
+        )}
         <div className="grow w-full flex items-center justify-center">
           <StartHotseat emphasis="default">
             <Icon name="phone" />

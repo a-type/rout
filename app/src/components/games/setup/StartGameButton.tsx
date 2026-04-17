@@ -33,8 +33,10 @@ export const StartGameButton = withGame<StartGameButtonProps>(
           surface
           d="row"
           items="center"
+          justify="center"
           gap="sm"
           p
+          full="width"
           className={clsx('mr-auto self-start', className)}
         >
           <Icon name="dots" />
@@ -77,7 +79,7 @@ export const StartGameButton = withGame<StartGameButtonProps>(
           <Box col items="center" p>
             <GameIcon
               gameId={gameSuite.gameId}
-              className="w-full max-h-50vmin aspect-1 object-contain"
+              className="w-full max-h-50vmin aspect-1 object-contain rounded-sm"
             />
             <div className="text-lg font-bold">
               <GameTitle gameId={gameSuite.gameId} />
