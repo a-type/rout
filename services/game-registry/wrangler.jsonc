@@ -37,8 +37,8 @@
       "service": "game--exquisite-fridge--v1",
     },
     {
-      "binding": "game--garden-path--v1",
-      "service": "game--garden-path--v1",
+      "binding": "game--gridlock--v1",
+      "service": "game--gridlock--v1",
     },
     {
       "binding": "game--hearts--v1",
