@@ -29,7 +29,7 @@ export const SubmitTurn = withSuspense(
   }) {
     const [nextStepsManualState, setNextStepsManualState] = useState<
       'hide' | 'show-auto' | 'show-manual'
-    >('hide');
+    >('show-auto');
     const canShowNextSteps =
       gameSuite.turnWasSubmitted &&
       !gameSuite.isHotseat &&
@@ -248,26 +248,31 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
       className="overflow-clip"
     >
       {gameSuite.remoteTurnError ? (
-        <>
-          <Button emphasis="ghost" onClick={() => gameSuite.prepareTurn(null)}>
-            <Icon name="refresh" />
-            Reset
-          </Button>
+        <Box col full="width" gap>
           <div className="font-bold color-attention-ink flex-1">
             {gameSuite.remoteTurnError.message}
           </div>
-          <Button
-            loading={gameSuite.submittingTurn}
-            emphasis="default"
-            onClick={() =>
-              gameSuite.submitTurn({
-                delay: 0,
-              })
-            }
-          >
-            Retry
-          </Button>
-        </>
+          <Box gap justify="between">
+            <Button
+              emphasis="ghost"
+              onClick={() => gameSuite.prepareTurn(null)}
+            >
+              <Icon name="refresh" />
+              Reset
+            </Button>
+            <Button
+              loading={gameSuite.submittingTurn}
+              emphasis="default"
+              onClick={() =>
+                gameSuite.submitTurn({
+                  delay: 0,
+                })
+              }
+            >
+              Retry
+            </Button>
+          </Box>
+        </Box>
       ) : (
         <>
           <div className="font-bold color-main-ink flex-1">

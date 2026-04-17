@@ -231,7 +231,7 @@ export class PublicSdk extends BaseSdk {
         refetchOnWindowFocus: false,
       },
       enabled(input) {
-        return !!input.aliasId;
+        return !!input.aliasId && input.aliasId !== 'empty';
       },
     },
   );
