@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { logger, PrefixedId } from '@long-game/common';
 import {
   AnyNotification,
   TurnReadyNotification,
@@ -16,6 +16,7 @@ type ScheduledTasks = {
 export class NotificationScheduler extends DurableObject<ApiBindings> {
   #sql: SqlWrapper;
   #scheduler: Scheduler<ScheduledTasks>;
+  // todo: convert to logger, migrate usages of generic loggers
   #log = (level: 'info' | 'debug' | 'warn' | 'error', ...messages: any[]) => {
     console[level](
       `[NotificationScheduler ${this.ctx.id.toString()}]`,
@@ -35,7 +36,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
   }
 
   #handleScheduledTask = (task: ScheduledTasks) => {
-    console.log(`Handling scheduled task: ${JSON.stringify(task)}`);
+    logger.debug(`Handling scheduled task: ${JSON.stringify(task)}`);
     if (task.type === 'flush') {
       return this.#sendNotifications();
     }
@@ -96,7 +97,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
             },
             this.env,
           );
-          console.log(`Notified user ${userId} of ${turns.length} turns ready`);
+          logger.info(`Notified user ${userId} of ${turns.length} turns ready`);
           break;
         }
         default: {
@@ -109,7 +110,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
                 this.env,
               );
               markSent.add(n.id);
-              console.log(
+              logger.info(
                 `Notified user ${n.userId} of notification ${n.id} (${type})`,
               );
             }),
@@ -123,11 +124,11 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
     // mark all sent... in batches, I guess.
     if (markSent.size > 0) {
       const toMark = Array.from(markSent);
-      console.log(`Marking ${toMark.length} notifications as sent`);
+      logger.debug(`Marking ${toMark.length} notifications as sent`);
       const batchSize = 20;
       for (let i = 0; i < toMark.length; i += batchSize) {
         const batch = toMark.slice(i, i + batchSize);
-        console.log(`Marking batch of ${batch.length} notifications as sent`);
+        logger.debug(`Marking batch of ${batch.length} notifications as sent`);
         await this.#sql.run(
           db
             .updateTable('Notification')
@@ -142,7 +143,7 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
   };
 
   async add(userId: PrefixedId<'u'>, noti: AnyNotification) {
-    console.log(`Buffering notification for user ${userId}:`, noti);
+    logger.debug(`Buffering notification for user ${userId}:`, noti);
     await this.#sql.run(
       db
         .insertInto('Notification')

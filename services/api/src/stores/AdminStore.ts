@@ -332,15 +332,38 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
     userId: PrefixedId<'u'>,
     notification: AnyNotification,
   ) {
+    const gameSessionIds =
+      'gameSessionId' in notification
+        ? [notification.gameSessionId as PrefixedId<'gs'>]
+        : 'turns' in notification
+          ? notification.turns.map((t) => t.gameSessionId as PrefixedId<'gs'>)
+          : null;
     await this.#db
       .insertInto('Notification')
       .values({
         id: notification.id,
         userId,
         data: notification,
+        gameSessionIds: gameSessionIds ? JSON.stringify(gameSessionIds) : null,
       })
       .onConflict((oc) => oc.doNothing())
       .execute();
+  }
+
+  async getRecentNotificationsForGameSession(
+    gameSessionId: PrefixedId<'gs'>,
+    count: number,
+  ) {
+    const notifications = await this.#db
+      .selectFrom('Notification')
+      .selectAll()
+      // TODO: learn how to use D1 JSON functions to find a matching array element instead.
+      .where('gameSessionIds', 'like', `%${gameSessionId}%`)
+      .orderBy('createdAt', 'desc')
+      .limit(count)
+      .execute();
+
+    return notifications;
   }
 
   async markNotificationAsRead(notificationId: PrefixedId<'no'>) {

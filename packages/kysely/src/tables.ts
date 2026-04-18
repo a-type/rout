@@ -179,6 +179,8 @@ export interface NotificationTable {
   data: AnyNotification;
   readAt: DateColumnOptional;
   deliveryFailure: string | null;
+  /** a JSON array of associated game session ids */
+  gameSessionIds: string | null;
 }
 export type Notification = Selectable<NotificationTable>;
 export type NewNotification = Insertable<NotificationTable>;

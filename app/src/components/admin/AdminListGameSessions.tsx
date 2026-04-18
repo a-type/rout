@@ -87,6 +87,9 @@ function GameSessionCard({ session }: { session: AdminGameSessionSummary }) {
         <ErrorBoundary>
           {open && <EditGameSession session={session} />}
         </ErrorBoundary>
+        <ErrorBoundary>
+          {open && <RecentNotifications id={session.id} />}
+        </ErrorBoundary>
         <Dialog.Actions>
           <Dialog.Close>Close</Dialog.Close>
         </Dialog.Actions>
@@ -150,5 +153,36 @@ function PickLeader({ details }: { details: AdminGameSessionDetails }) {
         </Select.Content>
       </Select>
     </FieldRoot>
+  );
+}
+
+function RecentNotifications({ id }: { id: PrefixedId<'gs'> }) {
+  const { data: notifications } =
+    sdkHooks.useAdminGetGameSessionRecentNotifications({
+      sessionId: id,
+    });
+  const { data: details } = sdkHooks.useAdminGetGameSessionDetails({
+    id,
+  });
+  const members = details.members;
+
+  return (
+    <Box col gap>
+      <FieldLabel>Recent Notifications</FieldLabel>
+      {notifications.map((n) => (
+        <Box key={n.id} col gap border rounded p="sm">
+          <div>
+            <strong>{n.data.type}</strong> to user{' '}
+            {members.find((m) => m.id === n.userId)?.displayName || n.userId}
+          </div>
+          <div>{n.createdAt.toString()}</div>
+          <div>{n.readAt ? `Read at ${n.readAt.toString()}` : 'Unread'}</div>
+          {n.deliveryFailure && (
+            <pre className="text-attention-dark">{n.deliveryFailure}</pre>
+          )}
+          <pre>{JSON.stringify(n.data, null, 2)}</pre>
+        </Box>
+      ))}
+    </Box>
   );
 }

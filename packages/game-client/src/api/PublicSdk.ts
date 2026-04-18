@@ -671,6 +671,17 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['adminGetGameSessionDetails']],
     },
   );
+
+  adminGetGameSessionRecentNotifications = this.sdkQuery(
+    'adminGetGameSessionRecentNotifications',
+    this.apiRpc.admin.gameSessions[':sessionId'].recentNotifications.$get,
+    {
+      transformInput: (input: { sessionId: PrefixedId<'gs'> }) => ({
+        param: { sessionId: input.sessionId },
+      }),
+      enabled: (input) => !!input.sessionId,
+    },
+  );
 }
 
 export type Friendship = InferReturnData<PublicSdk['getFriendships']>[number];

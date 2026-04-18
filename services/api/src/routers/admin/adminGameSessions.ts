@@ -110,4 +110,17 @@ export const adminGameSessionsRouter = new Hono<Env>()
       await gameSession.setLeader(leaderId);
       return ctx.json({ ok: true });
     },
+  )
+  .get(
+    '/:sessionId/recentNotifications',
+    zValidator('param', z.object({ sessionId: idShapes.GameSession })),
+    async (ctx) => {
+      const sessionId = ctx.req.valid('param').sessionId;
+      const notifications =
+        await ctx.env.ADMIN_STORE.getRecentNotificationsForGameSession(
+          sessionId,
+          10,
+        );
+      return ctx.json(wrapRpcData(notifications));
+    },
   );

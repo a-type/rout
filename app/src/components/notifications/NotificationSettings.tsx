@@ -140,7 +140,11 @@ function NotificationSettingsRow({
           <Icon name={canPush ? 'phone' : 'x'} loading={loading} /> Push
         </StyledToggleItem>
         <StyledToggleItem value="email" disabled={config.emailRequired}>
-          <Icon name="email" loading={loading} /> Email
+          <Icon
+            name={config.emailRequired ? 'lock' : 'email'}
+            loading={loading}
+          />{' '}
+          Email
         </StyledToggleItem>
       </ToggleGroup>
     </Box>
