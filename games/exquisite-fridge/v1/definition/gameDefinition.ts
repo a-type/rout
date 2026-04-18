@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { Drawing, PrefixedId } from '@long-game/common';
 import {
   GameDefinition,
   roundFormat,
@@ -7,6 +7,7 @@ import {
 import { ROUND_COUNT } from './constants.js';
 import {
   getPlayerSequenceIndex,
+  isIllustrationRound,
   StorySequence,
   StoryStep,
   WordItem,
@@ -25,10 +26,12 @@ export type GlobalState = {
 export type PlayerState = {
   hand: WordItem[];
   prompt: StoryStep;
+  illustrationRound: boolean;
 };
 
 export type TurnData = {
   words: WordItem[];
+  illustration?: Drawing;
 };
 
 // optional: extend the validation error type with your own metadata
@@ -67,7 +70,7 @@ export const gameDefinition: GameDefinition<{
       };
     }
   },
-  validatePartialTurn: ({ playerState, turn }) => {
+  validatePartialTurn: ({ playerState, turn, roundIndex }) => {
     // all used words must be in player's hand
     const handWords = Object.fromEntries(
       playerState.hand.map((word) => [word.id, word]),
@@ -104,6 +107,16 @@ export const gameDefinition: GameDefinition<{
             data: { wordId: word.id },
           };
         }
+      }
+    }
+
+    // drawing round
+    if (isIllustrationRound(roundIndex)) {
+      if (!turn.data.illustration) {
+        return {
+          code: 'missing-illustration',
+          message: 'You must include an illustration with your turn.',
+        };
       }
     }
   },
@@ -170,6 +183,7 @@ export const gameDefinition: GameDefinition<{
     return {
       prompt: seq[seq.length - 1] || { words: [] },
       hand: globalState.hands[playerId] || [],
+      illustrationRound: isIllustrationRound(roundIndex),
     };
   },
 

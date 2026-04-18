@@ -228,7 +228,10 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
       <Box col gap="xs">
         <div className="text-xs uppercase color-gray-dark">Hotseat</div>
         <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>
-        <GameIcon gameId={gameSuite.gameId} className="w-[200px] rd-md" />
+        <GameIcon
+          gameId={gameSuite.gameId}
+          className="w-[200px] h-[200px] rd-md"
+        />
         <H1 className="mb-sm">Select Player</H1>
         <Box
           gap="sm"

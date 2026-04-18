@@ -1,15 +1,12 @@
 import { Box, Button, clsx, Icon } from '@a-type/ui';
 import { genericId } from '@long-game/common';
 import {
-  isValidFreebie,
-  WordItem,
-} from '../definition/index';
-import {
   moveItem,
   SortableTokenList,
   TokenSpace,
   TurnError,
 } from '@long-game/game-ui';
+import { isValidFreebie, WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
 import { WordTile } from './WordTile.js';
 import { collectInput } from './WriteInDialog.js';
@@ -55,6 +52,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
               };
             }
             gameSuite.prepareTurn((cur) => ({
+              ...cur,
               words: moveItem(cur.words, wordData, index),
             }));
           }}

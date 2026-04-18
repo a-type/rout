@@ -1,9 +1,10 @@
-import { PrefixedId } from '@long-game/common';
+import { Drawing, PrefixedId } from '@long-game/common';
 
 export type StorySequence = StoryStep[];
 export type StoryStep = {
   id: string;
   words: WordItem[];
+  illustration?: Drawing;
   playerId: PrefixedId<'u'>;
 };
 export type WordItem = {
@@ -28,4 +29,8 @@ export function getPlayerSequenceIndex({
   playerIndex: number;
 }): number {
   return (playerIndex + roundIndex) % sequenceCount;
+}
+
+export function isIllustrationRound(roundIndex: number): boolean {
+  return roundIndex % 3 === 2;
 }

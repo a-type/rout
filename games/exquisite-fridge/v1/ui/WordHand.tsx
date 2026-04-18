@@ -1,11 +1,8 @@
 import { Box, Button, H4, Icon, Input } from '@a-type/ui';
 import { useLocalStorage } from '@long-game/game-client';
-import {
-  freebieWords,
-  WordItem,
-} from '../definition/index';
 import { HelpSurface, TokenSpace } from '@long-game/game-ui';
 import { memo, startTransition, useState } from 'react';
+import { freebieWords, WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
 import { WordTile as UnmemoizedWordTile } from './WordTile.js';
 
@@ -20,7 +17,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
   className,
 }) {
   const {
-    finalState: { hand },
+    initialState: { hand },
     currentTurn: { words },
   } = gameSuite;
   const usedIds = new Set(words.map((w) => w.id));
@@ -80,7 +77,6 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         </Box>
         <Box gap="md" wrap full="width" layout="center start" className="pb-md">
           {hand
-            .filter((handWord) => !usedIds.has(handWord.id))
             .filter(
               (word) =>
                 !filter ||
@@ -92,7 +88,11 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
                 : b.text.localeCompare(a.text),
             )
             .map((word) => (
-              <WordTile value={word} key={word.id} />
+              <WordTile
+                value={word}
+                key={word.id}
+                used={usedIds.has(word.id)}
+              />
             ))}
         </Box>
       </Box>

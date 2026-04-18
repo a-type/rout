@@ -1,11 +1,12 @@
 import { Box, clsx, H2, P, Tabs } from '@a-type/ui';
-import { StoryStep } from '../definition/index';
 import {
   PlayerAvatar,
   PlayerName,
   TopographyBackground,
   usePlayerThemed,
 } from '@long-game/game-ui';
+import { DrawCanvas } from '@long-game/game-ui/drawing';
+import { StoryStep } from '../definition/index';
 import { hooks } from './gameClient.js';
 import { WordTile } from './WordTile.js';
 
@@ -60,6 +61,18 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
       style={theme.style}
       className={clsx(theme.className, 'pb-[40px]')}
     >
+      {section.illustration && (
+        <Box layout="center center">
+          <DrawCanvas
+            readonly
+            drawing={section.illustration}
+            colorClasses={{
+              black: 'fill-black',
+            }}
+            sizes={[4]}
+          />
+        </Box>
+      )}
       <Box gap wrap>
         {section.words.map((word, index) => (
           <WordTile disabled value={word} key={index} />

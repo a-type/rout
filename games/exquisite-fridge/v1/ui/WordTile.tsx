@@ -1,12 +1,13 @@
 import { Box, clsx, Icon } from '@a-type/ui';
-import { WordItem } from '../definition/index';
 import { Token } from '@long-game/game-ui';
+import { WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
 
 export interface WordTileProps {
   value: WordItem;
   className?: string;
   disabled?: boolean;
+  used?: boolean;
   movedBehavior?: 'fade' | 'remove';
   disableChat?: boolean;
 }
@@ -16,6 +17,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
   value,
   className,
   disabled,
+  used,
   movedBehavior = 'fade',
   disableChat,
 }) {
@@ -24,12 +26,13 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
 
   return (
     <Token
-      id={value.id}
+      id={used ? `used-${value.id}` : value.id}
       data={value}
-      disabled={disabled || gameSuite.turnWasSubmitted}
+      disabled={disabled || used || gameSuite.turnWasSubmitted}
       className={clsx(
         'relative rounded-xs color-black border border-gray-dark shadow-gray-dark shadow-[1px_1px_0_1px]',
         'bg-white',
+        used && '!opacity-50',
         className,
       )}
       handleProps={{

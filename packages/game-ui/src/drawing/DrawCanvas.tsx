@@ -10,6 +10,8 @@ export interface DrawCanvasProps {
   onChange?: (value: Drawing) => void;
   className?: string;
   style?: CSSProperties;
+  colorClasses?: Record<string, `fill-${string}`>;
+  sizes?: number[];
 }
 
 function getStrokeOptions(size: number) {
@@ -42,10 +44,16 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
   onChange,
   className,
   style,
+  colorClasses = {
+    light: 'fill-main-light',
+    dark: 'fill-main-dark',
+    contrast: 'fill-black',
+  },
+  sizes = [1, 2, 8],
 }) {
   const [points, setPoints] = useState<number[][]>([]);
   const lastPointRef = useRef<number[] | null>(null);
-  const [color, setColor] = useState<'dark' | 'light' | 'contrast'>('contrast');
+  const [color, setColor] = useState(Object.keys(colorClasses)[0]);
   const [size, setSize] = useState(2);
 
   const stroke = getStroke(points, getStrokeOptions(size));
@@ -73,52 +81,40 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
             }}
             items="center"
           >
-            <Box gap>
-              <Button
-                toggled={color === 'contrast'}
-                emphasis="ghost"
-                onClick={() => setColor('contrast')}
-              >
-                <div className="bg-black w-8 h-8 rounded-full" />
-              </Button>
-              <Button
-                toggled={color === 'dark'}
-                emphasis="ghost"
-                onClick={() => setColor('dark')}
-              >
-                <div className="bg-main-dark w-8 h-8 rounded-full" />
-              </Button>
-              <Button
-                toggled={color === 'light'}
-                emphasis="ghost"
-                onClick={() => setColor('light')}
-              >
-                <div className="bg-main-light w-8 h-8 rounded-full" />
-              </Button>
-            </Box>
-            <Box gap>
-              <Button
-                toggled={size === 1}
-                emphasis="ghost"
-                onClick={() => setSize(1)}
-              >
-                <div className="bg-black w-4px h-4px rounded-full" />
-              </Button>
-              <Button
-                toggled={size === 2}
-                emphasis="ghost"
-                onClick={() => setSize(2)}
-              >
-                <div className="bg-black w-8px h-8px rounded-full" />
-              </Button>
-              <Button
-                toggled={size === 8}
-                emphasis="ghost"
-                onClick={() => setSize(8)}
-              >
-                <div className="bg-black w-16px h-16px rounded-full" />
-              </Button>
-            </Box>
+            {Object.keys(colorClasses).length > 1 ? (
+              <Box gap>
+                {Object.entries(colorClasses).map(([color, colorClass]) => (
+                  <Button
+                    key={color}
+                    toggled={color === color}
+                    emphasis="ghost"
+                    onClick={() => setColor(color)}
+                  >
+                    <div className={clsx(colorClass, 'w-8 h-8 rounded-full')} />
+                  </Button>
+                ))}
+              </Box>
+            ) : null}
+            {sizes.length > 1 ? (
+              <Box gap>
+                {sizes.map((s) => (
+                  <Button
+                    key={s}
+                    toggled={size === s}
+                    emphasis="ghost"
+                    onClick={() => setSize(s)}
+                  >
+                    <div
+                      style={{
+                        width: s * 4,
+                        height: s * 4,
+                      }}
+                      className={`bg-black rounded-full`}
+                    />
+                  </Button>
+                ))}
+              </Box>
+            ) : null}
           </Box>
           <Box className="color-gray-dark text-xs">No, there's no eraser!</Box>
         </>
@@ -173,18 +169,9 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
         )}
       >
         {drawing.strokes.map((stroke, i) => (
-          <Stroke stroke={stroke} key={i} />
+          <Stroke stroke={stroke} key={i} colorClasses={colorClasses} />
         ))}
-        {points && (
-          <path
-            d={pathData}
-            className={clsx({
-              'fill-main-light': color === 'light',
-              'fill-main-dark': color === 'dark',
-              'fill-black': color === 'contrast',
-            })}
-          />
-        )}
+        {points && <path d={pathData} className={colorClasses[color]} />}
       </svg>
     </Box>
   );
@@ -192,19 +179,11 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
 
 const Stroke = withGame<{
   stroke: Drawing['strokes'][number];
-}>(function Stroke({ stroke }) {
+  colorClasses: Record<string, string>;
+}>(function Stroke({ stroke, colorClasses }) {
   const pathData = getSvgPathFromStroke(stroke.path);
 
-  return (
-    <path
-      d={pathData}
-      className={clsx({
-        'fill-main-light': stroke.color === 'light',
-        'fill-main-dark': stroke.color === 'dark',
-        'fill-black': stroke.color === 'contrast',
-      })}
-    />
-  );
+  return <path d={pathData} className={colorClasses[stroke.color]} />;
 });
 
 function getSvgPathFromStroke(stroke: Drawing['strokes'][number]['path']) {
