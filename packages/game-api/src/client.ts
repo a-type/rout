@@ -161,8 +161,11 @@ export class GameApiClient {
     for (let i = latestRoundIndex; i >= -1; i--) {
       const hasCheckpoint = await this.#stateCheckpointCache.has(i);
       if (hasCheckpoint) {
-        checkpointToUse = await this.#stateCheckpointCache.get(i);
-        break;
+        const checkpoint = await this.#stateCheckpointCache.get(i);
+        if (i === -1 || checkpoint?.turnCount === rounds[i]?.turns.length) {
+          checkpointToUse = checkpoint;
+          break;
+        }
       }
     }
 

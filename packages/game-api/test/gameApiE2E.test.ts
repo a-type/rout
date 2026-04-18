@@ -1,7 +1,7 @@
 import { GameRound, LongGameError } from '@long-game/common';
-import { GameMember } from '@long-game/game-definition';
+import { GameMember, StateCheckpoint } from '@long-game/game-definition';
 import { beforeAll, beforeEach, expect, it, vi } from 'vitest';
-import { GameApiClient, GameApiClientInit } from '../src/client';
+import { GameApiClient, GameApiClientInit, StateCache } from '../src/client';
 import testServer from './testServer';
 
 beforeAll(testServer);
@@ -226,6 +226,73 @@ it('should support a configurable cache for global state checkpoints', async () 
   await clientWithCustomCache.computeGlobalState(rounds);
 
   expect(customCache.has).toHaveBeenCalledWith(0);
+  expect(customCache.set).toHaveBeenCalledWith(0, {
+    randomState: expect.anything(),
+    roundIndex: 0,
+    turnCount: 2,
+    state: {
+      randomNumber: expect.any(Number),
+      members,
+      winner: null,
+    },
+  });
+});
+
+it('should not use the cache if checkpoint turn count does not match rounds turn count', async () => {
+  const cacheMap = new Map<number, StateCheckpoint>();
+  cacheMap.set(0, {
+    randomState: {} as any,
+    roundIndex: 0,
+    turnCount: 1, // does not match the 2 turns in the rounds
+    state: {
+      randomNumber: 123,
+      members,
+      winner: null,
+    },
+  });
+  const customCache: StateCache = {
+    get: vi.fn(async (idx: number) => cacheMap.get(idx) ?? null),
+    set: vi.fn(async (idx, state) => {
+      cacheMap.set(idx, state);
+    }),
+    has: vi.fn(async (idx: number) => cacheMap.has(idx)),
+  };
+  const clientWithCustomCache = new GameApiClient({
+    ...clientInit,
+    stateCache: customCache,
+  });
+  const rounds: GameRound<any>[] = [
+    {
+      roundIndex: 0,
+      turns: [
+        {
+          playerId: 'u-1',
+          data: {
+            move: 'reroll',
+          },
+          createdAt: new Date().toISOString(),
+          roundIndex: 0,
+        },
+        {
+          playerId: 'u-2',
+          data: {
+            move: 'none',
+          },
+          createdAt: new Date().toISOString(),
+          roundIndex: 0,
+        },
+      ],
+    },
+  ];
+
+  const globalState = await clientWithCustomCache.computeGlobalState(rounds);
+  expect(globalState).toEqual({
+    randomNumber: expect.any(Number),
+    members,
+    winner: null,
+  });
+  expect(customCache.has).toHaveBeenCalledWith(0);
+  expect(customCache.get).toHaveBeenCalledWith(0);
   expect(customCache.set).toHaveBeenCalledWith(0, {
     randomState: expect.anything(),
     roundIndex: 0,
