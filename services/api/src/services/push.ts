@@ -14,6 +14,8 @@ export async function sendPushToAllUserDevices(
 
   const subscriptions = await userStore.listPushSubscriptions();
 
+  let sendFailure: Error | undefined;
+
   for (const subscription of subscriptions) {
     if (!subscription.auth || !subscription.p256dh) {
       throw new LongGameError(
@@ -54,6 +56,7 @@ export async function sendPushToAllUserDevices(
         if (result.status >= 400 && result.status < 500) {
           // validation error with subscription
           await userStore.deletePushSubscription(subscription.endpoint);
+          sendFailure = LongGameError.fromResponse(result) || sendFailure;
         }
       } else {
         console.log(
@@ -72,6 +75,10 @@ export async function sendPushToAllUserDevices(
         'Error sending push notification',
         err,
       );
+    }
+
+    if (sendFailure) {
+      throw sendFailure;
     }
   }
 }

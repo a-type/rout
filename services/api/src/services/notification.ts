@@ -1,4 +1,4 @@
-import { logger, PrefixedId } from '@long-game/common';
+import { logger, LongGameError, PrefixedId } from '@long-game/common';
 import {
   AnyNotification,
   getNotificationConfig,
@@ -29,7 +29,10 @@ export async function notifyUser(
         `Failed to send push notification to user ${userId}:`,
         error,
       );
-      await db.addNotificationDeliveryFailure(notification.id, String(error));
+      await db.addNotificationDeliveryFailure(
+        notification.id,
+        LongGameError.wrap(error).toLogsSync().join('\n'),
+      );
       throw error;
     }
   }
@@ -63,7 +66,10 @@ export async function notifyUser(
         `Failed to send email notification to user ${userId}:`,
         error,
       );
-      await db.addNotificationDeliveryFailure(notification.id, String(error));
+      await db.addNotificationDeliveryFailure(
+        notification.id,
+        LongGameError.wrap(error).toLogsSync().join('\n'),
+      );
       throw error;
     }
   }

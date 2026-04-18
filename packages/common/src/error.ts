@@ -135,4 +135,9 @@ export class LongGameError extends Error {
       : []),
     ...(this.stack ? [this.stack] : []),
   ];
+
+  toLogsSync = () => [
+    `LongGameError: ${this.message} (code: ${this.code})`,
+    ...(this.stack ? [this.stack] : []),
+  ];
 }
