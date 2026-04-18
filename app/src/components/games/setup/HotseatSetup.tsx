@@ -3,13 +3,16 @@ import {
   clsx,
   H1,
   H2,
+  Icon,
   LiveUpdateTextField,
   NumberStepper,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { HotseatGameSuite, withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
-import { GamePicker } from './GamePicker';
+import { GameIcon } from '../GameIcon';
+import { GameManualDialog } from '../GameManualDialog';
+import { GameTitle } from '../GameTitle';
 import { StartGameButton } from './StartGameButton';
 
 export interface HotseatSetupProps {
@@ -17,21 +20,22 @@ export interface HotseatSetupProps {
 }
 
 export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
-  gameSuite,
   className,
+  gameSuite,
 }) {
   return (
     <Box col p gap grow className={clsx('m-auto max-w-800px', className)}>
-      <Box d="col" gap grow>
+      <Box d="col" gap grow layout="center center">
         <H1>Hotseat Setup</H1>
-        <GamePicker
-          id="game-picker"
-          value={gameSuite.gameId}
-          loading={false}
-          hotseat
-        />
+        <GameIcon gameId={gameSuite.gameId} className="w-200px" />
+        <H2>
+          <GameTitle gameId={gameSuite.gameId} />
+        </H2>
+        <GameManualDialog>
+          <Icon name="book" /> How To Play
+        </GameManualDialog>
+        <HotseatPlayerSetup />
       </Box>
-      <HotseatPlayerSetup />
       <StartGameButton />
     </Box>
   );
