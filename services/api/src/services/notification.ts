@@ -1,4 +1,4 @@
-import { PrefixedId } from '@long-game/common';
+import { logger, PrefixedId } from '@long-game/common';
 import {
   AnyNotification,
   getNotificationConfig,
@@ -19,33 +19,52 @@ export async function notifyUser(
     notification.type === 'test'
       ? { push: true, email: true }
       : notificationSettings[notification.type];
+
   if (sendPush) {
-    console.debug(`Sending push notification to user: ${userId}`);
-    await sendPushToAllUserDevices(userId, notification, bindings);
+    logger.debug(`Sending push notification to user: ${userId}`);
+    try {
+      await sendPushToAllUserDevices(userId, notification, bindings);
+    } catch (error) {
+      logger.urgent(
+        `Failed to send push notification to user ${userId}:`,
+        error,
+      );
+      await db.addNotificationDeliveryFailure(notification.id, String(error));
+      throw error;
+    }
   }
 
   if (sendEmail) {
-    console.debug(`Sending email notification to user: ${userId}`);
+    logger.debug(`Sending email notification to user: ${userId}`);
     const config = getNotificationConfig(notification);
     const user = await db.getUser(userId);
     if (!user) {
-      console.error(`User not found for ID: ${userId}`);
+      logger.warn(`User not found for ID: ${userId}`);
       return;
     }
     const text = config.text(notification, 'email');
     const link = config.link(notification);
-    await email.sendCustomEmail(
-      {
-        to: user.email,
-        subject: config.title(notification, 'email'),
-        text: `${text}\n\n${link}\nCheers,\nThe Rout Team`,
-        html: `<h1>${config.title(notification, 'email')}</h1>
+    try {
+      await email.sendCustomEmail(
+        {
+          to: user.email,
+          subject: config.title(notification, 'email'),
+          text: `${text}\n\n${link}\nCheers,\nThe Rout Team`,
+          html: `<h1>${config.title(notification, 'email')}</h1>
 			<p>${text}</p>
 			<p><a href="${bindings.UI_ORIGIN}${link}">Click here to open Rout!</a></p>
 			<p>Cheers,</p>
 			<p>The Rout Team</p>`,
-      },
-      { env: bindings },
-    );
+        },
+        { env: bindings },
+      );
+    } catch (error) {
+      logger.urgent(
+        `Failed to send email notification to user ${userId}:`,
+        error,
+      );
+      await db.addNotificationDeliveryFailure(notification.id, String(error));
+      throw error;
+    }
   }
 }

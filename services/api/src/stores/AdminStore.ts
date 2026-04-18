@@ -355,6 +355,21 @@ export class AdminStore extends WorkerEntrypoint<ApiBindings> {
       .execute();
   }
 
+  async addNotificationDeliveryFailure(
+    notificationId: PrefixedId<'no'>,
+    error: string,
+  ) {
+    assertPrefixedId(notificationId, 'no');
+
+    await this.#db
+      .updateTable('Notification')
+      .set({
+        deliveryFailure: error,
+      })
+      .where('id', '=', notificationId)
+      .execute();
+  }
+
   async updateUserEntitlements(
     userId: PrefixedId<'u'>,
     entitlements: Record<string, boolean>,

@@ -178,6 +178,7 @@ export interface NotificationTable {
   userId: PrefixedId<'u'>;
   data: AnyNotification;
   readAt: DateColumnOptional;
+  deliveryFailure: string | null;
 }
 export type Notification = Selectable<NotificationTable>;
 export type NewNotification = Insertable<NotificationTable>;
