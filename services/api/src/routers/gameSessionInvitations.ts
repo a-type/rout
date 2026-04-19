@@ -94,6 +94,32 @@ export const gameSessionInvitationsRouter = new Hono()
       );
       return ctx.json({ success: true });
     },
+  )
+  .delete(
+    '/:id',
+    zValidator(
+      'param',
+      z.object({
+        id: z.custom((v) => isPrefixedId(v, 'gsi')),
+      }),
+    ),
+    async (ctx) => {
+      const { id } = ctx.req.valid('param');
+      const invite = await ctx.get('userStore').deleteGameSessionInvitation(id);
+
+      try {
+        // go ahead and update the session now
+        await updateGameSessionMembers(
+          ctx.env,
+          ctx.get('userStore'),
+          invite.gameSessionId,
+        );
+      } catch (err) {
+        console.error(err);
+      }
+
+      return ctx.json({ success: true });
+    },
   );
 
 async function updateGameSessionMembers(

@@ -675,6 +675,46 @@ export class UserStore extends RpcTarget {
     return invitation;
   }
 
+  async deleteGameSessionInvitation(inviteId: PrefixedId<'gsi'>) {
+    const invitation = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('id', '=', inviteId)
+      .select(['gameSessionId', 'userId'])
+      .executeTakeFirstOrThrow();
+
+    const ownMembership = await this.#db
+      .selectFrom('GameSessionInvitation')
+      .where('gameSessionId', '=', invitation.gameSessionId)
+      .where('userId', '=', this.#userId)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!ownMembership) {
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only game session members can delete invitations',
+      );
+    }
+
+    if (
+      invitation.userId !== this.#userId &&
+      ownMembership.inviterId !== this.#userId
+    ) {
+      // only the invited user or the inviter can delete an invitation
+      throw new LongGameError(
+        LongGameError.Code.Forbidden,
+        'Only the inviter or the invited user can delete this invitation',
+      );
+    }
+
+    await this.#db
+      .deleteFrom('GameSessionInvitation')
+      .where('id', '=', inviteId)
+      .executeTakeFirstOrThrow();
+
+    return invitation;
+  }
+
   /**
    * Used to 'forget' a game session -- the session state is in Durable Objects,
    * which must be cleared separately, but deleting invitations makes the

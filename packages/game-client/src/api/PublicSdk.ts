@@ -144,6 +144,15 @@ export class PublicSdk extends BaseSdk {
       invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
     },
   );
+  cancelGameSessionInvitation = this.sdkMutation(
+    this.apiRpc.gameSessionInvitations[':id'].$delete,
+    {
+      transformInput: (input: { id: string }) => ({
+        param: { id: input.id },
+      }),
+      invalidate: [['getGameSessionInvitations'], ['getGameSessionPregame']],
+    },
+  );
   getPublicGameSessionFromInviteCode = this.sdkQuery(
     'getPublicGameSessionFromInviteCode',
     this.apiRpc.public.publicInviteGameInfo[':code'].$get,

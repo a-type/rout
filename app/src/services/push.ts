@@ -1,9 +1,10 @@
 import { VAPID_PUBLIC_KEY } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
+import { logger } from '@long-game/common';
 import { useCallback, useEffect, useState } from 'react';
 import { proxy, useSnapshot } from 'valtio';
 
-const SIMULATE = true;
+const SIMULATE = false;
 
 const subscribedState = proxy({
   subscribed: false,
@@ -12,26 +13,34 @@ const subscribedState = proxy({
 async function getRegistration() {
   if (!('serviceWorker' in navigator)) {
     // not supported
+    logger.warn('Service workers are not supported in this browser');
     return null;
   }
 
   if (!('PushManager' in window)) {
     // not supported
+    logger.warn('PushManager is not supported in this browser');
     return null;
   }
 
   const registration = await navigator.serviceWorker.getRegistration();
   if (!registration) {
     // not supported
+    logger.warn('No service worker registration found');
     return null;
   }
 
   return registration;
 }
 
-getIsSubscribedToPush().then((subscribed) => {
-  subscribedState.subscribed = !!subscribed;
-});
+getIsSubscribedToPush()
+  .then((subscribed) => {
+    subscribedState.subscribed = !!subscribed;
+  })
+  .catch((err) => {
+    subscribedState.subscribed = false;
+    logger.urgent('Error checking push subscription status', err);
+  });
 
 async function subscribeToPush() {
   const registration = await getRegistration();
@@ -144,17 +153,20 @@ export function useUnsubscribeFromPush() {
 async function getIsSubscribedToPush() {
   if (!('serviceWorker' in navigator)) {
     // not supported
+    logger.warn('Service workers are not supported in this browser');
     return false;
   }
 
   if (!('PushManager' in window)) {
     // not supported
+    logger.warn('PushManager is not supported in this browser');
     return false;
   }
 
   const registration = await navigator.serviceWorker.getRegistration();
   if (!registration) {
     // not supported
+    logger.warn('No service worker registration found');
     return false;
   }
 
@@ -163,6 +175,7 @@ async function getIsSubscribedToPush() {
     return true;
   }
 
+  logger.info('User is not subscribed to push notifications');
   return false;
 }
 

@@ -33,8 +33,6 @@ export const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
       ) && !players[friendship.id],
   );
 
-  const inviteMutation = sdkHooks.useSendGameSessionInvitation();
-
   const entries: GameSetupInviteEntryData[] = [
     ...pregame.invitations.map((invitation) => ({
       id: invitation.id,
@@ -59,43 +57,76 @@ export const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
       <H2 className="text-nowrap">Invite friends</H2>
       <Card.Grid>
         {entries?.map((entry) => (
-          <Card key={entry.id}>
-            <Card.Main>
-              <Card.Title className="flex flex-row gap-sm items-center">
-                <PlayerAvatar playerId={entry.userId} size={32} />
-                <span>{entry.displayName}</span>
-              </Card.Title>
-              {entry.status === 'uninvited' ? (
-                <Card.Content>Click to invite</Card.Content>
-              ) : (
-                <Card.Content>{entry.status}</Card.Content>
-              )}
-            </Card.Main>
-            <Card.Footer>
-              <Card.Actions>
-                {entry.status === 'uninvited' && (
-                  <Button
-                    size="small"
-                    onClick={() =>
-                      inviteMutation.mutateAsync({
-                        gameSessionId: sessionId,
-                        userId: entry.userId,
-                      })
-                    }
-                  >
-                    Invite
-                  </Button>
-                )}
-                {entry.status === 'pending' && (
-                  <Button size="small" disabled>
-                    Invite Sent
-                  </Button>
-                )}
-              </Card.Actions>
-            </Card.Footer>
-          </Card>
+          <GameSetupInviteEntry
+            key={entry.id}
+            entry={entry}
+            sessionId={sessionId}
+          />
         ))}
       </Card.Grid>
     </Box>
   );
 });
+
+function GameSetupInviteEntry({
+  entry,
+  sessionId,
+}: {
+  entry: GameSetupInviteEntryData;
+  sessionId: PrefixedId<'gs'>;
+}) {
+  const inviteMutation = sdkHooks.useSendGameSessionInvitation();
+  const cancelInviteMutation = sdkHooks.useCancelGameSessionInvitation();
+
+  return (
+    <Card key={entry.id}>
+      <Card.Main>
+        <Card.Title className="flex flex-row gap-sm items-center">
+          <PlayerAvatar playerId={entry.userId} size={32} />
+          <span>{entry.displayName}</span>
+        </Card.Title>
+        {entry.status === 'uninvited' ? (
+          <Card.Content>Click to invite</Card.Content>
+        ) : (
+          <Card.Content>{entry.status}</Card.Content>
+        )}
+      </Card.Main>
+      <Card.Footer>
+        <Card.Actions>
+          {entry.status === 'uninvited' && (
+            <Button
+              size="small"
+              onClick={() =>
+                inviteMutation.mutateAsync({
+                  gameSessionId: sessionId,
+                  userId: entry.userId,
+                })
+              }
+            >
+              Invite
+            </Button>
+          )}
+          {entry.status === 'pending' && (
+            <>
+              <Button size="small" disabled>
+                Invite Sent
+              </Button>
+              <Button
+                size="small"
+                color="attention"
+                emphasis="light"
+                onClick={() =>
+                  cancelInviteMutation.mutateAsync({
+                    id: entry.id,
+                  })
+                }
+              >
+                Cancel
+              </Button>
+            </>
+          )}
+        </Card.Actions>
+      </Card.Footer>
+    </Card>
+  );
+}
