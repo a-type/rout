@@ -18,6 +18,7 @@
     "EMAIL_FROM": "noreply@rout.games",
     // ! removes some state constraints - like letting client see global state for debugging
     "DEV_MODE": false,
+    "EMAIL_SERVICE": "ses",
   },
   "services": [
     {
@@ -60,6 +61,11 @@
       },
     ],
   },
+  "send_email": [
+    {
+      "name": "SEND_EMAIL",
+    },
+  ],
   "migrations": [
     {
       "tag": "v1",

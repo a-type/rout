@@ -156,9 +156,10 @@ export class NotificationScheduler extends DurableObject<ApiBindings> {
         })
         .onConflict((c) => c.column('id').doNothing()),
     );
-    // buffer 5 minutes
+    // buffer 5 minutes in prod, 30s in dev
+    const devMode = this.env.DEV_MODE === 'true';
     await this.#scheduler.scheduleTask(
-      new Date(Date.now() + 1000 * 60 * 5),
+      new Date(Date.now() + (devMode ? 1000 * 30 : 1000 * 60 * 5)),
       { type: 'flush' },
       'flush-notifications',
     );

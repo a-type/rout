@@ -1,20 +1,34 @@
 import { Email } from '@a-type/auth';
 import { SesEmailProvider } from '@a-type/auth-email-ses';
 import { APP_NAME, PrefixedId } from '@long-game/common';
+import { env } from 'cloudflare:workers';
 import { Context } from 'hono';
-import { Env } from '../config/ctx.js';
+import { Env } from '../config/ctx';
 
 export const email = new Email<{ env: ApiBindings }>({
-  provider: new SesEmailProvider({
-    async getConnectionInfo(baseCtx) {
-      const ctx = baseCtx as Context<Env>;
-      return {
-        accessKeyId: ctx.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: ctx.env.AWS_SECRET_ACCESS_KEY,
-        region: 'us-east-1',
-      };
-    },
-  }),
+  provider:
+    env.EMAIL_SERVICE === 'ses'
+      ? new SesEmailProvider({
+          async getConnectionInfo(baseCtx) {
+            const ctx = baseCtx as Context<Env>;
+            return {
+              accessKeyId: ctx.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: ctx.env.AWS_SECRET_ACCESS_KEY,
+              region: 'us-east-1',
+            };
+          },
+        })
+      : {
+          sendMail: async (args, ctx) => {
+            await ctx.env.SEND_EMAIL.send({
+              to: args.to,
+              subject: args.subject,
+              from: args.from,
+              text: args.text,
+              html: args.html,
+            });
+          },
+        },
 
   async getConfig(ctx) {
     return {
