@@ -13,3 +13,13 @@ body[data-cursor-grabbing='true'] .handleGrabMonitor {
 .noPointerEvents {
   pointer-events: none;
 }
+
+.removed {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.moved {
+  opacity: 0.5;
+}

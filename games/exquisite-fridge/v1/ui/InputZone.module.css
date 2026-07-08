@@ -1,0 +1,16 @@
+.main {
+  min-height: 20vh;
+  width: 100%;
+  @apply --mx-shadow(var(--m-shadow-md));
+}
+
+.zone {
+  flex: 1;
+  min-height: 48px;
+}
+
+.reset {
+  position: absolute;
+  bottom: var(--m-space-sm);
+  right: var(--m-space-sm);
+}

@@ -1,0 +1,16 @@
+.main {
+  max-width: 700px;
+  width: 100%;
+  margin-block: auto;
+}
+
+.inputZone {
+  position: sticky;
+  width: 100%;
+  top: 0;
+  z-index: 1;
+}
+
+.nextButton {
+  margin-inline: auto;
+}

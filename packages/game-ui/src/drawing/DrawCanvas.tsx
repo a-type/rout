@@ -11,7 +11,7 @@ export interface DrawCanvasProps {
   onChange?: (value: Drawing) => void;
   className?: string;
   style?: CSSProperties;
-  colorClasses?: Record<string, `fill-${string}`>;
+  colorClasses?: Record<string, string>;
   sizes?: number[];
 }
 
@@ -46,9 +46,9 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
   className,
   style,
   colorClasses = {
-    light: 'fill-main-light',
-    dark: 'fill-main-dark',
-    contrast: 'fill-black',
+    light: cls.fillMainLight,
+    dark: cls.fillMainDark,
+    contrast: cls.fillBlack,
   },
   sizes = [1, 2, 8],
 }) {

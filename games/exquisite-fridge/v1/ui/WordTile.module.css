@@ -1,0 +1,35 @@
+.root {
+  position: relative;
+  border-radius: var(--m-radius-xs);
+  @apply --mx-fg(var(--m-color-neutral-ink));
+  @apply --mx-borderColor(var(--m-color-neutral-heavy));
+  @apply --mx-shadow(1px 1px 0 1px var(--m-color-neutral-heavy));
+  @apply --mx-bg(var(--m-color-neutral-paper));
+
+  &[data-used='true'] {
+    opacity: 0.5 !important;
+  }
+}
+
+.inner {
+  padding-inline: var(--m-space-lg);
+  padding-block: var(--m-space-xs);
+  height: 100%;
+}
+
+.handwritten {
+  font-family: cursive;
+  font-size: var(--m-text-size-sm);
+}
+
+.blank {
+  @apply --mx-fg(var(--m-color-neutral-heavy));
+}
+
+.new {
+  position: absolute;
+  top: --fn-literal(-1px);
+  right: --fn-literal(-1px);
+  @apply --mx-fill(var(--m-color-main));
+  transform: rotate(5deg);
+}

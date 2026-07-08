@@ -4,6 +4,7 @@ import { HelpSurface, TokenSpace } from '@long-game/game-ui';
 import { memo, startTransition, useState } from 'react';
 import { freebieWords, WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './WordHand.module.css';
 import { WordTile as UnmemoizedWordTile } from './WordTile.js';
 
 const WordTile = memo(UnmemoizedWordTile);
@@ -51,11 +52,11 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
         />
       }
     >
-      <Box col className="px-[50px] md:px-0 w-full h-full">
-        <H4 className="text-center mb-xs">Free tiles</H4>
-        <FreebieWords className="mb-md" />
-        <H4 className="text-center mb-xs">Your pile</H4>
-        <Box surface gap="sm" p="sm" wrap className="mb-sm">
+      <Box col className={cls.main}>
+        <H4 className={cls.title}>Free tiles</H4>
+        <FreebieWords className={cls.section} />
+        <H4 className={cls.title}>Your pile</H4>
+        <Box surface gap="sm" p="sm" wrap className={cls.section}>
           <Button
             size="small"
             toggled={sortOrder === 'alpha-asc'}
@@ -69,13 +70,19 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
             placeholder="Filter..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="flex-1 min-w-4ch"
+            className={cls.input}
             aria-label="Filter words"
             name="filter-words"
             size={4}
           />
         </Box>
-        <Box gap="md" wrap full="width" layout="center start" className="pb-md">
+        <Box
+          gap="md"
+          wrap
+          full="width"
+          layout="center start"
+          className={cls.section}
+        >
           {hand
             .filter(
               (word) =>

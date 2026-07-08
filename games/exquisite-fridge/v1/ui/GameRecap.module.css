@@ -1,0 +1,21 @@
+.main {
+  max-width: 500px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.sequenceSection {
+  padding-block-end: --fn-literal(40px);
+}
+
+.fillBlack {
+  fill: var(--m-color-neutral-ink);
+}
+
+.playerAttribution {
+  font-size: var(--m-text-size-sm);
+  @apply --mx-fg(var(--m-color-main-heavy));
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}

@@ -25,3 +25,15 @@
   border-radius: var(--m-radius-lg);
   @apply --mx-borderColor(var(--m-color-neutral-ink));
 }
+
+.fillMainLight {
+  fill: var(--m-color-main-light);
+}
+
+.fillMainDark {
+  fill: var(--m-color-main-heavy);
+}
+
+.fillBlack {
+  fill: var(--m-color-neutral-ink);
+}

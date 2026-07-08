@@ -307,14 +307,15 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
         data-draggable={id}
         data-is-moved={isPortaling}
         ref={mainRef}
-        className={className}
+        className={clsx(
+          {
+            [cls.removed]: isPortaling && movedBehavior === 'remove',
+            [cls.moved]: isPortaling && movedBehavior === 'fade',
+          },
+          className,
+        )}
         animate={{
           width: isPortaling && movedBehavior === 'remove' ? 0 : undefined,
-        }}
-        style={{
-          opacity: isPortaling ? (movedBehavior === 'remove' ? 0 : 0.5) : 1,
-          position:
-            isPortaling && movedBehavior === 'remove' ? 'absolute' : undefined,
         }}
         {...rest}
       >

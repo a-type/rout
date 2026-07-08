@@ -10,11 +10,13 @@
     }
   },
   "devDependencies": {
+    "@arbor-css/postcss": "catalog:",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
     "@module-federation/enhanced": "catalog:",
     "@long-game/common": "workspace:*",
-    "unplugin-typegpu": "catalog:"
+    "unplugin-typegpu": "catalog:",
+    "@long-game/arbor-config": "workspace:*"
   }
 }

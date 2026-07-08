@@ -8,6 +8,7 @@ import {
 import { DrawCanvas } from '@long-game/game-ui/drawing';
 import { StoryStep } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './GameRecap.module.css';
 import { WordTile } from './WordTile.js';
 
 export interface GameRecapProps {}
@@ -23,7 +24,7 @@ export const GameRecap = hooks.withGame<GameRecapProps>(function GameRecap({
   return (
     <Box col full="width" grow p>
       <TopographyBackground />
-      <Box col surface gap p="md" className="max-w-500px w-full mx-auto">
+      <Box col surface gap p="md" className={cls.main}>
         <H2>That's a wrap!</H2>
         <P>Time to read our stories!</P>
         <Tabs defaultValue="0" className="w-full">
@@ -59,7 +60,7 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
       col
       gap
       style={theme.style}
-      className={clsx(theme.className, 'pb-[40px]')}
+      className={clsx(theme.className, cls.sequenceSection)}
     >
       {section.illustration && (
         <Box layout="center center">
@@ -67,7 +68,7 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
             readonly
             drawing={section.illustration}
             colorClasses={{
-              black: 'fill-black',
+              black: cls.fillBlack,
             }}
             sizes={[4]}
           />
@@ -83,8 +84,8 @@ function RecapSequenceSection({ section }: { section: StoryStep }) {
         layout="center center"
         surface
         color="primary"
-        p="sm"
-        className="text-xs color-main-dark absolute right-0 bottom-0"
+        p="md"
+        className={clsx(cls.playerAttribution, '@mode-dense')}
       >
         <PlayerAvatar playerId={section.playerId} size={20} />
         <PlayerName playerId={section.playerId} />

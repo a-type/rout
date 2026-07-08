@@ -1,3 +1,5 @@
+import { ArborPlugin } from '@arbor-css/postcss';
+import arborPreset from '@long-game/arbor-config';
 import { idToFederationId } from '@long-game/common';
 import {
   createModuleFederationConfig,
@@ -73,6 +75,13 @@ export const gameRsbuildConfig = (game) => {
           optimization: {
             realContentHash: true,
           },
+        },
+        postcss: (_, { addPlugins }) => {
+          addPlugins(
+            ArborPlugin({
+              preset: arborPreset,
+            }),
+          );
         },
       },
       server: {

@@ -38,6 +38,7 @@
   "devDependencies": {
     "@aaroon/workbox-rspack-plugin": "^0.3.3",
     "@birchill/inject-manifest-plugin": "^1.0.1",
+    "@long-game/arbor-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
     "@rsbuild/core": "catalog:",
