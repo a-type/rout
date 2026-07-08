@@ -7,6 +7,8 @@ on:
     paths:
       - "games/scribble/v1/**"
       - "packages/game-api/**"
+      - ".github/workflows/deploy-scribble-v1.yaml"
+  workflow_dispatch:
 
 env:
   GAME_REGISTRY_ORIGIN: ${{ vars.GAME_REGISTRY_ORIGIN }}

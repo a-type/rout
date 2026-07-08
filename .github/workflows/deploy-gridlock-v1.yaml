@@ -8,6 +8,7 @@ on:
       - "games/gridlock/v1/**"
       - "packages/game-api/**"
       - ".github/workflows/deploy-gridlock-v1.yaml"
+  workflow_dispatch:
 
 env:
   GAME_REGISTRY_ORIGIN: ${{ vars.GAME_REGISTRY_ORIGIN }}

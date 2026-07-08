@@ -7,6 +7,8 @@ on:
     paths:
       - "games/hearts/v1/**"
       - "packages/game-api/**"
+      - ".github/workflows/deploy-hearts-v1.yaml"
+  workflow_dispatch:
 
 env:
   GAME_REGISTRY_ORIGIN: ${{ vars.GAME_REGISTRY_ORIGIN }}

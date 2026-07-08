@@ -215,6 +215,7 @@ on:
       - "games/${name}/v1/**"
       - "packages/game-api/**"
       - ".github/workflows/deploy-${camelName}-v1.yaml"
+  workflow_dispatch:
 
 env:
   GAME_REGISTRY_ORIGIN: \${{ vars.GAME_REGISTRY_ORIGIN }}
