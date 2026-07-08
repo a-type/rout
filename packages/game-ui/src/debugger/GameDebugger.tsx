@@ -23,6 +23,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PlayerAvatar } from '../players/PlayerAvatar.js';
 import { PlayerName } from '../players/PlayerName.js';
+import cls from './GameDebugger.module.css';
 
 export interface GameDebuggerProps extends ButtonProps {}
 
@@ -173,7 +174,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
         <Tabs.Content value="globalState">
           <Box col>
             <H2>Global State</H2>
-            <pre className="text-xs">
+            <pre className={cls.pre}>
               {JSON.stringify(debug.globalState, null, 2)}
             </pre>
           </Box>
@@ -187,12 +188,12 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
                 <Tabs.Trigger value="final">Final</Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="initial">
-                <pre className="text-xs">
+                <pre className={cls.pre}>
                   {JSON.stringify(debug.initialState, null, 2)}
                 </pre>
               </Tabs.Content>
               <Tabs.Content value="final">
-                <pre className="text-xs">
+                <pre className={cls.pre}>
                   {JSON.stringify(debug.finalState, null, 2)}
                 </pre>
               </Tabs.Content>
@@ -205,7 +206,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
             {gameSuite.turnError && (
               <Box color="attention" surface col p="sm">
                 <H2>Turn Validation Error</H2>
-                <pre className="text-xs">
+                <pre className={cls.pre}>
                   {JSON.stringify(gameSuite.turnError, null, 2)}
                 </pre>
               </Box>

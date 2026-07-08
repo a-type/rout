@@ -47,7 +47,7 @@ export function SpatialChatDraggable({ className }: SpatialChatDraggableProps) {
         </Draggable.Handle>
       </Draggable>
       <Popover.Content anchor={anchorRef} className={cls.popover}>
-        <Popover.Arrow style={{ stroke: 'none' }} />
+        <Popover.Arrow className={cls.arrow} />
         <H2>Try spatial chat</H2>
         <P>
           Drop this bubble onto a supported surface to comment on things

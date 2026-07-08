@@ -83,11 +83,11 @@ function SimpleCardContent({
   return (
     <Box col layout="center center" full p="xs" className={cls.simple} border>
       <Box col className={cls.indicatorTL}>
-        <CardNumber cardRank={cardRank} className="mr-auto" />
+        <CardNumber cardRank={cardRank} className={cls.rankLeft} />
         <CardSuitIcon cardSuit={cardSuit} />
       </Box>
       <Box col className={cls.indicatorBR}>
-        <CardNumber cardRank={cardRank} className="ml-auto" />
+        <CardNumber cardRank={cardRank} className={cls.rankRight} />
         <CardSuitIcon cardSuit={cardSuit} />
       </Box>
     </Box>
@@ -278,9 +278,9 @@ function ScalingText({
         y="50%"
         dominantBaseline="middle"
         textAnchor="middle"
-        className="font-bold"
         fontSize="80"
         fill="currentColor"
+        fontWeight="600"
       >
         {children}
       </text>

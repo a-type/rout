@@ -10,6 +10,7 @@ import cls from '../chat/ChatSurface.module.css';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { Droppable } from '../dnd/Droppable.js';
 import { useRendererContext } from '../RendererProvider.js';
+import cls2 from './HelpSurface.module.css';
 
 export interface HelpSurfaceProps {
   id: string;
@@ -81,13 +82,13 @@ export function HelpSurface({
       </Droppable>
       <Popover.Content anchor={anchorRef} className={cls.popover}>
         <Popover.Arrow />
-        <Popover.Title className="capitalize">{title}</Popover.Title>
+        <Popover.Title className={cls2.title}>{title}</Popover.Title>
         {content}
         <Box
           items="center"
           justify="between"
           gap="sm"
-          style={{ flexShrink: 0, paddingBlockStart: 'var(--m-space-md)' }}
+          className={cls2.readMore}
           render={<Popover.Description />}
         >
           <Button

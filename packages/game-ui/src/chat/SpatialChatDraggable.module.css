@@ -46,6 +46,10 @@
   max-width: 400px;
 }
 
+.arrow {
+  stroke: none;
+}
+
 .mobileHelp {
   @media (min-width: 640px) {
     display: none;

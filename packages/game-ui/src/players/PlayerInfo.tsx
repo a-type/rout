@@ -7,6 +7,7 @@ import { PlayerFriendChip } from './PlayerFriendChip.js';
 import { PlayerStatusChip } from './PlayerStatusChip.js';
 import { PlayerTurnChip } from './PlayerTurnChip.js';
 import { usePlayerThemed } from './usePlayerThemed.js';
+import cls from './PlayerInfo.module.css';
 
 export interface PlayerInfoProps {
   playerId: PrefixedId<'u'>;
@@ -33,9 +34,7 @@ export const PlayerInfo = withSuspense(
         <Box
           gap
           wrap
-          style={{
-            maxWidth: '70vw',
-          }}
+          className={cls.chips}
         >
           <PlayerStatusChip playerId={playerId} />
           <PlayerTurnChip playerId={playerId} />

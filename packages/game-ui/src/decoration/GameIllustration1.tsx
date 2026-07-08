@@ -1,41 +1,23 @@
-import { CSSProperties } from 'react';
+import cls from './GameIllustration1.module.css';
 
 export interface GameIllustration1Props {
   className?: string;
 }
 
 export function GameIllustration1({ className }: GameIllustration1Props) {
-  const floatStyle: CSSProperties = {
-    animationName: 'game-illustration-1-float',
-    animationIterationCount: 'infinite',
-    animationDuration: '25s',
-    animationTimingFunction: 'linear',
-  };
   return (
     <div className={className}>
       <svg
         viewBox="0 0 512 512"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="h-full w-auto"
+        className={cls.svg}
       >
-        <style>
-          {`
-						@keyframes game-illustration-1-float {
-							0%, 100% {
-								transform: translateY(0);
-							}
-							50% {
-								transform: translateY(40px);
-							}
-						}
-					`}
-        </style>
         <Grid />
         <g>
-          <Pen style={{ ...floatStyle, animationDelay: '10s' }} />
-          <Crown style={{ ...floatStyle, animationDelay: '5s' }} />
-          <Stars style={{ ...floatStyle, animationDelay: '20s' }} />
+          <Pen className={`${cls.float} ${cls.delay10}`} />
+          <Crown className={`${cls.float} ${cls.delay5}`} />
+          <Stars className={`${cls.float} ${cls.delay20}`} />
         </g>
         <defs>
           <filter
@@ -394,9 +376,9 @@ function Grid() {
   );
 }
 
-function Pen({ style }: { style: CSSProperties }) {
+function Pen({ className }: { className: string }) {
   return (
-    <g style={style}>
+    <g className={className}>
       <g filter="url(#filter1_d_1_6)">
         <path
           d="M336.623 206.415C320.94 144.75 199.601 160.2 220.858 246.823C242.115 333.446 152.474 270.753 184.83 349.202C217.186 427.65 91.97 315.781 111.381 296.35"
@@ -423,9 +405,9 @@ function Pen({ style }: { style: CSSProperties }) {
   );
 }
 
-function Crown({ style }: { style: CSSProperties }) {
+function Crown({ className }: { className: string }) {
   return (
-    <g filter="url(#filter3_d_1_6)" style={style}>
+    <g filter="url(#filter3_d_1_6)" className={className}>
       <path
         d="M244.432 375.733L271.381 268.509C271.381 268.509 259.484 252.921 262.901 241.838C266.792 229.219 272.199 225.447 284.885 229.111C296.242 232.391 301.08 240.561 298.783 252.157C296.712 262.613 286.502 266.419 286.502 266.419L314.338 336.016L378.474 274.643C378.474 274.643 372.313 259.429 376.658 251.449C381.357 242.819 390.006 237.851 399.411 240.7C409.996 243.906 414.895 256.202 410.985 266.547C407.477 275.826 389.001 279.273 389.001 279.273L379.33 364.6L441.219 339.383C441.219 339.383 445.119 328.546 448.265 323.364C452.86 315.796 465.435 312.89 471.916 321.749C478.398 330.609 479.45 333.398 475.141 341.739C471.078 349.606 453.541 348.626 453.541 348.626L395.927 442.363L244.432 375.733Z"
         fill="var(--m-color-main-light)"
@@ -433,7 +415,7 @@ function Crown({ style }: { style: CSSProperties }) {
       />
       <path
         d="M244.432 375.733L271.381 268.509C271.381 268.509 259.484 252.921 262.901 241.838C266.792 229.219 272.199 225.447 284.885 229.111C296.242 232.391 301.08 240.561 298.783 252.157C296.712 262.613 286.502 266.419 286.502 266.419L314.338 336.016L378.474 274.643C378.474 274.643 372.313 259.429 376.658 251.449C381.357 242.819 390.006 237.851 399.411 240.7C409.996 243.906 414.895 256.202 410.985 266.547C407.477 275.826 389.001 279.273 389.001 279.273L379.33 364.6L441.219 339.383C441.219 339.383 445.119 328.546 448.265 323.364C452.86 315.796 465.435 312.89 471.916 321.749C478.398 330.609 479.45 333.398 475.141 341.739C471.078 349.606 453.541 348.626 453.541 348.626L395.927 442.363L244.432 375.733Z"
-        className="stroke-main-dark"
+        className={cls.stroke}
         strokeWidth="11"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -442,9 +424,9 @@ function Crown({ style }: { style: CSSProperties }) {
   );
 }
 
-function Stars({ style }: { style: CSSProperties }) {
+function Stars({ className }: { className: string }) {
   return (
-    <g style={style}>
+    <g className={className}>
       <g filter="url(#filter4_d_1_6)">
         <path
           d="M324.943 47.0648L356.462 78.9421C358.137 80.6364 360.713 81.0593 362.842 79.9895L402.899 59.8635L382.322 99.6908C381.229 101.808 381.622 104.388 383.298 106.082L414.817 137.96L370.58 130.697C368.229 130.311 365.897 131.483 364.803 133.6L344.226 173.427L337.463 129.111C337.104 126.756 335.269 124.9 332.917 124.514L288.681 117.251L328.738 97.1249C330.867 96.0551 332.065 93.7361 331.706 91.3806L324.943 47.0648Z"

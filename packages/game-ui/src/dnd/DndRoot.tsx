@@ -4,6 +4,7 @@ import { DebugView } from './DebugView.js';
 import { DndAlly } from './DndAlly.js';
 import { useDndStore } from './dndStore.js';
 import { useMonitorGlobalGesture } from './gestureStore.js';
+import cls from './DndRoot.module.css';
 
 export interface DndRootProps extends HTMLProps<HTMLDivElement> {
   debug?: boolean;
@@ -20,23 +21,11 @@ export function DndRoot({ children, debug, ...rest }: DndRootProps) {
       <div
         data-role="dnd-overlay"
         ref={overlayRef}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 50,
-          pointerEvents: 'none',
-          overflow: 'clip',
-        }}
+        className={cls.overlay}
       />
       <svg
         data-role="dnd-svg-overlay"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 50,
-          pointerEvents: 'none',
-          overflow: 'clip',
-        }}
+        className={cls.svgOverlay}
         ref={svgOverlayRef}
       >
         <defs>

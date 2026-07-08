@@ -17,6 +17,7 @@ import { withGame } from '@long-game/game-client';
 import { RefObject, useImperativeHandle, useRef, useTransition } from 'react';
 import { PlayerAvatar } from '../players/PlayerAvatar.js';
 import { PlayerName } from '../players/PlayerName.js';
+import cls from './ChatForm.module.css';
 
 export interface ChatFormProps extends BoxProps {
   timing?: 'round' | 'endgame';
@@ -74,7 +75,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
             onSent?.();
           });
         }}
-        className="!gap-0"
+        className={cls.form}
       >
         {(form) => (
           <>
@@ -82,10 +83,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
               name="text"
               placeholder="Say something..."
               autoSize
-              style={{
-                maxHeight: 200,
-                flex: 1,
-              }}
+              className={cls.textArea}
               textAreaClassName="w-full"
               inputRef={fieldRef}
               autoFocus={autoFocus}

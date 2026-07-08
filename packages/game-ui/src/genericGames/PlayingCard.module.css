@@ -85,6 +85,14 @@
   transform: rotate(180deg);
 }
 
+.rankLeft {
+  margin-right: auto;
+}
+
+.rankRight {
+  margin-left: auto;
+}
+
 .placeholder {
   border-style: dashed;
 
