@@ -28,11 +28,11 @@ export function SettingsPage({}: SettingsPageProps) {
     <PageRoot>
       <PageContent>
         <MainNav />
-        <Box d="col" gap>
+        <Box col gap>
           <H1>Settings</H1>
 
           <Divider />
-          <Box d="col" gap>
+          <Box col gap>
             <H2>You</H2>
             <EditProfileForm />
           </Box>
@@ -50,7 +50,7 @@ export function SettingsPage({}: SettingsPageProps) {
             </Button>
           </form>
           <Divider />
-          <Box d="col" gap>
+          <Box col gap>
             <H2>Support</H2>
             <a href="https://rout.games/privacy">Privacy Policy</a>
             <a href="https://rout.games/tos">Terms of Service</a>

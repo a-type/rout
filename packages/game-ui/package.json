@@ -27,9 +27,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts && pnpm build:uno",
+    "build": "pnpm build:ts",
     "build:ts": "tsc",
-    "build:uno": "scripts uno ./dist",
     "dev": "tsc -w --preserveWatchOutput",
     "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
@@ -64,13 +63,11 @@
   },
   "devDependencies": {
     "@long-game/scripts": "workspace:*",
-    "@long-game/uno-config": "workspace:*",
     "@storybook/react-vite": "^9.0.15",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@unocss/transformer-variant-group": "catalog:",
     "storybook": "^9.0.15",
     "typescript": "catalog:",
-    "unocss": "catalog:"
+    "typescript-plugin-css-modules": "catalog:"
   }
 }

@@ -1,12 +1,13 @@
-import { Box, Chip, H2, Tabs } from '@a-type/ui';
+import { Box, Chip, H2, Tabs, Text } from '@a-type/ui';
+import { ChatSurface, PlayerAvatar } from '@long-game/game-ui';
 import {
   DescriptionItem,
   DrawingItem,
   ItemKey,
   SequenceItem,
 } from '../definition/index';
-import { ChatSurface, PlayerAvatar } from '@long-game/game-ui';
 import { DescriptionText } from './DescriptionText.js';
+import cls from './GameRecap.module.css';
 import { PlayerAttribution } from './PlayerAttribution.js';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
@@ -24,31 +25,30 @@ export const GameRecap = hooks.withGame(function GameRecap({ gameSuite }) {
   }
 
   return (
-    <Box d="col" gap items="center" className="w-full" p>
-      <Tabs
-        defaultValue="0"
-        className="w-full flex flex-col gap-md items-center"
-      >
-        <Tabs.List className="sticky top-sm z-100">
-          {postgameGlobalState.sequences.map((seq, index) => (
-            <Tabs.Trigger key={index} value={index.toString()}>
-              Sequence {index + 1}
-            </Tabs.Trigger>
+    <Box col gap items="center" className="w-full" p>
+      <Tabs defaultValue="0">
+        <Box full="width" col gap items="center">
+          <Tabs.List className={cls.tabs}>
+            {postgameGlobalState.sequences.map((seq, index) => (
+              <Tabs.Trigger key={index} value={index.toString()}>
+                Sequence {index + 1}
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+          {postgameGlobalState.sequences.map((sequence, index) => (
+            <Tabs.Content
+              key={index}
+              value={index.toString()}
+              className={cls.tabContent}
+            >
+              <RecapSequence
+                sequence={sequence}
+                key={`seq-${index}`}
+                index={index}
+              />
+            </Tabs.Content>
           ))}
-        </Tabs.List>
-        {postgameGlobalState.sequences.map((sequence, index) => (
-          <Tabs.Content
-            key={index}
-            value={index.toString()}
-            className="w-full flex-1"
-          >
-            <RecapSequence
-              sequence={sequence}
-              key={`seq-${index}`}
-              index={index}
-            />
-          </Tabs.Content>
-        ))}
+        </Box>
       </Tabs>
     </Box>
   );
@@ -61,7 +61,7 @@ const RecapSequence = hooks.withGame<{
   index: number;
 }>(function RecapSequence({ sequence, index }) {
   return (
-    <Box d="col" gap items="center" className="w-full">
+    <Box col gap items="center" className="w-full">
       <H2>Sequence {index + 1}</H2>
       {sequence.map((item, itemIndex) => (
         <RecapItem
@@ -82,9 +82,9 @@ const RecapItem = hooks.withGame<{
 
   return (
     <ChatSurface sceneId={itemKey}>
-      <Box surface d="col" gap items="center" className="relative">
+      <Box surface col gap items="center">
         {item.kind === 'drawing' ? (
-          <Box d="col" gap items="center">
+          <Box col gap items="center">
             <Canvas
               readonly
               forceAttribution
@@ -93,12 +93,11 @@ const RecapItem = hooks.withGame<{
             />
           </Box>
         ) : (
-          <Box d="col" gap items="center">
+          <Box col gap items="center">
             <DescriptionText>{item.description}</DescriptionText>
-            <PlayerAttribution
-              playerId={item.playerId}
-              className="text-xs color-gray-dark"
-            />
+            <Text emphasis="ambient" dim>
+              <PlayerAttribution playerId={item.playerId} />
+            </Text>
           </Box>
         )}
         <RecapRating item={item} />

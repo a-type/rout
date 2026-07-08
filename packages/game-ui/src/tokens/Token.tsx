@@ -4,7 +4,7 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import { ReactNode } from 'react';
+import { memo, ReactNode } from 'react';
 import { ChatSurface } from '../chat/ChatSurface.js';
 import {
   DefaultDraggedContainer,
@@ -29,7 +29,7 @@ export interface TokenProps<Data = unknown> extends DraggableProps {
 }
 
 const tokenTags = ['token'];
-function TokenDefault({
+const TokenDefault = memo(function TokenDefault({
   children,
   data,
   className,
@@ -90,7 +90,7 @@ function TokenDefault({
       </ChatSurface>
     </Draggable>
   );
-}
+});
 
 export const Token = Object.assign(TokenDefault, {
   Handle: Draggable.Handle,

@@ -6,7 +6,8 @@
     "declaration": true,
     "declarationDir": "./dist",
     "declarationMap": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": ["src"]
 }

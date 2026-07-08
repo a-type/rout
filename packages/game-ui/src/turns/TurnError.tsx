@@ -25,7 +25,7 @@ export const TurnError = withGame<TurnErrorProps<BaseTurnError>>(
               color="attention"
               emphasis="ghost"
               onClick={() => suite.prepareTurn(null)}
-              className="ml-auto"
+              style={{ marginInline: 'auto' }}
             >
               <Icon name="refresh" /> Reset
             </Button>

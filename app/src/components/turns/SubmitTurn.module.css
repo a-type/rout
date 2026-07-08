@@ -1,0 +1,34 @@
+.button {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  @apply --mx-shadow(var(--m-shadow-lg));
+}
+
+.statuses {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-25%);
+}
+
+.progressContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: --fn-literal(3px);
+}
+.progressLine {
+  height: 100%;
+  @apply --mx-bg(var(--m-color-main));
+}
+
+.cancelContent {
+  padding: var(--m-space-sm) var(--m-space-lg);
+  padding-inline-end: 0;
+}

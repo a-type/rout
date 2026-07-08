@@ -9,11 +9,7 @@ const GameDetailsPage = () => {
     <PageRoot>
       <PageContent>
         <MainNav />
-        <Button
-          emphasis="ghost"
-          className="mr-auto my-md"
-          render={<Link to="/library" />}
-        >
+        <Button emphasis="ghost" align="start" render={<Link to="/library" />}>
           <Icon name="arrowLeft" />
           Back to library
         </Button>

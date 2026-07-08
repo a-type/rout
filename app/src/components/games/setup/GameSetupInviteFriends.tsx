@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk.js';
-import { Box, Button, Card, H2 } from '@a-type/ui';
+import { Box, Button, Card, Heading } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
@@ -54,7 +54,13 @@ export const GameSetupInviteFriends = withGame(function GameSetupInviteFriends({
 
   return (
     <Box gap="sm" col full="width" grow>
-      <H2 className="text-nowrap">Invite friends</H2>
+      <Heading
+        render={<h2 />}
+        emphasis="secondary"
+        style={{ whiteSpace: 'nowrap' }}
+      >
+        Invite friends
+      </Heading>
       <Card.Grid>
         {entries?.map((entry) => (
           <GameSetupInviteEntry
@@ -81,7 +87,7 @@ function GameSetupInviteEntry({
   return (
     <Card key={entry.id}>
       <Card.Main>
-        <Card.Title className="flex flex-row gap-sm items-center">
+        <Card.Title>
           <PlayerAvatar playerId={entry.userId} size={32} />
           <span>{entry.displayName}</span>
         </Card.Title>

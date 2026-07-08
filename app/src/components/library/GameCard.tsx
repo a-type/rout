@@ -1,6 +1,7 @@
 import { useGame } from '@/hooks/useGame';
-import { Card, Chip, clsx } from '@a-type/ui';
+import { Card, Chip, clsx, Img } from '@a-type/ui';
 import { OpenQuickBuyButton } from '../store/QuickBuyPopup.js';
+import cls from './GameCard.module.css';
 
 export interface GameCardProps {
   onClick?: (gameId: string) => void;
@@ -21,25 +22,20 @@ export function GameCard({
   return (
     <Card
       key={gameId}
-      className={clsx(
-        'aspect-1',
-        selected && 'outline-6px outline-accent outline-solid',
-        className,
-      )}
+      data-selected={selected}
+      className={clsx(cls.root, className)}
     >
       <Card.Image>
-        <img
+        <Img
           src={`/game-data/${gameId}/icon.png`}
           alt={`${game.title} icon`}
-          className="w-full h-full object-cover"
+          full
+          fit="cover"
         />
       </Card.Image>
       <Card.Main onClick={onClick ? () => onClick(gameId) : undefined}>
-        <Card.Title className="flex-shrink-0">{game.title}</Card.Title>
-        <Card.Content
-          unstyled
-          className="text-xxs flex flex-row gap-xs flex-wrap"
-        >
+        <Card.Title style={{ flexShrink: 0 }}>{game.title}</Card.Title>
+        <Card.Content unstyled className={clsx(cls.content, '@mode-denser')}>
           {game.tags.map((tag) => (
             <Chip color="primary">{tag}</Chip>
           ))}

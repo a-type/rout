@@ -2,15 +2,16 @@ import {
   AvatarList,
   Box,
   Button,
-  clsx,
   EmojiPicker,
   Icon,
   Popover,
+  Text,
   Tooltip,
 } from '@a-type/ui';
 import { GameSessionChatMessage } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '../players/PlayerAvatar.js';
+import cls from './ChatReactions.module.css';
 
 export interface ChatReactionsProps {
   message: GameSessionChatMessage;
@@ -20,14 +21,12 @@ export interface ChatReactionsProps {
 export const ChatReactions = withGame<ChatReactionsProps>(
   function ChatReactions({ message, className, gameSuite }) {
     return (
-      <Box gap wrap className={clsx('rounded-2xl', className)}>
+      <Box gap wrap round="lg" className={className}>
         <Popover>
-          <Popover.Trigger
-            render={<Button size="small" emphasis="ghost" className="p-xs" />}
-          >
+          <Popover.Trigger render={<Button size="wrapper" emphasis="ghost" />}>
             <Icon name="smile" />
           </Popover.Trigger>
-          <Popover.Content className="p-xs">
+          <Popover.Content>
             <Popover.Arrow />
             <EmojiPicker
               onValueChange={(v) => {
@@ -58,16 +57,14 @@ export const ChatReactions = withGame<ChatReactionsProps>(
                   users.includes(gameSuite.playerId) ? 'accent' : 'primary'
                 }
                 surface
-                className="cursor-pointer text-sm rounded-full py-xs px-sm"
+                className={cls.display}
                 onClick={() => gameSuite.toggleChatReaction(message, emoji)}
               >
-                <span className="hover:scale-150% transition-transform">
-                  {emoji}
-                </span>{' '}
+                <span className={cls.emoji}>{emoji}</span>{' '}
                 {users.length > 1 && (
-                  <span className="color-gray-dark font-bold text-xs">
+                  <Text emphasis="ambient" dim bold>
                     {users.length}
-                  </span>
+                  </Text>
                 )}
               </Box>
             </Tooltip>

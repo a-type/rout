@@ -26,9 +26,9 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
   return (
     <>
       <GameLayout.Controls>
-        <GameLog className="flex-1 min-h-0" />
+        <GameLog style={{ flex: 1, minHeight: 0 }} />
       </GameLayout.Controls>
-      <GameLayout.SecondaryControls className="justify-between">
+      <GameLayout.SecondaryControls style={{ justifyContent: 'space-between' }}>
         <Box justify="between" items="center">
           <Box gap="xs" items="center">
             <NavigationControls />

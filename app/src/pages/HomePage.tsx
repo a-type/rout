@@ -18,6 +18,7 @@ import {
 } from '@a-type/ui';
 import { Link } from '@verdant-web/react-router';
 import { Suspense } from 'react';
+import cls from './HomePage.module.css';
 
 export interface HomePageProps {}
 
@@ -44,11 +45,7 @@ export function HomePage({}: HomePageProps) {
           <HotseatGamesList status="active" />
         </Box>
         <Divider className="bg-gray" />
-        <Button
-          emphasis="ghost"
-          className="ml-auto color-gray-dark"
-          render={<Link to="/history" />}
-        >
+        <Button emphasis="ghost" render={<Link to="/history" />}>
           <Icon name="calendar" />
           History
           <Icon name="arrowRight" />
@@ -56,11 +53,7 @@ export function HomePage({}: HomePageProps) {
         <Suspense>
           <CompleteProfileDialog />
         </Suspense>
-        <Box
-          gap
-          justify="center"
-          className="sticky z-100 bottom-md pointer-events-none [&>*]:pointer-events-auto"
-        >
+        <Box gap justify="center" className={cls.newGameAction}>
           <NewGameAction className="shadow-lg" />
         </Box>
       </PageContent>

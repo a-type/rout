@@ -1,11 +1,12 @@
 import { Box } from '@a-type/ui';
-import { Task, TaskCompletion } from '../definition/index';
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
+import { Task, TaskCompletion } from '../definition/index';
 import { DescriptionResult } from './DescriptionResult.js';
 import { DrawingResult } from './DrawingResult.js';
 import { DrawPrompt } from './DrawPrompt.js';
 import { hooks } from './gameClient.js';
+import cls from './Gameplay.module.css';
 import { gameplayState } from './gameplayState.js';
 import { RatingsPrompt } from './RatingsPrompt.js';
 import { WritePrompt } from './WritePrompt.js';
@@ -28,9 +29,9 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
     }
 
     return (
-      <Box items="center" gap col className="px-sm py-lg lg:px-lg" full="width">
+      <Box items="center" gap col className={cls.historical} full="width">
         {initialState.tasks.map((task, index) => (
-          <Box d="col" gap p key={index}>
+          <Box col gap p key={index}>
             <ItemRenderer item={taskCompletions[index]} prompt={task} />
           </Box>
         ))}
@@ -39,17 +40,7 @@ export const Gameplay = hooks.withGame(function Client({ gameSuite }) {
   }
 
   return (
-    <Box
-      p={{
-        default: 'sm',
-        lg: 'lg',
-      }}
-      items="center"
-      full="width"
-      grow
-      col
-      gap
-    >
+    <Box className={cls.root} items="center" full="width" grow col gap>
       {initialState.tasks.map((task, index) => (
         <TaskRenderer index={index} task={task} key={index} />
       ))}
@@ -88,7 +79,7 @@ function ItemRenderer({
 
 function TaskRenderer({ index, task }: { index: number; task: Task }) {
   return (
-    <Box d="col" gap p full>
+    <Box col gap p full>
       {task.kind === 'description' ? (
         <DrawPrompt
           prompt={task.description}

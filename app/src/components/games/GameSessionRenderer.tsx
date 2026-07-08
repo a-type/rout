@@ -6,13 +6,13 @@ import {
 import {
   Box,
   Button,
-  clsx,
   ErrorBoundary,
-  H1,
+  Heading,
   Icon,
   Popover,
   Select,
   Spinner,
+  Text,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import {
@@ -28,15 +28,17 @@ import {
   SpatialChatDraggable,
   SpatialHelpDraggable,
 } from '@long-game/game-ui';
+import { ScrollTicker } from '@long-game/visual-components';
 import { Link, useNavigate } from '@verdant-web/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
-import { ScrollTicker } from '../general/ScrollTicker.js';
+import { Banner } from '../general/Banner.js';
 import { PlayerModal } from '../players/PlayerModal.js';
 import { PlayerThemeWrapper } from '../players/PlayerThemed.js';
 import { SubmitTurn } from '../turns/SubmitTurn.js';
 import { GameControls } from './GameControls.js';
 import { GameIcon } from './GameIcon.js';
 import { GameLayout, GameLayoutSkeleton } from './GameLayout.js';
+import cls from './GameSessionRenderer.module.css';
 import { GameSetup } from './setup/GameSetup.js';
 import { HotseatSetup } from './setup/HotseatSetup.js';
 
@@ -87,23 +89,15 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
     return (
       <>
         {gameSuite.gameStatus.status === 'complete' && (
-          <Box
-            color="primary"
-            surface
-            className="rounded-none flex-shrink-0 py-xs"
-          >
+          <Banner>
             <ScrollTicker>
               <span>Game Over!</span>
               <Icon name="flag" />
             </ScrollTicker>
-          </Box>
+          </Banner>
         )}
         {gameSuite.gameStatus.status === 'abandoned' && (
-          <Box
-            color="attention"
-            surface
-            className="rounded-none flex-shrink-0 py-xs"
-          >
+          <Banner className="@mode-attention">
             <ScrollTicker>
               <span>Game Abandoned 😢</span>
             </ScrollTicker>
@@ -122,7 +116,7 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
                 </Popover.Description>
               </Popover.Content>
             </Popover>
-          </Box>
+          </Banner>
         )}
         {gameSuite.gameStatus.status === 'active' && gameSuite.pickingPlayer ? (
           <HotseatPlayerSelector />
@@ -167,7 +161,13 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
       <RendererProvider value={providerValue}>
         <DndRoot
           debug={debugDnd}
-          className="w-full flex-1-0-0 min-h-0 flex flex-col"
+          style={{
+            width: '100%',
+            flex: '1 0 0',
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
           <GameLayout>
             <GameLayout.Main>
@@ -199,12 +199,12 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                 <>
                   <ErrorBoundary>
                     <Suspense>
-                      <SpatialChatDraggable className="fixed anchor-to-gameMain left-[calc(anchor(left)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                      <SpatialChatDraggable className={cls.spatialChat} />
                     </Suspense>
                   </ErrorBoundary>
                   <ErrorBoundary>
                     <Suspense>
-                      <SpatialHelpDraggable className="fixed anchor-to-gameMain right-[calc(anchor(right)+0.5rem)] bottom-[calc(anchor(bottom)+1rem)] lg:bottom-[calc(anchor(bottom)+0.5rem)] z-menu" />
+                      <SpatialHelpDraggable className={cls.spatialHelp} />
                     </Suspense>
                   </ErrorBoundary>
                 </>
@@ -224,19 +224,22 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
   const members = gameSuite.members;
 
   return (
-    <Box full col gap layout="center center" className="flex-grow">
+    <Box full col gap layout="center center" grow>
       <Box col gap="xs">
-        <div className="text-xs uppercase color-gray-dark">Hotseat</div>
-        <div className="text-sm">Round {gameSuite.latestRoundIndex + 1}</div>
+        <Text render={<h1 />} emphasis="ambient" uppercase dim>
+          Hotseat
+        </Text>
+        <Heading render={<h2 />} emphasis="secondary">
+          Round {gameSuite.latestRoundIndex + 1}
+        </Heading>
         <GameIcon
           gameId={gameSuite.gameId}
-          className="w-[200px] h-[200px] rd-md"
+          style={{ width: 200, height: 200, borderRadius: 'var(--m-radius)' }}
         />
-        <H1 className="mb-sm">Select Player</H1>
-        <Box
-          gap="sm"
-          className="grid grid-auto-rows-[1fr] grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
-        >
+        <Heading render={<h3 />} emphasis="ambient">
+          Select Player
+        </Heading>
+        <Box gap="sm" items="stretch" full="width" className={cls.playerGrid}>
           {members.map((member) => (
             <Button
               key={member.id}
@@ -245,21 +248,20 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
                   gameSuite.switchPlayer(member.id);
                 });
               }}
-              className={clsx('rounded-lg p-xs')}
+              size="small"
               emphasis={
                 gameSuite.playerStatuses[member.id]?.pendingTurn
                   ? 'default'
                   : 'ghost'
               }
+              className={cls.hotseatPlayerButton}
             >
-              <PlayerAvatar
-                playerId={member.id}
-                size={40}
-                className="rounded-md"
-              />
+              <PlayerAvatar playerId={member.id} size={40} />
               <Box gap="sm" col items="start">
-                <PlayerName playerId={member.id} disableYou />
-                <div className="text-xs color-gray-dark">
+                <Text emphasis="primary" bold>
+                  <PlayerName playerId={member.id} disableYou />
+                </Text>
+                <Text emphasis="ambient" dim>
                   {/* FIXME: clean up */}
                   {gameSuite.playerStatuses[member.id]?.pendingTurn
                     ? 'Your turn!'
@@ -268,7 +270,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
                         )
                       ? 'Played'
                       : 'Not playing'}
-                </div>
+                </Text>
               </Box>
             </Button>
           ))}
@@ -277,7 +279,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
           render={<Link to="/" />}
           emphasis="ghost"
           size="small"
-          className="mt-lg self-start"
+          align="start"
         >
           <Icon name="arrowLeft" />
           Back to Games
@@ -301,7 +303,7 @@ const HotseatBanner = withGame<{ className?: string }>(function HotseatBanner({
       items="center"
       className={className}
     >
-      <div className="font-bold">Hotseat</div>
+      <Text bold>Hotseat</Text>
       <Select
         value={gameSuite.playerId}
         onValueChange={(value) => value && gameSuite.switchPlayer(value)}

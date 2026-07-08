@@ -9,6 +9,7 @@ import {
   Button,
   H3,
   Icon,
+  Text,
   toast,
   ToggleGroup,
   withClassName,
@@ -18,6 +19,7 @@ import {
   NotificationType,
   notificationTypes,
 } from '@long-game/notifications';
+import cls from './NotificationSettings.module.css';
 
 export interface NotificationSettingsProps {}
 
@@ -29,10 +31,10 @@ export function NotificationSettings({}: NotificationSettingsProps) {
   const [subscribeToPush, isSubscribingToPush] = useSubscribeToPush();
 
   return (
-    <Box d="col" gap container>
+    <Box col gap container>
       <H3>Settings</H3>
       {canPush && !subscribedToPush && (
-        <Box surface color="primary" d="col" gap p border items="start">
+        <Box surface color="primary" col gap p border items="start">
           <div>
             <strong>Never miss a turn!</strong> Turn on notifications on this
             device.
@@ -46,7 +48,7 @@ export function NotificationSettings({}: NotificationSettingsProps) {
           </Button>
         </Box>
       )}
-      <Box d="col" gap>
+      <Box col gap>
         {notificationTypes.map((key) => {
           return (
             <NotificationSettingsRow
@@ -107,16 +109,16 @@ function NotificationSettingsRow({
   const loading = subscribingToPush || updateNotificationSettings.isPending;
 
   return (
-    <Box d="row" gap items="center" justify="between">
+    <Box gap items="center" justify="between">
       <Box col gap="sm">
         <div>{config.name}</div>
-        <div className="text-sm italic color-gray-dark">
+        <Text emphasis="ambient" italic dim>
           {config.description}
-        </div>
+        </Text>
         {config.emailRequired && (
-          <div className="text-sm italic color-gray-dark">
+          <Text emphasis="ambient" italic dim>
             Email notifications are required.
-          </div>
+          </Text>
         )}
       </Box>
       <ToggleGroup
@@ -151,10 +153,4 @@ function NotificationSettingsRow({
   );
 }
 
-const StyledToggleItem = withClassName(
-  ToggleGroup.Item,
-  'flex flex-row gap-xs items-center',
-  'disabled:(!bg-gray-light !color-gray-darker)',
-  'disabled:hover:!bg-gray-light',
-  'disabled:focus:!bg-gray-light',
-);
+const StyledToggleItem = withClassName(ToggleGroup.Item, cls.toggleItem);

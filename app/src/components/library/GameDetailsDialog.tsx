@@ -18,7 +18,11 @@ export function GameDetailsDialog({
   return (
     <Dialog>
       <Dialog.Trigger
-        render={children || <GameIcon gameId={gameId} className="w-12 h-12" />}
+        render={
+          children || (
+            <GameIcon gameId={gameId} style={{ width: 48, height: 48 }} />
+          )
+        }
       />
       <Dialog.Content width="md">
         <Dialog.Title>{game.title}</Dialog.Title>

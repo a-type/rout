@@ -22,11 +22,10 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
     (currentTurn && isPassTurn(currentTurn) && currentTurn.pass) || [];
   return (
     <Box
-      d="col"
+      col
       full
       layout="center center"
-      color="primary"
-      surface
+      surface="primary"
       gap
       p
       className={className}
@@ -83,7 +82,7 @@ export const PassZone = hooks.withGame<PassZoneProps>(function PassZone({
           }
         })}
       </CardGrid>
-      <Box className="color-gray-dark text-xs md:text-sm">
+      <Box dim className="@mode-dense">
         Drag 3 cards here to pass to another player
       </Box>
     </Box>

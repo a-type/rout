@@ -37,7 +37,6 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   if (!latestMessage) {
     return (
       <Box
-        direction="row"
         gap="sm"
         p="none"
         items="center"
@@ -79,16 +78,16 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   return null;
 });
 
-export const GameLog = withGame<{ className?: string }>(function GameLog({
-  gameSuite,
-  ...props
-}) {
+export const GameLog = withGame<{
+  className?: string;
+  style?: React.CSSProperties;
+}>(function GameLog({ gameSuite, ...props }) {
   const open = useSnapshot(localState).open;
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
   if (isLarge) {
     return (
-      <Box d="col" gap="none" p="sm" items="stretch" {...props}>
+      <Box col gap="none" p="sm" items="stretch" {...props}>
         <ChatLog log={gameSuite.combinedLog} className="px-xs" />
         <GameLogChatInput />
       </Box>
@@ -121,11 +120,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
           </Suspense>
         </Dialog.Trigger>
         <Dialog.Content width="md">
-          <Box
-            layout="stretch stretch"
-            className={clsx('w-full h-70vh')}
-            d="col"
-          >
+          <Box layout="stretch stretch" className={clsx('w-full h-70vh')} col>
             <ChatLog log={gameSuite.combinedLog} />
             <GameLogChatInput />
           </Box>

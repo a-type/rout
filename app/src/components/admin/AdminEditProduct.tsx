@@ -161,7 +161,7 @@ function ProductItemField() {
   return (
     <FieldArray name="items">
       {(arrayHelpers) => (
-        <Box d="col" gap>
+        <Box col gap>
           <H3>Games</H3>
           <Box gap wrap>
             {values.map((gameId: string) => (

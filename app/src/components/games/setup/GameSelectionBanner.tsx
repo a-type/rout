@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { GameIcon } from '../GameIcon.js';
 import { GameTitle } from '../GameTitle.js';
 import { GamePicker } from './GamePicker.js';
+import cls from './GameSelectionBanner.module.css';
 
 export const GameSelectionBanner = withGame(function GameSelectionBanner({
   gameSuite,
@@ -20,17 +21,14 @@ export const GameSelectionBanner = withGame(function GameSelectionBanner({
       justify="between"
       full="width"
       gap="sm"
-      className="z-1 text-lg md:text-xl"
+      className={cls.root}
     >
-      <div className="flex flex-row gap-md items-center">
-        <GameIcon
-          gameId={gameId}
-          className="h-48px aspect-1 rounded-sm border-black border-thin border-solid"
-        />
+      <Box gap items="center">
+        <GameIcon gameId={gameId} className={cls.icon} />
         <div className="bg-white px-sm py-xs rounded-sm">
           <GameTitle gameId={gameId} />
         </div>
-      </div>
+      </Box>
       {gameSuite.youAreLeader && (
         <Dialog>
           <Dialog.Trigger render={<Button size="small" emphasis="light" />}>

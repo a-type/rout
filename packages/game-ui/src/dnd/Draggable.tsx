@@ -22,6 +22,7 @@ import { useMergedRef } from '../hooks/useMergedRef.js';
 import { useBindBounds, useTagBounds } from './bounds.js';
 import { draggableDataRegistry } from './dataRegistry.js';
 import { useDndStore } from './dndStore.js';
+import cls from './Draggable.module.css';
 import { DragGestureContext, gesture } from './gestureStore.js';
 import { TAGS } from './tags.js';
 import { flipTransition } from './transitions.js';
@@ -198,9 +199,8 @@ function DraggableHandle({
       data-candidate={isCandidate}
       data-dragging={isDragging}
       className={clsx(
-        'select-none',
-        !disabled && 'cursor-grab',
-        !disabled && '[body.cursor-grabbing_&]:cursor-grabbing',
+        cls.handle,
+        !disabled && cls.handleGrabMonitor,
         className,
       )}
       {...rest}
@@ -293,7 +293,7 @@ const DndOverlayPortal = memo(function DndOverlayPortal({
           <DraggedRoot
             Container={DraggedContainer}
             {...rest}
-            className={clsx('pointer-events-none', className, draggedClassName)}
+            className={clsx(cls.noPointerEvents, className, draggedClassName)}
           >
             {children}
           </DraggedRoot>,

@@ -1,0 +1,6 @@
+.votes {
+  display: flex;
+  flex-direction: row;
+  gap: var(--m-space-xs);
+  align-items: center;
+}

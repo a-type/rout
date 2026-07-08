@@ -6,11 +6,12 @@ import {
   ButtonProps,
   clsx,
   H2,
-  H5,
+  Heading,
   Icon,
   Popover,
   PopoverArrow,
   ScrollArea,
+  Text,
 } from '@a-type/ui';
 import { Notification } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
@@ -18,6 +19,7 @@ import { getNotificationConfig } from '@long-game/notifications';
 import { useNavigate } from '@verdant-web/react-router';
 import { ReactElement, Suspense, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings.js';
+import cls from './NotificationsButton.module.css';
 
 export interface NotificationsButtonProps
   extends Omit<ButtonProps, 'children'> {
@@ -65,12 +67,9 @@ export const NotificationsButton = withSuspense(
             )
           }
         />
-        <Popover.Content
-          sticky
-          className="min-h-400px max-h-80vh w-500px max-w-90vw p-md flex flex-col bg-darken-1"
-        >
+        <Popover.Content sticky className={cls.content}>
           <PopoverArrow />
-          <Box gap items="center" justify="between" className="mb-md">
+          <Box gap items="center" justify="between" className={cls.contentMain}>
             <H2>Notifications</H2>
             <Box gap items="center">
               {!showSettings && (
@@ -78,8 +77,14 @@ export const NotificationsButton = withSuspense(
                   emphasis="ghost"
                   onClick={() => markAllRead.mutate(undefined)}
                 >
-                  <Icon name="check" className="relative -left-3px" />
-                  <Icon name="check" className="absolute left-13px" />
+                  <Icon
+                    name="check"
+                    style={{ position: 'relative', left: -3 }}
+                  />
+                  <Icon
+                    name="check"
+                    style={{ position: 'absolute', left: 13 }}
+                  />
                 </Button>
               )}
               <Button
@@ -92,7 +97,7 @@ export const NotificationsButton = withSuspense(
               </Button>
             </Box>
           </Box>
-          <ScrollArea className="max-h-800px min-h-0 grow shrink">
+          <ScrollArea className={cls.scrollArea}>
             {showSettings ? (
               <Suspense>
                 <NotificationSettings />
@@ -120,12 +125,7 @@ export const NotificationsButton = withSuspense(
                     )}
                   </>
                 ) : (
-                  <Box
-                    full
-                    d="col"
-                    layout="center center"
-                    className="color-gray-dark flex-1"
-                  >
+                  <Box full col layout="center center" grow dim>
                     <Icon name="bell" size={80} />
                     <span>Nothing to see here!</span>
                   </Box>
@@ -161,12 +161,14 @@ function NotificationItem({
     <Box
       key={notification.id}
       gap
-      surface={notification.readAt ? false : 'white'}
+      surface={notification.readAt ? false : 'ambient'}
       items="center"
+      p="md"
+      className="@mode-dense"
     >
       <Button
         emphasis="ghost"
-        className="flex-1 font-normal items-start text-start p-sm"
+        className={cls.markRead}
         onClick={() => {
           if (!notification.readAt) {
             markRead.mutate({ id: notification.id, read: true });
@@ -175,18 +177,17 @@ function NotificationItem({
           onClick?.();
         }}
       >
-        <Box d="col" gap="sm">
-          <H5
-            className={clsx(
-              'text-wrap',
-              notification.readAt ? 'font-normal' : '',
-            )}
+        <Box col gap="sm">
+          <Heading
+            emphasis="ambient"
+            bold={!notification.readAt}
+            className={clsx('@mode-denser')}
           >
             {config.title(notification.data, 'email')}
-          </H5>
-          <div className="text-xs text-wrap">
+          </Heading>
+          <Text emphasis="ambient">
             {config.text(notification.data, 'email')}
-          </div>
+          </Text>
         </Box>
       </Button>
       {!notification.readAt && (
@@ -202,14 +203,12 @@ function NotificationItem({
       <Button
         color="attention"
         emphasis="ghost"
-        className="flex-shrink-0"
+        style={{ flexShrink: 0 }}
         onClick={() => deleteSelf.mutate({ id: notification.id })}
       >
         <Icon name="x" />
       </Button>
-      {!notification.readAt && (
-        <div className="absolute left-0 top-0 h-3 w-3 rounded-full bg-accent-dark border-wash border-solid" />
-      )}
+      {!notification.readAt && <div className={cls.pip} />}
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { Box, Button, clsx, Dialog, Icon, P } from '@a-type/ui';
+import { Box, Button, Dialog, Icon, P, Text } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatars } from '@long-game/game-ui';
 import { useState } from 'react';
@@ -31,13 +31,13 @@ export const StartGameButton = withGame<StartGameButtonProps>(
       return (
         <Box
           surface
-          d="row"
           items="center"
           justify="center"
           gap="sm"
           p
           full="width"
-          className={clsx('mr-auto self-start', className)}
+          style={{ marginRight: 'auto', alignSelf: 'start' }}
+          className={className}
         >
           <Icon name="dots" />
           <P>Waiting for the host to start the game&hellip;</P>
@@ -52,11 +52,12 @@ export const StartGameButton = withGame<StartGameButtonProps>(
             <Button
               disabled={cannotStart || starting}
               emphasis={cannotStart ? 'default' : 'primary'}
-              className={clsx(
-                `w-full disabled:opacity-100 data-[disabled]:opacity-100 justify-center`,
-                className,
-              )}
-              color={cannotStart ? 'gray' : 'primary'}
+              className={className}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+              }}
+              color="primary"
             />
           }
         >
@@ -79,18 +80,24 @@ export const StartGameButton = withGame<StartGameButtonProps>(
           <Box col items="center" p>
             <GameIcon
               gameId={gameSuite.gameId}
-              className="w-full max-h-50vmin aspect-1 object-contain rounded-sm"
+              style={{
+                width: '100%',
+                maxHeight: '50vmin',
+                aspectRatio: '1 / 1',
+                objectFit: 'contain',
+                borderRadius: 'var(--m-radius-sm)',
+              }}
             />
-            <div className="text-lg font-bold">
+            <Text emphasis="primary" bold>
               <GameTitle gameId={gameSuite.gameId} />
-            </div>
+            </Text>
           </Box>
           <Box gap items="center">
-            <span className="font-bold">Players:</span>
+            <Text bold>Players:</Text>
             <PlayerAvatars />
           </Box>
-          <Dialog.Actions className="w-full justify-stretch">
-            <Dialog.Close className="grow justify-center">
+          <Dialog.Actions full="width" justify="stretch">
+            <Dialog.Close style={{ flex: 1, justifyContent: 'center' }}>
               Hold on...
             </Dialog.Close>
             <Button
@@ -98,7 +105,7 @@ export const StartGameButton = withGame<StartGameButtonProps>(
               loading={starting}
               onClick={startGame}
               emphasis="primary"
-              className="grow justify-center"
+              style={{ flex: 1, justifyContent: 'center' }}
             >
               Let's go!
               <Icon name="check" />

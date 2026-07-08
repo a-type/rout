@@ -2,6 +2,7 @@ import { clsx } from '@a-type/ui';
 import { isPrefixedId, ParsedChatToken } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { usePlayerThemed } from '../../players/usePlayerThemed';
+import cls from './PlayerHandleChatToken.module.css';
 
 export interface PlayerHandleChatTokenProps {
   token: ParsedChatToken;
@@ -16,10 +17,7 @@ export const PlayerHandleChatToken = withGame<PlayerHandleChatTokenProps>(
     const playerThemed = usePlayerThemed(player.id);
     return (
       <span
-        className={clsx(
-          playerThemed.className,
-          'bg-main-wash bg-darken-1 color-main-ink font-bold text-nowrap px-xs rounded',
-        )}
+        className={clsx(playerThemed.className, cls.root)}
         style={playerThemed.style}
       >
         {player.displayName}

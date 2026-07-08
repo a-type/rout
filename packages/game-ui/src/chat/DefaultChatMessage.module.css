@@ -1,0 +1,113 @@
+.root {
+  &[data-is-self='true'] {
+    margin-left: auto;
+  }
+  &[data-is-self='false'] {
+    margin-right: auto;
+  }
+
+  &[data-is-future='true'] {
+    opacity: 50%;
+  }
+
+  &[data-compact='true'] {
+    width: 100%;
+  }
+
+  &[data-compact='false'][data-is-previous-message-same-author='false'] {
+    margin-top: var(--m-space-lg);
+  }
+}
+
+.author {
+  position: absolute;
+  top: 0;
+  transform: translateY(calc(-1 * 4 / 5 * 100%));
+  border-radius: var(--m-radius-lg);
+  @apply --mx-bg(var(--m-color-main-light));
+  @apply --mx-fg(var(--m-color-neutral-ink));
+  z-index: 1;
+
+  &[data-is-self='true'] {
+    right: 0;
+  }
+  &[data-is-self='false'] {
+    left: 0;
+  }
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: --fn-literal(12px);
+  height: auto;
+}
+
+.name {
+  display: block;
+  padding-right: var(--m-space-md);
+  padding-block: var(--m-space-xs);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.metadata {
+  font-size: var(--m-prose-ambient-size);
+  padding-inline: var(--m-space-sm);
+}
+
+.popover {
+  padding: var(--m-space-sm);
+  display: flex;
+  flex-direction: row;
+  gap: var(--m-space-sm);
+  align-items: center;
+  min-width: 0;
+}
+
+.privacyTrigger {
+  padding: var(--m-space-xs);
+  margin-block: auto;
+  @apply --mx-bg(var(--m-color-accent-wash));
+  margin-top: --fn-literal(-2px);
+}
+
+.reactions {
+  position: relative;
+  top: --fn-literal(-2px);
+  z-index: 10;
+  @apply --mx-bg(var(--m-color-main-wash));
+  font-style: normal;
+}
+
+.bubble {
+  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg-lighter(2);
+  @apply --mx-fg(var(--m-color-neutral-ink));
+
+  transition: opacity var(--m-duration) var(--m-easing);
+
+  padding: var(--m-space-sm) var(--m-space-md);
+
+  &[data-is-self='true'][data-previous-message-same-author='false'] {
+    border-top-right-radius: var(--m-radius-lg);
+  }
+  &[data-is-self='false'][data-previous-message-same-author='false'] {
+    border-top-left-radius: var(--m-radius-lg);
+  }
+  &[data-is-self='true'][data-next-message-same-author='false'] {
+    border-bottom-right-radius: var(--m-radius-lg);
+  }
+  &[data-is-self='false'][data-next-message-same-author='false'] {
+    border-bottom-left-radius: var(--m-radius-lg);
+  }
+  &[data-compact='true'] {
+    border-radius: 0;
+  }
+}
+
+.content {
+  width: 100%;
+  @apply --mx-prose-secondary;
+  white-space: pre-wrap;
+  text-align: start;
+}

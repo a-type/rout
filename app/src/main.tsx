@@ -1,6 +1,6 @@
 import './bootstrap.js';
 
-import 'uno.css';
+import '@a-type/ui/main.css';
 
 // TODO: safer way to expose config to other packages -
 // maybe a shared config package.

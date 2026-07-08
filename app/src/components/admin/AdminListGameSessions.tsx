@@ -6,9 +6,9 @@ import {
   ConfirmedButton,
   Dialog,
   ErrorBoundary,
-  FieldLabel,
-  FieldRoot,
+  Field,
   Select,
+  Text,
   toast,
 } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
@@ -129,30 +129,34 @@ function PickLeader({ details }: { details: AdminGameSessionDetails }) {
   const setLeader = sdkHooks.useAdminSetGameSessionLeader();
 
   return (
-    <FieldRoot>
-      <FieldLabel htmlFor="leader">Leader</FieldLabel>
-      <Select
-        id="leader"
-        value={details.createdBy ?? null}
-        disabled={setLeader.isPending}
-        onValueChange={(memberId) => {
-          setLeader.mutate({
-            sessionId: details.id,
-            leaderId: memberId as PrefixedId<'u'>,
-          });
-        }}
-        items={members}
-      >
-        <Select.Trigger />
-        <Select.Content>
-          {members.map((m) => (
-            <Select.Item key={m.value} value={m.value}>
-              {m.label}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select>
-    </FieldRoot>
+    <Field>
+      <Field.Label htmlFor="leader">Leader</Field.Label>
+      <Field.Control
+        render={
+          <Select
+            id="leader"
+            value={details.createdBy ?? null}
+            disabled={setLeader.isPending}
+            onValueChange={(memberId) => {
+              setLeader.mutate({
+                sessionId: details.id,
+                leaderId: memberId as PrefixedId<'u'>,
+              });
+            }}
+            items={members}
+          >
+            <Select.Trigger />
+            <Select.Content>
+              {members.map((m) => (
+                <Select.Item key={m.value} value={m.value}>
+                  {m.label}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select>
+        }
+      />
+    </Field>
   );
 }
 
@@ -167,22 +171,26 @@ function RecentNotifications({ id }: { id: PrefixedId<'gs'> }) {
   const members = details.members;
 
   return (
-    <Box col gap>
-      <FieldLabel>Recent Notifications</FieldLabel>
-      {notifications.map((n) => (
-        <Box key={n.id} col gap border rounded p="sm">
-          <div>
-            <strong>{n.data.type}</strong> to user{' '}
-            {members.find((m) => m.id === n.userId)?.displayName || n.userId}
-          </div>
-          <div>{n.createdAt.toString()}</div>
-          <div>{n.readAt ? `Read at ${n.readAt.toString()}` : 'Unread'}</div>
-          {n.deliveryFailure && (
-            <pre className="text-attention-dark">{n.deliveryFailure}</pre>
-          )}
-          <pre>{JSON.stringify(n.data, null, 2)}</pre>
-        </Box>
-      ))}
-    </Box>
+    <Field>
+      <Field.Label>Recent Notifications</Field.Label>
+      <Field.Control>
+        {notifications.map((n) => (
+          <Box key={n.id} col gap border rounded p="sm">
+            <div>
+              <strong>{n.data.type}</strong> to user{' '}
+              {members.find((m) => m.id === n.userId)?.displayName || n.userId}
+            </div>
+            <div>{n.createdAt.toString()}</div>
+            <div>{n.readAt ? `Read at ${n.readAt.toString()}` : 'Unread'}</div>
+            {n.deliveryFailure && (
+              <Text render={<pre />} color="attention">
+                {n.deliveryFailure}
+              </Text>
+            )}
+            <pre>{JSON.stringify(n.data, null, 2)}</pre>
+          </Box>
+        ))}
+      </Field.Control>
+    </Field>
   );
 }

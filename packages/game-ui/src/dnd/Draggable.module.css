@@ -1,0 +1,15 @@
+.handle {
+  user-select: none;
+}
+
+.handleGrabMonitor {
+  cursor: grab;
+}
+
+body[data-cursor-grabbing='true'] .handleGrabMonitor {
+  cursor: grabbing;
+}
+
+.noPointerEvents {
+  pointer-events: none;
+}

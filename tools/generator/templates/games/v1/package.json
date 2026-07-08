@@ -29,9 +29,9 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@long-game/scripts": "workspace:*",
-    "@long-game/uno-config": "workspace:*",
     "@long-game/bundler-config": "workspace:*",
     "@rsbuild/core": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "typescript-plugin-css-modules": "catalog:"
   }
 }

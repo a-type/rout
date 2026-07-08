@@ -12,7 +12,7 @@ export function InviteCard({ session, className }: InviteCardProps) {
   return (
     <GameSummaryCard session={session} className={className}>
       <GameSummaryCard.Trigger>
-        <GameSummaryCard.Icon className="opacity-50" />
+        <GameSummaryCard.Icon style={{ opacity: 0.5 }} />
         <GameSummaryCard.Details>
           <GameSummaryCard.Title />
           <GameSessionMemberAvatars sessionId={session.id} />

@@ -22,7 +22,7 @@ export function GameLimitUpsell(props: GameLimitUpsellProps) {
       to{' '}
       {MAX_ACTIVE_GAMES_BY_ENTITLEMENT[ENTITLEMENT_NAMES.EXTRA_GAME_SESSIONS]}{' '}
       simultaneous games.
-      <P className="text-sm color-gray-dark">
+      <P emphasis="ambient" dim>
         Completed and abandoned games do not count towards your limit.
       </P>
       <GoldUpgrade />

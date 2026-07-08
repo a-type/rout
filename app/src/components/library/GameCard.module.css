@@ -1,0 +1,13 @@
+.root {
+  aspect-ratio: 1;
+  &[data-selected='true'] {
+    outline: 6px solid var(--m-color-accent);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  gap: var(--m-space-sm);
+  flex-wrap: wrap;
+}

@@ -1,0 +1,11 @@
+.layout {
+  flex-direction: column;
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.disclaimer {
+  width: 100%;
+  text-align: center;
+}

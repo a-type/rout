@@ -20,11 +20,23 @@ export function DndRoot({ children, debug, ...rest }: DndRootProps) {
       <div
         data-role="dnd-overlay"
         ref={overlayRef}
-        className="fixed inset-0 z-50 pointer-events-none overflow-hidden"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          pointerEvents: 'none',
+          overflow: 'clip',
+        }}
       />
       <svg
         data-role="dnd-svg-overlay"
-        className="fixed inset-0 z-50 pointer-events-none overflow-hidden"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          pointerEvents: 'none',
+          overflow: 'clip',
+        }}
         ref={svgOverlayRef}
       >
         <defs>

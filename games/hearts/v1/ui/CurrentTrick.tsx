@@ -14,6 +14,7 @@ import {
   isCard,
 } from '../definition/index';
 import { CardGrid } from './CardGrid.js';
+import cls from './CurrentTrick.module.css';
 import { hooks } from './gameClient.js';
 
 export interface CurrentTrickProps {
@@ -102,9 +103,9 @@ export const CurrentTrick = hooks.withGame<CurrentTrickProps>(
             .map((_, i) => (
               <PlayingCard.Placeholder key={i}>
                 {i === 0 && (
-                  <Box gap layout="center center" d="col" full>
+                  <Box gap layout="center center" col full>
                     <PlayerAvatar playerId={pendingPlayerId} size="60%" />
-                    <div className="p-sm text-center">
+                    <div className={cls.turn}>
                       {myTurn ? (
                         'Your turn!'
                       ) : (

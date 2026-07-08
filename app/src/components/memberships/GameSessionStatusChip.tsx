@@ -8,8 +8,10 @@ export interface GameSessionStatusChipProps extends ChipProps {
 export function GameSessionStatusChip({ status }: GameSessionStatusChipProps) {
   return (
     <Chip
-      color={status === 'complete' ? 'primary' : 'gray'}
-      className={clsx(status !== 'complete' && 'bg-white')}
+      emphasis="primary"
+      className={clsx(
+        status === 'complete' ? '@mode-success' : '@mode-neutral',
+      )}
     >
       <Icon
         name={

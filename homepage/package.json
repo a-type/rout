@@ -21,13 +21,10 @@
     "unplugin-typegpu": "catalog:"
   },
   "devDependencies": {
-    "@long-game/uno-config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/three": "catalog:",
-    "@unocss/transformer-variant-group": "catalog:",
     "@vitejs/plugin-react-swc": "catalog:",
-    "unocss": "catalog:",
     "vite": "catalog:"
   }
 }

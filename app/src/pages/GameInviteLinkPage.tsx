@@ -1,11 +1,10 @@
-import { Wordmark } from '@/components/brand/Wordmark';
 import { MainNav } from '@/components/nav/MainNav';
 import { EditProfileForm } from '@/components/users/EditProfile';
 import { UserAvatar } from '@/components/users/UserAvatar';
 import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, P, PageContent, PageRoot, toast } from '@a-type/ui';
-import { TopographyBackground } from '@long-game/game-ui';
+import { TopographyBackground, Wordmark } from '@long-game/game-ui';
 import { Link, useNavigate, useParams } from '@verdant-web/react-router';
 
 const GameInviteLinkPage = () => {
@@ -34,13 +33,13 @@ const GameInviteLinkPage = () => {
       <PageRoot>
         <TopographyBackground className="fixed" />
         <PageContent>
-          <Box d="col" gap layout="center center" full grow>
+          <Box col gap layout="center center" full grow>
             <Wordmark />
-            <P className="text-center">
+            <P style={{ textAlign: 'center' }}>
               You've been invited to join a game
               {game?.title ? ` of ${game.title}` : ''} on Rout!
             </P>
-            <P className="text-center">
+            <P style={{ textAlign: 'center' }}>
               Before we get started, you need to log in or create a profile.
             </P>
             <Button
@@ -67,18 +66,26 @@ const GameInviteLinkPage = () => {
       <TopographyBackground />
       <PageContent>
         <MainNav />
-        <Box d="col" gap layout="center center" full grow>
-          <UserAvatar userId={me.id} className="aspect-1 w-20vmin" />
+        <Box col gap layout="center center" full grow>
+          <UserAvatar
+            userId={me.id}
+            style={{
+              aspectRatio: '1 / 1',
+              width: '20vmin',
+            }}
+          />
           {me.displayName && (
-            <P className="font-bold text-lg">Hey {me.displayName}!</P>
+            <P bold emphasis="primary">
+              Hey {me.displayName}!
+            </P>
           )}
-          <P className="text-center">
+          <P style={{ textAlign: 'center' }}>
             You've been invited to join a game
             {game?.title ? ` of ${game.title}` : ''} on Rout!
           </P>
           {incompleteProfile ? (
-            <Box d="col" gap surface p>
-              <P className="text-center">
+            <Box col gap surface p>
+              <P style={{ textAlign: 'center' }}>
                 Before we get started, let's complete your profile.
               </P>
               <EditProfileForm />

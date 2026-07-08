@@ -1,9 +1,10 @@
 import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
-import { Box, Button, ButtonProps, Card, clsx, Dialog, Icon } from '@a-type/ui';
+import { Box, Button, ButtonProps, Card, Dialog, Icon } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
 import { Link, useSearchParams } from '@verdant-web/react-router';
 import { BuyGameProduct } from './BuyGameProduct.js';
+import { Price } from './Price.js';
 
 export interface QuickBuyPopupProps {}
 
@@ -98,17 +99,12 @@ function QuickBuyProductCard({ product }: { product: GameProduct }) {
     <Card>
       <Card.Main>
         <Card.Title>{product.name}</Card.Title>
-        <Card.Content
-          className={clsx(
-            'text-md font-bold',
-            product.isOwned && 'bg-accent-wash color-accent-ink',
-          )}
-        >
-          {product.isOwned ? 'Owned' : `$${product.priceCents / 100}`}
+        <Card.Content unstyled>
+          <Price product={product} />
         </Card.Content>
         <Card.Content>{product.gameProductItems.length} games</Card.Content>
       </Card.Main>
-      <Card.Actions className="flex-col items-start w-full">
+      <Card.Actions>
         <Button
           size="small"
           render={<Link to={`/library?productId=${product.id}`} />}

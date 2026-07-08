@@ -1,9 +1,6 @@
-import { Box, H2 } from '@a-type/ui';
-import {
-  DescriptionItem,
-  DrawingItem,
-} from '../definition/index';
+import { Box, Heading } from '@a-type/ui';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
+import { DescriptionItem, DrawingItem } from '../definition/index';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
 
@@ -15,10 +12,14 @@ export interface DrawingResultProps {
 export const DrawingResult = hooks.withGame<DrawingResultProps>(
   function DrawingResult({ gameSuite, item, prompt }) {
     return (
-      <Box d="col" gap items="center">
-        <H2 className="text-3xl text-center">
+      <Box col gap items="center">
+        <Heading
+          render={<h2 />}
+          emphasis="secondary"
+          style={{ textAlign: 'center' }}
+        >
           {prompt?.description ?? 'Free draw'}
-        </H2>
+        </Heading>
         {prompt && (
           <Box gap items="center">
             Prompt by <PlayerAvatar playerId={prompt.playerId} />

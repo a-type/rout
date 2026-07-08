@@ -12,6 +12,7 @@ import {
   NumberStepper,
   Spinner,
   Tabs,
+  Text,
 } from '@a-type/ui';
 import {
   GameSessionSuite,
@@ -98,7 +99,7 @@ export function GameDebugger({ ...props }: GameDebuggerProps) {
 type DebugData = Awaited<ReturnType<GameSessionSuite<any>['debug']>>;
 const DebuggerUi = withGame(function DebuggerUi({ gameSuite }) {
   return (
-    <Box d="col" p gap>
+    <Box col p gap>
       <IconSpritesheet />
       <H1>Game Debugger</H1>
       <ActionBar>
@@ -152,7 +153,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
     <>
       <Box gap wrap items="center">
         {gameSuite.members.map((member) => (
-          <Box key={member.id} d="col" items="center">
+          <Box key={member.id} col items="center">
             <Suspense>
               <PlayerAvatar playerId={member.id} size="60px" />
               <PlayerName playerId={member.id} />
@@ -170,7 +171,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
           <Tabs.Trigger value="rounds">Round History</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="globalState">
-          <Box d="col">
+          <Box col>
             <H2>Global State</H2>
             <pre className="text-xs">
               {JSON.stringify(debug.globalState, null, 2)}
@@ -178,9 +179,9 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
           </Box>
         </Tabs.Content>
         <Tabs.Content value="playerState">
-          <Box d="col">
+          <Box col>
             <H2>Player State</H2>
-            <Tabs className="flex flex-col min-h-0 flex-1" defaultValue="final">
+            <Tabs defaultValue="final">
               <Tabs.List>
                 <Tabs.Trigger value="initial">Initial</Tabs.Trigger>
                 <Tabs.Trigger value="final">Final</Tabs.Trigger>
@@ -199,10 +200,10 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
           </Box>
         </Tabs.Content>
         <Tabs.Content value="currentTurn">
-          <Box d="col">
+          <Box col>
             <H2>Current Turn</H2>
             {gameSuite.turnError && (
-              <Box color="attention" surface d="col" p="sm">
+              <Box color="attention" surface col p="sm">
                 <H2>Turn Validation Error</H2>
                 <pre className="text-xs">
                   {JSON.stringify(gameSuite.turnError, null, 2)}
@@ -214,7 +215,7 @@ const DebuggerContent = withGame(function DebuggerContent({ gameSuite }) {
           </Box>
         </Tabs.Content>
         <Tabs.Content value="rounds">
-          <Box d="col">
+          <Box col>
             <H2>Round History</H2>
             <NumberStepper
               value={roundIndex}
@@ -237,5 +238,9 @@ const RoundDebug = withGame<{ roundIndex: number }>(function RoundDebug({
   gameSuite,
 }) {
   const round = gameSuite.getRound(roundIndex);
-  return <pre className="text-xs">{JSON.stringify(round, null, 2)}</pre>;
+  return (
+    <Text render={<pre />} emphasis="ambient">
+      {JSON.stringify(round, null, 2)}
+    </Text>
+  );
 });

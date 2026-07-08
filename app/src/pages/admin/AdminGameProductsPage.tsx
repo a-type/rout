@@ -5,7 +5,7 @@ import { Box } from '@a-type/ui';
 
 const AdminGameProductsPage = () => {
   return (
-    <Box d="col" p gap>
+    <Box col p gap>
       <AdminCreateProduct />
       <AdminEditProduct />
       <AdminViewProducts />

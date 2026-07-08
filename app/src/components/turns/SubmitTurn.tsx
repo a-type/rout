@@ -5,6 +5,7 @@ import {
   Dialog,
   Icon,
   RelativeTime,
+  Text,
   Tooltip,
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
@@ -13,6 +14,7 @@ import { TopographyButton } from '@long-game/visual-components';
 import { motion } from 'motion/react';
 import { ReactNode, useEffect, useState } from 'react';
 import { SubmitNextSteps } from './SubmitNextSteps';
+import cls from './SubmitTurn.module.css';
 
 export interface SubmitTurnProps {
   className?: string;
@@ -158,8 +160,10 @@ const MainContent = withGame<{
     <Box col gap="lg" items="center" className={className}>
       <Box col>
         <TopographyButton
-          className="items-center justify-center w-full h-full shadow-lg disabled:(opacity-100 bg-wash color-gray border-gray) data-[disabled=true]:(opacity-100 bg-wash color-gray-border-gray) data-[disabled=true]:hover:ring-none"
-          color={gameSuite.turnError ? 'attention' : 'primary'}
+          className={clsx(cls.button, {
+            '@mode-attention': gameSuite.turnError,
+            '@mode-user': !gameSuite.turnError,
+          })}
           visuallyDisabled={cannotSubmit && !gameSuite.turnWasSubmitted}
           disableTopography={cannotSubmit}
           emphasis={cannotSubmit ? 'light' : 'primary'}
@@ -208,7 +212,7 @@ const MainContent = withGame<{
             </Button.Icon>
           )}
         </TopographyButton>
-        <PlayerStatuses className="absolute z-100 pointer-events-none bottom-0 left-50% -translate-x-1/2 translate-y-2/3" />
+        <PlayerStatuses className={cls.statuses} />
       </Box>
       {showProblemState && gameSuite.turnError && (
         <Box rounded items="center" gap surface color="attention" p border>
@@ -238,17 +242,16 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
       surface
       color={gameSuite.remoteTurnError ? 'attention' : 'accent'}
       elevated="lg"
-      p="sm"
       border
-      rounded
-      container="reset"
-      className="overflow-clip"
+      round
+      overflow="clip"
+      className={cls.cancelContent}
     >
       {gameSuite.remoteTurnError ? (
         <Box col full="width" gap>
-          <div className="font-bold color-attention-ink flex-1">
+          <Text bold color="attention" style={{ flex: 1 }}>
             {gameSuite.remoteTurnError.message}
-          </div>
+          </Text>
           <Box gap justify="between">
             <Button
               emphasis="ghost"
@@ -272,9 +275,9 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
         </Box>
       ) : (
         <>
-          <div className="font-bold color-main-ink flex-1">
+          <Text bold color="main" style={{ flex: 1 }}>
             Submitting turn...
-          </div>
+          </Text>
           <Button
             loading={gameSuite.submittingTurn}
             emphasis="primary"
@@ -289,7 +292,7 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
           >
             <Icon name="skipEnd" />
           </Button>
-          <div className="absolute bottom-0 left-0 right-0 h-3px">
+          <div className={cls.progressContainer}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '100%' }}
@@ -297,7 +300,7 @@ const CancelContent = withGame<{ duration: number }>(function CancelContent({
                 duration: duration / 1000,
                 ease: 'linear',
               }}
-              className="h-full bg-main"
+              className={cls.progressLine}
             />
           </div>
         </>

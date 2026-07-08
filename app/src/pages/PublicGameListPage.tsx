@@ -1,8 +1,9 @@
-import { Wordmark } from '@/components/brand/Wordmark';
 import { GameIcon } from '@/components/games/GameIcon';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, H1, H2, P, PageContent, PageRoot } from '@a-type/ui';
+import { Wordmark } from '@long-game/game-ui';
 import { Link } from '@verdant-web/react-router';
+import cls from './PublicGameListPage.module.css';
 
 const PublicGameListPage = () => {
   const { data: games } = sdkHooks.useGetGames({ prerelease: false });
@@ -24,13 +25,10 @@ const PublicGameListPage = () => {
               surface
               gap
               p
-              className="hover:shadow-md transition-shadow cursor-pointer"
+              className={cls.gameCard}
               render={<Link to={`/games/${game.id}`} />}
             >
-              <GameIcon
-                gameId={game.id}
-                className="w-32 h-32 border border-default rounded-md"
-              />
+              <GameIcon gameId={game.id} className={cls.gameIcon} />
               <Box col gap="sm" grow>
                 <H2>{game.title}</H2>
                 <P>{game.description}</P>

@@ -1,0 +1,9 @@
+.newGameAction {
+  position: sticky;
+  z-index: 100;
+  bottom: var(--m-space-md);
+  pointer-events: none;
+  & > * {
+    pointer-events: auto;
+  }
+}

@@ -5,7 +5,7 @@ import {
   FormikForm,
   SubmitButton,
   TextField,
-  useField
+  useField,
 } from '@a-type/ui';
 import { colors, randomItem } from '@long-game/common';
 import { TimezoneField } from '../general/TimeZoneField.js';
@@ -43,7 +43,7 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
       />
       <ColorPickerField />
       <TimezoneFieldWrapper />
-      <Box justify="end" className="w-full">
+      <Box justify="end" full="width">
         <SubmitButton>Save</SubmitButton>
       </Box>
     </FormikForm>
@@ -53,16 +53,22 @@ export function EditProfileForm({ onSave }: EditProfileProps) {
 function ColorPickerField() {
   const [{ value }, _, tools] = useField('color');
   return (
-    <div className="flex flex-row flex-wrap gap-1 items-center">
+    <Box wrap grow items="center">
       {(Object.keys(colors) as (keyof typeof colors)[]).map((palette) => (
         <Button
           type="button"
           onClick={() => tools.setValue(palette)}
-          className="w-6 h-6 p-0 bg-white items-center justify-center"
+          style={{
+            width: 32,
+            height: 32,
+            backgroundColor: 'var(--m-color-neutral-paper)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <span className="sr-only">{palette}</span>
-          <div
-            className="rounded-full"
+          <Box
+            round="lg"
             style={{
               background: colors[palette].default,
               width: value === palette ? '100%' : '50%',
@@ -71,20 +77,21 @@ function ColorPickerField() {
           />
         </Button>
       ))}
-    </div>
+    </Box>
   );
 }
 
 function TimezoneFieldWrapper() {
   const [{ value }, _, tools] = useField('timezone');
-  return (<TimezoneField
-        value={value}
-        onValueChange={(value) => {
-          if (value) {
-            tools.setValue(value);
-          }
-        }}
-        name="timezone"
-      />
+  return (
+    <TimezoneField
+      value={value}
+      onValueChange={(value) => {
+        if (value) {
+          tools.setValue(value);
+        }
+      }}
+      name="timezone"
+    />
   );
 }

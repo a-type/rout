@@ -1,0 +1,17 @@
+.image {
+  object-fit: contain;
+  @apply --mx-bg(var(--m-color-main-wash));
+  min-width: 0;
+  width: auto;
+  height: auto;
+  border-radius: var(--m-radius);
+  @apply --mx-borderColor(var(--m-color-neutral-ink));
+  flex: 1 1 0;
+}
+
+.galleryItem {
+  width: --fn-literal(80px);
+  object-fit: cover;
+  border-radius: var(--m-radius);
+  aspect-ratio: 1;
+}

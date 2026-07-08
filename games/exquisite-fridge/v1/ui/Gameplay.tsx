@@ -27,7 +27,7 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       className="bg-wash"
       grow
     >
-      <Box container="reset" gap col className="max-w-700px w-full my-auto">
+      <Box container gap col className="max-w-700px w-full my-auto">
         <Box gap full="width">
           <PromptDisplay className="grow" />
           {gameSuite.currentTurn.illustration && (

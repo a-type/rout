@@ -1,0 +1,4 @@
+.root {
+  position: stickky;
+  bottom: var(--m-space-sm);
+}

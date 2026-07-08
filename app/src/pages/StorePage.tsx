@@ -11,7 +11,7 @@ const LibraryPage = () => {
     <PageRoot>
       <PageContent>
         <MainNav />
-        <Box d="col" gap>
+        <Box col gap>
           <Tabs
             value="store"
             onValueChange={() => {
@@ -23,7 +23,7 @@ const LibraryPage = () => {
               <Tabs.Trigger value="store">Store</Tabs.Trigger>
             </Tabs.List>
           </Tabs>
-          <Box d="col" gap>
+          <Box col gap>
             <H2>Store</H2>
             <GameStore />
           </Box>

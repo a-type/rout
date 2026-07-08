@@ -12,13 +12,15 @@ export function HotseatGameSessionMenu({
   return (
     <DropdownMenu>
       <DropdownMenu.Trigger
-        render={<Button size="small" emphasis="default" className="min-h-0" />}
+        render={
+          <Button size="small" emphasis="default" style={{ minHeight: 0 }} />
+        }
       >
         <Icon name="dots" />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Item
-          color="attention"
+          className="@mode-attention"
           onClick={async () => {
             await HotseatBackend.delete(gameSessionId);
             queryClient.invalidateQueries({

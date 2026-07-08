@@ -5,7 +5,7 @@ import { UserAvatar } from '../users/UserAvatar.js';
 
 export function FriendInvites() {
   return (
-    <Box d="col" gap>
+    <Box col gap>
       <IncomingFriendRequests />
       <OutgoingFriendRequests />
     </Box>
@@ -24,7 +24,7 @@ export function IncomingFriendRequests(props: BoxProps) {
   return (
     <Box col gap {...props}>
       <H2>Incoming Invites</H2>
-      <Box d="col" gap>
+      <Box col gap>
         {invites.map((invite) => (
           <IncomingInvite key={invite.id} invite={invite} />
         ))}
@@ -36,7 +36,7 @@ export function IncomingFriendRequests(props: BoxProps) {
 function IncomingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
   return (
-    <Box d="col" surface="white" gap p>
+    <Box col surface="ambient" gap p>
       <Box items="center" gap>
         {invite.otherUser ? (
           <UserAvatar
@@ -108,7 +108,7 @@ function OutgoingInvite({ invite }: { invite: FriendshipInvitation }) {
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
 
   return (
-    <Box items="center" surface="white" gap p>
+    <Box items="center" surface="ambient" gap p>
       {invite.otherUser ? (
         <UserAvatar
           userId={invite.otherUser.id}

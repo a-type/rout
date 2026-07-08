@@ -14,6 +14,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import cls from './Topography.module.css';
 
 export interface TopographyProps {
   speed?: number;
@@ -151,10 +152,7 @@ export function Topography({
       ref={ref}
       {...rest}
     >
-      <canvas
-        className="animate-fade-in animate-duration-1s motion-reduce:hidden"
-        ref={canvasRef}
-      />
+      <canvas className={cls.canvas} ref={canvasRef} />
     </div>
   );
 }

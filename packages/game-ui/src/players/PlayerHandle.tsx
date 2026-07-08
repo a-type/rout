@@ -1,4 +1,4 @@
-import { Button, clsx } from '@a-type/ui';
+import { Button } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { Link } from '@verdant-web/react-router';
@@ -17,7 +17,7 @@ export const PlayerHandle = withGame<PlayerHandleProps>(function PlayerHandle({
 
   return (
     <Button
-      className={clsx(className, 'bg-main-wash')}
+      className={className}
       style={style}
       size="small"
       emphasis="ghost"

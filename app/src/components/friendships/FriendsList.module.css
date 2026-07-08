@@ -1,0 +1,23 @@
+.grid {
+  display: grid;
+  padding: 0;
+  grid-template-columns: repeat(3, 1fr);
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-space-sm);
+  align-items: center;
+}
+
+.avatar {
+  width: 100%;
+  height: auto;
+  border-radius: --fn-literal(999px);
+  aspect-ratio: 1 / 1;
+}

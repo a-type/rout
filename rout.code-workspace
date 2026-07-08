@@ -59,5 +59,7 @@
   ],
   "settings": {
     "unocss.exclude": ["./services"],
+    "arborCss.configLocation": "/home/a-type/long-game/app/arbor.config.ts",
+    "arborCss.warnOnArbitraryValues": true,
   },
 }

@@ -1,0 +1,12 @@
+.root {
+  z-index: 1;
+  font-size: var(--m-prose-primary-size);
+}
+
+.icon {
+  height: --fn-literal(48px);
+  aspect-ratio: 1;
+  border-radius: var(--m-radius-sm);
+  @apply --mx-borderColor(var(--m-color-neutral-ink));
+  border-width: var(--m-lineWidth-sm);
+}

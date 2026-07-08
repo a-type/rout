@@ -1,6 +1,6 @@
 import { triggerInstall, useInstallReady } from '@/services/install';
 import { getIsPWAInstalled } from '@/services/platform';
-import { Box, Button } from '@a-type/ui';
+import { Box, Button, Img } from '@a-type/ui';
 import { useLocalStorage } from '@long-game/game-client';
 
 export interface AppInstallBannerProps {
@@ -30,9 +30,10 @@ export function AppInstallBanner({ className }: AppInstallBannerProps) {
       className={className}
     >
       <Box gap items="center" className="text-pretty">
-        <img
+        <Img
+          fit="cover"
+          style={{ width: 32, height: 32 }}
           src="/icons/android/android-launchericon-48-48.png"
-          className="object-cover w-32px h-32px"
         />
         Install Rout to keep the game going!
       </Box>
@@ -43,7 +44,7 @@ export function AppInstallBanner({ className }: AppInstallBannerProps) {
         >
           No thanks
         </Button>
-        <Button emphasis="contrast" onClick={() => triggerInstall()}>
+        <Button className="@mode-inverted" onClick={() => triggerInstall()}>
           Get the app
         </Button>
       </Box>

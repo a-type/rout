@@ -1,8 +1,5 @@
 import { Box } from '@a-type/ui';
-import {
-  DescriptionItem,
-  DrawingItem,
-} from '../definition/index';
+import { DescriptionItem, DrawingItem } from '../definition/index';
 import { DescriptionText } from './DescriptionText.js';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
@@ -15,7 +12,7 @@ export interface DescriptionResultProps {
 export const DescriptionResult = hooks.withGame<DescriptionResultProps>(
   function DescriptionResult({ drawing, item }) {
     return (
-      <Box d="col" gap items="center">
+      <Box col gap items="center">
         {drawing ? (
           <Canvas drawing={drawing.drawing} playerId={drawing.playerId} />
         ) : (

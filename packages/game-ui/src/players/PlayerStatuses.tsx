@@ -1,14 +1,16 @@
-import { AvatarList, AvatarListItemRoot, clsx, Icon } from '@a-type/ui';
+import { AvatarList, AvatarListItemRoot, Icon } from '@a-type/ui';
 import { GameSessionPlayerStatus } from '@long-game/common';
 import { PlayerInfo, withGame } from '@long-game/game-client';
 import { PlayerAvatar } from './PlayerAvatar.js';
+import cls from './PlayerStatuses.module.css';
 
 export interface PlayerStatusesProps {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const PlayerStatuses = withGame<PlayerStatusesProps>(
-  function PlayerStatuses({ gameSuite, className }) {
+  function PlayerStatuses({ gameSuite, className, style, ...rest }) {
     const memberStatusList = gameSuite.members.map((member) => {
       return {
         player: gameSuite.players[member.id] ?? {
@@ -29,7 +31,12 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
     });
 
     return (
-      <AvatarList count={memberStatusList.length} className={className}>
+      <AvatarList
+        count={memberStatusList.length}
+        className={className}
+        style={{ flexShrink: 0, ...style }}
+        {...rest}
+      >
         {memberStatusList
           .sort((a, b) =>
             a.status.pendingTurn && !b.status.pendingTurn
@@ -42,9 +49,9 @@ export const PlayerStatuses = withGame<PlayerStatusesProps>(
             <AvatarListItemRoot
               index={index}
               key={player.id}
-              className={clsx(
-                !hasPlayed && !status?.pendingTurn ? 'opacity-50' : '',
-              )}
+              style={{
+                opacity: !hasPlayed && !status?.pendingTurn ? 0.5 : 1,
+              }}
             >
               <PlayerStatusAvatar
                 player={player}
@@ -68,19 +75,11 @@ function PlayerStatusAvatar({
   hasPlayed: boolean;
 }) {
   return (
-    <div className={clsx('relative overflow-visible')}>
+    <div style={{ position: 'relative', overflow: 'visible' }}>
       <PlayerAvatar playerId={player.id} interactive />
       {hasPlayed || status?.pendingTurn ? (
-        <div
-          className={clsx(
-            'absolute -top-1 -right-2px rounded-full w-16px h-16px flex items-center justify-center',
-            hasPlayed ? 'bg-success-dark' : 'bg-gray-dark',
-          )}
-        >
-          <Icon
-            name={hasPlayed ? 'check' : 'clock'}
-            className="w-10px h-10px color-white"
-          />
+        <div className={cls.statusIcon} data-has-played={hasPlayed}>
+          <Icon name={hasPlayed ? 'check' : 'clock'} size={10} />
         </div>
       ) : null}
     </div>

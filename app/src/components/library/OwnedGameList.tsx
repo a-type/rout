@@ -14,7 +14,7 @@ export function OwnedGameList({ className }: OwnedGameListProps) {
 
   if (!ownedGameIds.length) {
     return (
-      <Box d="col" gap full="width" p="xl" layout="center center">
+      <Box col gap full="width" p="xl" layout="center center">
         <span>
           Wait just a minute! You should have games here! We can fix that...
         </span>

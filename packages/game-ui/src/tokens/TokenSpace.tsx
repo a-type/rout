@@ -9,6 +9,7 @@ import {
 } from '../dnd/Droppable.js';
 import { DragGestureContext } from '../dnd/gestureStore.js';
 import { useMergedRef } from '../hooks/useMergedRef.js';
+import cls from './TokenSpace.module.css';
 import { isToken, TokenDragData } from './types.js';
 
 export interface TokenSpaceProps<T = any>
@@ -127,12 +128,7 @@ export function TokenSpace<T = any>({
       <Droppable<TokenDragData>
         id={id}
         ref={finalRef}
-        className={clsx(
-          'relative',
-          '[&[data-over-accepted=true]]:(scale-102)',
-          'transition-transform',
-          className,
-        )}
+        className={clsx(cls.root, className)}
         onDrop={(droppable, gesture) =>
           onDrop?.(droppable.data as TokenDragData<T>, gesture)
         }
@@ -150,7 +146,7 @@ export function TokenSpace<T = any>({
         side="top"
         align="center"
         sideOffset={8}
-        className="palette-attention bg-attention-wash"
+        className={clsx(cls.error, '@mode-attention')}
       >
         <Popover.Arrow />
         {overError}

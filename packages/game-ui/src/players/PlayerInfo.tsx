@@ -1,4 +1,4 @@
-import { Box, clsx, TextSkeleton } from '@a-type/ui';
+import { Box, clsx, Text, TextSkeleton } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { withSuspense } from '../withSuspense.js';
@@ -23,20 +23,20 @@ export const PlayerInfo = withSuspense(
     const { className: themeClass, style } = usePlayerThemed(playerId);
 
     return (
-      <Box d="col" gap className={clsx(themeClass, className)} style={style}>
+      <Box col gap className={clsx(themeClass, className)} style={style}>
         <Box gap items="center">
-          {player ? (
-            <PlayerAvatar
-              playerId={player.id}
-              className="flex-shrink-0 aspect-1"
-              size={64}
-            />
-          ) : null}
-          <div className="text-lg font-bold">
+          {player ? <PlayerAvatar playerId={player.id} size={64} /> : null}
+          <Text emphasis="primary" bold>
             {player?.displayName ?? 'Anonymous'}
-          </div>
+          </Text>
         </Box>
-        <Box d="row" gap wrap className="max-w-70vw">
+        <Box
+          gap
+          wrap
+          style={{
+            maxWidth: '70vw',
+          }}
+        >
           <PlayerStatusChip playerId={playerId} />
           <PlayerTurnChip playerId={playerId} />
           <PlayerFriendChip playerId={playerId} />

@@ -1,0 +1,18 @@
+.statusIcon {
+  position: absolute;
+  top: calc(-1 * var(--m-space-xs));
+  right: calc(-1 * var(--m-space-sm));
+  border-radius: 999px;
+  width: --fn-literal(16px);
+  height: --fn-literal(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @apply --mx-bg(var(--m-color-neutral-heavy));
+  &[data-has-played='true'] {
+    @apply --mx-bg(var(--m-color-palette-success-heavy));
+  }
+
+  @apply --mx-fg(var(--m-color-neutral-paper));
+}

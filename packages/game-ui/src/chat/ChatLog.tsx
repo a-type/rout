@@ -1,7 +1,14 @@
-import { Box, clsx, RelativeTime, useStayScrolledToBottom } from '@a-type/ui';
+import {
+  Box,
+  clsx,
+  RelativeTime,
+  Text,
+  useStayScrolledToBottom,
+} from '@a-type/ui';
 import { GameLogItem, useGameSuite, withGame } from '@long-game/game-client';
 import { ReactNode, Suspense } from 'react';
 import { useRendererContext } from '../RendererProvider.js';
+import cls from './ChatLog.module.css';
 
 export interface ChatLogProps {
   log: GameLogItem<any>[];
@@ -59,13 +66,13 @@ export const ChatLog = withGame<ChatLogProps>(function ChatLog({
   return (
     <Box
       grow
-      container="reset"
+      container
       overflow="auto-y"
       full
       gap="xs"
       col
       items="stretch"
-      className={clsx('pt-md', className)}
+      className={clsx(cls.root, className)}
       data-testid="game-log"
       {...props}
       {...scrollProps}
@@ -92,21 +99,23 @@ function RoundBoundary({
     members: gameSuite.members,
   });
   return (
-    <div className="w-full items-center flex flex-row text-xxs color-gray-dark">
-      <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
-      <div className="px-md py-xs">
+    <Box full="width" items="center" dim className="@mode-denser">
+      <div className={cls.line} />
+      <div className={cls.dividerText}>
         {roundLabelStart ?? `Round ${startIndex + 1}`}
-        {roundLabelEnd && <> - {roundLabelEnd ?? `Round ${endIndex + 1}`}</>}
+        {startIndex !== endIndex && roundLabelEnd && (
+          <> - {roundLabelEnd ?? `Round ${endIndex + 1}`}</>
+        )}
       </div>
-      <div className="flex flex-1 border-1px border-b-solid border-gray-dark" />
-    </div>
+      <div className={cls.line} />
+    </Box>
   );
 }
 
 export function ChatLogTimestamp({ value }: { value: Date | number }) {
   return (
-    <span className="text-xs color-gray-dark italic pl-sm">
+    <Text emphasis="ambient" dim italic className={cls.timestamp}>
       <RelativeTime value={new Date(value).getTime()} />
-    </span>
+    </Text>
   );
 }

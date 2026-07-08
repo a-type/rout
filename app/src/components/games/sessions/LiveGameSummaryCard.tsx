@@ -36,7 +36,10 @@ export const LiveGameSummaryCard = withSuspense(
               <GameSessionMemberAvatars sessionId={session.id} />
               <GameSummaryCard.Status />
               {isMyTurn && (
-                <Chip color="accent" className="bg-main-dark color-contrast">
+                <Chip
+                  emphasis="primary"
+                  className="@mode-accent @mode-inverted"
+                >
                   <Icon name="star" /> Your turn
                 </Chip>
               )}

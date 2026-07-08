@@ -1,4 +1,4 @@
-import { Box, H2, TextArea } from '@a-type/ui';
+import { Box, Heading, TextArea } from '@a-type/ui';
 import { DrawingItem } from '../definition/index';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
@@ -21,10 +21,21 @@ export const WritePrompt = hooks.withGame<WritePromptProps>(
     }
 
     return (
-      <Box d="col" gap items="center" className="m-auto w-full max-w-1200px">
+      <Box
+        col
+        gap
+        items="center"
+        full="width"
+        style={{
+          margin: 'auto',
+          maxWidth: 1200,
+        }}
+      >
         {prompt ? (
           <>
-            <H2 className="text-3xl">What is it?</H2>
+            <Heading render={<h2 />} emphasis="primary">
+              What is it?
+            </Heading>
             <Canvas
               drawing={prompt.drawing}
               playerId={prompt.playerId}
@@ -32,9 +43,19 @@ export const WritePrompt = hooks.withGame<WritePromptProps>(
             />
           </>
         ) : (
-          <H2 className="text-3xl">Write something for someone to draw.</H2>
+          <Heading render={<h2 />} emphasis="primary">
+            Write something for someone to draw.
+          </Heading>
         )}
-        <Box d="col" gap items="center" full="width" className="max-w-600px">
+        <Box
+          col
+          gap
+          items="center"
+          full="width"
+          style={{
+            maxWidth: 600,
+          }}
+        >
           <TextArea
             className="w-full"
             autoSize

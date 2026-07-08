@@ -1,4 +1,3 @@
-import { Wordmark } from '@/components/brand/Wordmark';
 import { GameIcon } from '@/components/games/GameIcon';
 import { GameManual } from '@/components/games/GameManual';
 import { GameScreenshotGallery } from '@/components/games/GameScreenshotGallery';
@@ -18,8 +17,9 @@ import {
   PageNowPlaying,
   PageRoot,
 } from '@a-type/ui';
-import { ScrollTicker } from '@long-game/game-ui';
+import { ScrollTicker, Wordmark } from '@long-game/game-ui';
 import { Link, useParams } from '@verdant-web/react-router';
+import cls from './PublicGamePage.module.css';
 
 const PublicGamePage = () => {
   const { gameId } = useParams();
@@ -37,10 +37,7 @@ const PublicGamePage = () => {
           </Box>
 
           <Box gap items="end">
-            <GameIcon
-              gameId={gameId}
-              className="w-32 h-32 border border-default rounded-md"
-            />
+            <GameIcon gameId={gameId} size={128} border />
             <Box col gap="sm" grow>
               <H1 className="font-fancy">{game.title}</H1>
               <P>{game.description}</P>
@@ -49,7 +46,11 @@ const PublicGamePage = () => {
           {!!game.screenshots?.length && (
             <GameScreenshotGallery
               gameId={gameId}
-              className="w-full max-h-60vh mb-xl"
+              style={{
+                width: '100%',
+                maxHeight: '60vh',
+                marginBottom: 80,
+              }}
             />
           )}
           <H2>How to play</H2>
@@ -68,25 +69,16 @@ const PublicGamePage = () => {
             </Box>
           </Box>
 
-          <PageNowPlaying className="flex flex-row items-center justify-center">
-            <StartHotseat
-              gameId={gameId}
-              emphasis="default"
-              className="shadow-md"
-            >
+          <PageNowPlaying className={cls.actions}>
+            <StartHotseat gameId={gameId} emphasis="default">
               <Icon name="phone" /> Try Hotseat
             </StartHotseat>
             {me ? (
-              <StartOnline
-                gameId={gameId}
-                emphasis="primary"
-                className="shadow-md"
-              >
+              <StartOnline gameId={gameId} emphasis="primary">
                 <Icon name="gamePiece" /> Play with Friends
               </StartOnline>
             ) : (
               <Button
-                className="shadow-md"
                 emphasis="primary"
                 render={<Link to={`/login?returnTo=/games/${gameId}`} />}
               >
@@ -97,9 +89,7 @@ const PublicGamePage = () => {
           </PageNowPlaying>
         </PageContent>
       </PageRoot>
-      <ScrollTicker className="bg-accent color-accent-ink w-full relative z-1 p-sm font-bold uppercase">
-        Never lose touch
-      </ScrollTicker>
+      <ScrollTicker className={cls.ticker}>Never lose touch</ScrollTicker>
     </>
   );
 };

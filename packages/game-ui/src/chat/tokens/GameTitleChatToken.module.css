@@ -1,0 +1,15 @@
+.root {
+  display: inline-flex;
+  gap: var(--m-space-xs);
+  align-items: center;
+  @apply --mx-bg(var(--m-color-main-wash));
+  padding-inline: var(--m-space-xs);
+  @apply --mx-borderColor(var(--m-color-main));
+  white-space: nowrap;
+}
+
+.icon {
+  width: --fn-literal(1.5em);
+  height: --fn-literal(1.5em);
+  border-radius: var(--m-radius-xs);
+}

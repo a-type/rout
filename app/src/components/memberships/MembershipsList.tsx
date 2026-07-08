@@ -31,10 +31,10 @@ export const MembershipsList = withSuspense(function MembershipsList({
   }
 
   return (
-    <Box d="col" gap full="width">
+    <Box col gap full="width">
       {!sessions.length && (
-        <Box full="width" layout="center center" p className="min-h-8">
-          <Box col gap className="color-gray-dark" layout="center center">
+        <Box full="width" layout="center center" p style={{ minHeight: 32 }}>
+          <Box col gap dim layout="center center">
             {emptyState || "You're not a member of any online games."}
           </Box>
         </Box>
@@ -50,7 +50,7 @@ export const MembershipsList = withSuspense(function MembershipsList({
         ))}
       </GameSummaryCard.Grid>
       {hasNextPage && (
-        <Box full="width" d="row" layout="center center">
+        <Box full="width" layout="center center">
           <Button emphasis="ghost" onClick={() => fetchNextPage()}>
             {isFetchingNextPage ? 'Loading...' : 'Load more'}
           </Button>

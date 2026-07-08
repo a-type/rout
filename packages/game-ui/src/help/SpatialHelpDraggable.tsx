@@ -1,6 +1,7 @@
 import { Button, clsx, H2, Icon, P, Popover } from '@a-type/ui';
 import { useGameSuite } from '@long-game/game-client';
 import { useRef, useState } from 'react';
+import cls from '../chat/SpatialChatDraggable.module.css';
 import { Draggable } from '../dnd/Draggable.js';
 import { DragGestureContext } from '../dnd/gestureStore.js';
 import { usePlayerThemed } from '../players/usePlayerThemed.js';
@@ -38,32 +39,27 @@ export function SpatialHelpDraggable({ className }: SpatialHelpDraggableProps) {
           ref={anchorRef}
         >
           <div
-            className={clsx(
-              theme.className,
-              'bg-main border border-main-ink rounded-full rounded-tl-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
-              '[[data-draggable-preview]_&]:(rotate--135 -translate-x-1/5 -translate-y-2/3)',
-            )}
+            data-point-left={true}
+            className={clsx(theme.className, cls.handle)}
             style={theme.style}
           >
-            <Icon
-              name="info"
-              className="[[data-draggable-preview]_&]:rotate-135"
-            />
+            <Icon name="info" className={cls.icon} />
           </div>
         </Draggable.Handle>
       </Draggable>
-      <Popover.Content
-        anchor={anchorRef}
-        className="flex flex-col items-start gap-md max-w-400px"
-      >
-        <Popover.Arrow className="stroke-none" />
+      <Popover.Content anchor={anchorRef} className={cls.popover}>
+        <Popover.Arrow style={{ stroke: 'none' }} />
         <H2>Drag for info</H2>
         <P>
           Drop this bubble onto a supported game piece to learn more about it.
         </P>
         <Popover.Close
           render={
-            <Button size="small" emphasis="primary" className="ml-auto" />
+            <Button
+              size="small"
+              emphasis="primary"
+              style={{ marginLeft: 'auto' }}
+            />
           }
         >
           Ok

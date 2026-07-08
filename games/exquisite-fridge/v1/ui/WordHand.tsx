@@ -34,7 +34,7 @@ export const WordHand = hooks.withGame<WordHandProps>(function WordHand({
   return (
     <Box
       full="width"
-      container="reset"
+      container
       className={className}
       render={
         <TokenSpace<WordItem>

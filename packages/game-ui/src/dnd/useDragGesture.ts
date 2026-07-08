@@ -158,6 +158,7 @@ export function useDragGesture(options?: DragGestureOptions) {
             ref.current?.focus();
           }, 100);
         }
+        document.body.dataset.cursorGrabbing = 'false';
         document.body.classList.remove('cursor-grabbing');
       },
       onEnd: (gesture) => {
@@ -171,6 +172,7 @@ export function useDragGesture(options?: DragGestureOptions) {
             }
           }, 100);
         }
+        document.body.dataset.cursorGrabbing = 'false';
         document.body.classList.remove('cursor-grabbing');
         cancelDrag();
 
@@ -201,6 +203,7 @@ export function useDragGesture(options?: DragGestureOptions) {
 
     buzz([{ duration: 15 }], { intensity: 0.5 });
 
+    document.body.dataset.cursorGrabbing = 'true';
     document.body.classList.add('cursor-grabbing');
     if (gesture.type === 'touch' && options?.touchOffset) {
       setVector(gesture.offset, 0, options.touchOffset);

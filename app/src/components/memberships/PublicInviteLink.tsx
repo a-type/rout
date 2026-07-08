@@ -19,7 +19,7 @@ export function PublicInviteLink({
   return (
     <CopyTextbox
       value={data.link}
-      className={clsx('text-xs', className)}
+      className={clsx('@mode-dense', className)}
       hideVisit
     />
   );

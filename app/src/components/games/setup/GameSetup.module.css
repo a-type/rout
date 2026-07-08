@@ -1,0 +1,13 @@
+.banner {
+  position: sticky;
+  bottom: var(--m-space-sm);
+  z-index: 1000;
+  overflow: clip;
+
+  anchor-name: --gameselection;
+}
+
+.root {
+  margin: auto;
+  max-width: 800px;
+}

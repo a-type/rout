@@ -11,6 +11,7 @@ import { GameSession } from '@long-game/game-client';
 import { Link } from '@verdant-web/react-router';
 import {
   createContext,
+  CSSProperties,
   PropsWithChildren,
   ReactNode,
   Suspense,
@@ -18,6 +19,7 @@ import {
 } from 'react';
 import { GameIcon } from '../GameIcon.js';
 import { GameTitle } from '../GameTitle.js';
+import cls from './GameSummaryCard.module.css';
 
 export interface GameSummaryCardProps {
   session: Pick<GameSession, 'id' | 'gameId' | 'status' | 'canDelete'>;
@@ -54,7 +56,7 @@ export function GameSummaryCardRoot({
     <Suspense fallback={<Skeleton />}>
       <GameSummaryCardContext.Provider value={{ session, hotseat }}>
         <div
-          className={clsx('group relative p-xs overflow-visible', className)}
+          className={clsx(cls.root, className)}
           style={{
             anchorName: `--${session.id}`,
           }}
@@ -72,13 +74,10 @@ export const GameSummaryCardDetails = withClassName(
     col: true,
     p: 'md',
     gap: 'sm',
-    container: 'reset',
     surface: true,
     border: true,
   }),
-  'relative z-1 shadow-md min-w-200px max-w-3/4',
-  'transition-transform',
-  'group-hover:-rotate-10 group-focus-visible/trigger:-rotate-10',
+  cls.details,
 );
 
 function GameSummaryCardTitle() {
@@ -96,14 +95,20 @@ export function GameSummaryCardTrigger({ children }: { children?: ReactNode }) {
       size="wrapper"
       emphasis="ghost"
       render={<Link to={`/${hotseat ? 'hotseat' : 'session'}/${session.id}`} />}
-      className={clsx('group/trigger relative transition-all overflow-visible')}
+      className={cls.trigger}
     >
       {children}
     </Button>
   );
 }
 
-export function GameSummaryCardIcon({ className }: { className?: string }) {
+export function GameSummaryCardIcon({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   const { session } = useGameCardSummaryContext();
 
   return (
@@ -111,20 +116,14 @@ export function GameSummaryCardIcon({ className }: { className?: string }) {
       gameId={session.gameId}
       style={
         {
+          ...style,
           positionAnchor: `--${session.id}`,
           top: 'calc(anchor(top) + (anchor-size(height) * 1 / 2))',
           left: 'calc(anchor(left) + (anchor-size(width) * 3 / 4))',
           width: 'calc(anchor-size(height) * 5 / 4)',
         } as any
       }
-      className={clsx(
-        'aspect-1',
-        'object-cover border-solid border-default border-gray-dark rd-lg',
-        'fixed transform -translate-1/2 rotate-30',
-        'group-hover:(rotate-40 scale-105) group-focus-visible/trigger:(rotate-40 scale-105) transition-all',
-        'shadow-md',
-        className,
-      )}
+      className={clsx(cls.icon, className)}
     />
   );
 }
@@ -134,17 +133,9 @@ function GameSummaryCardStatus() {
   return <GameSessionStatusChip status={session.status} />;
 }
 
-export const GameSummaryCardMenu = withClassName(
-  SlotDiv,
-  'absolute bottom-sm right-sm group-hover:-rotate-30 transition-transform',
-);
+export const GameSummaryCardMenu = withClassName(SlotDiv, cls.menu);
 
-const GameSummaryCardGrid = withClassName(
-  SlotDiv,
-  'grid',
-  'grid-cols-1 sm:grid-cols-2',
-  'gap-md py-xl',
-);
+const GameSummaryCardGrid = withClassName(SlotDiv, cls.grid);
 
 export const GameSummaryCard = Object.assign(GameSummaryCardRoot, {
   Details: GameSummaryCardDetails,

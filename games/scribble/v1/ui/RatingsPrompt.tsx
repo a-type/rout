@@ -1,4 +1,6 @@
-import { Box, Button, Icon } from '@a-type/ui';
+import { Box, Button, Heading, Icon, Text } from '@a-type/ui';
+import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
+import { useState } from 'react';
 import {
   DescriptionItem,
   DrawingItem,
@@ -7,12 +9,10 @@ import {
   RatingCompletion,
   RatingTask,
 } from '../definition/index';
-import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
-import { useState } from 'react';
 import { Canvas } from './drawing/Canvas.js';
 import { hooks } from './gameClient.js';
 import { ratingEmoji } from './ratings.js';
-import './RatingsPrompt.css';
+import cls from './RatingsPrompt.module.css';
 
 export interface RatingsPromptProps {
   task: RatingTask;
@@ -36,7 +36,7 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
     const current = task.tasksToRate[index];
 
     return (
-      <Box d="col" gap="lg" items="center" full className="flex-1">
+      <Box col gap="lg" items="center" full grow>
         <RatingView
           key={index}
           assignment={current}
@@ -53,9 +53,9 @@ export const RatingsPrompt = hooks.withGame<RatingsPromptProps>(
           <Button disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
             <Icon name="arrowLeft" />
           </Button>
-          <Box className="text-2xl">
+          <Text emphasis="primary">
             {index + 1} / {task.tasksToRate.length}
-          </Box>
+          </Text>
           <Button
             disabled={index === task.tasksToRate.length - 1}
             onClick={() => setIndex((i) => i + 1)}
@@ -98,9 +98,9 @@ const RatingView = hooks.withGame<{
   };
 
   return (
-    <Box d="col" gap items="center" className="flex-1">
+    <Box col gap items="center" grow>
       <RatingPromptDisplay item={assignment.prompt} />
-      <div className="relative mb-auto">
+      <div className={cls.ratingViewLayout}>
         <RatingCompletionDisplay item={assignment.completion} />
         {rating && (
           <div
@@ -109,19 +109,19 @@ const RatingView = hooks.withGame<{
                 '--size': '10vmin',
               } as any
             }
-            className="absolute top-[calc(var(--size)/-2)] right-[calc(var(--size)/-2)] animate-fall animate-rating font-size-[var(--size)] z10 -translate-50%"
+            className={cls.emoji}
           >
             {ratingEmoji[rating]}
           </div>
         )}
       </div>
-      <Box className="text-lg text-center">
+      <Text emphasis="primary" align="center">
         React to this{' '}
         {assignment.completion.kind === 'description'
           ? 'description'
           : 'drawing'}
         :
-      </Box>
+      </Text>
       <RatingPicker value={rating} onChange={rate} />
     </Box>
   );
@@ -134,12 +134,14 @@ function RatingPromptDisplay({
 }) {
   if (item.kind === 'description') {
     return (
-      <Box d="col" gap items="center">
+      <Box col gap items="center">
         <Box gap items="center">
           <PlayerAvatar playerId={item.playerId} />
           <PlayerName playerId={item.playerId} />
         </Box>
-        <Box className="text-3xl text-center italic">"{item.description}"</Box>
+        <Heading emphasis="primary" align="center" italic>
+          "{item.description}"
+        </Heading>
       </Box>
     );
   } else {
@@ -157,7 +159,7 @@ function RatingCompletionDisplay({
   item: DescriptionItem | DrawingItem;
 }) {
   return (
-    <Box surface p className="animate-fall">
+    <Box surface p className={cls.animateFall}>
       <RatingPromptDisplay item={item} />
     </Box>
   );
@@ -171,14 +173,14 @@ function RatingPicker({
   onChange: (rating: Rating['rating']) => void;
 }) {
   return (
-    <Box gap justify="between" items="center" className="text-2xl">
+    <Box gap justify="between" items="center" className={cls.picker}>
       {Object.keys(ratingEmoji).map((rating) => (
         <Button
           key={rating}
           emphasis="ghost"
           onClick={() => onChange(rating as Rating['rating'])}
           toggled={value === (rating as Rating['rating'])}
-          className="font-size-inherit"
+          className={cls.picker}
         >
           {ratingEmoji[rating as Rating['rating']]}
         </Button>

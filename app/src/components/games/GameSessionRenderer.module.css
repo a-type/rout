@@ -1,0 +1,32 @@
+.spatialChat {
+  left: calc(anchor(left) + var(--m-space-md));
+}
+
+.spatialHelp {
+  right: calc(anchor(right) + var(--m-space-md));
+}
+
+.spatialChat,
+.spatialHelp {
+  position: fixed;
+  position-anchor: --gameMain;
+  z-index: 100;
+
+  bottom: calc(anchor(bottom) + var(--m-space-lg));
+
+  @media (min-width: 1024px) {
+    bottom: calc(anchor(bottom) + var(--m-space-md));
+  }
+}
+
+.playerGrid {
+  display: grid;
+  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.hotseatPlayerButton {
+  width: 100%;
+  padding: var(--m-space-sm);
+  gap: var(--m-space-md);
+}

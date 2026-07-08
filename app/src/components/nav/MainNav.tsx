@@ -22,7 +22,6 @@ export function MainNav({}: MainNavProps) {
           emphasis="ghost"
           render={<Link to="/" />}
           disabled={isHome}
-          className="px-md"
         >
           <Wordmark />
         </Button>

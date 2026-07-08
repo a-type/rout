@@ -1,0 +1,15 @@
+.avatar {
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  height: auto;
+  min-height: 8px;
+  min-width: 8px;
+  overflow: clip;
+
+  @apply --mx-borderColor(var(--m-color-neutral));
+  @apply --mx-bg(var(--m-color-main-wash));
+
+  &[data-status='online'] {
+    @apply --mx-borderColor(var(--m-color-main-heavy));
+  }
+}

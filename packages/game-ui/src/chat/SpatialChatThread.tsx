@@ -4,6 +4,7 @@ import { withGame } from '@long-game/game-client';
 import { Ref, Suspense } from 'react';
 import { ChatForm } from './ChatForm.js';
 import { ChatLog } from './ChatLog.js';
+import cls from './SpatialChatThread.module.css';
 
 export interface SpatialChatThreadProps {
   chats: GameSessionChatMessage[];
@@ -29,23 +30,14 @@ function SvgTrigger({
     return (
       <Box
         layout="center center"
-        className={clsx(
-          'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
-          className,
-        )}
+        className={clsx(cls.latest, className)}
         render={<g ref={ref} />}
+        color="accent"
+        surface="primary"
+        border
         {...rest}
       >
-        <Box
-          color="accent"
-          surface
-          border
-          className={clsx(
-            /* Invisible outer area to increase touch target size */
-            'w-8px h-8px',
-          )}
-          render={<g />}
-        />
+        <g className={cls.touchTarget} />
       </Box>
     );
   }
@@ -65,21 +57,13 @@ function DomTrigger({
     return (
       <Box
         layout="center center"
-        className={clsx(
-          'w-16px h-16px cursor-pointer rounded-full hover:bg-accent-light transition',
-          className,
-        )}
+        className={clsx(cls.latest, className)}
+        color="accent"
+        surface="primary"
+        border
         {...rest}
       >
-        <Box
-          color="accent"
-          surface
-          border
-          className={clsx(
-            /* Invisible outer area to increase touch target size */
-            'w-8px h-8px',
-          )}
-        />
+        <div className={cls.touchTarget} />
       </Box>
     );
   }
@@ -101,6 +85,7 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <Popover.Trigger
+          className={cls.trigger}
           render={
             svg ? (
               <SvgTrigger className={className} latestMessage={latestMessage} />
@@ -110,7 +95,7 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
           }
         />
         <Suspense>
-          <Popover.Content side="bottom" className="p-xs w-300px">
+          <Popover.Content side="bottom" className={cls.popover}>
             <Popover.Arrow />
             <ChatLog
               log={chats.map((chat) => ({
@@ -118,10 +103,10 @@ export const SpatialChatThread = withGame<SpatialChatThreadProps>(
                 chatMessage: chat,
                 timestamp: chat.createdAt,
               }))}
-              className="w-full max-h-400px"
+              className={cls.log}
             />
             <ChatForm
-              className="w-full px-xs"
+              className={cls.form}
               sceneId={sceneId}
               position={position}
             />

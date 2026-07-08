@@ -1,8 +1,9 @@
-import { Box, Button, Icon } from '@a-type/ui';
+import { Box, Button, Icon, Text } from '@a-type/ui';
 import { useDebounced } from '@long-game/game-client';
 import { SubmitTurn } from '@long-game/game-ui';
 import { hooks } from './gameClient.js';
 import { gameplayState } from './gameplayState.js';
+import cls from './ProceedOrSubmit.module.css';
 
 export interface ProceedOrSubmitProps {
   taskIndex: number;
@@ -27,13 +28,13 @@ export const ProceedOrSubmit = hooks.withGame<ProceedOrSubmitProps>(
     );
 
     if (showSubmit) {
-      return <SubmitTurn className="sticky bottom-sm" />;
+      return <SubmitTurn className={cls.root} />;
     }
 
     return (
-      <Box d="col" items="center" gap className="sticky bottom-sm">
+      <Box col items="center" gap className={cls.root}>
         {debouncedError && (
-          <Box p gap items="center" className="color-attention-ink">
+          <Box p gap items="center" render={<Text color="attention" />}>
             <Icon name="lightbulb" />
             {debouncedError.message}
           </Box>

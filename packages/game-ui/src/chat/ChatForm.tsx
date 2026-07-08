@@ -48,7 +48,7 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
   const [sending, startTransition] = useTransition();
 
   return (
-    <Box d="col" {...props}>
+    <Box col {...props}>
       <FormikForm
         initialValues={{ text: '', recipientIds: [] as PrefixedId<'u'>[] }}
         onSubmit={(values, { resetForm, setSubmitting }) => {
@@ -82,7 +82,10 @@ export const ChatForm = withGame<ChatFormProps>(function ChatForm({
               name="text"
               placeholder="Say something..."
               autoSize
-              className="max-h-200px flex-1"
+              style={{
+                maxHeight: 200,
+                flex: 1,
+              }}
               textAreaClassName="w-full"
               inputRef={fieldRef}
               autoFocus={autoFocus}
@@ -136,7 +139,7 @@ const RecipientsField = withGame(function RecipientsField({ gameSuite }) {
         )}
       </Popover.Trigger>
       <Popover.Content>
-        <Box container="reset" d="col" gap>
+        <Box container col gap>
           <H3>Select recipients</H3>
           <Box gap items="center">
             <Checkbox

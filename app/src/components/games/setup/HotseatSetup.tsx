@@ -1,6 +1,5 @@
 import {
   Box,
-  clsx,
   H1,
   H2,
   Icon,
@@ -24,10 +23,17 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
   gameSuite,
 }) {
   return (
-    <Box col p gap grow className={clsx('m-auto max-w-800px', className)}>
-      <Box d="col" gap grow layout="center center">
+    <Box
+      col
+      p
+      gap
+      grow
+      style={{ margin: 'auto', maxWidth: 800 }}
+      className={className}
+    >
+      <Box col gap grow layout="center center">
         <H1>Hotseat Setup</H1>
-        <GameIcon gameId={gameSuite.gameId} className="w-200px" />
+        <GameIcon gameId={gameSuite.gameId} style={{ width: 200 }} />
         <H2>
           <GameTitle gameId={gameSuite.gameId} />
         </H2>
@@ -43,7 +49,7 @@ export const HotseatSetup = withGame<HotseatSetupProps>(function HotseatSetup({
 
 const HotseatPlayerSetup = withGame(function HotseatPlayerSetup({ gameSuite }) {
   return (
-    <Box d="col" gap>
+    <Box col gap>
       <H2>Players</H2>
       <NumberStepper
         value={gameSuite.members.length}
@@ -65,7 +71,7 @@ const HotseatPlayerEntry = withGame<{ playerId: PrefixedId<'u'> }>(
   function HotseatPlayerEntry({ gameSuite, playerId }) {
     const player = gameSuite.getPlayer(playerId);
     return (
-      <Box d="row" items="center" gap>
+      <Box items="center" gap>
         <PlayerAvatar playerId={playerId} size={40} />
         <LiveUpdateTextField
           value={player.displayName}

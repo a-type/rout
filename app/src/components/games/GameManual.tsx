@@ -50,7 +50,7 @@ export const GameManual = withSuspense(
     }, []);
 
     return (
-      <Box d="col" gap="lg" ref={wrapperRef}>
+      <Box col gap="lg" ref={wrapperRef}>
         <LazyMarkdown
           urlTransform={(url) => {
             const asUrl = new URL(url, window.location.origin);

@@ -1,6 +1,4 @@
-import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
 import { idToFederationId } from '@long-game/common';
-import unoConfig from '@long-game/uno-config';
 import {
   createModuleFederationConfig,
   ModuleFederationPlugin,
@@ -59,12 +57,7 @@ export const gameRsbuildConfig = (game) => {
         sourcemap: true,
         minify: false,
       },
-      plugins: [
-        pluginReact(),
-        pluginUnoCss({
-          config: unoConfig(true),
-        }),
-      ],
+      plugins: [pluginReact()],
       tools: {
         rspack: {
           plugins: [

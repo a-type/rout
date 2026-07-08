@@ -1,6 +1,7 @@
 import { Box, P } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { PublicInviteLink } from '../../memberships/PublicInviteLink.js';
+import cls from './PublicInviteLinkSection.module.css';
 
 export function PublicInviteLinkSection({
   sessionId,
@@ -9,18 +10,11 @@ export function PublicInviteLinkSection({
 }) {
   return (
     <Box col gap="sm" surface p>
-      <Box
-        gap
-        items="center"
-        d={{
-          default: 'col',
-          md: 'row',
-        }}
-      >
-        <div className="text-nowrap">Join link:</div>
+      <Box gap items="center" className={cls.layout}>
+        <div style={{ whiteSpace: 'nowrap' }}>Join link:</div>
         <PublicInviteLink gameSessionId={sessionId} />
       </Box>
-      <P className="text-xs w-full text-center">
+      <P emphasis="ambient" dim className={cls.disclaimer}>
         Be careful with this link, anyone who has it can join this game.
       </P>
     </Box>

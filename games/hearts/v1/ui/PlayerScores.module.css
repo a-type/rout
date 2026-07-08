@@ -1,0 +1,58 @@
+.root {
+  user-select: none;
+  overflow-y: auto;
+}
+
+.label {
+  font-size: var(--m-prose-ambient-size);
+  font-weight: var(--m-text-weight-bold);
+  @apply --mx-fg(var(--m-color-neutral-heavy));
+  margin-block-end: var(--m-space-sm);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--m-space-sm);
+  align-items: start;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.playerScore {
+  padding-top: var(--m-space-lg);
+}
+
+.playerHeader {
+  white-space: nowrap;
+  font-size: var(--m-text-size-sm);
+  position: absolute;
+  top: var(--m-space-sm);
+  left: var(--m-space-md);
+  z-index: 1;
+}
+
+.cardList {
+  border-radius: var(--m-radius-lg);
+  margin-block-start: var(--m-space-sm);
+  margin-block-end: 0;
+}
+.cardListContent {
+  gap: var(--m-space-xs);
+}
+
+.scoreDisplay {
+  position: sticky;
+  left: 0;
+  margin-block: auto;
+  margin-inline-end: var(--m-space-md);
+  z-index: 1;
+  font-weight: var(--m-text-weight-bold);
+  @apply --mx-bg(inherit);
+}

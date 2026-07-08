@@ -107,7 +107,7 @@ export function GameListRoot({
 
   return (
     <Box
-      d="col"
+      col
       gap
       items="stretch"
       full="width"
@@ -125,7 +125,7 @@ export function GameListRoot({
             </Collapsible.Trigger>
           </div>
           <Collapsible.Content className="bg-white">
-            <Box d="col" gap="sm" p="sm" container="reset" full items="start">
+            <Box col gap="sm" p="sm" container full items="start">
               <label className="flex items-center gap-xs cursor-pointer">
                 <Switch
                   checked={filters.available}
@@ -161,7 +161,7 @@ export function GameListRoot({
       {!filteredGames.length && (
         <Box full="width" layout="center center" className="color-gray-dark">
           {filters.available ? (
-            <Box d="col" items="center" gap>
+            <Box col items="center" gap>
               No games owned by a player match these filters.
               {filteredGamesIncludingUnowned.length ? (
                 <Button

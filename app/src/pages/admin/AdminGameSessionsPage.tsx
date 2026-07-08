@@ -3,7 +3,7 @@ import { Box } from '@a-type/ui';
 
 const AdminGameSessionsPage = () => {
   return (
-    <Box d="col" p gap>
+    <Box col p gap>
       <AdminListGameSessions />
     </Box>
   );

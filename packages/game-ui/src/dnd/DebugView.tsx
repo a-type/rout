@@ -45,7 +45,15 @@ export function DebugView({}: DebugViewProps) {
 
   return (
     <canvas
-      className="fixed inset-0 w-full h-full z-1000000 pointer-events-none opacity-50"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 999999,
+        pointerEvents: 'none',
+        opacity: 0.5,
+      }}
       ref={ref}
     />
   );

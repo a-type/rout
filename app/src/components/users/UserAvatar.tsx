@@ -1,6 +1,6 @@
 import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
-import { Avatar, AvatarProps, clsx } from '@a-type/ui';
+import { Avatar, AvatarProps } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withSuspense } from '@long-game/game-ui';
 
@@ -29,7 +29,11 @@ export const UserAvatar = withSuspense(
         imageSrc={`${API_ORIGIN}/users/${user.id}/avatar`}
         name={user.displayName}
         crossOrigin="use-credentials"
-        className={clsx('aspect-1 overflow-hidden', rest.className)}
+        style={{
+          aspectRatio: '1 / 1',
+          overflow: 'clip',
+        }}
+        className={rest.className}
       />
     );
   },
@@ -50,7 +54,11 @@ export const MyAvatar = withSuspense(
         imageSrc={`${API_ORIGIN}/users/${user.id}/avatar`}
         name={user?.displayName}
         crossOrigin="use-credentials"
-        className={clsx('aspect-1 overflow-hidden', props.className)}
+        style={{
+          aspectRatio: '1 / 1',
+          overflow: 'clip',
+        }}
+        className={props.className}
       />
     );
   },

@@ -1,12 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk';
-import {
-  Button,
-  ButtonProps,
-  clsx,
-  DropdownMenu,
-  Icon,
-  toast,
-} from '@a-type/ui';
+import { Button, ButtonProps, DropdownMenu, Icon, toast } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 
 export interface LiveGameSessionMenuProps extends ButtonProps {
@@ -34,7 +27,8 @@ export function LiveGameSessionMenu({
           <Button
             size="small"
             emphasis="default"
-            className={clsx('min-h-0', className)}
+            style={{ minHeight: 0 }}
+            className={className}
             {...rest}
           />
         }
@@ -49,7 +43,7 @@ export function LiveGameSessionMenu({
               toast(`Game deleted.`);
               onDeleteOrAbandon?.();
             }}
-            color="attention"
+            className="@mode-attention"
           >
             Delete
             <DropdownMenu.ItemRightSlot>
@@ -68,7 +62,7 @@ export function LiveGameSessionMenu({
               onDeleteOrAbandon?.();
               toast(`You abandoned this game.`);
             }}
-            color="attention"
+            className="@mode-attention"
           >
             Abandon
             <DropdownMenu.ItemRightSlot>

@@ -10,14 +10,11 @@
     }
   },
   "devDependencies": {
-    "unocss": "catalog:",
-    "@a-type/rsbuild-plugin-unocss": "catalog:",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
     "@module-federation/enhanced": "catalog:",
     "@long-game/common": "workspace:*",
-    "@long-game/uno-config": "workspace:*",
     "unplugin-typegpu": "catalog:"
   }
 }

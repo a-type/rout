@@ -12,12 +12,11 @@ export function Invitations({}: InvitationsProps) {
   }
 
   return (
-    <Box direction="col">
+    <Box col>
       <H1>Invitations</H1>
       {invitations?.map((i) => (
         <Box
           key={i.id}
-          direction="row"
           justify="between"
           render={<Link to={`/session/${i.gameSessionId}`} />}
         >
