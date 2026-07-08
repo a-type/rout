@@ -1,0 +1,8 @@
+.content {
+  text-wrap: pretty;
+}
+
+.icon {
+  width: --fn-literal(32px);
+  height: --fn-literal(32px);
+}

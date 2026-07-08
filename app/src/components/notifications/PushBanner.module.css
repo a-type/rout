@@ -1,0 +1,9 @@
+.banner {
+  position: fixed;
+  top: var(--m-space-md);
+  left: 50%;
+  width: 95vw;
+  max-width: 600px;
+  transform: translateX(-50%);
+  z-index: 50;
+}

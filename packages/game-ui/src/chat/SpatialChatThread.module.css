@@ -1,0 +1,38 @@
+.latest {
+  width: --fn-literal(16px);
+  height: --fn-literal(16px);
+  cursor: pointer;
+  border-radius: --fn-literal(999px);
+
+  transition: all var(--m-duration) var(--m-easing);
+
+  &:hover {
+    @apply --mx-bg(var(--m-color-accent-light));
+  }
+}
+
+.touchTarget {
+  position: absolute;
+  width: --fn-literal(24px);
+  height: --fn-literal(24px);
+}
+
+.popover {
+  padding: var(--m-space-xs);
+  width: --fn-literal(300px);
+}
+
+.log {
+  width: 100%;
+  max-height: 400px;
+}
+
+.form {
+  width: 100%;
+  padding-inline: var(--m-space-xs);
+}
+
+.trigger {
+  min-width: 0;
+  min-height: 0;
+}

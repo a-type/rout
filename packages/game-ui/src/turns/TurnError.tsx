@@ -1,6 +1,7 @@
 import { Box, BoxProps, Button, CollapsibleSimple, Icon } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { BaseTurnError } from '@long-game/game-definition';
+import cls from './TurnError.module.css';
 
 export interface TurnErrorProps<TErr> extends BoxProps {
   showReset?: boolean;
@@ -25,7 +26,7 @@ export const TurnError = withGame<TurnErrorProps<BaseTurnError>>(
               color="attention"
               emphasis="ghost"
               onClick={() => suite.prepareTurn(null)}
-              className="ml-auto"
+              className={cls.resetButton}
             >
               <Icon name="refresh" /> Reset
             </Button>

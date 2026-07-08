@@ -1,0 +1,38 @@
+.svg {
+  height: 100%;
+  width: auto;
+}
+
+.float {
+  animation-name: game-illustration-1-float;
+  animation-iteration-count: infinite;
+  animation-duration: 25s;
+  animation-timing-function: linear;
+}
+
+.delay5 {
+  animation-delay: 5s;
+}
+
+.delay10 {
+  animation-delay: 10s;
+}
+
+.delay20 {
+  animation-delay: 20s;
+}
+
+.stroke {
+  stroke: var(--m-color-main-dark);
+}
+
+@keyframes game-illustration-1-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(40px);
+  }
+}

@@ -1,0 +1,8 @@
+.price {
+  font-size: var(--m-text-size-md);
+  font-weight: var(--m-text-weight-bold);
+  &[data-owned='true'] {
+    @apply --mx-bg(var(--m-color-palette-success-wash));
+    @apply --mx-fg(var(--m-color-palette-success-ink));
+  }
+}

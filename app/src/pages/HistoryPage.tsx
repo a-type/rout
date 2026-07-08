@@ -9,7 +9,7 @@ const HistoryPage = () => {
     <PageRoot>
       <PageContent>
         <MainNav />
-        <Box full d="col" gap>
+        <Box full col gap>
           <H1>Game history</H1>
           <MembershipsList />
         </Box>

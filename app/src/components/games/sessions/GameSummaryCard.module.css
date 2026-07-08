@@ -1,0 +1,65 @@
+.root {
+  position: relative;
+  padding: var(--m-space-xs);
+  overflow: visible;
+}
+
+.details {
+  position: relative;
+  z-index: 1;
+  @apply --mx-shadow(var(--m-shadow-md));
+  min-width: 200px;
+  max-width: 75%;
+
+  transition: transform var(--m-duration) var(--m-easing);
+
+  .root:hover &,
+  .trigger:focus-visible & {
+    transform: rotate(-10deg);
+  }
+}
+
+.trigger {
+  position: relative;
+  transition: all var(--m-duration) var(--m-easing);
+  overflow: visible;
+}
+
+.icon {
+  aspect-ratio: 1;
+  object-fit: cover;
+  @apply --mx-borderColor(var(--m-color-neutral-heavy));
+  border-radius: var(--m-radius);
+  @apply --mx-shadow(var(--m-shadow-md));
+
+  position: fixed;
+  transform: translate(-50%, -50%) rotate(30deg);
+  transition: transform var(--m-duration) var(--m-easing);
+
+  .root:hover &,
+  .trigger:focus-visible & {
+    transform: translate(-50%, -50%) rotate(40deg) scale(105%);
+  }
+}
+
+.menu {
+  position: absolute;
+  bottom: var(--m-space-sm);
+  right: var(--m-space-sm);
+  transition: transform var(--m-duration) var(--m-easing);
+
+  .root:hover & {
+    transform: rotate(-30deg);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--m-space-md);
+  padding-block: var(--m-space-xl);
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}

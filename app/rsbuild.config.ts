@@ -1,4 +1,3 @@
-import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
 import { InjectManifest } from '@birchill/inject-manifest-plugin';
 import {
   ModuleFederationPlugin,
@@ -6,7 +5,6 @@ import {
 } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import path from 'node:path';
 import typegpuPlugin from 'unplugin-typegpu/rspack';
 
 const federationConfig = createModuleFederationConfig({
@@ -41,51 +39,15 @@ const federationConfig = createModuleFederationConfig({
   },
 });
 
-const unoStats = {
-  invalidations: 0,
-  rebuilds: 0,
-  lastInvalidationTime: 0,
-};
-
 export default defineConfig(({ command }) => ({
-  plugins: [
-    pluginUnoCss({
-      logLevel: 'info',
-      enableIncludeCommentCheck: (file) => {
-        return (
-          file.includes(path.join('@a-type', 'ui', 'dist')) ||
-          file.includes(path.join('@a-type', 'auth-ui', 'dist')) ||
-          file.includes('@long-game')
-        );
-      },
-      enableCacheExtractedCSS: (file) =>
-        file.includes('@long-game') ? false : file.includes('node_modules'),
-
-      events: {
-        onCssGenerated: (result) => {
-          unoStats.rebuilds++;
-          console.log(`Invalidations: ${unoStats.invalidations}`);
-          console.log(`Rebuilds: ${unoStats.rebuilds}`);
-          console.log(
-            `Time since invalidation: ${Date.now() - unoStats.lastInvalidationTime}ms`,
-          );
-        },
-        onCssInvalidated: () => {
-          unoStats.invalidations++;
-          unoStats.lastInvalidationTime = Date.now();
-        },
-        onCssExtracted: (id, tokens) => {},
-        onCssBuildBegan(tokenCount) {},
-      },
-    }),
-    pluginReact(),
-  ],
+  plugins: [pluginReact()],
   resolve: {
     alias: {
       '@': './src',
     },
   },
   tools: {
+    lightningcssLoader: false,
     rspack: {
       plugins: [
         typegpuPlugin({}),
@@ -140,5 +102,6 @@ export default defineConfig(({ command }) => ({
     // causes an infinite loop of refreshing CSS.
     lazyCompilation: false,
   },
+
   logLevel: 'info',
 }));

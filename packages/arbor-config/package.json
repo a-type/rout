@@ -1,0 +1,21 @@
+{
+  "name": "@long-game/arbor-config",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/arbor.config.ts",
+      "default": "./src/arbor.config.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "core:dev": "pnpm dev"
+  },
+  "devDependencies": {
+    "@a-type/ui": "catalog:",
+    "@arbor-css/core": "catalog:"
+  }
+}

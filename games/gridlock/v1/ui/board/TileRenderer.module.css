@@ -1,0 +1,17 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+
+  @apply --mx-bg(var(--m-color-main-light));
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-blend-mode: color;
+  pointer-events: none;
+  stroke: 3;
+}

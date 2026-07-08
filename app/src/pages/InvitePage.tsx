@@ -38,7 +38,7 @@ function LoggedInInvite({
   const respondMutation = sdkHooks.useRespondToFriendshipInvite();
 
   return (
-    <Box direction="col">
+    <Box col>
       <H1>Become friends with {invite.inviterDisplayName}</H1>
       <P>
         {invite.inviterDisplayName} has invited you to be friends on {APP_NAME}!
@@ -72,7 +72,7 @@ function LoggedOutInvite({
 }) {
   // instruct users on signing up
   return (
-    <Box direction="col" items="start">
+    <Box col items="start">
       <H1>
         Join {invite.inviterDisplayName} on {APP_NAME}
       </H1>
@@ -81,10 +81,10 @@ function LoggedOutInvite({
         together.
       </P>
       <Button render={<Link to="/login?tab=signup" />}>Sign Up</Button>
-      <Box className="color-gray-dark">
+      <Box dim>
         Have an account already?{' '}
         <Button
-          className="inline-flex"
+          style={{ display: 'inline-flex' }}
           size="small"
           emphasis="ghost"
           render={<Link to="/login" />}

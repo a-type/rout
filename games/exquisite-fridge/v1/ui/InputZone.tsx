@@ -8,6 +8,7 @@ import {
 } from '@long-game/game-ui';
 import { isValidFreebie, WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './InputZone.module.css';
 import { WordTile } from './WordTile.js';
 import { collectInput } from './WriteInDialog.js';
 
@@ -22,13 +23,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
   const { currentTurn, turnWasSubmitted } = gameSuite;
   return (
     <Box col gap="sm" items="center" className={clsx('w-full', className)}>
-      <Box
-        col
-        layout="stretch start"
-        surface
-        className={clsx('min-h-20vh w-full shadow-md')}
-        border
-      >
+      <Box col layout="stretch start" surface className={cls.main} border>
         <SortableTokenList<WordItem>
           //debug
           onMove={async (token, index) => {
@@ -94,7 +89,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
               ],
             }));
           }}
-          className="flex-1 min-h-48px"
+          className={cls.zone}
         />
         {!turnWasSubmitted && (
           <Button
@@ -103,7 +98,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
             onClick={() => {
               gameSuite.prepareTurn(null);
             }}
-            className="absolute bottom-sm right-sm"
+            className={cls.reset}
           >
             <Icon name="x" />
             Reset
@@ -115,7 +110,7 @@ export const InputZone = hooks.withGame<InputZoneProps>(function InputZone({
         color="attention"
         p="sm"
         justify="center"
-        className="text-sm"
+        className="@mode-dense"
       />
     </Box>
   );

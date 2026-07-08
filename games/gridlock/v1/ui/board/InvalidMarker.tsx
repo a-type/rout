@@ -1,6 +1,7 @@
-import { Icon } from '@a-type/ui';
+import { clsx, Icon } from '@a-type/ui';
 import { fromCellKey } from '../../definition/index';
 import { hooks } from '../gameClient.js';
+import cls from './InvalidMarker.module.css';
 
 export interface InvalidMarkerProps {
   anchorNamespace?: string;
@@ -16,16 +17,12 @@ export const InvalidMarker = hooks.withGame<InvalidMarkerProps>(
 
     return (
       <div
-        className="pointer-events-none fixed ring-attention ring-5 ring-inset z-10"
+        className={clsx(cls.root, '@mode-attention')}
         style={{
           positionAnchor: `--${anchorNamespace}-${x}-${y}`,
-          top: 'anchor(top)',
-          left: 'anchor(left)',
-          bottom: 'anchor(bottom)',
-          right: 'anchor(right)',
         }}
       >
-        <Icon name="warning" className="absolute top-sm left-sm color-main" />
+        <Icon name="warning" className={cls.marker} />
       </div>
     );
   },

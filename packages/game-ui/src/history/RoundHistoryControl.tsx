@@ -36,7 +36,6 @@ export const RoundHistoryControl = withGame(
             loadRound(roundIndex - 1);
           }}
           disabled={roundIndex === 0}
-          className="p-sm"
         >
           <Icon name="previous" size={10} />
         </Button>
@@ -49,7 +48,7 @@ export const RoundHistoryControl = withGame(
             loadRound(asInt);
           }}
         >
-          <Select.Trigger size="small" className="px-md">
+          <Select.Trigger size="small">
             <Select.Value>
               {(indexString) =>
                 suite.gameDefinition.getRoundLabel?.({
@@ -80,7 +79,6 @@ export const RoundHistoryControl = withGame(
             }
             loadRound(roundIndex + 1);
           }}
-          className="p-sm"
           disabled={isCurrent}
         >
           <Icon name="next" size={10} />
@@ -91,7 +89,7 @@ export const RoundHistoryControl = withGame(
             loadRound(latestRoundIndex);
           }}
           disabled={isCurrent}
-          className={isCurrent ? 'hidden' : 'p-sm'}
+          style={{ display: isCurrent ? 'none' : undefined }}
         >
           <Icon name="skipEnd" size={10} />
         </Button>

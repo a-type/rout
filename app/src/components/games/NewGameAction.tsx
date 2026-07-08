@@ -7,6 +7,7 @@ import {
   clsx,
   Dialog,
   Icon,
+  Img,
   useResolvedColorMode,
 } from '@a-type/ui';
 import { genericId, LongGameError, PrefixedId } from '@long-game/common';
@@ -16,6 +17,7 @@ import { useNavigate, useSearchParams } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { GameLimitUpsell } from '../subscription/GameLimitUpsell.js';
 import { GameList } from './GameList.js';
+import cls from './NewGameAction.module.css';
 
 export const NewGameAction = withSuspense(function NewGameAction({
   children,
@@ -43,29 +45,18 @@ export const NewGameAction = withSuspense(function NewGameAction({
       }}
     >
       <Dialog.Trigger
-        color="primary"
-        className={clsx(
-          'overflow-clip border-thick border-primary-dark w-[64px] aspect-1 color-black',
-          colorMode === 'light' ? 'override-dark' : 'override-light',
-          className,
-        )}
+        className={clsx(cls.trigger, '@mode-inverted', className)}
         {...rest}
       >
         <TopographyBackground
           colorMode={colorMode === 'light' ? 'dark' : 'light'}
         />
-        <Icon name="plus" className="relative z-1 w-[24px] h-[24px] stroke-2" />
+        <Icon name="plus" size={24} className={cls.icon} />
       </Dialog.Trigger>
       <Dialog.Content
         disableSheet
-        className={clsx(
-          'w-100lvw h-100lvh max-w-unset max-h-unset',
-          'rd-none b-none inset-0',
-          'start-end:translate-x-full',
-          'translate-0',
-          'bg-primary-wash',
-        )}
-        innerClassName="grow h-full"
+        className={cls.content}
+        innerClassName={cls.contentInner}
       >
         <TopographyBackground />
         <Suspense>
@@ -80,25 +71,14 @@ function SelectModeContent() {
   const [_, setSearch] = useSearchParams();
 
   return (
-    <Box col gap className="relative z-1 grow" full>
+    <Box col gap grow full className={cls.selectContent}>
       <Dialog.Title className="font-fancy">New Game</Dialog.Title>
       <Suspense>
         <GameLimitUpsell />
-        <Box
-          direction={{
-            default: 'col',
-            md: 'row',
-          }}
-          gap
-          justify="stretch"
-          items="stretch"
-          className="m-auto md:(max-w-600px w-full max-h-400px h-full)"
-        >
-          <Card className="grow bg-primary-wash bg-lighten-3 aspect-1 flex-basis-300px min-w-0">
+        <Box gap justify="stretch" items="stretch" className={cls.selectBox}>
+          <Card className={cls.card} size="lg">
             <Card.Image
-              render={
-                <img src="/illustrations/online.png" className="object-cover" />
-              }
+              render={<Img fit="cover" src="/illustrations/online.png" />}
             />
             <Card.Main
               onClick={() =>
@@ -107,23 +87,18 @@ function SelectModeContent() {
                   return prev;
                 })
               }
-              className="justify-end flex flex-col h-full"
+              className={cls.cardMain}
             >
-              <Card.Title className="text-xl">Play Online</Card.Title>
-              <Card.Content className="bg-white">
+              <Card.Title>Play Online</Card.Title>
+              <Card.Content>
                 Play against your friends online. Take turns at your own pace or
                 play in real-time.
               </Card.Content>
             </Card.Main>
           </Card>
-          <Card className="grow bg-accent-wash bg-lighten-3 aspect-1 flex-basis-300px min-w-0">
+          <Card className={cls.card} size="lg">
             <Card.Image
-              render={
-                <img
-                  src="/illustrations/hotseat.png"
-                  className="object-cover"
-                />
-              }
+              render={<Img fit="cover" src="/illustrations/hotseat.png" />}
             />
             <Card.Main
               onClick={() =>
@@ -132,10 +107,10 @@ function SelectModeContent() {
                   return prev;
                 })
               }
-              className="justify-end flex flex-col h-full"
+              className={cls.cardMain}
             >
-              <Card.Title className="text-xl">Play Hotseat</Card.Title>
-              <Card.Content className="bg-white">
+              <Card.Title>Play Hotseat</Card.Title>
+              <Card.Content>
                 Take turns passing around this device. Great for road trips or
                 trying out a new game.
               </Card.Content>

@@ -1,4 +1,9 @@
-import { clsx, PROPS, useRender, UseRenderComponentProps } from '@a-type/ui';
+import {
+  clsx,
+  useRender,
+  UseRenderComponentProps,
+  userModeProps,
+} from '@a-type/ui';
 import {
   colors,
   PlayerColorName,
@@ -16,11 +21,10 @@ const byPalette: Record<
     name,
     {
       palette,
-      className: 'palette-primary',
+      className: '@mode-user',
       style: {
-        [PROPS.USER.COLOR.PRIMARY_HUE]: palette.okHue,
-        [PROPS.USER.COLOR.ACCENT_HUE]: 160,
-        [PROPS.USER.SATURATION]: palette.okSaturation,
+        [userModeProps.$userColorHue]: palette.okHue,
+        [userModeProps.$userColorSaturation]: palette.okSaturation,
       } as React.CSSProperties,
     },
   ]),
@@ -32,10 +36,10 @@ export function usePlayerThemed(playerId?: PrefixedId<'u'> | null) {
   const player = playerId ? suite.getPlayer(playerId) : null;
   if (!player)
     return {
-      className: 'palette-primary',
+      className: '@mode-user',
       style: {
-        [PROPS.USER.SATURATION]: 0,
-        [PROPS.USER.COLOR.PRIMARY_HUE]: 0,
+        [userModeProps.$userColorHue]: 0,
+        [userModeProps.$userColorSaturation]: 0,
       } as any,
       palette: colors.gray,
     };

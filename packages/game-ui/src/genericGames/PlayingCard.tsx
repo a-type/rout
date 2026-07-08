@@ -1,15 +1,8 @@
-import {
-  Box,
-  BoxProps,
-  clsx,
-  Icon,
-  IconName,
-  withClassName,
-  withProps,
-} from '@a-type/ui';
+import { Box, BoxProps, clsx, Icon, IconName, withClassName } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { CSSProperties, memo } from 'react';
 import { PlayerAvatar } from '../players/PlayerAvatar.js';
+import cls from './PlayingCard.module.css';
 
 export type PlayingCardSuit = 'h' | 'd' | 'c' | 's';
 
@@ -18,8 +11,10 @@ export interface PlayingCardProps {
   cardRank: number;
   playerId?: PrefixedId<'u'>;
   className?: string;
+  style?: CSSProperties;
   /** Doesn't do anything to events, but styles the card to appear disabled. */
   disabled?: boolean;
+  size?: string | number;
 }
 
 const suitToIcon: Record<PlayingCardSuit, IconName> = {
@@ -35,9 +30,12 @@ const PlayingCardRoot = memo(function PlayingCardRoot({
   disabled,
   playerId,
   className,
+  size,
+  style: userStyle,
   ...rest
 }: PlayingCardProps) {
   const color = getCardColor(cardSuit);
+  const sizeStyle = size ? { width: size, ...userStyle } : userStyle;
   return (
     <CardRoot
       data-color={color}
@@ -45,21 +43,17 @@ const PlayingCardRoot = memo(function PlayingCardRoot({
       data-disabled={disabled}
       className={clsx(
         'playing-card',
-        `palette-${color === 'red' ? 'tomato' : 'gray'}`,
+        `@mode-${color === 'red' ? 'tomato' : 'neutral'}`,
         className,
       )}
+      style={sizeStyle}
       {...rest}
     >
       <ExtremelySimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <SimpleCardContent cardSuit={cardSuit} cardRank={cardRank} />
       <DetailedCardContent cardSuit={cardSuit} cardRank={cardRank} />
       {disabled && <Slash />}
-      {playerId && (
-        <PlayerAvatar
-          playerId={playerId}
-          className="absolute top-sm right-sm"
-        />
-      )}
+      {playerId && <PlayerAvatar playerId={playerId} className={cls.avatar} />}
     </CardRoot>
   );
 });
@@ -72,13 +66,7 @@ function ExtremelySimpleCardContent({
   cardRank: number;
 }) {
   return (
-    <Box
-      d="col"
-      layout="center center"
-      full
-      className="flex @[40px]:hidden rounded-xs bg-white py-1px"
-      border
-    >
+    <Box col layout="center center" full className={cls.extremelySimple} border>
       <CardNumber cardRank={cardRank} />
       <CardSuitIcon cardSuit={cardSuit} />
     </Box>
@@ -93,20 +81,13 @@ function SimpleCardContent({
   cardRank: number;
 }) {
   return (
-    <Box
-      d="col"
-      layout="center center"
-      full
-      p="xs"
-      className="hidden @[40px]:flex @[80px]:hidden rounded-sm bg-white"
-      border
-    >
-      <Box d="col" className="absolute left-2px top-2px">
-        <CardNumber cardRank={cardRank} className="mr-auto" />
+    <Box col layout="center center" full p="xs" className={cls.simple} border>
+      <Box col className={cls.indicatorTL}>
+        <CardNumber cardRank={cardRank} className={cls.rankLeft} />
         <CardSuitIcon cardSuit={cardSuit} />
       </Box>
-      <Box d="col" className="absolute right-2px bottom-2px rotate-180">
-        <CardNumber cardRank={cardRank} className="ml-auto" />
+      <Box col className={cls.indicatorBR}>
+        <CardNumber cardRank={cardRank} className={cls.rankRight} />
         <CardSuitIcon cardSuit={cardSuit} />
       </Box>
     </Box>
@@ -213,28 +194,22 @@ function DetailedCardContent({
 
   const pattern = symbolPatterns[symbolCount - 1];
   return (
-    <Box
-      layout="center center"
-      full
-      d="col"
-      border
-      className="hidden @[80px]:flex bg-white"
-    >
-      <NumberSuitStack className="top-0 left-0">
+    <Box layout="center center" full col border className={cls.detailed}>
+      <NumberSuitStack className={cls.indicatorTL}>
         <CardNumber cardRank={cardRank} />
         <CardSuitIcon cardSuit={cardSuit} />
       </NumberSuitStack>
-      <NumberSuitStack className="bottom-0 right-0">
-        <CardSuitIcon cardSuit={cardSuit} className="rotate-180" />
-        <CardNumber cardRank={cardRank} className="rotate-180" />
+      <NumberSuitStack className={cls.indicatorBR}>
+        <CardNumber cardRank={cardRank} />
+        <CardSuitIcon cardSuit={cardSuit} />
       </NumberSuitStack>
-      <Box className="flex-1 inset-16px absolute">
+      <Box grow className={cls.detailedCenter}>
         {pattern.map((pos, index) => (
           <CardSymbol
             key={index}
             cardSuit={cardSuit}
             cardRank={cardRank}
-            className="absolute flex-grow-0"
+            className={cls.detailedSymbol}
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
@@ -249,28 +224,25 @@ function DetailedCardContent({
   );
 }
 
-const NumberSuitStack = withClassName(
-  'div',
-  'p-sm flex flex-col items-center justify-center absolute h-25% w-20% min-h-50px min-w-40px',
-);
+const NumberSuitStack = withClassName('div', cls.suitStack);
 
 export function PlayingCardPlaceholder({
   children,
   className,
+  size,
+  style: userStyle,
   ...rest
-}: BoxProps) {
+}: BoxProps & { size?: string | number }) {
+  const sizeStyle = size ? { width: size, ...userStyle } : userStyle;
   return (
     <CardRoot
-      className={clsx('opacity-50', className)}
-      container="reset"
+      className={clsx(className, cls.placeholderRoot)}
+      style={sizeStyle}
+      container
       data-disabled
       {...rest}
     >
-      <Box
-        border
-        full
-        className="border-dashed @[40px]:rounded-sm @[80px]:rounded-lg rounded-xs"
-      >
+      <Box border full className={cls.placeholder}>
         {children}
       </Box>
     </CardRoot>
@@ -281,13 +253,7 @@ export const PlayingCard = Object.assign(PlayingCardRoot, {
   Placeholder: PlayingCardPlaceholder,
 });
 
-const CardRoot = withClassName(
-  withProps(Box, { container: 'reset' }),
-  'aspect-[3/4] flex-1 h-auto min-w-24px min-h-32px max-h-50vh select-none @container',
-  '[&[data-suit=s]]:(color-main-ink)',
-  '[&[data-suit=c],&[data-suit=d]]:(color-main-dark color-lighten-1)',
-  '[&[data-suit=h]]:(color-main-dark color-darken-2)',
-);
+const CardRoot = withClassName(Box, cls.cardRoot);
 
 function ScalingText({
   children,
@@ -301,7 +267,7 @@ function ScalingText({
 }) {
   return (
     <svg
-      className={clsx('flex-1', className)}
+      className={clsx(cls.text, className)}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
       style={style}
@@ -312,9 +278,9 @@ function ScalingText({
         y="50%"
         dominantBaseline="middle"
         textAnchor="middle"
-        className="font-bold"
         fontSize="80"
         fill="currentColor"
+        fontWeight="600"
       >
         {children}
       </text>
@@ -330,12 +296,7 @@ function CardNumber({
   className?: string;
 }) {
   return (
-    <ScalingText
-      className={clsx(
-        '[.playing-card[data-disabled=true]_&]:opacity-50',
-        className,
-      )}
-    >
+    <ScalingText className={clsx(cls.generalSymbol, className)}>
       {toDisplayRank(cardRank)}
     </ScalingText>
   );
@@ -353,11 +314,8 @@ function CardSuitIcon({
   return (
     <Icon
       name={suitToIcon[cardSuit]}
-      className={clsx(
-        'flex-1 stroke-width-1px min-w-20px w-auto h-auto aspect-1 [vector-effect:non-scaling-stroke] fill-[currentColor]',
-        '[.playing-card[data-disabled=true]_&]:opacity-50',
-        className,
-      )}
+      className={clsx(cls.generalSymbol, cls.suitIcon, className)}
+      vectorEffect="non-scaling-stroke"
       style={style}
     />
   );
@@ -380,13 +338,7 @@ function CardSymbol({
     );
   }
   return (
-    <ScalingText
-      className={clsx(
-        '[.playing-card[data-disabled=true]_&]:opacity-50',
-        className,
-      )}
-      style={style}
-    >
+    <ScalingText className={clsx(cls.generalSymbol, className)} style={style}>
       {toDisplayRank(cardRank)}
     </ScalingText>
   );
@@ -394,7 +346,7 @@ function CardSymbol({
 
 function Slash() {
   return (
-    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 100 100">
+    <svg className={cls.slash} viewBox="0 0 100 100">
       <line
         x1="90"
         y1="-10"
@@ -402,7 +354,6 @@ function Slash() {
         y2="110"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
-        className="stroke-black"
       />
     </svg>
   );

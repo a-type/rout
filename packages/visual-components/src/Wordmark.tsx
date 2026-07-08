@@ -1,18 +1,18 @@
-import { clsx, H1 } from '@a-type/ui';
+import { clsx, Heading, TypographyProps } from '@a-type/ui';
+import cls from './Wordmark.module.css';
 
-export interface WordmarkProps {
+export interface WordmarkProps extends TypographyProps {
   className?: string;
 }
 
-export function Wordmark({ className }: WordmarkProps) {
+export function Wordmark({ className, ...rest }: WordmarkProps) {
   return (
-    <H1
-      className={clsx(
-        'font-fancy layer-components:([font-size:12vmin] text-center relative z-1 text-shadow-[0_0_20px_var(--color-white)])',
-        className,
-      )}
+    <Heading
+      emphasis="secondary"
+      className={clsx('font-fancy', cls.root, className)}
+      {...rest}
     >
       rout!
-    </H1>
+    </Heading>
   );
 }

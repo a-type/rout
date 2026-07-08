@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Drawing } from '../../../../packages/common/src/genericGames';
 import { ROUND_COUNT } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './Gameplay.module.css';
 import { InputZone } from './InputZone.js';
 import { PromptDisplay } from './PromptDisplay.js';
 import { Whiteboard } from './Whiteboard';
@@ -24,10 +25,10 @@ export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
       gap
       full="width"
       layout="center start"
-      className="bg-wash"
+      surface="secondary"
       grow
     >
-      <Box container="reset" gap col className="max-w-700px w-full my-auto">
+      <Box container gap col className={cls.main}>
         <Box gap full="width">
           <PromptDisplay className="grow" />
           {gameSuite.currentTurn.illustration && (
@@ -57,7 +58,7 @@ const PromptGameplay = hooks.withGame(function PromptGameplay({ gameSuite }) {
           <P>Write the next part of the story.</P>
         </Box>
       )}
-      <InputZone className="sticky w-full top-0 z-1" />
+      <InputZone className={cls.inputZone} />
       <WordHand className="w-full" />
     </>
   );
@@ -75,7 +76,7 @@ const DrawingGameplay = hooks.withGame(function DrawingGameplay({ gameSuite }) {
       </Box>
       <Whiteboard drawing={drawing} onChange={setDrawing} />
       <Button
-        className="mx-auto"
+        className={cls.nextButton}
         emphasis="primary"
         onClick={() => {
           gameSuite.prepareTurn((cur) => ({

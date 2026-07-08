@@ -6,14 +6,12 @@ import hearts from '@long-game/game-hearts';
 import heirApparent from '@long-game/game-heir-apparent';
 import numberGuess from '@long-game/game-number-guess';
 import scribble from '@long-game/game-scribble';
-import wizardBall from '@long-game/game-wizard-ball';
 
 export const gamesById: Record<string, GameModule> = {
   [numberGuess.id]: numberGuess,
   [hearts.id]: hearts,
   [scribble.id]: scribble,
   [exquisiteFridge.id]: exquisiteFridge,
-  [wizardBall.id]: wizardBall,
   [heirApparent.id]: heirApparent,
   [gardenPath.id]: gardenPath,
   // GENERATED - DO NOT REMOVE THIS LINE

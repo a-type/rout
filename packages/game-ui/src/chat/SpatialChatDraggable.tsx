@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Draggable } from '../dnd/Draggable.js';
 import { DragGestureContext } from '../dnd/gestureStore.js';
 import { usePlayerThemed } from '../players/usePlayerThemed.js';
+import cls from './SpatialChatDraggable.module.css';
 
 export interface SpatialChatDraggableProps {
   className?: string;
@@ -38,38 +39,26 @@ export function SpatialChatDraggable({ className }: SpatialChatDraggableProps) {
           ref={anchorRef}
         >
           <div
-            className={clsx(
-              theme.className,
-              'bg-main border border-main-ink rounded-full rounded-tr-xs color-black p-sm aspect-1 flex items-center justify-center transition-transform',
-              '[[data-draggable-preview]_&]:(rotate-135 -translate-x-1/5 -translate-y-2/3)',
-            )}
+            className={clsx(theme.className, cls.handle)}
             style={theme.style}
           >
-            <Icon
-              name="chat"
-              className="[[data-draggable-preview]_&]:rotate--135"
-            />
+            <Icon name="chat" className={cls.icon} />
           </div>
         </Draggable.Handle>
       </Draggable>
-      <Popover.Content
-        anchor={anchorRef}
-        className="flex flex-col items-start gap-md max-w-400px"
-      >
-        <Popover.Arrow className="stroke-none" />
+      <Popover.Content anchor={anchorRef} className={cls.popover}>
+        <Popover.Arrow className={cls.arrow} />
         <H2>Try spatial chat</H2>
         <P>
           Drop this bubble onto a supported surface to comment on things
           directly in your game.
         </P>
-        <P className="md:hidden">(Tap the bar below to open the chat log)</P>
+        <P className={cls.mobileHelp}>
+          (Tap the bar below to open the chat log)
+        </P>
         <Popover.Close
           render={
-            <Button
-              size="small"
-              emphasis="primary"
-              className="ml-auto color-black"
-            />
+            <Button size="small" emphasis="primary" className={cls.close} />
           }
         >
           Ok

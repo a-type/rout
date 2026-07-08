@@ -8,6 +8,7 @@ import {
 import { useNavigate } from '@verdant-web/react-router';
 import { Suspense } from 'react';
 import { NotificationsButton } from '../notifications/NotificationsButton.js';
+import cls from './GameControls.module.css';
 import { GameLayout } from './GameLayout.js';
 import { GameLog } from './GameLog.js';
 import { GameManualDialog } from './GameManualDialog.js';
@@ -26,9 +27,9 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
   return (
     <>
       <GameLayout.Controls>
-        <GameLog className="flex-1 min-h-0" />
+        <GameLog className={cls.log} />
       </GameLayout.Controls>
-      <GameLayout.SecondaryControls className="justify-between">
+      <GameLayout.SecondaryControls className={cls.secondaryControls}>
         <Box justify="between" items="center">
           <Box gap="xs" items="center">
             <NavigationControls />
@@ -44,7 +45,7 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
               canDelete={pregame}
               onDeleteOrAbandon={() => navigate('/')}
             />
-            <PlayerStatuses className="flex-shrink-1" />
+            <PlayerStatuses className={cls.playerStatuses} />
           </Box>
           {!pregame && (
             <Popover>
@@ -67,7 +68,7 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
             color="accent"
             surface
             layout="center between"
-            className="px-md py-xs rounded-none -mx-md -mb-md text-xs"
+            className={cls.history}
             gap
           >
             <div>Viewing game history</div>

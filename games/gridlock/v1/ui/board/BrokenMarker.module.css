@@ -1,0 +1,47 @@
+.root {
+  top: anchor(top);
+  left: anchor(left);
+  right: anchor(right);
+  bottom: anchor(bottom);
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--m-text-weight-bold);
+  line-height: 1;
+
+  @apply --mx-fg(var(--m-color-neutral-paper));
+  @apply --mx-bg(var(--m-color-main));
+
+  width: --fn-literal(16px);
+  height: --fn-literal(16px);
+  border-radius: var(--m-radius-full);
+  font-size: --fn-literal(0.5em);
+
+  &[data-direction='up'] {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &[data-direction='down'] {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &[data-direction='left'] {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &[data-direction='right'] {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}

@@ -1,0 +1,49 @@
+.endDecorations {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  stroke-width: 3px;
+}
+
+.fillMainDark {
+  fill: var(--m-color-main-heavy);
+}
+
+.fillMain {
+  fill: var(--m-color-main);
+}
+
+.fillMainLight {
+  fill: var(--m-color-main-light);
+}
+
+.fillWater {
+  fill: var(--m-color-palette-blueberry-wash);
+}
+
+.originCenter {
+  transform-origin: center;
+}
+
+.transparent {
+  opacity: 20%;
+}
+
+.flower {
+  stroke: var(--m-color-accent-heavy);
+  stroke-width: 1;
+  fill: var(--m-color-accent-light);
+}
+
+.pathOuter {
+  fill: var(--m-color-main-heavy);
+  stroke: var(--m-color-main-heavy);
+  stroke: 5;
+}
+
+.pathInner {
+  fill: var(--m-color-neutral-paper);
+  stroke: var(--m-color-neutral-ink);
+  stroke: 1;
+}

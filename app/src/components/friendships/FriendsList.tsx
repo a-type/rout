@@ -1,5 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
+import { Ul } from '@a-type/ui';
 import { UserAvatar } from '../users/UserAvatar.js';
+import cls from './FriendsList.module.css';
 
 export function FriendsList() {
   const { data } = sdkHooks.useGetFriendships();
@@ -7,17 +9,14 @@ export function FriendsList() {
   return (
     <div>
       <h1>Friends</h1>
-      <ul className="p-0 grid grid-cols-3 md:grid-cols-6">
+      <Ul unstyled className={cls.grid}>
         {data.map((friend) => (
-          <li className="flex flex-col gap-2 items-center" key={friend.id}>
-            <UserAvatar
-              userId={friend.id}
-              className="w-full h-auto rounded-full aspect-square"
-            />
+          <Ul.Item className={cls.item} key={friend.id}>
+            <UserAvatar userId={friend.id} className={cls.avatar} />
             {friend.displayName}
-          </li>
+          </Ul.Item>
         ))}
-      </ul>
+      </Ul>
     </div>
   );
 }

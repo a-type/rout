@@ -7,6 +7,7 @@ import { lazy, useLayoutEffect, useRef } from 'react';
 import type { Components } from 'react-markdown';
 import customHeaderId from 'remark-custom-header-id';
 import mdc from 'remark-mdc';
+import cls from './GameManual.module.css';
 
 const LazyMarkdown = lazy(() => import('react-markdown'));
 
@@ -50,7 +51,7 @@ export const GameManual = withSuspense(
     }, []);
 
     return (
-      <Box d="col" gap="lg" ref={wrapperRef}>
+      <Box col gap="lg" ref={wrapperRef}>
         <LazyMarkdown
           urlTransform={(url) => {
             const asUrl = new URL(url, window.location.origin);
@@ -76,31 +77,22 @@ const markdownComponents: Components = {
   img: ({ node, className, ...props }) => {
     return (
       <Box full="width" layout="center center" render={<span />}>
-        <img
-          {...props}
-          className={clsx(
-            'max-w-80% h-auto w-auto max-h-60vh rounded-lg mx-auto',
-            className,
-          )}
-        />
+        <img {...props} className={clsx(cls.image, className)} />
       </Box>
     );
   },
-  h1: H1,
-  h2: H2,
-  h3: H3,
-  h4: H4,
-  p: P,
+  h1: H1 as any,
+  h2: H2 as any,
+  h3: H3 as any,
+  h4: H4 as any,
+  p: P as any,
   blockquote: ({ node, className, ...props }) => {
     return (
       <Box
         full="width"
         surface
         p="sm"
-        className={clsx(
-          'border-l-4 border-l-solid border-l-main-dark ml-sm w-80%',
-          className,
-        )}
+        className={clsx(cls.blockquote, className)}
         render={<blockquote {...props} />}
       />
     );

@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { Droppable } from '../dnd/Droppable.js';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
+import cls from './ChatSurface.module.css';
 import { SpatialChatThread } from './SpatialChatThread.js';
 
 export interface ChatSurfaceProps extends HTMLAttributes<HTMLDivElement> {
@@ -68,12 +69,11 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       noParenting
       id={sceneId}
       onDrop={handleDrop}
-      className={clsx(
-        'relative',
-        isSpatialChatDragging &&
-          'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
-        className,
-      )}
+      accept={(draggable) => {
+        return draggable.id === 'spatial-chat';
+      }}
+      className={clsx(cls.root, className)}
+      data-dragging={isSpatialChatDragging}
       render={render}
       tags={droppableTags}
       svg={svg}
@@ -81,7 +81,7 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       {children}
       <SpatialChatThread
         chats={chats}
-        className="absolute top-full left-1/2 -translate-1/2"
+        className={cls.thread}
         open={open}
         onOpenChange={setOpen}
         sceneId={sceneId}

@@ -3,6 +3,7 @@ import { Dialog } from '@a-type/ui';
 import { ReactElement } from 'react';
 import { GameIcon } from '../games/GameIcon';
 import { GameManual } from '../games/GameManual';
+import cls from './GameDetailsDialog.module.css';
 
 export interface GameDetailsDialogProps {
   gameId: string;
@@ -18,12 +19,14 @@ export function GameDetailsDialog({
   return (
     <Dialog>
       <Dialog.Trigger
-        render={children || <GameIcon gameId={gameId} className="w-12 h-12" />}
+        render={
+          children || <GameIcon gameId={gameId} className={cls.triggerIcon} />
+        }
       />
       <Dialog.Content width="md">
         <Dialog.Title>{game.title}</Dialog.Title>
         <Dialog.Description>{game?.description}</Dialog.Description>
-        <GameIcon gameId={gameId} className="w-full h-48 object-cover" />
+        <GameIcon gameId={gameId} className={cls.coverIcon} />
         <GameManual gameId={gameId} />
         <Dialog.Actions>
           <Dialog.Close />

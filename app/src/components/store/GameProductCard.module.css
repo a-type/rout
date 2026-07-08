@@ -1,0 +1,11 @@
+.admins {
+  font-size: var(--m-prose-ambient-size);
+  display: flex;
+  flex-direction: row;
+}
+
+.details {
+  position: absolute;
+  bottom: var(--m-space-sm);
+  right: var(--m-space-sm);
+}

@@ -1,0 +1,69 @@
+.collapsible {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.triggerWrap {
+  margin-right: auto;
+  background: var(--m-color-white);
+  border-top-left-radius: var(--m-radius-sm);
+  border-top-right-radius: var(--m-radius-sm);
+
+  &:has([aria-expanded='false']) {
+    border-bottom-left-radius: var(--m-radius-sm);
+    border-bottom-right-radius: var(--m-radius-sm);
+  }
+}
+
+.content {
+  background: var(--m-color-white);
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--m-space-xs);
+  cursor: pointer;
+}
+
+.gameGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--m-space-md);
+  padding: var(--m-space-md);
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.emptyState {
+  color: var(--m-color-gray-dark);
+}
+
+.item {
+  aspect-ratio: 1;
+  min-width: --fn-literal(80px);
+}
+
+.selected {
+  box-shadow: 0 0 0 --fn-literal(6px) var(--m-color-accent-heavy);
+}
+
+.title {
+  font-size: var(--m-text-size-sm);
+
+  @media (min-width: 768px) {
+    font-size: var(--m-text-size-md);
+  }
+}
+
+.actionButton {
+  width: 100%;
+  justify-content: center;
+}

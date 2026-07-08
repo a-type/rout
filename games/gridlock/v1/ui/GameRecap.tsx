@@ -1,7 +1,7 @@
-import { Button, Dialog } from '@a-type/ui';
+import { Box, Button, Dialog, Text } from '@a-type/ui';
 import { GameMember } from '@long-game/game-definition';
-import { scoreBoard } from '../definition/index';
 import { PlayerAvatar, PlayerName, PlayerThemed } from '@long-game/game-ui';
+import { scoreBoard } from '../definition/index';
 import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
 
@@ -11,14 +11,14 @@ export const GameRecap = hooks.withGame<GameRecapProps>(function GameRecap({
   gameSuite,
 }) {
   return (
-    <div className="w-full flex flex-col items-center min-h-0">
+    <Box full="width" col items="center" style={{ minHeight: 0 }}>
       <Scoreboard />
-      <div className="p-md w-full grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-md">
+      <div className={cls.grid}>
         {gameSuite.members.map((member) => (
           <RecapPlayerBoard key={member.id} player={member} />
         ))}
       </div>
-    </div>
+    </Box>
   );
 });
 
@@ -31,23 +31,22 @@ const Scoreboard = hooks.withGame(function Scoreboard({ gameSuite }) {
     })
     .sort((a, b) => b.score - a.score);
   return (
-    <div className="w-full flex flex-col gap-xs w-full items-center text-xl">
-      <div>👑 Winner{gameSuite.winners.length === 1 ? '' : 's'} </div>
-      <div className="flex flex-row items-center gap-md">
+    <Box full="width" col gap="xs" items="center">
+      <Text emphasis="primary">
+        👑 Winner{gameSuite.winners.length === 1 ? '' : 's'}{' '}
+      </Text>
+      <Box items="center" gap>
         {scores.map(({ player, score }) => (
-          <div
-            key={player.id}
-            className="flex flex-col items-center gap-xs font-bold"
-          >
-            <div className="flex flex-row items-center gap-xs">
-              <PlayerAvatar playerId={player.id} />
+          <Box key={player.id} col items="center" gap="xs">
+            <PlayerAvatar playerId={player.id} />
+            <Text bold>
               <PlayerName playerId={player.id} />
-            </div>
-            <span className="font-normal">Score: {score}</span>
-          </div>
+            </Text>
+            <Text>Score: {score}</Text>
+          </Box>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 });
 
@@ -57,17 +56,21 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
     if (!playerBoard) return null;
     return (
       <Dialog>
-        <PlayerThemed
-          playerId={player.id}
-          className="bg-white border-default rd-md p-md w-full flex flex-col"
+        <Box
+          surface
+          round
+          p
+          full="width"
+          col
+          render={<PlayerThemed playerId={player.id} />}
         >
-          <div className="flex items-center gap-xs mb-sm">
+          <Box items="center" gap="xs">
             <PlayerAvatar interactive playerId={player.id} size="40px" />
             <PlayerName playerId={player.id} />
-            <span className="ml-auto font-bold">
+            <Text bold style={{ marginLeft: 'auto' }}>
               Score: {scoreBoard(playerBoard)}
-            </span>
-          </div>
+            </Text>
+          </Box>
           <Dialog.Trigger render={<Button emphasis="ghost" size="wrapper" />}>
             <BoardRenderer
               board={playerBoard}
@@ -76,8 +79,8 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
               className="w-full"
             />
           </Dialog.Trigger>
-        </PlayerThemed>
-        <Dialog.Content disableSheet width="lg" className="max-w-3xl">
+        </Box>
+        <Dialog.Content disableSheet width="lg">
           <BoardRenderer
             board={playerBoard}
             playerId={player.id}

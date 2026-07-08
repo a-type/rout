@@ -21,7 +21,7 @@ export const PlayerTurnChip = withGame<PlayerTurnChipProps>(
 
     if (isPendingTurn && !hasPlayed) {
       return (
-        <Chip color="primary" className="text-sm palette-lemon">
+        <Chip emphasis="primary" className="@mode-lemon">
           <Icon name="clock" size={16} />
           <span>Yet to play</span>
         </Chip>
@@ -29,7 +29,7 @@ export const PlayerTurnChip = withGame<PlayerTurnChipProps>(
     }
     if (hasPlayed) {
       return (
-        <Chip color="primary" className="text-sm palette-success">
+        <Chip emphasis="primary" className="@mode-success">
           <Icon name="check" size={16} />
           <span>Played</span>
         </Chip>
@@ -38,7 +38,7 @@ export const PlayerTurnChip = withGame<PlayerTurnChipProps>(
 
     if (!hasPlayed && !isPendingTurn) {
       return (
-        <Chip color="gray" className="text-sm color-black">
+        <Chip emphasis="default" className="@mode-neutral">
           <Icon name="x" size={16} />
           <span>Not playing this round</span>
         </Chip>

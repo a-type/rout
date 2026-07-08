@@ -1,12 +1,13 @@
-import { Box, clsx } from '@a-type/ui';
-import { WordItem } from '../definition/index';
+import { Box, clsx, Text } from '@a-type/ui';
 import {
   HelpSurface,
   PlayerAvatar,
   PlayerName,
   usePlayerThemed,
 } from '@long-game/game-ui';
+import { WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './PromptDisplay.module.css';
 import { WordTile } from './WordTile.js';
 
 export interface PromptDisplayProps {
@@ -42,6 +43,7 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
         }
         rulesId="continuing-the-story"
         title="Prompt"
+        className="w-full"
       >
         <Box
           col
@@ -49,18 +51,19 @@ export const PromptDisplay = hooks.withGame<PromptDisplayProps>(
           surface
           color="primary"
           p
+          full="width"
           style={theme.style}
           className={clsx(theme.className, className)}
         >
-          <div className="text-xs">
-            <span className="leading-24px [vertical-align:top]">
+          <Text emphasis="ambient">
+            <span className={cls.leadIn}>
               The latest part of the story, written by
             </span>
-            <div className="inline-flex items-center gap-sm bg-main-light pr-sm ml-sm rounded-full">
+            <div className={cls.player}>
               <PlayerAvatar playerId={prompt.playerId} />
               <PlayerName playerId={prompt.playerId} />
             </div>
-          </div>
+          </Text>
           <Box gap wrap items="center">
             {prompt.words.map((word: WordItem) => (
               <WordTile key={word.id} value={word} disabled />

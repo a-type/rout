@@ -1,6 +1,6 @@
-import { pluginUnoCss } from '@a-type/rsbuild-plugin-unocss';
+import { ArborPlugin } from '@arbor-css/postcss';
+import arborPreset from '@long-game/arbor-config';
 import { idToFederationId } from '@long-game/common';
-import unoConfig from '@long-game/uno-config';
 import {
   createModuleFederationConfig,
   ModuleFederationPlugin,
@@ -59,12 +59,7 @@ export const gameRsbuildConfig = (game) => {
         sourcemap: true,
         minify: false,
       },
-      plugins: [
-        pluginReact(),
-        pluginUnoCss({
-          config: unoConfig(true),
-        }),
-      ],
+      plugins: [pluginReact()],
       tools: {
         rspack: {
           plugins: [
@@ -80,6 +75,13 @@ export const gameRsbuildConfig = (game) => {
           optimization: {
             realContentHash: true,
           },
+        },
+        postcss: (_, { addPlugins }) => {
+          addPlugins(
+            ArborPlugin({
+              preset: arborPreset,
+            }),
+          );
         },
       },
       server: {

@@ -1,5 +1,6 @@
 import { Button, ButtonProps, clsx } from '@a-type/ui';
 import { TopographyBackground } from './TopographyBackground.js';
+import cls from './TopographyButton.module.css';
 
 export const TopographyButton = ({
   children,
@@ -12,22 +13,11 @@ export const TopographyButton = ({
   wrapperClassName?: string;
 }) => {
   return (
-    <Button
-      emphasis="primary"
-      {...props}
-      className={clsx('relative z-10 overflow-hidden', className)}
-    >
+    <Button emphasis="primary" {...props} className={clsx(cls.root, className)}>
       {!props.disabled && !props.visuallyDisabled && !disableTopography && (
-        <TopographyBackground className="absolute opacity-80 [:hover>&]:[filter:brightness(1.25)]" />
+        <TopographyBackground className={cls.bg} />
       )}
-      <div
-        className={clsx(
-          'relative z-1 flex flex-row gap-2 items-center',
-          wrapperClassName,
-        )}
-      >
-        {children}
-      </div>
+      <div className={clsx(cls.content, wrapperClassName)}>{children}</div>
     </Button>
   );
 };

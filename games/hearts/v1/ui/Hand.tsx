@@ -6,6 +6,7 @@ import {
   isPassTurn,
 } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './Hand.module.css';
 
 export interface HandProps {
   className?: string;
@@ -50,7 +51,7 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
           className="h-full"
         />
       )}
-      className="min-h-100px"
+      className={cls.hand}
       {...rest}
     >
       {[...hand]
@@ -68,13 +69,13 @@ export const Hand = hooks.withGame<HandProps>(function Hand({
               id={card}
               data={card}
               disabled={cardDisabled}
-              className="rounded-lg"
+              className={cls.token}
               movedBehavior="fade"
             >
               <PlayingCard
                 cardSuit={getCardSuit(card)}
                 cardRank={getCardRank(card)}
-                className="w-52px"
+                size={52}
                 disabled={cardDisabled}
               />
             </Token>

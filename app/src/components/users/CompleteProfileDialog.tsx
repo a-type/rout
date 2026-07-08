@@ -1,5 +1,5 @@
 import { sdkHooks } from '@/services/publicSdk.js';
-import { Dialog, DialogContent, DialogTitle } from '@a-type/ui';
+import { Box, Dialog, DialogContent, DialogTitle } from '@a-type/ui';
 import { PlayerColorName } from '@long-game/common';
 import { EditProfileForm } from './EditProfile.js';
 
@@ -12,9 +12,10 @@ export function CompleteProfileDialog() {
     <Dialog open={open}>
       <DialogContent>
         <DialogTitle>Complete your profile</DialogTitle>
-        <div className="mb-lg">Just a few things to start playing</div>
-
-        <EditProfileForm />
+        <Box col gap>
+          <div>Just a few things to start playing</div>
+          <EditProfileForm />
+        </Box>
       </DialogContent>
     </Dialog>
   );

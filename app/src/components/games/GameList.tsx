@@ -15,6 +15,7 @@ import { ReactNode, useState } from 'react';
 import { GameDetailsDialog } from '../library/GameDetailsDialog';
 import { useOpenQuickBuy } from '../store/QuickBuyPopup';
 import { GameIcon } from './GameIcon';
+import cls from './GameList.module.css';
 import { GameTitle } from './GameTitle';
 
 interface GameListFilters {
@@ -107,7 +108,7 @@ export function GameListRoot({
 
   return (
     <Box
-      d="col"
+      col
       gap
       items="stretch"
       full="width"
@@ -115,8 +116,8 @@ export function GameListRoot({
       {...rest}
     >
       <Box>
-        <Collapsible className="w-full flex flex-col">
-          <div className="bg-white rd-t-sm mr-auto [&:has([aria-expanded=false])]:rd-b-sm">
+        <Collapsible className={cls.collapsible}>
+          <div className={cls.triggerWrap}>
             <Collapsible.Trigger
               render={<Button size="small" emphasis="ghost" />}
             >
@@ -124,9 +125,9 @@ export function GameListRoot({
               Filters
             </Collapsible.Trigger>
           </div>
-          <Collapsible.Content className="bg-white">
-            <Box d="col" gap="sm" p="sm" container="reset" full items="start">
-              <label className="flex items-center gap-xs cursor-pointer">
+          <Collapsible.Content className={cls.content}>
+            <Box col gap="sm" p="sm" container full items="start">
+              <label className={cls.filterLabel}>
                 <Switch
                   checked={filters.available}
                   onCheckedChange={toggleAvailableFilter}
@@ -155,13 +156,13 @@ export function GameListRoot({
           </Collapsible.Content>
         </Collapsible>
       </Box>
-      <Box className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-md p-md">
+      <Box className={cls.gameGrid}>
         {children({ games: filteredGames, filters })}
       </Box>
       {!filteredGames.length && (
-        <Box full="width" layout="center center" className="color-gray-dark">
+        <Box full="width" layout="center center" className={cls.emptyState}>
           {filters.available ? (
-            <Box d="col" items="center" gap>
+            <Box col items="center" gap>
               No games owned by a player match these filters.
               {filteredGamesIncludingUnowned.length ? (
                 <Button
@@ -211,17 +212,11 @@ export function GameListItem({
   const openQuickBuy = useOpenQuickBuy();
 
   return (
-    <Card
-      className={clsx(
-        'aspect-1 min-w-80px',
-        selected && 'ring-accent ring-6',
-        className,
-      )}
-    >
+    <Card className={clsx(cls.item, selected && cls.selected, className)}>
       <Card.Image render={<GameIcon gameId={gameId} />} />
       <GameDetailsDialog gameId={gameId}>
         <Card.Main nonInteractive={false}>
-          <Card.Title className="text-sm md:text-md">
+          <Card.Title className={cls.title}>
             <GameTitle gameId={gameId} />
           </Card.Title>
           {selected && (
@@ -235,7 +230,7 @@ export function GameListItem({
       <Card.Footer>
         {!owned && (
           <Button
-            className="w-full justify-center"
+            className={cls.actionButton}
             color="accent"
             emphasis="primary"
             onClick={() => openQuickBuy(gameId)}
@@ -246,7 +241,7 @@ export function GameListItem({
         )}
         {owned && canSelect && (
           <Button
-            className="w-full justify-center"
+            className={cls.actionButton}
             emphasis="primary"
             onClick={onSelect}
             disabled={selected}
@@ -257,7 +252,7 @@ export function GameListItem({
         )}
         {!canSelect && canVote && (
           <Button
-            className="w-full justify-center"
+            className={cls.actionButton}
             emphasis="primary"
             onClick={() => {
               if (voted) {

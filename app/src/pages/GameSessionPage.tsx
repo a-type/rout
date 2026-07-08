@@ -23,7 +23,7 @@ export function GameSessionPage() {
   }
 
   return (
-    <ErrorBoundary fallback={<div>Ooops, something went wrong 😥.</div>}>
+    <ErrorBoundary fallback={<div>Oops, something went wrong 😥.</div>}>
       <GameSessionRenderer gameSessionId={sessionId} />
     </ErrorBoundary>
   );

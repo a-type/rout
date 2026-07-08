@@ -4,6 +4,7 @@ import { Box, Button, H3, Icon, withProps } from '@a-type/ui';
 import { useLocalStorage } from '@long-game/game-client';
 import { useState } from 'react';
 import { NotificationSettings } from './NotificationSettings';
+import cls from './PushBanner.module.css';
 
 export interface PushBannerProps {}
 
@@ -79,5 +80,5 @@ const Banner = withProps(Box, {
   col: true,
   gap: true,
   p: true,
-  className: 'fixed top-md left-1/2 w-95vw max-w-600px -translate-x-1/2 z-50',
+  className: cls.banner,
 });

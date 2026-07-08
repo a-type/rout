@@ -1,0 +1,9 @@
+.root {
+  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg-heavier(1);
+  @apply --mx-fg(var(--m-color-main-ink));
+  font-weight: var(--m-text-weight-bold);
+  white-space: nowrap;
+  padding-inline: var(--m-space-xs);
+  border-radius: var(--m-radius);
+}

@@ -1,7 +1,5 @@
 {
   "files.exclude": {
     // "**/node_modules": true
-  },
-  "unocss.exclude": ["./services"],
-  "unocss.colorPreview": false
+  }
 }

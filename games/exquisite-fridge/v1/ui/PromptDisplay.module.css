@@ -1,0 +1,14 @@
+.leadIn {
+  line-height: --fn-literal(24px);
+  vertical-align: top;
+}
+
+.player {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--m-space-sm);
+  @apply --mx-bg(var(--m-color-main-light));
+  padding-inline-end: var(--m-space-sm);
+  margin-inline-start: var(--m-space-sm);
+  border-radius: --fn-literal(999px);
+}

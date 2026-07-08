@@ -1,0 +1,15 @@
+.popover {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--m-space-md);
+  max-width: 400px;
+}
+
+.arrow {
+  stroke: none;
+}
+
+.close {
+  margin-left: auto;
+}

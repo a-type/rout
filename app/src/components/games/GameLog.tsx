@@ -1,5 +1,5 @@
 import { getFederatedGameComponent } from '@/services/games';
-import { Box, Button, clsx, Dialog } from '@a-type/ui';
+import { Box, Button, Dialog } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import {
   ChatForm,
@@ -11,6 +11,7 @@ import {
 } from '@long-game/game-ui';
 import { Suspense, useEffect, useRef } from 'react';
 import { subscribe, useSnapshot } from 'valtio';
+import cls from './GameLog.module.css';
 
 export function GameLogChatInput() {
   const toolsRef = useRef<{ focus: () => void }>(null);
@@ -37,7 +38,6 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   if (!latestMessage) {
     return (
       <Box
-        direction="row"
         gap="sm"
         p="none"
         items="center"
@@ -61,10 +61,10 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
         : DefaultChatMessage;
     return (
       <div
-        className="absolute top-full left-0 right-xs"
+        className={cls.collapsedTrigger}
         data-testid="game-log-collapsed-trigger"
       >
-        <div className="relative -top-34px -left-4px w-[calc(100%+16px)]">
+        <div className={cls.collapsedTriggerInner}>
           <ChatMessage
             message={latestMessage.chatMessage}
             previousMessage={null}
@@ -79,17 +79,17 @@ const GameLogCollapsedTriggerContent = withGame(({ gameSuite }) => {
   return null;
 });
 
-export const GameLog = withGame<{ className?: string }>(function GameLog({
-  gameSuite,
-  ...props
-}) {
+export const GameLog = withGame<{
+  className?: string;
+  style?: React.CSSProperties;
+}>(function GameLog({ gameSuite, ...props }) {
   const open = useSnapshot(localState).open;
   const isLarge = useMediaQuery('(min-width: 1024px)');
 
   if (isLarge) {
     return (
-      <Box d="col" gap="none" p="sm" items="stretch" {...props}>
-        <ChatLog log={gameSuite.combinedLog} className="px-xs" />
+      <Box col gap="none" p="sm" items="stretch" {...props}>
+        <ChatLog log={gameSuite.combinedLog} className={cls.log} />
         <GameLogChatInput />
       </Box>
     );
@@ -111,7 +111,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
                   }, 50);
                 }
               }}
-              className="w-full font-normal h-32px rounded-xs p-0"
+              className={cls.openButton}
               aria-label="Open Game Log"
             />
           }
@@ -121,11 +121,7 @@ export const GameLog = withGame<{ className?: string }>(function GameLog({
           </Suspense>
         </Dialog.Trigger>
         <Dialog.Content width="md">
-          <Box
-            layout="stretch stretch"
-            className={clsx('w-full h-70vh')}
-            d="col"
-          >
+          <Box layout="stretch stretch" className={cls.content} col>
             <ChatLog log={gameSuite.combinedLog} />
             <GameLogChatInput />
           </Box>

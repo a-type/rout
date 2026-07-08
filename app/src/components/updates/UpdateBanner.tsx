@@ -1,7 +1,7 @@
 import { skipWaiting, usePollForUpdates } from '@/swRegister.js';
 import { Box, Button, Icon } from '@a-type/ui';
+import { ScrollTicker } from '@long-game/visual-components';
 import { useState } from 'react';
-import { ScrollTicker } from '../general/ScrollTicker.js';
 import { useIsUpdateAvailable, useIsUpdating } from './updateState.js';
 
 const TEST = false;
@@ -24,7 +24,12 @@ export function UpdateBanner({}) {
       full="width"
       surface
       color="accent"
-      className="rounded-none flex-shrink-0 relative z-10000"
+      style={{
+        borderRadius: 0,
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 10000,
+      }}
     >
       <ScrollTicker>
         <Icon name="star" />

@@ -9,7 +9,7 @@ import { GameIcons } from './GameIcons.js';
 
 const App = () => {
   return (
-    <Box d="col" layout="center start" className="bg-wash" gap="lg">
+    <Box col layout="center start" className="bg-wash" gap="lg">
       <ScrollTicker className="bg-white color-black w-full relative z-1 p-sm font-bold">
         BETA
       </ScrollTicker>

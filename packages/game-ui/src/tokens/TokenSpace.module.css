@@ -1,0 +1,13 @@
+.root {
+  position: relative;
+  transition: transform var(--m-duration) var(--m-easing);
+
+  &[data-over-accepted='true'] {
+    scale: 102%;
+  }
+}
+
+.error {
+  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-fg(var(--m-color-main-ink));
+}

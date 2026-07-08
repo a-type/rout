@@ -7,7 +7,8 @@
     "declarationMap": true,
     "lib": ["ESNext", "DOM"],
     "composite": true,
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": ["src"],
   "exclude": ["dist", "node_modules", "../game-client"],

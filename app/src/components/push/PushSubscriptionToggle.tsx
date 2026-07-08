@@ -37,7 +37,8 @@ export function PushSubscriptionToggle({
           <Button
             toggled={!!subscribed}
             toggleMode="state-only"
-            emphasis={subscribed ? 'ghost' : 'contrast'}
+            emphasis={subscribed ? 'ghost' : 'default'}
+            className={!subscribed ? '@mode-inverted' : ''}
             {...rest}
           />
         }

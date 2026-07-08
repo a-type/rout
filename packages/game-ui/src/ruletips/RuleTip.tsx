@@ -95,7 +95,7 @@ export function RuleTip({
     render: children,
     ref: anchorRef,
     props: {
-      className: 'touch-none',
+      style: { touchAction: 'none' },
       onPointerDown: handleDown,
       onContextMenu: preventDefault,
     },

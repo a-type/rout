@@ -19,7 +19,7 @@
     "browser-test:run": "playwright test --config=playwright.config.ts",
     "browser-test:ui": "pnpm browser-test:run --ui",
     "browser-test:servers": "pnpm run --parallel --stream \"/browser-test:server/\"",
-    "free-ports": "pnpx kill-port 9229 3099 3100 3101 3300 3301 3302 3303 3304 3305 3306 3307 3308 3309 3310"
+    "free-ports": "pnpx kill-port 9229 3099 3100 3101 3300 3301 3302 3303 3304 3305 3306 3307 3308 3309 3310 3400 3401 3402 3403 3404 3405 3406 3407 3408 3409 3410 3500 3501 3502 3503 3504 3505 3506 3507 3508 3509 3510"
   },
   "keywords": [],
   "author": "",
@@ -28,17 +28,14 @@
     "@a-type/ui": "catalog:",
     "@clack/prompts": "0.9.0",
     "@cloudflare/workers-types": "catalog:",
-    "@unocss/transformer-variant-group": "^65.4.2",
     "cp-tpl": "1.0.9",
     "turbo": "2.3.3",
     "typescript": "catalog:",
-    "unocss": "catalog:",
     "web-push": "catalog:",
     "wrangler": "catalog:",
     "vitest": "catalog:",
     "prettier": "3.5.3",
     "change-case": "5.4.4",
-    "@long-game/uno-config": "workspace:*",
     "@playwright/test": "^1.54.2",
     "@types/node": "^24.1.0",
     "@vitest/coverage-v8": "catalog:"

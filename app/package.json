@@ -14,6 +14,8 @@
   "dependencies": {
     "@a-type/auth-ui": "catalog:",
     "@a-type/ui": "catalog:",
+    "@arbor-css/core": "catalog:",
+    "@arbor-css/postcss": "catalog:",
     "@long-game/common": "workspace:*",
     "@long-game/game-client": "workspace:*",
     "@long-game/game-definition": "workspace:*",
@@ -34,10 +36,9 @@
     "valtio": "catalog:"
   },
   "devDependencies": {
-    "@a-type/rsbuild-plugin-unocss": "catalog:",
     "@aaroon/workbox-rspack-plugin": "^0.3.3",
     "@birchill/inject-manifest-plugin": "^1.0.1",
-    "@long-game/uno-config": "workspace:*",
+    "@long-game/arbor-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",
     "@module-federation/rsbuild-plugin": "catalog:",
     "@rsbuild/core": "catalog:",
@@ -46,13 +47,13 @@
     "@rspack/core": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "unocss": "catalog:",
     "workbox-core": "^7.3.0",
     "workbox-expiration": "^7.3.0",
     "workbox-precaching": "^7.3.0",
     "workbox-routing": "^7.3.0",
     "workbox-strategies": "^7.3.0",
     "workbox-window": "^7.3.0",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "typescript-plugin-css-modules": "catalog:"
   }
 }

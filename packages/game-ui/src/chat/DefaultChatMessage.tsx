@@ -7,6 +7,7 @@ import {
   Icon,
   Popover,
   RelativeTime,
+  Text,
 } from '@a-type/ui';
 import {
   GameSessionChatMessage,
@@ -18,6 +19,7 @@ import { PlayerName } from '../players/PlayerName.js';
 import { usePlayerThemed } from '../players/usePlayerThemed.js';
 import { ChatReactions } from './ChatReactions.js';
 import { ChatTextWithTokens } from './ChatTextWithTokens.js';
+import cls from './DefaultChatMessage.module.css';
 
 export interface ChatMessageProps extends BoxProps {
   message: GameSessionChatMessage;
@@ -79,14 +81,16 @@ const DefaultChatMessageRoot = withGame<ChatMessageProps>(
     );
     return (
       <Box
-        d="col"
+        col
+        data-is-self={isSelf}
+        data-is-system={isSystem}
+        data-is-future={isFuture}
+        data-compact={props.compact}
+        data-is-previous-message-same-author={isPreviousMessageSameAuthor}
         className={clsx(
-          isSystem ? 'palette-gray' : themeClass,
-          isSelf ? 'ml-auto' : 'mr-auto',
-          isFuture && 'opacity-50',
-          props.compact && 'w-full',
+          cls.root,
+          isSystem ? '@mode-neutral' : themeClass,
           props.className,
-          !props.compact && !isPreviousMessageSameAuthor && 'mt-md',
         )}
         gap="xs"
         style={props.style ? { ...themeStyle, ...props.style } : themeStyle}
@@ -107,21 +111,19 @@ const DefaultChatMessageAuthor = withGame<ChatMessageProps>(
     if (isPreviousMessageSameAuthor) return null;
     return (
       <Box
-        className={clsx(
-          'absolute top-0 -translate-y-3/5 rounded-12px text-xs bg-main-light color-black z-1',
-          isSelf ? 'right-0' : 'left-0',
-        )}
+        className={clsx('@mode-denser', cls.author)}
+        data-is-self={isSelf}
         gap="sm"
         items="center"
       >
         <PlayerAvatar
           playerId={props.message.authorId}
-          className="flex-shrink-0 w-16px h-auto"
+          className={cls.avatar}
           interactive
         />
-        <span className="font-bold block pr-md py-xs text-nowrap overflow-hidden">
+        <Text emphasis="secondary" bold className={cls.name}>
           <PlayerName playerId={props.message.authorId} />
-        </span>
+        </Text>
       </Box>
     );
   },
@@ -135,16 +137,17 @@ const DefaultChatMessageMetadata = withGame<ChatMessageProps>(
 
     return (
       <Box
-        className="text-xs color-gray-dark px-sm"
+        className={cls.metadata}
+        dim
         full="width"
         gap
         justify="between"
-        d={isSelf ? 'row-reverse' : 'row'}
+        reverse={isSelf}
       >
-        <Box d="row" gap>
+        <Box gap>
           {isDm && (
             <Popover>
-              <Popover.Content className="p-sm flex flex-row gap-sm items-center min-w-0">
+              <Popover.Content className={cls.popover}>
                 <Popover.Arrow />
                 <span>DM:</span>
                 <AvatarList count={props.message.recipientIds!.length}>
@@ -158,8 +161,8 @@ const DefaultChatMessageMetadata = withGame<ChatMessageProps>(
               <Popover.Trigger
                 render={
                   <Button
-                    size="small"
-                    className="px-xs py-xs my-auto bg-accent-wash -mt-6px"
+                    size="wrapper"
+                    className={cls.privacyTrigger}
                     emphasis="ghost"
                   />
                 }
@@ -169,18 +172,15 @@ const DefaultChatMessageMetadata = withGame<ChatMessageProps>(
             </Popover>
           )}
           {(!isNextMessageSameAuthor || nextMessageIsLongFromNow) && (
-            <span className="italic text-nowrap">
+            <Text italic wrap={false}>
               <RelativeTime
                 abbreviate
                 value={new Date(props.message.createdAt).getTime()}
               />
-            </span>
+            </Text>
           )}
         </Box>
-        <ChatReactions
-          message={props.message}
-          className={clsx('relative -top-4px z-10 bg-wash [font-style:normal]')}
-        />
+        <ChatReactions message={props.message} className={cls.reactions} />
       </Box>
     );
   },
@@ -192,29 +192,17 @@ const DefaultChatMessageBubble = withGame<ChatMessageProps>(
       useChatMessageDetails(props, gameSuite);
     return (
       <Box
-        d="col"
+        col
         surface
         items="start"
         gap="sm"
         elevated={props.compact ? undefined : 'sm'}
         border={!props.compact}
-        className={clsx(
-          'bg-main-wash bg-lighten-2 color-black',
-          'transition-opacity',
-          'px-md py-sm',
-          {
-            'rounded-tr-0':
-              !props.compact && isSelf && !isPreviousMessageSameAuthor,
-            'rounded-tl-0':
-              !props.compact && !isSelf && !isPreviousMessageSameAuthor,
-            'rounded-br-0':
-              !props.compact && isSelf && !isNextMessageSameAuthor,
-            'rounded-bl-0':
-              !props.compact && !isSelf && !isNextMessageSameAuthor,
-            'rounded-0': props.compact,
-          },
-          className,
-        )}
+        data-compact={props.compact}
+        data-is-self={isSelf}
+        data-is-previous-message-same-author={isPreviousMessageSameAuthor}
+        data-is-next-message-same-author={isNextMessageSameAuthor}
+        className={clsx(cls.bubble, className)}
       >
         {props.children}
       </Box>
@@ -225,12 +213,7 @@ const DefaultChatMessageBubble = withGame<ChatMessageProps>(
 const DefaultChatMessageContent = withGame<ChatMessageProps>(
   function DefaultChatMessageContent({ message, className }) {
     return (
-      <div
-        className={clsx(
-          'w-full leading-relaxed whitespace-pre-wrap text-start',
-          className,
-        )}
-      >
+      <div className={clsx(cls.content, className)}>
         <ChatTextWithTokens>{message.content}</ChatTextWithTokens>
       </div>
     );

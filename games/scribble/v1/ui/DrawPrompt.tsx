@@ -1,4 +1,4 @@
-import { Box, H2, H3 } from '@a-type/ui';
+import { Box, Heading, Text } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { PlayerAvatar, PlayerName } from '@long-game/game-ui';
 import { Canvas } from './drawing/Canvas.js';
@@ -29,9 +29,11 @@ export const DrawPrompt = hooks.withGame<DrawPromptProps>(function DrawPrompt({
   }
 
   return (
-    <Box d="col" gap items="center">
-      <H2>Draw this:</H2>
-      <H3 className="text-3xl italic text-center">"{prompt}"</H3>
+    <Box col gap items="center">
+      <Text bold>Draw this:</Text>
+      <Heading italic style={{ textAlign: 'center' }}>
+        "{prompt}"
+      </Heading>
       {byPlayerId && (
         <Box gap items="center">
           Prompt by <PlayerAvatar playerId={byPlayerId} />

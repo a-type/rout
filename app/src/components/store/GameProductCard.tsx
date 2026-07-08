@@ -1,8 +1,10 @@
-import { Button, Card, Dialog, Icon, Marquee, clsx } from '@a-type/ui';
+import { Button, Card, Dialog, Icon, Marquee } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
 import { useSearchParams } from '@verdant-web/react-router';
 import { GameIcon } from '../games/GameIcon.js';
 import { BuyGameProduct } from './BuyGameProduct.js';
+import cls from './GameProductCard.module.css';
+import { Price } from './Price.js';
 
 export interface GameProductCardProps {
   returnToAfterPurchase?: string;
@@ -46,33 +48,20 @@ export function GameProductCard({
           }
         }}
       >
-        <Dialog.Trigger render={<Card.Main className="aspect-1" />}>
+        <Dialog.Trigger render={<Card.Main style={{ aspectRatio: 1 }} />}>
           <Card.Title>{product.name}</Card.Title>
-          <Card.Content
-            className={clsx(
-              'text-md font-bold',
-              product.isOwned && 'bg-accent-wash color-accent-ink',
-            )}
-          >
-            {product.isOwned
-              ? 'Owned'
-              : product.priceCents === 0
-                ? 'Free'
-                : `$${product.priceCents / 100}`}
+          <Card.Content unstyled>
+            <Price product={product} />
           </Card.Content>
           <Card.Content>{product.gameProductItems.length} games</Card.Content>
           {!product.publishedAt && (
-            <Card.Content className="text-xs flex-row">
+            <Card.Content className={cls.admins}>
               <Icon name="eyeClosed" />
               Admins only
             </Card.Content>
           )}
 
-          <Button
-            tabIndex={-1}
-            className="absolute bottom-sm right-sm"
-            render={<div />}
-          >
+          <Button tabIndex={-1} className={cls.details} render={<div />}>
             Details <Icon name="new_window" />
           </Button>
         </Dialog.Trigger>
@@ -80,7 +69,7 @@ export function GameProductCard({
           <Dialog.Title>{product.name}</Dialog.Title>
           <Dialog.Description>{product.description}</Dialog.Description>
           <Dialog.Actions>
-            <Dialog.Close className="mr-auto" />
+            <Dialog.Close style={{ marginRight: 'auto' }} />
             <BuyGameProduct
               color="accent"
               emphasis="primary"

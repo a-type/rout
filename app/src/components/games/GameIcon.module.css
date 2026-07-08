@@ -1,0 +1,23 @@
+.loading {
+  @apply --mx-bg(var(--m-color-neutral-light));
+  animation-name: pulse;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: var(--m-easing);
+
+  &[data-border='true'] {
+    @apply --mx-borderColor(var(--m-color-neutral-heavy));
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

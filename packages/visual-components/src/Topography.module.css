@@ -1,0 +1,8 @@
+.canvas {
+  @apply --mx-animation(fadeIn);
+  animation-duration: 1s;
+
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}

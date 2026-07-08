@@ -1,4 +1,4 @@
-import { Chip, Icon } from '@a-type/ui';
+import { Chip, Icon, Text } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 
@@ -11,14 +11,14 @@ export const PlayerStatusChip = withGame<PlayerStatusChipProps>(
     const status = gameSuite.playerStatuses[playerId] ?? null;
 
     return status.online ? (
-      <Chip color="primary" className="text-sm">
+      <Chip emphasis="primary" className="@mode-primary">
         <Icon name="globe" size={16} />
         <span>Online</span>
       </Chip>
     ) : (
-      <Chip color="gray" className="text-sm color-gray-dark">
+      <Chip emphasis="primary" className="@mode-neutral">
         <Icon name="x" size={16} />
-        <span>Offline</span>
+        <Text dim>Offline</Text>
       </Chip>
     );
   },

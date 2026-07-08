@@ -1,11 +1,12 @@
+import { HelpSurface } from '@long-game/game-ui';
+import clsx from 'clsx';
 import {
   fromCellKey,
   getCenterCellKey,
   PathDetails,
   scorePath,
 } from '../../definition/index';
-import { HelpSurface } from '@long-game/game-ui';
-import clsx from 'clsx';
+import cls from './PathScores.module.css';
 
 export interface PathScoresProps {
   paths: PathDetails[];
@@ -29,18 +30,15 @@ export function PathScores({
             key={path.id}
             style={{
               positionAnchor: `--${anchorNamespace}-${x}-${y}`,
-              top: 'anchor(center)',
-              left: 'anchor(center)',
             }}
+            data-complete={path.isComplete}
+            data-broken={path.breaks.length > 0}
             className={clsx(
-              'fixed -translate-x-1/2 -translate-y-1/2 text-0.75em pointer-events-none flex items-center justify-center p-xs rd-full leading-0 aspect-1 z-1',
-              'color-contrast border-thin font-bold',
               {
-                'bg-success': path.isComplete,
-                'bg-main-wash border-main-dark border-dashed':
-                  !path.isComplete && path.breaks.length === 0,
-                'bg-gray': path.breaks.length > 0,
+                '@mode-success': path.isComplete,
+                '@mode-neutral': !path.isComplete && path.breaks.length > 0,
               },
+              cls.root,
             )}
             content={
               path.isComplete

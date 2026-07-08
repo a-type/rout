@@ -1,4 +1,4 @@
-import { Box, clsx, useAnimationFrame } from '@a-type/ui';
+import { Box, useAnimationFrame } from '@a-type/ui';
 import { ReactNode, useMemo, useRef, useSyncExternalStore } from 'react';
 
 function useMediaQuery(query: string): boolean {
@@ -63,15 +63,14 @@ export function ScrollTicker({
   }, [ref.current, prefersReducedMotion, speed]);
 
   return (
-    <div
-      className={clsx('flex-1 overflow-hidden', className)}
-      ref={parentRef}
-      {...props}
-    >
+    <Box grow overflow="clip" className={className} ref={parentRef} {...props}>
       <Box
         gap="sm"
         full="height"
-        className="text-nowrap translate-x-[var(--x)]"
+        style={{
+          whiteSpace: 'nowrap',
+          transform: 'translateX(var(--x))',
+        }}
         items="center"
         ref={ref}
       >
@@ -81,6 +80,6 @@ export function ScrollTicker({
           </div>
         ))}
       </Box>
-    </div>
+    </Box>
   );
 }

@@ -2,6 +2,7 @@ import { PrefixedId } from '@long-game/common';
 import { PlayingCard, Token } from '@long-game/game-ui';
 import { getCardRank, getCardSuit } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './PlayerScoredCards.module.css';
 
 export interface PlayerScoredCardsProps {
   playerId: PrefixedId<'u'>;
@@ -18,12 +19,13 @@ export const PlayerScoredCards = hooks.withGame<PlayerScoredCardsProps>(
             <PlayingCard
               cardSuit={getCardSuit(card)}
               cardRank={getCardRank(card)}
-              className="w-28px flex-shrink-1 flex-grow-0 flex-basis-auto"
+              size={28}
+              className={cls.card}
             />
           </Token>
         ))}
         {!scoredCards.length && (
-          <PlayingCard.Placeholder className="w-28px invisible flex-shrink-1 flex-grow-0 flex-basis-auto" />
+          <PlayingCard.Placeholder size={28} className={cls.card} />
         )}
       </>
     );

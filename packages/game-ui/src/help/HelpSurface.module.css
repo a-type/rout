@@ -1,0 +1,8 @@
+.title {
+  text-transform: capitalize;
+}
+
+.readMore {
+  flex-shrink: 0;
+  padding-block-start: var(--m-space-md);
+}

@@ -3,15 +3,10 @@
   "bin": {
     "scripts": "./scripts.mjs"
   },
-  "scripts": {
-    "uno": "unocss --config uno.extract.config.ts"
-  },
+  "scripts": {},
   "dependencies": {
     "copyfiles": "catalog:",
     "@types/node": "22.14.0",
-    "minimist": "1.2.8",
-    "unocss": "catalog:",
-    "@unocss/cli": "catalog:",
-    "@long-game/uno-config": "workspace:*"
+    "minimist": "1.2.8"
   }
 }

@@ -2,6 +2,7 @@ import { AvatarList, Card, Icon } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { PlayerAvatar } from '@long-game/game-ui';
 import { GameList } from '../GameList.js';
+import cls from './GamePicker.module.css';
 
 export interface GamePickerProps {
   value: string;
@@ -63,8 +64,8 @@ export const GamePickerItem = withGame<{
       canVote={!gameSuite.youAreLeader}
     >
       {voters?.length > 0 && (
-        <Card.Content unstyled className="flex flex-row gap-xs items-center">
-          <Icon name="suitHeart" className="fill-attention" size={20} />
+        <Card.Content unstyled className={cls.votes}>
+          <Icon name="suitHeart" filled className="@mode-attention" size={20} />
           <AvatarList count={voters.length}>
             {voters.map((voter, i) => (
               <AvatarList.ItemRoot index={i} key={voter}>

@@ -1,0 +1,21 @@
+.actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  & > * {
+    @apply --mx-shadow(var(--m-shadow-md));
+  }
+}
+
+.ticker {
+  @apply --mx-bg(var(--m-color-accent));
+  @apply --mx-bg(var(--m-color-accent-ink));
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: var(--m-space-sm);
+  font-weight: var(--m-text-weight-bold);
+  text-transform: uppercase;
+}

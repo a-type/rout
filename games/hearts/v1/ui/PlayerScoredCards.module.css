@@ -1,0 +1,5 @@
+.card {
+  flex-shrink: 1;
+  flex-grow: 0;
+  flex-basis: auto;
+}

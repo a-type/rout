@@ -1,0 +1,11 @@
+.toggleItem {
+  display: flex;
+  flex-direction: row;
+  gap: var(--m-space-xs);
+  align-items: center;
+
+  &:disabled {
+    @apply --mx-bg(var(--m-color-neutral-light));
+    @apply --mx-fg(var(--m-color-neutral-ink));
+  }
+}

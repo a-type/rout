@@ -1,0 +1,23 @@
+.root {
+  @apply --mx-bg(var(--m-color-main-wash));
+  flex: 1;
+}
+
+.scores {
+  flex: 0 1 auto;
+  min-height: 80px;
+}
+
+.main {
+  position: sticky;
+  top: var(--m-space-sm);
+  z-index: 1;
+}
+
+.hand {
+  position: sticky;
+  margin-block-end: var(--m-space-lg);
+  bottom: var(--m-space-md);
+  flex-shrink: 0;
+  z-index: 10;
+}

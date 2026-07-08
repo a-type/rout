@@ -27,7 +27,7 @@ export const PlayerFriendChip = withGame<PlayerFriendChipProps>(
 
     if (isFriend) {
       return (
-        <Chip color="gray" className="text-sm">
+        <Chip emphasis="primary" className="@mode-dense @mode-neutral">
           <Icon name="smile" size={16} />
           <span>Friend</span>
         </Chip>
@@ -38,7 +38,6 @@ export const PlayerFriendChip = withGame<PlayerFriendChipProps>(
       <Button
         size="small"
         emphasis="primary"
-        className="text-sm"
         onClick={() => inviteMutation.mutateAsync({ userId: playerId })}
         disabled={inviteSent}
       >

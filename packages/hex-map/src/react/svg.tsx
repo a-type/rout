@@ -93,6 +93,7 @@ export function SvgHexTileContent({
   children,
   className,
   coordinate,
+  style,
   ...rest
 }: SVGProps<SVGGElement> & { coordinate: HexCoordinate }) {
   const { actualWidth, actualHeight } = useTilePosition(coordinate);
@@ -101,6 +102,10 @@ export function SvgHexTileContent({
       className={className}
       width={actualWidth}
       height={actualHeight}
+      style={{
+        position: 'relative',
+        ...style,
+      }}
       {...rest}
     >
       {children}
@@ -131,11 +136,7 @@ export function SvgHexTileDefault({
         stroke={stroke}
         strokeWidth={strokeWidth}
       />
-      <SvgHexTileContent
-        className={`relative`}
-        coordinate={coordinate}
-        {...svgProps}
-      >
+      <SvgHexTileContent coordinate={coordinate} {...svgProps}>
         {children}
       </SvgHexTileContent>
     </SvgHexTileRoot>

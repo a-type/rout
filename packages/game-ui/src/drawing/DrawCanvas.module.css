@@ -1,0 +1,39 @@
+.tools {
+  flex-direction: column;
+  @media (min-width: 640px) {
+    flex-direction: row;
+  }
+}
+
+.colorDot {
+  width: --fn-literal(32px);
+  height: --fn-literal(32px);
+  border-radius: --fn-literal(999px);
+}
+
+.sizeDot {
+  @apply --mx-bg(var(--m-color-neutral-ink));
+  border-radius: --fn-literal(999px);
+}
+
+.canvas {
+  touch-action: none;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 50vh;
+  @apply --mx-bg(var(--m-color-neutral-paper));
+  border-radius: var(--m-radius-lg);
+  @apply --mx-borderColor(var(--m-color-neutral-ink));
+}
+
+.fillMainLight {
+  fill: var(--m-color-main-light);
+}
+
+.fillMainDark {
+  fill: var(--m-color-main-heavy);
+}
+
+.fillBlack {
+  fill: var(--m-color-neutral-ink);
+}

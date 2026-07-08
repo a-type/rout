@@ -1,10 +1,11 @@
-import { Box, clsx, H1, Icon } from '@a-type/ui';
+import { Box, clsx, Heading, Icon } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { TopographyBackground } from '@long-game/game-ui';
 import { GameManualDialog } from '../GameManualDialog.js';
 import { GameMembersPage } from './GameMembersPage.js';
 import { GameSelectionBanner } from './GameSelectionBanner.js';
+import cls from './GameSetup.module.css';
 import { PlayingBouncy } from './PlayingBouncy.js';
 import { StartGameButton } from './StartGameButton.js';
 
@@ -18,17 +19,19 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
   className,
 }) {
   return (
-    <Box p d="col" gap grow className={clsx('m-auto max-w-800px', className)}>
-      <Box d="col" gap grow>
-        <H1 className="text-md font-bold uppercase">Game Setup</H1>
+    <Box p col gap grow className={clsx(cls.root, className)}>
+      <Box col gap grow>
+        <Heading emphasis="ambient" render={<h1 />} bold uppercase>
+          Game Setup
+        </Heading>
         <GameMembersPage gameSessionId={gameSessionId} />
       </Box>
       <Box
-        className="sticky bottom-sm z-1000 overflow-clip anchor-gameselection"
+        className={cls.banner}
         full="width"
         col
         gap
-        surface="white"
+        surface="ambient"
         border
         elevated="md"
         p
@@ -36,9 +39,8 @@ export const GameSetup = withGame<GameSetupProps>(function GameSetup({
         <TopographyBackground />
         <GameSelectionBanner />
         <GameManualDialog
-          emphasis="contrast"
           size="small"
-          className="justify-center"
+          className="@mode-inverted justify-center"
         >
           <Icon name="book" />
           How to play

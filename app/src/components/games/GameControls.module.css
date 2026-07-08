@@ -1,0 +1,20 @@
+.history {
+  padding: var(--m-space-xs) var(--m-space-md);
+  border-radius: 0;
+  margin-inline: calc(-1 * var(--m-space-md));
+  margin-block-end: calc(-1 * var(--m-space-md));
+  font-size: var(--m-text-size-sm);
+}
+
+.playerStatuses {
+  flex-shrink: 1;
+}
+
+.log {
+  flex: 1 0 0;
+  min-height: 0;
+}
+
+.secondaryControls {
+  justify-content: space-between;
+}

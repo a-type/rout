@@ -8,6 +8,7 @@ import {
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { Link } from '@verdant-web/react-router';
+import cls from './PlayerAvatar.module.css';
 import { PlayerInfo } from './PlayerInfo.js';
 import { usePlayerThemed } from './usePlayerThemed.js';
 
@@ -64,13 +65,8 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
         ...style,
         width: size ?? 24,
       }}
-      className={clsx(
-        'flex-shrink-0 aspect-1 overflow-hidden',
-        'border-solid border-2px color-main-dark bg-main-wash',
-        status?.online ? 'border-main-dark' : 'border-gray',
-        themeClass,
-        className,
-      )}
+      data-status={status?.online ? 'online' : 'offline'}
+      className={clsx(cls.avatar, themeClass, className)}
       popIn={false}
       crossOrigin="use-credentials"
     />
@@ -78,7 +74,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
 
   return (
     <Tooltip
-      color="white"
+      color="neutral"
       content={
         !playerId ? (
           'Unknown player'

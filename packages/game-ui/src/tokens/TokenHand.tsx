@@ -8,6 +8,7 @@ import {
 import {
   Children,
   createContext,
+  CSSProperties,
   memo,
   ReactNode,
   Ref,
@@ -18,6 +19,7 @@ import { draggableDataRegistry } from '../dnd/dataRegistry.js';
 import { useDndStore } from '../dnd/dndStore.js';
 import { gesture } from '../dnd/index.js';
 import { useWindowEvent } from '../hooks/useWindowEvent.js';
+import cls from './TokenHand.module.css';
 import { TokenSpace } from './TokenSpace.js';
 import { isToken, TokenDragData } from './types.js';
 
@@ -40,6 +42,7 @@ export interface TokenHandProps<T> {
   renderDetailed?: (value: TokenDragData<T>) => ReactNode;
   ref?: Ref<HTMLDivElement>;
   className?: string;
+  style?: CSSProperties;
   onDrop?: (value: TokenDragData<T>) => void;
   /** Defaults to 'hand', use if you have multiple hands */
   id?: string;
@@ -54,16 +57,26 @@ export function TokenHand<T = unknown>({
   id,
   children,
   priority,
+  style,
   ...rest
 }: TokenHandProps<T>) {
   return (
     <TokenHandContext.Provider value={true}>
-      <Box ref={userRef} full="width" className={className}>
+      <Box ref={userRef} full="width" className={className} style={style}>
         <TokenSpace
           id={id || 'hand'}
           type="hand"
           onDrop={(v) => onDrop?.(v as TokenDragData<T>)}
-          className="flex flex-row items-center justify-center gap-xs w-full overflow-hidden p-xs"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'var(--m-space-xs)',
+            overflow: 'clip',
+            width: '100%',
+            padding: 'var(--m-space-xs)',
+          }}
           priority={priority}
           {...rest}
         >
@@ -117,14 +130,38 @@ const TokenHandPreview = memo(function TokenHandPreview({
 
   return createPortal(
     <motion.div
-      className="pointer-events-none select-none w-50vmin h-50vmin overflow-hidden flex items-center justify-center absolute z-10000"
-      style={{ transform }}
+      style={{
+        transform,
+        pointerEvents: 'none',
+        userSelect: 'none',
+        width: '50vmin',
+        height: '50vmin',
+        overflow: 'clip',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        zIndex: 10000,
+      }}
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       exit={{ opacity: 0 }}
       transition={{ delay: 0.5, duration: 0.2 }}
     >
-      <div className="m-auto max-w-full max-h-full w-full h-full flex flex-col items-center justify-center overflow-hidden">
+      <div
+        style={{
+          margin: 'auto',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'clip',
+        }}
+      >
         {renderDetailed(candidate as TokenDragData<any>)}
       </div>
     </motion.div>,
@@ -133,12 +170,7 @@ const TokenHandPreview = memo(function TokenHandPreview({
 });
 
 // causes items to squeeze together if they overflow horizontally
-const HandItemWrapper = withClassName(
-  'div',
-  'min-w-12px flex-shrink-1 flex-basis-auto',
-  // we want the last child to not shrink so the end of the hand is not 'cut off'
-  'last:(flex-shrink-0 min-w-auto)',
-);
+const HandItemWrapper = withClassName('div', cls.itemWrapper);
 
 function useFollowPointer(offset: { x: number; y: number } = { x: 0, y: 0 }) {
   const x = useMotionValue(0);

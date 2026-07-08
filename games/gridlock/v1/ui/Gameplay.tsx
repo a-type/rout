@@ -1,18 +1,13 @@
-import clsx from 'clsx';
-import { hooks } from './gameClient.js';
+import { Box } from '@a-type/ui';
+import cls from './Gameplay.module.css';
 import { PlayerSwitcher } from './PlayerSwitcher.js';
 
 export interface GameplayProps {}
 
-export const Gameplay = hooks.withGame<GameplayProps>(function Gameplay({
-  gameSuite,
-}) {
+export function Gameplay() {
   return (
-    <div
-      data-gameplay
-      className={clsx('w-full grow flex flex-col gap-md p-md items-center')}
-    >
-      <PlayerSwitcher className="shrink grow basis-0 w-full" />
-    </div>
+    <Box full="width" grow col gap p items="center" data-gameplay>
+      <PlayerSwitcher className={cls.switcher} />
+    </Box>
   );
-});
+}

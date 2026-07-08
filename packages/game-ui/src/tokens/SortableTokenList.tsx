@@ -1,4 +1,4 @@
-import { Box, BoxProps, clsx } from '@a-type/ui';
+import { Box, BoxProps } from '@a-type/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { Children, useId, useState } from 'react';
 import { gesture } from '../dnd/gestureStore.js';
@@ -81,10 +81,13 @@ function SortableTokenListGap({
   const [width, setWidth] = useState(0);
   return (
     <motion.div
-      className={clsx(
-        'relative w-0 self-stretch pointer-events-none',
-        last && 'flex-1',
-      )}
+      style={{
+        position: 'relative',
+        width: 0,
+        alignSelf: 'stretch',
+        pointerEvents: 'none',
+        flex: last ? 1 : undefined,
+      }}
       animate={last ? undefined : { width }}
       transition={
         width === 0 ? { duration: 0 } : { duration: 0.08, ease: 'easeInOut' }
@@ -96,12 +99,16 @@ function SortableTokenListGap({
           if (token) setWidth(gesture.initialBounds.width || gapSize);
           else setWidth(0);
         }}
-        className={clsx(
-          'absolute left-1/2 top-1/2 center h-120%',
-          last ? 'w-full' : 'w-200%',
-          debug && 'outline outline-attention',
-        )}
-        style={{ minWidth: last ? 40 : gapSize }}
+        style={{
+          minWidth: last ? 40 : gapSize,
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          height: '120%',
+          width: last ? '100%' : '200%',
+          outline: debug ? '1px solid red' : undefined,
+        }}
         {...rest}
       />
     </motion.div>

@@ -1,5 +1,7 @@
+import { clsx, Img } from '@a-type/ui';
 import { ParsedChatToken } from '@long-game/common';
 import { useGame } from '../../hooks/useGame';
+import cls from './GameTitleChatToken.module.css';
 
 export interface GameTitleChatTokenProps {
   token: ParsedChatToken;
@@ -11,11 +13,12 @@ export function GameTitleChatToken({ token }: GameTitleChatTokenProps) {
     return '???';
   }
   return (
-    <span className="inline-flex gap-xs items-center bg-main-wash palette-gray px-2xs border-main text-nowrap">
-      <img
+    <span className={clsx('@mode-neutral', cls.root)}>
+      <Img
+        fit="cover"
         src={`/game-data/${game.id}/icon.png`}
         alt={`${game.title} icon`}
-        className="object-cover w-1.5em h-1.5em rounded-xs"
+        className={cls.icon}
       />
       {game.title}
     </span>

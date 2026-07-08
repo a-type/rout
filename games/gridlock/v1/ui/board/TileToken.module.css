@@ -1,0 +1,18 @@
+.root {
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.dragged {
+  width: --fn-literal(48px);
+  height: --fn-literal(48px);
+  position: relative;
+}
+
+.hand {
+  @apply --mx-borderColor(var(--m-color-neutral-heavy));
+}
+
+.unplayable {
+  opacity: 0.5;
+}

@@ -128,12 +128,15 @@ export function DomHexTileRoot({
         top: center[1] - actualHeight / 2 + actualMapHeight / 2,
         width: actualWidth,
         height: actualHeight,
+        overflow: 'visible',
+        position: 'absolute',
+        contain: 'layout',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         ...style,
       }}
-      className={
-        'overflow-visible absolute contain-layout flex items-center justify-center ' +
-        className
-      }
+      className={className}
       data-q={coordinate[0]}
       data-r={coordinate[1]}
       {...rest}
@@ -155,7 +158,10 @@ export function DomHexTileShape({
       viewBox={`${-actualWidth / 2} ${-actualHeight / 2} ${actualWidth} ${actualHeight}`}
       width={actualWidth}
       height={actualHeight}
-      className={`absolute inset-0`}
+      style={{
+        position: 'absolute',
+        inset: 0,
+      }}
       {...props}
     >
       <polygon points={polygonPath} vectorEffect="non-scaling-stroke" />
@@ -165,11 +171,11 @@ export function DomHexTileShape({
 
 export function DomHexTileContent({
   children,
-  className,
+  style,
   ...rest
 }: HTMLProps<HTMLDivElement>) {
   return (
-    <div className={`relative ${className}`} {...rest}>
+    <div style={{ position: 'relative', ...style }} {...rest}>
       {children}
     </div>
   );
@@ -200,7 +206,7 @@ export function DomHexTileDefault({
         vectorEffect="non-scaling-stroke"
         {...svgProps}
       />
-      <DomHexTileContent className="relative">{children}</DomHexTileContent>
+      <DomHexTileContent>{children}</DomHexTileContent>
     </DomHexTileRoot>
   );
 }

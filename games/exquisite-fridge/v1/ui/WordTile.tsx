@@ -2,6 +2,7 @@ import { Box, clsx, Icon } from '@a-type/ui';
 import { Token } from '@long-game/game-ui';
 import { WordItem } from '../definition/index';
 import { hooks } from './gameClient.js';
+import cls from './WordTile.module.css';
 
 export interface WordTileProps {
   value: WordItem;
@@ -29,12 +30,8 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       id={used ? `used-${value.id}` : value.id}
       data={value}
       disabled={disabled || used || gameSuite.turnWasSubmitted}
-      className={clsx(
-        'relative rounded-xs color-black border border-gray-dark shadow-gray-dark shadow-[1px_1px_0_1px]',
-        'bg-white',
-        used && '!opacity-50',
-        className,
-      )}
+      className={clsx(cls.root, className)}
+      data-used={used}
       handleProps={{
         // words are smaller; move the upward a bit
         touchOffset: -60,
@@ -51,14 +48,9 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
       }
       rulesId={isBlank ? 'blank-tiles' : value.isNew ? 'new-tiles' : undefined}
     >
-      <Box
-        className={clsx(
-          'px-lg py-xs h-full',
-          isHandwritten && 'font-[cursive] text-sm',
-        )}
-      >
+      <Box className={clsx(cls.inner, isHandwritten && cls.handwritten)}>
         {isBlank ? (
-          <span className="color-gray-dark">
+          <span className={cls.blank}>
             <Icon name="pencil" />
             ...
           </span>
@@ -66,12 +58,7 @@ export const WordTile = hooks.withGame<WordTileProps>(function WordTile({
           <span>{value.text}</span>
         )}
       </Box>
-      {value.isNew && (
-        <Icon
-          name="star"
-          className="absolute -top-1 -right-1 fill-primary rotate-5"
-        />
-      )}
+      {value.isNew && <Icon name="star" className={cls.new} />}
     </Token>
   );
 });

@@ -24,7 +24,7 @@ export const HotseatGamesList = withSuspense(function HotseatGamesList({
 
   if (!data.length) {
     return (
-      <Box col gap layout="center center" className="text-gray-dark">
+      <Box col gap layout="center center" dim>
         <div>No hotseat games</div>
         <div>Play unlimited games by passing around this device</div>
         <StartHotseat emphasis="ghost" size="small">

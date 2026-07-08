@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
 } from 'react';
+import cls from '../chat/ChatSurface.module.css';
 import { DraggableData, useDndStore } from '../dnd/dndStore.js';
 import { Droppable } from '../dnd/Droppable.js';
 import { useRendererContext } from '../RendererProvider.js';
+import cls2 from './HelpSurface.module.css';
 
 export interface HelpSurfaceProps {
   id: string;
@@ -68,12 +70,9 @@ export function HelpSurface({
         noParenting
         id={id}
         onDrop={handleDrop}
-        className={clsx(
-          'layer-components:relative',
-          isHelpDragging &&
-            'transition ring-2 ring-accent outline-[4px_var(--color-accent-light)] after:(content-empty absolute inset-0 bg-accent-light opacity-20) [&[data-over-accepted=true]]:after:bg-white [&[data-over-accepted=true]]:ring-6',
-          className,
-        )}
+        accept={(draggable) => draggable.id === 'spatial-help'}
+        className={clsx(cls.root, className)}
+        data-is-dragging={isHelpDragging}
         tags={droppableTags}
         render={render}
         data-help-surface={id}
@@ -81,15 +80,15 @@ export function HelpSurface({
       >
         {children}
       </Droppable>
-      <Popover.Content anchor={anchorRef} className="p-md pb-sm max-w-400px">
+      <Popover.Content anchor={anchorRef} className={cls.popover}>
         <Popover.Arrow />
-        <Popover.Title className="capitalize">{title}</Popover.Title>
+        <Popover.Title className={cls2.title}>{title}</Popover.Title>
         {content}
         <Box
           items="center"
           justify="between"
           gap="sm"
-          className="flex-shrink-0 pt-md"
+          className={cls2.readMore}
           render={<Popover.Description />}
         >
           <Button

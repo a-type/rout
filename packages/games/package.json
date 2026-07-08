@@ -24,7 +24,6 @@
     "@long-game/game-hearts": "workspace:*",
     "@long-game/game-scribble": "workspace:*",
     "@long-game/game-exquisite-fridge": "workspace:*",
-    "@long-game/game-wizard-ball": "workspace:*",
     "@long-game/game-heir-apparent": "workspace:*",
     "@long-game/game-gridlock": "workspace:*"
   },

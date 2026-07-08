@@ -1,4 +1,4 @@
-import { Box, clsx, PROPS } from '@a-type/ui';
+import { Box, PROPS } from '@a-type/ui';
 import { colors, PrefixedId } from '@long-game/common';
 import { DrawCanvas } from '@long-game/game-ui/drawing';
 import { Drawing } from '../../definition/index';
@@ -28,11 +28,11 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
 
   return (
     <Box
-      d="col"
+      col
       gap="xs"
       items="center"
       full="width"
-      container="reset"
+      container
       className={className}
       p
     >
@@ -46,14 +46,16 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
             [PROPS.USER.COLOR.ACCENT_HUE]: palette.okHue,
           } as any
         }
-        className={clsx('theme', 'override-light')}
+        className="@mode-light"
       />
       {(forceAttribution || playerId !== gameSuite.playerId) && (
         <Box
           gap
           p="sm"
           items="center"
-          className="mx-auto text-xs color-gray-dark"
+          dim
+          style={{ marginInline: 'auto' }}
+          className="@mode-dense"
         >
           Drawing by <PlayerAttribution playerId={playerId} />
         </Box>

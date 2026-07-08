@@ -1,0 +1,7 @@
+.hand {
+  min-height: 100px;
+}
+
+.token {
+  border-radius: var(--m-radius-lg);
+}

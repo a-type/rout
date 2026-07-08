@@ -1,0 +1,8 @@
+.form {
+  gap: 0;
+}
+
+.textArea {
+  max-height: 200px;
+  flex: 1;
+}

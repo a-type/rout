@@ -37,7 +37,7 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   const guess = viewingTurn?.guess ?? 0;
 
   return (
-    <Box direction="col" p="lg" gap>
+    <Box col p="lg" gap>
       <h1>{title}</h1>
       <label htmlFor="guess">Enter your guess:</label>
       <Input

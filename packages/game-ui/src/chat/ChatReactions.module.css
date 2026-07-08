@@ -1,0 +1,12 @@
+.display {
+  cursor: pointer;
+  border-radius: --fn-literal(999px);
+  padding: var(--m-space-xs) var(--m-space-sm);
+}
+
+.emoji {
+  transition: transform var(--m-duration) var(--m-easing);
+  &:hover {
+    transform: scale(150%);
+  }
+}

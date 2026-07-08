@@ -1,7 +1,7 @@
-import { boardSize } from '../../definition/index';
 import clsx from 'clsx';
-import { CSSProperties, ReactNode } from 'react';
-import './BoardGrid.css';
+import { CSSProperties, ReactNode, useMemo } from 'react';
+import { boardSize } from '../../definition/index';
+import cls from './BoardGrid.module.css';
 
 export interface BoardGridProps {
   className?: string;
@@ -12,27 +12,19 @@ export interface BoardGridProps {
 export function BoardGrid({
   className,
   children,
-  style,
+  style: userStyle,
   ...rest
 }: BoardGridProps) {
+  const style = useMemo(
+    () =>
+      ({
+        '--board-size': boardSize.toString(),
+      }) as CSSProperties,
+    [userStyle],
+  );
   return (
-    <div
-      className={clsx(
-        'layer-components:(w-auto h-auto max-w-full max-h-full flex flex-col items-center justify-center) @container aspect-1',
-        className,
-      )}
-    >
-      <div
-        className={clsx(
-          'grid shrink bg-wash p-xs w-100cqmin h-100cqmin aspect-1',
-        )}
-        style={{
-          ...style,
-          gridTemplateColumns: `repeat(${boardSize}, 1fr)`,
-          gridTemplateRows: `repeat(${boardSize}, auto)`,
-        }}
-        {...rest}
-      >
+    <div className={clsx(cls.root, className)}>
+      <div className={cls.grid} style={style} {...rest}>
         {children}
       </div>
     </div>
@@ -45,7 +37,7 @@ export function BoardGridCell({
   children,
   className,
   anchorNamespace = 'cell',
-  style,
+  style: userStyle,
 }: {
   x: number;
   y: number;
@@ -54,22 +46,17 @@ export function BoardGridCell({
   anchorNamespace?: string;
   style?: CSSProperties;
 }) {
+  const style = useMemo(() => {
+    return {
+      ...userStyle,
+      anchorName: `--${anchorNamespace}-${x}-${y}`,
+      gridColumnStart: x + 1,
+      gridRowStart: y + 1,
+      animationDelay: `${(x + y) * 50}ms`,
+    };
+  }, [x, y, userStyle, anchorNamespace]);
   return (
-    <div
-      style={{
-        ...style,
-        anchorName: `--${anchorNamespace}-${x}-${y}`,
-        gridColumnStart: x + 1,
-        gridRowStart: y + 1,
-        animationDelay: `${(x + y) * 50}ms`,
-        animationName: 'tile-bounce',
-        animationDuration: '500ms',
-        // bouncy
-        animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-        animationIterationCount: '1',
-      }}
-      className={clsx('relative w-full', className)}
-    >
+    <div style={style} className={clsx(cls.tile, className)}>
       {children}
     </div>
   );

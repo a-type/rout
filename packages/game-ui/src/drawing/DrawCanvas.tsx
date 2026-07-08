@@ -3,6 +3,7 @@ import { Drawing } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
 import { getStroke, StrokeOptions } from 'perfect-freehand';
 import { CSSProperties, PointerEvent, useRef, useState } from 'react';
+import cls from './DrawCanvas.module.css';
 
 export interface DrawCanvasProps {
   readonly?: boolean;
@@ -10,7 +11,7 @@ export interface DrawCanvasProps {
   onChange?: (value: Drawing) => void;
   className?: string;
   style?: CSSProperties;
-  colorClasses?: Record<string, `fill-${string}`>;
+  colorClasses?: Record<string, string>;
   sizes?: number[];
 }
 
@@ -45,9 +46,9 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
   className,
   style,
   colorClasses = {
-    light: 'fill-main-light',
-    dark: 'fill-main-dark',
-    contrast: 'fill-black',
+    light: cls.fillMainLight,
+    dark: cls.fillMainDark,
+    contrast: cls.fillBlack,
   },
   sizes = [1, 2, 8],
 }) {
@@ -62,12 +63,12 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
   return (
     <Box
       full="width"
-      d="col"
+      col
       gap
       items="center"
-      container="reset"
+      container
       style={style}
-      className={clsx('theme', className)}
+      className={className}
     >
       {!readonly && (
         <>
@@ -75,10 +76,7 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
             justify="between"
             gap
             surface
-            d={{
-              default: 'col',
-              sm: 'row',
-            }}
+            className={cls.tools}
             items="center"
           >
             {Object.keys(colorClasses).length > 1 ? (
@@ -90,7 +88,7 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
                     emphasis="ghost"
                     onClick={() => setColor(color)}
                   >
-                    <div className={clsx(colorClass, 'w-8 h-8 rounded-full')} />
+                    <div className={clsx(colorClass, cls.colorDot)} />
                   </Button>
                 ))}
               </Box>
@@ -109,14 +107,16 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
                         width: s * 4,
                         height: s * 4,
                       }}
-                      className={`bg-black rounded-full`}
+                      className={cls.sizeDot}
                     />
                   </Button>
                 ))}
               </Box>
             ) : null}
           </Box>
-          <Box className="color-gray-dark text-xs">No, there's no eraser!</Box>
+          <Box dim className="@mode-dense">
+            No, there's no eraser!
+          </Box>
         </>
       )}
       <svg
@@ -163,10 +163,7 @@ export const DrawCanvas = withGame<DrawCanvasProps>(function DrawCanvas({
                 lastPointRef.current = null;
               }
         }
-        className={clsx(
-          'touch-none aspect-1 w-100% max-w-50vh bg-white rounded-lg border-default',
-          'theme',
-        )}
+        className={cls.canvas}
       >
         {drawing.strokes.map((stroke, i) => (
           <Stroke stroke={stroke} key={i} colorClasses={colorClasses} />

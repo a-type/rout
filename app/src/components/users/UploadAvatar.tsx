@@ -1,6 +1,6 @@
 import { API_ORIGIN } from '@/config';
 import { sdkHooks } from '@/services/publicSdk';
-import { clsx, Icon, ImageUploader, ImageUploaderRoot } from '@a-type/ui';
+import { Icon, ImageUploader, ImageUploaderRoot } from '@a-type/ui';
 
 export interface UploadAvatarProps {
   className?: string;
@@ -12,7 +12,12 @@ export function UploadAvatar({ className }: UploadAvatarProps) {
   return (
     <ImageUploaderRoot
       value={me?.hasAvatar ? `${API_ORIGIN}/users/${me.id}/avatar` : null}
-      className={clsx('w-32 aspect-1 overflow-hidden', className)}
+      className={className}
+      style={{
+        width: 128,
+        aspectRatio: '1 / 1',
+        overflow: 'clip',
+      }}
       onChange={async (image) => {
         if (image) {
           await setAvatar.mutateAsync({ image });
@@ -21,12 +26,16 @@ export function UploadAvatar({ className }: UploadAvatarProps) {
       maxDimension={128}
     >
       <ImageUploader.EmptyControls>
-        <Icon name="profile" className="w-12 h-12" />
+        <Icon name="profile" size={48} />
       </ImageUploader.EmptyControls>
       <ImageUploader.Display crossOrigin="use-credentials" />
       <ImageUploader.FileButton
         emphasis="default"
-        className="absolute top-sm right-sm"
+        style={{
+          position: 'absolute',
+          top: 'var(--m-space-sm)',
+          right: 'var(--m-space-sm)',
+        }}
       >
         <Icon name="upload" />
       </ImageUploader.FileButton>

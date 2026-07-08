@@ -1,4 +1,4 @@
-import { Box, BoxProps, Button, Icon, Input, clsx, toast } from '@a-type/ui';
+import { Box, BoxProps, Button, Icon, Input, toast } from '@a-type/ui';
 import { Link } from '@verdant-web/react-router';
 
 export interface CopyTextboxProps extends BoxProps {
@@ -24,17 +24,11 @@ export function CopyTextbox({
   };
 
   return (
-    <Box
-      d="row"
-      gap="sm"
-      items="center"
-      className={clsx('w-full', className)}
-      {...rest}
-    >
+    <Box gap="sm" items="center" full="width" className={className} {...rest}>
       <Input
         disabled
         value={value}
-        className="flex-[1_1_0] [font-size:inherit] py-2xs"
+        style={{ flex: '1 1 0', fontSize: 'inherit', paddingBlock: 1 }}
         endAccessory={
           <>
             <Button size="small" emphasis="ghost" onClick={copy}>
@@ -44,7 +38,7 @@ export function CopyTextbox({
               <Button
                 size="small"
                 emphasis="ghost"
-                render={<Link className="color-inherit" newTab to={value} />}
+                render={<Link newTab to={value} />}
               >
                 <Icon name="new_window" />
               </Button>

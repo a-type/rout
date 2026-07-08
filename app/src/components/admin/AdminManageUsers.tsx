@@ -15,7 +15,7 @@ export function AdminManageUsers({}: AdminManageUsersProps) {
     <Box col gap>
       {results.map((user) => (
         <Box surface key={user.id} p border gap items="center">
-          <Box col gap className="flex-1">
+          <Box col gap grow>
             <Box>{user.displayName}</Box>
             <Box>{user.email}</Box>
           </Box>

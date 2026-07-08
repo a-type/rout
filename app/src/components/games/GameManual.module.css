@@ -1,0 +1,16 @@
+.image {
+  max-width: 80%;
+  max-height: 60vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--m-radius-lg);
+  margin-inline: auto;
+}
+
+.blockquote {
+  width: 80%;
+  margin-left: var(--m-space-sm);
+  border-left-width: var(--m-lineWidth-md);
+  border-left-style: solid;
+  border-left-color: var(--m-color-main-dark);
+}

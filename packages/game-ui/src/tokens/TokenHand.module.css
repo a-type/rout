@@ -1,0 +1,10 @@
+.itemWrapper {
+  min-width: --fn-literal(12px);
+  flex-shrink: 1;
+  flex-basis: auto;
+
+  &:last-child {
+    flex-shrink: 0;
+    min-width: auto;
+  }
+}
