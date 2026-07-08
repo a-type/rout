@@ -77,10 +77,7 @@ const markdownComponents: Components = {
   img: ({ node, className, ...props }) => {
     return (
       <Box full="width" layout="center center" render={<span />}>
-        <img
-          {...props}
-          className={clsx(cls.image, className)}
-        />
+        <img {...props} className={clsx(cls.image, className)} />
       </Box>
     );
   },
