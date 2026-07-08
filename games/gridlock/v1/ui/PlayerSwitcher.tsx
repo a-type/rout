@@ -1,35 +1,24 @@
-import { Button, Tabs, clsx, withClassName } from '@a-type/ui';
+import { Box, Button, Tabs, clsx, withClassName } from '@a-type/ui';
 import { PlayerAvatar } from '@long-game/game-ui';
 import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
 import { TileHand } from './hand/TileHand.js';
+import cls from './PlayerSwitcher.module.css';
 import { rendererState } from './state.js';
 
 export interface PlayerSwitcherProps {
   className?: string;
 }
 
-const StyledBoardRenderer = withClassName(
-  BoardRenderer,
-  'basis-0 min-w-300px min-h-300px grow',
-);
+const StyledBoardRenderer = withClassName(BoardRenderer, cls.boardRenderer);
 
-const StyledTabsContent = withClassName(
-  Tabs.Content,
-  'flex flex-col items-center justify-center grow',
-);
+const StyledTabsContent = withClassName(Tabs.Content, cls.tabsContent);
 
-const StyledTabsTrigger = withClassName(
-  Tabs.Unstyled.Tab,
-  'data-[active]:bg-main-light',
-);
+const StyledTabsTrigger = withClassName(Tabs.Unstyled.Tab, cls.tabsTrigger);
 
-const StyledTabsList = withClassName(
-  Tabs.Unstyled.List,
-  'flex items-center gap-xs p-xs',
-);
+const StyledTabsList = withClassName(Tabs.Unstyled.List, cls.tabsList);
 
 export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
   function PlayerSwitcher({ gameSuite, className }) {
@@ -44,7 +33,7 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
       <Tabs
         value={value}
         onValueChange={(v) => (rendererState.viewingPlayerId = v)}
-        className={clsx('flex flex-col gap-sm', className)}
+        className={clsx(cls.tabs, className)}
       >
         <StyledTabsList>
           <Button
@@ -53,7 +42,7 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
           >
             Your Board
           </Button>
-          <div className="ml-auto flex flex-row gap-xs">
+          <Box gap="xs" style={{ marginLeft: 'auto' }}>
             {gameSuite.otherPlayers.map((player) => (
               <Button
                 key={player.id}
@@ -66,17 +55,14 @@ export const PlayerSwitcher = hooks.withGame<PlayerSwitcherProps>(
                 </Button.Icon>
               </Button>
             ))}
-          </div>
+          </Box>
         </StyledTabsList>
-        <StyledTabsContent
-          value={gameSuite.playerId}
-          className="flex flex-col gap-lg"
-        >
+        <StyledTabsContent value={gameSuite.playerId}>
           <StyledBoardRenderer
             board={gameSuite.finalState.board}
             playerId={gameSuite.playerId}
           />
-          <div className="w-full flex flex-col gap-xs items-center shrink-0">
+          <div className={cls.hand}>
             <TileHand />
           </div>
         </StyledTabsContent>

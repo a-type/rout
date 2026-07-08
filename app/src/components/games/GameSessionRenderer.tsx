@@ -159,16 +159,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
 
     return (
       <RendererProvider value={providerValue}>
-        <DndRoot
-          debug={debugDnd}
-          style={{
-            width: '100%',
-            flex: '1 0 0',
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <DndRoot debug={debugDnd} className={cls.dnd}>
           <GameLayout>
             <GameLayout.Main>
               <Suspense
@@ -185,7 +176,7 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                     <GameSetup gameSessionId={sessionId} className="w-full" />
                   )
                 ) : (
-                  <div className="flex flex-col pb-lg flex-1 min-h-50vh">
+                  <div className={cls.main}>
                     {hotseat && <HotseatBanner />}
                     <ErrorBoundary>
                       <Renderer />

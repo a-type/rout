@@ -1,4 +1,8 @@
 import { PrefixedId } from '@long-game/common';
+import { HelpSurface, usePlayerThemed } from '@long-game/game-ui';
+import clsx from 'clsx';
+import { Fragment } from 'react/jsx-runtime';
+import { useSnapshot } from 'valtio';
 import {
   boardSize,
   getDistinctPaths,
@@ -6,13 +10,10 @@ import {
   PlayerBoard,
   toCellKey,
 } from '../../definition/index';
-import { HelpSurface, usePlayerThemed } from '@long-game/game-ui';
-import clsx from 'clsx';
-import { Fragment } from 'react/jsx-runtime';
-import { useSnapshot } from 'valtio';
 import { hooks } from '../gameClient.js';
 import { rendererState } from '../state.js';
 import { BoardGrid } from './BoardGrid.js';
+import cls from './BoardRenderer.module.css';
 import { LiveBoardCell } from './LiveBoardCell.js';
 import { PathAnnotations } from './PathAnnotations.js';
 import { ReadonlyBoardCell } from './ReadonlyBoardCell.js';
@@ -65,7 +66,7 @@ export const BoardRenderer = hooks.withGame<BoardRendererProps>(
                     playerId={playerId}
                     pathIsBroken={path?.breaks.length > 0}
                     pathIsComplete={path?.isComplete}
-                    className={focused ? 'bg-accent-wash' : undefined}
+                    className={focused ? cls.focusedTile : undefined}
                   />
                 );
               }
@@ -77,7 +78,7 @@ export const BoardRenderer = hooks.withGame<BoardRendererProps>(
                   pathIsBroken={path?.breaks.length > 0}
                   pathIsComplete={path?.isComplete}
                   playerId={playerId}
-                  className={focused ? 'bg-accent-wash' : undefined}
+                  className={focused ? cls.focusedTile : undefined}
                 />
               );
             })}

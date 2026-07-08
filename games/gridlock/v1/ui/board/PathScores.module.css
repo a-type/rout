@@ -1,0 +1,30 @@
+.root {
+  position: fixed;
+  top: anchor(center);
+  left: anchor(center);
+  transform: translate(-50%, -50%);
+  font-size: --fn-literal(0.75em);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--m-space-sm);
+  border-radius: var(--m-radius-full);
+  line-height: 0;
+  aspect-ratio: 1;
+  z-index: 1;
+
+  @apply --mx-borderColor(transparent);
+  border-width: var(--m-lineWidth-sm);
+
+  @apply --mx-fg(--fn-color-contrast());
+  @apply --mx-bg(var(--m-color-main-wash));
+  &[data-complete='false'][data-broken='false'] {
+    border-style: dashed;
+    @apply --mx-borderColor(var(--m-color-main-heavy));
+  }
+  &[data-complete='true'],
+  &[data-broken='true'] {
+    @apply --mx-bg(var(--m-color-main));
+  }
+}

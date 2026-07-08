@@ -1,10 +1,8 @@
-import {
-  hasAnyValidPlacement,
-  Tile,
-} from '../../definition/index';
 import { TokenHand } from '@long-game/game-ui';
+import { hasAnyValidPlacement, Tile } from '../../definition/index';
 import { TileToken } from '../board/TileToken.js';
 import { hooks } from '../gameClient.js';
+import cls from './TileHand.module.css';
 
 export interface TileHandProps {}
 
@@ -23,11 +21,11 @@ export const TileHand = hooks.withGame<TileHandProps>(function TileHand({
           };
         });
       }}
-      className="w-auto min-h-[48px] border-default rounded-sm p-xs bg-white"
+      className={cls.root}
     >
       {initialHand.map((tile) => {
         if (!hand.some((t) => t.id === tile.id)) {
-          return <div className="w-[48px] h-[48px] bg-wash" key={tile.id} />;
+          return <div className={cls.blank} key={tile.id} />;
         }
         const unplayable = !hasAnyValidPlacement({
           board,
@@ -37,7 +35,7 @@ export const TileHand = hooks.withGame<TileHandProps>(function TileHand({
           <TileToken
             key={tile.id}
             tile={tile}
-            className="layer-components:h-[48px]"
+            className={cls.tile}
             unplayable={unplayable}
             inHand
             playerId={gameSuite.playerId}

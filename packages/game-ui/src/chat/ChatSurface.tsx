@@ -69,6 +69,9 @@ export const ChatSurface = withGame<ChatSurfaceProps>(function ChatSurface({
       noParenting
       id={sceneId}
       onDrop={handleDrop}
+      accept={(draggable) => {
+        return draggable.id === 'spatial-chat';
+      }}
       className={clsx(cls.root, className)}
       data-dragging={isSpatialChatDragging}
       render={render}

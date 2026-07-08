@@ -1,10 +1,8 @@
 import { PrefixedId } from '@long-game/common';
-import {
-  fromCellKey,
-  PlayerBoardCell,
-} from '../../definition/index';
 import clsx from 'clsx';
+import { fromCellKey, PlayerBoardCell } from '../../definition/index';
 import { BoardGridCell } from './BoardGrid';
+import cls from './ReadonlyBoardCell.module.css';
 import { TileToken } from './TileToken';
 
 export interface ReadonlyBoardCellProps {
@@ -28,7 +26,7 @@ export function ReadonlyBoardCell({
     <BoardGridCell
       x={x}
       y={y}
-      className={clsx('layer-components:bg-white', className)}
+      className={clsx(cls.root, className)}
       anchorNamespace={playerId}
     >
       {cell && (

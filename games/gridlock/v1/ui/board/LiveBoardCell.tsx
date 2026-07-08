@@ -1,4 +1,7 @@
 import { PrefixedId } from '@long-game/common';
+import { TokenSpace } from '@long-game/game-ui';
+import clsx from 'clsx';
+import { memo } from 'react';
 import {
   fromCellKey,
   isValidPlacement,
@@ -6,11 +9,9 @@ import {
   Tile,
   toCellKey,
 } from '../../definition/index';
-import { TokenSpace } from '@long-game/game-ui';
-import clsx from 'clsx';
-import { memo } from 'react';
 import { hooks } from '../gameClient.js';
 import { BoardGridCell } from './BoardGrid.js';
+import cls from './LiveBoardCell.module.css';
 import { TileToken } from './TileToken.js';
 
 export const LiveBoardCell = memo(
@@ -40,22 +41,15 @@ export const LiveBoardCell = memo(
       <BoardGridCell
         x={x}
         y={y}
-        className={clsx(invalid && 'palette-attention', className)}
+        className={clsx(invalid && '@mode-attention', className)}
         style={{
           zIndex: cell ? 1 : 0,
         }}
         anchorNamespace={playerId}
       >
         <TokenSpace<Tile>
-          className={clsx(
-            'transition-all w-full h-full aspect-1 flex items-stretch justify-stretch',
-            'layer-components:(border-main/50 border-1px border-solid bg-main-wash)',
-            'data-[over-accepted=true]:bg-main-light',
-            'data-[dragged-accepted=false]:(opacity-50 border-transparent bg-transparent)',
-            cell && 'layer-components:bg-white shadow-lg shadow-main',
-            cell && 'data-[dragging="true"]:scale-80',
-            'will-change-transform',
-          )}
+          className={cls.root}
+          data-has-cell={!!cell}
           id={toCellKey(x, y)}
           tags={['tile']}
           accept={(token) => {
@@ -92,7 +86,7 @@ export const LiveBoardCell = memo(
           {cell && (
             <TileToken
               tile={cell.tile}
-              className="layer-components:(w-full h-full)"
+              className="w-full h-full"
               pathIsBroken={pathIsBroken}
               pathIsComplete={pathIsComplete}
               illegal={invalid}

@@ -41,10 +41,6 @@
       "name": "❄️ Exquisite Fridge",
     },
     {
-      "path": "./games/wizard-ball",
-      "name": "🧙‍♂️ Wizard Ball",
-    },
-    {
       "path": "./games/heir-apparent",
       "name": "👑 Heir Apparent",
     },
@@ -59,7 +55,7 @@
   ],
   "settings": {
     "unocss.exclude": ["./services"],
-    "arborCss.configLocation": "/home/a-type/long-game/app/arbor.config.ts",
+    "arborCss.configLocation": "/home/a-type/long-game/packages/arbor-config/src/arbor.config.ts",
     "arborCss.warnOnArbitraryValues": true,
   },
 }

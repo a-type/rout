@@ -1,0 +1,35 @@
+.root {
+  transition: all var(--m-duration) var(--m-easing);
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+
+  @apply --mx-borderColor(var(--m-color-main));
+  @apply --mx-borderColor-faded(50%);
+  @apply --mx-bg(var(--m-color-neutral-wash));
+
+  &[data-dragging='true'][data-dragged-accepted='true'] {
+    @apply --mx-bg(var(--m-color-main-light));
+  }
+
+  &[data-dragging='true'][data-dragged-accepted='false'] {
+    opacity: 50%;
+    border-color: transparent;
+    background-color: transparent;
+  }
+
+  &[data-has-cell='true'] {
+    @apply --mx-bg(var(--m-color-neutral-paper));
+    @apply --mx-shadow(var(--m-shadow-lg));
+    --m-shadow-color: var(--m-color-main);
+
+    &[data-dragging='true'] {
+      transform: scale(90%);
+    }
+  }
+
+  will-change: transform, background-color, border-color, opacity;
+}

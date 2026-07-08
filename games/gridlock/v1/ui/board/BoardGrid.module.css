@@ -1,0 +1,47 @@
+.root {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+
+  container-type: inline-size;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--board-size), 1fr);
+  grid-template-rows: repeat(var(--board-size), 1fr);
+  width: 100%;
+  height: 100%;
+  flex-shrink: 1;
+  @apply --mx-bg(var(--m-color-neutral-wash));
+  padding: var(--m-space-xs);
+  width: 100cqmin;
+  height: 100cqmin;
+  aspect-ratio: 1;
+}
+
+@keyframes tile-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.tile {
+  animation-name: tile-bounce;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  animation-iteration-count: 1;
+
+  position: relative;
+  width: 100%;
+}

@@ -1,13 +1,10 @@
 import { PrefixedId } from '@long-game/common';
-import {
-  isEmptyTile,
-  isTerminatorTile,
-  Tile,
-} from '../../definition/index';
 import { Token } from '@long-game/game-ui';
 import { clsx } from 'clsx';
+import { isEmptyTile, isTerminatorTile, Tile } from '../../definition/index';
 import { hooks } from '../gameClient.js';
 import { TileRenderer, TileRendererProps } from './TileRenderer.js';
+import cls from './TileToken.module.css';
 
 export interface TileTokenProps extends TileRendererProps {
   tile: Tile;
@@ -59,8 +56,8 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
       // differentiate tile chat threads per player
       chatSceneId={`${playerId}-${tile.id}`}
       disabled={disabled}
-      className={clsx('aspect-1 relative', className)}
-      draggedClassName="w-[48px] h-[48px] relative"
+      className={clsx(cls.root, className)}
+      draggedClassName={cls.dragged}
       movedBehavior="fade"
       tags={['tile']}
       rulesId={rulesId}
@@ -69,7 +66,7 @@ export const TileToken = hooks.withGame<TileTokenProps>(function TileToken({
     >
       <TileRenderer
         tile={tile}
-        className={clsx(inHand && 'border-default', unplayable && 'opacity-50')}
+        className={clsx(inHand && cls.hand, unplayable && cls.unplayable)}
         {...rest}
       />
     </Token>

@@ -69,6 +69,7 @@ export function HelpSurface({
         noParenting
         id={id}
         onDrop={handleDrop}
+        accept={(draggable) => draggable.id === 'spatial-help'}
         className={clsx(cls.root, className)}
         data-is-dragging={isHelpDragging}
         tags={droppableTags}
