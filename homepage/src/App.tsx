@@ -1,27 +1,26 @@
-import { Box, Button, H2, P, withClassName, withProps } from '@a-type/ui';
+import { Box, Button, clsx, H2, P, withClassName, withProps } from '@a-type/ui';
 import {
   ScrollTicker,
   TopographyBackground,
   Wordmark,
 } from '@long-game/visual-components';
+import cls from './App.module.css';
 import { Footer } from './Footer.js';
 import { GameIcons } from './GameIcons.js';
 
 const App = () => {
   return (
-    <Box col layout="center start" className="bg-wash" gap="lg">
-      <ScrollTicker className="bg-white color-black w-full relative z-1 p-sm font-bold">
-        BETA
-      </ScrollTicker>
+    <Box col layout="center start" className={cls.root} gap="lg">
+      <ScrollTicker className={cls.topTicker}>BETA</ScrollTicker>
       <Box
         gap
         p
         surface
         justify="between"
         items="center"
-        className="sticky top-sm w-full max-w-600px z-1 px-lg"
+        className={cls.header}
       >
-        <Wordmark className="text-2xl" />
+        <Wordmark className={cls.wordmark} />
         <Box gap>
           <Button
             emphasis="primary"
@@ -32,36 +31,34 @@ const App = () => {
           </Button>
         </Box>
       </Box>
-      <TopographyBackground colorMode="dark" className="fixed inset-0" />
+      <TopographyBackground colorMode="dark" className={cls.background} />
       <GameIcons />
-      <Container items="center" className="text-center py-xl">
-        <H2 className="text-6xl font-medium font-heading text-shadow text-shadow-lg text-shadow-color-primary">
+      <Container items="center" className={cls.heroContainer}>
+        <H2 className={cls.heroTitle}>
           Play games
           <br />
           every day
           <br />
           with your friends
         </H2>
-        <P className="text-lg color-gray-ink">
+        <P className={cls.heroCopy}>
           No more scheduling. Every day is game night.
         </P>
-        <P className="text-lg color-gray-ink">
+        <P className={cls.heroCopy}>
           Rout games are social board games you play like a daily crossword.
         </P>
       </Container>
       <Container items="center">
         <Button
           emphasis="primary"
-          className="text-xl px-xl p-md"
+          className={clsx('@mode-inverted', cls.ctaButton)}
           render={<a href="https://play.rout.games" />}
         >
           Play Now
         </Button>
       </Container>
       <Footer />
-      <ScrollTicker className="bg-accent color-accent-ink w-full relative z-1 p-sm font-bold">
-        NEVER LOSE TOUCH
-      </ScrollTicker>
+      <ScrollTicker className={cls.bottomTicker}>NEVER LOSE TOUCH</ScrollTicker>
     </Box>
   );
 };
@@ -69,10 +66,10 @@ const App = () => {
 const Container = withClassName(
   withProps(Box, {
     p: 'xl',
-    d: 'col',
+    col: true,
     gap: 'xl',
   }),
-  'max-w-800px w-full flex-shrink-0',
+  cls.container,
 );
 
 export default App;

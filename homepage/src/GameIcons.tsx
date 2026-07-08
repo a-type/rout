@@ -1,6 +1,7 @@
-import { Box, useAnimationFrame } from '@a-type/ui';
+import { Box, clsx, useAnimationFrame } from '@a-type/ui';
 import { allGames } from '@long-game/games';
 import { Children, useEffect, useRef } from 'react';
+import cls from './GameIcons.module.css';
 
 export interface GameIconsProps {}
 
@@ -19,14 +20,19 @@ export function GameIcons({}: GameIconsProps) {
           key={game.id}
           surface="ambient"
           border
-          className="aspect-1 w-200px flex-shrink-0 color-gray-dark"
+          className={cls.card}
           layout="center center"
-          render={<a href={`/games/${game.id}`} className="underline-none" />}
+          render={
+            <a
+              href={`https://play.rout.games/games/${game.id}`}
+              className={cls.cardLink}
+            />
+          }
         >
           <img
             src={`https://play.rout.games/game-data/${game.id}/icon.png`}
             alt={`${game.title} icon`}
-            className="w-full h-full object-cover"
+            className={cls.iconImage}
           />
         </Box>
       );
@@ -35,7 +41,7 @@ export function GameIcons({}: GameIconsProps) {
       <Box
         surface="ambient"
         border
-        className="aspect-1 w-200px flex-shrink-0 color-primary-dark text-center"
+        className={cls.placeholderCard}
         key={i}
         layout="center center"
       >
@@ -66,23 +72,14 @@ export function GameIcons({}: GameIconsProps) {
   });
 
   return (
-    <div
-      ref={rootRef}
-      className="w-full overflow-hidden relative flex-shrink-0"
-    >
-      <div
-        ref={innerRef}
-        className="w-min-content flex-shrink-0 overflow-x-visible flex flex-row gap-lg items-center relative"
-      >
+    <div ref={rootRef} className={cls.root}>
+      <div ref={innerRef} className={cls.inner}>
         {new Array(repeat).fill(null).map((_, i) =>
           Children.map(children, (child, index) => (
             <div
-              className="flex-shrink-0 relative"
+              className={clsx(cls.item, cls.itemOffset)}
               data-index={index}
               key={`${index}-${i}`}
-              style={{
-                transform: `translateX(calc(var(--width, 0px) * var(--mult, 0)))`,
-              }}
             >
               {child}
             </div>

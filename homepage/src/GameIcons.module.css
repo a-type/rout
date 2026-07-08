@@ -1,0 +1,51 @@
+.root {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.inner {
+  width: min-content;
+  flex-shrink: 0;
+  overflow-x: visible;
+  display: flex;
+  flex-direction: row;
+  gap: var(--m-space-lg);
+  align-items: center;
+  position: relative;
+}
+
+.item {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.itemOffset {
+  transform: translateX(calc(var(--width, 0px) * var(--mult, 0)));
+}
+
+.card {
+  aspect-ratio: 1;
+  width: 200px;
+  flex-shrink: 0;
+  @apply --mx-fg(var(--m-color-gray-dark));
+}
+
+.cardLink {
+  text-decoration: none;
+}
+
+.iconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholderCard {
+  aspect-ratio: 1;
+  width: 200px;
+  flex-shrink: 0;
+  text-align: center;
+  @apply --mx-fg(var(--m-color-primary-dark));
+}

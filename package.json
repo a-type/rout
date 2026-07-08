@@ -38,7 +38,8 @@
     "change-case": "5.4.4",
     "@playwright/test": "^1.54.2",
     "@types/node": "^24.1.0",
-    "@vitest/coverage-v8": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "typescript-plugin-css-modules": "catalog:"
   },
   "volta": {
     "node": "24.14.1"

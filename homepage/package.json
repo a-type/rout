@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@a-type/ui": "catalog:",
+    "@arbor-css/core": "catalog:",
+    "@arbor-css/postcss": "catalog:",
     "@long-game/visual-components": "workspace:*",
     "@long-game/games": "workspace:*",
     "@react-three/drei": "catalog:",
@@ -25,6 +27,8 @@
     "@types/react-dom": "catalog:",
     "@types/three": "catalog:",
     "@vitejs/plugin-react-swc": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "@long-game/arbor-config": "workspace:*",
+    "typescript-plugin-css-modules": "catalog:"
   }
 }

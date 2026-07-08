@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import App from './App.js';
 
 import '@a-type/ui/main.css';
-import 'virtual:uno.css';
 import './main.css';
 
 function main() {

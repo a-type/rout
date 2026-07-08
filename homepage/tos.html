@@ -1,52 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rout! | Terms of Service</title>
   <script type="module" src="/css.ts"></script>
+  <style>
+    #root {
+      min-height: 100dvh;
+    }
+
+    .policy-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 100000;
+    }
+
+    .policy-progress[data-state='visible'] {
+      opacity: 1;
+      transition: opacity 160ms ease;
+    }
+
+    .policy-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      @apply --mx-bg(var(--m-color-accent));
+    }
+
+    .policy-shell {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .policy-content {
+      width: 100%;
+      min-width: 0;
+      max-width: 960px;
+      margin: 0 auto 120px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+
+    .policy-content h1,
+    .policy-content h2,
+    .policy-content h3,
+    .policy-content p {
+      margin: 0;
+    }
+
+    .policy-content h1 {
+      margin-top: 1.25rem;
+      font-size: 1.5rem;
+      font-weight: 650;
+    }
+
+    .policy-content h2 {
+      margin-top: 1rem;
+      font-size: 1.125rem;
+      font-weight: 650;
+    }
+
+    .policy-content h3 {
+      margin-top: 0.625rem;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    .policy-content p,
+    .policy-content li {
+      line-height: 1.5;
+    }
+
+    .policy-content ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .policy-progress {
+        height: 2px;
+      }
+
+      .policy-content {
+        padding: 24px;
+      }
+    }
+  </style>
 </head>
-<body class="theme-eggplant theme">
+<body class="@mode-eggplant">
   <div id="root">
-    <div
-      class="fixed top-0 left-0 w-full h-4px pointer-events-none op-0 z-100000 [&amp;[data-state=visible]]:opacity-100 [&amp;[data-state=visible]]:transition-opacity md:h-2px motion-reduce:hidden"
-      data-state="hidden"
-    >
-      <div
-        class="absolute top-0 left-0 h-full bg-accent"
-        style="width: 0%"
-      ></div>
+    <div class="policy-progress" data-state="hidden">
+      <div class="policy-progress-bar"></div>
     </div>
-    <div
-      class="layer-components:[grid-area:content] layer-components:max-w-full layer-components:min-w-0 layer-components:w-full layer-components:flex layer-components:flex-col layer-components:items-start layer-components:relative layer-components:flex-1 layer-components:gap-3 layer-variants:overflow-y-auto layer-variants:h-full"
-    >
-      <div
-        class="layer-components:w-full layer-components:min-w-0 layer-components:flex layer-components:flex-col layer-components:mb-120px layer-components:px-4 layer-components:py-4 layer-components:flex-1"
-        style="
-          --content-left: 0px;
-          --content-top: 0px;
-          --content-width: 994.6666870117188px;
-          --content-height: 4893.33349609375px;
-          --content-ready: 1;
-        "
-      >
-        <h1
-          class="layer-components:my-0 layer-components:font-title layer-components:text-2xl layer-components:font-semibold layer-components:color-inherit layer-components:color-darken-1"
-        >
-          Terms and Conditions
-        </h1>
-        <p class="layer-components:my-0 layer-components:leading-normal">
-          Last updated May 1, 2025
-        </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Acceptance of Terms
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+    <div class="policy-shell">
+      <div class="policy-content">
+        <h1>Terms and Conditions</h1>
+        <p>Last updated May 1, 2025</p>
+        <h2>Acceptance of Terms</h2>
+        <p>
           These Terms govern your access to and use of the Rout software product
           and services provided through this website ("Services").
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           Please read these Terms carefully before accessing or using our
           Services. By accessing or using any part of our Service, you agree to
           be bound by all of the Terms and all other operating rules, policies,
@@ -55,12 +124,8 @@
           automatically change, update, or add on to our Services as stated in
           the Terms, and the Agreement will apply to any changes.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Who's Who
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Who's Who</h2>
+        <p>
           "You" means any individual or entity using our Service. If you use our
           Service on behalf of another person or entity, you represent and
           warrant that you're authorized to accept the Agreement on that
@@ -69,16 +134,12 @@
           if you, or that person or entity, violates the Agreement, you and that
           person or entity agree to be responsible to us.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           "Us" ("Rout", "Rout.games", "we", "us", "our"), means me, Grant
           Forrest, the sole owner and creator of Rout.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Your Account
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Your Account</h2>
+        <p>
           When using our Services requires an account, you agree to provide us
           with complete and accurate information and to keep the information
           current so that we can communicate with you about your account. We may
@@ -87,7 +148,7 @@
           inquiries or complaints we receive about the ways you use our Services
           so you can make informed choices in response.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           You're solely responsible and liable for all activity under your
           account. You're also fully responsible for maintaining the security of
           your account (which includes keeping your password secure). We're not
@@ -98,7 +159,7 @@
           other breach of security. If we believe your account has been
           compromised, we may suspend or disable it.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           If you'd like to learn about how we handle the data you provide us,
           please see our
           <a
@@ -108,12 +169,8 @@
             >Privacy Policy.</a
           >
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Minimum Age Requirements
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Minimum Age Requirements</h2>
+        <p>
           Our Services are not directed to children. You're not allowed to
           access or use our Services if you're under the age of 13 (or 16 in
           Europe). If you register as a user or otherwise use our Services, you
@@ -123,12 +180,8 @@
           majority where you live), you can only use our Services under the
           supervision of a parent or legal guardian who agrees to the Agreement.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Responsibility of Users
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Responsibility of Users</h2>
+        <p>
           We haven't reviewed, and can't review, all of the content (like text,
           photos, and other materials) posted to or made available through our
           Services by users or anyone else (“Content”) or on websites that link
@@ -177,17 +230,13 @@
             between you and the provider of any Content.
           </li>
         </ul>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Fees, Payment, and Renewal
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Fees, Payment, and Renewal</h2>
+        <p>
           <strong>Fees for Paid Services</strong> Some of our Services are
           offered for a fee. This section applies to any purchases of Paid
           Services.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           By using a Paid Service, you agree to pay the specified fees, in the
           form of recurring fees (subscriptions). Your subscription begins on
           your purchase date, and we'll bill or charge you in the
@@ -195,7 +244,7 @@
           by us) until you cancel your subscription. You can cancel your
           subscription at any time by visiting your account settings.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Taxes.</strong> To the extent permitted by law, or unless
           explicitly stated otherwise, all fees do not include applicable
           federal, provincial, state, local or other governmental sales,
@@ -206,7 +255,7 @@
           you've paid or will pay, you're responsible for those Taxes, and we
           may collect payment from you.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Payment</strong> You must provide accurate and up-to-date
           payment information. By providing your payment information, you
           authorize us to store it until you request deletion. If your payment
@@ -219,7 +268,7 @@
           (e.g., new expiration date) or other payment methods provided if we
           can't charge your primary payment method.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Automatic Renewal</strong> By enrolling in a subscription, you
           authorize us to automatically charge the then-applicable fees and
           Taxes for each subsequent subscription period until the subscription
@@ -235,11 +284,11 @@
           If you've purchased access to multiple services, you may have multiple
           renewal dates.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           You can view your renewal date(s), cancel, or manage subscriptions in
           your settings.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Fees and Changes</strong> We may change our fees at any time
           in accordance with these Terms and requirements under applicable law.
           This means that we may change our fees going forward, start charging
@@ -248,25 +297,15 @@
           If you don't agree with the changes, you must cancel your Paid
           Service.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Feedback
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Feedback</h2>
+        <p>
           We love hearing from you and are always looking to improve our
           Services. When you share comments, ideas, or feedback with us, you
           agree that we're free to use them without any restriction or
           compensation to you.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          General Representation and Warranty
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
-          You represent and warrant that your use of our Services:
-        </p>
+        <h2>General Representation and Warranty</h2>
+        <p>You represent and warrant that your use of our Services:</p>
         <ul>
           <li>
             will be in strict accordance with the Agreement, with our Privacy
@@ -336,12 +375,8 @@
             the Services or related data without our consent.
           </li>
         </ul>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Specific Service Terms
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Specific Service Terms</h2>
+        <p>
           Rout provides a platform and application for playing games with
           others. You can use it for free, and certain features are included in
           a paid subscription Service, and certain content included in one-time
@@ -349,37 +384,33 @@
           rights you have to content you create with Rout, including all content
           you create when using Rout applications.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Public Content</strong>. By default, all Content you create is
           private, and only accessible to you and anyone else who is a member of
           the games you participate in. If you choose to make Content public, it
           will be visible to anyone on the internet with a link to that Public
           Content. Making Content public is optional.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           By making Content public, you grant us a worldwide, royalty-free,
           transferrable, sub-licensable, and non-exclusive license to use,
           reproduce, modify, distribute, adapt, publicly display, and publish
           the Content solely for the purpose of providing and improving our
           products and Services.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Removing Content</strong> if you delete Content, we'll use
           reasonable efforts to remove it from our Services, but you acknowledge
           that cached or archived copies of your Content may not be made
           immediately unavailable.
         </p>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <p>
           <strong>Web Traffic</strong> We may use a third-party service to
           measure Rout's audience and usage. By visiting Rout and any associated
           Applications, you agree to this monitoring.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Copyright Policy
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Copyright Policy</h2>
+        <p>
           As we ask others to respect our intellectual property rights, we
           respect the intellectual property rights of others. If you believe any
           Content violates your copyright, please
@@ -390,12 +421,8 @@
             >contact us</a
           >.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Intellectual Property
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Intellectual Property</h2>
+        <p>
           The Agreement doesn't transfer any Rout or third-party intellectual
           property to you, and all right, title, and interest in and to such
           property remains (as between Rout and you) solely with Rout. Rout, and
@@ -407,12 +434,8 @@
           grant you any right or license to reproduce or otherwise use any Rout
           or third-party trademarks.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Changes
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Changes</h2>
+        <p>
           We may modify the Terms from time to time, for example, to reflect
           changes to our Services (e.g., adding new features or benefits to our
           Services or retiring certain features of certain Services) or for
@@ -427,12 +450,8 @@
           object to any changes at any time by ceasing your use of our Services
           and may cancel any subscription you have.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Termination
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Termination</h2>
+        <p>
           We may terminate your access to all or any part of our Services at any
           time, with or without cause or notice, effective immediately,
           including if we believe, in our sole discretion, that you have
@@ -452,12 +471,8 @@
           time, or, if you use a Paid Service, you can cancel at any time,
           subject to the Fees, Payment, and Renewal section of these Terms.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Disclaimers
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Disclaimers</h2>
+        <p>
           Our Services are provided “as is.” We and our suppliers and licensors
           hereby disclaim all warranties of any kind, express or implied,
           including, without limitation, the warranties of merchantability,
@@ -468,12 +483,8 @@
           obtain content or services through, our Services at your own
           discretion and risk.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Limitation of Liability
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Limitation of Liability</h2>
+        <p>
           In no event will we, or our suppliers or licensors, be liable with
           respect to any subject matter of this agreement under any contract,
           negligence, strict liability or other legal or equitable theory for:
@@ -486,12 +497,8 @@
           their reasonable control. The foregoing shall not apply to the extent
           prohibited by applicable law.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Indemnification
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Indemnification</h2>
+        <p>
           You agree to indemnify and hold harmless Rout, its contractors, and
           its licensors, and their respective directors, officers, employees,
           and agents from and against any and all losses, liabilities, demands,
@@ -501,12 +508,8 @@
           provider of third-party services used in connection with the Services,
           and Content that you post.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          US Economic Sanctions
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>US Economic Sanctions</h2>
+        <p>
           You agree that our ability to provide our Services to you is subject
           to compliance with US sanctions that restrict or prohibit who or from
           where our Services can be accessed. By using the Services, you
@@ -527,23 +530,15 @@
           access may cause a violation or create unacceptable risk to us under
           export controls or sanctions.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Translation
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Translation</h2>
+        <p>
           We may translate the English language version of these Terms into
           other languages for your convenience. In the event of any conflict
           between the English language version and any translation, the English
           language version shall prevail.
         </p>
-        <h2
-          class="layer-components:my-0 layer-components:text-lg layer-components:font-title layer-components:font-bold layer-components:color-inherit layer-components:color-lighten-1"
-        >
-          Miscellaneous
-        </h2>
-        <p class="layer-components:my-0 layer-components:leading-normal">
+        <h2>Miscellaneous</h2>
+        <p>
           The Agreement (together with any other terms we provide that apply to
           any specific Service) constitutes the entire agreement between Rout
           and you concerning our Services. If any part of the Agreement is

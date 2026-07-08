@@ -1,0 +1,9 @@
+.root {
+  font-size: var(--m-text-size-sm);
+  @apply --mx-fg(var(--m-color-neutral-heavy));
+}
+
+.content {
+  width: 100%;
+  max-width: 600px;
+}

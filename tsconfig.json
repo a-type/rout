@@ -16,7 +16,12 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "isolatedModules": true,
-    "customConditions": ["development"]
+    "customConditions": ["development"],
+    "plugins": [
+      {
+        "name": "typescript-plugin-css-modules"
+      }
+    ]
   },
   "exclude": ["node_modules", "**/*/dist"]
 }

@@ -1,0 +1,73 @@
+.root {
+  @apply --mx-bg(var(--m-color-main-wash));
+}
+
+.topTicker {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: var(--m-space-sm);
+  font-weight: var(--m-text-weight-bold);
+  background: var(--m-color-neutral-paper);
+  color: var(--m-color-neutral-ink);
+}
+
+.bottomTicker {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: var(--m-space-sm);
+  font-weight: var(--m-text-weight-bold);
+  @apply --mx-bg(var(--m-color-accent));
+  @apply --mx-fg(var(--m-color-accent-ink));
+}
+
+.header {
+  position: sticky;
+  top: var(--m-space-sm);
+  width: 100%;
+  max-width: 600px;
+  z-index: 1;
+  padding-inline: var(--m-space-lg);
+}
+
+.wordmark {
+  font-size: 2rem;
+}
+
+.background {
+  position: fixed;
+  inset: 0;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.heroContainer {
+  text-align: center;
+  padding-block: var(--m-space-xl);
+}
+
+.heroTitle {
+  font-size: --fn-literal(3.75rem);
+  font-weight: 500;
+  font-family: 'Nunito', system-ui;
+  text-shadow: 0 0 12px
+    color-mix(in srgb, var(--m-color-main-heavy) 45%, transparent);
+  line-height: 1;
+  @apply --mx-fg(var(--m-color-main-ink));
+}
+
+.heroCopy {
+  font-size: var(--m-text-size-lg);
+  @apply --mx-fg(var(--m-color-neutral-ink));
+}
+
+.ctaButton {
+  font-size: var(--m-text-size-lg);
+  padding-inline: var(--m-space-xl);
+  padding-block: var(--m-space-md);
+}

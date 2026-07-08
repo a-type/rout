@@ -206,6 +206,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      typescript-plugin-css-modules:
+        specifier: 'catalog:'
+        version: 5.2.0(typescript@5.9.3)
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@24.1.0)(@vitest/coverage-v8@4.1.4)(vite@7.3.1(@types/node@24.1.0)(jiti@2.6.1)(less@4.6.7)(lightningcss@1.32.0)(sass@1.101.0)(stylus@0.62.0)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
@@ -729,6 +732,12 @@ importers:
       '@a-type/ui':
         specifier: 'catalog:'
         version: 6.0.75(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@arbor-css/core':
+        specifier: 'catalog:'
+        version: 0.0.140
+      '@arbor-css/postcss':
+        specifier: 'catalog:'
+        version: 0.0.140(@arbor-css/core@0.0.140)
       '@long-game/games':
         specifier: workspace:*
         version: link:../packages/games
@@ -757,6 +766,9 @@ importers:
         specifier: 'catalog:'
         version: 0.10.2(typegpu@0.10.2)
     devDependencies:
+      '@long-game/arbor-config':
+        specifier: workspace:*
+        version: link:../packages/arbor-config
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.17
@@ -769,6 +781,9 @@ importers:
       '@vitejs/plugin-react-swc':
         specifier: 'catalog:'
         version: 3.9.0(@swc/helpers@0.5.23)(vite@7.0.5(@types/node@24.1.0)(jiti@2.6.1)(less@4.6.7)(lightningcss@1.32.0)(sass@1.101.0)(stylus@0.62.0)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1))
+      typescript-plugin-css-modules:
+        specifier: 'catalog:'
+        version: 5.2.0(typescript@6.0.2)
       vite:
         specifier: 'catalog:'
         version: 7.0.5(@types/node@24.1.0)(jiti@2.6.1)(less@4.6.7)(lightningcss@1.32.0)(sass@1.101.0)(stylus@0.62.0)(terser@5.33.0)(tsx@4.19.2)(yaml@2.8.1)

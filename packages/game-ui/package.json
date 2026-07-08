@@ -27,8 +27,9 @@
   },
   "type": "module",
   "scripts": {
-    "build": "pnpm build:ts",
+    "build": "pnpm build:ts && pnpm build:css",
     "build:ts": "tsc",
+    "build:css": "scripts css",
     "dev": "tsc -w --preserveWatchOutput",
     "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",

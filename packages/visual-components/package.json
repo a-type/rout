@@ -16,8 +16,9 @@
     "dev": "tsc -w --preserveWatchOutput",
     "core:dev": "pnpm dev",
     "package:dev": "pnpm dev",
-    "build": "pnpm build:ts",
-    "build:ts": "tsc"
+    "build": "pnpm build:ts && pnpm build:css",
+    "build:ts": "tsc",
+    "build:css": "scripts css"
   },
   "peerDependencies": {
     "@a-type/ui": "catalog:",

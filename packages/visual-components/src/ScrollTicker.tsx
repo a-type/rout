@@ -16,7 +16,7 @@ function useMediaQuery(query: string): boolean {
 export function ScrollTicker({
   className,
   children,
-  speed = 0.3,
+  speed = 0.2,
   repeat = 50,
   ...props
 }: {
@@ -45,7 +45,7 @@ export function ScrollTicker({
       const scrollWidth = marquee.scrollWidth;
 
       const content = ref.current;
-      const contentWidth = content.clientWidth;
+      const contentWidth = marquee.clientWidth;
 
       const x = xRef.current;
 
@@ -63,13 +63,21 @@ export function ScrollTicker({
   }, [ref.current, prefersReducedMotion, speed]);
 
   return (
-    <Box grow overflow="clip" className={className} ref={parentRef} {...props}>
+    <Box
+      grow
+      overflow="hidden"
+      className={className}
+      ref={parentRef}
+      full="width"
+      {...props}
+    >
       <Box
         gap="sm"
         full="height"
         style={{
           whiteSpace: 'nowrap',
           transform: 'translateX(var(--x))',
+          width: 'max-content',
         }}
         items="center"
         ref={ref}
