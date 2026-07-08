@@ -77,14 +77,8 @@ export const NotificationsButton = withSuspense(
                   emphasis="ghost"
                   onClick={() => markAllRead.mutate(undefined)}
                 >
-                  <Icon
-                    name="check"
-                    style={{ position: 'relative', left: -3 }}
-                  />
-                  <Icon
-                    name="check"
-                    style={{ position: 'absolute', left: 13 }}
-                  />
+                  <Icon name="check" className={cls.checkPrimary} />
+                  <Icon name="check" className={cls.checkSecondary} />
                 </Button>
               )}
               <Button
@@ -118,7 +112,7 @@ export const NotificationsButton = withSuspense(
                         emphasis="ghost"
                         onClick={() => fetchNextPage()}
                         loading={isFetchingNextPage}
-                        className="m-auto mt-lg"
+                        className={cls.loadMoreButton}
                       >
                         {isFetchingNextPage ? 'Loading...' : 'Load more'}
                       </Button>
@@ -203,7 +197,7 @@ function NotificationItem({
       <Button
         color="attention"
         emphasis="ghost"
-        style={{ flexShrink: 0 }}
+        className={cls.deleteButton}
         onClick={() => deleteSelf.mutate({ id: notification.id })}
       >
         <Icon name="x" />

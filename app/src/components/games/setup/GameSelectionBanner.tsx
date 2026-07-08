@@ -25,7 +25,7 @@ export const GameSelectionBanner = withGame(function GameSelectionBanner({
     >
       <Box gap items="center">
         <GameIcon gameId={gameId} className={cls.icon} />
-        <div className="bg-white px-sm py-xs rounded-sm">
+        <div className={cls.title}>
           <GameTitle gameId={gameId} />
         </div>
       </Box>

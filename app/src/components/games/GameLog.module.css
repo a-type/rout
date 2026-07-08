@@ -1,0 +1,30 @@
+.collapsedTrigger {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: var(--m-space-xs);
+}
+
+.collapsedTriggerInner {
+  position: relative;
+  top: --fn-literal(-34px);
+  left: --fn-literal(-4px);
+  width: calc(100% + 16px);
+}
+
+.log {
+  padding-inline: var(--m-space-xs);
+}
+
+.openButton {
+  width: 100%;
+  font-weight: var(--m-text-weight-normal);
+  height: --fn-literal(32px);
+  border-radius: var(--m-radius-xs);
+  padding: 0;
+}
+
+.content {
+  width: 100%;
+  height: 70vh;
+}

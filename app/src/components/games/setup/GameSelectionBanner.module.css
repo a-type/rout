@@ -10,3 +10,9 @@
   @apply --mx-borderColor(var(--m-color-neutral-ink));
   border-width: var(--m-lineWidth-sm);
 }
+
+.title {
+  background: var(--m-color-white);
+  padding: var(--m-space-xs) var(--m-space-sm);
+  border-radius: var(--m-radius-sm);
+}

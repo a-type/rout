@@ -1,0 +1,10 @@
+.triggerIcon {
+  width: --fn-literal(48px);
+  height: --fn-literal(48px);
+}
+
+.coverIcon {
+  width: 100%;
+  height: --fn-literal(12rem);
+  object-fit: cover;
+}

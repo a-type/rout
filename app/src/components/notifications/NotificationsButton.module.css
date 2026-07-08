@@ -34,6 +34,25 @@
   padding: var(--m-space-sm);
 }
 
+.checkPrimary {
+  position: relative;
+  left: -3px;
+}
+
+.checkSecondary {
+  position: absolute;
+  left: 13px;
+}
+
+.deleteButton {
+  flex-shrink: 0;
+}
+
+.loadMoreButton {
+  margin: auto;
+  margin-top: var(--m-space-lg);
+}
+
 .pip {
   position: absolute;
   left: 0;

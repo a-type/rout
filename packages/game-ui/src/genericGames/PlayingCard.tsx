@@ -267,7 +267,7 @@ function ScalingText({
 }) {
   return (
     <svg
-      className={clsx('flex-1', className)}
+      className={clsx(cls.text, className)}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
       style={style}

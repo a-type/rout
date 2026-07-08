@@ -153,3 +153,7 @@
 .placeholderRoot {
   opacity: 0.5;
 }
+
+.text {
+  flex: 1;
+}

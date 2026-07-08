@@ -3,6 +3,7 @@ import { Wordmark } from '@long-game/game-ui';
 import { Link, useMatchingRoutes } from '@verdant-web/react-router';
 import { NotificationsButton } from '../notifications/NotificationsButton.js';
 import { MyAvatar } from '../users/UserAvatar.js';
+import cls from './MainNav.module.css';
 
 export interface MainNavProps {}
 
@@ -53,7 +54,7 @@ export function MainNav({}: MainNavProps) {
             emphasis={isSettings ? 'primary' : 'ghost'}
             render={<Link to="/settings" />}
             size="wrapper"
-            className="p-xs"
+            className={cls.avatarButton}
           >
             <MyAvatar />
           </Button>
