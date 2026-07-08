@@ -56,11 +56,7 @@ export function SpatialHelpDraggable({ className }: SpatialHelpDraggableProps) {
         </P>
         <Popover.Close
           render={
-            <Button
-              size="small"
-              emphasis="primary"
-              className={cls.close}
-            />
+            <Button size="small" emphasis="primary" className={cls.close} />
           }
         >
           Ok

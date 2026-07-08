@@ -4,10 +4,10 @@ import { withGame } from '@long-game/game-client';
 import { withSuspense } from '../withSuspense.js';
 import { PlayerAvatar } from './PlayerAvatar.js';
 import { PlayerFriendChip } from './PlayerFriendChip.js';
+import cls from './PlayerInfo.module.css';
 import { PlayerStatusChip } from './PlayerStatusChip.js';
 import { PlayerTurnChip } from './PlayerTurnChip.js';
 import { usePlayerThemed } from './usePlayerThemed.js';
-import cls from './PlayerInfo.module.css';
 
 export interface PlayerInfoProps {
   playerId: PrefixedId<'u'>;
@@ -31,11 +31,7 @@ export const PlayerInfo = withSuspense(
             {player?.displayName ?? 'Anonymous'}
           </Text>
         </Box>
-        <Box
-          gap
-          wrap
-          className={cls.chips}
-        >
+        <Box gap wrap className={cls.chips}>
           <PlayerStatusChip playerId={playerId} />
           <PlayerTurnChip playerId={playerId} />
           <PlayerFriendChip playerId={playerId} />

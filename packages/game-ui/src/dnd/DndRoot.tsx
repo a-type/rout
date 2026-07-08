@@ -2,9 +2,9 @@ import { HTMLProps, useEffect } from 'react';
 import { boundsRegistry } from './bounds.js';
 import { DebugView } from './DebugView.js';
 import { DndAlly } from './DndAlly.js';
+import cls from './DndRoot.module.css';
 import { useDndStore } from './dndStore.js';
 import { useMonitorGlobalGesture } from './gestureStore.js';
-import cls from './DndRoot.module.css';
 
 export interface DndRootProps extends HTMLProps<HTMLDivElement> {
   debug?: boolean;
@@ -18,11 +18,7 @@ export function DndRoot({ children, debug, ...rest }: DndRootProps) {
 
   return (
     <div data-role="dnd-root" {...rest}>
-      <div
-        data-role="dnd-overlay"
-        ref={overlayRef}
-        className={cls.overlay}
-      />
+      <div data-role="dnd-overlay" ref={overlayRef} className={cls.overlay} />
       <svg
         data-role="dnd-svg-overlay"
         className={cls.svgOverlay}
