@@ -17,7 +17,7 @@
   @apply --mx-borderColor(transparent);
   border-width: var(--m-lineWidth-sm);
 
-  @apply --mx-fg(--fn-color-contrast());
+  @apply --mx-fg(var(--m-color-neutral-ink));
   @apply --mx-bg(var(--m-color-main-wash));
   &[data-complete='false'][data-broken='false'] {
     border-style: dashed;
