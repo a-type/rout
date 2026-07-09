@@ -1,12 +1,9 @@
-import { Box, PROPS } from '@a-type/ui';
-import {
-  FortressPiece,
-  hexLayout,
-} from '../definition/index';
+import { Box, userModeProps } from '@a-type/ui';
 import { Token, useIsDragPreview } from '@long-game/game-ui';
 import { deserializeCoordinate } from '@long-game/hex-map';
 import { DomHexMap, DomHexTile } from '@long-game/hex-map/react';
 import { motion } from 'motion/react';
+import { FortressPiece, hexLayout } from '../definition/index';
 import { hooks } from './gameClient.js';
 import { tileColors } from './tileGraphics.js';
 import { zoomGlobal } from './viewportGlobals.js';
@@ -44,7 +41,7 @@ function Content({ piece }: { piece: FortressPiece }) {
           strokeWidth={1}
           style={
             {
-              [PROPS.USER.COLOR.PRIMARY_HUE]: tileColors[tile.type],
+              [userModeProps.$userColorHue]: tileColors[tile.type],
             } as any
           }
           className="palette-main stroke-gray-dark fill-main-light"

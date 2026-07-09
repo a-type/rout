@@ -1,7 +1,6 @@
-import { Box, PROPS } from '@a-type/ui';
-import { colors, PrefixedId } from '@long-game/common';
+import { Box, userModeProps } from '@a-type/ui';
+import { colors, Drawing, PrefixedId } from '@long-game/common';
 import { DrawCanvas } from '@long-game/game-ui/drawing';
-import { Drawing } from '../../definition/index';
 import { hooks } from '../gameClient.js';
 import { PlayerAttribution } from '../PlayerAttribution.js';
 
@@ -42,11 +41,11 @@ export const Canvas = hooks.withGame<CanvasProps>(function Canvas({
         onChange={onChange}
         style={
           {
-            [PROPS.USER.COLOR.PRIMARY_HUE]: palette.okHue,
-            [PROPS.USER.COLOR.ACCENT_HUE]: palette.okHue,
+            [userModeProps.$userColorHue]: palette.okHue,
+            [userModeProps.$userColorSaturation]: palette.okSaturation,
           } as any
         }
-        className="@mode-light"
+        className="@mode-light @mode-user"
       />
       {(forceAttribution || playerId !== gameSuite.playerId) && (
         <Box

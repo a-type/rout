@@ -1,4 +1,7 @@
-import { PROPS } from '@a-type/ui';
+import { userModeProps } from '@a-type/ui';
+import { TokenSpace } from '@long-game/game-ui';
+import { HexCoordinate, serializeCoordinate } from '@long-game/hex-map';
+import { SvgHexTile } from '@long-game/hex-map/react';
 import {
   FortressPiece,
   GameMapTileData,
@@ -7,9 +10,6 @@ import {
   TurnData,
   UnitData,
 } from '../definition/index';
-import { TokenSpace } from '@long-game/game-ui';
-import { HexCoordinate, serializeCoordinate } from '@long-game/hex-map';
-import { SvgHexTile } from '@long-game/hex-map/react';
 import { hooks } from './gameClient.js';
 import { tileColors } from './tileGraphics.js';
 
@@ -76,7 +76,7 @@ export const MapTile = hooks.withGame<MapTileProps>(function MapTile({
           strokeWidth={1}
           style={
             {
-              [PROPS.USER.COLOR.PRIMARY_HUE]: tileColors[tile.terrain.type],
+              [userModeProps.$userColorHue]: tileColors[tile.terrain.type],
             } as any
           }
           className="theme"
