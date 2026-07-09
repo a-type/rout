@@ -1,0 +1,60 @@
+.content {
+  width: 100lvw;
+  height: 100lvh;
+  max-width: unset;
+  max-height: unset;
+
+  border-radius: 0;
+  border: none;
+  inset: 0;
+
+  @apply --mx-bg(var(--m-color-main-wash));
+
+  transition: transform var(--m-duration) var(--m-easing);
+  transform: translateX(0);
+  &[data-starting-style],
+  &[data-ending-style] {
+    transform: translateX(100%);
+  }
+}
+
+.contentInner {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.selectContent {
+  position: relative;
+  z-index: 1;
+}
+
+.selectBox {
+  flex-direction: column;
+
+  margin: auto;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    max-width: 600px;
+    width: 100%;
+    max-height: 400px;
+    height: 100%;
+  }
+}
+
+.card {
+  flex-grow: 1;
+  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg-lighter(3);
+  aspect-ratio: 1;
+  flex-basis: 300px;
+  min-width: 0;
+  max-height: 30vh;
+}
+
+.cardMain {
+  display: flex;
+  justify-content: end;
+  flex-direction: column;
+  height: 100%;
+}

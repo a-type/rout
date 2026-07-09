@@ -1,3 +1,4 @@
+import { NewGameWizard } from '@/components/games/NewGameWizard.js';
 import { PushBanner } from '@/components/notifications/PushBanner.js';
 import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import { updateState } from '@/components/updates/updateState.js';
@@ -163,6 +164,7 @@ export const Pages = () => {
         </Box>
         <QuickBuyPopup />
         <PushBanner />
+        <NewGameWizard />
       </Router>
     </ErrorBoundary>
   );

@@ -2,7 +2,7 @@ import { gameModules } from '@/services/games';
 import { Button, ButtonProps, Icon } from '@a-type/ui';
 import { genericId, PrefixedId } from '@long-game/common';
 import { HotseatBackend } from '@long-game/game-client';
-import { useNavigate } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@verdant-web/react-router';
 import { ReactNode } from 'react';
 
 export interface StartHotseatProps extends ButtonProps {
@@ -12,6 +12,26 @@ export interface StartHotseatProps extends ButtonProps {
 
 export function StartHotseat({ children, gameId, ...rest }: StartHotseatProps) {
   const navigate = useNavigate();
+
+  const content = children ?? (
+    <>
+      <Icon name="phone" />
+      <span>New Hotseat</span>
+    </>
+  );
+
+  if (!gameId) {
+    return (
+      <Button
+        emphasis="primary"
+        render={<Link to="?newGame=true&mode=hotseat" />}
+        {...rest}
+      >
+        {content}
+      </Button>
+    );
+  }
+
   return (
     <Button
       emphasis="primary"
@@ -29,12 +49,7 @@ export function StartHotseat({ children, gameId, ...rest }: StartHotseatProps) {
       }}
       {...rest}
     >
-      {children ?? (
-        <>
-          <Icon name="phone" />
-          <span>New Hotseat</span>
-        </>
-      )}
+      {content}
     </Button>
   );
 }
