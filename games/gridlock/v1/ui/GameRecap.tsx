@@ -4,6 +4,7 @@ import { PlayerAvatar, PlayerName, PlayerThemed } from '@long-game/game-ui';
 import { scoreBoard } from '../definition/index';
 import { BoardRenderer } from './board/BoardRenderer.js';
 import { hooks } from './gameClient.js';
+import cls from './GameRecap.module.css';
 
 export interface GameRecapProps {}
 
