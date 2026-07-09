@@ -57,7 +57,6 @@ export const StartGameButton = withGame<StartGameButtonProps>(
                 width: '100%',
                 justifyContent: 'center',
               }}
-              color="primary"
             />
           }
         >

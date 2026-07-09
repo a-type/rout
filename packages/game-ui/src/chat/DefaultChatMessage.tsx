@@ -198,6 +198,7 @@ const DefaultChatMessageBubble = withGame<ChatMessageProps>(
         gap="sm"
         elevated={props.compact ? undefined : 'sm'}
         border={!props.compact}
+        data-chat-bubble
         data-compact={props.compact}
         data-is-self={isSelf}
         data-is-previous-message-same-author={isPreviousMessageSameAuthor}
