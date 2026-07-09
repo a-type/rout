@@ -74,7 +74,7 @@ export const SubmitTurn = withSuspense(
             col
             gap="lg"
             items="center"
-            className={clsx('rounded-lg', 'sticky bottom-sm', className)}
+            className={clsx(cls.root, className)}
             render={
               <motion.div
                 layout
@@ -91,7 +91,7 @@ export const SubmitTurn = withSuspense(
             ) : (
               <MainContent
                 delay={delay}
-                className="m-auto"
+                className={cls.mainContent}
                 showNextSteps={() => setNextStepsManualState('show')}
               >
                 {children}

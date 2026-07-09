@@ -1,3 +1,7 @@
 .focusedTile {
   @apply --mx-bg(var(--m-color-accent-wash));
 }
+
+.root {
+  width: 100%;
+}

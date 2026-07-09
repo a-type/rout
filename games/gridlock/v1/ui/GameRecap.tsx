@@ -72,7 +72,9 @@ const RecapPlayerBoard = hooks.withGame<{ player: GameMember }>(
               Score: {scoreBoard(playerBoard)}
             </Text>
           </Box>
-          <Dialog.Trigger render={<Button emphasis="ghost" size="wrapper" />}>
+          <Dialog.Trigger
+            render={<Button emphasis="ghost" size="wrapper" full="width" />}
+          >
             <BoardRenderer
               board={playerBoard}
               playerId={player.id}

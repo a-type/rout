@@ -34,7 +34,7 @@
 .main {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 50vh;
   padding-bottom: var(--m-space-lg);
 }

@@ -43,7 +43,7 @@ export const BoardRenderer = hooks.withGame<BoardRendererProps>(
         priority={-1}
         render={
           <BoardGrid
-            className={clsx(className, playerStyles.className)}
+            className={clsx(cls.root, className, playerStyles.className)}
             style={playerStyles.style}
           />
         }
