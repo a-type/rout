@@ -4,6 +4,7 @@ import {
   createModuleFederationConfig,
 } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
+import { pluginCssMinimizer } from '@rsbuild/plugin-css-minimizer';
 import { pluginReact } from '@rsbuild/plugin-react';
 import typegpuPlugin from 'unplugin-typegpu/rspack';
 
@@ -40,7 +41,7 @@ const federationConfig = createModuleFederationConfig({
 });
 
 export default defineConfig(({ command }) => ({
-  plugins: [pluginReact()],
+  plugins: [pluginReact(), pluginCssMinimizer()],
   resolve: {
     alias: {
       '@': './src',
@@ -93,6 +94,11 @@ export default defineConfig(({ command }) => ({
       index: './src/main.tsx',
     },
   },
+  // output: {
+  //   minify: {
+  //     css: false,
+  //   },
+  // },
   dev: {
     client: {
       host: 'localhost',
