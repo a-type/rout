@@ -94,11 +94,6 @@ export default defineConfig(({ command }) => ({
       index: './src/main.tsx',
     },
   },
-  // output: {
-  //   minify: {
-  //     css: false,
-  //   },
-  // },
   dev: {
     client: {
       host: 'localhost',
