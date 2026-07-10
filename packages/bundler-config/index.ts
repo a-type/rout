@@ -8,7 +8,6 @@ import typegpuPlugin from 'unplugin-typegpu/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import restart from 'vite-plugin-restart';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const localPackages = [
   '@long-game/game-ui',
@@ -66,7 +65,9 @@ const cssConfig = {
   },
 };
 
-const resolveConfig = (command: string) => ({});
+const resolveConfig = (command: string) => ({
+  tsconfigPaths: true,
+});
 
 export const gameViteConfig = (game: {
   id: string;
@@ -140,7 +141,6 @@ export const appViteConfig = defineConfig(({ command }) => {
 
   return {
     plugins: [
-      tsconfigPaths(),
       pluginReact(),
       typegpuPlugin({}),
       VitePWA({

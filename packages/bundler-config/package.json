@@ -13,7 +13,6 @@
     "@module-federation/enhanced": "catalog:",
     "@module-federation/vite": "catalog:",
     "vite": "catalog:",
-    "vite-tsconfig-paths": "catalog:",
     "vite-plugin-pwa": "catalog:",
     "vite-plugin-restart": "catalog:",
     "@vitejs/plugin-react": "catalog:",
