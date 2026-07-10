@@ -45,7 +45,11 @@ export function HomePage({}: HomePageProps) {
           <HotseatGamesList status="active" />
         </Box>
         <Divider className="bg-gray" />
-        <Button emphasis="ghost" render={<Link to="/history" />}>
+        <Button
+          emphasis="ghost"
+          nativeButton={false}
+          render={<Link to="/history" />}
+        >
           <Icon name="calendar" />
           History
           <Icon name="arrowRight" />

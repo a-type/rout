@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run build:ui && pnpm run build:worker",
-    "build:ui": "rsbuild build",
+    "build:ui": "vite build",
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-heir-apparent-v1 --parallel \"/dev:.*/\"",
-    "dev:ui": "rsbuild dev",
+    "dev:ui": "vite",
     "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3505 --inspector-port 33505",
     "test": "vitest --passWithNoTests"
   },
@@ -31,7 +31,7 @@
     "@types/react-dom": "catalog:",
     "@long-game/scripts": "workspace:*",
     "@long-game/bundler-config": "workspace:*",
-    "@rsbuild/core": "catalog:",
+    "vite": "catalog:",
     "wrangler": "catalog:",
     "vitest": "catalog:"
   }

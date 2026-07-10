@@ -94,6 +94,7 @@ export function GameSummaryCardTrigger({ children }: { children?: ReactNode }) {
     <Button
       size="wrapper"
       emphasis="ghost"
+      nativeButton={false}
       render={<Link to={`/${hotseat ? 'hotseat' : 'session'}/${session.id}`} />}
       className={cls.trigger}
     >

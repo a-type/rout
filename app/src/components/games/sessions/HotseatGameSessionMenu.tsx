@@ -13,7 +13,12 @@ export function HotseatGameSessionMenu({
     <DropdownMenu>
       <DropdownMenu.Trigger
         render={
-          <Button size="small" emphasis="default" style={{ minHeight: 0 }} />
+          <Button
+            size="small"
+            emphasis="default"
+            style={{ minHeight: 0 }}
+            aria-label="Game menu"
+          />
         }
       >
         <Icon name="dots" />

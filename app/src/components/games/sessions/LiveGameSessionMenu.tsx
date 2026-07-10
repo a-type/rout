@@ -27,6 +27,7 @@ export function LiveGameSessionMenu({
           <Button
             size="small"
             emphasis="default"
+            aria-label="Game session menu"
             style={{ minHeight: 0 }}
             className={className}
             {...rest}

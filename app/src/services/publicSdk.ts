@@ -2,12 +2,15 @@ import { toast } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import {
   hookifySdk,
+  nonce,
   PublicSdk,
   publicSdk,
   SdkHooks,
 } from '@long-game/game-client';
-export { publicSdk } from '@long-game/game-client';
 export type { BaseSdk, PublicSdk } from '@long-game/game-client';
+export { publicSdk };
+
+console.log('Client nonce:', nonce);
 
 export const sdkHooks: SdkHooks<PublicSdk> = hookifySdk<PublicSdk>();
 

@@ -5,16 +5,16 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run build:ui && pnpm run build:worker",
-    "build:ui": "rsbuild build",
+    "build:ui": "vite build",
     "build:worker": "wrangler build --config ./wrangler.jsonc",
     "dev": "pnpm run --filter @long-game/game-number-guess-v1 --parallel \"/dev:.*/\"",
-    "dev:ui": "rsbuild dev",
+    "dev:ui": "vite",
     "dev:worker": "wrangler dev --config ./wrangler.jsonc --port 3500 --inspector-port 33500",
     "core:dev": "pnpm dev",
     "test": "vitest --passWithNoTests",
-    "browser-test:build": "rsbuild build --env-mode=test",
+    "browser-test:build": "vite build --mode=test",
     "browser-test:server": "pnpm --filter @long-game/game-number-guess-v1 run \"/browser-test:run:.*/\"",
-    "browser-test:server:ui": "rsbuild preview",
+    "browser-test:server:ui": "vite preview",
     "browser-test:server:worker": "pnpm dev:worker"
   },
   "dependencies": {
@@ -34,7 +34,7 @@
     "@types/react-dom": "catalog:",
     "@long-game/scripts": "workspace:*",
     "@long-game/bundler-config": "workspace:*",
-    "@rsbuild/core": "catalog:",
+    "vite": "catalog:",
     "wrangler": "catalog:"
   }
 }

@@ -2,8 +2,8 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "./ui-dist",
-    "declarationDir": "./ui-dist",
+    "outDir": "./dist-ui",
+    "declarationDir": "./dist-ui",
     "declaration": true,
     "declarationMap": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"]

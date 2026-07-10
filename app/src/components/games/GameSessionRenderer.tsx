@@ -91,8 +91,8 @@ const GameSessionRendererInner = withGame<{ hotseat: boolean }>(
         {gameSuite.gameStatus.status === 'complete' && (
           <Banner>
             <ScrollTicker>
-              <span>Game Over!</span>
               <Icon name="flag" />
+              <span>&nbsp;Game Over!</span>
             </ScrollTicker>
           </Banner>
         )}
@@ -178,7 +178,24 @@ const GameplayRenderer = withGame<{ hotseat: boolean }>(
                 ) : (
                   <div className={cls.main}>
                     {hotseat && <HotseatBanner />}
-                    <ErrorBoundary>
+                    <ErrorBoundary
+                      fallback={(props) => (
+                        <Box col>
+                          <Text
+                            render={<h1 />}
+                            emphasis="ambient"
+                            uppercase
+                            dim
+                          >
+                            Game failed to load
+                          </Text>
+                          <Text render={<p />} emphasis="ambient" dim>
+                            {props.error.message}
+                          </Text>
+                          <Button onClick={props.clearError}>Try Again</Button>
+                        </Box>
+                      )}
+                    >
                       <Renderer />
                       {/* using key to reset state when changing games */}
                       <SubmitTurn key={sessionId} />

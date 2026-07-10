@@ -23,7 +23,15 @@ export const ChatReactions = withGame<ChatReactionsProps>(
     return (
       <Box gap wrap round="lg" className={className}>
         <Popover>
-          <Popover.Trigger render={<Button size="wrapper" emphasis="ghost" />}>
+          <Popover.Trigger
+            render={
+              <Button
+                size="wrapper"
+                emphasis="ghost"
+                aria-label="Select reaction"
+              />
+            }
+          >
             <Icon name="smile" />
           </Popover.Trigger>
           <Popover.Content>

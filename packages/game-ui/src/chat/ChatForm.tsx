@@ -123,7 +123,15 @@ const RecipientsField = withGame(function RecipientsField({ gameSuite }) {
 
   return (
     <Popover>
-      <Popover.Trigger render={<Button emphasis="ghost" size="small" />}>
+      <Popover.Trigger
+        render={
+          <Button
+            emphasis="ghost"
+            size="small"
+            aria-label="Select recipients"
+          />
+        }
+      >
         {selectedUsers.length > 0 ? (
           <AvatarList count={selectedUsers.length}>
             {selectedUsers.map(({ id }, index) => (

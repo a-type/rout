@@ -5,16 +5,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./index.mjs",
-      "types": "./index.d.ts"
+      "import": "./index.ts"
     }
   },
   "devDependencies": {
     "@arbor-css/postcss": "catalog:",
-    "@rsbuild/core": "catalog:",
-    "@rsbuild/plugin-react": "catalog:",
-    "@module-federation/rsbuild-plugin": "catalog:",
     "@module-federation/enhanced": "catalog:",
+    "@module-federation/vite": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vite-plugin-pwa": "catalog:",
+    "vite-plugin-restart": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "@long-game/common": "workspace:*",
     "unplugin-typegpu": "catalog:",
     "@long-game/arbor-config": "workspace:*"

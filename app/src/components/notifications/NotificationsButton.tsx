@@ -60,6 +60,7 @@ export const NotificationsButton = withSuspense(
               <Button
                 color="accent"
                 emphasis={hasUnread ? 'primary' : 'ghost'}
+                aria-label="Show notifications"
                 {...rest}
               >
                 <Icon name="bell" />

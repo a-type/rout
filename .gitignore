@@ -1,6 +1,7 @@
 node_modules
 dist/
-ui-dist/
+dist-ui/
+dist-ui/
 worker-dist/
 *.sqlite
 *.db

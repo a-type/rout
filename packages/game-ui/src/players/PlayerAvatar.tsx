@@ -67,7 +67,6 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
       }}
       data-status={status?.online ? 'online' : 'offline'}
       className={clsx(cls.avatar, themeClass, className)}
-      popIn={false}
       crossOrigin="use-credentials"
     />
   );
@@ -101,6 +100,7 @@ export const PlayerAvatar = withGame<PlayerAvatarProps>(function PlayerAvatar({
               />
             ) : undefined
           }
+          nativeButton={false}
         >
           {content}
         </Button>

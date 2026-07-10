@@ -72,7 +72,7 @@ export function ScrollTicker({
       {...props}
     >
       <Box
-        gap="sm"
+        gap="lg"
         full="height"
         style={{
           whiteSpace: 'nowrap',

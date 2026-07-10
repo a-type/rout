@@ -87,7 +87,7 @@ export function GameDebugger({ ...props }: GameDebuggerProps) {
 
   return (
     <>
-      <Button onClick={showDebugger} {...props}>
+      <Button aria-label="Show debugger" onClick={showDebugger} {...props}>
         <Icon name="bug" />
       </Button>
       <Suspense>

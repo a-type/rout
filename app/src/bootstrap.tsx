@@ -3,7 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App.js';
 import './services/federation.js';
 
+import '@a-type/ui/main.css';
 import './main.css';
+
 import { attachToPwaEvents } from './pwaEvents.js';
 import { registerServiceWorker } from './swRegister.js';
 

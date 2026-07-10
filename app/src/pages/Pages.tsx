@@ -3,7 +3,7 @@ import { PushBanner } from '@/components/notifications/PushBanner.js';
 import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import { updateState } from '@/components/updates/updateState.js';
 import { checkForUpdate, skipWaiting } from '@/swRegister.js';
-import { Box, ErrorBoundary } from '@a-type/ui';
+import { Box, Button, ErrorBoundary, Text } from '@a-type/ui';
 import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
 import { lazy, useCallback } from 'react';
 import GameSessionPage from './GameSessionPage.js';
@@ -152,11 +152,17 @@ export const Pages = () => {
   return (
     <ErrorBoundary
       // TODO: use error details to show different error messages
-      fallback={
-        <Box full layout="center center">
-          Something went wrong!
+      fallback={(props) => (
+        <Box col>
+          <Text render={<h1 />} emphasis="ambient" uppercase dim>
+            Something went wrong!
+          </Text>
+          <Text render={<p />} emphasis="ambient" dim>
+            {props.error.message}
+          </Text>
+          <Button onClick={props.clearError}>Try Again</Button>
         </Box>
-      }
+      )}
     >
       <Router routes={routes} onNavigate={handleNavigate}>
         <Box full="width" grow col>

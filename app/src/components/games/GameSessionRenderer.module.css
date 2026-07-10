@@ -37,6 +37,7 @@
   flex: 1 0 auto;
   min-height: 50vh;
   padding-bottom: var(--m-space-lg);
+  padding-top: var(--m-space-md);
 }
 
 .dnd {

@@ -17,6 +17,7 @@ export const NewGameAction = withSuspense(function NewGameAction({
   const colorMode = useResolvedColorMode();
   return (
     <Button
+      nativeButton={false}
       render={<Link to="?newGame=true" />}
       className={clsx(cls.trigger, '@mode-inverted', className)}
       {...rest}

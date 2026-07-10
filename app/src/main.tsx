@@ -1,8 +1,25 @@
-import './bootstrap.js';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './App.js';
+import './services/federation.js';
 
 import '@a-type/ui/main.css';
+import './main.css';
 
-// TODO: safer way to expose config to other packages -
-// maybe a shared config package.
-import * as config from './config.js';
-(window as any).LONG_GAME_CONFIG = config;
+import { attachToPwaEvents } from './pwaEvents.js';
+import { registerServiceWorker } from './swRegister.js';
+
+function main() {
+  const root = createRoot(document.getElementById('root')!);
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
+
+main();
+
+registerServiceWorker().then(() => {
+  attachToPwaEvents();
+});

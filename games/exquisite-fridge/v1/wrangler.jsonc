@@ -4,7 +4,7 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-04-12",
   "assets": {
-    "directory": "./ui-dist",
+    "directory": "./dist-ui",
     "binding": "ASSETS",
   },
 }

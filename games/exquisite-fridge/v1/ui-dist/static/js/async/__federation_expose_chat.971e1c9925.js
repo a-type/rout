@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunk_long_game_game_exquisite_fridge_v1=self.rspackChunk_long_game_game_exquisite_fridge_v1||[]).push([[887],{7896(e,s,a){a.r(s);let _=a(7084).DefaultChatMessage;s.default=_,a.d(s,{},{ChatMessage:_})}}]);

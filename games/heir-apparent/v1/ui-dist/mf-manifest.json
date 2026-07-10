@@ -1,0 +1,222 @@
+{
+  "id": "heir_apparent_v1",
+  "name": "heir_apparent_v1",
+  "metaData": {
+    "name": "heir_apparent_v1",
+    "globalName": "heir_apparent_v1",
+    "buildInfo": {
+      "buildVersion": "0.0.1",
+      "buildName": "@long-game/game-heir-apparent-v1"
+    },
+    "remoteEntry": {
+      "name": "static/js/heir_apparent_v1.89d951df91.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "pluginVersion": "2.6.0",
+    "getPublicPath": "function() { return \"http://localhost:3102/heir-apparent/v1/\"; }"
+  },
+  "shared": [
+    {
+      "id": "heir_apparent_v1:@long-game/game-ui",
+      "name": "@long-game/game-ui",
+      "version": "0.0.1",
+      "singleton": true,
+      "requiredVersion": ">0.0.0",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/23.2882c8db3f.js",
+            "static/js/730.16a11809ce.js",
+            "static/js/959.dc95ee9662.js",
+            "static/js/async/355.9ea97866b4.js",
+            "static/js/async/494.5229a93b67.js",
+            "static/js/async/512.13b1cab6e9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/512.de8f780483.css"
+          ],
+          "async": []
+        }
+      }
+    },
+    {
+      "id": "heir_apparent_v1:react/jsx-runtime",
+      "name": "react/jsx-runtime",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^18",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.93f6159109.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "id": "heir_apparent_v1:@long-game/game-client",
+      "name": "@long-game/game-client",
+      "version": "0.0.1",
+      "singleton": true,
+      "requiredVersion": ">0.0.0",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/730.16a11809ce.js",
+            "static/js/821.62ef03a0d6.js",
+            "static/js/959.dc95ee9662.js",
+            "static/js/async/190.d1e3cc35c1.js",
+            "static/js/async/84.8bf1a07e35.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "id": "heir_apparent_v1:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": ">19.0.0",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.93f6159109.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "id": "heir_apparent_v1:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": ">19.0.0",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.93f6159109.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "id": "heir_apparent_v1:@a-type/ui",
+      "name": "@a-type/ui",
+      "version": "6.0.75",
+      "singleton": true,
+      "requiredVersion": ">5.0.0",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/23.2882c8db3f.js",
+            "static/js/async/139.017fbeb2e8.js",
+            "static/js/async/355.9ea97866b4.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/139.6e1ce1ba95.css"
+          ],
+          "async": []
+        }
+      }
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "heir_apparent_v1:renderer",
+      "name": "renderer",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_renderer.2453b1386e.js"
+          ],
+          "async": [
+            "static/js/async/171.42de301153.js",
+            "static/js/async/264.bea635537a.js",
+            "static/js/async/362.2cce6a3d55.js",
+            "static/js/async/940.8cdeb55bfb.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./renderer"
+    },
+    {
+      "id": "heir_apparent_v1:chat",
+      "name": "chat",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_chat.a2fee4334e.js"
+          ],
+          "async": [
+            "static/js/async/171.42de301153.js",
+            "static/js/async/264.bea635537a.js",
+            "static/js/async/362.2cce6a3d55.js",
+            "static/js/async/940.8cdeb55bfb.js",
+            "static/js/async/__federation_expose_definition.6f79827f3b.js",
+            "static/js/async/__federation_expose_renderer.2453b1386e.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./chat"
+    },
+    {
+      "id": "heir_apparent_v1:definition",
+      "name": "definition",
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_definition.6f79827f3b.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./definition"
+    }
+  ]
+}

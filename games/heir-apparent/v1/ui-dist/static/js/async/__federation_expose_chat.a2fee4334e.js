@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunk_long_game_game_heir_apparent_v1=self.rspackChunk_long_game_game_heir_apparent_v1||[]).push([[887],{7896(e,a,_){_.r(a);let s=_(7084).DefaultChatMessage;a.default=s,_.d(a,{},{ChatMessage:s})}}]);

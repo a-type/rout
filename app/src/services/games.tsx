@@ -11,11 +11,8 @@ import {
   GameDefinition,
 } from '@long-game/game-definition';
 import { DefaultChatMessage } from '@long-game/game-ui';
-import {
-  loadRemote,
-  registerRemotes,
-} from '@module-federation/enhanced/runtime';
 import { ComponentType, lazy } from 'react';
+import { federation } from './federation.js';
 import { publicSdk } from './publicSdk.js';
 
 const cache: Map<string, any> = new Map();
@@ -60,7 +57,8 @@ export function getFederatedGameComponent(
     return cache.get(federatedPath)!;
   }
   if (componentName === 'definition') {
-    const promise = loadRemote<{ default: GameDefinition }>(federatedPath)
+    const promise = federation
+      .loadRemote<{ default: GameDefinition }>(federatedPath)
       .then((mod) => mod?.default)
       .catch((err) => {
         console.error(err);
@@ -71,7 +69,8 @@ export function getFederatedGameComponent(
   }
   if (componentName === 'renderer') {
     const promise = lazy(() =>
-      loadRemote(federatedPath)
+      federation
+        .loadRemote(federatedPath)
         .then((m: any) => {
           console.debug('Loaded remote renderer for', gameId, version);
           return { default: m.Renderer };
@@ -88,7 +87,8 @@ export function getFederatedGameComponent(
   }
   if (componentName === 'chat') {
     const promise = lazy(() =>
-      loadRemote(federatedPath)
+      federation
+        .loadRemote(federatedPath)
         .then((m: any) => ({ default: m.ChatMessage }))
         .catch((err) => {
           console.error(err);
@@ -107,12 +107,13 @@ async function registerFederatedGames() {
   const games = await publicSdk.getGames.run({
     prerelease: true,
   });
-  registerRemotes(
+  federation.registerRemotes(
     Object.entries(games)
       .map(([id, meta]) =>
         meta.versions.map((version) => ({
           name: idToFederationId(id, version.version),
           entry: `${version.url}/mf-manifest.json`,
+          type: 'module',
         })),
       )
       .flat(),

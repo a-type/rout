@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import tgpu from 'unplugin-typegpu/vite';
 import { fileURLToPath, URL } from 'url';

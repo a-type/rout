@@ -21,6 +21,7 @@ export function MainNav({}: MainNavProps) {
         <Button
           size="wrapper"
           emphasis="ghost"
+          nativeButton={false}
           render={<Link to="/" />}
           disabled={isHome}
         >
@@ -34,6 +35,7 @@ export function MainNav({}: MainNavProps) {
         <Tooltip content="Game Library">
           <Button
             emphasis={isLibrary ? 'primary' : 'ghost'}
+            nativeButton={false}
             render={<Link to="/library" />}
             size="small"
           >
@@ -43,6 +45,7 @@ export function MainNav({}: MainNavProps) {
         <Tooltip content="Friends">
           <Button
             emphasis={isFriends ? 'primary' : 'ghost'}
+            nativeButton={false}
             render={<Link to="/friends" />}
             size="small"
           >
@@ -52,6 +55,7 @@ export function MainNav({}: MainNavProps) {
         <Tooltip content="Settings">
           <Button
             emphasis={isSettings ? 'primary' : 'ghost'}
+            nativeButton={false}
             render={<Link to="/settings" />}
             size="wrapper"
             className={cls.avatarButton}

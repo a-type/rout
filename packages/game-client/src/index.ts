@@ -22,5 +22,18 @@ export type { HotseatGameSuite } from './suite/HotseatGameSuite.js';
 export { useCreateGameSuite } from './suite/useCreateGameSuite.js';
 export * from './types.js';
 export * from './useStorage.js';
+export { nonce };
+
+import nonce from './nonce.js';
+if (
+  (window as any).__game_client_nonce__ &&
+  (window as any).__game_client_nonce__ !== nonce
+) {
+  console.error(
+    'Nonce mismatch! This is likely due to a hot reload. Please refresh the page.',
+    `Expected nonce: ${nonce}, but found: ${(window as any).__game_client_nonce__}`,
+  );
+}
+(window as any).__game_client_nonce__ = nonce;
 
 (window as any).toJS = toJS; // for debugging

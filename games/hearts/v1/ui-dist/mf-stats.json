@@ -1,0 +1,256 @@
+{
+  "id": "hearts_v1",
+  "name": "hearts_v1",
+  "metaData": {
+    "name": "hearts_v1",
+    "globalName": "hearts_v1",
+    "buildInfo": {
+      "buildVersion": "0.0.1",
+      "buildName": "@long-game/game-hearts-v1"
+    },
+    "remoteEntry": {
+      "name": "static/js/hearts_v1.e809ef45cf.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "pluginVersion": "2.6.0",
+    "getPublicPath": "function() { return \"http://localhost:3102/hearts/v1/\"; }"
+  },
+  "shared": [
+    {
+      "id": "hearts_v1:@long-game/game-ui",
+      "name": "@long-game/game-ui",
+      "version": "0.0.1",
+      "requiredVersion": ">0.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/730.f7d7d6dd18.js",
+            "static/js/959.d237fd047c.js",
+            "static/js/async/494.c9c7deb99b.js",
+            "static/js/async/512.406eda3aa8.js",
+            "static/js/async/780.ac8860c1e0.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/512.de8f780483.css"
+          ],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/ChatMessage.tsx"
+      ],
+      "usedExports": []
+    },
+    {
+      "id": "hearts_v1:react/jsx-runtime",
+      "name": "react/jsx-runtime",
+      "version": "19.2.7",
+      "requiredVersion": "^18",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.83c9c425b9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/Renderer.tsx"
+      ],
+      "usedExports": []
+    },
+    {
+      "id": "hearts_v1:@long-game/game-client",
+      "name": "@long-game/game-client",
+      "version": "0.0.1",
+      "requiredVersion": ">0.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/730.f7d7d6dd18.js",
+            "static/js/821.1734754822.js",
+            "static/js/959.d237fd047c.js",
+            "static/js/async/190.16ae51a6f9.js",
+            "static/js/async/84.4028196f19.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "hearts_v1:react",
+      "name": "react",
+      "version": "19.2.7",
+      "requiredVersion": ">19.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.83c9c425b9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "hearts_v1:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "requiredVersion": ">19.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.83c9c425b9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "hearts_v1:@a-type/ui",
+      "name": "@a-type/ui",
+      "version": "6.0.75",
+      "requiredVersion": ">5.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/139.524ab136e0.js",
+            "static/js/async/780.ac8860c1e0.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/139.6e1ce1ba95.css"
+          ],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/Renderer.tsx"
+      ],
+      "usedExports": []
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./renderer",
+      "file": "ui/Renderer.tsx",
+      "id": "hearts_v1:renderer",
+      "name": "renderer",
+      "requires": [
+        "@a-type/ui",
+        "react/jsx-runtime"
+      ],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/317.db170ddfad.js",
+            "static/js/async/__federation_expose_renderer.ac0d33e811.js"
+          ],
+          "async": [
+            "static/js/async/171.de2fa4c0be.js",
+            "static/js/async/264.34534d0d15.js",
+            "static/js/async/362.8298c3d0fe.js",
+            "static/js/async/940.3ead66163a.js"
+          ]
+        },
+        "css": {
+          "sync": [
+            "static/css/async/__federation_expose_renderer.aa13c55eb1.css"
+          ],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./chat",
+      "file": "ui/ChatMessage.tsx",
+      "id": "hearts_v1:chat",
+      "name": "chat",
+      "requires": [
+        "@long-game/game-ui"
+      ],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_chat.048b475eb3.js"
+          ],
+          "async": [
+            "static/js/async/171.de2fa4c0be.js",
+            "static/js/async/264.34534d0d15.js",
+            "static/js/async/317.db170ddfad.js",
+            "static/js/async/362.8298c3d0fe.js",
+            "static/js/async/940.3ead66163a.js",
+            "static/js/async/__federation_expose_definition.96a3c5e92d.js",
+            "static/js/async/__federation_expose_renderer.ac0d33e811.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": [
+            "static/css/async/__federation_expose_renderer.aa13c55eb1.css"
+          ]
+        }
+      }
+    },
+    {
+      "path": "./definition",
+      "file": "ui/definition.ts",
+      "id": "hearts_v1:definition",
+      "name": "definition",
+      "requires": [],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/317.db170ddfad.js",
+            "static/js/async/__federation_expose_definition.96a3c5e92d.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

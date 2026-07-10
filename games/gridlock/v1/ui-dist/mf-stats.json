@@ -1,0 +1,254 @@
+{
+  "id": "gridlock_v1",
+  "name": "gridlock_v1",
+  "metaData": {
+    "name": "gridlock_v1",
+    "globalName": "gridlock_v1",
+    "buildInfo": {
+      "buildVersion": "0.0.1",
+      "buildName": "@long-game/game-gridlock-v1"
+    },
+    "remoteEntry": {
+      "name": "static/js/gridlock_v1.cbcdee2cc7.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "pluginVersion": "2.6.0",
+    "getPublicPath": "function() { return \"http://localhost:3102/gridlock/v1/\"; }"
+  },
+  "shared": [
+    {
+      "id": "gridlock_v1:@long-game/game-ui",
+      "name": "@long-game/game-ui",
+      "version": "0.0.1",
+      "requiredVersion": ">0.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/619.2d1985144a.js",
+            "static/js/730.eed6614cdf.js",
+            "static/js/959.a637874ee7.js",
+            "static/js/async/494.38cdae9960.js",
+            "static/js/async/512.68d130abe6.js",
+            "static/js/async/535.7ae17666f8.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/512.de8f780483.css"
+          ],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/ChatMessage.tsx"
+      ],
+      "usedExports": []
+    },
+    {
+      "id": "gridlock_v1:react/jsx-runtime",
+      "name": "react/jsx-runtime",
+      "version": "19.2.7",
+      "requiredVersion": "^18",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.ece8b9e616.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/Renderer.tsx"
+      ],
+      "usedExports": []
+    },
+    {
+      "id": "gridlock_v1:@long-game/game-client",
+      "name": "@long-game/game-client",
+      "version": "0.0.1",
+      "requiredVersion": ">0.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/730.eed6614cdf.js",
+            "static/js/821.818d21b0a1.js",
+            "static/js/959.a637874ee7.js",
+            "static/js/async/190.6750cc5eea.js",
+            "static/js/async/84.966e6d4524.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "gridlock_v1:react",
+      "name": "react",
+      "version": "19.2.7",
+      "requiredVersion": ">19.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.ece8b9e616.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "gridlock_v1:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "requiredVersion": ">19.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/lib-react.ece8b9e616.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": []
+    },
+    {
+      "id": "gridlock_v1:@a-type/ui",
+      "name": "@a-type/ui",
+      "version": "6.0.75",
+      "requiredVersion": ">5.0.0",
+      "singleton": true,
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/619.2d1985144a.js",
+            "static/js/async/293.cdffb80eeb.js",
+            "static/js/async/535.7ae17666f8.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "static/css/async/293.6e1ce1ba95.css"
+          ],
+          "async": []
+        }
+      },
+      "usedIn": [
+        "ui/ChatMessage.tsx"
+      ],
+      "usedExports": []
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./renderer",
+      "file": "ui/Renderer.tsx",
+      "id": "gridlock_v1:renderer",
+      "name": "renderer",
+      "requires": [
+        "react/jsx-runtime"
+      ],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_renderer.ac481a84a0.js"
+          ],
+          "async": [
+            "static/js/async/171.1ea316fb36.js",
+            "static/js/async/264.315cda5d8d.js",
+            "static/js/async/362.a70187c2fc.js",
+            "static/js/async/940.25107cb1b6.js"
+          ]
+        },
+        "css": {
+          "sync": [
+            "static/css/async/__federation_expose_renderer.d8eb30929d.css"
+          ],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./chat",
+      "file": "ui/ChatMessage.tsx",
+      "id": "gridlock_v1:chat",
+      "name": "chat",
+      "requires": [
+        "@long-game/game-ui",
+        "@a-type/ui"
+      ],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_chat.76751976bf.js"
+          ],
+          "async": [
+            "static/js/async/171.1ea316fb36.js",
+            "static/js/async/264.315cda5d8d.js",
+            "static/js/async/362.a70187c2fc.js",
+            "static/js/async/940.25107cb1b6.js",
+            "static/js/async/__federation_expose_renderer.ac481a84a0.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": [
+            "static/css/async/__federation_expose_renderer.d8eb30929d.css"
+          ]
+        }
+      }
+    },
+    {
+      "path": "./definition",
+      "file": "ui/definition.ts",
+      "id": "gridlock_v1:definition",
+      "name": "definition",
+      "requires": [],
+      "assets": {
+        "js": {
+          "sync": [
+            "static/js/async/__federation_expose_definition.06910cf8c6.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

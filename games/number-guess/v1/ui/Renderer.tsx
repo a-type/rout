@@ -1,4 +1,4 @@
-import { Box, Input, toast } from '@a-type/ui';
+import { Box, Field, Input, toast } from '@a-type/ui';
 import { typedHooks } from '@long-game/game-client';
 import { useEffect } from 'react';
 import gameDefinition from './definition';
@@ -6,7 +6,7 @@ import gameDefinition from './definition';
 const hooks = typedHooks<typeof gameDefinition>();
 
 // Debugging HMR stuff.
-const title = 'Guess!';
+const title = 'Guess';
 console.log('Renderer loaded', gameDefinition, title);
 
 export const Renderer = hooks.withGame(function Client({ gameSuite }) {
@@ -39,19 +39,24 @@ const LocalGuess = hooks.withGame(function LocalGuess({ gameSuite }) {
   return (
     <Box col p="lg" gap>
       <h1>{title}</h1>
-      <label htmlFor="guess">Enter your guess:</label>
-      <Input
-        type="number"
-        disabled={!isViewingCurrentRound}
-        value={guess}
-        onValueChange={(v) => {
-          let num = parseInt(v);
-          if (isNaN(num)) num = 0;
-          prepareTurn({ guess: num });
-        }}
-        autoFocus
-        id="guess"
-      />
+      <Field stretch id="guess">
+        <Field.Label>Enter your guess:</Field.Label>
+        <Field.Control
+          render={
+            <Input
+              type="number"
+              disabled={!isViewingCurrentRound}
+              value={guess}
+              onValueChange={(v) => {
+                let num = parseInt(v);
+                if (isNaN(num)) num = 0;
+                prepareTurn({ guess: num });
+              }}
+              autoFocus
+            />
+          }
+        />
+      </Field>
     </Box>
   );
 });

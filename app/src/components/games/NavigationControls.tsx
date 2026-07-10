@@ -10,6 +10,7 @@ export function NavigationControls({}: NavigationControlsProps) {
         className="@mode-inverted"
         aria-label="Go home"
         render={<Link to="/" />}
+        nativeButton={false}
       >
         <Icon name="arrowLeft" />
       </Button>
