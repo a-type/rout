@@ -4,21 +4,18 @@
   "private": true,
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "workerd": "./src/index.ts",
       "production": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./drawing": {
-      "development": "./src/drawing/index.ts",
       "workerd": "./src/drawing/index.ts",
       "production": "./dist/drawing/index.js",
       "import": "./dist/drawing/index.js",
       "types": "./dist/drawing/index.d.ts"
     },
     "./genericGames": {
-      "development": "./src/genericGames/index.ts",
       "workerd": "./src/genericGames/index.ts",
       "production": "./dist/genericGames/index.js",
       "import": "./dist/genericGames/index.js",

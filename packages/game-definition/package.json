@@ -5,7 +5,6 @@
   "sideEffects": true,
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "production": "./dist/esm/index.js",
       "workerd": "./src/index.ts",
       "import": "./dist/esm/index.js",
