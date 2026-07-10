@@ -1,4 +1,4 @@
-import { skipWaiting, usePollForUpdates } from '@/swRegister.js';
+import { updateApp, usePollForUpdates } from '@/swRegister.js';
 import { Box, Button, Icon } from '@a-type/ui';
 import { ScrollTicker } from '@long-game/visual-components';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ const TEST = false;
 export function UpdateBanner({}) {
   const updateAvailable = useIsUpdateAvailable();
   const updating = useIsUpdating();
-  usePollForUpdates(true, 60_000); // 1 minute
+  usePollForUpdates(60_000); // 1 minute
 
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +43,7 @@ export function UpdateBanner({}) {
         onClick={async () => {
           try {
             setLoading(true);
-            await skipWaiting();
+            await updateApp();
           } catch (err) {
             console.error('Update failed', err);
             // reload anyway

@@ -1,74 +1,54 @@
 import { useEffect } from 'react';
-import {
-  updateState,
-  useIsUpdateAvailable,
-} from './components/updates/updateState';
+import { proxy, useSnapshot } from 'valtio';
+import { registerSW } from 'virtual:pwa-register';
+import { attachToPwaEvents } from './pwaEvents';
 
-export let checkForUpdate: () => Promise<void> = () => Promise.resolve();
-export let skipWaiting = () => {};
+export const updateState = proxy({
+  updateAvailable: false,
+});
 
-export async function registerServiceWorker() {
-  if (typeof window === 'undefined') return;
-  if (import.meta.env.DEV) return;
+let check: (() => void) | undefined = undefined;
 
-  try {
-    const registration = await navigator.serviceWorker.register(
-      new URL(
-        /* webpackChunkName: "sw" */
-        './service-worker.ts',
-        import.meta.url,
-      ),
-    );
-    if (!registration) {
-      console.error(`Service worker registration failed`);
-      return;
+const update = registerSW({
+  onNeedRefresh() {
+    updateState.updateAvailable = true;
+    console.log('Update available and ready to install');
+  },
+  onRegisteredSW(swUrl, registration) {
+    console.log('Service worker registered', swUrl);
+    if (registration) {
+      attachToPwaEvents();
+      setInterval(
+        () => {
+          registration.update();
+          check = registration.update;
+          // hourly
+        },
+        60 * 60 * 1000,
+      );
     }
+  },
+  onRegisterError(error) {
+    console.error('Service worker registration error', error);
+  },
+});
 
-    console.info('Service worker registered', registration);
-
-    checkForUpdate = async () => {
-      await registration.update();
-    };
-    skipWaiting = () => {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('Service worker updated, reloading page');
-        window.location.reload();
-      });
-
-      if (!registration.waiting) {
-        throw new Error('No waiting service worker registration');
-      }
-
-      registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
-      updateState.updating = true;
-    };
-
-    registration.onupdatefound = () => {
-      updateState.updateAvailable = true;
-      console.log('Update available and ready to install');
-    };
-
-    setInterval(
-      () => {
-        registration.update();
-        checkForUpdate = async () => {
-          await registration.update();
-        };
-      },
-      60 * 60 * 1000,
-    ); // hourly
-  } catch (error) {
-    console.error('Service worker registration failed', error);
-  }
+export async function updateApp(reload?: boolean) {
+  await update(!!reload);
 }
 
-export function usePollForUpdates(immediate = true, interval: number = 30_000) {
-  const updateAvailable = useIsUpdateAvailable();
+export function checkForUpdate() {
+  check?.();
+}
+
+export function useIsUpdateAvailable() {
+  return useSnapshot(updateState).updateAvailable;
+}
+
+export function usePollForUpdates(interval: number = 30_000) {
+  const updateAvailable = useSnapshot(updateState).updateAvailable;
 
   useEffect(() => {
-    if (immediate) {
-      checkForUpdate();
-    }
     const iv = setInterval(() => {
       checkForUpdate();
     }, interval);

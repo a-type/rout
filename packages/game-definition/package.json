@@ -2,6 +2,7 @@
   "name": "@long-game/game-definition",
   "version": "0.0.1",
   "private": true,
+  "sideEffects": true,
   "exports": {
     ".": {
       "development": "./src/index.ts",

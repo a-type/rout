@@ -2,7 +2,7 @@
  * On startup, register all federated game modules
  */
 
-import { checkForUpdate, skipWaiting } from '@/swRegister.js';
+import { checkForUpdate, updateApp } from '@/swRegister.js';
 import { Box, Button, H2, Icon, P } from '@a-type/ui';
 import { idToFederationId } from '@long-game/common';
 import { GameModuleContext } from '@long-game/game-client';
@@ -136,7 +136,7 @@ function MissingRenderer() {
           <Button
             onClick={async () => {
               await checkForUpdate();
-              skipWaiting();
+              await updateApp();
               window.location.reload();
             }}
           >

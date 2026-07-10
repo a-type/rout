@@ -6,8 +6,7 @@ import './services/federation.js';
 import '@a-type/ui/main.css';
 import './main.css';
 
-import { attachToPwaEvents } from './pwaEvents.js';
-import { registerServiceWorker } from './swRegister.js';
+import './swRegister.js';
 
 function main() {
   const root = createRoot(document.getElementById('root')!);
@@ -19,7 +18,3 @@ function main() {
 }
 
 main();
-
-registerServiceWorker().then(() => {
-  attachToPwaEvents();
-});

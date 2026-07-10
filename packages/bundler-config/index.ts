@@ -121,9 +121,11 @@ export const gameViteConfig = (game: {
         port: game.devPort,
         strictPort: true,
         origin: baseUrl,
-        ws: {
-          clientPort: game.devPort,
-        },
+      },
+      preview: {
+        port: game.devPort,
+        strictPort: true,
+        origin: baseUrl,
       },
       resolve: resolveConfig(command),
       optimizeDeps: optimizeDepsConfig,
@@ -157,6 +159,10 @@ export const appViteConfig = defineConfig(({ command }) => {
     resolve: resolveConfig(command),
     css: cssConfig,
     server: {
+      port: 3100,
+      strictPort: true,
+    },
+    preview: {
       port: 3100,
       strictPort: true,
     },

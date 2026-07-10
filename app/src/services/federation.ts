@@ -84,6 +84,7 @@ federation.registerShared({
     version: internalPackageVersions,
     scope,
     lib: () => GameDefinition,
+    strategy: 'loaded-first',
     shareConfig: {
       singleton: true,
       requiredVersion: internalPackageVersions,
@@ -93,6 +94,7 @@ federation.registerShared({
     version: internalPackageVersions,
     scope,
     lib: () => GameUI,
+    strategy: 'loaded-first',
     shareConfig: {
       singleton: true,
       requiredVersion: internalPackageVersions,
@@ -102,6 +104,7 @@ federation.registerShared({
     version: internalPackageVersions,
     scope,
     lib: () => Notifications,
+    strategy: 'loaded-first',
     shareConfig: {
       singleton: true,
       requiredVersion: internalPackageVersions,
@@ -111,6 +114,7 @@ federation.registerShared({
     version: internalPackageVersions,
     scope,
     lib: () => VisualComponents,
+    strategy: 'loaded-first',
     shareConfig: {
       singleton: true,
       requiredVersion: internalPackageVersions,
@@ -120,6 +124,7 @@ federation.registerShared({
     version: internalPackageVersions,
     scope,
     lib: () => Common,
+    strategy: 'loaded-first',
     shareConfig: {
       singleton: true,
       requiredVersion: internalPackageVersions,

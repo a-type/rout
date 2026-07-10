@@ -2,7 +2,7 @@ import { NewGameWizard } from '@/components/games/NewGameWizard.js';
 import { PushBanner } from '@/components/notifications/PushBanner.js';
 import { QuickBuyPopup } from '@/components/store/QuickBuyPopup.js';
 import { updateState } from '@/components/updates/updateState.js';
-import { checkForUpdate, skipWaiting } from '@/swRegister.js';
+import { checkForUpdate, updateApp } from '@/swRegister.js';
 import { Box, Button, ErrorBoundary, Text } from '@a-type/ui';
 import { makeRoutes, Outlet, Router } from '@verdant-web/react-router';
 import { lazy, useCallback } from 'react';
@@ -140,7 +140,7 @@ export const Pages = () => {
         !ev.state?.noUpdate
       ) {
         console.info('Update ready to install, intercepting navigation...');
-        skipWaiting();
+        updateApp();
         return false;
       }
       if (!prev) {
