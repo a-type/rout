@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: true,
+    cssMinify: 'esbuild',
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),

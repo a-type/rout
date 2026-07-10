@@ -1,10 +1,7 @@
 import { ArborPlugin } from '@arbor-css/postcss';
 import arborPreset from '@long-game/arbor-config';
 import { idToFederationId } from '@long-game/common';
-import {
-  createModuleFederationConfig,
-  federation,
-} from '@module-federation/vite';
+import { federation } from '@module-federation/vite';
 import pluginReact from '@vitejs/plugin-react';
 import path from 'node:path';
 import typegpuPlugin from 'unplugin-typegpu/vite';
@@ -22,7 +19,7 @@ const localPackages = [
 
 const shareScope = 'default';
 
-const shareConfig = Object.fromEntries(
+const shareConfig: any = Object.fromEntries(
   [
     'react',
     'react/',
@@ -33,10 +30,10 @@ const shareConfig = Object.fromEntries(
   ].map((pkg) => [
     pkg,
     {
-      singleton: true,
-      import: false,
-      // allowNodeModulesSuffixMatch: true,
-      // shareScope,
+      singleton: true as const,
+      // force games not to import their own share deps - if we can't
+      // get a shared dep from host, error immediately.
+      import: false as const,
     },
   ]),
 );
@@ -51,17 +48,7 @@ const restartConfig = {
   glob: true,
 };
 
-const optimizeDepsConfig = {
-  // exclude: localPackages,
-  // include: [
-  //   'react/jsx-runtime',
-  //   'react',
-  //   'react-dom',
-  //   'react-dom/client',
-  //   'formik',
-  //   'hoist-non-react-statics',
-  // ],
-};
+const optimizeDepsConfig = {};
 
 const buildConfig = {
   target: 'esnext' as const,
@@ -79,13 +66,7 @@ const cssConfig = {
   },
 };
 
-const resolveConfig = (command: string) => ({
-  // mainFields: ['browser', 'module', 'main'],
-  // conditions:
-  //   command === 'build'
-  //     ? ['production', 'import', 'module', 'browser', 'default']
-  //     : ['development', 'import', 'module', 'browser', 'default'],
-});
+const resolveConfig = (command: string) => ({});
 
 export const gameViteConfig = (game: {
   id: string;
@@ -153,14 +134,7 @@ export const gameViteConfig = (game: {
 };
 
 export const appViteConfig = defineConfig(({ command }) => {
-  const federationConfig = createModuleFederationConfig({
-    name: 'long-game',
-    manifest: false,
-    dts: false,
-    shared: shareConfig,
-    shareScope: 'games',
-    shareStrategy: 'loaded-first',
-  });
+  // main host app federation is all runtime.
 
   return {
     plugins: [
@@ -169,6 +143,7 @@ export const appViteConfig = defineConfig(({ command }) => {
       typegpuPlugin({}),
       VitePWA({
         srcDir: 'src',
+        filename: 'service-worker.ts',
         strategies: 'injectManifest',
         injectManifest: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB
@@ -177,7 +152,6 @@ export const appViteConfig = defineConfig(({ command }) => {
           sourcemap: true,
         },
       }),
-      // federation(federationConfig),
       restart(restartConfig),
     ],
     resolve: resolveConfig(command),
