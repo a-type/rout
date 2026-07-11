@@ -145,7 +145,7 @@ export const appViteConfig = defineConfig(({ command }) => {
       typegpuPlugin({}),
       VitePWA({
         srcDir: 'src',
-        filename: 'service-worker.ts',
+        filename: 'sw.ts',
         strategies: 'injectManifest',
         injectManifest: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB
