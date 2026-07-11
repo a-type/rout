@@ -35,11 +35,11 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
 
+      - name: Build everything
+        run: pnpm run build
+
       - name: Run unit tests
         run: pnpm core:test:ci
-
-      - name: Build UI
-        run: pnpm --filter "@long-game/app..." run build
 
       - name: Build Number Guess test game
         run: pnpm --filter "@long-game/game-number-guess-v1" run browser-test:build
