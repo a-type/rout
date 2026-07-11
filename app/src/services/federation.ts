@@ -23,6 +23,36 @@ import * as VisualComponents from '@long-game/visual-components';
 const scope = 'default';
 const internalPackageVersions = '0.0.1';
 
+const sharedModulesForViteRemotes = {
+  react: React,
+  'react/jsx-runtime': ReactJsx,
+  'react/jsx-dev-runtime': ReactJsxDev,
+  'react-dom': ReactDOM,
+  '@a-type/ui': UI,
+  '@long-game/common': Common,
+  '@long-game/game-client': GameClient,
+  '@long-game/game-definition': GameDefinition,
+  '@long-game/game-ui': GameUI,
+  '@long-game/notifications': Notifications,
+  '@long-game/visual-components': VisualComponents,
+};
+
+function seedViteModuleCacheShareEntries(
+  modules: Record<string, unknown>,
+): void {
+  const g = globalThis as any;
+  const moduleCache = (g.__mf_module_cache__ ??= {
+    share: {},
+    remote: {},
+  });
+  moduleCache.share ??= {};
+
+  for (const [name, mod] of Object.entries(modules)) {
+    moduleCache.share[name] = mod;
+    moduleCache.share[`default:${name}`] = mod;
+  }
+}
+
 federation.registerShared({
   react: {
     version: React.version,
@@ -131,6 +161,11 @@ federation.registerShared({
     },
   },
 });
+
+// Vite remote chunks read from __mf_module_cache__.share directly in prod.
+// Seed exact keys with concrete module exports so remotes receive the module
+// object shape they expect (instead of runtime metadata entries).
+seedViteModuleCacheShareEntries(sharedModulesForViteRemotes);
 
 federation.registerPlugins([
   RetryPlugin({
