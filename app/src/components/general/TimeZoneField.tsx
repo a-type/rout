@@ -46,7 +46,7 @@ export function TimezoneField({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 'var(--m-space-xs)',
+                      gap: 'var(--m-sp-xs)',
                       alignItems: 'start',
                       flexShrink: 0,
                     }}

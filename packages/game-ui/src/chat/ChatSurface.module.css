@@ -2,22 +2,22 @@
   position: relative;
 
   &[data-dragging='true'] {
-    transition: all var(--m-duration) var(--m-easing);
-    @apply --mx-ring(--fn-ring(var(--m-color-accent, var(--m-lineWidth))));
-    outline: var(--m-lineWidth-lg) var(--m-color-accent-light);
+    transition: all var(--m-dur) var(--m-ease);
+    @apply --mx-ring(--fn-ring(var(--m-accent, var(--m-lw))));
+    outline: var(--m-lw-lg) var(--m-accent-light);
 
     &::after {
       content: '';
       position: absolute;
       inset: 0;
-      @apply --mx-bg(var(--m-color-accent-light));
+      @apply --mx-bg(var(--m-accent-light));
       opacity: 20%;
     }
 
     &[data-over-accepted='true'] {
-      @apply --mx-ring(--fn-ring(var(--m-color-accent, --fn-literal(6px))));
+      @apply --mx-ring(--fn-ring(var(--m-accent, --fn-literal(6px))));
       &::after {
-        @apply --mx-bg(var(--m-color-neutral-paper));
+        @apply --mx-bg(var(--m-gray-paper));
       }
     }
   }

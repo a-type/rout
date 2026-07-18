@@ -1,6 +1,6 @@
 .banner {
   position: fixed;
-  top: var(--m-space-md);
+  top: var(--m-sp-md);
   left: 50%;
   width: 95vw;
   max-width: 600px;

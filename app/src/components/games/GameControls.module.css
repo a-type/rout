@@ -1,9 +1,9 @@
 .history {
-  padding: var(--m-space-xs) var(--m-space-md);
+  padding: var(--m-sp-xs) var(--m-sp-md);
   border-radius: 0;
-  margin-inline: calc(-1 * var(--m-space-md));
-  margin-block-end: calc(-1 * var(--m-space-md));
-  font-size: var(--m-text-size-sm);
+  margin-inline: calc(-1 * var(--m-sp-md));
+  margin-block-end: calc(-1 * var(--m-sp-md));
+  font-size: var(--m-fs-sm);
 }
 
 .playerStatuses {

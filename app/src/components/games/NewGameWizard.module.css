@@ -8,9 +8,9 @@
   border: none;
   inset: 0;
 
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg(var(--m-tint-wash));
 
-  transition: transform var(--m-duration) var(--m-easing);
+  transition: transform var(--m-dur) var(--m-ease);
   transform: translateX(0);
   &[data-starting-style],
   &[data-ending-style] {
@@ -44,7 +44,7 @@
 
 .card {
   flex-grow: 1;
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg(var(--m-tint-wash));
   @apply --mx-bg-lighter(3);
   aspect-ratio: 1;
   flex-basis: 300px;

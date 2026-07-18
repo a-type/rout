@@ -1,9 +1,9 @@
 .spatialChat {
-  left: calc(anchor(left) + var(--m-space-md));
+  left: calc(anchor(left) + var(--m-sp-md));
 }
 
 .spatialHelp {
-  right: calc(anchor(right) + var(--m-space-md));
+  right: calc(anchor(right) + var(--m-sp-md));
 }
 
 .spatialChat,
@@ -12,10 +12,10 @@
   position-anchor: --gameMain;
   z-index: 100;
 
-  bottom: calc(anchor(bottom) + var(--m-space-lg));
+  bottom: calc(anchor(bottom) + var(--m-sp-lg));
 
   @media (min-width: 1024px) {
-    bottom: calc(anchor(bottom) + var(--m-space-md));
+    bottom: calc(anchor(bottom) + var(--m-sp-md));
   }
 }
 
@@ -27,8 +27,8 @@
 
 .hotseatPlayerButton {
   width: 100%;
-  padding: var(--m-space-sm);
-  gap: var(--m-space-md);
+  padding: var(--m-sp-sm);
+  gap: var(--m-sp-md);
 }
 
 .main {
@@ -36,8 +36,8 @@
   flex-direction: column;
   flex: 1 0 auto;
   min-height: 50vh;
-  padding-bottom: var(--m-space-lg);
-  padding-top: var(--m-space-md);
+  padding-bottom: var(--m-sp-lg);
+  padding-top: var(--m-sp-md);
 }
 
 .dnd {

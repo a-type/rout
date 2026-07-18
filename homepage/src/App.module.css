@@ -1,34 +1,34 @@
 .root {
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg(var(--m-tint-wash));
 }
 
 .topTicker {
   width: 100%;
   position: relative;
   z-index: 1;
-  padding: var(--m-space-sm);
-  font-weight: var(--m-text-weight-bold);
-  background: var(--m-color-neutral-paper);
-  color: var(--m-color-neutral-ink);
+  padding: var(--m-sp-sm);
+  font-weight: var(--m-fw-bold);
+  background: var(--m-gray-paper);
+  color: var(--m-gray-ink);
 }
 
 .bottomTicker {
   width: 100%;
   position: relative;
   z-index: 1;
-  padding: var(--m-space-sm);
-  font-weight: var(--m-text-weight-bold);
-  @apply --mx-bg(var(--m-color-accent));
-  @apply --mx-fg(var(--m-color-accent-ink));
+  padding: var(--m-sp-sm);
+  font-weight: var(--m-fw-bold);
+  @apply --mx-bg(var(--m-accent));
+  @apply --mx-fg(var(--m-accent-ink));
 }
 
 .header {
   position: sticky;
-  top: var(--m-space-sm);
+  top: var(--m-sp-sm);
   width: 100%;
   max-width: 600px;
   z-index: 1;
-  padding-inline: var(--m-space-lg);
+  padding-inline: var(--m-sp-lg);
 }
 
 .wordmark {
@@ -48,26 +48,25 @@
 
 .heroContainer {
   text-align: center;
-  padding-block: var(--m-space-xl);
+  padding-block: var(--m-sp-xl);
 }
 
 .heroTitle {
   font-size: --fn-literal(3.75rem);
   font-weight: 500;
   font-family: 'Nunito', system-ui;
-  text-shadow: 0 0 12px
-    color-mix(in srgb, var(--m-color-main-heavy) 45%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--m-tint-heavy) 45%, transparent);
   line-height: 1;
-  @apply --mx-fg(var(--m-color-main-ink));
+  @apply --mx-fg(var(--m-tint-ink));
 }
 
 .heroCopy {
-  font-size: var(--m-text-size-lg);
-  @apply --mx-fg(var(--m-color-neutral-ink));
+  font-size: var(--m-fs-lg);
+  @apply --mx-fg(var(--m-gray-ink));
 }
 
 .ctaButton {
-  font-size: var(--m-text-size-lg);
-  padding-inline: var(--m-space-xl);
-  padding-block: var(--m-space-md);
+  font-size: var(--m-fs-lg);
+  padding-inline: var(--m-sp-xl);
+  padding-block: var(--m-sp-md);
 }

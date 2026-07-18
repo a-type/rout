@@ -11,7 +11,7 @@
   overflow-x: visible;
   display: flex;
   flex-direction: row;
-  gap: var(--m-space-lg);
+  gap: var(--m-sp-lg);
   align-items: center;
   position: relative;
 }

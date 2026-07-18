@@ -1,6 +1,6 @@
 .tabs {
   position: sticky;
-  top: var(--m-space-sm);
+  top: var(--m-sp-sm);
   z-index: 100;
 }
 

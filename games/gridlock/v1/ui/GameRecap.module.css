@@ -1,7 +1,7 @@
 .grid {
-  padding: var(--m-space-md);
+  padding: var(--m-sp-md);
   width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--m-space-md);
+  gap: var(--m-sp-md);
 }

@@ -10,7 +10,7 @@
 }
 
 .hand {
-  @apply --mx-borderColor(var(--m-color-neutral-heavy));
+  @apply --mx-borderColor(var(--m-gray-heavy));
 }
 
 .unplayable {

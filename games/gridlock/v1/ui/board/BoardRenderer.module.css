@@ -1,5 +1,5 @@
 .focusedTile {
-  @apply --mx-bg(var(--m-color-accent-wash));
+  @apply --mx-bg(var(--m-accent-wash));
 }
 
 .root {

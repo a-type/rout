@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   pointer-events: none;
-  @apply --mx-ring(inset --fn-ring(var(--m-color-main), 5px));
+  @apply --mx-ring(inset --fn-ring(var(--m-tint), 5px));
   z-index: 10;
   top: anchor(top);
   left: anchor(left);
@@ -11,7 +11,7 @@
 
 .marker {
   position: absolute;
-  top: var(--m-space-sm);
-  left: var(--m-space-sm);
-  @apply --mx-fg(var(--m-color-main));
+  top: var(--m-sp-sm);
+  left: var(--m-sp-sm);
+  @apply --mx-fg(var(--m-tint));
 }

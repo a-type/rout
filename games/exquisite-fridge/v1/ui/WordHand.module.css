@@ -11,11 +11,11 @@
 
 .title {
   text-align: center;
-  margin-bottom: var(--m-space-xs);
+  margin-bottom: var(--m-sp-xs);
 }
 
 .section {
-  margin-block-end: var(--m-space-md);
+  margin-block-end: var(--m-sp-md);
 }
 
 .input {

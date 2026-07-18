@@ -13,31 +13,31 @@
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-  gap: var(--m-space-lg);
+  gap: var(--m-sp-lg);
 }
 
 .tabsTrigger[data-active] {
-  @apply --mx-bg(var(--m-color-main-light));
+  @apply --mx-bg(var(--m-tint-light));
 }
 
 .tabsList {
   display: flex;
   align-items: center;
-  gap: var(--m-space-xs);
-  padding: var(--m-space-xs);
+  gap: var(--m-sp-xs);
+  padding: var(--m-sp-xs);
 }
 
 .tabs {
   display: flex;
   flex-direction: column;
-  gap: var(--m-space-sm);
+  gap: var(--m-sp-sm);
 }
 
 .hand {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--m-space-xs);
+  gap: var(--m-sp-xs);
   align-items: center;
   flex-shrink: 0;
 }

@@ -1,15 +1,15 @@
 .root {
   display: inline-flex;
-  gap: var(--m-space-xs);
+  gap: var(--m-sp-xs);
   align-items: center;
-  @apply --mx-bg(var(--m-color-main-wash));
-  padding-inline: var(--m-space-xs);
-  @apply --mx-borderColor(var(--m-color-main));
+  @apply --mx-bg(var(--m-tint-wash));
+  padding-inline: var(--m-sp-xs);
+  @apply --mx-borderColor(var(--m-tint));
   white-space: nowrap;
 }
 
 .icon {
   width: --fn-literal(1.5em);
   height: --fn-literal(1.5em);
-  border-radius: var(--m-radius-xs);
+  border-radius: var(--m-rd-xs);
 }

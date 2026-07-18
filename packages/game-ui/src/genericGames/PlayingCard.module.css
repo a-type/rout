@@ -1,14 +1,14 @@
 .avatar {
   position: absolute;
-  top: var(--m-space-md);
-  right: var(--m-space-md);
+  top: var(--m-sp-md);
+  right: var(--m-sp-md);
 }
 
 .extremelySimple {
   display: flex;
-  border-radius: var(--m-radius-xs);
+  border-radius: var(--m-rd-xs);
   padding-block: --fn-literal(1px);
-  @apply --mx-bg(var(--m-color-neutral-paper));
+  @apply --mx-bg(var(--m-gray-paper));
 
   @container (min-width: 40px) {
     display: none;
@@ -17,8 +17,8 @@
 
 .simple {
   display: none;
-  border-radius: var(--m-radius-sm);
-  @apply --mx-bg(var(--m-color-neutral-paper));
+  border-radius: var(--m-rd-sm);
+  @apply --mx-bg(var(--m-gray-paper));
 
   @container (min-width: 40px) {
     display: flex;
@@ -36,8 +36,8 @@
 
 .detailed {
   display: none;
-  border-radius: var(--m-radius-lg);
-  @apply --mx-bg(var(--m-color-neutral-paper));
+  border-radius: var(--m-rd-lg);
+  @apply --mx-bg(var(--m-gray-paper));
 
   @container (min-width: 80px) {
     display: flex;
@@ -61,7 +61,7 @@
 }
 
 .suitStack {
-  padding: var(--m-space-sm);
+  padding: var(--m-sp-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -96,12 +96,12 @@
 .placeholder {
   border-style: dashed;
 
-  border-radius: var(--m-radius-xs);
+  border-radius: var(--m-rd-xs);
   @container (min-width: 40px) {
-    border-radius: var(--m-radius-sm);
+    border-radius: var(--m-rd-sm);
   }
   @container (min-width: 80px) {
-    border-radius: var(--m-radius-lg);
+    border-radius: var(--m-rd-lg);
   }
 }
 
@@ -117,15 +117,15 @@
   container-type: inline-size;
 
   &[data-suit='s'] {
-    @apply --mx-fg(var(--m-color-main-ink));
+    @apply --mx-fg(var(--m-tint-ink));
   }
   &[data-suit='c'],
   &[data-suit='d'] {
-    @apply --mx-fg(var(--m-color-main-heavy));
+    @apply --mx-fg(var(--m-tint-heavy));
     @apply --mx-fg-lighter(1);
   }
   &[data-suit='h'] {
-    @apply --mx-fg(var(--m-color-main-heavy));
+    @apply --mx-fg(var(--m-tint-heavy));
     @apply --mx-fg-heavier(2);
   }
 }
@@ -138,7 +138,7 @@
 
 .suitIcon {
   flex: 1;
-  stroke-width: var(--m-lineWidth-sm);
+  stroke-width: var(--m-lw-sm);
   min-width: 20px;
   width: auto;
   height: auto;
@@ -154,7 +154,7 @@
   height: 100%;
 
   & line {
-    @apply --mx-stroke(var(--m-color-neutral-ink));
+    @apply --mx-stroke(var(--m-gray-ink));
   }
 }
 

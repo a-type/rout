@@ -1,15 +1,15 @@
 .trigger {
   overflow: clip;
-  border-width: var(--m-lineWidth-lg);
+  border-width: var(--m-lw-lg);
   border-style: solid;
-  border-color: var(--m-color-main-heavy);
+  border-color: var(--m-tint-heavy);
   width: --fn-literal(64px);
   aspect-ratio: 1;
-  @apply --mx-fg(var(--m-color-main-ink));
+  @apply --mx-fg(var(--m-tint-ink));
 }
 
 .icon {
-  stroke-width: var(--m-lineWidth-lg);
+  stroke-width: var(--m-lw-lg);
   z-index: 1;
   position: relative;
 }

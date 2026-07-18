@@ -10,12 +10,12 @@
 }
 
 .ticker {
-  @apply --mx-bg(var(--m-color-accent));
-  @apply --mx-bg(var(--m-color-accent-ink));
+  @apply --mx-bg(var(--m-accent));
+  @apply --mx-bg(var(--m-accent-ink));
   width: 100%;
   position: relative;
   z-index: 1;
-  padding: var(--m-space-sm);
-  font-weight: var(--m-text-weight-bold);
+  padding: var(--m-sp-sm);
+  font-weight: var(--m-fw-bold);
   text-transform: uppercase;
 }

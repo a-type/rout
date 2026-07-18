@@ -1,16 +1,16 @@
 .root {
   width: auto;
   min-height: 48px;
-  @apply --mx-borderColor(var(--m-color-neutral-heavy));
-  border-radius: var(--m-radius-sm);
-  padding: var(--m-space-sm);
-  @apply --mx-bg(var(--m-color-neutral-paper));
+  @apply --mx-borderColor(var(--m-gray-heavy));
+  border-radius: var(--m-rd-sm);
+  padding: var(--m-sp-sm);
+  @apply --mx-bg(var(--m-gray-paper));
 }
 
 .blank {
   width: --fn-literal(48px);
   height: --fn-literal(48px);
-  @apply --mx-bg(var(--m-color-neutral-wash));
+  @apply --mx-bg(var(--m-gray-wash));
 }
 
 .tile {

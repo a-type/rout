@@ -6,6 +6,6 @@
 
 .details {
   position: absolute;
-  bottom: var(--m-space-sm);
-  right: var(--m-space-sm);
+  bottom: var(--m-sp-sm);
+  right: var(--m-sp-sm);
 }

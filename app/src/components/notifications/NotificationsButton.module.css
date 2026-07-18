@@ -3,14 +3,14 @@
   max-height: 80vh;
   width: --fn-literal(500px);
   max-width: 90vw;
-  padding: var(--m-space-md);
+  padding: var(--m-sp-md);
   display: flex;
   flex-direction: column;
   @apply --mx-bg-heavier(0.5);
 }
 
 .contentMain {
-  margin-bottom: var(--m-space-md);
+  margin-bottom: var(--m-sp-md);
 }
 
 .scrollArea {
@@ -22,16 +22,16 @@
   & > div {
     display: flex;
     flex-direction: column;
-    gap: var(--m-space-sm);
+    gap: var(--m-sp-sm);
   }
 }
 
 .markRead {
   flex: 1;
-  font-weight: var(--m-text-weight-normal);
+  font-weight: var(--m-fw-normal);
   align-items: start;
   text-align: start;
-  padding: var(--m-space-sm);
+  padding: var(--m-sp-sm);
 }
 
 .checkPrimary {
@@ -50,7 +50,7 @@
 
 .loadMoreButton {
   margin: auto;
-  margin-top: var(--m-space-lg);
+  margin-top: var(--m-sp-lg);
 }
 
 .pip {
@@ -60,6 +60,6 @@
   height: --fn-literal(12px);
   width: --fn-literal(12px);
   border-radius: 50%;
-  @apply --mx-bg(var(--m-color-accent-heavy));
-  @apply --mx-borderColor(var(--m-color-accent-wash));
+  @apply --mx-bg(var(--m-accent-heavy));
+  @apply --mx-borderColor(var(--m-accent-wash));
 }

@@ -33,8 +33,8 @@ export function UploadAvatar({ className }: UploadAvatarProps) {
         emphasis="default"
         style={{
           position: 'absolute',
-          top: 'var(--m-space-sm)',
-          right: 'var(--m-space-sm)',
+          top: 'var(--m-sp-sm)',
+          right: 'var(--m-sp-sm)',
         }}
       >
         <Icon name="upload" />

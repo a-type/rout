@@ -1,5 +1,5 @@
 .root {
   text-align: center;
   z-index: 1;
-  text-shadow: 0 0 20px var(--m-color-neutral-paper);
+  text-shadow: 0 0 20px var(--m-gray-paper);
 }

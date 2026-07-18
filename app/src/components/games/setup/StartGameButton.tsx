@@ -84,7 +84,7 @@ export const StartGameButton = withGame<StartGameButtonProps>(
                 maxHeight: '50vmin',
                 aspectRatio: '1 / 1',
                 objectFit: 'contain',
-                borderRadius: 'var(--m-radius-sm)',
+                borderRadius: 'var(--m-rd-sm)',
               }}
             />
             <Text emphasis="primary" bold>

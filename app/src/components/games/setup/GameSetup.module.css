@@ -1,6 +1,6 @@
 .banner {
   position: sticky;
-  bottom: var(--m-space-sm);
+  bottom: var(--m-sp-sm);
   z-index: 1000;
   overflow: clip;
 

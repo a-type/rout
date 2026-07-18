@@ -1,17 +1,17 @@
 .root {
-  padding-block-start: var(--m-space-md);
+  padding-block-start: var(--m-sp-md);
 }
 
 .line {
   display: flex;
   flex-grow: 1;
-  border-top: var(--m-lineWidth-sm) solid var(--m-color-neutral-heavy);
+  border-top: var(--m-lw-sm) solid var(--m-gray-heavy);
 }
 
 .dividerText {
-  padding: var(--m-space-xs) var(--m-space-md);
+  padding: var(--m-sp-xs) var(--m-sp-md);
 }
 
 .timestamp {
-  padding-inline-start: var(--m-space-sm);
+  padding-inline-start: var(--m-sp-sm);
 }

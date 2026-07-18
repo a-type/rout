@@ -6,13 +6,13 @@
 .icon {
   height: --fn-literal(48px);
   aspect-ratio: 1;
-  border-radius: var(--m-radius-sm);
-  @apply --mx-borderColor(var(--m-color-neutral-ink));
-  border-width: var(--m-lineWidth-sm);
+  border-radius: var(--m-rd-sm);
+  @apply --mx-borderColor(var(--m-gray-ink));
+  border-width: var(--m-lw-sm);
 }
 
 .title {
-  background: var(--m-color-white);
-  padding: var(--m-space-xs) var(--m-space-sm);
-  border-radius: var(--m-radius-sm);
+  background: var(--m-gray-paper);
+  padding: var(--m-sp-xs) var(--m-sp-sm);
+  border-radius: var(--m-rd-sm);
 }

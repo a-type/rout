@@ -1,7 +1,7 @@
 .root {
-  border-radius: var(--m-radius-lg);
+  border-radius: var(--m-rd-lg);
   position: sticky;
-  bottom: var(--m-space-lg);
+  bottom: var(--m-sp-lg);
   z-index: 99999;
 }
 
@@ -32,7 +32,7 @@
 }
 .progressLine {
   height: 100%;
-  @apply --mx-bg(var(--m-color-main));
+  @apply --mx-bg(var(--m-tint));
 }
 
 .mainContent {
@@ -40,6 +40,6 @@
 }
 
 .cancelContent {
-  padding: var(--m-space-sm) var(--m-space-lg);
+  padding: var(--m-sp-sm) var(--m-sp-lg);
   padding-inline-end: 0;
 }

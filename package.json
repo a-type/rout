@@ -19,13 +19,15 @@
     "browser-test:run": "playwright test --config=playwright.config.ts",
     "browser-test:ui": "pnpm browser-test:run --ui",
     "browser-test:servers": "pnpm run --parallel --stream \"/browser-test:server/\"",
-    "free-ports": "pnpx kill-port 9229 3099 3100 3101 3300 3301 3302 3303 3304 3305 3306 3307 3308 3309 3310 3400 3401 3402 3403 3404 3405 3406 3407 3408 3409 3410 3500 3501 3502 3503 3504 3505 3506 3507 3508 3509 3510"
+    "free-ports": "pnpx kill-port 9229 3099 3100 3101 3300 3301 3302 3303 3304 3305 3306 3307 3308 3309 3310 3400 3401 3402 3403 3404 3405 3406 3407 3408 3409 3410 3500 3501 3502 3503 3504 3505 3506 3507 3508 3509 3510",
+    "test:arbor": "arbor validate 'app/src/**/*.css' 'games/**/src/**/*.css' 'packages/**/src/**/*.css' --config packages/arbor-config/src/arbor.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@a-type/ui": "catalog:",
+    "@arbor-css/core": "catalog:",
     "@clack/prompts": "0.9.0",
     "@cloudflare/workers-types": "catalog:",
     "cp-tpl": "1.0.9",

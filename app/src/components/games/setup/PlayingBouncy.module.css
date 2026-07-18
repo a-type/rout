@@ -8,7 +8,7 @@
   animation-name: bounce;
   animation-duration: 1s;
   animation-iteration-count: infinite;
-  animation-timing-function: var(--m-easing-loose);
+  animation-timing-function: var(--m-ease-loose);
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -34,9 +34,9 @@
   }
 
   @apply --mx-surface-primary;
-  padding: var(--m-space-xs) var(--m-space-sm);
-  border-radius: var(--m-radius-sm);
-  font-weight: var(--m-text-weight-bold);
+  padding: var(--m-sp-xs) var(--m-sp-sm);
+  border-radius: var(--m-rd-sm);
+  font-weight: var(--m-fw-bold);
 
   @apply --mx-shadow(var(--m-shadow-lg));
 }

@@ -6,9 +6,9 @@
 .player {
   display: inline-flex;
   align-items: center;
-  gap: var(--m-space-sm);
-  @apply --mx-bg(var(--m-color-main-light));
-  padding-inline-end: var(--m-space-sm);
-  margin-inline-start: var(--m-space-sm);
+  gap: var(--m-sp-sm);
+  @apply --mx-bg(var(--m-tint-light));
+  padding-inline-end: var(--m-sp-sm);
+  margin-inline-start: var(--m-sp-sm);
   border-radius: --fn-literal(999px);
 }

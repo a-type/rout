@@ -3,7 +3,7 @@
   inset: 0;
   overflow: clip;
 
-  @apply --mx-bg(var(--m-color-main-light));
+  @apply --mx-bg(var(--m-tint-light));
 }
 
 .image {

@@ -11,7 +11,7 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: var(--m-space-sm);
+  gap: var(--m-sp-sm);
   align-items: center;
 }
 

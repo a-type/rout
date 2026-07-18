@@ -88,7 +88,15 @@ export const GameLog = withGame<{
 
   if (isLarge) {
     return (
-      <Box col gap="none" p="sm" items="stretch" {...props}>
+      <Box
+        col
+        gap="none"
+        p="sm"
+        items="stretch"
+        full="height"
+        shrink
+        {...props}
+      >
         <ChatLog log={gameSuite.combinedLog} className={cls.log} />
         <GameLogChatInput />
       </Box>

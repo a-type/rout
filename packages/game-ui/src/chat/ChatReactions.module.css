@@ -1,11 +1,11 @@
 .display {
   cursor: pointer;
   border-radius: --fn-literal(999px);
-  padding: var(--m-space-xs) var(--m-space-sm);
+  padding: var(--m-sp-xs) var(--m-sp-sm);
 }
 
 .emoji {
-  transition: transform var(--m-duration) var(--m-easing);
+  transition: transform var(--m-dur) var(--m-ease);
   &:hover {
     transform: scale(150%);
   }

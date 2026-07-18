@@ -1,6 +1,6 @@
 .root {
   position: relative;
-  transition: transform var(--m-duration) var(--m-easing);
+  transition: transform var(--m-dur) var(--m-ease);
 
   &[data-over-accepted='true'] {
     scale: 102%;
@@ -8,6 +8,6 @@
 }
 
 .error {
-  @apply --mx-bg(var(--m-color-main-wash));
-  @apply --mx-fg(var(--m-color-main-ink));
+  @apply --mx-bg(var(--m-tint-wash));
+  @apply --mx-fg(var(--m-tint-ink));
 }

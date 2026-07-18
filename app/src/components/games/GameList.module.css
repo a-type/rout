@@ -6,32 +6,32 @@
 
 .triggerWrap {
   margin-right: auto;
-  background: var(--m-color-white);
-  border-top-left-radius: var(--m-radius-sm);
-  border-top-right-radius: var(--m-radius-sm);
+  background: var(--m-gray-paper);
+  border-top-left-radius: var(--m-rd-sm);
+  border-top-right-radius: var(--m-rd-sm);
 
   &:has([aria-expanded='false']) {
-    border-bottom-left-radius: var(--m-radius-sm);
-    border-bottom-right-radius: var(--m-radius-sm);
+    border-bottom-left-radius: var(--m-rd-sm);
+    border-bottom-right-radius: var(--m-rd-sm);
   }
 }
 
 .content {
-  background: var(--m-color-white);
+  background: var(--m-gray-paper);
 }
 
 .filterLabel {
   display: flex;
   align-items: center;
-  gap: var(--m-space-xs);
+  gap: var(--m-sp-xs);
   cursor: pointer;
 }
 
 .gameGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--m-space-md);
-  padding: var(--m-space-md);
+  gap: var(--m-sp-md);
+  padding: var(--m-sp-md);
 
   @media (min-width: 640px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -43,7 +43,7 @@
 }
 
 .emptyState {
-  color: var(--m-color-gray-dark);
+  color: var(--m-gray-heavy);
 }
 
 .item {
@@ -52,14 +52,14 @@
 }
 
 .selected {
-  box-shadow: 0 0 0 --fn-literal(6px) var(--m-color-accent-heavy);
+  box-shadow: 0 0 0 --fn-literal(6px) var(--m-accent-heavy);
 }
 
 .title {
-  font-size: var(--m-text-size-sm);
+  font-size: var(--m-fs-sm);
 
   @media (min-width: 768px) {
-    font-size: var(--m-text-size-md);
+    font-size: var(--m-fs-md);
   }
 }
 

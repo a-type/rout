@@ -242,7 +242,7 @@ const HotseatPlayerSelector = withGame(function HotseatPlayerSelector({
         </Heading>
         <GameIcon
           gameId={gameSuite.gameId}
-          style={{ width: 200, height: 200, borderRadius: 'var(--m-radius)' }}
+          style={{ width: 200, height: 200, borderRadius: 'var(--m-rd)' }}
         />
         <Heading render={<h3 />} emphasis="ambient">
           Select Player

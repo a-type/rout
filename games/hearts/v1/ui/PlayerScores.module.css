@@ -5,15 +5,15 @@
 
 .label {
   font-size: var(--m-prose-ambient-size);
-  font-weight: var(--m-text-weight-bold);
-  @apply --mx-fg(var(--m-color-neutral-heavy));
-  margin-block-end: var(--m-space-sm);
+  font-weight: var(--m-fw-bold);
+  @apply --mx-fg(var(--m-gray-heavy));
+  margin-block-end: var(--m-sp-sm);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--m-space-sm);
+  gap: var(--m-sp-sm);
   align-items: start;
 
   @media (min-width: 768px) {
@@ -26,33 +26,33 @@
 }
 
 .playerScore {
-  padding-top: var(--m-space-lg);
+  padding-top: var(--m-sp-lg);
 }
 
 .playerHeader {
   white-space: nowrap;
-  font-size: var(--m-text-size-sm);
+  font-size: var(--m-fs-sm);
   position: absolute;
-  top: var(--m-space-sm);
-  left: var(--m-space-md);
+  top: var(--m-sp-sm);
+  left: var(--m-sp-md);
   z-index: 1;
 }
 
 .cardList {
-  border-radius: var(--m-radius-lg);
-  margin-block-start: var(--m-space-sm);
+  border-radius: var(--m-rd-lg);
+  margin-block-start: var(--m-sp-sm);
   margin-block-end: 0;
 }
 .cardListContent {
-  gap: var(--m-space-xs);
+  gap: var(--m-sp-xs);
 }
 
 .scoreDisplay {
   position: sticky;
   left: 0;
   margin-block: auto;
-  margin-inline-end: var(--m-space-md);
+  margin-inline-end: var(--m-sp-md);
   z-index: 1;
-  font-weight: var(--m-text-weight-bold);
+  font-weight: var(--m-fw-bold);
   @apply --mx-bg(inherit);
 }

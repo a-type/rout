@@ -61,7 +61,7 @@ function ColorPickerField() {
           style={{
             width: 32,
             height: 32,
-            backgroundColor: 'var(--m-color-neutral-paper)',
+            backgroundColor: 'var(--m-gray-paper)',
             alignItems: 'center',
             justifyContent: 'center',
           }}

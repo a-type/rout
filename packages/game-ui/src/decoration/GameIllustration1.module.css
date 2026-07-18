@@ -23,7 +23,7 @@
 }
 
 .stroke {
-  stroke: var(--m-color-main-dark);
+  stroke: var(--m-tint-heavy);
 }
 
 @keyframes game-illustration-1-float {

@@ -1,5 +1,5 @@
 .root {
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg(var(--m-tint-wash));
   flex: 1;
 }
 
@@ -10,14 +10,14 @@
 
 .main {
   position: sticky;
-  top: var(--m-space-sm);
+  top: var(--m-sp-sm);
   z-index: 1;
 }
 
 .hand {
   position: sticky;
-  margin-block-end: var(--m-space-lg);
-  bottom: var(--m-space-md);
+  margin-block-end: var(--m-sp-lg);
+  bottom: var(--m-sp-md);
   flex-shrink: 0;
   z-index: 10;
 }

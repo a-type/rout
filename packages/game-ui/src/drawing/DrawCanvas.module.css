@@ -12,7 +12,7 @@
 }
 
 .sizeDot {
-  @apply --mx-bg(var(--m-color-neutral-ink));
+  @apply --mx-bg(var(--m-gray-ink));
   border-radius: --fn-literal(999px);
 }
 
@@ -21,19 +21,19 @@
   aspect-ratio: 1;
   width: 100%;
   max-width: 50vh;
-  @apply --mx-bg(var(--m-color-neutral-paper));
-  border-radius: var(--m-radius-lg);
-  @apply --mx-borderColor(var(--m-color-neutral-ink));
+  @apply --mx-bg(var(--m-gray-paper));
+  border-radius: var(--m-rd-lg);
+  @apply --mx-borderColor(var(--m-gray-ink));
 }
 
 .fillMainLight {
-  fill: var(--m-color-main-light);
+  fill: var(--m-tint-light);
 }
 
 .fillMainDark {
-  fill: var(--m-color-main-heavy);
+  fill: var(--m-tint-heavy);
 }
 
 .fillBlack {
-  fill: var(--m-color-neutral-ink);
+  fill: var(--m-gray-ink);
 }

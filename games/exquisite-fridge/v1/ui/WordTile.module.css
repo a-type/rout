@@ -1,10 +1,10 @@
 .root {
   position: relative;
-  border-radius: var(--m-radius-xs);
-  @apply --mx-fg(var(--m-color-neutral-ink));
-  @apply --mx-borderColor(var(--m-color-neutral-heavy));
-  @apply --mx-shadow(1px 1px 0 1px var(--m-color-neutral-heavy));
-  @apply --mx-bg(var(--m-color-neutral-paper));
+  border-radius: var(--m-rd-xs);
+  @apply --mx-fg(var(--m-gray-ink));
+  @apply --mx-borderColor(var(--m-gray-heavy));
+  @apply --mx-shadow(1px 1px 0 1px var(--m-gray-heavy));
+  @apply --mx-bg(var(--m-gray-paper));
 
   &[data-used='true'] {
     opacity: 0.5 !important;
@@ -12,24 +12,24 @@
 }
 
 .inner {
-  padding-inline: var(--m-space-lg);
-  padding-block: var(--m-space-xs);
+  padding-inline: var(--m-sp-lg);
+  padding-block: var(--m-sp-xs);
   height: 100%;
 }
 
 .handwritten {
   font-family: cursive;
-  font-size: var(--m-text-size-sm);
+  font-size: var(--m-fs-sm);
 }
 
 .blank {
-  @apply --mx-fg(var(--m-color-neutral-heavy));
+  @apply --mx-fg(var(--m-gray-heavy));
 }
 
 .new {
   position: absolute;
   top: --fn-literal(-1px);
   right: --fn-literal(-1px);
-  @apply --mx-fill(var(--m-color-main));
+  @apply --mx-fill(var(--m-tint));
   transform: rotate(5deg);
 }

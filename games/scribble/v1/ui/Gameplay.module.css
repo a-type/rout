@@ -1,15 +1,15 @@
 .historical {
-  padding: var(--m-space-lg) var(--m-space-sm);
+  padding: var(--m-sp-lg) var(--m-sp-sm);
 
   @media (min-width: 1024px) {
-    padding-inline: var(--m-space-lg);
+    padding-inline: var(--m-sp-lg);
   }
 }
 
 .root {
-  padding: var(--m-space-sm);
+  padding: var(--m-sp-sm);
 
   @media (min-width: 1024px) {
-    padding-inline: var(--m-space-lg);
+    padding-inline: var(--m-sp-lg);
   }
 }

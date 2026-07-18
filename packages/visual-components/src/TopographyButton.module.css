@@ -18,6 +18,6 @@
   z-index: 1;
   display: flex;
   flex-direction: row;
-  gap: var(--m-space-sm);
+  gap: var(--m-sp-sm);
   align-items: center;
 }

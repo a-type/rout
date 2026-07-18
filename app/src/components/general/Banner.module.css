@@ -1,5 +1,5 @@
 .root {
-  @apply --mx-bg(var(--m-color-main-light));
+  @apply --mx-bg(var(--m-tint-light));
   flex-shrink: 0;
-  padding: var(--m-space-xs) var(--m-space-md);
+  padding: var(--m-sp-xs) var(--m-sp-md);
 }

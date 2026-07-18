@@ -13,15 +13,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: var(--m-text-weight-bold);
+  font-weight: var(--m-fw-bold);
   line-height: 1;
 
-  @apply --mx-fg(var(--m-color-neutral-paper));
-  @apply --mx-bg(var(--m-color-main));
+  @apply --mx-fg(var(--m-gray-paper));
+  @apply --mx-bg(var(--m-tint));
 
   width: --fn-literal(16px);
   height: --fn-literal(16px);
-  border-radius: var(--m-radius-full);
+  border-radius: var(--m-rd-full);
   font-size: --fn-literal(0.5em);
 
   &[data-direction='up'] {

@@ -2,7 +2,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  right: var(--m-space-xs);
+  right: var(--m-sp-xs);
   flex-shrink: 0;
 }
 
@@ -19,14 +19,15 @@
 }
 
 .log {
-  padding-inline: var(--m-space-xs);
+  padding-inline: var(--m-sp-xs);
+  min-height: 300px;
 }
 
 .openButton {
   width: 100%;
-  font-weight: var(--m-text-weight-normal);
+  font-weight: var(--m-fw-normal);
   height: --fn-literal(32px);
-  border-radius: var(--m-radius-xs);
+  border-radius: var(--m-rd-xs);
   padding: 0;
   margin-top: --fn-literal(2px);
   @apply --mx-bg(inherit);

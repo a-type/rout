@@ -7,19 +7,19 @@
 }
 
 .fillMainDark {
-  fill: var(--m-color-main-heavy);
+  fill: var(--m-tint-heavy);
 }
 
 .fillMain {
-  fill: var(--m-color-main);
+  fill: var(--m-tint);
 }
 
 .fillMainLight {
-  fill: var(--m-color-main-light);
+  fill: var(--m-tint-light);
 }
 
 .fillWater {
-  fill: var(--m-color-palette-blueberry-wash);
+  fill: var(--m-color-blueberry-wash);
 }
 
 .originCenter {
@@ -31,19 +31,19 @@
 }
 
 .flower {
-  stroke: var(--m-color-accent-heavy);
+  stroke: var(--m-accent-heavy);
   stroke-width: 1;
-  fill: var(--m-color-accent-light);
+  fill: var(--m-accent-light);
 }
 
 .pathOuter {
-  fill: var(--m-color-main-heavy);
-  stroke: var(--m-color-main-heavy);
+  fill: var(--m-tint-heavy);
+  stroke: var(--m-tint-heavy);
   stroke: 5;
 }
 
 .pathInner {
-  fill: var(--m-color-neutral-paper);
-  stroke: var(--m-color-neutral-ink);
+  fill: var(--m-gray-paper);
+  stroke: var(--m-gray-ink);
   stroke: 1;
 }

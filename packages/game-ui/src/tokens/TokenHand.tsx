@@ -72,10 +72,10 @@ export function TokenHand<T = unknown>({
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 'var(--m-space-xs)',
+            gap: 'var(--m-sp-xs)',
             overflow: 'clip',
             width: '100%',
-            padding: 'var(--m-space-xs)',
+            padding: 'var(--m-sp-xs)',
           }}
           priority={priority}
           {...rest}

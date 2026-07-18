@@ -40,7 +40,7 @@
 }
 
 .picker {
-  font-size: var(--m-text-size-lg);
+  font-size: var(--m-fs-lg);
 
   & > button {
     font-size: inherit;

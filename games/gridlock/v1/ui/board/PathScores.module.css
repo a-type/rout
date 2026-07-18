@@ -8,23 +8,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--m-space-sm);
-  border-radius: var(--m-radius-full);
+  padding: var(--m-sp-sm);
+  border-radius: var(--m-rd-full);
   line-height: 0;
   aspect-ratio: 1;
   z-index: 1;
 
   @apply --mx-borderColor(transparent);
-  border-width: var(--m-lineWidth-sm);
+  border-width: var(--m-lw-sm);
 
-  @apply --mx-fg(var(--m-color-neutral-ink));
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-fg(var(--m-gray-ink));
+  @apply --mx-bg(var(--m-tint-wash));
   &[data-complete='false'][data-broken='false'] {
     border-style: dashed;
-    @apply --mx-borderColor(var(--m-color-main-heavy));
+    @apply --mx-borderColor(var(--m-tint-heavy));
   }
   &[data-complete='true'],
   &[data-broken='true'] {
-    @apply --mx-bg(var(--m-color-main));
+    @apply --mx-bg(var(--m-tint));
   }
 }

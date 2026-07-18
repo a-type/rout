@@ -1,5 +1,5 @@
 .root {
-  transition: all var(--m-duration) var(--m-easing);
+  transition: all var(--m-dur) var(--m-ease);
   width: 100%;
   height: 100%;
   aspect-ratio: 1;
@@ -7,12 +7,12 @@
   align-items: stretch;
   justify-content: stretch;
 
-  @apply --mx-borderColor(var(--m-color-main));
+  @apply --mx-borderColor(var(--m-tint));
   @apply --mx-borderColor-faded(50%);
-  @apply --mx-bg(var(--m-color-neutral-wash));
+  @apply --mx-bg(var(--m-gray-wash));
 
   &[data-dragging='true'][data-dragged-accepted='true'] {
-    @apply --mx-bg(var(--m-color-main-light));
+    @apply --mx-bg(var(--m-tint-light));
   }
 
   &[data-dragging='true'][data-dragged-accepted='false'] {
@@ -22,9 +22,9 @@
   }
 
   &[data-has-cell='true'] {
-    @apply --mx-bg(var(--m-color-neutral-paper));
+    @apply --mx-bg(var(--m-gray-paper));
     @apply --mx-shadow(var(--m-shadow-lg));
-    --m-shadow-color: var(--m-color-main);
+    --m-shadow-color: var(--m-tint);
 
     &[data-dragging='true'] {
       transform: scale(90%);

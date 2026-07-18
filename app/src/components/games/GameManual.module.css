@@ -3,14 +3,14 @@
   max-height: 60vh;
   width: auto;
   height: auto;
-  border-radius: var(--m-radius-lg);
+  border-radius: var(--m-rd-lg);
   margin-inline: auto;
 }
 
 .blockquote {
   width: 80%;
-  margin-left: var(--m-space-sm);
-  border-left-width: var(--m-lineWidth-md);
+  margin-left: var(--m-sp-sm);
+  border-left-width: var(--m-lw-md);
   border-left-style: solid;
-  border-left-color: var(--m-color-main-dark);
+  border-left-color: var(--m-tint-heavy);
 }

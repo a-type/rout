@@ -1,6 +1,6 @@
 .root {
   position: relative;
-  padding: var(--m-space-xs);
+  padding: var(--m-sp-xs);
   overflow: visible;
 }
 
@@ -11,7 +11,7 @@
   min-width: 200px;
   max-width: 75%;
 
-  transition: transform var(--m-duration) var(--m-easing);
+  transition: transform var(--m-dur) var(--m-ease);
 
   .root:hover &,
   .trigger:focus-visible & {
@@ -21,20 +21,20 @@
 
 .trigger {
   position: relative;
-  transition: all var(--m-duration) var(--m-easing);
+  transition: all var(--m-dur) var(--m-ease);
   overflow: visible;
 }
 
 .icon {
   aspect-ratio: 1;
   object-fit: cover;
-  @apply --mx-borderColor(var(--m-color-neutral-heavy));
-  border-radius: var(--m-radius);
+  @apply --mx-borderColor(var(--m-gray-heavy));
+  border-radius: var(--m-rd);
   @apply --mx-shadow(var(--m-shadow-md));
 
   position: fixed;
   transform: translate(-50%, -50%) rotate(30deg);
-  transition: transform var(--m-duration) var(--m-easing);
+  transition: transform var(--m-dur) var(--m-ease);
 
   .root:hover &,
   .trigger:focus-visible & {
@@ -44,9 +44,9 @@
 
 .menu {
   position: absolute;
-  bottom: var(--m-space-sm);
-  right: var(--m-space-sm);
-  transition: transform var(--m-duration) var(--m-easing);
+  bottom: var(--m-sp-sm);
+  right: var(--m-sp-sm);
+  transition: transform var(--m-dur) var(--m-ease);
 
   .root:hover & {
     transform: rotate(-30deg);
@@ -56,8 +56,8 @@
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--m-space-md);
-  padding-block: var(--m-space-xl);
+  gap: var(--m-sp-md);
+  padding-block: var(--m-sp-xl);
 
   @media (min-width: 640px) {
     grid-template-columns: 1fr 1fr;

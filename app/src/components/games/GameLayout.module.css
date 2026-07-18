@@ -30,12 +30,12 @@
   display: flex;
   flex-direction: column;
 
-  @apply --mx-bg(var(--m-color-main-wash));
+  @apply --mx-bg(var(--m-tint-wash));
 
   anchor-name: --gameMain;
 
   @media (min-width: 1024px) {
-    border-left: var(--m-lineWidth) solid var(--m-color-neutral-ink);
+    border-left: var(--m-lw) solid var(--m-gray-ink);
     padding-block: 0;
   }
 }
@@ -47,8 +47,8 @@
   flex-direction: column;
   z-index: 100;
 
-  @apply --mx-bg(var(--m-color-main-paper));
-  border-top: var(--m-lineWidth) solid var(--m-color-neutral-ink);
+  @apply --mx-bg(var(--m-tint-paper));
+  border-top: var(--m-lw) solid var(--m-gray-ink);
 
   anchor-name: --gameControls;
 
@@ -67,18 +67,18 @@
   grid-area: top;
   width: 100%;
   height: auto;
-  padding: var(--m-space-sm);
+  padding: var(--m-sp-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--m-space-sm);
+  gap: var(--m-sp-sm);
   align-items: stretch;
-  @apply --mx-bg(var(--m-color-main-light));
+  @apply --mx-bg(var(--m-tint-light));
 
   anchor-name: --gameSecondaryControls;
 
   @media (min-width: 1024px) {
     grid-area: sidebarsecondary;
-    padding: var(--m-space-md);
+    padding: var(--m-sp-md);
     z-index: 0;
     position: relative;
   }

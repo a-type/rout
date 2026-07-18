@@ -9,12 +9,12 @@
 }
 
 .fillBlack {
-  fill: var(--m-color-neutral-ink);
+  fill: var(--m-gray-ink);
 }
 
 .playerAttribution {
-  font-size: var(--m-text-size-sm);
-  @apply --mx-fg(var(--m-color-main-heavy));
+  font-size: var(--m-fs-sm);
+  @apply --mx-fg(var(--m-tint-heavy));
   position: absolute;
   right: 0;
   bottom: 0;

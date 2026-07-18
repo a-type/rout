@@ -1,5 +1,5 @@
 .gameCard {
-  transition: box-shadow var(--m-duration) var(--m-easing);
+  transition: box-shadow var(--m-dur) var(--m-ease);
   &:hover {
     @apply --mx-shadow(var(--m-shadow-md));
   }
@@ -9,6 +9,6 @@
 .gameIcon {
   width: --fn-literal(128px);
   aspect-ratio: 1;
-  @apply --mx-borderColor(var(--m-color-neutral-heavy));
-  border-radius: var(--m-radius);
+  @apply --mx-borderColor(var(--m-gray-heavy));
+  border-radius: var(--m-rd);
 }
