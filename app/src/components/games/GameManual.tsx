@@ -2,7 +2,7 @@ import { Box, clsx, H1, H2, H3, H4, P, Spinner } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { fetch, queryClient, useSuspenseQuery } from '@long-game/game-client';
 import { useGame, withSuspense } from '@long-game/game-ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import { lazy, useLayoutEffect, useRef } from 'react';
 import type { Components } from 'react-markdown';
 import customHeaderId from 'remark-custom-header-id';

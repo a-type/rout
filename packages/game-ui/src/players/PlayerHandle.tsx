@@ -1,7 +1,7 @@
 import { Button } from '@a-type/ui';
 import { PrefixedId } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import { usePlayerThemed } from './usePlayerThemed';
 
 export interface PlayerHandleProps {

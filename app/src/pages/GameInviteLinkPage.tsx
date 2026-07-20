@@ -5,10 +5,12 @@ import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, P, PageContent, PageRoot, toast } from '@a-type/ui';
 import { TopographyBackground, Wordmark } from '@long-game/game-ui';
-import { Link, useNavigate, useParams } from '@verdant-web/react-router';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
 
 const GameInviteLinkPage = () => {
-  const { code } = useParams<{ code: string }>();
+  const { code } = useParams({
+    from: '/gameInvite/$code',
+  });
   if (!code) {
     throw new Error('No code provided');
   }
@@ -24,7 +26,9 @@ const GameInviteLinkPage = () => {
   async function claim() {
     await claimMutation.mutateAsync({ code });
     toast("You're in!");
-    navigate(`/session/${publicInviteData.gameSessionId}`);
+    navigate({
+      to: `/session/${publicInviteData.gameSessionId}`,
+    });
   }
 
   if (!me) {
@@ -46,8 +50,11 @@ const GameInviteLinkPage = () => {
               emphasis="primary"
               render={
                 <Link
-                  to={`/login?tab=signup&returnTo=${location.href}`}
-                  preserveQuery
+                  to={`/login`}
+                  search={(prev) => ({
+                    ...prev,
+                    returnTo: location.href,
+                  })}
                 />
               }
             >

@@ -164,6 +164,7 @@ const DefaultChatMessageMetadata = withGame<ChatMessageProps>(
                     size="wrapper"
                     className={cls.privacyTrigger}
                     emphasis="ghost"
+                    aria-label="Set message recipients"
                   />
                 }
               >

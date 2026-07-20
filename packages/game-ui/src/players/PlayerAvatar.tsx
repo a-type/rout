@@ -7,7 +7,7 @@ import {
   SystemChatAuthorId,
 } from '@long-game/common';
 import { withGame } from '@long-game/game-client';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import cls from './PlayerAvatar.module.css';
 import { PlayerInfo } from './PlayerInfo.js';
 import { usePlayerThemed } from './usePlayerThemed.js';

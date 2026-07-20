@@ -8,7 +8,7 @@ import {
   withProps,
 } from '@a-type/ui';
 import { GameSession } from '@long-game/game-client';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import {
   createContext,
   CSSProperties,
@@ -95,7 +95,12 @@ export function GameSummaryCardTrigger({ children }: { children?: ReactNode }) {
       size="wrapper"
       emphasis="ghost"
       nativeButton={false}
-      render={<Link to={`/${hotseat ? 'hotseat' : 'session'}/${session.id}`} />}
+      render={
+        <Link
+          to={hotseat ? '/hotseat/$sessionId' : '/session/$sessionId'}
+          params={{ sessionId: session.id }}
+        />
+      }
       className={cls.trigger}
     >
       {children}

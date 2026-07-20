@@ -2,21 +2,23 @@ import { useGame } from '@/hooks/useGame';
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, ButtonProps, Card, Dialog, Icon } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
-import { Link, useSearchParams } from '@verdant-web/react-router';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { BuyGameProduct } from './BuyGameProduct.js';
 import { Price } from './Price.js';
 
 export interface QuickBuyPopupProps {}
 
 export function QuickBuyPopup({}: QuickBuyPopupProps) {
-  const [search, setSearch] = useSearchParams();
-  const gameId = search.get('quickBuy');
+  const { quickBuy: gameId } = useSearch({
+    strict: false,
+  });
+  const navigate = useNavigate();
   const game = useGame(gameId || '');
 
   const close = () => {
-    setSearch((v) => {
-      v.delete('quickBuy');
-      return v;
+    navigate({
+      from: '/',
+      search: ({ quickBuy, ...v }) => v,
     });
   };
 
@@ -45,11 +47,14 @@ export function QuickBuyPopup({}: QuickBuyPopupProps) {
 }
 
 export function useOpenQuickBuy() {
-  const [, setSearch] = useSearchParams();
+  const navigate = useNavigate();
   const open = (gameId: string) => {
-    setSearch((v) => {
-      v.set('quickBuy', gameId);
-      return v;
+    navigate({
+      from: '/',
+      search: (prev) => ({
+        ...prev,
+        quickBuy: gameId,
+      }),
     });
   };
   return open;
@@ -107,7 +112,14 @@ function QuickBuyProductCard({ product }: { product: GameProduct }) {
       <Card.Actions>
         <Button
           size="small"
-          render={<Link to={`/library?productId=${product.id}`} />}
+          render={
+            <Link
+              to="/library"
+              search={{
+                productId: product.id,
+              }}
+            />
+          }
         >
           View in store
           <Icon name="arrowRight" />

@@ -1,15 +1,17 @@
+import { router } from '@/router';
 import { sdkHooks } from '@/services/publicSdk';
 import { Notification } from '@long-game/game-client';
 import { getNotificationConfig } from '@long-game/notifications';
-import { useOnLocationChange } from '@verdant-web/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 /**
  * Marks notifications as read if the user is already looking at the thing.
  */
 export function useAutoReadNotifications(notifications: Notification[]) {
-  const [location, setLocation] = useState(window.location.pathname);
-  useOnLocationChange((loc) => setLocation(loc.pathname));
+  const location = useSyncExternalStore(
+    (cb) => router.subscribe('onBeforeNavigate', cb),
+    () => router.state.location.pathname,
+  );
   const markRead = sdkHooks.useMarkNotificationAsRead();
 
   const lastRan = useRef(0);
@@ -22,7 +24,7 @@ export function useAutoReadNotifications(notifications: Notification[]) {
 
     for (const notification of notifications) {
       if (notification.readAt) {
-        return;
+        continue;
       }
 
       const config = getNotificationConfig(notification.data);

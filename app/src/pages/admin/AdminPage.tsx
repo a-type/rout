@@ -1,6 +1,6 @@
 import { MainNav } from '@/components/nav/MainNav';
 import { Box, H1, PageContent, PageRoot } from '@a-type/ui';
-import { Link, Outlet } from '@verdant-web/react-router';
+import { Link, Outlet } from '@tanstack/react-router';
 
 const AdminPage = () => {
   return (

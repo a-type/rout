@@ -18,11 +18,13 @@ import {
   PageRoot,
 } from '@a-type/ui';
 import { ScrollTicker, Wordmark } from '@long-game/game-ui';
-import { Link, useParams } from '@verdant-web/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 import cls from './PublicGamePage.module.css';
 
 const PublicGamePage = () => {
-  const { gameId } = useParams();
+  const { gameId } = useParams({
+    from: '/games/$gameId',
+  });
   const game = useGame(gameId);
   const { data: me } = sdkHooks.useGetMe();
 
@@ -31,9 +33,9 @@ const PublicGamePage = () => {
       <PageRoot className="h-auto">
         <PageContent>
           <Box gap p>
-            <Link to="https://rout.games">
+            <a href="https://rout.games">
               <Wordmark className="text-lg" />
-            </Link>
+            </a>
           </Box>
 
           <Box gap items="end">
@@ -80,7 +82,9 @@ const PublicGamePage = () => {
             ) : (
               <Button
                 emphasis="primary"
-                render={<Link to={`/login?returnTo=/games/${gameId}`} />}
+                render={
+                  <Link to="/login" search={{ returnTo: `/games/${gameId}` }} />
+                }
               >
                 Play with Friends
                 <Icon name="arrowRight" />

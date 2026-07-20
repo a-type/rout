@@ -1,7 +1,7 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Card } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 
 export interface AdminViewProductsProps {}
 
@@ -29,7 +29,11 @@ function AdminProductCard({ product }: { product: GameProduct }) {
           />
         ))}
       </Card.Image>
-      <Card.Main render={<Link to={`?productId=${product.id}`} />}>
+      <Card.Main
+        render={
+          <Link from="/admin/products" search={{ productId: product.id }} />
+        }
+      >
         <Card.Title>{product.name}</Card.Title>
         <Card.Content>${product.priceCents / 100}</Card.Content>
         <Card.Content>{product.gameProductItems.length} games</Card.Content>

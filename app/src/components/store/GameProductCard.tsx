@@ -1,6 +1,6 @@
 import { Button, Card, Dialog, Icon, Marquee } from '@a-type/ui';
 import { GameProduct } from '@long-game/game-client';
-import { useSearchParams } from '@verdant-web/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { GameIcon } from '../games/GameIcon.js';
 import { BuyGameProduct } from './BuyGameProduct.js';
 import cls from './GameProductCard.module.css';
@@ -15,18 +15,24 @@ export function GameProductCard({
   product,
   returnToAfterPurchase,
 }: GameProductCardProps) {
-  const [search, setSearch] = useSearchParams();
-  const isOpen = search.get('productId') === product.id;
+  const { productId } = useSearch({
+    strict: false,
+  });
+  const navigate = useNavigate();
+  const isOpen = !!productId;
   const open = () => {
-    setSearch((v) => {
-      v.set('productId', product.id);
-      return v;
+    navigate({
+      from: '/',
+      search: (prev) => ({
+        ...prev,
+        productId: product.id,
+      }),
     });
   };
   const close = () => {
-    setSearch((v) => {
-      v.delete('productId');
-      return v;
+    navigate({
+      from: '/',
+      search: ({ productId, ...v }) => v,
     });
   };
   return (

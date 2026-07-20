@@ -9,7 +9,7 @@ import {
   GameSessionInvitation,
   GameSessionPregame,
 } from '@long-game/game-client';
-import { Link, useNavigate } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { GoldUpgrade } from '../subscription/GoldUpgrade.js';
 import { UserAvatar } from '../users/UserAvatar.js';
 
@@ -66,7 +66,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
               id: myInvite.id,
             });
             toast('Invite declined');
-            navigate('/');
+            navigate({ to: '/' });
           }}
         >
           Decline invite
@@ -102,7 +102,7 @@ export function GameJoinPreview({ myInvite, pregame }: GameJoinPreviewProps) {
               id: myInvite.id,
             });
             toast('Invite declined');
-            navigate('/');
+            navigate({ to: '/' });
           }}
         >
           Decline

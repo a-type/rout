@@ -7,14 +7,14 @@ import {
 } from '@a-type/auth-ui';
 import { Box, H2, Tabs } from '@a-type/ui';
 import { TopographyBackground, Wordmark } from '@long-game/game-ui';
-import { Link, useSearchParams } from '@verdant-web/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 
 export interface LoginPageProps {}
 
 export function LoginPage({}: LoginPageProps) {
-  const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get('returnTo') ?? undefined;
-  const tab = searchParams.get('tab') ?? 'login';
+  const { returnTo, tab = 'login' } = useSearch({
+    from: '/login',
+  });
   useThemedTitleBar();
 
   return (
@@ -38,10 +38,16 @@ export function LoginPage({}: LoginPageProps) {
           render={<Box items="center" col gap container />}
         >
           <Tabs.List className="justify-center" color="primary">
-            <Tabs.Trigger value="login" render={<Link to="?tab=login" />}>
+            <Tabs.Trigger
+              value="login"
+              render={<Link from="/login" search={{ tab: 'login' }} />}
+            >
               Log in
             </Tabs.Trigger>
-            <Tabs.Trigger value="signup" render={<Link to="?tab=signup" />}>
+            <Tabs.Trigger
+              value="signup"
+              render={<Link from="/login" search={{ tab: 'signup' }} />}
+            >
               Sign up
             </Tabs.Trigger>
           </Tabs.List>

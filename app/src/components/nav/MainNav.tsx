@@ -1,6 +1,6 @@
 import { Box, Button, Icon, Tooltip } from '@a-type/ui';
 import { Wordmark } from '@long-game/game-ui';
-import { Link, useMatchingRoutes } from '@verdant-web/react-router';
+import { Link, useMatches } from '@tanstack/react-router';
 import { NotificationsButton } from '../notifications/NotificationsButton.js';
 import { MyAvatar } from '../users/UserAvatar.js';
 import cls from './MainNav.module.css';
@@ -8,13 +8,13 @@ import cls from './MainNav.module.css';
 export interface MainNavProps {}
 
 export function MainNav({}: MainNavProps) {
-  const routes = useMatchingRoutes();
-  const isHome = routes.every((route) => route.path === '/');
-  const isFriends = routes.some((route) => route.path === '/friends');
+  const routes = useMatches();
+  const isHome = routes.every((route) => route.pathname === '/');
+  const isFriends = routes.some((route) => route.pathname === '/friends');
   const isLibrary =
-    routes.some((route) => route.path === '/library') ||
-    routes.some((route) => route.path === '/store');
-  const isSettings = routes.some((route) => route.path === '/settings');
+    routes.some((route) => route.pathname === '/library') ||
+    routes.some((route) => route.pathname === '/store');
+  const isSettings = routes.some((route) => route.pathname === '/settings');
   return (
     <Box gap justify="between" items="center">
       <Tooltip content="Home" disabled={isHome}>

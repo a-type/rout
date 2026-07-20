@@ -1,5 +1,5 @@
 import { Box, BoxProps, Button, Icon, Input, toast } from '@a-type/ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 
 export interface CopyTextboxProps extends BoxProps {
   value: string;
@@ -38,7 +38,9 @@ export function CopyTextbox({
               <Button
                 size="small"
                 emphasis="ghost"
-                render={<Link newTab to={value} />}
+                render={
+                  <Link target="_blank" rel="noopener noreferrer" to={value} />
+                }
               >
                 <Icon name="new_window" />
               </Button>

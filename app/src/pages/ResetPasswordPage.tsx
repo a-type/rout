@@ -1,14 +1,14 @@
 import { API_ORIGIN } from '@/config.js';
 import { ResetPasswordForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
-import { useSearchParams } from '@verdant-web/react-router';
+import { useSearch } from '@tanstack/react-router';
 
 export interface ResetPasswordPageProps {}
 
 export function ResetPasswordPage({}: ResetPasswordPageProps) {
-  const [params] = useSearchParams();
-  const code = params.get('code');
-  const email = params.get('email');
+  const { code, email } = useSearch({
+    from: '/reset-password',
+  });
 
   if (!code || !email) {
     return (

@@ -49,7 +49,7 @@
     "@react-three/fiber": "catalog:",
     "@types/three": "catalog:",
     "@use-gesture/react": "catalog:",
-    "@verdant-web/react-router": "catalog:",
+    "@tanstack/react-router": "catalog:",
     "immer": "catalog:",
     "motion": "catalog:",
     "perfect-freehand": "^1.2.2",

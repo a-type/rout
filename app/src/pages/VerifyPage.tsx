@@ -1,14 +1,14 @@
 import { API_ORIGIN } from '@/config.js';
 import { EmailCompleteSignupForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
-import { useSearchParams } from '@verdant-web/react-router';
+import { useSearch } from '@tanstack/react-router';
 
 export interface VerifyPageProps {}
 
 export function VerifyPage({}: VerifyPageProps) {
-  const [searchParams] = useSearchParams();
-  const code = searchParams.get('code');
-  const email = searchParams.get('email');
+  const { code, email } = useSearch({
+    from: '/verify',
+  });
 
   if (!code || !email) {
     return (

@@ -14,18 +14,16 @@ import {
   TextField,
   useValues,
 } from '@a-type/ui';
-import { PrefixedId } from '@long-game/common';
-import { useSearchParams } from '@verdant-web/react-router';
+import { isPrefixedId, PrefixedId } from '@long-game/common';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 
 export interface AdminEditProductProps {}
 
 export function AdminEditProduct({}: AdminEditProductProps) {
-  const [search] = useSearchParams();
-  const productId: PrefixedId<'gp'> = search.get(
-    'productId',
-  )! as PrefixedId<'gp'>;
-
-  if (!productId) {
+  const { productId } = useSearch({
+    from: '/admin/products',
+  });
+  if (!productId || !isPrefixedId(productId, 'gp')) {
     return null;
   }
 
@@ -37,7 +35,7 @@ function AdminEditProductContent({
 }: {
   productId: PrefixedId<'gp'>;
 }) {
-  const [, setSearch] = useSearchParams();
+  const navigate = useNavigate();
   const { data: initialProduct } = sdkHooks.useGetGameProduct({
     id: productId!,
   });
@@ -62,9 +60,9 @@ function AdminEditProductContent({
       open={!!productId}
       onOpenChange={(open) => {
         if (!open) {
-          setSearch((prev) => {
-            prev.delete('productId');
-            return prev;
+          navigate({
+            from: '/admin/products',
+            search: ({ productId, ...prev }) => prev,
           });
         }
       }}
@@ -111,9 +109,9 @@ function AdminEditProductContent({
               }
             }
 
-            setSearch((prev) => {
-              prev.delete('productId');
-              return prev;
+            navigate({
+              from: '/admin/products',
+              search: ({ productId, ...prev }) => prev,
             });
           }}
         >
@@ -132,9 +130,9 @@ function AdminEditProductContent({
                 );
                 if (ok) {
                   deleteProduct.mutateAsync({ id: productId! });
-                  setSearch((prev) => {
-                    prev.delete('productId');
-                    return prev;
+                  navigate({
+                    from: '/admin/products',
+                    search: ({ productId, ...prev }) => prev,
                   });
                 }
               }}

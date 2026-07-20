@@ -2,6 +2,7 @@ import { ArborPlugin } from '@arbor-css/postcss';
 import arborPreset from '@long-game/arbor-config';
 import { idToFederationId } from '@long-game/common';
 import { federation } from '@module-federation/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import pluginReact from '@vitejs/plugin-react';
 import path from 'node:path';
 import typegpuPlugin from 'unplugin-typegpu/vite';
@@ -141,6 +142,10 @@ export const appViteConfig = defineConfig(({ command }) => {
 
   return {
     plugins: [
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+      }),
       pluginReact(),
       typegpuPlugin({}),
       VitePWA({

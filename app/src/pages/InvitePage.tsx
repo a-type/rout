@@ -3,10 +3,12 @@ import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, H1, Icon, P, PageContent, PageRoot } from '@a-type/ui';
 import { APP_NAME } from '@long-game/common';
 import { FriendshipInvitationPublicInfo, Self } from '@long-game/game-client';
-import { Link, useParams } from '@verdant-web/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 
 const InvitePage = () => {
-  const { inviteId: id } = useParams();
+  const { inviteId: id } = useParams({
+    from: '/invite/$inviteId',
+  });
   const { data: me } = sdkHooks.useGetMe();
   const { data: invite } = sdkHooks.useGetPublicFriendshipInvite({ id });
 
@@ -80,7 +82,9 @@ function LoggedOutInvite({
         Let the games begin! Create an account to start your ritual of play
         together.
       </P>
-      <Button render={<Link to="/login?tab=signup" />}>Sign Up</Button>
+      <Button render={<Link to="/login" search={{ tab: 'signup' }} />}>
+        Sign Up
+      </Button>
       <Box dim>
         Have an account already?{' '}
         <Button

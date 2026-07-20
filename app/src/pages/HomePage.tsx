@@ -16,7 +16,7 @@ import {
   PageContent,
   PageRoot,
 } from '@a-type/ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import { Suspense } from 'react';
 import cls from './HomePage.module.css';
 

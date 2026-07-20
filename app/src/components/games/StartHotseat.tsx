@@ -2,7 +2,7 @@ import { gameModules } from '@/services/games';
 import { Button, ButtonProps, Icon } from '@a-type/ui';
 import { genericId, PrefixedId } from '@long-game/common';
 import { HotseatBackend } from '@long-game/game-client';
-import { Link, useNavigate } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { ReactNode } from 'react';
 
 export interface StartHotseatProps extends ButtonProps {
@@ -24,7 +24,15 @@ export function StartHotseat({ children, gameId, ...rest }: StartHotseatProps) {
     return (
       <Button
         emphasis="primary"
-        render={<Link to="?newGame=true&mode=hotseat" />}
+        render={
+          <Link
+            from="/"
+            search={{
+              newGame: true,
+              mode: 'hotseat',
+            }}
+          />
+        }
         {...rest}
       >
         {content}
@@ -45,7 +53,9 @@ export function StartHotseat({ children, gameId, ...rest }: StartHotseatProps) {
           );
           await HotseatBackend.preSetGame(sessionId, gameId, definition);
         }
-        navigate(`/hotseat/${sessionId}`);
+        navigate({
+          to: `/hotseat/${sessionId}`,
+        });
       }}
       {...rest}
     >

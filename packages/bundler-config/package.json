@@ -18,6 +18,7 @@
     "@vitejs/plugin-react": "catalog:",
     "@long-game/common": "workspace:*",
     "unplugin-typegpu": "catalog:",
-    "@long-game/arbor-config": "workspace:*"
+    "@long-game/arbor-config": "workspace:*",
+    "@tanstack/router-plugin": "catalog:"
   }
 }

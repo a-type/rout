@@ -16,7 +16,7 @@ import {
 import { Notification } from '@long-game/game-client';
 import { withSuspense } from '@long-game/game-ui';
 import { getNotificationConfig } from '@long-game/notifications';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { ReactElement, Suspense, useState } from 'react';
 import { NotificationSettings } from './NotificationSettings.js';
 import cls from './NotificationsButton.module.css';
@@ -168,7 +168,7 @@ function NotificationItem({
           if (!notification.readAt) {
             markRead.mutate({ id: notification.id, read: true });
           }
-          navigate(config.link(notification.data));
+          navigate({ to: config.link(notification.data) });
           onClick?.();
         }}
       >

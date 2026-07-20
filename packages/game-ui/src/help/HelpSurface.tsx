@@ -44,7 +44,8 @@ export function HelpSurface({
   const handleDrop = (draggable: DraggableData) => {
     if (draggable.id !== 'spatial-help') return;
     if (!content) {
-      navigate(`?help=true#${rulesId}`);
+      // TODO: fix the typings here
+      navigate({ search: { help: true } as any, hash: rulesId });
     } else {
       setOpen(true);
     }

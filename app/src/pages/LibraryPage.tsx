@@ -2,7 +2,7 @@ import { OwnedGameList } from '@/components/library/OwnedGameList';
 import { MainNav } from '@/components/nav/MainNav';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
 import { Box, H2, PageContent, PageRoot, Tabs } from '@a-type/ui';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 const LibraryPage = () => {
   useThemedTitleBar();
@@ -15,7 +15,10 @@ const LibraryPage = () => {
           <Tabs
             value="library"
             onValueChange={() => {
-              navigate('/store');
+              navigate({
+                to: '/store',
+                viewTransition: false,
+              });
             }}
           >
             <Tabs.List>

@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Dialog, Icon, Spinner } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
-import { useSearchParams } from '@verdant-web/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Suspense } from 'react';
 import { GameManual } from './GameManual.js';
 
@@ -8,19 +8,16 @@ export interface GameManualDialogProps extends ButtonProps {}
 
 export const GameManualDialog = withGame<GameManualDialogProps>(
   function GameManualDialog({ gameSuite, children, ...props }) {
-    const [params, setParams] = useSearchParams();
-    const open = params.get('rules');
+    const { rules } = useSearch({ strict: false });
+    const navigate = useNavigate();
     return (
       <Dialog
-        open={!!open}
+        open={!!rules}
         onOpenChange={(o) => {
-          setParams((prev) => {
-            if (o) {
-              prev.set('rules', 'true');
-            } else {
-              prev.delete('rules');
-            }
-            return prev;
+          navigate({
+            search: {
+              rules: o ? true : undefined,
+            } as any,
           });
         }}
       >

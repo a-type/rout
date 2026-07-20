@@ -29,7 +29,7 @@ import {
   SpatialHelpDraggable,
 } from '@long-game/game-ui';
 import { ScrollTicker } from '@long-game/visual-components';
-import { Link, useNavigate } from '@verdant-web/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { startTransition, Suspense, use, useMemo } from 'react';
 import { Banner } from '../general/Banner.js';
 import { PlayerModal } from '../players/PlayerModal.js';

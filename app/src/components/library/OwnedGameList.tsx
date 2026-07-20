@@ -1,6 +1,6 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, Button, Card, cardGridColumns } from '@a-type/ui';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { GameCard } from './GameCard.js';
 
 export interface OwnedGameListProps {
@@ -39,7 +39,7 @@ export function OwnedGameList({ className }: OwnedGameListProps) {
           owned
           className={className}
           onClick={() => {
-            navigate(`/library/${gameId}`);
+            navigate({ to: `/library/${gameId}` });
           }}
         />
       ))}

@@ -6,7 +6,7 @@ import {
   useResolvedColorMode,
 } from '@a-type/ui';
 import { TopographyBackground, withSuspense } from '@long-game/game-ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import cls from './NewGameAction.module.css';
 
 export const NewGameAction = withSuspense(function NewGameAction({
@@ -18,7 +18,15 @@ export const NewGameAction = withSuspense(function NewGameAction({
   return (
     <Button
       nativeButton={false}
-      render={<Link to="?newGame=true" />}
+      render={
+        <Link
+          from="/"
+          search={(prev) => ({
+            ...prev,
+            newGame: true,
+          })}
+        />
+      }
       className={clsx(cls.trigger, '@mode-inverted', className)}
       {...rest}
     >

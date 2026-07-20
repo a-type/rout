@@ -5,7 +5,7 @@ import {
   PlayerStatuses,
   RoundHistoryControl,
 } from '@long-game/game-ui';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { Suspense } from 'react';
 import { NotificationsButton } from '../notifications/NotificationsButton.js';
 import cls from './GameControls.module.css';
@@ -43,7 +43,7 @@ export const GameControls = withGame<GameControlsProps>(function GameControls({
               sessionId={gameSuite.gameSessionId}
               canAbandon
               canDelete={pregame}
-              onDeleteOrAbandon={() => navigate('/')}
+              onDeleteOrAbandon={() => navigate({ to: '/' })}
             />
             <PlayerStatuses className={cls.playerStatuses} />
           </Box>

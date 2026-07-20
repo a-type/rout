@@ -1,6 +1,6 @@
 import { sdkHooks } from '@/services/publicSdk';
 import { Box, H1 } from '@a-type/ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 
 export interface InvitationsProps {}
 
@@ -18,7 +18,12 @@ export function Invitations({}: InvitationsProps) {
         <Box
           key={i.id}
           justify="between"
-          render={<Link to={`/session/${i.gameSessionId}`} />}
+          render={
+            <Link
+              to="/session/$sessionId"
+              params={{ sessionId: i.gameSessionId }}
+            />
+          }
         >
           <Box>{i.gameSessionId}</Box>
           <Box>{i.status}</Box>

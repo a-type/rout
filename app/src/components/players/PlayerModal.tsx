@@ -8,21 +8,23 @@ import {
   PlayerTurnChip,
   usePlayerThemed,
 } from '@long-game/game-ui';
-import { useSearchParams } from '@verdant-web/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Suspense } from 'react';
 
 export const PlayerModal = () => {
-  const [search, setSearch] = useSearchParams();
-  const rawPlayerId = search.get('playerId');
+  const { playerId: rawPlayerId } = useSearch({
+    strict: false,
+  });
+  const navigate = useNavigate();
 
   const playerId =
     rawPlayerId && isPrefixedId(rawPlayerId, 'u')
       ? (rawPlayerId as PrefixedId<'u'>)
       : null;
   const close = () => {
-    setSearch((v) => {
-      v.delete('playerId');
-      return v;
+    navigate({
+      from: '/',
+      search: ({ playerId, ...v }) => v,
     });
   };
 

@@ -4,7 +4,7 @@ import { Box, Card, Dialog, Img } from '@a-type/ui';
 import { genericId, LongGameError, PrefixedId } from '@long-game/common';
 import { HotseatBackend } from '@long-game/game-client';
 import { TopographyBackground } from '@long-game/visual-components';
-import { useNavigate, useSearchParams } from '@verdant-web/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Suspense } from 'react';
 import { GameLimitUpsell } from '../subscription/GameLimitUpsell.js';
 import { GameList } from './GameList.js';
@@ -14,23 +14,25 @@ import cls from './NewGameWizard.module.css';
 export interface NewGameWizardProps {}
 
 export function NewGameWizard({}: NewGameWizardProps) {
-  const [search, setSearch] = useSearchParams();
-  const open = search.get('newGame') === 'true';
-  const mode = search.get('mode') as 'hotseat' | 'live' | null;
+  const { newGame: open, mode } = useSearch({
+    strict: false,
+  });
+  const navigate = useNavigate();
 
   return (
     <Dialog
       handle={newGameTriggerHandle}
       open={!!open}
       onOpenChange={(open) => {
-        setSearch((prev) => {
-          if (open) {
-            prev.set('newGame', 'true');
-          } else {
-            prev.delete('newGame');
-            prev.delete('mode');
-          }
-          return prev;
+        navigate({
+          search: (prev) => {
+            if (open) {
+              return { ...prev, newGame: true } as never;
+            } else {
+              const { newGame, mode, ...rest } = prev;
+              return rest as never;
+            }
+          },
         });
       }}
     >
@@ -49,7 +51,7 @@ export function NewGameWizard({}: NewGameWizardProps) {
 }
 
 function SelectModeContent() {
-  const [_, setSearch] = useSearchParams();
+  const navigate = useNavigate();
 
   return (
     <Box col gap grow full className={cls.selectContent}>
@@ -63,9 +65,9 @@ function SelectModeContent() {
             />
             <Card.Main
               onClick={() =>
-                setSearch((prev) => {
-                  prev.set('mode', 'live');
-                  return prev;
+                navigate({
+                  from: '/',
+                  search: (prev) => ({ ...prev, mode: 'live' }),
                 })
               }
               className={cls.cardMain}
@@ -83,9 +85,9 @@ function SelectModeContent() {
             />
             <Card.Main
               onClick={() =>
-                setSearch((prev) => {
-                  prev.set('mode', 'hotseat');
-                  return prev;
+                navigate({
+                  from: '/',
+                  search: (prev) => ({ ...prev, mode: 'hotseat' }),
                 })
               }
               className={cls.cardMain}
@@ -104,8 +106,7 @@ function SelectModeContent() {
 }
 
 function SelectGameContent() {
-  const [search] = useSearchParams();
-  const mode = search.get('mode') as 'hotseat' | 'live' | null;
+  const { mode } = useSearch({ strict: false });
   const mutation = sdkHooks.usePrepareGameSession();
   const navigate = useNavigate();
 
@@ -118,8 +119,9 @@ function SelectGameContent() {
         'Failed to create game session',
       );
     }
-    navigate(`/session/${gameSessionId}`, {
-      skipTransition: true,
+    navigate({
+      to: `/session/${gameSessionId}`,
+      viewTransition: false,
     });
   };
 
@@ -130,8 +132,9 @@ function SelectGameContent() {
       const definition = await gameModules.getGameDefinition(gameId, version);
       await HotseatBackend.preSetGame(sessionId, gameId, definition);
     }
-    navigate(`/hotseat/${sessionId}`, {
-      skipTransition: true,
+    navigate({
+      to: `/hotseat/${sessionId}`,
+      viewTransition: false,
     });
   };
 

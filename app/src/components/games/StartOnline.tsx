@@ -2,7 +2,7 @@ import { sdkHooks } from '@/services/publicSdk';
 import { ButtonProps, Icon } from '@a-type/ui';
 import { LongGameError } from '@long-game/common';
 import { TopographyButton } from '@long-game/visual-components';
-import { useNavigate } from '@verdant-web/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { ReactNode } from 'react';
 
 export interface StartOnlineProps extends ButtonProps {
@@ -23,7 +23,7 @@ export function StartOnline({ children, gameId, ...rest }: StartOnlineProps) {
         'Failed to create game session',
       );
     }
-    navigate(`/session/${gameSessionId}`);
+    navigate({ to: `/session/${gameSessionId}` });
   };
 
   return (

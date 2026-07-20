@@ -2,13 +2,17 @@ import { GameJoinPreview } from '@/components/games/GameJoinPreview';
 import { GameSessionRenderer } from '@/components/games/GameSessionRenderer';
 import { sdkHooks } from '@/services/publicSdk';
 import { ErrorBoundary } from '@a-type/ui';
-import { PrefixedId } from '@long-game/common';
-import { useParams } from '@verdant-web/react-router';
+import { isPrefixedId } from '@long-game/common';
+import { useParams } from '@tanstack/react-router';
 
 export function GameSessionPage() {
-  const { sessionId } = useParams<{
-    sessionId: PrefixedId<'gs'>;
-  }>();
+  const { sessionId } = useParams({
+    from: '/session/$sessionId',
+  });
+
+  if (!isPrefixedId(sessionId, 'gs')) {
+    throw new Error(`Invalid sessionId: ${sessionId}`);
+  }
 
   // if player is only invited but not a member, don't join them to
   // the game session state yet

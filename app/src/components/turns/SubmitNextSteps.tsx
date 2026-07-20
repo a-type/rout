@@ -10,7 +10,7 @@ import {
 } from '@a-type/ui';
 import { withGame } from '@long-game/game-client';
 import { PlayerStatuses } from '@long-game/game-ui';
-import { Link } from '@verdant-web/react-router';
+import { Link } from '@tanstack/react-router';
 import { StartHotseat } from '../games/StartHotseat';
 import { MembershipsList } from '../memberships/MembershipsList';
 
