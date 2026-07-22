@@ -11,7 +11,7 @@ packages:
 catalog:
   '@arbor-css/core': ^0.0.145
   '@arbor-css/postcss': ^0.0.145
-  '@a-type/ui': ^6.1.6
+  '@a-type/ui': ^6.1.10
 
   '@a-type/react-space': 0.2.17
   '@a-type/auth-fetch': 2.1.3
