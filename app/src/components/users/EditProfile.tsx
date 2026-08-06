@@ -64,15 +64,16 @@ function ColorPickerField() {
             backgroundColor: 'var(--m-gray-paper)',
             alignItems: 'center',
             justifyContent: 'center',
+            padding: 0,
           }}
         >
           <span className="sr-only">{palette}</span>
           <Box
-            round="lg"
+            round="sm"
             style={{
               background: colors[palette].default,
-              width: value === palette ? '100%' : '50%',
-              height: value === palette ? '100%' : '50%',
+              width: value === palette ? '80%' : '50%',
+              height: value === palette ? '80%' : '50%',
             }}
           />
         </Button>
