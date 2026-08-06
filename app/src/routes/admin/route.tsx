@@ -7,8 +7,10 @@ import z from 'zod';
 export const Route = createFileRoute('/admin')({
   component: AdminPage,
   validateSearch: zodValidator(
-    z.object({
-      productId: idShapes.GameProduct,
-    }),
+    z
+      .object({
+        productId: idShapes.GameProduct,
+      })
+      .partial(),
   ),
 });

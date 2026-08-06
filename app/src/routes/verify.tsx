@@ -6,9 +6,11 @@ import z from 'zod';
 export const Route = createFileRoute('/verify')({
   component: CompleteSignupPage,
   validateSearch: zodValidator(
-    z.object({
-      code: z.string(),
-      email: z.string().email(),
-    }),
+    z
+      .object({
+        code: z.string(),
+        email: z.string().email(),
+      })
+      .partial(),
   ),
 });

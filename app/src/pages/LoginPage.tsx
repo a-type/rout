@@ -1,10 +1,8 @@
-import { API_ORIGIN } from '@/config.js';
+import { EmailSigninForm } from '@/components/auth/EmailSigninForm';
+import { EmailSignupForm } from '@/components/auth/EmailSignupForm';
+import { OAuthSigninButton } from '@/components/auth/OAuthSigninButton';
+import { API_ORIGIN } from '@/config';
 import { useThemedTitleBar } from '@/hooks/useThemedTitleBar';
-import {
-  EmailSigninForm,
-  EmailSignupForm,
-  OAuthSigninButton,
-} from '@a-type/auth-ui';
 import { Box, H2, Tabs } from '@a-type/ui';
 import { TopographyBackground, Wordmark } from '@long-game/game-ui';
 import { Link, useSearch } from '@tanstack/react-router';

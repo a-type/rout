@@ -1,5 +1,5 @@
+import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 import { API_ORIGIN } from '@/config.js';
-import { ResetPasswordForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
 import { useSearch } from '@tanstack/react-router';
 
@@ -28,7 +28,7 @@ export function ResetPasswordPage({}: ResetPasswordPageProps) {
         <ResetPasswordForm
           code={code}
           email={email}
-          endpoint={`${API_ORIGIN}/auth/complete-email-signup`}
+          endpoint={`${API_ORIGIN}/auth/complete-reset-password`}
         />
       </PageContent>
     </PageRoot>

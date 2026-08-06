@@ -1,5 +1,5 @@
+import { EmailCompleteSignupForm } from '@/components/auth/EmailCompleteSignupForm';
 import { API_ORIGIN } from '@/config.js';
-import { EmailCompleteSignupForm } from '@a-type/auth-ui';
 import { H1, P, PageContent, PageRoot } from '@a-type/ui';
 import { useSearch } from '@tanstack/react-router';
 

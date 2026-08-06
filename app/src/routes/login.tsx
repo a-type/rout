@@ -6,9 +6,11 @@ import z from 'zod';
 export const Route = createFileRoute('/login')({
   component: LoginPage,
   validateSearch: zodValidator(
-    z.object({
-      returnTo: z.string(),
-      tab: z.enum(['login', 'signup']),
-    }),
+    z
+      .object({
+        returnTo: z.string(),
+        tab: z.enum(['login', 'signup']),
+      })
+      .partial(),
   ),
 });

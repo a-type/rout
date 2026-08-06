@@ -6,9 +6,11 @@ import z from 'zod';
 export const Route = createFileRoute('/reset-password')({
   component: ResetPasswordPage,
   validateSearch: zodValidator(
-    z.object({
-      code: z.string(),
-      email: z.string().email(),
-    }),
+    z
+      .object({
+        code: z.string(),
+        email: z.string().email(),
+      })
+      .partial(),
   ),
 });

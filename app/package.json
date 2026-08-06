@@ -12,7 +12,6 @@
     "browser-test:server": "pnpm run preview"
   },
   "dependencies": {
-    "@a-type/auth-ui": "catalog:",
     "@a-type/ui": "catalog:",
     "@arbor-css/core": "catalog:",
     "@arbor-css/postcss": "catalog:",

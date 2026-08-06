@@ -35,12 +35,9 @@ export function NewGameWizard({}: NewGameWizardProps) {
           },
         });
       }}
+      disableSheet
     >
-      <Dialog.Content
-        disableSheet
-        className={cls.content}
-        innerClassName={cls.contentInner}
-      >
+      <Dialog.Content className={cls.content} innerClassName={cls.contentInner}>
         <TopographyBackground />
         <Suspense>
           {mode ? <SelectGameContent /> : <SelectModeContent />}
